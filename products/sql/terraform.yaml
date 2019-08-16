@@ -20,6 +20,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["projects/{{project}}/instances/{{instance}}/databases/{{name}}",
                     "{{project}}/{{instance}}/{{name}}",
                     "instances/{{instance}}/databases/{{name}}",
+                    # support for a legacy import format
+                    "{{instance}}:{{name}}",
                     "{{instance}}/{{name}}",
                     "{{name}}"]
     timeouts: !ruby/object:Api::Timeouts

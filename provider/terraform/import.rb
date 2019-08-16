@@ -65,8 +65,10 @@ module Provider
         short_id_default_format = field_markers.join('/')
 
         # Regexes should be unique and ordered from most specific to least specific
+        # Searching for {{ finds the number of values in the regexes, since the split
+        # marker may vary for formats defined in import_formats.
         (id_formats + [short_id_format, short_id_default_project_format, short_id_default_format])
-          .uniq.reject(&:empty?).sort_by { |i| i.count('/') }.reverse
+          .uniq.reject(&:empty?).sort_by { |i| i.count('{{') }.reverse
       end
     end
   end
