@@ -64,7 +64,7 @@ def downstream_changelog_info(gh, upstream_pr_num, changelog_repos):
     ghrepo = gh.get_repo(repo_name)
 
     for _r, prnum in pulls:
-      print "Fetching %s PR %d" % repo_name, prnum
+      print "Fetching %s PR %d" % (repo_name, prnum)
       pr = ghrepo.get_pull(int(prnum))
       set_changelog_info(pr, release_note, labels_to_add)
 
