@@ -76,7 +76,7 @@ def set_changelog_info(gh_pull, release_note, labels_to_add):
     release_note: String of release note text to set
     labels_to_add: List of strings. Changelog-related labels to add/replace.
   """
-  print "Setting changelog info for downstream PR %d" % gh_pull.url
+  print "Setting changelog info for downstream PR %s" % gh_pull.url
   edited_body = strutils.set_release_note(release_note, gh_pull.body)
   gh_pull.edit(body=edited_body)
 
@@ -100,7 +100,4 @@ if __name__ == '__main__':
   assert len(sys.argv) == 2, "expected id filename as argument"
   with open(sys.argv[1]) as f:
     pr_num = int(f.read())
-
-    # TODO(emilymye): Replace this no-op print statement with code after
-    # verifying w/ pipeline.
     downstream_changelog_info(gh, pr_num, downstream_repos)
