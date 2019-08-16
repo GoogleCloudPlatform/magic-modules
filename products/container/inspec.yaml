@@ -30,6 +30,3 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       cluster: !ruby/object:Overrides::Inspec::PropertyOverride
         resource: 'RegionalCluster'
-files: !ruby/object:Provider::Config::Files
-  copy:
-    'Gemfile': 'provider/inspec/Gemfile'

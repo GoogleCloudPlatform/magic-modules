@@ -87,6 +87,3 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Zone: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-files: !ruby/object:Provider::Config::Files
-  copy:
-    'Gemfile': 'provider/inspec/Gemfile'

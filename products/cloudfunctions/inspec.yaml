@@ -17,6 +17,3 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       trigger_http: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
-files: !ruby/object:Provider::Config::Files
-  copy:
-    'Gemfile': 'provider/inspec/Gemfile'
