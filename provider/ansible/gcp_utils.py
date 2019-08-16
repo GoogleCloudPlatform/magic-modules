@@ -133,7 +133,11 @@ class GcpSession(object):
         resp = callback(self.module, self.full_get(url, params, **kwargs))
         items = resp.get(array_name) if resp.get(array_name) else []
         while resp.get(pageToken):
-            params['pageToken'] = resp.get(pageToken)
+            if params:
+                params['pageToken'] = resp.get(pageToken)
+            else:
+                params = {'pageToken': resp[pageToken]}
+
             resp = callback(self.module, self.full_get(url, params, **kwargs))
             if resp.get(array_name):
                 items = items + resp.get(array_name)
