@@ -119,6 +119,30 @@ class GcpSession(object):
         kwargs.update({'json': body})
         return self.full_patch(url, **kwargs)
 
+    def list(self, url, callback, params=None, array_name='items',
+             pageToken='nextPageToken', **kwargs):
+        """
+        This should be used for calling the GCP list APIs. It will return
+        an array of items
+
+        This takes a callback to a `return_if_object(module, response)`
+        function that will decode the response + return a dictionary. Some
+        modules handle the decode + error processing differently, so we should
+        defer to the module to handle this.
+        """
+        resp = callback(self.module, self.full_get(url, params, **kwargs))
+        items = resp.get(array_name) if resp.get(array_name) else []
+        while resp.get(pageToken):
+            if params:
+                params['pageToken'] = resp.get(pageToken)
+            else:
+                params = {'pageToken': resp[pageToken]}
+
+            resp = callback(self.module, self.full_get(url, params, **kwargs))
+            if resp.get(array_name):
+                items = items + resp.get(array_name)
+        return items
+
     # The following methods fully mimic the requests API and should be used.
     def full_get(self, url, params=None, **kwargs):
         kwargs['headers'] = self._set_headers(kwargs.get('headers'))
