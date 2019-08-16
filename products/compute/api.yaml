@@ -6224,7 +6224,7 @@ objects:
       operation: !ruby/object:Api::Async::Operation
         kind: 'compute#operation'
         path: 'name'
-        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
       result: !ruby/object:Api::Async::Result
         path: 'targetLink'
