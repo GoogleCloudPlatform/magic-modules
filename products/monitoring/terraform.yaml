@@ -91,6 +91,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "http"
         vars:
           display_name: "http-uptime-check"
+        test_env_vars:
+          project_id: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
         name: "uptime_check_tcp"
         primary_resource_id: "tcp_group"
