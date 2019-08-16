@@ -132,6 +132,7 @@ module Provider
           if File.exist?(target_file) && File.mtime(target_file) > @start_time
             raise "#{target_file} was already modified during this run. #{File.mtime(target_file)}"
           end
+
           FileUtils.copy_entry source, target_file
         end
       end.map(&:join)
