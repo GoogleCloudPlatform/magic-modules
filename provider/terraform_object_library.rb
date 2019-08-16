@@ -53,7 +53,9 @@ module Provider
                           ['google/config.go',
                            'third_party/terraform/utils/config.go.erb'],
                           ['google/utils.go',
-                           'third_party/terraform/utils/utils.go.erb']
+                           'third_party/terraform/utils/utils.go.erb'],
+                          ['google/provider_handwritten_endpoint.go',
+                           'third_party/terraform/utils/provider_handwritten_endpoint.go.erb']
                         ],
                         file_template)
     end
