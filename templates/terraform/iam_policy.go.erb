@@ -82,6 +82,7 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 	values["project"] = project
 <% end -%>
 
+	// We may have gotten either a long or short name, so attempt to parse long name if possible
 	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Get("<%= resource_params.last.underscore -%>").(string))
 
 	if err != nil {
@@ -108,11 +109,13 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 		Config:  config,
 	}
 
+<%# Set all URL qualifiers in state -%>
 <% resource_params.each_with_index do |param, i| -%>
 <% if i = resource_params.size - 1 -%>
 <% if param == 'project' -%>
 	d.Set("project", u.project)
 <% else -%>
+<%# Set the last parameter as the long name (unless it is project) -%>
 	d.Set("<%= resource_params.last.underscore -%>", u.GetResourceId())
 <% end -%>
 <% else -%>
@@ -154,8 +157,10 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 		Config:  config,
 	}
 <% if resource_params.last == 'project' -%>
+<%# Resource is only identified by project, so only set project -%>
 	d.Set("project", u.project)
 <% else -%>
+<%# Set resource long name in state, this has all the information that we need to identify it -%>
 	d.Set("<%= resource_params.last.underscore -%>", u.GetResourceId())
 <% end -%>
 	d.SetId(u.GetResourceId())
@@ -214,6 +219,7 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 
 <% import_url = resource_uri.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '') -%>
 <% string_qualifiers = resource_params.map{|param| "u.#{param.underscore}"}.join(', ') -%>
+<%# TODO(slevenick): this should use normal resource qualify methods to replace base_url -%>
 func (u *<%= resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodIdentifier string) string {
 	return fmt.Sprintf("<%= object.__product.base_url -%>%s<%= object.iam_policy.method_name_separator -%>%s", fmt.Sprintf("<%= import_url -%>", <%= string_qualifiers -%>), methodIdentifier)
 }

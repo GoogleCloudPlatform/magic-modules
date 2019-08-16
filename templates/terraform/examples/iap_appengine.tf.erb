@@ -1,7 +1,7 @@
 resource "google_project" "my_project" {
-  name       = "%{project_id}"
-  project_id = "%{project_id}"
-  org_id     = "%{org_id}"
+	name       = "%{project_id}"
+	project_id = "%{project_id}"
+	org_id     = "%{org_id}"
 }
 
 resource "google_project_service" "project_service" {
@@ -10,6 +10,6 @@ resource "google_project_service" "project_service" {
 }
 
 resource "google_app_engine_application" "app" {
-  project     = "${google_project_service.project_service.project}"
-  location_id = "us-central"
+	project     = "${google_project_service.project_service.project}"
+	location_id = "us-central"
 }
