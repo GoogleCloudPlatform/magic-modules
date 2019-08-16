@@ -119,12 +119,19 @@ module Provider
     # rubocop:enable Lint/UnusedMethodArgument
 
     def copy_file_list(output_folder, files)
+      puts "start_time is #{@start_time}"
       files.map do |target, source|
         Thread.new do
           target_file = File.join(output_folder, target)
           target_dir = File.dirname(target_file)
           Google::LOGGER.debug "Copying #{source} => #{target}"
           FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
+
+          # If we've modified a file since starting an MM run, it's a reasonable
+          # assumption that it was this run that modified it.
+          if File.exist?(target_file) && File.mtime(target_file) > @start_time
+            raise "#{target_file} was already modified during this run. #{File.mtime(target_file)}"
+          end
           FileUtils.copy_entry source, target_file
         end
       end.map(&:join)
