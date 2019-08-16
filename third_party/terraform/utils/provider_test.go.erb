@@ -290,6 +290,15 @@ resource "google_project" "project-2" {
 	billing_account = "%s"
 }
 
+// Set to allow reading project services on project 2 later when we use
+// project 1's credentials. Once the project service resource becomes
+// enabled for user_project_override, we should be able to remove this
+// block.
+resource "google_project_service" "project-1-resourceman" {
+	project = google_project.project-1.project_id
+	service = "cloudresourcemanager.googleapis.com"
+}
+
 resource "google_project_service" "project-2-binauthz" {
 	project = google_project.project-2.project_id
 	service = "binaryauthorization.googleapis.com"
