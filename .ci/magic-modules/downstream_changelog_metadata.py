@@ -100,7 +100,4 @@ if __name__ == '__main__':
   assert len(sys.argv) == 2, "expected id filename as argument"
   with open(sys.argv[1]) as f:
     pr_num = int(f.read())
-
-    # TODO(emilymye): Replace this no-op print statement with code after
-    # verifying w/ pipeline.
     downstream_changelog_info(gh, pr_num, downstream_repos)
