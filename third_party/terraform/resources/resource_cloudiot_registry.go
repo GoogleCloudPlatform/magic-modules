@@ -2,11 +2,12 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform/helper/validation"
+	"log"
 	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/validation"
 	"google.golang.org/api/cloudiot/v1"
 )
 
@@ -29,12 +30,21 @@ func resourceCloudIoTRegistry() *schema.Resource {
 			State: resourceCloudIoTRegistryStateImporter,
 		},
 
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Version: 0,
+				Type:    resourceCloudIotRegistryV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: resourceCloudIotRegistryStateUpgradeV0toV1,
+			},
+		},
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateCloudIoTID,
+				ValidateFunc: validateCloudIotID,
 			},
 			"project": {
 				Type:     schema.TypeString,
@@ -48,15 +58,46 @@ func resourceCloudIoTRegistry() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"log_level": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: emptyOrDefaultStringSuppress(""),
+				ValidateFunc: validation.StringInSlice(
+					[]string{"", "NONE", "ERROR", "INFO", "DEBUG"}, false),
+			},
 			"event_notification_config": {
-				Type:     schema.TypeMap,
-				Optional: true,
+				Type:          schema.TypeMap,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "eventNotificationConfig has been deprecated in favor or  eventNotificationConfigs (plural). Please switch to using the plural field.",
+				ConflictsWith: []string{"event_notification_configs"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"pubsub_topic_name": {
 							Type:             schema.TypeString,
 							Required:         true,
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
+						},
+					},
+				},
+			},
+			"event_notification_configs": {
+				Type:          schema.TypeList,
+				Optional:      true,
+				Computed:      true,
+				MaxItems:      10,
+				ConflictsWith: []string{"event_notification_config"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"pubsub_topic_name": {
+							Type:             schema.TypeString,
+							Required:         true,
+							DiffSuppressFunc: compareSelfLinkOrResourceName,
+						},
+						"subfolder_matches": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateCloudIotRegistrySubfolderMatch,
 						},
 					},
 				},
@@ -135,6 +176,17 @@ func resourceCloudIoTRegistry() *schema.Resource {
 	}
 }
 
+func buildEventNotificationConfigs(v []interface{}) []*cloudiot.EventNotificationConfig {
+	cfgList := make([]*cloudiot.EventNotificationConfig, 0, len(v))
+	for _, cfgRaw := range v {
+		if cfgRaw == nil {
+			continue
+		}
+		cfgList = append(cfgList, buildEventNotificationConfig(cfgRaw.(map[string]interface{})))
+	}
+	return cfgList
+}
+
 func buildEventNotificationConfig(config map[string]interface{}) *cloudiot.EventNotificationConfig {
 	if v, ok := config["pubsub_topic_name"]; ok {
 		return &cloudiot.EventNotificationConfig{
@@ -192,10 +244,13 @@ func expandCredentials(credentials []interface{}) []*cloudiot.RegistryCredential
 
 func createDeviceRegistry(d *schema.ResourceData) *cloudiot.DeviceRegistry {
 	deviceRegistry := &cloudiot.DeviceRegistry{}
-	if v, ok := d.GetOk("event_notification_config"); ok {
-		deviceRegistry.EventNotificationConfigs = make([]*cloudiot.EventNotificationConfig, 1, 1)
-		deviceRegistry.EventNotificationConfigs[0] = buildEventNotificationConfig(v.(map[string]interface{}))
+	if v, ok := d.GetOk("event_notification_configs"); ok {
+		deviceRegistry.EventNotificationConfigs = buildEventNotificationConfigs(v.([]interface{}))
+	} else if v, ok := d.GetOk("event_notification_config"); ok {
+		deviceRegistry.EventNotificationConfigs = []*cloudiot.EventNotificationConfig{
+			buildEventNotificationConfig(v.(map[string]interface{}))}
 	}
+
 	if v, ok := d.GetOk("state_notification_config"); ok {
 		deviceRegistry.StateNotificationConfig = buildStateNotificationConfig(v.(map[string]interface{}))
 	}
@@ -208,6 +263,11 @@ func createDeviceRegistry(d *schema.ResourceData) *cloudiot.DeviceRegistry {
 	if v, ok := d.GetOk("credentials"); ok {
 		deviceRegistry.Credentials = expandCredentials(v.([]interface{}))
 	}
+	if v, ok := d.GetOk("log_level"); ok {
+		deviceRegistry.LogLevel = v.(string)
+	}
+	deviceRegistry.ForceSendFields = append(deviceRegistry.ForceSendFields, "logLevel")
+
 	return deviceRegistry
 }
 
@@ -251,14 +311,23 @@ func resourceCloudIoTRegistryUpdate(d *schema.ResourceData, meta interface{}) er
 
 	d.Partial(true)
 
+	if d.HasChange("event_notification_configs") {
+		hasChanged = true
+		updateMask = append(updateMask, "event_notification_configs")
+		if v, ok := d.GetOk("event_notification_configs"); ok {
+			deviceRegistry.EventNotificationConfigs = buildEventNotificationConfigs(v.([]interface{}))
+		}
+	}
+
 	if d.HasChange("event_notification_config") {
 		hasChanged = true
 		updateMask = append(updateMask, "event_notification_configs")
 		if v, ok := d.GetOk("event_notification_config"); ok {
-			deviceRegistry.EventNotificationConfigs = make([]*cloudiot.EventNotificationConfig, 1, 1)
-			deviceRegistry.EventNotificationConfigs[0] = buildEventNotificationConfig(v.(map[string]interface{}))
+			deviceRegistry.EventNotificationConfigs = []*cloudiot.EventNotificationConfig{
+				buildEventNotificationConfig(v.(map[string]interface{}))}
 		}
 	}
+
 	if d.HasChange("state_notification_config") {
 		hasChanged = true
 		updateMask = append(updateMask, "state_notification_config.pubsub_topic_name")
@@ -287,6 +356,14 @@ func resourceCloudIoTRegistryUpdate(d *schema.ResourceData, meta interface{}) er
 			deviceRegistry.Credentials = expandCredentials(v.([]interface{}))
 		}
 	}
+	if d.HasChange("log_level") {
+		hasChanged = true
+		updateMask = append(updateMask, "log_level")
+		if v, ok := d.GetOk("log_level"); ok {
+			deviceRegistry.LogLevel = v.(string)
+			deviceRegistry.ForceSendFields = append(deviceRegistry.ForceSendFields, "logLevel")
+		}
+	}
 	if hasChanged {
 		_, err := config.clientCloudIoT.Projects.Locations.Registries.Patch(d.Id(),
 			deviceRegistry).UpdateMask(strings.Join(updateMask, ",")).Do()
@@ -297,8 +374,23 @@ func resourceCloudIoTRegistryUpdate(d *schema.ResourceData, meta interface{}) er
 			d.SetPartial(updateMaskItem)
 		}
 	}
+
 	d.Partial(false)
 	return resourceCloudIoTRegistryRead(d, meta)
+}
+
+func flattenCloudIotRegistryEventNotificationConfigs(cfgs []*cloudiot.EventNotificationConfig, d *schema.ResourceData) []interface{} {
+	ls := make([]interface{}, 0, len(cfgs))
+	for _, cfg := range cfgs {
+		if cfg == nil {
+			continue
+		}
+		ls = append(ls, map[string]interface{}{
+			"subfolder_matches": cfg.SubfolderMatches,
+			"pubsub_topic_name": cfg.PubsubTopicName,
+		})
+	}
+	return ls
 }
 
 func resourceCloudIoTRegistryRead(d *schema.ResourceData, meta interface{}) error {
@@ -308,15 +400,23 @@ func resourceCloudIoTRegistryRead(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Registry %q", name))
 	}
-
 	d.Set("name", res.Id)
 
 	if len(res.EventNotificationConfigs) > 0 {
-		eventConfig := map[string]string{"pubsub_topic_name": res.EventNotificationConfigs[0].PubsubTopicName}
-		d.Set("event_notification_config", eventConfig)
+		cfgs := flattenCloudIotRegistryEventNotificationConfigs(res.EventNotificationConfigs, d)
+		if err := d.Set("event_notification_configs", cfgs); err != nil {
+			return fmt.Errorf("Error reading Registry: %s", err)
+		}
+		if err := d.Set("event_notification_config", map[string]string{
+			"pubsub_topic_name": res.EventNotificationConfigs[0].PubsubTopicName,
+		}); err != nil {
+			return fmt.Errorf("Error reading Registry: %s", err)
+		}
 	} else {
+		d.Set("event_notification_configs", nil)
 		d.Set("event_notification_config", nil)
 	}
+
 	pubsubTopicName := res.StateNotificationConfig.PubsubTopicName
 	if pubsubTopicName != "" {
 		d.Set("state_notification_config",
@@ -337,6 +437,8 @@ func resourceCloudIoTRegistryRead(d *schema.ResourceData, meta interface{}) erro
 		credentials[i]["public_key_certificate"] = pubcert
 	}
 	d.Set("credentials", credentials)
+	d.Set("log_level", res.LogLevel)
+
 	return nil
 }
 
@@ -368,4 +470,80 @@ func resourceCloudIoTRegistryStateImporter(d *schema.ResourceData, meta interfac
 	d.Set("region", region)
 	d.SetId(id)
 	return []*schema.ResourceData{d}, nil
+}
+
+func resourceCloudIotRegistryStateUpgradeV0toV1(rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+	log.Printf("[DEBUG] State before upgrade: %#v", rawState)
+
+	oldCfg, ok := rawState["event_notification_config"]
+	if ok {
+		delete(rawState, "event_notification_config")
+	}
+
+	v, ok := rawState["event_notification_configs"]
+	if ok && v != nil {
+		// Just ignore old value if event_notification_configs is already set.
+		return rawState, nil
+	}
+
+	rawState["event_notification_configs"] = []interface{}{oldCfg}
+	log.Printf("[DEBUG] State after upgrade: %#v", rawState)
+	return rawState, nil
+}
+
+func validateCloudIotID(v interface{}, k string) (warnings []string, errors []error) {
+	value := v.(string)
+	if strings.HasPrefix(value, "goog") {
+		errors = append(errors, fmt.Errorf(
+			"%q (%q) can not start with \"goog\"", k, value))
+	}
+	if !regexp.MustCompile(CloudIoTIdRegex).MatchString(value) {
+		errors = append(errors, fmt.Errorf(
+			"%q (%q) doesn't match regexp %q", k, value, CloudIoTIdRegex))
+	}
+	return
+}
+
+func validateCloudIotRegistrySubfolderMatch(v interface{}, k string) (warnings []string, errors []error) {
+	value := v.(string)
+	if strings.HasPrefix(value, "/") {
+		errors = append(errors, fmt.Errorf(
+			"%q (%q) can not start with '/'", k, value))
+	}
+	return
+}
+
+func resourceCloudIotRegistryV0() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"log_level": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"event_notification_config": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
+			"state_notification_config": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
+			"mqtt_config": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
+			"http_config": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
+			"credentials": {
+				Type:     schema.TypeList,
+				Optional: true,
+			},
+		},
+	}
 }
