@@ -3,7 +3,6 @@ package google
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/validation"
-	"log"
 	"regexp"
 	"strings"
 
@@ -28,15 +27,6 @@ func resourceCloudIoTRegistry() *schema.Resource {
 
 		Importer: &schema.ResourceImporter{
 			State: resourceCloudIoTRegistryStateImporter,
-		},
-
-		SchemaVersion: 1,
-		StateUpgraders: []schema.StateUpgrader{
-			{
-				Version: 0,
-				Type:    resourceCloudIotRegistryV0().CoreConfigSchema().ImpliedType(),
-				Upgrade: resourceCloudIotRegistryStateUpgradeV0toV1,
-			},
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -69,7 +59,7 @@ func resourceCloudIoTRegistry() *schema.Resource {
 				Type:          schema.TypeMap,
 				Optional:      true,
 				Computed:      true,
-				Deprecated:    "eventNotificationConfig has been deprecated in favor or  eventNotificationConfigs (plural). Please switch to using the plural field.",
+				Deprecated:    "eventNotificationConfig has been deprecated in favor of eventNotificationConfigs (plural). Please switch to using the plural field.",
 				ConflictsWith: []string{"event_notification_configs"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -472,25 +462,6 @@ func resourceCloudIoTRegistryStateImporter(d *schema.ResourceData, meta interfac
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceCloudIotRegistryStateUpgradeV0toV1(rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
-	log.Printf("[DEBUG] State before upgrade: %#v", rawState)
-
-	oldCfg, ok := rawState["event_notification_config"]
-	if ok {
-		delete(rawState, "event_notification_config")
-	}
-
-	v, ok := rawState["event_notification_configs"]
-	if ok && v != nil {
-		// Just ignore old value if event_notification_configs is already set.
-		return rawState, nil
-	}
-
-	rawState["event_notification_configs"] = []interface{}{oldCfg}
-	log.Printf("[DEBUG] State after upgrade: %#v", rawState)
-	return rawState, nil
-}
-
 func validateCloudIotID(v interface{}, k string) (warnings []string, errors []error) {
 	value := v.(string)
 	if strings.HasPrefix(value, "goog") {
@@ -511,39 +482,4 @@ func validateCloudIotRegistrySubfolderMatch(v interface{}, k string) (warnings [
 			"%q (%q) can not start with '/'", k, value))
 	}
 	return
-}
-
-func resourceCloudIotRegistryV0() *schema.Resource {
-	return &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"log_level": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"event_notification_config": {
-				Type:     schema.TypeMap,
-				Optional: true,
-			},
-			"state_notification_config": {
-				Type:     schema.TypeMap,
-				Optional: true,
-			},
-			"mqtt_config": {
-				Type:     schema.TypeMap,
-				Optional: true,
-			},
-			"http_config": {
-				Type:     schema.TypeMap,
-				Optional: true,
-			},
-			"credentials": {
-				Type:     schema.TypeList,
-				Optional: true,
-			},
-		},
-	}
 }

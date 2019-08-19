@@ -2,9 +2,8 @@ package google
 
 import (
 	"fmt"
-	"reflect"
-	"testing"
 	"strings"
+	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
@@ -32,85 +31,6 @@ func TestValidateCloudIoTID(t *testing.T) {
 	es := testStringValidationCases(x, validateCloudIotID)
 	if len(es) > 0 {
 		t.Errorf("Failed to validate CloudIoT ID names: %v", es)
-	}
-}
-
-func TestCloudIotRegistryStateUpgradeV0(t *testing.T) {
-	t.Parallel()
-
-	cases := map[string]struct {
-		V0State    map[string]interface{}
-		V1Expected map[string]interface{}
-	}{
-		"Move single to plural": {
-			V0State: map[string]interface{}{
-				"event_notification_config": map[string]interface{}{
-					"pubsub_topic_name": "projects/my-project/topics/my-topic",
-				},
-			},
-			V1Expected: map[string]interface{}{
-				"event_notification_configs": []interface{}{
-					map[string]interface{}{
-						"pubsub_topic_name": "projects/my-project/topics/my-topic",
-					},
-				},
-			},
-		},
-		"Delete single if plural in state": {
-			V0State: map[string]interface{}{
-				"event_notification_config": map[string]interface{}{
-					"pubsub_topic_name": "projects/my-project/topics/singular-topic",
-				},
-				"event_notification_configs": []interface{}{
-					map[string]interface{}{
-						"pubsub_topic_name": "projects/my-project/topics/plural-topic",
-					},
-				},
-			},
-			V1Expected: map[string]interface{}{
-				"event_notification_configs": []interface{}{
-					map[string]interface{}{
-						"pubsub_topic_name": "projects/my-project/topics/plural-topic",
-					},
-				},
-			},
-		},
-		"no-op": {
-			V0State: map[string]interface{}{
-				"name":      "my-test-name",
-				"log_level": "INFO",
-				"event_notification_configs": []interface{}{
-					map[string]interface{}{
-						"pubsub_topic_name": "projects/my-project/topics/plural-topic",
-					},
-				},
-			},
-			V1Expected: map[string]interface{}{
-				"name":      "my-test-name",
-				"log_level": "INFO",
-				"event_notification_configs": []interface{}{
-					map[string]interface{}{
-						"pubsub_topic_name": "projects/my-project/topics/plural-topic",
-					},
-				},
-			},
-		},
-	}
-	for tn, tc := range cases {
-		t.Run(tn, func(t *testing.T) {
-			actual, err := resourceCloudIotRegistryStateUpgradeV0toV1(tc.V0State, &Config{})
-
-			if err != nil {
-				t.Error(err)
-			}
-
-			for k, v := range tc.V1Expected {
-				if !reflect.DeepEqual(actual[k], v) {
-					t.Errorf("expected: %#v -> %#v\n got: %#v -> %#v\n in: %#v",
-						k, v, k, actual[k], actual)
-				}
-			}
-		})
 	}
 }
 
