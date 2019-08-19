@@ -66,15 +66,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{domain_name}}"
+    import_format: ["{{domain_name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_domain_mapping_basic"
         primary_resource_id: "domain_mapping"
         vars:
-          domain: "dm-test"
+          domain: "dm-test-"
+    custom_code:  !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/domain_mapping.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'domainName'
+      overrideStrategy: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      sslSettings: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'certificateIdDiffSuppress'
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

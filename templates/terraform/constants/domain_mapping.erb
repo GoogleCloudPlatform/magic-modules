@@ -1,0 +1,15 @@
+// While the domain mapping is setting up the certificate id, GET returns a field
+// `pendingManagedCertificateId`, which will eventually be empty when `certificateID`
+// is set
+func certificateIdDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	fields := strings.Split(k, ".")
+	nestedField := fields[len(fields) - 1]
+
+	// The certificate id was pending before, but is no longer pending
+	if nestedField == "pending_managed_certificate_id" && (old != "" && new == "") {
+		return true
+	}
+
+	return false
+}
+
