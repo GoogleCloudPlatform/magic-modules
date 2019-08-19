@@ -1,0 +1,31 @@
+---
+:facts:
+  :Instance:
+    :version_added: '2.9'
+:regular:
+  :Instance:
+    :version_added: '2.9'
+    :name:
+      :version_added: '2.9'
+    :description:
+      :version_added: '2.9'
+    :tier:
+      :version_added: '2.9'
+    :labels:
+      :version_added: '2.9'
+    :fileShares:
+      :version_added: '2.9'
+      :name:
+        :version_added: '2.9'
+      :capacityGb:
+        :version_added: '2.9'
+    :networks:
+      :version_added: '2.9'
+      :network:
+        :version_added: '2.9'
+      :modes:
+        :version_added: '2.9'
+      :reservedIpRange:
+        :version_added: '2.9'
+    :zone:
+      :version_added: '2.9'
