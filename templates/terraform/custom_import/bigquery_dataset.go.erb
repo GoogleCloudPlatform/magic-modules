@@ -1,3 +1,9 @@
+// Explicitly set to default as a workaround for `ImportStateVerify` tests, and so that users
+// don't see a diff immediately after import.
+d.Set("delete_contents_on_destroy", false)
+
+// Auto generated importers do not support neither ':' or '/' as Id separators
+// so we customize it here.
 id := d.Id()
 
 pd := fmt.Sprintf("(%s)[:/](%s)", ProjectRegex, datasetIdRegexp)

@@ -16,7 +16,11 @@ legacy_name: 'bigquery'
 overrides: !ruby/object:Overrides::ResourceOverrides
   Dataset: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}:{{dataset_id}}"
+    # We use a custom_import due to ':' and '/' being unsupported in
+    # auto importers. `import_format` here is just so we list the right
+    # formats in the generated docs.
     import_format: ["{{project}}:{{dataset_id}}", "{{project}}/{{dataset_id}}", "{{dataset_id}}"]
+    delete_url: projects/{{project}}/datasets/{{dataset_id}}?deleteContents={{delete_contents_on_destroy}}
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_dataset_basic"
@@ -30,6 +34,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateDefaultTableExpirationMs'
       datasetReference: !ruby/object:Overrides::Terraform::PropertyOverride
+        flatten_object: true
+      datasetReference.datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateDatasetId'
+      datasetReference.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -41,10 +50,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/bigquery_dataset.go.erb
       custom_import: templates/terraform/custom_import/bigquery_dataset.go.erb
-      encoder: templates/terraform/encoders/bigquery_dataset.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/bigquery_dataset.go.erb
-      pre_delete: templates/terraform/pre_delete/bigquery_dataset.go.erb
-      update_encoder: templates/terraform/encoders/bigquery_dataset.go.erb
     docs: !ruby/object:Provider::Terraform::Docs
       required_properties: |
         * `dataset_id` - (Required) A unique ID for the resource. Changing this forces a new resource to be created.

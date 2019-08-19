@@ -1,25 +1,5 @@
-"dataset_id": {
-    Type:     schema.TypeString,
-    Required: true,
-    ForceNew: true,
-    ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-        value := v.(string)
-        if !regexp.MustCompile(datasetIdRegexp).MatchString(value) {
-            errors = append(errors, fmt.Errorf(
-                "%q must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_)", k))
-        }
-
-        if len(value) > 1024 {
-            errors = append(errors, fmt.Errorf(
-                "%q cannot be greater than 1,024 characters", k))
-        }
-
-        return
-    },
-},
 "delete_contents_on_destroy": {
     Type:             schema.TypeBool,
     Optional:         true,
     Default:          false,
-    DiffSuppressFunc: emptyOrDefaultStringSuppress("false"),
 },
