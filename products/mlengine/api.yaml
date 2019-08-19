@@ -137,12 +137,6 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: The description specified for the version when it was created.
-        # isDefault is output-only, but all creation-based providers will override this
-        # to implement `setDefaultVersion` API.
-      - !ruby/object:Api::Type::Boolean
-        name: 'isDefault'
-        description:  If true, this version will be used to handle prediction requests that do not specify a version
-        output: true
       - !ruby/object:Api::Type::String
         name: 'deploymentUri'
         description: The Cloud Storage location of the trained model used to create the version
