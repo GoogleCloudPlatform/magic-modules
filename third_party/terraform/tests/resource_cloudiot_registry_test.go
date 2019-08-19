@@ -198,7 +198,7 @@ func TestAccCloudIoTRegistry_update(t *testing.T) {
 	})
 }
 
-func TestAccCloudIoTRegistry_deprecatedEventNotificationConfig(t *testing.T) {
+func TestAccCloudIoTRegistry_eventNotificationConfigDeprecatedSingleToPlural(t *testing.T) {
 	t.Parallel()
 
 	registryName := fmt.Sprintf("tf-registry-test-%s", acctest.RandString(10))
@@ -220,6 +220,35 @@ func TestAccCloudIoTRegistry_deprecatedEventNotificationConfig(t *testing.T) {
 			{
 				// Use new field (event_notification_configs) to see if plan changed
 				Config:             testAccCloudIoTRegistry_pluralEventNotificationConfigs(topic, registryName),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
+}
+
+func TestAccCloudIoTRegistry_eventNotificationConfigPluralToDeprecatedSingle(t *testing.T) {
+	t.Parallel()
+
+	registryName := fmt.Sprintf("tf-registry-test-%s", acctest.RandString(10))
+	topic := fmt.Sprintf("tf-registry-test-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCloudIoTRegistryDestroy,
+		Steps: []resource.TestStep{
+			{
+				// Use deprecated field (event_notification_config) to create
+				Config: testAccCloudIoTRegistry_pluralEventNotificationConfigs(topic, registryName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_cloudiot_registry.foobar", "event_notification_configs.#", "1"),
+				),
+			},
+			{
+				// Use new field (event_notification_configs) to see if plan changed
+				Config:             testAccCloudIoTRegistry_singleEventNotificationConfig(topic, registryName),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
 			},
