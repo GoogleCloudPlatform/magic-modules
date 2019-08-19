@@ -52,8 +52,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/bigquery_dataset.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/bigquery_dataset.go.erb
     docs: !ruby/object:Provider::Terraform::Docs
-      required_properties: |
-        * `dataset_id` - (Required) A unique ID for the resource. Changing this forces a new resource to be created.
       optional_properties: |
         * `delete_contents_on_destroy` - (Optional) If set to `true`, delete all the tables in the
           dataset when destroying the resource; otherwise, destroying the resource will
