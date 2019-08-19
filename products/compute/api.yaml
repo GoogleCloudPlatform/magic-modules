@@ -7218,6 +7218,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'count'
+            required: true
             description: |
              The number of resources that are allocated.
           - !ruby/object:Api::Type::Integer
@@ -7231,11 +7232,9 @@ objects:
             description: |
               The instance properties for the reservation.
             properties:
-              - !ruby/object:Api::Type::ResourceRef
+              - !ruby/object:Api::Type::String
                 name: 'machineType'
                 required: true
-                resource: 'MachineType'
-                imports: 'name'
                 description: |
                   The name of the machine type to reserve.
               - !ruby/object:Api::Type::String
