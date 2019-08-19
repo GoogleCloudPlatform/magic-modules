@@ -14,7 +14,7 @@
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_filestore_instance
   code:
-    name: <%= ctx[:name] -%>
+    name: <%= ctx[:name] %>
     zone: 'us-central1-b'
     tier: "PREMIUM"
     file_shares:

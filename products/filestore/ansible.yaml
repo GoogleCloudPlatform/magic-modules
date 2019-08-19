@@ -17,6 +17,12 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Instance: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      fileShares.name: !ruby/object:Overrides::Ansible::PropertyOverride
+        # Ansible treats input slightly different than TF. This should
+        # be fixed.
+        input: false
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>
