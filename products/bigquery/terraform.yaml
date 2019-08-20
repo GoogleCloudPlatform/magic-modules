@@ -16,9 +16,6 @@ legacy_name: 'bigquery'
 overrides: !ruby/object:Overrides::ResourceOverrides
   Dataset: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}:{{dataset_id}}"
-    # We use a custom_import due to ':' and '/' being unsupported in
-    # auto importers. `import_format` here is just so we list the right
-    # formats in the generated docs.
     import_format: ["{{project}}:{{dataset_id}}", "{{project}}/{{dataset_id}}", "{{dataset_id}}"]
     delete_url: projects/{{project}}/datasets/{{dataset_id}}?deleteContents={{delete_contents_on_destroy}}
     examples:
@@ -27,6 +24,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "dataset"
         vars:
           dataset_id: "example_dataset"
+        ignore_read_extra:
+          - "delete_contents_on_destroy"
     properties:
       access: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -50,7 +49,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/bigquery_dataset.go.erb
-      custom_import: templates/terraform/custom_import/bigquery_dataset.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/bigquery_dataset.go.erb
     docs: !ruby/object:Provider::Terraform::Docs
       optional_properties: |
