@@ -60,9 +60,9 @@ func resource<%= resource_name -%>() *schema.Resource {
 
         Timeouts: &schema.ResourceTimeout {
             Create: schema.DefaultTimeout(<%= timeouts.insert_minutes  -%> * time.Minute),
-<%          if updatable?(object, properties) -%>
+<%      if updatable?(object, properties) -%>
             Update: schema.DefaultTimeout(<%= timeouts.update_minutes -%> * time.Minute),
-<%          end -%>
+<%      end -%>
             Delete: schema.DefaultTimeout(<%= timeouts.delete_minutes -%> * time.Minute),
         },
 
@@ -82,24 +82,33 @@ func resource<%= resource_name -%>() *schema.Resource {
 <%=     lines(compile(object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
 
         Schema: map[string]*schema.Schema{
-<%          order_properties(properties).each do |prop| -%>
-<%=             lines(build_schema_property(prop, object)) -%>
-<%          end -%>
-<%=         lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
-<%          if has_project -%>
+<%      order_properties(properties).each do |prop| -%>
+<%=       lines(build_schema_property(prop, object)) -%>
+<%      end -%>
+<%-     unless object.virtual_fields.empty? -%>
+<%-       object.virtual_fields.each do |field| -%>
+            "<%= field.name -%>": {
+              Type:     schema.TypeBool,
+              Optional: true,
+              Default:  false,
+            },
+<%        end -%>
+<%      end -%>
+<%=     lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
+<%      if has_project -%>
             "project": {
                 Type:     schema.TypeString,
                 Optional: true,
                 Computed: true,
                 ForceNew: true,
             },
-<%          end -%>
-<%          if object.has_self_link -%>
+<%      end -%>
+<%      if object.has_self_link -%>
             "self_link": {
                 Type:     schema.TypeString,
                 Computed: true,
             },
-<%          end -%>
+<%      end -%>
         },
     }
 }
@@ -240,6 +249,15 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         d.SetId("")
         return nil
     }
+<%  end -%>
+
+<%- unless object.virtual_fields.empty? -%>
+  // Explicitly set virtual fields to default values if unset
+<%-   object.virtual_fields.each do |field| -%>
+    if _, ok := d.GetOk("<%= field.name -%>"); !ok {
+      d.Set("<%= field.name -%>", false)
+    }
+<%    end -%>
 <%  end -%>
 
 <%  if object.custom_code.decoder -%>
@@ -572,6 +590,13 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
         return nil, fmt.Errorf("Error constructing id: %s", err)
     }
     d.SetId(id)
+
+<%-  unless object.virtual_fields.empty? -%>
+    // Explicitly set virtual fields to default values on import
+  <%-  object.virtual_fields.each do |field| -%>
+    d.Set("<%= field.name %>", false)
+  <%   end -%>
+<%   end -%>
 <%= lines(compile(object.custom_code.post_import)) if object.custom_code.post_import -%>
 
     return []*schema.ResourceData{d}, nil
