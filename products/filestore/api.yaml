@@ -46,8 +46,9 @@ async: !ruby/object:Api::Async
 objects:
   - !ruby/object:Api::Resource
     name: 'Instance'
-    base_url:  projects/{{project}}/locations/{{zone}}/instances?instanceId={{name}}
+    create_url:  projects/{{project}}/locations/{{zone}}/instances?instanceId={{name}}
     self_link: projects/{{project}}/locations/{{zone}}/instances/{{name}}
+    base_url:  projects/{{project}}/locations/{{zone}}/instances
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -76,6 +77,7 @@ objects:
           The resource name of the instance.
         required: true
         url_param_only: true
+        pattern: projects/{{project}}/locations/{{zone}}/instances/{{name}}
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
