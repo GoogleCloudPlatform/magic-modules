@@ -70,8 +70,12 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'keyRing'
         description: |
-          The name of the key ring being used. Name must be of the format
+          The id of the `KeyRing` to which the key shall belong.  Name must be
+          of the format
           'projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}'
+        required: true
+        input: true
+        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -86,13 +90,6 @@ objects:
           The time that this resource was created on the server.
           This is in RFC3339 text format.
         output: true
-      - !ruby/object:Api::Type::String
-        name: 'keyRing'
-        description: |
-          The id of the `KeyRing` to which the key shall belong.
-        required: true
-        input: true
-        url_param_only: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
