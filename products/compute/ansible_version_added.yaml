@@ -529,6 +529,8 @@
           :version_added: '2.6'
         :type:
           :version_added: '2.6'
+      :labels:
+        :version_added: '2.9'
       :machineType:
         :version_added: '2.6'
       :minCpuPlatform:
@@ -631,6 +633,8 @@
     :version_added: '2.6'
     :canIpForward:
       :version_added: '2.6'
+    :deletionProtection:
+      :version_added: '2.9'
     :disks:
       :version_added: '2.6'
       :autoDelete:
@@ -675,6 +679,8 @@
         :version_added: '2.6'
       :acceleratorType:
         :version_added: '2.6'
+    :hostname:
+      :version_added: '2.9'
     :labels:
       :version_added: '2.9'
     :metadata:
@@ -721,6 +727,14 @@
         :version_added: '2.6'
       :scopes:
         :version_added: '2.6'
+    :shieldedInstanceConfig:
+      :version_added: '2.9'
+      :enableSecureBoot:
+        :version_added: '2.9'
+      :enableVtpm:
+        :version_added: '2.9'
+      :enableIntegrityMonitoring:
+        :version_added: '2.9'
     :status:
       :version_added: '2.8'
     :tags:
@@ -781,6 +795,8 @@
       :version_added: '2.8'
     :description:
       :version_added: '2.8'
+    :bandwidth:
+      :version_added: '2.9'
     :edgeAvailabilityDomain:
       :version_added: '2.8'
     :type:

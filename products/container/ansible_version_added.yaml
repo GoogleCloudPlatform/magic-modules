@@ -7,10 +7,6 @@
 :regular:
   :Cluster:
     :version_added: '2.6'
-    :kubectlPath:
-      :version_added: '2.9'
-    :kubectlContext:
-      :version_added: '2.9'
     :name:
       :version_added: '2.6'
     :description:
@@ -123,6 +119,10 @@
       :version_added: '2.9'
     :location:
       :version_added: '2.8'
+    :kubectlPath:
+      :version_added: '2.9'
+    :kubectlContext:
+      :version_added: '2.9'
   :NodePool:
     :version_added: '2.6'
     :name:
