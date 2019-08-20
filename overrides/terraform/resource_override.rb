@@ -71,7 +71,10 @@ module Overrides
 
         check :id_format, type: String, default: '{{name}}'
         check :examples, item_type: Provider::Terraform::Examples, type: Array, default: []
-        check :virtual_fields, item_type: Provider::Terraform::VirtualFields, type: Array, default: []
+        check :virtual_fields,
+              item_type: Provider::Terraform::VirtualFields,
+              type: Array,
+              default: []
 
         check :custom_code, type: Provider::Terraform::CustomCode,
                             default: Provider::Terraform::CustomCode.new
