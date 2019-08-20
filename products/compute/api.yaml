@@ -4668,6 +4668,11 @@ objects:
         description: |
           Region where the regional interconnect attachment resides.
     properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'adminEnabled'
+        description: |
+          Whether the VLAN attachment is enabled or disabled.  When using
+          PARTNER type this will Pre-Activate the interconnect attachment
       - !ruby/object:Api::Type::String
         name: 'cloudRouterIpAddress'
         description: |
