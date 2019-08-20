@@ -55,8 +55,6 @@
         :version_added: '2.8'
       :tableId:
         :version_added: '2.8'
-    :clustering:
-      :version_added: '2.9'
     :description:
       :version_added: '2.8'
     :friendlyName:
@@ -65,8 +63,6 @@
       :version_added: '2.8'
     :name:
       :version_added: '2.8'
-    :numRows:
-      :version_added: '2.9'
     :view:
       :version_added: '2.8'
       :useLegacySql:
@@ -81,8 +77,6 @@
       :version_added: '2.8'
       :expirationMs:
         :version_added: '2.8'
-      :field:
-        :version_added: '2.9'
       :type:
         :version_added: '2.8'
     :schema:
