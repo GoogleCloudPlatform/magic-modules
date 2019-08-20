@@ -17,8 +17,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: false
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-  DomainMapping: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
   FirewallRule: !ruby/object:Overrides::Ansible::ResourceOverride
     # Because of lack of state, Ansible treats identity
