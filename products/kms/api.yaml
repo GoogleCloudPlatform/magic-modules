@@ -69,7 +69,9 @@ objects:
     parameters:
       - !ruby/object:Api::Type::String
         name: 'keyRing'
-        description: The name of the key ring being used.
+        description: |
+          The name of the key ring being used. Name must be of the format
+          'projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

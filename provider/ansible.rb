@@ -259,16 +259,14 @@ module Provider
 
         target_folder = data.output_folder
 
-        unless data.object.custom_test
-          name = module_name(data.object)
-          path = File.join(target_folder,
-                           "test/integration/targets/#{name}/tasks/main.yml")
-          data.generate(
-            'templates/ansible/integration_test.erb',
-            path,
-            self
-          )
-        end
+        name = module_name(data.object)
+        path = File.join(target_folder,
+                         "test/integration/targets/#{name}/tasks/main.yml")
+        data.generate(
+          'templates/ansible/integration_test.erb',
+          path,
+          self
+        )
 
         # Generate 'defaults' file that contains variables.
         path = File.join(target_folder,
@@ -331,7 +329,7 @@ module Provider
         parts = url.scan(/\{\{(.*?)\}\}/).flatten
         parts << 'name'
         parts.delete('project')
-        parts.map { |pt| object.all_user_properties.select { |p| p.name == pt }[0] }
+        parts.map { |pt| object.all_user_properties.select { |p| p.out_name == pt }[0] }
       end.flatten
     end
 
