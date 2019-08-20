@@ -210,7 +210,9 @@ def main():
         'updateMask': updateMask(resource_to_request(module), response_to_hash(module, fetch))
     }
     request = resource_to_request(module)
+<% unless object.all_user_properties.select { |p| p.name == 'name' }.first&.url_param_only -%>
     del request['name']
+<% end -%>
 <%
   method_args.append("request")
   method_args.append("params=params")
