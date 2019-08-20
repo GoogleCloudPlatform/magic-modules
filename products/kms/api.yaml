@@ -27,22 +27,24 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'KeyRing'
-    base_url: 'projects/{{project}}/locations/{{location}}/keyRings?keyRingId={{name}}'
+    base_url: 'projects/{{project}}/locations/{{location}}/keyRings'
+    create_url: 'projects/{{project}}/locations/{{location}}/keyRings?keyRingId={{name}}'
     self_link: 'projects/{{project}}/locations/{{location}}/keyRings/{{name}}'
     input: true
     description: |
       A `KeyRing` is a toplevel logical grouping of `CryptoKeys`.
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        description: |
-          The resource name for the KeyRing.
-        required: true
+    parameters:
       - !ruby/object:Api::Type::String
         name: 'location'
         description: |
           The location for the KeyRing.
           A full list of valid locations can be found by running `gcloud kms locations list`.
+        required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource name for the KeyRing.
         required: true
       - !ruby/object:Api::Type::Time
         name: 'creationTime'
@@ -57,12 +59,17 @@ objects:
       api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings'
   - !ruby/object:Api::Resource
     name: 'CryptoKey'
-    base_url: '{{key_ring}}/cryptoKeys?cryptoKeyId={{name}}'
+    base_url: '{{key_ring}}/cryptoKeys'
+    create_url: '{{key_ring}}/cryptoKeys?cryptoKeyId={{name}}'
     self_link: '{{key_ring}}/cryptoKeys/{{name}}'
     update_verb: :PATCH
     update_mask: true
     description: |
       A `CryptoKey` represents a logical key that can be used for cryptographic operations.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'keyRing'
+        description: The name of the key ring being used.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

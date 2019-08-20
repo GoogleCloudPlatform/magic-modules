@@ -1,0 +1,11 @@
+---
+:facts:
+  :KeyRing:
+    :version_added: '2.9'
+:regular:
+  :KeyRing:
+    :version_added: '2.9'
+    :name:
+      :version_added: '2.9'
+    :location:
+      :version_added: '2.9'
