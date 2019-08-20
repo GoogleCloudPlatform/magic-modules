@@ -159,7 +159,7 @@ func TestAccCloudIoTRegistry_eventNotificationConfigPluralToDeprecatedSingle(t *
 		CheckDestroy: testAccCheckCloudIoTRegistryDestroy,
 		Steps: []resource.TestStep{
 			{
-				// Use deprecated field (event_notification_config) to create
+				// Use new field (event_notification_config) to create
 				Config: testAccCloudIoTRegistry_pluralEventNotificationConfigs(topic, registryName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
