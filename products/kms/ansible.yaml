@@ -19,6 +19,12 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   CryptoKey: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
+    properties:
+      purpose: !ruby/object:Overrides::Ansible::PropertyOverride
+        description: |
+          The immutable purpose of the CryptoKey. See
+          https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys#CryptoKeyPurpose
+          for inputs.
 overrides: !ruby/object:Overrides::ResourceOverrides
   KeyRing: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
