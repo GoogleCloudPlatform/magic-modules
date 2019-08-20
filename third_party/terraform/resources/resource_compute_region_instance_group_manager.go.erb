@@ -326,6 +326,14 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 							Optional:     true,
 							ValidateFunc: validation.IntBetween(0, 3600),
 						},
+<% unless version == 'ga' -%>
+						"instance_redistribution_type": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"PROACTIVE", "NONE", ""}, false),
+							DiffSuppressFunc: emptyOrDefaultStringSuppress("PROACTIVE"),
+						},
+<% end -%>
 					},
 				},
 			},
@@ -359,7 +367,7 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 <% unless version == 'ga' -%>
 		AutoHealingPolicies: expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		Versions:            expandVersions(d.Get("version").([]interface{})),
-		UpdatePolicy:        expandUpdatePolicy(d.Get("update_policy").([]interface{})),
+		UpdatePolicy:        expandRegionUpdatePolicy(d.Get("update_policy").([]interface{})),
 <% end -%>
 		DistributionPolicy:  expandDistributionPolicy(d.Get("distribution_policy_zones").(*schema.Set)),
 		// Force send TargetSize to allow size of 0.
@@ -486,7 +494,7 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	if err := d.Set("version", flattenVersions(manager.Versions)); err != nil {
 		return err
 	}
-	if err := d.Set("update_policy", flattenUpdatePolicy(manager.UpdatePolicy)); err != nil {
+	if err := d.Set("update_policy", flattenRegionUpdatePolicy(manager.UpdatePolicy)); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
 <% end -%>
@@ -656,7 +664,7 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 	}
 
 	if d.HasChange("update_policy") {
-		updatedManager.UpdatePolicy = expandUpdatePolicy(d.Get("update_policy").([]interface{}))
+		updatedManager.UpdatePolicy = expandRegionUpdatePolicy(d.Get("update_policy").([]interface{}))
 		change = true
 	}
 
@@ -754,6 +762,83 @@ func resourceComputeRegionInstanceGroupManagerDelete(d *schema.ResourceData, met
 	d.SetId("")
 	return nil
 }
+
+<% unless version == 'ga' -%>
+func expandRegionUpdatePolicy(configured []interface{}) *computeBeta.InstanceGroupManagerUpdatePolicy {
+	updatePolicy := &computeBeta.InstanceGroupManagerUpdatePolicy{}
+
+	for _, raw := range configured {
+		data := raw.(map[string]interface{})
+
+		updatePolicy.MinimalAction = data["minimal_action"].(string)
+		updatePolicy.Type = data["type"].(string)
+		updatePolicy.InstanceRedistributionType = data["instance_redistribution_type"].(string)
+
+		// percent and fixed values are conflicting
+		// when the percent values are set, the fixed values will be ignored
+		if v := data["max_surge_percent"]; v.(int) > 0 {
+			updatePolicy.MaxSurge = &computeBeta.FixedOrPercent{
+				Percent: int64(v.(int)),
+				NullFields: []string{"Fixed"},
+			}
+		} else {
+			updatePolicy.MaxSurge = &computeBeta.FixedOrPercent{
+				Fixed: int64(data["max_surge_fixed"].(int)),
+				// allow setting this value to 0
+				ForceSendFields: []string{"Fixed"},
+				NullFields:      []string{"Percent"},
+			}
+		}
+
+		if v := data["max_unavailable_percent"]; v.(int) > 0 {
+			updatePolicy.MaxUnavailable = &computeBeta.FixedOrPercent{
+				Percent: int64(v.(int)),
+				NullFields: []string{"Fixed"},
+			}
+		} else {
+			updatePolicy.MaxUnavailable = &computeBeta.FixedOrPercent{
+				Fixed: int64(data["max_unavailable_fixed"].(int)),
+				// allow setting this value to 0
+				ForceSendFields: []string{"Fixed"},
+				NullFields:      []string{"Percent"},
+			}
+		}
+
+		if v, ok := data["min_ready_sec"]; ok {
+			updatePolicy.MinReadySec = int64(v.(int))
+		}
+	}
+	return updatePolicy
+}
+
+func flattenRegionUpdatePolicy(updatePolicy *computeBeta.InstanceGroupManagerUpdatePolicy) []map[string]interface{} {
+	results := []map[string]interface{}{}
+	if updatePolicy != nil {
+		up := map[string]interface{}{}
+		if updatePolicy.MaxSurge != nil {
+			up["max_surge_fixed"] = updatePolicy.MaxSurge.Fixed
+			up["max_surge_percent"] = updatePolicy.MaxSurge.Percent
+		} else {
+			up["max_surge_fixed"] = 0
+			up["max_surge_percent"] = 0
+		}
+		if updatePolicy.MaxUnavailable != nil {
+			up["max_unavailable_fixed"] = updatePolicy.MaxUnavailable.Fixed
+			up["max_unavailable_percent"] = updatePolicy.MaxUnavailable.Percent
+		} else {
+			up["max_unavailable_fixed"] = 0
+			up["max_unavailable_percent"] = 0
+		}
+		up["min_ready_sec"] = updatePolicy.MinReadySec
+		up["minimal_action"] = updatePolicy.MinimalAction
+		up["type"] = updatePolicy.Type
+		up["instance_redistribution_type"] = updatePolicy.InstanceRedistributionType
+
+		results = append(results, up)
+	}
+	return results
+}
+<% end -%>
 
 func expandDistributionPolicy(configured *schema.Set) *computeBeta.DistributionPolicy {
 	if configured.Len() == 0 {
