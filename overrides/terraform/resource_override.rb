@@ -15,6 +15,7 @@ require 'overrides/resources'
 require 'provider/terraform/custom_code'
 require 'provider/terraform/docs'
 require 'provider/terraform/examples'
+require 'provider/terraform/virtual_fields'
 
 module Overrides
   module Terraform
@@ -37,6 +38,9 @@ module Overrides
           # Examples in documentation. Backed by generated tests, and have
           # corresponding OiCS walkthroughs.
           :examples,
+
+          # Virtual fields on the Terraform resource.
+          :virtual_fields,
 
           # TODO(alexstephen): Deprecate once all resources using autogen async.
           :autogen_async,
@@ -67,6 +71,7 @@ module Overrides
 
         check :id_format, type: String, default: '{{name}}'
         check :examples, item_type: Provider::Terraform::Examples, type: Array, default: []
+        check :virtual_fields, item_type: Provider::Terraform::VirtualFields, type: Array, default: []
 
         check :custom_code, type: Provider::Terraform::CustomCode,
                             default: Provider::Terraform::CustomCode.new
