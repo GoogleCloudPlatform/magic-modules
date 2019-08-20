@@ -64,10 +64,19 @@ objects:
               description: |
                 A special group to grant access to.
                 
+                
                 Possible values include:
+                
+                
                 * `projectOwners`: Owners of the enclosing project.
+                
+                
                 * `projectReaders`: Readers of the enclosing project.
+                
+                
                 * `projectWriters`: Writers of the enclosing project.
+                
+                
                 * `allAuthenticatedUsers`: All authenticated BigQuery users. 
             - !ruby/object:Api::Type::String
               name: 'userByEmail'
@@ -124,6 +133,7 @@ objects:
         description: |
           The default lifetime of all tables in the dataset, in milliseconds.
           The minimum value is 3600000 milliseconds (one hour).
+          
           
           Once this property is set, all newly-created tables in the dataset
           will have an `expirationTime` property set to the creation time plus
@@ -185,18 +195,22 @@ objects:
         name: 'location'
         description: |
           The geographic location where the dataset should reside.
-          See [official docs].(https://cloud.google.com/bigquery/docs/dataset-locations)
+          See [official docs](https://cloud.google.com/bigquery/docs/dataset-locations).
+          
           
           There are two types of locations, regional or multi-regional. A regional
           location is a specific geographic place, such as Tokyo, and a multi-regional
           location is a large geographic area, such as the United States, that
           contains at least two geographic places.
           
+          
           Possible regional values include: `asia-east1`, `asia-northeast1`,
           `asia-southeast1`, `australia-southeast1`, `europe-north1`,
           `europe-west2` and `us-east4`.
           
+          
           Possible multi-regional values: `EU` and `US`.
+
 
           The default value is multi-regional location `US`.
           Changing this forces a new resource to be created.

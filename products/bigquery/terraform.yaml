@@ -24,8 +24,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "dataset"
         vars:
           dataset_id: "example_dataset"
-        ignore_read_extra:
-          - "delete_contents_on_destroy"
+    virtual_fields:
+      - !ruby/object:Provider::Terraform::VirtualFields
+        name: 'delete_contents_on_destroy'
+        description: |
+          If set to `true`, delete all the tables in the
+          dataset when destroying the resource; otherwise,
+          destroying the resource will fail if tables are present.
     properties:
       access: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -49,12 +54,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/bigquery_dataset.go.erb
-      extra_schema_entry: templates/terraform/extra_schema_entry/bigquery_dataset.go.erb
-    docs: !ruby/object:Provider::Terraform::Docs
-      optional_properties: |
-        * `delete_contents_on_destroy` - (Optional) If set to `true`, delete all the tables in the
-          dataset when destroying the resource; otherwise, destroying the resource will
-          fail if tables are present.
   Table: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
 

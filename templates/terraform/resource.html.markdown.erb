@@ -124,9 +124,6 @@ The following arguments are supported:
     If it is not provided, the provider project is used.
 <% end -%>
 
-<% properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop)) -%>
-<% end -%>
 <%- unless object.virtual_fields.empty? -%>
 <%-   object.virtual_fields.each do |field| -%>
 * `<%= field.name -%>` - (Optional) <%= field.description -%>
