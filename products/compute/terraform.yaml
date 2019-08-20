@@ -786,6 +786,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "vpc_network"
         vars:
           network_name: "vpc-network"
+    virtual_fields:
+      - !ruby/object:Provider::Terraform::VirtualFields
+        name: 'delete_default_routes_on_create'
+        description: |
+          If set to `true`, default routes (`0.0.0.0/0`) will be deleted
+          immediately after network creation. Defaults to `false`.
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -816,15 +822,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      extra_schema_entry: templates/terraform/extra_schema_entry/compute_network_delete_default_route.erb
       post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
-      post_import: templates/terraform/custom_import/compute_network_delete_default_route.erb
       encoder: templates/terraform/encoders/network.erb
-      decoder: templates/terraform/decoders/network.erb
-    docs: !ruby/object:Provider::Terraform::Docs
-      optional_properties: |
-        * `delete_default_routes_on_create`: If set to `true`, default routes (`0.0.0.0/0`) will be deleted
-          immediately after network creation. Defaults to `false`.
   NetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{zone}}/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}"
     mutex: networkEndpoint/{{project}}/{{zone}}/{{network_endpoint_group}}
