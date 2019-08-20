@@ -34,6 +34,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - products/kms/helpers/python/provider_key_ring.py
     delete: |
       module.fail_json(msg="KeyRings cannot be deleted")
+    properties:
+      purpose: !ruby/object:Overrides::Ansible::PropertyOverride
+        description: |
+          The immutable purpose of this CryptoKey. See
+          https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys#CryptoKeyPurpose
+          for possible inputs.
+
 files: !ruby/object:Provider::Config::Files
   copy:
     'test/integration/targets/gcp_kms_key_ring/tasks/main.yml': products/kms/helpers/python/key_ring_test.yaml

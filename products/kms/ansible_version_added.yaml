@@ -15,8 +15,6 @@
     :version_added: '2.9'
     :name:
       :version_added: '2.9'
-    :keyRing:
-      :version_added: '2.9'
     :labels:
       :version_added: '2.9'
     :purpose:
@@ -29,3 +27,5 @@
         :version_added: '2.9'
       :protectionLevel:
         :version_added: '2.9'
+    :keyRing:
+      :version_added: '2.9'
