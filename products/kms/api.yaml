@@ -70,7 +70,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'keyRing'
         description: |
-          The id of the `KeyRing` to which the key shall belong.  Name must be
+          The KeyRing that this key belongs to. Format: `'projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}'`.
           of the format
           'projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}'
         required: true
