@@ -24,6 +24,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "dataset"
         vars:
           dataset_id: "example_dataset"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_cmek"
+        skip_test: true
+        primary_resource_id: "dataset"
+        vars:
+          dataset_id: "example_dataset"
+          key_name: "example-key"
+          keyring_name: "example-keyring"
     virtual_fields:
       - !ruby/object:Provider::Terraform::VirtualFields
         name: 'delete_contents_on_destroy'

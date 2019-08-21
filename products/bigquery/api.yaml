@@ -215,6 +215,20 @@ objects:
           The default value is multi-regional location `US`.
           Changing this forces a new resource to be created.
         default_value: US
+      - !ruby/object:Api::Type::NestedObject
+        name: 'defaultEncryptionConfiguration'
+        description: |
+          The default encryption key for all tables in the dataset. Once this property is set,
+          all newly-created partitioned tables in the dataset will have encryption key set to
+          this value, unless table creation request (or query) overrides the key.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyName'
+            required: true
+            description: |
+              Describes the Cloud KMS encryption key that will be used to protect destination
+              BigQuery table. The BigQuery Service Account associated with your project requires
+              access to this encryption key.
   - !ruby/object:Api::Resource
     name: 'Table'
     kind: 'bigquery#table'
