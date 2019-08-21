@@ -14,8 +14,9 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   AutoscalingPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{projects/{{project}}/locations/{{region}}/autoscalingPolicies/{{policy_id}}}}"
-    import_format: ["{{projects/{{project}}/locations/{{region}}/autoscalingPolicies/{{policy_id}}}}"]
+    id_format: "projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}"
+    self_link: "projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}"
+    import_format: ["projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dataproc_autoscaling_policy"

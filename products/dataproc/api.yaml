@@ -26,15 +26,24 @@ scopes:
 apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Cloud Dataproc API
-    url: https://cloud.google.com/dataproc/docs/reference/rest/
+    url: https://console.cloud.google.com/apis/library/dataproc.googleapis.com
 objects:
   - !ruby/object:Api::Resource
     name: 'AutoscalingPolicy'
-    base_url: "projects/{{project}}/locations/{{region}}/autoscalingPolicies"
-    self_link: "projects/{{project}}/locations/{{region}}/autoscalingPolicies/{{policy_id}}"
+    base_url: "projects/{{project}}/locations/{{location}}/autoscalingPolicies"
+    self_link: "projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{id}}"
     min_version: beta
     description: |
       Describes an autoscaling policy for Dataproc cluster autoscaler.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        url_param_only: true
+        input: true
+        default_value: global
+        description: |
+          The  location where the autoscaling poicy should reside.
+          The default value is `global`.
     properties:
       - !ruby/object:Api::Type::String
         name: 'id'
@@ -121,6 +130,14 @@ objects:
         description: |
           Basic algorithm for autoscaling.
         properties:
+          - !ruby/object:Api::Type::String
+            name: 'cooldownPeriod'
+            default_value: "120s"
+            description: |
+              Duration between scaling events. A scaling period starts after the
+              update operation from the previous event has completed.
+
+              Bounds: [2m, 1d]. Default: 2m.
           - !ruby/object:Api::Type::NestedObject
             name: 'yarnConfig'
             required: true
@@ -160,6 +177,7 @@ objects:
                   Bounds: [0.0, 1.0].
               - !ruby/object:Api::Type::Double
                 name: 'scaleUpMinWorkerFraction'
+                default_value: 0.0
                 description: |
                   Minimum scale-up threshold as a fraction of total cluster size before scaling
                   occurs. For example, in a 20-worker cluster, a threshold of 0.1 means the autoscaler
@@ -169,6 +187,7 @@ objects:
                   Bounds: [0.0, 1.0]. Default: 0.0.
               - !ruby/object:Api::Type::Double
                 name: 'scaleDownMinWorkerFraction'
+                default_value: 0.0
                 description: |
                   Minimum scale-down threshold as a fraction of total cluster size before scaling occurs.
                   For example, in a 20-worker cluster, a threshold of 0.1 means the autoscaler must
@@ -176,11 +195,3 @@ objects:
                   means the autoscaler will scale down on any recommended change.
 
                   Bounds: [0.0, 1.0]. Default: 0.0.
-          - !ruby/object:Api::Type::String
-            name: 'cooldownPeriod'
-            default_value: "120s"
-            description: |
-              Duration between scaling events. A scaling period starts after the
-              update operation from the previous event has completed.
-
-              Bounds: [2m, 1d]. Default: 2m.
