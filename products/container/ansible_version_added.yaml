@@ -7,10 +7,6 @@
 :regular:
   :Cluster:
     :version_added: '2.6'
-    :kubectlPath:
-      :version_added: '2.9'
-    :kubectlContext:
-      :version_added: '2.9'
     :name:
       :version_added: '2.6'
     :description:
@@ -117,12 +113,36 @@
       :version_added: '2.9'
       :maxPodsPerNode:
         :version_added: '2.9'
+    :ipAllocationPolicy:
+      :version_added: '2.9'
+      :useIpAliases:
+        :version_added: '2.9'
+      :createSubnetwork:
+        :version_added: '2.9'
+      :subnetworkName:
+        :version_added: '2.9'
+      :clusterSecondaryRangeName:
+        :version_added: '2.9'
+      :servicesSecondaryRangeName:
+        :version_added: '2.9'
+      :clusterIpv4CidrBlock:
+        :version_added: '2.9'
+      :nodeIpv4CidrBlock:
+        :version_added: '2.9'
+      :servicesIpv4CidrBlock:
+        :version_added: '2.9'
+      :tpuIpv4CidrBlock:
+        :version_added: '2.9'
     :enableTpu:
       :version_added: '2.9'
     :tpuIpv4CidrBlock:
       :version_added: '2.9'
     :location:
       :version_added: '2.8'
+    :kubectlPath:
+      :version_added: '2.9'
+    :kubectlContext:
+      :version_added: '2.9'
   :NodePool:
     :version_added: '2.6'
     :name:
