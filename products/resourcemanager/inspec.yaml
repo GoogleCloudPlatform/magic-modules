@@ -23,6 +23,3 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     product_url: https://cloudresourcemanager.googleapis.com/v2/
     # Creating and viewing folders requires organization level privileges
     privileged: true
-files: !ruby/object:Provider::Config::Files
-  copy:
-    'Gemfile': 'provider/inspec/Gemfile'
