@@ -32,6 +32,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
           results['resources'] | map(attribute='datasetReference') | map(attribute='datasetId') | select("match", ".*my_example_dataset.*") | list | length == 0
 overrides: !ruby/object:Overrides::ResourceOverrides
   Dataset: !ruby/object:Overrides::Ansible::ResourceOverride
+    # Override self_link due to GoogleCloudPlatform/magic-modules#2219
+    self_link: "projects/{project}/datasets/{name}"
     properties:
       access.view.tableId: !ruby/object:Overrides::Ansible::PropertyOverride
         # Ansible linter doesn't like the (_) notation.
