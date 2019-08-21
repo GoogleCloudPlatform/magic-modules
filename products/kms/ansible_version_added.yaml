@@ -1,0 +1,31 @@
+---
+:facts:
+  :KeyRing:
+    :version_added: '2.9'
+  :CryptoKey:
+    :version_added: '2.9'
+:regular:
+  :KeyRing:
+    :version_added: '2.9'
+    :name:
+      :version_added: '2.9'
+    :location:
+      :version_added: '2.9'
+  :CryptoKey:
+    :version_added: '2.9'
+    :name:
+      :version_added: '2.9'
+    :labels:
+      :version_added: '2.9'
+    :purpose:
+      :version_added: '2.9'
+    :rotationPeriod:
+      :version_added: '2.9'
+    :versionTemplate:
+      :version_added: '2.9'
+      :algorithm:
+        :version_added: '2.9'
+      :protectionLevel:
+        :version_added: '2.9'
+    :keyRing:
+      :version_added: '2.9'
