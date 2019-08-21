@@ -31,10 +31,11 @@ module Provider
 
       # Transforms a Cloud API representation of a property into a Terraform
       # schema representation.
-      def build_flatten_method(prefix, property)
+      def build_flatten_method(prefix, property, object)
         compile_template 'templates/terraform/flatten_property_method.erb',
                          prefix: prefix,
-                         property: property
+                         property: property,
+                         object: object
       end
 
       # Transforms a Terraform schema representation of a property into a

@@ -137,7 +137,6 @@ func Provider() terraform.ResourceProvider {
 			ServiceManagementCustomEndpointEntryKey:      ServiceManagementCustomEndpointEntry,
 			ServiceNetworkingCustomEndpointEntryKey:      ServiceNetworkingCustomEndpointEntry,
 			ServiceUsageCustomEndpointEntryKey:           ServiceUsageCustomEndpointEntry,
-			BigQueryCustomEndpointEntryKey:                BigQueryCustomEndpointEntry,
 			CloudFunctionsCustomEndpointEntryKey:         CloudFunctionsCustomEndpointEntry,
 			CloudIoTCustomEndpointEntryKey:               CloudIoTCustomEndpointEntry,
 			StorageTransferCustomEndpointEntryKey:        StorageTransferCustomEndpointEntry,
@@ -259,7 +258,6 @@ end
 			},
 			map[string]*schema.Resource{
 				"google_app_engine_application":                resourceAppEngineApplication(),
-				"google_bigquery_dataset":                      resourceBigQueryDataset(),
 				"google_bigquery_table":                        resourceBigQueryTable(),
 				"google_bigtable_instance":                     resourceBigtableInstance(),
 				"google_bigtable_instance_iam_binding":         ResourceIamBinding(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
@@ -451,7 +449,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.ServiceManagementBasePath = d.Get(ServiceManagementCustomEndpointEntryKey).(string)
 	config.ServiceNetworkingBasePath = d.Get(ServiceNetworkingCustomEndpointEntryKey).(string)
 	config.ServiceUsageBasePath = d.Get(ServiceUsageCustomEndpointEntryKey).(string)
-	config.BigQueryBasePath = d.Get(BigQueryCustomEndpointEntryKey).(string)
 	config.CloudFunctionsBasePath = d.Get(CloudFunctionsCustomEndpointEntryKey).(string)
 	config.CloudIoTBasePath = d.Get(CloudIoTCustomEndpointEntryKey).(string)
 	config.StorageTransferBasePath = d.Get(StorageTransferCustomEndpointEntryKey).(string)
