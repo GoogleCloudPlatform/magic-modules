@@ -19,8 +19,8 @@ require 'provider/ansible/tests'
 module Overrides
   module Ansible
     # Allows overriding snowflake transport requests
-    # Each one of these takes in a filename.
-    # Each file should contain a single Python function.
+    # Each one of these takes in a filename or a function name.
+    # If filename, each file should contain one Python file.
     class Transport < Api::Object
       attr_reader :encoder
       attr_reader :decoders
