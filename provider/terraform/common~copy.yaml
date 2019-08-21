@@ -49,5 +49,9 @@
 '<%= fname -%>': '<%= file_path -%>'
 <% end -%>
 '<%= dir -%>/test-fixtures/': 'third_party/terraform/utils/test-fixtures'
-'website': 'third_party/terraform/website'
+<%  Dir["third_party/terraform/website/**/*.*"].each do |file_path|
+    fname = file_path.split('/', 4)[3]
+-%>
+'website/<%= fname -%>': 'third_party/terraform/website/<%= fname -%>'
+<% end -%>
 'version': 'third_party/terraform/version'
