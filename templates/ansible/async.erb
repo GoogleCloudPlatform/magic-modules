@@ -26,7 +26,7 @@ def wait_for_operation(module, response):
 <% if !object.transport.decoders.empty? -%>
     response = <%= method %>
     if response:
-<% object.transport.decoders.each do |d| -%>
+<% object.transport.decoder_functions.each do |d| -%>
         response = <%= d -%>(response, module)
         return response
 <% end -%>

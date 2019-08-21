@@ -395,10 +395,10 @@ def unwrap_resource(result, module):
     except getattr(json.decoder, 'JSONDecodeError', ValueError):
         module.fail_json(msg="Invalid JSON response with error: %s" % response.text)
 
-<% unless object.transport.decoders.empty? -%>
-<% object.transport.decoders.each do |d| -%>
+<% unless object.transport.decoder_functions.empty? -%>
+<% object.transport.decoder_functions.each do |d| -%>
     result = <%= d -%>(result, module)
-<% end # decoders.each -%>
+<% end # decoders_functions.each -%>
 
 <% end -%>
     if navigate_hash(result, ['error', 'errors']):
@@ -411,9 +411,9 @@ def unwrap_resource(result, module):
 def is_different(module, response):
     request = resource_to_request(module)
     response = response_to_hash(module, response)
-<% object.transport.decoders.each do |d| -%>
-    result = <%= d -%>(result, module)
-<% end # decoders.each -%>
+<% object.transport.decoder_functions.each do |d| -%>
+    result = <%= d -%>(response, module)
+<% end # decoder_functions.each -%>
 
     # Remove all output-only from response.
     response_vals = {}
