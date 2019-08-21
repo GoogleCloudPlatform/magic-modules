@@ -33,20 +33,12 @@ module Overrides
         check :remove_nones_post_encoder, type: :boolean, default: true
       end
 
-      def encoders?
-        !@encoders.empty?
-      end
-
-      def decoders?
-        !@decoders.empty?
-      end
-
       def encoder_functions
-        @encoders.map { |e| compile(e).match(/def ([a-z]*)\(module, response\)/).first }
+        @encoders.map { |e| compile(e).match(/def ([a-z]*)\(request, module\)/).first }
       end
 
       def decoder_functions
-        @decoders.map { |e| compile(e).match(/def ([a-z]*)\(module, response\)/).first }
+        @decoders.map { |e| compile(e).match(/def ([a-z]*)\(response, module\)/).first }
       end
     end
 

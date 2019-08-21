@@ -319,8 +319,8 @@ def resource_to_request(module):
 }.merge(request_properties(properties_in_request))
 -%>
     request = <%= lines(python_literal(request_hash, use_hash_brackets: true)) -%>
-<% if object.encoder? -%>
-    request = <%= object.transport.encoder -%>(request, module)
+<% object.transport.encoder_functions.each do |e| -%>
+    request = <%= e -%>(request, module)
 <% end -%>
 <% if !object.transport or object&.transport&.remove_nones_post_encoder -%>
     return_vals = {}
@@ -395,7 +395,7 @@ def unwrap_resource(result, module):
     except getattr(json.decoder, 'JSONDecodeError', ValueError):
         module.fail_json(msg="Invalid JSON response with error: %s" % response.text)
 
-<% if object.decoder? -%>
+<% unless object.transport.decoders.empty? -%>
 <% object.transport.decoders.each do |d| -%>
     result = <%= d -%>(result, module)
 <% end # decoders.each -%>
@@ -411,11 +411,9 @@ def unwrap_resource(result, module):
 def is_different(module, response):
     request = resource_to_request(module)
     response = response_to_hash(module, response)
-<% if object.decoder? -%>
 <% object.transport.decoders.each do |d| -%>
     result = <%= d -%>(result, module)
 <% end # decoders.each -%>
-<% end -%>
 
     # Remove all output-only from response.
     response_vals = {}
