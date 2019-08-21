@@ -49,8 +49,4 @@ resource "google_compute_route" "default" {
   network      = "${google_compute_network.default.name}"
   next_hop_ilb = "${google_compute_forwarding_rule.default.self_link}"
   priority     = 2000
-  # Google sets next_hop_ip for internal load balancer. Routes have no update method so using lifecycle changes to create and destroy.
-  lifecycle {
-    ignore_changes = [ "next_hop_ip" ]
-  }
 }
