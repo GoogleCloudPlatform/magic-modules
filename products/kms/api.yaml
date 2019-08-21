@@ -70,9 +70,8 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'keyRing'
         description: |
-          The KeyRing that this key belongs to. Format: `'projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}'`.
-          of the format
-          'projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}'
+          The KeyRing that this key belongs to.
+          Format: `'projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}'`.
         required: true
         input: true
         url_param_only: true
