@@ -1059,16 +1059,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           route_name: "network-route"
           network_name: "compute-network"
       - !ruby/object:Provider::Terraform::Examples
-        name: "route_proxy"
+        name: "route_ilb_beta"
         min_version: "beta"
-        primary_resource_id: "route_proxy_beta"
+        primary_resource_id: "route-ilb-beta"
         vars:
-          route_name: "network-route-proxy"
+          route_name: "route-ilb-beta"
           network_name: "compute-network"
           subnet_name: "compute-subnet"
-          forwarding_rule: "compute-forwarding-rule"
-          health_check: "proxy-health-check"
-          backend: "compute-backend"
+          forwarding_rule_name: "compute-forwarding-rule"
+          health_check_name: "proxy-health-check"
+          backend_name: "compute-backend"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
