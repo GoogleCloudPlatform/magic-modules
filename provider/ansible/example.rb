@@ -47,7 +47,7 @@ module Provider
         object.all_user_properties
               .map(&:name)
               .select { |para| properties.include? para }
-              .map { |para| { para => handwritten_example[para] } }
+              .map { |para| { para.underscore => handwritten_example[para.underscore] } }
               .reduce({}, :merge)
       end
     end
