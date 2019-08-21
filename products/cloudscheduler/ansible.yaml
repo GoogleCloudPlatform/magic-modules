@@ -23,7 +23,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: The relative URI.
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
-      decoder: decode_request
+      decoder:
+        - decode_request
     provider_helpers:
       - products/cloudscheduler/helpers/python/job.py
 files: !ruby/object:Provider::Config::Files

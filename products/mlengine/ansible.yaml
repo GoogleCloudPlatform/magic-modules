@@ -23,7 +23,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
 overrides: !ruby/object:Overrides::ResourceOverrides
   Model: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
-      decoder: decode_response
+      decoder:
+        - decode_response
     provider_helpers:
       - products/mlengine/helpers/ansible/model_decoder.py
   Version: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -35,7 +36,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         if module.params.get('is_default') is True:
             set_default(module)
     transport: !ruby/object:Overrides::Ansible::Transport
-      decoder: decode_response
+      decoder:
+        - decode_response
     properties:
       isDefault: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ['default']
