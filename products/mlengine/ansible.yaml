@@ -24,9 +24,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Model: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       decoder:
-        - decode_response
-    provider_helpers:
-      - products/mlengine/helpers/ansible/model_decoder.py
+        - 'templates/ansible/decoders/full_name_to_short_name.py'
   Version: !ruby/object:Overrides::Ansible::ResourceOverride
     custom_code: !ruby/object:Provider::Ansible::CustomCode
       update: |
@@ -37,12 +35,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
             set_default(module)
     transport: !ruby/object:Overrides::Ansible::Transport
       decoder:
-        - decode_response
+        - 'templates/ansible/decoders/full_name_to_short_name.py'
     properties:
       isDefault: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ['default']
     provider_helpers:
-      - products/mlengine/helpers/ansible/model_decoder.py
       - products/mlengine/helpers/ansible/version_set_default.py
 files: !ruby/object:Provider::Config::Files
   resource:

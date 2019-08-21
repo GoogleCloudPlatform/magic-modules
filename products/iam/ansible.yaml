@@ -27,17 +27,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Ansible::CustomCode
       custom_create_resource: true
     transport: !ruby/object:Overrides::Ansible::Transport
-      decoder:
-        - decode_response
+      decoders:
+        - 'templates/ansible/decoder/full_name_to_short_name.py'
     provider_helpers:
       - 'products/iam/helpers/python/provider_role.py'
   ServiceAccount: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
-      encoder: encode_request
-      decoder:
-        - decode_response
-    provider_helpers:
-      - 'products/iam/helpers/python/provider_service_account.py'
+      encoders:
+        - 'products/iam/helpers/python/provider_service_account.py'
+      decoders:
+        - 'templates/ansible/decoder/full_name_to_short_name.py'
   ServiceAccountKey: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       decoder:

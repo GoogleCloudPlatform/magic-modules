@@ -10,10 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# Short names are given (and expected) by the API
-# but are returned as full names.
-def decode_response(response, module):
-    if 'name' in response and 'metadata' not in response:
+def full_name_to_short(response, module):
+    if 'name' in response:
         response['name'] = response['name'].split('/')[-1]
     return response
