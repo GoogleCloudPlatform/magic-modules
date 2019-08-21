@@ -396,7 +396,9 @@ def unwrap_resource(result, module):
         module.fail_json(msg="Invalid JSON response with error: %s" % response.text)
 
 <% if object.decoder? -%>
-    result = <%= object.transport.decoder -%>(result, module)
+<% object.transport.decoders.each do |d| -%>
+    result = <%= d -%>(result, module)
+<% end # decoders.each -%>
 
 <% end -%>
     if navigate_hash(result, ['error', 'errors']):
@@ -410,7 +412,9 @@ def is_different(module, response):
     request = resource_to_request(module)
     response = response_to_hash(module, response)
 <% if object.decoder? -%>
-    request = <%= object.transport.decoder -%>(request, module)
+<% object.transport.decoders.each do |d| -%>
+    result = <%= d -%>(result, module)
+<% end # decoders.each -%>
 <% end -%>
 
     # Remove all output-only from response.

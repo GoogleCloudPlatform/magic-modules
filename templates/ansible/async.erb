@@ -26,7 +26,10 @@ def wait_for_operation(module, response):
 <% if object.decoder? -%>
     response = <%= method %>
     if response:
-        return <%= method_call('decode_response', ['response', 'module']) %>
+<% object.decoders.each do |d| -%>
+        response = <%= d -%>(response, module)
+        return response
+<% end -%>
     else:
         return {}
 <% else -%>

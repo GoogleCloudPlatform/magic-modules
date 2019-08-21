@@ -21,13 +21,13 @@ module Overrides
     # Allows overriding snowflake transport requests
     class Transport < Api::Object
       attr_reader :encoder
-      attr_reader :decoder
+      attr_reader :decoders
       attr_reader :remove_nones_post_encoder
 
       def validate
         super
         check :encoder, type: ::String
-        check :decoder, type: ::String
+        check :decoders, type: ::Array, default: []
         check :remove_nones_post_encoder, type: :boolean, default: true
       end
     end
