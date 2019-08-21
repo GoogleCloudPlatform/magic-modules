@@ -1067,6 +1067,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_name: "compute-network"
           subnet_name: "compute-subnet"
           forwarding_rule: "compute-forwarding-rule"
+          health_check: "proxy-health-check"
+          backend: "compute-backend"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation

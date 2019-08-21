@@ -22,13 +22,13 @@ resource "google_compute_forwarding_rule" "default" {
 }
 
 resource "google_compute_region_backend_service" "backend" {
-  name                  = "website-backend"
+  name                  = "<%= ctx[:vars]['backend'] %>"
   region                = "us-central1"
   health_checks         = ["${google_compute_health_check.hc.self_link}"]
 }
 
 resource "google_compute_health_check" "hc" {
-  name               = "check-website-backend"
+  name               = "<%= ctx[:vars]['health_check'] %>"
   check_interval_sec = 1
   timeout_sec        = 1
 
