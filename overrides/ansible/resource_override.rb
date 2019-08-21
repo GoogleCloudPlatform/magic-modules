@@ -28,17 +28,29 @@ module Overrides
 
       def validate
         super
-        check :encoder, type: ::String, default: []
+        check :encoders, type: ::String, default: []
         check :decoders, type: ::Array, default: []
         check :remove_nones_post_encoder, type: :boolean, default: true
       end
 
       def encoder_functions
-        @encoders.map { |e| compile(e).match(/def ([a-z]*)\(request, module\)/).first }
+        @encoders.map do |e|
+          if File.exists?(e)
+            compile(e).match(/def ([a-z]*)\(request, module\)/).first
+          else
+            e
+          end
+        end
       end
 
       def decoder_functions
-        @decoders.map { |e| compile(e).match(/def ([a-z]*)\(response, module\)/).first }
+        @decoders.map do |e|
+          if File.exists?(e)
+            compile(e).match(/def ([a-z]*)\(request, module\)/).first
+          else
+            e
+          end
+        end
       end
     end
 
