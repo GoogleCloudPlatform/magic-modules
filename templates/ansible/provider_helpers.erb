@@ -1,9 +1,11 @@
 <%
+    provider_helpers = object.provider_helpers + object.transport.encoders +
+                        object.transport.decoders
 -%>
-<% unless object.provider_helpers.empty? -%>
+<% unless provider_helpers.empty? -%>
 <%=
-  object.provider_helpers.map do |f|
-    if f == object.provider_helpers.last
+  provider_helpers.map do |f|
+    if f == provider_helpers.last
       lines(compile(f))
     else
       lines(compile(f), 2)
