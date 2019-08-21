@@ -30,7 +30,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_update_resource: true
       update: |
         module.fail_json(msg="Spanner objects can't be updated to ensure data safety")
-      decoder:
+      decoders:
         - decode_response
     provider_helpers:
       - 'products/spanner/helpers/python/instance_helpers.py.erb'
@@ -43,16 +43,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update: |
         module.fail_json(msg="Spanner objects can't be updated to ensure data safety")
     transport: !ruby/object:Overrides::Ansible::Transport
-      encoder: encode_request
-      decoder:
+      encoders:
+        - encode_request
+      decoders:
         - decode_response
     provider_helpers:
       - 'products/spanner/helpers/python/database_helpers.py.erb'
   # Virtual => true objects that don't need dedicated resources.
   InstanceConfig: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
-      encoder: encode_request
-      decoder:
+      encoders:
+        - encode_request
+      decoders:
         - decode_response
     exclude: true
 files: !ruby/object:Provider::Config::Files

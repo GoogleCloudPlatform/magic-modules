@@ -27,7 +27,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         elif module.params['trigger_http']:
           module.params['https_trigger'] = {}
     transport: !ruby/object:Overrides::Ansible::Transport
-      encoder:
+      encoders:
         - 'products/cloudfunctions/helpers/ansible/function_transport.py'
       remove_nones_post_encoder: false
 files: !ruby/object:Provider::Config::Files

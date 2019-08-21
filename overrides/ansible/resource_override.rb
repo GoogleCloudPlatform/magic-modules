@@ -22,31 +22,35 @@ module Overrides
     # Each one of these takes in a filename or a function name.
     # If filename, each file should contain one Python file.
     class Transport < Api::Object
-      attr_reader :encoder
+      include Compile::Core
+
+      attr_reader :encoders
       attr_reader :decoders
       attr_reader :remove_nones_post_encoder
 
       def validate
         super
-        check :encoders, type: ::String, default: []
-        check :decoders, type: ::Array, default: []
+        check :encoders, type: ::Array, default: [], item_type: ::String
+        check :decoders, type: ::Array, default: [], item_type: ::String
         check :remove_nones_post_encoder, type: :boolean, default: true
       end
 
       def encoder_functions
-        @encoders.map do |e|
-          if File.exists?(e)
-            compile(e).match(/def ([a-z]*)\(request, module\)/).first
-          else
-            e
-          end
-        end
+        function_names(@encoders)
       end
 
       def decoder_functions
-        @decoders.map do |e|
-          if File.exists?(e)
-            compile(e).match(/def ([a-z]*)\(request, module\)/).first
+        function_names(@decoders)
+      end
+
+      private
+
+      # Given an array of files that contain a single function and function names,
+      # return the list of function names
+      def function_names(array)
+        array.map do |e|
+          if File.file?(e)
+            compile(e).match(/def ([a-zA-Z_]*)\([a-zA-Z_]*, [a-zA-Z_]*\)/)[1]
           else
             e
           end

@@ -22,9 +22,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       appEngineHttpTarget.relativeUri: !ruby/object:Overrides::Ansible::PropertyOverride
         description: The relative URI.
     transport: !ruby/object:Overrides::Ansible::Transport
-      encoder: encode_request
-      decoder:
-        - decode_request
+      encoders:
+        - encode_request
+      decoders:
+        - templates/ansible/decoders/full_name_to_short_name.py
     provider_helpers:
       - products/cloudscheduler/helpers/python/job.py
 files: !ruby/object:Provider::Config::Files

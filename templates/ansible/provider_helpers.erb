@@ -1,6 +1,7 @@
 <%
     provider_helpers = object.provider_helpers + object.transport.encoders +
                         object.transport.decoders
+    provider_helpers = provider_helpers.select { |e| File.file?(e) }
 -%>
 <% unless provider_helpers.empty? -%>
 <%=

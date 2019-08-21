@@ -23,7 +23,7 @@ datasources: !ruby/object:Overrides::ResourceOverrides
 overrides: !ruby/object:Overrides::ResourceOverrides
   Model: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
-      decoder:
+      decoders:
         - 'templates/ansible/decoders/full_name_to_short_name.py'
   Version: !ruby/object:Overrides::Ansible::ResourceOverride
     custom_code: !ruby/object:Provider::Ansible::CustomCode
@@ -34,7 +34,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         if module.params.get('is_default') is True:
             set_default(module)
     transport: !ruby/object:Overrides::Ansible::Transport
-      decoder:
+      decoders:
         - 'templates/ansible/decoders/full_name_to_short_name.py'
     properties:
       isDefault: !ruby/object:Overrides::Ansible::PropertyOverride
