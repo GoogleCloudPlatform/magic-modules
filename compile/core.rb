@@ -118,20 +118,18 @@ module Compile
     # WARNING: Do *NOT* change caller_frame = 1 value unless you really know
     # what you're doing. It is reserved for future use.
     def compile(file, caller_frame = 1)
-      begin
-        ctx = binding.of_caller(caller_frame)
-        has_erbout = ctx.local_variables.include?(:_erbout)
-        content = ctx.local_variable_get(:_erbout) if has_erbout # save code
-        ctx.local_variable_set(:compiler, compiler)
-        Google::LOGGER.debug "Compiling #{file}"
-        input = ERB.new get_helper_file(file), trim_mode: '->'
-        compiled = input.result(ctx)
-        ctx.local_variable_set(:_erbout, content) if has_erbout # restore code
-        compiled
-      rescue
-        Google::LOGGER.fatal "Error compiling #{file}"
-        raise
-      end
+      ctx = binding.of_caller(caller_frame)
+      has_erbout = ctx.local_variables.include?(:_erbout)
+      content = ctx.local_variable_get(:_erbout) if has_erbout # save code
+      ctx.local_variable_set(:compiler, compiler)
+      Google::LOGGER.debug "Compiling #{file}"
+      input = ERB.new get_helper_file(file), trim_mode: '->'
+      compiled = input.result(ctx)
+      ctx.local_variable_set(:_erbout, content) if has_erbout # restore code
+      compiled
+    rescue StandardError
+      Google::LOGGER.fatal "Error compiling #{file}"
+      raise
     end
 
     def ansible_style_yaml(obj, options = {})

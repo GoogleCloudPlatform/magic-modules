@@ -29,7 +29,6 @@ module Provider
       @config = config
       @api = api
 
-
       # @target_version_name is the version specified by MM for this generation
       # run. That's distinct from @version below, which is the best-fit version
       # supported by the product.
@@ -76,10 +75,7 @@ module Provider
       end
     end
 
-    # Main entry point for the compiler. As this method is simply invoking other
-    # generators, it is okay to ignore Rubocop warnings about method size and
-    # complexity.
-    #
+    # Main entry point for generation.
     def generate(output_folder, types, product_path, dump_yaml)
       generate_objects(output_folder, types)
       copy_files(output_folder) \
@@ -121,7 +117,9 @@ module Provider
       # version_name is actually used because all of the variables in scope in this method
       # are made available within the templates by the compile call.
       # TODO: remove version_name, use @target_version_name or pass it in expicitly
+      # rubocop:disable Lint/UselessAssignment
       version_name = @target_version_name
+      # rubocop:enable Lint/UselessAssignment
       provider_name ||= self.class.name.split('::').last.downcase
       return unless File.exist?("provider/#{provider_name}/common~copy.yaml")
 
