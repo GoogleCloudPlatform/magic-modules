@@ -54,10 +54,10 @@ module Provider
         attr_accessor :example
       end
 
-    def initialize(config, api, version_name, start_time)
-      super(config, api, version_name, start_time)
-      @version_added = build_version_added
-    end
+      def initialize(config, api, version_name, start_time)
+        super(config, api, version_name, start_time)
+        @version_added = build_version_added
+      end
 
       # Returns a string representation of the corresponding Python type
       # for a MM type.
