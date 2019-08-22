@@ -1,0 +1,30 @@
+apiVersion: core.cnrm.cloud.google.com/v1alpha1
+kind: ServiceMapping
+metadata:
+  name: monitoring.cnrm.cloud.google.com
+  namespace: cnrm-system
+spec:
+  name: Monitoring
+  version: v1alpha1
+  resources:
+    - name: google_monitoring_alert_policy
+      kind: MonitoringAlertPolicy
+      metadataMapping:
+        name: name
+      idTemplate: "{{name}}"
+    - name: google_monitoring_group
+      kind: MonitoringGroup
+      metadataMapping:
+        name: name
+      idTemplate: "{{name}}"
+    - name: google_monitoring_notification_channel
+      kind: MonitoringNotificationChannel
+      metadataMapping:
+        name: name
+        labels: labels
+      idTemplate: "{{name}}"
+    - name: google_monitoring_uptime_check_config
+      kind: MonitoringUptimeCheckConfig
+      metadataMapping:
+        name: name
+      idTemplate: "{{name}}"

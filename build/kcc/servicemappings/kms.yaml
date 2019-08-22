@@ -1,0 +1,20 @@
+apiVersion: core.cnrm.cloud.google.com/v1alpha1
+kind: ServiceMapping
+metadata:
+  name: kms.cnrm.cloud.google.com
+  namespace: cnrm-system
+spec:
+  name: Kms
+  version: v1alpha1
+  resources:
+    - name: google_kms_key_ring
+      kind: KmsKeyRing
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/locations/{{location}}/keyRings/{{name}}"
+    - name: google_kms_crypto_key
+      kind: KmsCryptoKey
+      metadataMapping:
+        name: name
+        labels: labels
+      idTemplate: "{{key_ring}}/cryptoKeys/{{name}}"

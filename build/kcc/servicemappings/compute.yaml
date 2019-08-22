@@ -1,0 +1,385 @@
+apiVersion: core.cnrm.cloud.google.com/v1alpha1
+kind: ServiceMapping
+metadata:
+  name: compute.cnrm.cloud.google.com
+  namespace: cnrm-system
+spec:
+  name: Compute
+  version: v1alpha1
+  resources:
+    - name: google_compute_address
+      kind: ComputeAddress
+      metadataMapping:
+        name: name
+        labels: labels
+      idTemplate: "projects/{{project}}/regions/{{region}}/addresses/{{name}}"
+      resourceReferences:
+        - key: subnetworkRef
+          tfField: subnetwork
+          kind: Subnetwork
+          required: false
+    - name: google_compute_autoscaler
+      kind: ComputeAutoscaler
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/zones/{{zone}}/autoscalers/{{name}}"
+      resourceReferences:
+        - key: targetRef
+          tfField: target
+          kind: InstanceGroupManager
+          required: true
+    - name: google_compute_backend_bucket
+      kind: ComputeBackendBucket
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/backendBuckets/{{name}}"
+    - name: google_compute_backend_bucket_signed_url_key
+      kind: ComputeBackendBucketSignedUrlKey
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/backendBuckets/{{backend_bucket}}/{{name}}"
+    - name: google_compute_backend_service
+      kind: ComputeBackendService
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/backendServices/{{name}}"
+    - name: google_compute_region_backend_service
+      kind: ComputeRegionBackendService
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/regions/{{region}}/backendServices/{{name}}"
+      resourceReferences:
+        - key: regionRef
+          tfField: region
+          kind: Region
+          required: false
+    - name: google_compute_backend_service_signed_url_key
+      kind: ComputeBackendServiceSignedUrlKey
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/backendServices/{{backend_service}}/{{name}}"
+    - name: google_compute_disk
+      kind: ComputeDisk
+      metadataMapping:
+        name: name
+        labels: labels
+      idTemplate: "projects/{{project}}/zones/{{zone}}/disks/{{name}}"
+      resourceReferences:
+        - key: typeRef
+          tfField: type
+          kind: DiskType
+          required: false
+    - name: google_compute_firewall
+      kind: ComputeFirewall
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/firewalls/{{name}}"
+      resourceReferences:
+        - key: networkRef
+          tfField: network
+          kind: Network
+          required: true
+    - name: google_compute_forwarding_rule
+      kind: ComputeForwardingRule
+      metadataMapping:
+        name: name
+        labels: labels
+      idTemplate: "projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}"
+      resourceReferences:
+        - key: backendServiceRef
+          tfField: backendService
+          kind: BackendService
+          required: false
+        - key: networkRef
+          tfField: network
+          kind: Network
+          required: false
+        - key: subnetworkRef
+          tfField: subnetwork
+          kind: Subnetwork
+          required: false
+        - key: targetRef
+          tfField: target
+          kind: TargetPool
+          required: false
+    - name: google_compute_global_address
+      kind: ComputeGlobalAddress
+      metadataMapping:
+        name: name
+        labels: labels
+      idTemplate: "projects/{{project}}/global/addresses/{{name}}"
+      resourceReferences:
+        - key: networkRef
+          tfField: network
+          kind: Network
+          required: false
+    - name: google_compute_global_forwarding_rule
+      kind: ComputeGlobalForwardingRule
+      metadataMapping:
+        name: name
+        labels: labels
+      idTemplate: "projects/{{project}}/global/forwardingRules/{{name}}"
+      resourceReferences:
+        - key: networkRef
+          tfField: network
+          kind: Network
+          required: false
+    - name: google_compute_http_health_check
+      kind: ComputeHttpHealthCheck
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/httpHealthChecks/{{name}}"
+    - name: google_compute_https_health_check
+      kind: ComputeHttpsHealthCheck
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/httpsHealthChecks/{{name}}"
+    - name: google_compute_health_check
+      kind: ComputeHealthCheck
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/healthChecks/{{name}}"
+    - name: google_compute_image
+      kind: ComputeImage
+      metadataMapping:
+        name: name
+        labels: labels
+      idTemplate: "projects/{{project}}/global/images/{{name}}"
+      resourceReferences:
+        - key: sourceDiskRef
+          tfField: sourceDisk
+          kind: Disk
+          required: false
+    - name: google_compute_interconnect_attachment
+      kind: ComputeInterconnectAttachment
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/regions/{{region}}/interconnectAttachments/{{name}}"
+      resourceReferences:
+        - key: routerRef
+          tfField: router
+          kind: Router
+          required: true
+    - name: google_compute_network
+      kind: ComputeNetwork
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/networks/{{name}}"
+    - name: google_compute_network_endpoint
+      kind: ComputeNetworkEndpoint
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}"
+      resourceReferences:
+        - key: instanceRef
+          tfField: instance
+          kind: Instance
+          required: true
+    - name: google_compute_network_endpoint_group
+      kind: ComputeNetworkEndpointGroup
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{name}}"
+      resourceReferences:
+        - key: networkRef
+          tfField: network
+          kind: Network
+          required: true
+        - key: subnetworkRef
+          tfField: subnetwork
+          kind: Subnetwork
+          required: false
+    - name: google_compute_node_group
+      kind: ComputeNodeGroup
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/zones/{{zone}}/nodeGroups/{{name}}"
+      resourceReferences:
+        - key: nodeTemplateRef
+          tfField: nodeTemplate
+          kind: NodeTemplate
+          required: true
+    - name: google_compute_node_template
+      kind: ComputeNodeTemplate
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/regions/{{region}}/nodeTemplates/{{name}}"
+    - name: google_compute_region_autoscaler
+      kind: ComputeRegionAutoscaler
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/regions/{{region}}/autoscalers/{{name}}"
+    - name: google_compute_region_disk
+      kind: ComputeRegionDisk
+      metadataMapping:
+        name: name
+        labels: labels
+      idTemplate: "projects/{{project}}/regions/{{region}}/disks/{{name}}"
+      resourceReferences:
+        - key: typeRef
+          tfField: type
+          kind: RegionDiskType
+          required: false
+    - name: google_compute_route
+      kind: ComputeRoute
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/routes/{{name}}"
+      resourceReferences:
+        - key: networkRef
+          tfField: network
+          kind: Network
+          required: true
+        - key: nextHopInstanceRef
+          tfField: nextHopInstance
+          kind: Instance
+          required: false
+        - key: nextHopVpnTunnelRef
+          tfField: nextHopVpnTunnel
+          kind: VpnTunnel
+          required: false
+    - name: google_compute_router
+      kind: ComputeRouter
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/regions/{{region}}/routers/{{name}}"
+      resourceReferences:
+        - key: networkRef
+          tfField: network
+          kind: Network
+          required: true
+    - name: google_compute_snapshot
+      kind: ComputeSnapshot
+      metadataMapping:
+        name: name
+        labels: labels
+      idTemplate: "projects/{{project}}/global/snapshots/{{name}}"
+    - name: google_compute_ssl_certificate
+      kind: ComputeSslCertificate
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/sslCertificates/{{name}}"
+    - name: google_compute_ssl_policy
+      kind: ComputeSslPolicy
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/sslPolicies/{{name}}"
+    - name: google_compute_subnetwork
+      kind: ComputeSubnetwork
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/regions/{{region}}/subnetworks/{{name}}"
+      resourceReferences:
+        - key: networkRef
+          tfField: network
+          kind: Network
+          required: true
+        - key: regionRef
+          tfField: region
+          kind: Region
+          required: false
+    - name: google_compute_target_http_proxy
+      kind: ComputeTargetHttpProxy
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/targetHttpProxies/{{name}}"
+      resourceReferences:
+        - key: urlMapRef
+          tfField: urlMap
+          kind: UrlMap
+          required: true
+    - name: google_compute_target_https_proxy
+      kind: ComputeTargetHttpsProxy
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/targetHttpsProxies/{{name}}"
+      resourceReferences:
+        - key: sslPolicyRef
+          tfField: sslPolicy
+          kind: SslPolicy
+          required: false
+        - key: urlMapRef
+          tfField: urlMap
+          kind: UrlMap
+          required: true
+    - name: google_compute_target_instance
+      kind: ComputeTargetInstance
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/zones/{{zone}}/targetInstances/{{name}}"
+      resourceReferences:
+        - key: instanceRef
+          tfField: instance
+          kind: Instance
+          required: true
+    - name: google_compute_target_ssl_proxy
+      kind: ComputeTargetSslProxy
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/targetSslProxies/{{name}}"
+      resourceReferences:
+        - key: backendServiceRef
+          tfField: backendService
+          kind: BackendService
+          required: true
+        - key: sslPolicyRef
+          tfField: sslPolicy
+          kind: SslPolicy
+          required: false
+    - name: google_compute_target_tcp_proxy
+      kind: ComputeTargetTcpProxy
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/targetTcpProxies/{{name}}"
+      resourceReferences:
+        - key: backendServiceRef
+          tfField: backendService
+          kind: BackendService
+          required: true
+    - name: google_compute_vpn_gateway
+      kind: ComputeVpnGateway
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/regions/{{region}}/targetVpnGateways/{{name}}"
+      resourceReferences:
+        - key: networkRef
+          tfField: network
+          kind: Network
+          required: true
+    - name: google_compute_url_map
+      kind: ComputeUrlMap
+      metadataMapping:
+        name: name
+      idTemplate: "projects/{{project}}/global/urlMaps/{{name}}"
+      resourceReferences:
+        - key: defaultServiceRef
+          tfField: defaultService
+          kind: BackendService
+          required: true
+    - name: google_compute_vpn_tunnel
+      kind: ComputeVpnTunnel
+      metadataMapping:
+        name: name
+        labels: labels
+      idTemplate: "projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}"
+      resourceReferences:
+        - key: targetVpnGatewayRef
+          tfField: targetVpnGateway
+          kind: VpnGateway
+          required: false
+        - key: vpnGatewayRef
+          tfField: vpnGateway
+          kind: HaVpnGateway
+          required: false
+        - key: peerExternalGatewayRef
+          tfField: peerExternalGateway
+          kind: ExternalVpnGateway
+          required: false
+        - key: peerGcpGatewayRef
+          tfField: peerGcpGateway
+          kind: HaVpnGateway
+          required: false
+        - key: routerRef
+          tfField: router
+          kind: Router
+          required: false
