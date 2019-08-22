@@ -25,9 +25,23 @@ module Provider
   class Core
     include Compile::Core
 
-    def initialize(config, api, start_time)
+    def initialize(config, api, version_name, start_time)
       @config = config
       @api = api
+
+
+      # @target_version_name is the version specified by MM for this generation
+      # run. That's distinct from @version below, which is the best-fit version
+      # supported by the product.
+      # These values will often match, but if a product supports only GA while
+      # MM is ran @ beta, @target_version_name will be at beta and @version will
+      # be @ GA.
+      # This matters for Terraform, where the primary folder for a provider
+      # needs to match the provider name.
+      @target_version_name = version_name
+
+      @version = @api.version_obj_or_closest(version_name)
+      @api.set_properties_based_on_version(@version)
 
       # The compiler will error out if a file has been written in this compiler
       # run already. Instead of storing all the modified files in state we'll
@@ -66,8 +80,8 @@ module Provider
     # generators, it is okay to ignore Rubocop warnings about method size and
     # complexity.
     #
-    def generate(output_folder, types, version_name, product_path, dump_yaml)
-      generate_objects(output_folder, types, version_name)
+    def generate(output_folder, types, product_path, dump_yaml)
+      generate_objects(output_folder, types)
       copy_files(output_folder) \
         unless @config.files.nil? || @config.files.copy.nil?
       # Compilation has to be the last step, as some files (e.g.
@@ -76,13 +90,13 @@ module Provider
       # common-compile.yaml is a special file that will get compiled by the last product
       # used in a single invocation of the compiled. It should not contain product-specific
       # information; instead, it should be run-specific such as the version to compile at.
-      compile_product_files(output_folder, version_name) \
+      compile_product_files(output_folder) \
         unless @config.files.nil? || @config.files.compile.nil?
 
-      generate_datasources(output_folder, types, version_name) \
+      generate_datasources(output_folder, types) \
         unless @config.datasources.nil?
 
-      generate_operation(output_folder, types, version_name)
+      generate_operation(output_folder, types)
 
       # Write a file with the final version of the api, after overrides
       # have been applied.
@@ -97,18 +111,17 @@ module Provider
       end
     end
 
-    def generate_operation(output_folder, types, version_name); end
+    def generate_operation(output_folder, types); end
 
     def copy_files(output_folder)
       copy_file_list(output_folder, @config.files.copy)
     end
 
-    # version_name is actually used because all of the variables in scope in this method
-    # are made available within the templates by the compile call. This means that version_name
-    # is exposed to the templating logic and version_name is used in other places in the same
-    # way so it needs to be named consistently
-    # rubocop:disable Lint/UnusedMethodArgument
-    def copy_common_files(output_folder, version_name = 'ga', provider_name = nil)
+    def copy_common_files(output_folder, provider_name = nil)
+      # version_name is actually used because all of the variables in scope in this method
+      # are made available within the templates by the compile call.
+      # TODO: remove version_name, use @target_version_name or pass it in expicitly
+      version_name = @target_version_name
       provider_name ||= self.class.name.split('::').last.downcase
       return unless File.exist?("provider/#{provider_name}/common~copy.yaml")
 
@@ -116,7 +129,6 @@ module Provider
       files = YAML.safe_load(compile("provider/#{provider_name}/common~copy.yaml"))
       copy_file_list(output_folder, files)
     end
-    # rubocop:enable Lint/UnusedMethodArgument
 
     def copy_file_list(output_folder, files)
       puts "start_time is #{@start_time}"
@@ -139,12 +151,12 @@ module Provider
     end
 
     # Compiles files specified within the product
-    def compile_product_files(output_folder, version_name)
+    def compile_product_files(output_folder)
       file_template = ProductFileTemplate.new(
         output_folder,
         nil,
         @api,
-        version_name,
+        @target_version_name,
         build_env
       )
       compile_file_list(output_folder, @config.files.compile, file_template)
@@ -153,7 +165,6 @@ module Provider
     # Compiles files that are shared at the provider level
     def compile_common_files(
       output_folder,
-      version_name,
       products,
       common_compile_file,
       override_path = nil
@@ -165,7 +176,7 @@ module Provider
 
       file_template = ProviderFileTemplate.new(
         output_folder,
-        version_name,
+        @target_version_name,
         build_env,
         products,
         override_path
@@ -183,36 +194,25 @@ module Provider
       end.map(&:join)
     end
 
-    def api_version_setup(version_name)
-      version = @api.version_obj_or_closest(version_name)
-      @api.set_properties_based_on_version(version)
-      version
-    end
-
-    def generate_objects(output_folder, types, version_name)
-      version = api_version_setup(version_name)
+    def generate_objects(output_folder, types)
       (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
         elsif types.empty? && object.exclude
           Google::LOGGER.info "Excluding #{object.name} per API catalog"
-        elsif types.empty? && object.not_in_version?(version)
+        elsif types.empty? && object.not_in_version?(@version)
           Google::LOGGER.info "Excluding #{object.name} per API version"
         else
           Google::LOGGER.info "Generating #{object.name}"
           # exclude_if_not_in_version must be called in order to filter out
           # beta properties that are nested within GA resources
-          object.exclude_if_not_in_version!(version)
+          object.exclude_if_not_in_version!(@version)
 
           # Make object immutable.
           object.freeze
           object.all_user_properties.each(&:freeze)
 
-          # version_name will differ from version.name if the resource is being
-          # generated at its default version instead of the one that was passed
-          # in to the compiler. Terraform needs to know which version was passed
-          # in so it can name its output directories correctly.
-          generate_object object, output_folder, version_name
+          generate_object object, output_folder, @target_version_name
         end
       end
     end
@@ -238,15 +238,14 @@ module Provider
     # Generate files at a per-resource basis.
     def generate_resource_files(data) end
 
-    def generate_datasources(output_folder, types, version_name)
+    def generate_datasources(output_folder, types)
       # We need to apply overrides for datasources
       @api = Overrides::Runner.build(@api, @config.datasources,
                                      @config.resource_override,
                                      @config.property_override)
       @api.validate
 
-      version = @api.version_obj_or_closest(version_name)
-      @api.set_properties_based_on_version(version)
+      @api.set_properties_based_on_version(@version)
       @api.objects.each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info(
@@ -256,18 +255,18 @@ module Provider
           Google::LOGGER.info(
             "Excluding #{object.name} datasource per API catalog"
           )
-        elsif types.empty? && object.not_in_version?(version)
+        elsif types.empty? && object.not_in_version?(@version)
           Google::LOGGER.info(
             "Excluding #{object.name} datasource per API version"
           )
         else
-          generate_datasource object, output_folder, version_name
+          generate_datasource object, output_folder
         end
       end
     end
 
-    def generate_datasource(object, output_folder, version_name)
-      data = build_object_data(object, output_folder, version_name)
+    def generate_datasource(object, output_folder)
+      data = build_object_data(object, output_folder, @target_version_name)
 
       compile_datasource data.clone
     end
