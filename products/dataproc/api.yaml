@@ -1,0 +1,197 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Dataproc
+display_name: Cloud Dataproc
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://dataproc.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://dataproc.googleapis.com/v1beta2/
+scopes:
+  - https://www.googleapis.com/auth/cloud-identity
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Cloud Dataproc API
+    url: https://console.cloud.google.com/apis/library/dataproc.googleapis.com
+objects:
+  - !ruby/object:Api::Resource
+    name: 'AutoscalingPolicy'
+    base_url: "projects/{{project}}/locations/{{location}}/autoscalingPolicies"
+    self_link: "projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{id}}"
+    min_version: beta
+    description: |
+      Describes an autoscaling policy for Dataproc cluster autoscaler.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        url_param_only: true
+        input: true
+        default_value: global
+        description: |
+          The  location where the autoscaling poicy should reside.
+          The default value is `global`.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        required: true
+        description: |
+          The policy id. The id must contain only letters (a-z, A-Z), numbers (0-9), underscores (_),
+          and hyphens (-). Cannot begin or end with underscore or hyphen. Must consist of between
+          3 and 50 characters.
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: |
+          The "resource name" of the autoscaling policy.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'workerConfig'
+        description: |
+          Describes how the autoscaler will operate for primary workers.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'minInstances'
+            default_value: 2
+            description: |
+              Minimum number of instances for this group. Bounds: [2, maxInstances]. Defaults to 2.
+          - !ruby/object:Api::Type::Integer
+            name: 'maxInstances'
+            required: true
+            description: |
+              Maximum number of instances for this group.
+          - !ruby/object:Api::Type::Integer
+            name: 'weight'
+            default_value: 1
+            description: |
+              Weight for the instance group, which is used to determine the fraction of total workers
+              in the cluster from this instance group. For example, if primary workers have weight 2,
+              and secondary workers have weight 1, the cluster will have approximately 2 primary workers
+              for each secondary worker.
+
+              The cluster may not reach the specified balance if constrained by min/max bounds or other
+              autoscaling settings. For example, if maxInstances for secondary workers is 0, then only
+              primary workers will be added. The cluster can also be out of balance when created.
+
+              If weight is not set on any instance group, the cluster will default to equal weight for
+              all groups: the cluster will attempt to maintain an equal number of workers in each group
+              within the configured size bounds for each group. If weight is set for one group only,
+              the cluster will default to zero weight on the unset group. For example if weight is set
+              only on primary workers, the cluster will use primary workers only and no secondary workers.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'secondaryWorkerConfig'
+        description: |
+          Describes how the autoscaler will operate for secondary workers.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'minInstances'
+            default_value: 2
+            description: |
+              Minimum number of instances for this group. Bounds: [0, maxInstances]. Defaults to 0.
+          - !ruby/object:Api::Type::Integer
+            name: 'maxInstances'
+            default_value: 0
+            description: |
+              Maximum number of instances for this group. Note that by default, clusters will not use
+              secondary workers. Required for secondary workers if the minimum secondary instances is set.
+              Bounds: [minInstances, ). Defaults to 0.
+          - !ruby/object:Api::Type::Integer
+            name: 'weight'
+            default_value: 1
+            description: |
+              Weight for the instance group, which is used to determine the fraction of total workers
+              in the cluster from this instance group. For example, if primary workers have weight 2,
+              and secondary workers have weight 1, the cluster will have approximately 2 primary workers
+              for each secondary worker.
+
+              The cluster may not reach the specified balance if constrained by min/max bounds or other
+              autoscaling settings. For example, if maxInstances for secondary workers is 0, then only
+              primary workers will be added. The cluster can also be out of balance when created.
+
+              If weight is not set on any instance group, the cluster will default to equal weight for
+              all groups: the cluster will attempt to maintain an equal number of workers in each group
+              within the configured size bounds for each group. If weight is set for one group only,
+              the cluster will default to zero weight on the unset group. For example if weight is set
+              only on primary workers, the cluster will use primary workers only and no secondary workers.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'basicAlgorithm'
+        description: |
+          Basic algorithm for autoscaling.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'cooldownPeriod'
+            default_value: "120s"
+            description: |
+              Duration between scaling events. A scaling period starts after the
+              update operation from the previous event has completed.
+
+              Bounds: [2m, 1d]. Default: 2m.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'yarnConfig'
+            required: true
+            description: |
+              YARN autoscaling configuration.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'gracefulDecommissionTimeout'
+                required: true
+                description: |
+                  Timeout for YARN graceful decommissioning of Node Managers. Specifies the
+                  duration to wait for jobs to complete before forcefully removing workers
+                  (and potentially interrupting jobs). Only applicable to downscaling operations.
+
+                  Bounds: [0s, 1d].
+              - !ruby/object:Api::Type::Double
+                name: 'scaleUpFactor'
+                required: true
+                description: |
+                  Fraction of average pending memory in the last cooldown period for which to
+                  add workers. A scale-up factor of 1.0 will result in scaling up so that there
+                  is no pending memory remaining after the update (more aggressive scaling).
+                  A scale-up factor closer to 0 will result in a smaller magnitude of scaling up
+                  (less aggressive scaling).
+
+                  Bounds: [0.0, 1.0].
+              - !ruby/object:Api::Type::Double
+                name: 'scaleDownFactor'
+                required: true
+                description: |
+                  Fraction of average pending memory in the last cooldown period for which to
+                  remove workers. A scale-down factor of 1 will result in scaling down so that there
+                  is no available memory remaining after the update (more aggressive scaling).
+                  A scale-down factor of 0 disables removing workers, which can be beneficial for
+                  autoscaling a single job.
+
+                  Bounds: [0.0, 1.0].
+              - !ruby/object:Api::Type::Double
+                name: 'scaleUpMinWorkerFraction'
+                default_value: 0.0
+                description: |
+                  Minimum scale-up threshold as a fraction of total cluster size before scaling
+                  occurs. For example, in a 20-worker cluster, a threshold of 0.1 means the autoscaler
+                  must recommend at least a 2-worker scale-up for the cluster to scale. A threshold of
+                  0 means the autoscaler will scale up on any recommended change.
+
+                  Bounds: [0.0, 1.0]. Default: 0.0.
+              - !ruby/object:Api::Type::Double
+                name: 'scaleDownMinWorkerFraction'
+                default_value: 0.0
+                description: |
+                  Minimum scale-down threshold as a fraction of total cluster size before scaling occurs.
+                  For example, in a 20-worker cluster, a threshold of 0.1 means the autoscaler must
+                  recommend at least a 2 worker scale-down for the cluster to scale. A threshold of 0
+                  means the autoscaler will scale down on any recommended change.
+
+                  Bounds: [0.0, 1.0]. Default: 0.0.
