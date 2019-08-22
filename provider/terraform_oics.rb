@@ -19,17 +19,16 @@ module Provider
   class TerraformOiCS < Provider::Terraform
     # We don't want *any* static generation, so we override generate to only
     # generate objects.
-    def generate(output_folder, types, version_name, _product_path, _dump_yaml)
-      generate_objects(output_folder, types, version_name)
+    def generate(output_folder, types, _product_path, _dump_yaml)
+      generate_objects(output_folder, types)
     end
 
     # Create a directory of examples per resource
     def generate_resource(data)
-      version = @api.version_obj_or_closest(data.version)
       examples = data.object.examples
                      .reject(&:skip_test)
                      .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
-                     .reject { |e| version < @api.version_obj_or_closest(e.min_version) }
+                     .reject { |e| @version < @api.version_obj_or_closest(e.min_version) }
 
       examples.each do |example|
         target_folder = data.output_folder

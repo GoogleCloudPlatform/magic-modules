@@ -26,7 +26,7 @@ describe Provider::Terraform do
     let(:config) do
       Provider::Config.parse('spec/data/terraform-config.yaml', product)[1]
     end
-    let(:provider) { Provider::Terraform.new(config, product, Time.now) }
+    let(:provider) { Provider::Terraform.new(config, product, 'ga', Time.now) }
     let(:resource) { product.objects[0] }
 
     before do

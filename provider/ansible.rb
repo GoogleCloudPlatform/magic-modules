@@ -54,13 +54,9 @@ module Provider
         attr_accessor :example
       end
 
-      def api_version_setup(version_name)
-        version = @api.version_obj_or_closest(version_name)
-        @api.set_properties_based_on_version(version)
-
-        # Generate version_added_file
+      def initialize(config, api, version_name, start_time)
+        super(config, api, version_name, start_time)
         @version_added = build_version_added
-        version
       end
 
       # Returns a string representation of the corresponding Python type
@@ -298,7 +294,7 @@ module Provider
         File.symlink "#{name}_info.py", deprecated_facts_path
       end
 
-      def generate_objects(output_folder, types, version_name)
+      def generate_objects(output_folder, types)
         # We have two sets of overrides - one for regular modules, one for
         # datasources.
         # When building regular modules, we will potentially need some
@@ -360,8 +356,8 @@ module Provider
       compile_file_list(data.output_folder, files, file_template)
     end
 
-    def copy_common_files(output_folder, version_name = 'ga', provider_name = 'ansible')
-      super(output_folder, version_name, provider_name)
+    def copy_common_files(output_folder, provider_name = 'ansible')
+      super(output_folder, provider_name)
     end
   end
 end
