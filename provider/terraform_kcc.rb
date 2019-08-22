@@ -19,8 +19,7 @@ module Provider
   # Instead of generating KCC directly, this provider generates a KCC-compatible
   # library to be consumed by KCC.
   class TerraformKCC < Provider::Terraform
-
-    def generate(output_folder, types, version_name, product_path, dump_yaml)
+    def generate(output_folder, _types, version_name, _product_path, _dump_yaml)
       compile_product_files(output_folder, version_name)
     end
 
@@ -34,7 +33,10 @@ module Provider
       )
       compile_file_list(output_folder,
                         [
-                          ["servicemappings/#{@api.name.downcase}_gen.yaml", 'templates/kcc/service_mapping.yaml.erb'],
+                          [
+                            "servicemappings/#{@api.name.downcase}.yaml",
+                            'templates/kcc/product/service_mapping.yaml.erb'
+                          ]
                         ],
                         file_template)
     end
@@ -47,7 +49,12 @@ module Provider
         build_env,
         products
       )
-      compile_file_list(output_folder, [], file_template)
+      compile_file_list(output_folder, [
+                          [
+                            'common/resources.go',
+                            'templates/kcc/controller_resources.go.erb'
+                          ]
+                        ], file_template)
     end
 
     def copy_common_files(output_folder, _version_name)
