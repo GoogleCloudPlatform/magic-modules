@@ -263,11 +263,14 @@ func resourceGCSBucketLifecycleCreateOrUpdate(d TerraformResourceData, sb *stora
 }
 
 func expandIamConfiguration(d TerraformResourceData) *storage.BucketIamConfiguration {
-	return &storage.BucketIamConfiguration{
+	conf := &storage.BucketIamConfiguration{
 		ForceSendFields: []string{"BucketPolicyOnly"},
 		BucketPolicyOnly: &storage.BucketIamConfigurationBucketPolicyOnly{
-			Enabled:         d.Get("bucket_policy_only").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
 	}
+	if v, ok := d.GetOk("bucket_policy_only"); ok {
+		conf.BucketPolicyOnly.Enabled = v.(bool)
+	}
+	return conf
 }
