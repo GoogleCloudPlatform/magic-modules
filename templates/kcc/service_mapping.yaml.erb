@@ -1,0 +1,72 @@
+<%- # the license inside this block applies to this file
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+-%>
+<%
+# TODO: Add YAML autogen notice
+autogen_exception
+-%>
+apiVersion: core.cnrm.cloud.google.com/v1alpha1
+kind: ServiceMapping
+metadata:
+  name: <%= product.name.downcase %>.cnrm.cloud.google.com
+  namespace: cnrm-system
+spec:
+  name: <%= product.name %>
+  version: v1alpha1
+  resources:
+<%
+  product.objects.reject { |r| r.exclude || r.not_in_version?(product.version_obj_or_closest(version)) }.each do |object|
+    if @config.legacy_name.nil?
+     terraform_name = "google_" + (product.name + object.name).underscore
+    else
+     terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
+    end
+-%>
+    - name: <%= terraform_name %>
+      kind: <%= "#{product.name}#{object.name}" %>
+<%-
+    iam_policy = object&.iam_policy
+    unless iam_policy.nil? || iam_policy.exclude
+-%>
+      iamPolicyName: <%= "#{terraform_name}_iam_policy" %>
+<%- end -%>
+      metadataMapping:
+        name: name
+<%  if object.properties.map(&:name).include?("labels") -%>
+        labels: labels
+<%  end -%>
+<%
+    # idTemplate is an import id fed into the provider, which is (slightly)
+    # distinct from a Terraform id.
+    # Select the first format, which will generally be the long form.
+    id_template = import_id_formats(object)[0]
+-%>
+      idTemplate: "<%= id_template %>"
+<%-
+    references = object.properties.select { |p| p.is_a?(Api::Type::ResourceRef) }
+    unless references.empty?
+-%>
+      resourceReferences:
+<%-   references.each do |property| -%>
+        - key: <%= property.name.camelize(:lower) %>Ref
+          tfField: <%= property.name %>
+          kind: <%= property.resource %>
+<%-     if property.required -%>
+          required: true
+<%      else -%>
+          required: false
+<%      end -%>
+<%    end -%>
+<%  end -%>
+<% end -%>
