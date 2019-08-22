@@ -26,9 +26,8 @@ objects:
     description: |
       A domain serving an App Engine application.
     base_url: 'apps/{{project}}/domainMappings'
-    self_link: 'apps/{{project}}/domainMappings/{{domain_name}}'
+    self_link: 'apps/{{project}}/domainMappings/{{id}}'
     update_verb: :PATCH
-    update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -59,7 +58,6 @@ objects:
           By default, overrides are rejected.
         url_param_only: true
         values:
-          - :UNSPECIFIED_DOMAIN_OVERRIDE_STRATEGY
           - :STRICT
           - :OVERRIDE
         default_value: :STRICT
@@ -67,6 +65,7 @@ objects:
         name: 'id'
         description: |
           Relative name of the domain serving the application. Example: example.com.
+        input: true
         required: true
     properties:
       - !ruby/object:Api::Type::String
@@ -94,11 +93,11 @@ objects:
               SSL management type for this domain. If `AUTOMATIC`, a managed certificate is automatically provisioned.
               If `MANUAL`, `certificateId` must be manually specified in order to configure SSL for this domain.
             values:
-              - :SSL_MANAGEMENT_TYPE_UNSPECIFIED
               - :AUTOMATIC
               - :MANUAL
           - !ruby/object:Api::Type::Enum
             name: 'pendingManagedCertificateId'
+            output: true
             description: |
               ID of the managed `AuthorizedCertificate` resource currently being provisioned, if applicable. Until the new
               managed certificate has been successfully provisioned, the previous SSL state will be preserved. Once the
@@ -106,7 +105,6 @@ objects:
               field will be left empty. To remove SSL support while there is still a pending managed certificate, clear the
               `certificateId` field with an update request.
             values:
-              - :SSL_MANAGEMENT_TYPE_UNSPECIFIED
               - :AUTOMATIC
               - :MANUAL
       - !ruby/object:Api::Type::Array
@@ -130,7 +128,6 @@ objects:
               description: |
                 Resource record type. Example: `AAAA`.
               values:
-                - :RECORD_TYPE_UNSPECIFIED
                 - :A
                 - :AAAA
                 - :CNAME
