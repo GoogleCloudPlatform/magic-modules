@@ -1063,7 +1063,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: "beta"
         primary_resource_id: "route-ilb-beta"
         vars:
-          route_name: "route-ilb-beta"
           network_name: "compute-network"
           subnet_name: "compute-subnet"
           forwarding_rule_name: "compute-forwarding-rule"
