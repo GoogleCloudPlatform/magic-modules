@@ -1575,6 +1575,8 @@ objects:
           resource: 'ResourcePolicy'
           imports: 'selfLink'
           description: 'A resource policy applied to this disk for automatic snapshot creations.'
+        update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/addResourcePolicies'
+        update_verb: :POST
   - !ruby/object:Api::Resource
     name: 'Firewall'
     kind: 'compute#firewall'
