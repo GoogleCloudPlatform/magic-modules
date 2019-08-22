@@ -54,14 +54,10 @@ module Provider
         attr_accessor :example
       end
 
-      def api_version_setup(version_name)
-        version = @api.version_obj_or_closest(version_name)
-        @api.set_properties_based_on_version(version)
-
-        # Generate version_added_file
-        @version_added = build_version_added
-        version
-      end
+    def initialize(config, api, version_name, start_time)
+      super(config, api, version_name, start_time)
+      @version_added = build_version_added
+    end
 
       # Returns a string representation of the corresponding Python type
       # for a MM type.
