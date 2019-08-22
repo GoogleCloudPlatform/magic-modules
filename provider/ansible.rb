@@ -298,7 +298,7 @@ module Provider
         File.symlink "#{name}_info.py", deprecated_facts_path
       end
 
-      def generate_objects(output_folder, types, version_name)
+      def generate_objects(output_folder, types)
         # We have two sets of overrides - one for regular modules, one for
         # datasources.
         # When building regular modules, we will potentially need some
@@ -360,8 +360,8 @@ module Provider
       compile_file_list(data.output_folder, files, file_template)
     end
 
-    def copy_common_files(output_folder, version_name = 'ga', provider_name = 'ansible')
-      super(output_folder, version_name, provider_name)
+    def copy_common_files(output_folder, provider_name = 'ansible')
+      super(output_folder, provider_name)
     end
   end
 end
