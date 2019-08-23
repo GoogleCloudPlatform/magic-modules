@@ -1,6 +1,6 @@
 resource "google_compute_network" "default" {
-  provider      = "google-beta"
-  name = "<%= ctx[:vars]['network_name'] %>"
+  provider                = "google-beta"
+  name                    = "<%= ctx[:vars]['network_name'] %>"
   auto_create_subnetworks = false
 }
 
