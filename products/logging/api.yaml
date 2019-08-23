@@ -190,3 +190,19 @@ objects:
                 item_type: Api::Type::String
                 description: |
                   The values must be monotonically increasing.
+  - !ruby/object:Api::Resource
+    name: "OrganizationLogSink"
+    base_url: organization/{{organizationId}}/sinks/{{name}}
+    description: |
+      Describes a sink used to export log entries
+    properties:
+      - !ruby/object:Api::Type::String
+        name: organizationId
+        description: |
+          Id of the organization that this sink belongs to
+        required: true
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          Name of the sink
+        required: true
