@@ -5,8 +5,8 @@ gem 'google-api-client'
 gem 'google-cloud'
 gem 'googleauth'
 gem 'inifile'
-gem 'inspec', '~> 3.0', '>= 3.0.25'
 gem 'rubocop'
+gem 'inspec-bin'
 
 group :development do
   gem 'github_changelog_generator'
