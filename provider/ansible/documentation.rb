@@ -30,8 +30,8 @@ module Provider
             'description' => [
               format_description(prop.description),
               (resourceref_description(prop) \
-               if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly\
-                && prop.contain_extra_docs)
+               if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly && \
+                prop.contain_extra_docs),
               (choices_description(prop) \
                if prop.is_a?(Api::Type::Enum) && prop.contain_extra_docs)
             ].flatten.compact,
