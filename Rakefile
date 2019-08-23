@@ -25,7 +25,6 @@ PROVIDER_FOLDERS = {
 require 'rspec/core/rake_task'
 require 'rubocop/rake_task'
 require 'tempfile'
-require 'erb_lint/cli'
 
 RSpec::Core::RakeTask.new(:spec)
 RuboCop::RakeTask.new
@@ -75,17 +74,7 @@ end
 
 # Test Tasks
 desc 'Run all of the MM tests (rubocop, rspec)'
-multitask test: %w[rubocop spec erblint]
-
-desc 'Lints all of the ERB templates'
-task :erblint do
-  current_directory = File.dirname(__FILE__)
-  ERBLint::CLI.new.run([
-                         '--config',
-                         current_directory + '/.erb-lint.yml',
-                         current_directory + '/templates/**/*.erb'
-                       ])
-end
+multitask test: %w[rubocop spec]
 
 # Compiling Tasks
 compile_list = Providers.provider_list.map do |x|
