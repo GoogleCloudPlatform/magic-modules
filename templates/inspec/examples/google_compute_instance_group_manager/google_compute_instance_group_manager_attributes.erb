@@ -1,4 +1,3 @@
 gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
 gcp_zone = attribute(:gcp_zone, default: '<%= external_attribute('gcp_zone') -%>', description: 'The GCP project zone.')
-gcp_lb_mig1_name = attribute(:gcp_lb_mig1_name, default: '<%= external_attribute('gcp_lb_mig1_name') -%>', description: 'Managed instance group name.')
 instance_group_manager = attribute('instance_group_manager', default: <%= JSON.pretty_generate(grab_attributes['instance_group_manager']) -%>, description: 'Instance group manager definition')

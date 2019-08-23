@@ -9,7 +9,6 @@ describe google_compute_instance_group_manager(project: <%= doc_generation ? "#{
   its('named_ports.count') { should cmp 1 }
   its('named_ports.first.name') { should eq <%= doc_generation ? "'#{instance_group_manager['named_port_name']}'" : "instance_group_manager['named_port_name']" -%> }
   its('named_ports.first.port') { should eq <%= doc_generation ? "'#{instance_group_manager['named_port_port']}'" : "instance_group_manager['named_port_port']" -%> }
-  its('instance_template') { should match <%= doc_generation ? "#{gcp_lb_mig1_name}" : "gcp_lb_mig1_name" -%> }
 end
 
 describe google_compute_instance_group_manager(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, zone: <%= doc_generation ? "#{gcp_zone}" : "gcp_zone" -%>, name: 'nonexistent') do
