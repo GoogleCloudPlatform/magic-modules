@@ -1068,6 +1068,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           forwarding_rule_name: "compute-forwarding-rule"
           health_check_name: "proxy-health-check"
           backend_name: "compute-backend"
+          route_name: "route-ilb-beta"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation

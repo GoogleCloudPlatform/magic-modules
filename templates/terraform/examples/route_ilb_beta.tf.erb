@@ -42,9 +42,9 @@ resource "google_compute_forwarding_rule" "default" {
   subnetwork            = "${google_compute_subnetwork.default.name}"
 }
 
-resource "google_compute_route" "default" {
+resource "google_compute_route" "<%= ctx[:primary_resource_id] %>" {
   provider     = "google-beta"
-  name         = "<%= ctx[:primary_resource_id] %>"
+  name         = "<%= ctx[:vars]['route_name'] %>"
   dest_range   = "0.0.0.0/0"
   network      = "${google_compute_network.default.name}"
   next_hop_ilb = "${google_compute_forwarding_rule.default.self_link}"
