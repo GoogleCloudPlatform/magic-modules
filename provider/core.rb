@@ -129,7 +129,6 @@ module Provider
     end
 
     def copy_file_list(output_folder, files)
-      puts "start_time is #{@start_time}"
       files.map do |target, source|
         Thread.new do
           target_file = File.join(output_folder, target)
