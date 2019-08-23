@@ -84,12 +84,11 @@ objects:
         output: true
         exclude: true
         values:
-          - STATE_UNSPECIFIED
-          - READY
-          - CREATING
-          - DELETING
-          - ERROR
-          - UPDATING
+          - :READY
+          - :CREATING
+          - :DELETING
+          - :ERROR
+          - :UPDATING
       - !ruby/object:Api::Type::Integer
         name: minThroughput
         description: |
