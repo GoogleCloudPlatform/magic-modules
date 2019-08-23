@@ -6,7 +6,7 @@ resource "google_compute_reservation" "<%= ctx[:primary_resource_id] %>" {
     count = 1
     instance_properties {
       min_cpu_platform = "Intel Cascade Lake"
-      machine_type = "n1-standard-1"
+      machine_type = "n2-standard-2"
     }
   }
 }
