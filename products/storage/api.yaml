@@ -465,6 +465,8 @@ objects:
       and call all BucketAccessControls methods on the bucket.  For more
       information, see Access Control, with the caveat that this API uses
       READER, WRITER, and OWNER instead of READ, WRITE, and FULL_CONTROL.
+    identity:
+      - entity
     properties:
       - !ruby/object:Api::Type::ResourceRef
         name: 'bucket'

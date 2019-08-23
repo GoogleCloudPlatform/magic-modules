@@ -155,7 +155,7 @@ module Provider
 
       def rrefs_in_link(link, object)
         props_in_link = link.scan(/{([a-z_]*)}/).flatten
-        (object.parameters || []).select do |p|
+        (object.all_user_properties || []).select do |p|
           props_in_link.include?(p.name.underscore) && \
             p.is_a?(Api::Type::ResourceRef) && !p.resource_ref.readonly
         end.any?
@@ -165,7 +165,7 @@ module Provider
         props_in_link = link.scan(/{([a-z_]*)}/).flatten
         props = props_in_link.map do |p|
           # Select a resourceref if it exists.
-          rref = (object.parameters || []).select do |prop|
+          rref = (object.all_user_properties || []).select do |prop|
             prop.name.underscore == p && \
               prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly
           end
