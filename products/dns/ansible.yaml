@@ -24,7 +24,7 @@ datasources: !ruby/object:Overrides::ResourceOverrides
           "'www.testzone-4.com.'in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
           "'www.testzone-4.com.'not in \"{{ results['resources'] | map(attribute='name') | list }}\""
-    collection: "https://www.googleapis.com/dns/v1/projects/{project}/managedZones/{managed_zone}/rrsets"
+    base_url: "projects/{{project}}/managedZones/{{managed_zone}}/rrsets"
   ManagedZone: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       filter: !ruby/object:Provider::Ansible::FilterProp
