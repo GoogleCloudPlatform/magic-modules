@@ -1277,12 +1277,11 @@ objects:
         output: true
   - !ruby/object:Api::Resource
     name: 'DiskResourcePoliciesAttachment'
-    kind: 'compute#diskResourcePoliciesAttachment'
     input: true
     min_version: beta
     base_url: projects/{{project}}/zones/{{zone}}/disks
     create_verb: :POST
-    create_url: projects/{{project}}/zones/{{zone}}/disks/{{name}}/addResourcePolicies
+    create_url: projects/{{project}}/zones/{{zone}}/disks/{{disk}}/addResourcePolicies
     delete_verb: :POST
     delete_url: projects/{{project}}/zones/{{zone}}/disks/{{name}}/removeResourcePolicies
     self_link: projects/{{project}}/zones/{{zone}}/disks/{{name}}
