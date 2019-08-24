@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
 )
 
 func TestAccComputeDiskResourcePolicyAttachment_basic(t *testing.T) {
@@ -21,22 +22,47 @@ func TestAccComputeDiskResourcePolicyAttachment_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDiskResourcePolicyAttachment_basic(diskName, policyName),
-			},
-			{
-				ResourceName:      "google_compute_disk_resource_policy_attachment.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeDiskResourcePolicyAttachmentExists(
+						"google_compute_disk_resource_policy_attachment.foobar", "google_compute_resource_policy.foobar", policyName),
+				),
 			},
 			{
 				Config: testAccComputeDiskResourcePolicyAttachment_basic(diskName, policyName2),
-			},
-			{
-				ResourceName:      "google_compute_disk_resource_policy_attachment.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeDiskResourcePolicyAttachmentExists(
+						"google_compute_disk_resource_policy_attachment.foobar", "google_compute_resource_policy.foobar", policyName2),
+				),
 			},
 		},
 	})
+}
+
+func testAccCheckComputeDiskResourcePolicyAttachmentExists(attachResName, policyResName, policyName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		attachRes, ok := s.RootModule().Resources[attachResName]
+		if !ok {
+			return fmt.Errorf("Not found: %s", attachResName)
+		}
+
+		if attachRes.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		policyRes, ok := s.RootModule().Resources[policyResName]
+		if !ok {
+			return fmt.Errorf("Not found: %s", policyResName)
+		}
+
+		if policyRes.Primary.Attributes["name"] != policyName {
+			return fmt.Errorf("Resource Policy is incorrect")
+		}
+		if attachRes.Primary.Attributes["name"] != policyRes.Primary.Attributes["self_link"] {
+			return fmt.Errorf("Resource Policy Attachment is incorrect")
+		}
+
+		return nil
+	}
 }
 
 func testAccComputeDiskResourcePolicyAttachment_basic(diskName, policyName string) string {
