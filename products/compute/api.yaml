@@ -6166,7 +6166,6 @@ objects:
           create the disk. Provide this when creating the disk.
   - !ruby/object:Api::Resource
     name: 'ResourcePolicy'
-    min_version: beta
     kind: 'compute#resourcePolicy'
     base_url: projects/{{project}}/regions/{{region}}/resourcePolicies
     input: true
