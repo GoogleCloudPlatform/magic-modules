@@ -14,7 +14,7 @@
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_storage_bucket_access_control
   code:
-    bucket: <%= ctx[:name] %>
+    bucket: "{{ bucket }}"
     entity: 'user-alexstephen@google.com'
     role: 'WRITER'
     project: <%= ctx[:project] %>

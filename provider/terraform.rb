@@ -183,11 +183,11 @@ module Provider
                     filepath, self)
     end
 
-    def generate_operation(output_folder, _types, version_name)
+    def generate_operation(output_folder, _types)
       return if @api.objects.select(&:autogen_async).empty?
 
       product_name = @api.name.underscore
-      data = build_object_data(@api.objects.first, output_folder, version_name)
+      data = build_object_data(@api.objects.first, output_folder, @target_version_name)
       target_folder = File.join(data.output_folder, folder_name(data.version))
 
       data.object = @api.objects.select(&:autogen_async).first
