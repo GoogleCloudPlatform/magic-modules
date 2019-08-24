@@ -306,12 +306,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/compute_disk_resource_policies_attachment.go.erb
       pre_delete: templates/terraform/pre_delete/compute_disk_resource_policies_attachment.go.erb
-    # properties:
-    #   name: !ruby/object:Overrides::Terraform::PropertyOverride
-    #     name: disk
-    # create_url: projects/{{project}}/zones/{{zone}}/disks/{{disk}}/addResourcePolicies
-    # delete_url: projects/{{project}}/zones/{{zone}}/disks/{{disk}}/removeResourcePolicies
-    # self_link: projects/{{project}}/zones/{{zone}}/disks/{{disk}}
   Disk: !ruby/object:Overrides::Terraform::ResourceOverride
     # Larger disks were timing out at creation. Bumping up to 5 minutes.
     # https://github.com/terraform-providers/terraform-provider-google/issues/703
