@@ -1276,7 +1276,7 @@ objects:
           "10GB-10TB".
         output: true
   - !ruby/object:Api::Resource
-    name: 'DiskResourcePoliciesAttachment'
+    name: 'DiskResourcePolicyAttachment'
     input: true
     base_url: projects/{{project}}/zones/{{zone}}/disks
     create_verb: :POST
@@ -1333,7 +1333,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
-          A resource policy to be attached to the disk for scheduling snapshot
+          The resource policy to be attached to the disk for scheduling snapshot
           creation.
         required: true
   - !ruby/object:Api::Resource

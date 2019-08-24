@@ -302,7 +302,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
         Because the API does not return the sensitive key value,
         we cannot confirm or reverse changes to a key outside of Terraform.
-  DiskResourcePoliciesAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
+  DiskResourcePolicyAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/compute_disk_resource_policies_attachment.go.erb
       pre_delete: templates/terraform/pre_delete/compute_disk_resource_policies_attachment.go.erb

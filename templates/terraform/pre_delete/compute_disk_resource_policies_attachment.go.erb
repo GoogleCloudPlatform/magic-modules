@@ -1,5 +1,5 @@
 obj = make(map[string]interface{})
-nameProp, err := expandComputeDiskResourcePoliciesAttachmentName(d.Get("name"), d, config)
+nameProp, err := expandComputeDiskResourcePolicyAttachmentName(d.Get("name"), d, config)
 if err != nil {
   return err
 } else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
