@@ -16,3 +16,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   # Handwritten managed zone resources exist in inspec-gcp already
   Metric: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  OrganizationLogSink: !ruby/object:Overrides::Inspec::ResourceOverride
+    # Creating a log sink requires organization level privileges
+    privileged: true

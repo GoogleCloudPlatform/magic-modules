@@ -221,3 +221,7 @@ regional_node_pool:
   cluster_name: inspec-gcp-regional-node-pool-cluster
   node_count: 1
   initial_node_count: 1
+
+org_sink:
+  name: inspec-gcp-org-sink
+  filter: resource.type = gce_instance
