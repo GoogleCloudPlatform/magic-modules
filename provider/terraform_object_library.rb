@@ -16,10 +16,9 @@ require 'provider/terraform_oics'
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
   class TerraformObjectLibrary < Provider::Terraform
-    def generate(output_folder, types, version_name, _product_path, _dump_yaml)
-      version = @api.version_obj_or_closest(version_name)
-      @base_url = version.base_url
-      generate_objects(output_folder, types, version.name)
+    def generate(output_folder, types, _product_path, _dump_yaml)
+      @base_url = @version.base_url
+      generate_objects(output_folder, types)
     end
 
     def generate_object(object, output_folder, version_name)
@@ -41,11 +40,11 @@ module Provider
                     self)
     end
 
-    def compile_common_files(output_folder, version_name, products, _common_compile_file)
+    def compile_common_files(output_folder, products, _common_compile_file)
       Google::LOGGER.info 'Compiling common files.'
       file_template = ProviderFileTemplate.new(
         output_folder,
-        version_name,
+        @target_version_name,
         build_env,
         products
       )
@@ -60,7 +59,7 @@ module Provider
                         file_template)
     end
 
-    def copy_common_files(output_folder, _version_name)
+    def copy_common_files(output_folder)
       Google::LOGGER.info 'Copying common files.'
       copy_file_list(output_folder, [
                        ['google/constants.go',

@@ -202,7 +202,7 @@ resource "google_compute_autoscaler" "gcp-inspec-autoscaler" {
   zone    = "${var.gcp_zone}"
   target  = "${google_compute_instance_group_manager.gcp-inspec-igm.self_link}"
 
-  autoscaling_policy = {
+  autoscaling_policy {
     max_replicas    = "${var.autoscaler["max_replicas"]}"
     min_replicas    = "${var.autoscaler["min_replicas"]}"
     cooldown_period = "${var.autoscaler["cooldown_period"]}"
@@ -224,10 +224,10 @@ resource "google_compute_target_pool" "gcp-inspec-target-pool" {
 }
 
 resource "google_cloudbuild_trigger" "gcp-inspec-cloudbuild-trigger" {
-  project = "${var.gcp_project_id}"
+  project = var.gcp_project_id
   trigger_template {
     branch_name = "${var.trigger["trigger_template_branch"]}"
-    project     = "${var.trigger["trigger_template_project"]}"
+    project_id  = "${var.trigger["trigger_template_project"]}"
     repo_name   = "${var.trigger["trigger_template_repo"]}"
   }
   filename = "${var.trigger["filename"]}"
