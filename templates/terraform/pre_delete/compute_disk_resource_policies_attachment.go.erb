@@ -1,7 +1,7 @@
 obj = make(map[string]interface{})
-resourcePoliciesProp, err := expandComputeDiskResourcePoliciesAttachmentResourcePolicies(d.Get("resource_policies"), d, config)
+nameProp, err := expandComputeDiskResourcePoliciesAttachmentName(d.Get("name"), d, config)
 if err != nil {
   return err
-} else if v, ok := d.GetOkExists("resource_policies"); !isEmptyValue(reflect.ValueOf(resourcePoliciesProp)) && (ok || !reflect.DeepEqual(v, resourcePoliciesProp)) {
-  obj["resourcePolicies"] = resourcePoliciesProp
+} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
+  obj["resourcePolicies"] = []interface{}{nameProp}
 }
