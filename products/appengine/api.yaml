@@ -145,7 +145,7 @@ objects:
         name: 'id'
         input: true
         description: |
-          Relative name of the version within the service. Example v1. Version names can contain only lowercase letters, numbers, or hyphens. Reserved names,"default", "latest", and any name with the prefix "ah-". 
+          Relative name of the version within the service. For example, `v1`. Version names can contain only lowercase letters, numbers, or hyphens. Reserved names,"default", "latest", and any name with the prefix "ah-". 
       - !ruby/object:Api::Type::String
         name: 'runtime'
         description: |
