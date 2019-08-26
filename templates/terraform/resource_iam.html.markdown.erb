@@ -160,7 +160,7 @@ exported:
 <%= product_ns -%> <%= object.name.downcase -%> IAM resources can be imported using the project, resource identifiers, role and member.
 
 ```
-$ terraform import <%= terraform_name -%>_policy.editor <%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%>
+$ terraform import <%= terraform_name -%>_policy.editor <%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") %>
 
 $ terraform import <%= terraform_name -%>_binding.editor "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%>"
 

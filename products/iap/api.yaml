@@ -71,5 +71,5 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'backendServiceName'
-        description: Name or ID of a backend service.
+        description: Name or self link of a backend service.
         required: true

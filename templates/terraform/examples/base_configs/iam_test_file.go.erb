@@ -127,10 +127,10 @@ func testAcc<%= resource_name -%>IamMember_basicGenerated(context map[string]int
 resource "<%= terraform_name -%>_iam_member" "foo" {
 	<%= params.last.underscore -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= object.iam_policy.parent_resource_attribute -%>}"
 <% unless object.iam_policy.test_project_name.nil? -%>
-	project       = "%{project_id}"
+	project = "%{project_id}"
 <% end -%>
-	role          = "%{role}"
-	member        = "user:admin@hashicorptest.com"
+	role = "%{role}"
+	member = "user:admin@hashicorptest.com"
 }
 `, context)
 }
@@ -141,7 +141,7 @@ func testAcc<%= resource_name -%>IamPolicy_basicGenerated(context map[string]int
 
 data "google_iam_policy" "foo" {
 	binding {
-		role    = "%{role}"
+		role = "%{role}"
 		members = ["user:admin@hashicorptest.com"]
 	}
 }
@@ -149,9 +149,9 @@ data "google_iam_policy" "foo" {
 resource "<%= terraform_name -%>_iam_policy" "foo" {
 	<%= params.last.underscore -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= object.iam_policy.parent_resource_attribute -%>}"
 <% unless object.iam_policy.test_project_name.nil? -%>
-	project       = "%{project_id}"
+	project = "%{project_id}"
 <% end -%>
-	policy_data   = "${data.google_iam_policy.foo.policy_data}"
+	policy_data = "${data.google_iam_policy.foo.policy_data}"
 }
 `, context)
 }
@@ -163,10 +163,10 @@ func testAcc<%= resource_name -%>IamBinding_basicGenerated(context map[string]in
 resource "<%= terraform_name -%>_iam_binding" "foo" {
 	<%= params.last.underscore -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= object.iam_policy.parent_resource_attribute -%>}"
 <% unless object.iam_policy.test_project_name.nil? -%>
-	project       = "%{project_id}"
+	project = "%{project_id}"
 <% end -%>
-	role          = "%{role}"
-	members       = ["user:admin@hashicorptest.com"]
+	role = "%{role}"
+	members = ["user:admin@hashicorptest.com"]
 }
 `, context)
 }
@@ -178,10 +178,10 @@ func testAcc<%= resource_name -%>IamBinding_updateGenerated(context map[string]i
 resource "<%= terraform_name -%>_iam_binding" "foo" {
 	<%= params.last.underscore -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= object.iam_policy.parent_resource_attribute -%>}"
 <% unless object.iam_policy.test_project_name.nil? -%>
-	project       = "%{project_id}"
+	project = "%{project_id}"
 <% end -%>
-	role          = "%{role}"
-	members       = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
+	role = "%{role}"
+	members = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
 }
 `, context)
 }

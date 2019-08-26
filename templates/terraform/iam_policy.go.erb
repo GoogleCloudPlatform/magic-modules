@@ -109,9 +109,9 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 		Config:  config,
 	}
 
-<%# Set all URL qualifiers in state -%>
+<%# Set all URL qualifiers in state so that we have consistent storage of needed fields -%>
 <% resource_params.each_with_index do |param, i| -%>
-<% if i = resource_params.size - 1 -%>
+<% if i == resource_params.size - 1 -%>
 <% if param == 'project' -%>
 	d.Set("project", u.project)
 <% else -%>
