@@ -190,3 +190,43 @@ objects:
                 item_type: Api::Type::String
                 description: |
                   The values must be monotonically increasing.
+  - !ruby/object:Api::Resource
+    name: "OrganizationLogSink"
+    base_url: organizations/{{organization}}/sinks
+    self_link: organizations/{{organization}}/sinks/{{name}}
+    collection_url_key: 'sinks'
+    description: |
+      Describes a sink used to export log entries
+    properties:
+      - !ruby/object:Api::Type::String
+        name: organization
+        description: |
+          Id of the organization that this sink belongs to.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          Name of the log sink.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: filter
+        description: |
+          An advanced logs filter. The only exported log entries are those that are in the
+          resource owning the sink and that match the filter.
+      - !ruby/object:Api::Type::String
+        name: destination
+        description: |
+          The export destination.
+      - !ruby/object:Api::Type::String
+        name: writerIdentity
+        description: |
+          An IAM identity—a service account or group—under which Logging writes the exported
+          log entries to the sink's destination. This field is set by sinks.create and sinks.update
+          based on the value of uniqueWriterIdentity in those methods.
+      - !ruby/object:Api::Type::Boolean
+        name: includeChildren
+        description: |
+          If the field is false, the default, only the logs owned by the sink's parent resource are
+          available for export. If the field is true, then logs from all the projects, folders, and
+          billing accounts contained in the sink's parent resource are also available for export.
+          Whether a particular log entry from the children is exported depends on the sink's filter expression.

@@ -141,6 +141,10 @@ variable "region_backend_service" {
   type = "map"
 }
 
+variable "org_sink" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -511,7 +515,7 @@ resource "google_sourcerepo_repository" "gcp-inspec-sourcerepo-repository" {
 resource "google_folder" "inspec-gcp-folder" {
   count = "${var.gcp_organization_id == "none" ? 0 : var.gcp_enable_privileged_resources}"
   display_name = "${var.folder["display_name"]}"
-  parent       = "${var.gcp_organization_id}"
+  parent       = "organizations/${var.gcp_organization_id}"
 }
 
 resource "google_storage_bucket_object" "archive" {
@@ -552,4 +556,16 @@ resource "google_container_node_pool" "inspec-gcp-regional-node-pool" {
   region     = "${var.gcp_location}"
   cluster    = "${google_container_cluster.gcp-inspec-regional-cluster.name}"
   node_count = "${var.regional_node_pool["node_count"]}"
+}
+
+resource "google_logging_organization_sink" "my-sink" {
+  count       = "${var.gcp_organization_id == "none" ? 0 : var.gcp_enable_privileged_resources}"
+  name        = "${var.org_sink.name}"
+  org_id      = "${var.gcp_organization_id}"
+
+  # Can export to pubsub, cloud storage, or bigquery
+  destination = "storage.googleapis.com/${google_storage_bucket.generic-storage-bucket.name}"
+
+  # Log all WARN or higher severity messages relating to instances
+  filter      = "${var.org_sink.filter}"
 }
