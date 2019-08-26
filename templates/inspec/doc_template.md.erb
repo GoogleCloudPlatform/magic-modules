@@ -50,11 +50,11 @@ with `where` as a block or a method.
 <% end -%>
 
 <% end # if plural -%>
-<% unless @api.apis_required.empty? -%>
+<% unless @api.apis_required&.empty? -%>
 
 ## GCP Permissions
 
-<% @api.apis_required.each do |api| -%>
+<% @api.apis_required&.each do |api| -%>
 Ensure the [<%= api.name -%>](<%= api.url -%>) is enabled for the current project.
 <% end # @api.apis_required.each -%>
 <% end # unless @api.apis_required.empty? -%>
