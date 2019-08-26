@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
@@ -107,13 +108,17 @@ func resourceGoogleProjectIamCustomRoleCreate(d *schema.ResourceData, meta inter
 	return resourceGoogleProjectIamCustomRoleRead(d, meta)
 }
 
+func extractProjectFromProjectIamCustomRoleID(id string) string {
+	//bucket, NotificationID
+	parts := strings.Split(id, "/")
+
+	return parts[1]
+}
+
 func resourceGoogleProjectIamCustomRoleRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
+	project := extractProjectFromProjectIamCustomRoleID(d.Id())
 
 	role, err := config.clientIAM.Projects.Roles.Get(d.Id()).Do()
 	if err != nil {
