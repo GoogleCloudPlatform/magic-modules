@@ -24,7 +24,47 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project_id: "test-project"
         test_env_vars:
           org_id: :ORG_ID
-
+  StandardAppVersion: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
+    import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
+    mutex: "apps/{{project}}/services/{{service}}"
+    parameters:
+      service: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        required: false
+    virtual_fields:
+      - !ruby/object:Provider::Terraform::VirtualFields
+        name: 'noop_on_destroy'
+        description: |
+          If set to `true`, the application version will not be deleted.
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_delete: templates/terraform/custom_delete/noop_on_destroy_appengine_version.go.erb
+      test_check_destroy: templates/terraform/custom_check_destroy/appengine_version.go.erb
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'version_id'
+      deployment: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      entrypoint: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      envVariables: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      threadsafe: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "app_engine_standard_app_version"
+        primary_resource_id: "version_id"
+        ignore_read_extra:
+          - "noop_on_destroy"
+        vars:
+          project_id: "test-project"
+          bucket_name: "appengine-static-content"
+          service_name: "tf-test-service"
+        test_env_vars:
+          org_id: :ORG_ID
+  Service: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
