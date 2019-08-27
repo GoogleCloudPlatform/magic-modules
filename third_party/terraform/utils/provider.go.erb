@@ -233,16 +233,14 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 products.each do |product|
   product_definition = product[:definitions]
   config = product[:overrides]
-  product_definition.objects.reject { |r| r.exclude || r.not_in_version?(product_definition.version_obj_or_closest(version)) }.each do |object|
-    if config.legacy_name.nil?
-     terraform_name = "google_" + (product_definition.name + object.name).underscore
-    else
-     terraform_name = "google_" + config.legacy_name + '_' + object.name.underscore
-    end
+  product_definition.objects.each do |object|
+    next if object.exclude || object.not_in_version?(product_definition.version_obj_or_closest(version))
+    tf_product = (@config.legacy_name || product_definition.name).underscore
+    terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
 -%>
-<% unless object&.exclude_resource -%>
+<% 	unless object&.exclude_resource -%>
 	"<%= terraform_name -%>": resource<%= product_definition.name + object.name -%>(),
-<% end -%>
+<%  end -%>
 <%
     iam_policy = object&.iam_policy
     unless iam_policy.nil? || iam_policy.exclude
@@ -252,9 +250,9 @@ products.each do |product|
 	"<%= terraform_name -%>_iam_member":               ResourceIamMember(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
 	"<%= terraform_name -%>_iam_policy":               ResourceIamPolicy(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
 <%
-    end
-  end
-end
+    end # unless iam_policy.nil? || iam_policy.exclude
+  end   # product_definition.objects.each do
+end     # products.each do
 -%>
 			},
 			map[string]*schema.Resource{
