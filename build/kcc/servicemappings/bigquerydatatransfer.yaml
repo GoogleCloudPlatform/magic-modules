@@ -9,6 +9,6 @@ spec:
   resources:
     - name: google_bigquery_data_transfer_config
       kind: BigqueryDataTransferConfig
+      idTemplate: "{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "{{name}}"

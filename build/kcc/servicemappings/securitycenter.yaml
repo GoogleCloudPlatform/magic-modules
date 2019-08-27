@@ -9,6 +9,6 @@ spec:
   resources:
     - name: google_scc_source
       kind: SecurityCenterSource
+      idTemplate: "organizations/{{organization}}/sources/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "organizations/{{organization}}/sources/{{name}}"

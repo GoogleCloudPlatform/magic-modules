@@ -9,6 +9,6 @@ spec:
   resources:
     - name: google_cloudbuild_trigger
       kind: CloudBuildTrigger
+      idTemplate: "projects/{{project}}/triggers/{{trigger_id}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/triggers/{{trigger_id}}"

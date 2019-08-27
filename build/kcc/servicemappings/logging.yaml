@@ -9,6 +9,6 @@ spec:
   resources:
     - name: google_logging_metric
       kind: LoggingMetric
+      idTemplate: "{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "{{name}}"

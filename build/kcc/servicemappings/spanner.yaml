@@ -9,10 +9,10 @@ spec:
   resources:
     - name: google_spanner_instance
       kind: SpannerInstance
+      idTemplate: "projects/{{project}}/instances/{{name}}"
       metadataMapping:
         name: name
         labels: labels
-      idTemplate: "projects/{{project}}/instances/{{name}}"
       resourceReferences:
         - key: configRef
           tfField: config
@@ -20,6 +20,6 @@ spec:
           required: true
     - name: google_spanner_database
       kind: SpannerDatabase
+      idTemplate: "projects/{{project}}/instances/{{instance}}/databases/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/instances/{{instance}}/databases/{{name}}"

@@ -9,6 +9,6 @@ spec:
   resources:
     - name: google_resource_manager_lien
       kind: ResourceManagerLien
+      idTemplate: "{{parent}}/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "{{parent}}/{{name}}"

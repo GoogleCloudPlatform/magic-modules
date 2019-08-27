@@ -9,9 +9,9 @@ spec:
   resources:
     - name: google_storage_object_access_control
       kind: StorageObjectAccessControl
+      idTemplate: "{{bucket}}/{{object}}/{{entity}}"
       metadataMapping:
         name: name
-      idTemplate: "{{bucket}}/{{object}}/{{entity}}"
       resourceReferences:
         - key: bucketRef
           tfField: bucket
@@ -19,9 +19,9 @@ spec:
           required: true
     - name: google_storage_default_object_access_control
       kind: StorageDefaultObjectAccessControl
+      idTemplate: "{{bucket}}/{{entity}}"
       metadataMapping:
         name: name
-      idTemplate: "{{bucket}}/{{entity}}"
       resourceReferences:
         - key: bucketRef
           tfField: bucket

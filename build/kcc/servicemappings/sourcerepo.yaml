@@ -10,6 +10,6 @@ spec:
     - name: google_sourcerepo_repository
       kind: SourceRepoRepository
       iamPolicyName: google_sourcerepo_repository_iam_policy
+      idTemplate: "projects/{{project}}/repos/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/repos/{{name}}"

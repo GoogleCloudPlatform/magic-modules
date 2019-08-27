@@ -9,9 +9,9 @@ spec:
   resources:
     - name: google_compute_address
       kind: ComputeAddress
+      idTemplate: "projects/{{project}}/regions/{{region}}/addresses/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/regions/{{region}}/addresses/{{name}}"
       resourceReferences:
         - key: subnetworkRef
           tfField: subnetwork
@@ -19,9 +19,9 @@ spec:
           required: false
     - name: google_compute_autoscaler
       kind: ComputeAutoscaler
+      idTemplate: "projects/{{project}}/zones/{{zone}}/autoscalers/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/zones/{{zone}}/autoscalers/{{name}}"
       resourceReferences:
         - key: targetRef
           tfField: target
@@ -29,36 +29,36 @@ spec:
           required: true
     - name: google_compute_backend_bucket
       kind: ComputeBackendBucket
+      idTemplate: "projects/{{project}}/global/backendBuckets/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/backendBuckets/{{name}}"
     - name: google_compute_backend_bucket_signed_url_key
       kind: ComputeBackendBucketSignedUrlKey
+      idTemplate: "projects/{{project}}/global/backendBuckets/{{backend_bucket}}/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/backendBuckets/{{backend_bucket}}/{{name}}"
     - name: google_compute_backend_service
       kind: ComputeBackendService
+      idTemplate: "projects/{{project}}/global/backendServices/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/backendServices/{{name}}"
     - name: google_compute_region_backend_service
       kind: ComputeRegionBackendService
+      idTemplate: "projects/{{project}}/regions/{{region}}/backendServices/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/regions/{{region}}/backendServices/{{name}}"
       resourceReferences:
     - name: google_compute_backend_service_signed_url_key
       kind: ComputeBackendServiceSignedUrlKey
+      idTemplate: "projects/{{project}}/global/backendServices/{{backend_service}}/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/backendServices/{{backend_service}}/{{name}}"
     - name: google_compute_disk
       kind: ComputeDisk
+      idTemplate: "projects/{{project}}/zones/{{zone}}/disks/{{name}}"
       metadataMapping:
         name: name
         labels: labels
-      idTemplate: "projects/{{project}}/zones/{{zone}}/disks/{{name}}"
       resourceReferences:
         - key: typeRef
           tfField: type
@@ -66,9 +66,9 @@ spec:
           required: false
     - name: google_compute_firewall
       kind: ComputeFirewall
+      idTemplate: "projects/{{project}}/global/firewalls/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/firewalls/{{name}}"
       resourceReferences:
         - key: networkRef
           tfField: network
@@ -76,9 +76,9 @@ spec:
           required: true
     - name: google_compute_forwarding_rule
       kind: ComputeForwardingRule
+      idTemplate: "projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}"
       resourceReferences:
         - key: backendServiceRef
           tfField: backendService
@@ -98,9 +98,9 @@ spec:
           required: false
     - name: google_compute_global_address
       kind: ComputeGlobalAddress
+      idTemplate: "projects/{{project}}/global/addresses/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/addresses/{{name}}"
       resourceReferences:
         - key: networkRef
           tfField: network
@@ -108,30 +108,30 @@ spec:
           required: false
     - name: google_compute_global_forwarding_rule
       kind: ComputeGlobalForwardingRule
+      idTemplate: "projects/{{project}}/global/forwardingRules/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/forwardingRules/{{name}}"
     - name: google_compute_http_health_check
       kind: ComputeHttpHealthCheck
+      idTemplate: "projects/{{project}}/global/httpHealthChecks/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/httpHealthChecks/{{name}}"
     - name: google_compute_https_health_check
       kind: ComputeHttpsHealthCheck
+      idTemplate: "projects/{{project}}/global/httpsHealthChecks/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/httpsHealthChecks/{{name}}"
     - name: google_compute_health_check
       kind: ComputeHealthCheck
+      idTemplate: "projects/{{project}}/global/healthChecks/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/healthChecks/{{name}}"
     - name: google_compute_image
       kind: ComputeImage
+      idTemplate: "projects/{{project}}/global/images/{{name}}"
       metadataMapping:
         name: name
         labels: labels
-      idTemplate: "projects/{{project}}/global/images/{{name}}"
       resourceReferences:
         - key: sourceDiskRef
           tfField: sourceDisk
@@ -139,9 +139,9 @@ spec:
           required: false
     - name: google_compute_interconnect_attachment
       kind: ComputeInterconnectAttachment
+      idTemplate: "projects/{{project}}/regions/{{region}}/interconnectAttachments/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/regions/{{region}}/interconnectAttachments/{{name}}"
       resourceReferences:
         - key: routerRef
           tfField: router
@@ -149,14 +149,14 @@ spec:
           required: true
     - name: google_compute_network
       kind: ComputeNetwork
+      idTemplate: "projects/{{project}}/global/networks/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/networks/{{name}}"
     - name: google_compute_network_endpoint
       kind: ComputeNetworkEndpoint
+      idTemplate: "projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}"
       resourceReferences:
         - key: instanceRef
           tfField: instance
@@ -164,9 +164,9 @@ spec:
           required: true
     - name: google_compute_network_endpoint_group
       kind: ComputeNetworkEndpointGroup
+      idTemplate: "projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{name}}"
       resourceReferences:
         - key: networkRef
           tfField: network
@@ -178,9 +178,9 @@ spec:
           required: false
     - name: google_compute_node_group
       kind: ComputeNodeGroup
+      idTemplate: "projects/{{project}}/zones/{{zone}}/nodeGroups/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/zones/{{zone}}/nodeGroups/{{name}}"
       resourceReferences:
         - key: nodeTemplateRef
           tfField: nodeTemplate
@@ -188,20 +188,20 @@ spec:
           required: true
     - name: google_compute_node_template
       kind: ComputeNodeTemplate
+      idTemplate: "projects/{{project}}/regions/{{region}}/nodeTemplates/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/regions/{{region}}/nodeTemplates/{{name}}"
     - name: google_compute_region_autoscaler
       kind: ComputeRegionAutoscaler
+      idTemplate: "projects/{{project}}/regions/{{region}}/autoscalers/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/regions/{{region}}/autoscalers/{{name}}"
     - name: google_compute_region_disk
       kind: ComputeRegionDisk
+      idTemplate: "projects/{{project}}/regions/{{region}}/disks/{{name}}"
       metadataMapping:
         name: name
         labels: labels
-      idTemplate: "projects/{{project}}/regions/{{region}}/disks/{{name}}"
       resourceReferences:
         - key: typeRef
           tfField: type
@@ -209,9 +209,9 @@ spec:
           required: false
     - name: google_compute_route
       kind: ComputeRoute
+      idTemplate: "projects/{{project}}/global/routes/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/routes/{{name}}"
       resourceReferences:
         - key: networkRef
           tfField: network
@@ -227,9 +227,9 @@ spec:
           required: false
     - name: google_compute_router
       kind: ComputeRouter
+      idTemplate: "projects/{{project}}/regions/{{region}}/routers/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/regions/{{region}}/routers/{{name}}"
       resourceReferences:
         - key: networkRef
           tfField: network
@@ -237,25 +237,25 @@ spec:
           required: true
     - name: google_compute_snapshot
       kind: ComputeSnapshot
+      idTemplate: "projects/{{project}}/global/snapshots/{{name}}"
       metadataMapping:
         name: name
         labels: labels
-      idTemplate: "projects/{{project}}/global/snapshots/{{name}}"
     - name: google_compute_ssl_certificate
       kind: ComputeSslCertificate
+      idTemplate: "projects/{{project}}/global/sslCertificates/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/sslCertificates/{{name}}"
     - name: google_compute_ssl_policy
       kind: ComputeSslPolicy
+      idTemplate: "projects/{{project}}/global/sslPolicies/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/sslPolicies/{{name}}"
     - name: google_compute_subnetwork
       kind: ComputeSubnetwork
+      idTemplate: "projects/{{project}}/regions/{{region}}/subnetworks/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/regions/{{region}}/subnetworks/{{name}}"
       resourceReferences:
         - key: networkRef
           tfField: network
@@ -263,9 +263,9 @@ spec:
           required: true
     - name: google_compute_target_http_proxy
       kind: ComputeTargetHttpProxy
+      idTemplate: "projects/{{project}}/global/targetHttpProxies/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/targetHttpProxies/{{name}}"
       resourceReferences:
         - key: urlMapRef
           tfField: urlMap
@@ -273,9 +273,9 @@ spec:
           required: true
     - name: google_compute_target_https_proxy
       kind: ComputeTargetHttpsProxy
+      idTemplate: "projects/{{project}}/global/targetHttpsProxies/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/targetHttpsProxies/{{name}}"
       resourceReferences:
         - key: sslPolicyRef
           tfField: sslPolicy
@@ -287,9 +287,9 @@ spec:
           required: true
     - name: google_compute_target_instance
       kind: ComputeTargetInstance
+      idTemplate: "projects/{{project}}/zones/{{zone}}/targetInstances/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/zones/{{zone}}/targetInstances/{{name}}"
       resourceReferences:
         - key: instanceRef
           tfField: instance
@@ -297,9 +297,9 @@ spec:
           required: true
     - name: google_compute_target_ssl_proxy
       kind: ComputeTargetSslProxy
+      idTemplate: "projects/{{project}}/global/targetSslProxies/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/targetSslProxies/{{name}}"
       resourceReferences:
         - key: backendServiceRef
           tfField: backendService
@@ -311,9 +311,9 @@ spec:
           required: false
     - name: google_compute_target_tcp_proxy
       kind: ComputeTargetTcpProxy
+      idTemplate: "projects/{{project}}/global/targetTcpProxies/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/targetTcpProxies/{{name}}"
       resourceReferences:
         - key: backendServiceRef
           tfField: backendService
@@ -321,9 +321,9 @@ spec:
           required: true
     - name: google_compute_vpn_gateway
       kind: ComputeVpnGateway
+      idTemplate: "projects/{{project}}/regions/{{region}}/targetVpnGateways/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/regions/{{region}}/targetVpnGateways/{{name}}"
       resourceReferences:
         - key: networkRef
           tfField: network
@@ -331,9 +331,9 @@ spec:
           required: true
     - name: google_compute_url_map
       kind: ComputeUrlMap
+      idTemplate: "projects/{{project}}/global/urlMaps/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/global/urlMaps/{{name}}"
       resourceReferences:
         - key: defaultServiceRef
           tfField: defaultService
@@ -341,9 +341,9 @@ spec:
           required: true
     - name: google_compute_vpn_tunnel
       kind: ComputeVpnTunnel
+      idTemplate: "projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}"
       resourceReferences:
         - key: targetVpnGatewayRef
           tfField: targetVpnGateway

@@ -9,22 +9,22 @@ spec:
   resources:
     - name: google_monitoring_alert_policy
       kind: MonitoringAlertPolicy
+      idTemplate: "{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "{{name}}"
     - name: google_monitoring_group
       kind: MonitoringGroup
+      idTemplate: "{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "{{name}}"
     - name: google_monitoring_notification_channel
       kind: MonitoringNotificationChannel
+      idTemplate: "{{name}}"
       metadataMapping:
         name: name
         labels: labels
-      idTemplate: "{{name}}"
     - name: google_monitoring_uptime_check_config
       kind: MonitoringUptimeCheckConfig
+      idTemplate: "{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "{{name}}"

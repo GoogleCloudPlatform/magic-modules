@@ -9,6 +9,6 @@ spec:
   resources:
     - name: google_firestore_index
       kind: FirestoreIndex
+      idTemplate: "{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "{{name}}"

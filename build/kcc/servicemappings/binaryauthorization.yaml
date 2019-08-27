@@ -9,11 +9,11 @@ spec:
   resources:
     - name: google_binary_authorization_attestor
       kind: BinaryAuthorizationAttestor
+      idTemplate: "projects/{{project}}/attestors/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/attestors/{{name}}"
     - name: google_binary_authorization_policy
       kind: BinaryAuthorizationPolicy
+      idTemplate: "projects/{{project}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}"

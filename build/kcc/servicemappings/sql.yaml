@@ -9,6 +9,6 @@ spec:
   resources:
     - name: google_sql_database
       kind: SqlDatabase
+      idTemplate: "projects/{{project}}/instances/{{instance}}/databases/{{name}}"
       metadataMapping:
         name: name
-      idTemplate: "projects/{{project}}/instances/{{instance}}/databases/{{name}}"

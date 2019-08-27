@@ -9,7 +9,7 @@ spec:
   resources:
     - name: google_ml_engine_model
       kind: MLEngineModel
+      idTemplate: "projects/{{project}}/models/{{name}}"
       metadataMapping:
         name: name
         labels: labels
-      idTemplate: "projects/{{project}}/models/{{name}}"

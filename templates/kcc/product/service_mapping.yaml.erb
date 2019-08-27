@@ -41,11 +41,6 @@ spec:
 -%>
       iamPolicyName: <%= "#{terraform_name}_iam_policy" %>
 <%- end -%>
-      metadataMapping:
-        name: name
-<%  if object.properties.map(&:name).include?("labels") -%>
-        labels: labels
-<%  end -%>
 <%
     # idTemplate is an import id fed into the provider, which is (slightly)
     # distinct from a Terraform id.
@@ -53,6 +48,11 @@ spec:
     id_template = import_id_formats(object)[0]
 -%>
       idTemplate: "<%= id_template %>"
+      metadataMapping:
+        name: name
+<%  if object.properties.map(&:name).include?("labels") -%>
+        labels: labels
+<%  end -%>
 <%-
     references = object.properties.select { |p| p.is_a?(Api::Type::ResourceRef) }
     unless references.empty?

@@ -9,11 +9,11 @@ spec:
   resources:
     - name: google_app_engine_firewall_rule
       kind: AppEngineFirewallRule
+      idTemplate: "{{project}}/{{priority}}"
       metadataMapping:
         name: name
-      idTemplate: "{{project}}/{{priority}}"
     - name: google_app_engine_standard_app_version
       kind: AppEngineStandardAppVersion
+      idTemplate: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
       metadataMapping:
         name: name
-      idTemplate: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
