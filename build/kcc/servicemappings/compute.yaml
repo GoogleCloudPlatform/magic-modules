@@ -11,7 +11,6 @@ spec:
       kind: ComputeAddress
       metadataMapping:
         name: name
-        labels: labels
       idTemplate: "projects/{{project}}/regions/{{region}}/addresses/{{name}}"
       resourceReferences:
         - key: subnetworkRef
@@ -83,7 +82,6 @@ spec:
       kind: ComputeForwardingRule
       metadataMapping:
         name: name
-        labels: labels
       idTemplate: "projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}"
       resourceReferences:
         - key: backendServiceRef
@@ -106,7 +104,6 @@ spec:
       kind: ComputeGlobalAddress
       metadataMapping:
         name: name
-        labels: labels
       idTemplate: "projects/{{project}}/global/addresses/{{name}}"
       resourceReferences:
         - key: networkRef
@@ -117,13 +114,7 @@ spec:
       kind: ComputeGlobalForwardingRule
       metadataMapping:
         name: name
-        labels: labels
       idTemplate: "projects/{{project}}/global/forwardingRules/{{name}}"
-      resourceReferences:
-        - key: networkRef
-          tfField: network
-          kind: Network
-          required: false
     - name: google_compute_http_health_check
       kind: ComputeHttpHealthCheck
       metadataMapping:
@@ -237,10 +228,6 @@ spec:
         - key: nextHopVpnTunnelRef
           tfField: nextHopVpnTunnel
           kind: VpnTunnel
-          required: false
-        - key: nextHopIlbRef
-          tfField: nextHopIlb
-          kind: ForwardingRule
           required: false
     - name: google_compute_router
       kind: ComputeRouter
@@ -364,24 +351,11 @@ spec:
       kind: ComputeVpnTunnel
       metadataMapping:
         name: name
-        labels: labels
       idTemplate: "projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}"
       resourceReferences:
         - key: targetVpnGatewayRef
           tfField: targetVpnGateway
           kind: VpnGateway
-          required: false
-        - key: vpnGatewayRef
-          tfField: vpnGateway
-          kind: HaVpnGateway
-          required: false
-        - key: peerExternalGatewayRef
-          tfField: peerExternalGateway
-          kind: ExternalVpnGateway
-          required: false
-        - key: peerGcpGatewayRef
-          tfField: peerGcpGateway
-          kind: HaVpnGateway
           required: false
         - key: routerRef
           tfField: router

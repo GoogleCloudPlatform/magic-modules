@@ -19,10 +19,36 @@ module Provider
   # Instead of generating KCC directly, this provider generates a KCC-compatible
   # library to be consumed by KCC.
   class TerraformKCC < Provider::Terraform
-    def generate(output_folder, _types, _product_path, _dump_yaml)
+    def generate(output_folder, types, _product_path, _dump_yaml)
       @base_url = @version.base_url
+      generate_objects(output_folder, types)
       compile_product_files(output_folder)
     end
+
+    # Create a directory of samples per resource
+    def generate_resource(data)
+      examples = data.object.examples
+                     .reject(&:skip_test)
+                     .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
+                     .reject { |e| @version < @api.version_obj_or_closest(e.min_version) }
+
+      examples.each do |example|
+        target_folder = File.join(data.output_folder, 'samples', example.name)
+        FileUtils.mkpath target_folder
+
+        data.example = example
+
+        data.generate(
+          'templates/kcc/samples/sample.tf.erb',
+          File.join(target_folder, 'main.tf'),
+          self
+        )
+      end
+    end
+
+    def generate_resource_tests(data) end
+
+    def generate_iam_policy(data) end
 
     def compile_product_files(output_folder)
       file_template = ProductFileTemplate.new(
