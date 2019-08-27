@@ -209,13 +209,16 @@ module Provider
 
       data.generate('templates/terraform/iam_policy.go.erb', filepath, self)
 
-      generated_test_name = "iam_#{product_name}_#{name}_generated_test.go"
-      filepath = File.join(target_folder, generated_test_name)
-      data.generate(
-        'templates/terraform/examples/base_configs/iam_test_file.go.erb',
-        filepath,
-        self
-      )
+      # Only generate test if testable examples exist.
+      unless data.object.examples.reject(&:skip_test).empty?
+        generated_test_name = "iam_#{product_name}_#{name}_generated_test.go"
+        filepath = File.join(target_folder, generated_test_name)
+        data.generate(
+          'templates/terraform/examples/base_configs/iam_test_file.go.erb',
+          filepath,
+          self
+        )
+      end
 
       generate_iam_documentation(data)
     end

@@ -36,11 +36,9 @@
     directly inserted from YAML.
 -%>
 <%
-  if @config.legacy_name.nil?
-    terraform_name = "google_" + (product_ns + object.name).underscore + "_iam"
-  else
-    terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore + "_iam"
-  end
+  tf_product = (@config.legacy_name || product_ns).underscore
+  resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
+  terraform_name = "#{resource_ns}_iam"
   properties = object.all_user_properties
   timeouts = object.async.nil? ? Api::Timeouts.new : object.timeouts
 -%>
@@ -83,7 +81,7 @@ data "google_iam_policy" "admin" {
 }
 
 resource "<%= terraform_name -%>_policy" "editor" {
-  <%= object.name.underscore -%>       = "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}")-%>"
+  <%= object.name.underscore -%> = "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}")-%>"
   policy_data = "${data.google_iam_policy.admin.policy_data}"
 }
 ```
@@ -92,7 +90,8 @@ resource "<%= terraform_name -%>_policy" "editor" {
 
 ```hcl
 resource "<%= terraform_name -%>_binding" "editor" {
-  <%= object.name.underscore -%>   = "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}")-%>"
+  <%= object.name.underscore -%> = "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}")-%>"
+  
   role    = "roles/editor"
   members = [
     "user:jane@example.com",
@@ -105,6 +104,7 @@ resource "<%= terraform_name -%>_binding" "editor" {
 ```hcl
 resource "<%= terraform_name -%>_member" "editor" {
   <%= object.name.underscore -%>  = "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}")-%>"
+  
   role   = "roles/editor"
   member = "user:jane@example.com"
 }
