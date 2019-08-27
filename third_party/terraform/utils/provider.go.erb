@@ -240,7 +240,9 @@ products.each do |product|
      terraform_name = "google_" + config.legacy_name + '_' + object.name.underscore
     end
 -%>
+<% unless object&.exclude_resource -%>
 	"<%= terraform_name -%>": resource<%= product_definition.name + object.name -%>(),
+<% end -%>
 <%
     iam_policy = object&.iam_policy
     unless iam_policy.nil? || iam_policy.exclude
