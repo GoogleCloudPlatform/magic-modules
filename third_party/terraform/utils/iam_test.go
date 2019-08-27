@@ -17,6 +17,15 @@ func TestIamMergeBindings(t *testing.T) {
 			input:  []*cloudresourcemanager.Binding{},
 			expect: []*cloudresourcemanager.Binding{},
 		},
+		// No members returns no binding
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role: "role-1",
+				},
+			},
+			expect: []*cloudresourcemanager.Binding{},
+		},
 		// Nothing to merge - return same list
 		{
 			input: []*cloudresourcemanager.Binding{
