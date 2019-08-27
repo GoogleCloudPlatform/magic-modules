@@ -20,6 +20,10 @@ versions:
     base_url: https://appengine.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: App Engine Admin API
+    url: https://console.cloud.google.com/apis/library/appengine.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
     name: 'FirewallRule'
@@ -145,7 +149,7 @@ objects:
         name: 'id'
         input: true
         description: |
-          Relative name of the version within the service. For example, `v1`. Version names can contain only lowercase letters, numbers, or hyphens. Reserved names,"default", "latest", and any name with the prefix "ah-". 
+          Relative name of the version within the service. Example v1. Version names can contain only lowercase letters, numbers, or hyphens. Reserved names,"default", "latest", and any name with the prefix "ah-". 
       - !ruby/object:Api::Type::String
         name: 'runtime'
         description: |
