@@ -235,7 +235,7 @@ products.each do |product|
   config = product[:overrides]
   product_definition.objects.each do |object|
     next if object.exclude || object.not_in_version?(product_definition.version_obj_or_closest(version))
-    tf_product = (@config.legacy_name || product_definition.name).underscore
+    tf_product = (config.legacy_name || product_definition.name).underscore
     terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
 -%>
 <% 	unless object&.exclude_resource -%>
