@@ -109,5 +109,16 @@ module Provider
         nil
       end
     end
+
+    def transform_refs_in_id(id_template, object)
+      final_id_template = id_template
+      prop_names = id_template.scan(/{{[[:word:]]+}}/).map{ |p| p.gsub('{{', '').gsub('}}', '') }
+      # probably won't catch overriden names
+      object.properties.reject{ |p| p.name == 'region' }.select { |p| p.is_a?(Api::Type::ResourceRef) && prop_names.include?(p.name) }.each do |prop|
+        puts "saw #{prop.name}"
+        final_id_template = final_id_template.gsub("{{#{prop.name}}}", "{{#{prop.name}Ref.name}}")
+      end
+      final_id_template
+    end
   end
 end

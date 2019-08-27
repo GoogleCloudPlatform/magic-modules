@@ -43,7 +43,7 @@ spec:
         name: name
     - name: google_compute_region_backend_service
       kind: ComputeRegionBackendService
-      idTemplate: "projects/{{project}}/regions/{{region}}/backendServices/{{name}}"
+      idTemplate: "projects/{{project}}/regions/{{regionRef.name}}/backendServices/{{name}}"
       metadataMapping:
         name: name
       resourceReferences:
@@ -152,7 +152,7 @@ spec:
         name: name
     - name: google_compute_network_endpoint
       kind: ComputeNetworkEndpoint
-      idTemplate: "projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}"
+      idTemplate: "projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/{{instanceRef.name}}/{{ip_address}}/{{port}}"
       metadataMapping:
       resourceReferences:
         - key: instanceRef
@@ -250,7 +250,7 @@ spec:
         name: name
     - name: google_compute_subnetwork
       kind: ComputeSubnetwork
-      idTemplate: "projects/{{project}}/regions/{{region}}/subnetworks/{{name}}"
+      idTemplate: "projects/{{project}}/regions/{{regionRef.name}}/subnetworks/{{name}}"
       metadataMapping:
         name: name
       resourceReferences:
