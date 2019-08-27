@@ -78,17 +78,17 @@ url_properties = object.all_user_properties.select { |param| params.include?(par
 
 ```hcl
 data "google_iam_policy" "admin" {
-  binding {
-    role    = "<%= object.iam_policy.allowed_iam_role -%>"
-    members = [
-      "user:jane@example.com",
-    ]
-  }
+	binding {
+		role = "<%= object.iam_policy.allowed_iam_role -%>"
+		members = [
+			"user:jane@example.com",
+		]
+	}
 }
 
 resource "<%= terraform_name -%>_policy" "editor" {
-<%= lines(compile("templates/terraform/iam/iam_example_qualifiers.md.erb")) -%>
-  policy_data = "${data.google_iam_policy.admin.policy_data}"
+<%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
+	policy_data = "${data.google_iam_policy.admin.policy_data}"
 }
 ```
 
@@ -96,11 +96,11 @@ resource "<%= terraform_name -%>_policy" "editor" {
 
 ```hcl
 resource "<%= terraform_name -%>_binding" "editor" {
-<%= lines(compile("templates/terraform/iam/iam_example_qualifiers.md.erb")) -%>
-  role    = "<%= object.iam_policy.allowed_iam_role -%>"
-  members = [
-    "user:jane@example.com",
-  ]
+<%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
+	role = "<%= object.iam_policy.allowed_iam_role -%>"
+	members = [
+		"user:jane@example.com",
+	]
 }
 ```
 
@@ -108,9 +108,9 @@ resource "<%= terraform_name -%>_binding" "editor" {
 
 ```hcl
 resource "<%= terraform_name -%>_member" "editor" {
-<%= lines(compile("templates/terraform/iam/iam_example_qualifiers.md.erb")) -%>
-  role   = "<%= object.iam_policy.allowed_iam_role -%>"
-  member = "user:jane@example.com"
+<%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
+	role = "<%= object.iam_policy.allowed_iam_role -%>"
+	member = "user:jane@example.com"
 }
 ```
 

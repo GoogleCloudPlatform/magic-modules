@@ -17,7 +17,6 @@ import (
 <% resource_name = product_ns + object.name -%>
 <% 
 individual_url = object.self_link_url
-parent_resource_last_param_name = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }.last
 params = individual_url.gsub('{{name}}', "{{#{object.name.underscore}}}").scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
 -%>
 <% 
@@ -119,7 +118,6 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 		},
 	})
 }
-<% parent_resource_type_type = object.iam_policy.parent_resource_type || terraform_name -%>
 
 func testAcc<%= resource_name -%>IamMember_basicGenerated(context map[string]interface{}) string {
 	return Nprintf(`

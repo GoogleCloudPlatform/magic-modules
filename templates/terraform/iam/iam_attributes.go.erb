@@ -1,6 +1,11 @@
+<% example = object.examples.reject(&:skip_test)
+         .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
+         .first -%>
+<% parent_resource_last_param_name = object.self_link_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }.last -%>
+<% parent_resource_type_type = object.iam_policy.parent_resource_type || terraform_name -%>
 <% params.each_with_index do |p, i| -%>
 <% if i == params.size - 1 -%>
-<% attribute = parent_resource_last_param_name -%>
+<% attribute = object.iam_policy.parent_resource_attribute || parent_resource_last_param_name.underscore -%>
 <% else -%>
 <% attribute = p.underscore -%>
 <% end -%>
