@@ -109,7 +109,6 @@ func resourceGoogleProjectIamCustomRoleCreate(d *schema.ResourceData, meta inter
 }
 
 func extractProjectFromProjectIamCustomRoleID(id string) string {
-	//bucket, NotificationID
 	parts := strings.Split(id, "/")
 
 	return parts[1]
