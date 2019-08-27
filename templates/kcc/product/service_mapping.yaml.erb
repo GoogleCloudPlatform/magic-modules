@@ -61,7 +61,7 @@ spec:
 <%-   references.reject { |p| p.name == 'region' }.each do |property| -%>
         - key: <%= property.name.camelize(:lower) %>Ref
           tfField: <%= property.name %>
-          kind: <%= property.resource %>
+          kind: <%= "#{product.name}#{property.resource}" %>
 <%-     if property.required -%>
           required: true
 <%      else -%>

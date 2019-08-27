@@ -16,7 +16,7 @@ spec:
       resourceReferences:
         - key: configRef
           tfField: config
-          kind: InstanceConfig
+          kind: SpannerInstanceConfig
           required: true
     - name: google_spanner_database
       kind: SpannerDatabase

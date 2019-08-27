@@ -15,7 +15,7 @@ spec:
       resourceReferences:
         - key: subnetworkRef
           tfField: subnetwork
-          kind: Subnetwork
+          kind: ComputeSubnetwork
           required: false
     - name: google_compute_autoscaler
       kind: ComputeAutoscaler
@@ -25,7 +25,7 @@ spec:
       resourceReferences:
         - key: targetRef
           tfField: target
-          kind: InstanceGroupManager
+          kind: ComputeInstanceGroupManager
           required: true
     - name: google_compute_backend_bucket
       kind: ComputeBackendBucket
@@ -62,7 +62,7 @@ spec:
       resourceReferences:
         - key: typeRef
           tfField: type
-          kind: DiskType
+          kind: ComputeDiskType
           required: false
     - name: google_compute_firewall
       kind: ComputeFirewall
@@ -72,7 +72,7 @@ spec:
       resourceReferences:
         - key: networkRef
           tfField: network
-          kind: Network
+          kind: ComputeNetwork
           required: true
     - name: google_compute_forwarding_rule
       kind: ComputeForwardingRule
@@ -82,19 +82,19 @@ spec:
       resourceReferences:
         - key: backendServiceRef
           tfField: backendService
-          kind: BackendService
+          kind: ComputeBackendService
           required: false
         - key: networkRef
           tfField: network
-          kind: Network
+          kind: ComputeNetwork
           required: false
         - key: subnetworkRef
           tfField: subnetwork
-          kind: Subnetwork
+          kind: ComputeSubnetwork
           required: false
         - key: targetRef
           tfField: target
-          kind: TargetPool
+          kind: ComputeTargetPool
           required: false
     - name: google_compute_global_address
       kind: ComputeGlobalAddress
@@ -104,7 +104,7 @@ spec:
       resourceReferences:
         - key: networkRef
           tfField: network
-          kind: Network
+          kind: ComputeNetwork
           required: false
     - name: google_compute_global_forwarding_rule
       kind: ComputeGlobalForwardingRule
@@ -135,7 +135,7 @@ spec:
       resourceReferences:
         - key: sourceDiskRef
           tfField: sourceDisk
-          kind: Disk
+          kind: ComputeDisk
           required: false
     - name: google_compute_interconnect_attachment
       kind: ComputeInterconnectAttachment
@@ -145,7 +145,7 @@ spec:
       resourceReferences:
         - key: routerRef
           tfField: router
-          kind: Router
+          kind: ComputeRouter
           required: true
     - name: google_compute_network
       kind: ComputeNetwork
@@ -160,7 +160,7 @@ spec:
       resourceReferences:
         - key: instanceRef
           tfField: instance
-          kind: Instance
+          kind: ComputeInstance
           required: true
     - name: google_compute_network_endpoint_group
       kind: ComputeNetworkEndpointGroup
@@ -170,11 +170,11 @@ spec:
       resourceReferences:
         - key: networkRef
           tfField: network
-          kind: Network
+          kind: ComputeNetwork
           required: true
         - key: subnetworkRef
           tfField: subnetwork
-          kind: Subnetwork
+          kind: ComputeSubnetwork
           required: false
     - name: google_compute_node_group
       kind: ComputeNodeGroup
@@ -184,7 +184,7 @@ spec:
       resourceReferences:
         - key: nodeTemplateRef
           tfField: nodeTemplate
-          kind: NodeTemplate
+          kind: ComputeNodeTemplate
           required: true
     - name: google_compute_node_template
       kind: ComputeNodeTemplate
@@ -205,7 +205,7 @@ spec:
       resourceReferences:
         - key: typeRef
           tfField: type
-          kind: RegionDiskType
+          kind: ComputeRegionDiskType
           required: false
     - name: google_compute_route
       kind: ComputeRoute
@@ -215,15 +215,15 @@ spec:
       resourceReferences:
         - key: networkRef
           tfField: network
-          kind: Network
+          kind: ComputeNetwork
           required: true
         - key: nextHopInstanceRef
           tfField: nextHopInstance
-          kind: Instance
+          kind: ComputeInstance
           required: false
         - key: nextHopVpnTunnelRef
           tfField: nextHopVpnTunnel
-          kind: VpnTunnel
+          kind: ComputeVpnTunnel
           required: false
     - name: google_compute_router
       kind: ComputeRouter
@@ -233,7 +233,7 @@ spec:
       resourceReferences:
         - key: networkRef
           tfField: network
-          kind: Network
+          kind: ComputeNetwork
           required: true
     - name: google_compute_snapshot
       kind: ComputeSnapshot
@@ -259,7 +259,7 @@ spec:
       resourceReferences:
         - key: networkRef
           tfField: network
-          kind: Network
+          kind: ComputeNetwork
           required: true
     - name: google_compute_target_http_proxy
       kind: ComputeTargetHttpProxy
@@ -269,7 +269,7 @@ spec:
       resourceReferences:
         - key: urlMapRef
           tfField: urlMap
-          kind: UrlMap
+          kind: ComputeUrlMap
           required: true
     - name: google_compute_target_https_proxy
       kind: ComputeTargetHttpsProxy
@@ -279,11 +279,11 @@ spec:
       resourceReferences:
         - key: sslPolicyRef
           tfField: sslPolicy
-          kind: SslPolicy
+          kind: ComputeSslPolicy
           required: false
         - key: urlMapRef
           tfField: urlMap
-          kind: UrlMap
+          kind: ComputeUrlMap
           required: true
     - name: google_compute_target_instance
       kind: ComputeTargetInstance
@@ -293,7 +293,7 @@ spec:
       resourceReferences:
         - key: instanceRef
           tfField: instance
-          kind: Instance
+          kind: ComputeInstance
           required: true
     - name: google_compute_target_ssl_proxy
       kind: ComputeTargetSslProxy
@@ -303,11 +303,11 @@ spec:
       resourceReferences:
         - key: backendServiceRef
           tfField: backendService
-          kind: BackendService
+          kind: ComputeBackendService
           required: true
         - key: sslPolicyRef
           tfField: sslPolicy
-          kind: SslPolicy
+          kind: ComputeSslPolicy
           required: false
     - name: google_compute_target_tcp_proxy
       kind: ComputeTargetTcpProxy
@@ -317,7 +317,7 @@ spec:
       resourceReferences:
         - key: backendServiceRef
           tfField: backendService
-          kind: BackendService
+          kind: ComputeBackendService
           required: true
     - name: google_compute_vpn_gateway
       kind: ComputeVpnGateway
@@ -327,7 +327,7 @@ spec:
       resourceReferences:
         - key: networkRef
           tfField: network
-          kind: Network
+          kind: ComputeNetwork
           required: true
     - name: google_compute_url_map
       kind: ComputeUrlMap
@@ -337,7 +337,7 @@ spec:
       resourceReferences:
         - key: defaultServiceRef
           tfField: defaultService
-          kind: BackendService
+          kind: ComputeBackendService
           required: true
     - name: google_compute_vpn_tunnel
       kind: ComputeVpnTunnel
@@ -347,9 +347,9 @@ spec:
       resourceReferences:
         - key: targetVpnGatewayRef
           tfField: targetVpnGateway
-          kind: VpnGateway
+          kind: ComputeVpnGateway
           required: false
         - key: routerRef
           tfField: router
-          kind: Router
+          kind: ComputeRouter
           required: false

@@ -23,5 +23,5 @@ spec:
       resourceReferences:
         - key: topicRef
           tfField: topic
-          kind: Topic
+          kind: PubsubTopic
           required: true

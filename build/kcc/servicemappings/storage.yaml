@@ -15,7 +15,7 @@ spec:
       resourceReferences:
         - key: bucketRef
           tfField: bucket
-          kind: Bucket
+          kind: StorageBucket
           required: true
     - name: google_storage_default_object_access_control
       kind: StorageDefaultObjectAccessControl
@@ -25,5 +25,5 @@ spec:
       resourceReferences:
         - key: bucketRef
           tfField: bucket
-          kind: Bucket
+          kind: StorageBucket
           required: true
