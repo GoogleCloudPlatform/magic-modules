@@ -11,4 +11,3 @@ spec:
       kind: BigtableAppProfile
       idTemplate: "projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}"
       metadataMapping:
-        name: name

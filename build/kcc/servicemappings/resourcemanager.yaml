@@ -11,4 +11,3 @@ spec:
       kind: ResourceManagerLien
       idTemplate: "{{parent}}/{{name}}"
       metadataMapping:
-        name: name

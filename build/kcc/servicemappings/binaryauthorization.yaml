@@ -16,4 +16,3 @@ spec:
       kind: BinaryAuthorizationPolicy
       idTemplate: "projects/{{project}}"
       metadataMapping:
-        name: name

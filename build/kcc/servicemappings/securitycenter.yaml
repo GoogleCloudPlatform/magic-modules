@@ -11,4 +11,3 @@ spec:
       kind: SecurityCenterSource
       idTemplate: "organizations/{{organization}}/sources/{{name}}"
       metadataMapping:
-        name: name

@@ -36,7 +36,6 @@ spec:
       kind: ComputeBackendBucketSignedUrlKey
       idTemplate: "projects/{{project}}/global/backendBuckets/{{backend_bucket}}/{{name}}"
       metadataMapping:
-        name: name
     - name: google_compute_backend_service
       kind: ComputeBackendService
       idTemplate: "projects/{{project}}/global/backendServices/{{name}}"
@@ -52,7 +51,6 @@ spec:
       kind: ComputeBackendServiceSignedUrlKey
       idTemplate: "projects/{{project}}/global/backendServices/{{backend_service}}/{{name}}"
       metadataMapping:
-        name: name
     - name: google_compute_disk
       kind: ComputeDisk
       idTemplate: "projects/{{project}}/zones/{{zone}}/disks/{{name}}"
@@ -156,7 +154,6 @@ spec:
       kind: ComputeNetworkEndpoint
       idTemplate: "projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}"
       metadataMapping:
-        name: name
       resourceReferences:
         - key: instanceRef
           tfField: instance

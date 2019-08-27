@@ -88,5 +88,26 @@ module Provider
       Google::LOGGER.info 'Copying common files.'
       copy_file_list(output_folder, [])
     end
+
+    # A strict mapping from K8S name -> Terraform resource "name" doesn't make
+    # sense for some resources but we can approximate this well enough for most
+    # of them. This is often the `name` field, but it could be named something
+    # else.
+    # If {{name}} is part of a resource id, it should be the last import format.
+    # Otherwise, {{value}} or values/{{value}} are also valid. If the final id
+    # has multiple terms, we can reject it as we can't create a 1:1 mapping from
+    # K8S resource name : Terraform field.
+    def guess_metadata_mapping_name(object)
+      final_import_parts = import_id_formats(object)[-1].scan(/{{[[:word:]]+}}/)
+
+      # remove {{project}}, {{region}} if present, KCC handles them specially
+      final_import_parts -= ['{{project}}', '{{region}}']
+
+      if final_import_parts.length == 1
+        final_import_parts.first.gsub('{{', '').gsub('}}', '')
+      else
+        nil
+      end
+    end
   end
 end

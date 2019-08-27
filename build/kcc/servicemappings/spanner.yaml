@@ -22,4 +22,3 @@ spec:
       kind: SpannerDatabase
       idTemplate: "projects/{{project}}/instances/{{instance}}/databases/{{name}}"
       metadataMapping:
-        name: name

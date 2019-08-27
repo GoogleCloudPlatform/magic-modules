@@ -11,4 +11,4 @@ spec:
       kind: CloudBuildTrigger
       idTemplate: "projects/{{project}}/triggers/{{trigger_id}}"
       metadataMapping:
-        name: name
+        name: trigger_id

@@ -11,5 +11,5 @@ spec:
       kind: BigQueryDataset
       idTemplate: "{{project}}/{{dataset_id}}"
       metadataMapping:
-        name: name
+        name: dataset_id
         labels: labels
