@@ -40,6 +40,11 @@ var SupportedResources = []schema.GroupVersionKind{
 		Kind:    "AppEngineFirewallRule",
 	},
 	{
+		Group:   "appengine.cnrm.cloud.google.com",
+		Version: "v1alpha2",
+		Kind:    "AppEngineStandardAppVersion",
+	},
+	{
 		Group:   "bigquery.cnrm.cloud.google.com",
 		Version: "v1alpha2",
 		Kind:    "BigQueryDataset",

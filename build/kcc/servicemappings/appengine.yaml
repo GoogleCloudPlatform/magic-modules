@@ -12,3 +12,8 @@ spec:
       metadataMapping:
         name: name
       idTemplate: "{{project}}/{{priority}}"
+    - name: google_app_engine_standard_app_version
+      kind: AppEngineStandardAppVersion
+      metadataMapping:
+        name: name
+      idTemplate: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"

@@ -238,6 +238,10 @@ spec:
           tfField: nextHopVpnTunnel
           kind: VpnTunnel
           required: false
+        - key: nextHopIlbRef
+          tfField: nextHopIlb
+          kind: ForwardingRule
+          required: false
     - name: google_compute_router
       kind: ComputeRouter
       metadataMapping:
