@@ -58,7 +58,7 @@ spec:
     unless references.empty?
 -%>
       resourceReferences:
-<%-   references.each do |property| -%>
+<%-   references.reject { |p| p.name == 'region' }.each do |property| -%>
         - key: <%= property.name.camelize(:lower) %>Ref
           tfField: <%= property.name %>
           kind: <%= property.resource %>

@@ -48,10 +48,6 @@ spec:
         name: name
       idTemplate: "projects/{{project}}/regions/{{region}}/backendServices/{{name}}"
       resourceReferences:
-        - key: regionRef
-          tfField: region
-          kind: Region
-          required: false
     - name: google_compute_backend_service_signed_url_key
       kind: ComputeBackendServiceSignedUrlKey
       metadataMapping:
@@ -265,10 +261,6 @@ spec:
           tfField: network
           kind: Network
           required: true
-        - key: regionRef
-          tfField: region
-          kind: Region
-          required: false
     - name: google_compute_target_http_proxy
       kind: ComputeTargetHttpProxy
       metadataMapping:
