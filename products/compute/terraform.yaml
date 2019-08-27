@@ -1064,6 +1064,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           route_name: "network-route"
           network_name: "compute-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "route_ilb_beta"
+        min_version: "beta"
+        primary_resource_id: "route-ilb-beta"
+        vars:
+          network_name: "compute-network"
+          subnet_name: "compute-subnet"
+          forwarding_rule_name: "compute-forwarding-rule"
+          health_check_name: "proxy-health-check"
+          backend_name: "compute-backend"
+          route_name: "route-ilb-beta"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -1072,6 +1083,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       priority: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: 1000
+      nextHopIp: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       nextHopGateway: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/route_gateway.erb

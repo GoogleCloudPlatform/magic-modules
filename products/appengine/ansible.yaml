@@ -23,6 +23,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # differently than Terraform.
     identity:
       - priority
+  Service: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  StandardAppVersion: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>
