@@ -23,8 +23,17 @@ func TestIamMergeBindings(t *testing.T) {
 				{
 					Role: "role-1",
 				},
+				{
+					Role:    "role-2",
+					Members: []string{"member-2"},
+				},
 			},
-			expect: []*cloudresourcemanager.Binding{},
+			expect: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-2",
+					Members: []string{"member-2"},
+				},
+			},
 		},
 		// Nothing to merge - return same list
 		{
