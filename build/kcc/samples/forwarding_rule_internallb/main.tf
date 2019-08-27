@@ -1,6 +1,6 @@
 // Forwarding rule for Internal Load Balancing
 resource "google_compute_forwarding_rule" "default" {
-  name                  = "website-forwarding-rule-${local.name_suffix}"
+  name                  = "website-forwarding-rule"
   region                = "us-central1"
 
   load_balancing_scheme = "INTERNAL"
@@ -11,13 +11,13 @@ resource "google_compute_forwarding_rule" "default" {
 }
 
 resource "google_compute_region_backend_service" "backend" {
-  name                  = "website-backend-${local.name_suffix}"
+  name                  = "website-backend"
   region                = "us-central1"
   health_checks         = ["${google_compute_health_check.hc.self_link}"]
 }
 
 resource "google_compute_health_check" "hc" {
-  name               = "check-website-backend-${local.name_suffix}"
+  name               = "check-website-backend"
   check_interval_sec = 1
   timeout_sec        = 1
 
@@ -27,12 +27,12 @@ resource "google_compute_health_check" "hc" {
 }
 
 resource "google_compute_network" "default" {
-  name = "website-net-${local.name_suffix}"
+  name = "website-net"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  name          = "website-net-${local.name_suffix}"
+  name          = "website-net"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
   network       = "${google_compute_network.default.self_link}"

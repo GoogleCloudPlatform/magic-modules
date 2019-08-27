@@ -1,5 +1,5 @@
 resource "google_compute_autoscaler" "foobar" {
-  name   = "my-autoscaler-${local.name_suffix}"
+  name   = "my-autoscaler"
   zone   = "us-central1-f"
   target = "${google_compute_instance_group_manager.foobar.self_link}"
 
@@ -15,7 +15,7 @@ resource "google_compute_autoscaler" "foobar" {
 }
 
 resource "google_compute_instance_template" "foobar" {
-  name           = "my-instance-template-${local.name_suffix}"
+  name           = "my-instance-template"
   machine_type   = "n1-standard-1"
   can_ip_forward = false
 
@@ -39,11 +39,11 @@ resource "google_compute_instance_template" "foobar" {
 }
 
 resource "google_compute_target_pool" "foobar" {
-  name = "my-target-pool-${local.name_suffix}"
+  name = "my-target-pool"
 }
 
 resource "google_compute_instance_group_manager" "foobar" {
-  name = "my-igm-${local.name_suffix}"
+  name = "my-igm"
   zone = "us-central1-f"
 
   instance_template  = "${google_compute_instance_template.foobar.self_link}"

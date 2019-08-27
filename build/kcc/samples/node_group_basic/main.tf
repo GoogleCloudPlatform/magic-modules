@@ -3,13 +3,13 @@ data "google_compute_node_types" "central1a" {
 }
 
 resource "google_compute_node_template" "soletenant-tmpl" {
-  name = "soletenant-tmpl-${local.name_suffix}"
+  name = "soletenant-tmpl"
   region = "us-central1"
   node_type = "${data.google_compute_node_types.central1a.names[0]}"
 }
 
 resource "google_compute_node_group" "nodes" {
-  name = "soletenant-group-${local.name_suffix}"
+  name = "soletenant-group"
   zone = "us-central1-a"
   description = "example google_compute_node_group for Terraform Google Provider"
 

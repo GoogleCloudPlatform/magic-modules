@@ -1,5 +1,5 @@
 resource "google_filestore_instance" "instance" {
-  name = "test-instance-${local.name_suffix}"
+  name = "test-instance"
   zone = "us-central1-b"
   tier = "PREMIUM"
 

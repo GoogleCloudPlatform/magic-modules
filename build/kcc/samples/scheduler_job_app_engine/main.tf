@@ -1,5 +1,5 @@
 resource "google_cloud_scheduler_job" "job" {
-  name     = "test-job-${local.name_suffix}"
+  name     = "test-job"
   schedule = "*/4 * * * *"
   description = "test app engine job"
   time_zone = "Europe/London"

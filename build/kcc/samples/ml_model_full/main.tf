@@ -1,5 +1,5 @@
 resource "google_ml_engine_model" "default" {
-  name = "default-${local.name_suffix}"
+  name = "default"
   description = "My model"
   regions = ["us-central1"]
   labels  = {

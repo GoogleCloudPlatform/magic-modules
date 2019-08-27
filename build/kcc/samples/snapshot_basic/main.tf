@@ -1,5 +1,5 @@
 resource "google_compute_snapshot" "snapshot" {
-	name = "my-snapshot-${local.name_suffix}"
+	name = "my-snapshot"
 	source_disk = "${google_compute_disk.persistent.name}"
 	zone = "us-central1-a"
 	labels = {
@@ -13,7 +13,7 @@ data "google_compute_image" "debian" {
 }
 
 resource "google_compute_disk" "persistent" {
-	name = "debian-disk-${local.name_suffix}"
+	name = "debian-disk"
 	image = "${data.google_compute_image.debian.self_link}"
 	size = 10
 	type = "pd-ssd"

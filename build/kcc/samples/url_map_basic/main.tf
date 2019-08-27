@@ -1,5 +1,5 @@
 resource "google_compute_url_map" "urlmap" {
-  name        = "urlmap-${local.name_suffix}"
+  name        = "urlmap"
   description = "a description"
 
   default_service = "${google_compute_backend_service.home.self_link}"
@@ -37,7 +37,7 @@ resource "google_compute_url_map" "urlmap" {
 }
 
 resource "google_compute_backend_service" "login" {
-  name        = "login-${local.name_suffix}"
+  name        = "login"
   port_name   = "http"
   protocol    = "HTTP"
   timeout_sec = 10
@@ -46,7 +46,7 @@ resource "google_compute_backend_service" "login" {
 }
 
 resource "google_compute_backend_service" "home" {
-  name        = "home-${local.name_suffix}"
+  name        = "home"
   port_name   = "http"
   protocol    = "HTTP"
   timeout_sec = 10
@@ -55,19 +55,19 @@ resource "google_compute_backend_service" "home" {
 }
 
 resource "google_compute_http_health_check" "default" {
-  name               = "health-check-${local.name_suffix}"
+  name               = "health-check"
   request_path       = "/"
   check_interval_sec = 1
   timeout_sec        = 1
 }
 
 resource "google_compute_backend_bucket" "static" {
-  name        = "static-asset-backend-bucket-${local.name_suffix}"
+  name        = "static-asset-backend-bucket"
   bucket_name = "${google_storage_bucket.static.name}"
   enable_cdn  = true
 }
 
 resource "google_storage_bucket" "static" {
-  name     = "static-asset-bucket-${local.name_suffix}"
+  name     = "static-asset-bucket"
   location = "US"
 }

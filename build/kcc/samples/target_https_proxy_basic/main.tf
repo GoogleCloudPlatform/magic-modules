@@ -1,17 +1,17 @@
 resource "google_compute_target_https_proxy" "default" {
-  name             = "test-proxy-${local.name_suffix}"
+  name             = "test-proxy"
   url_map          = "${google_compute_url_map.default.self_link}"
   ssl_certificates = ["${google_compute_ssl_certificate.default.self_link}"]
 }
 
 resource "google_compute_ssl_certificate" "default" {
-  name        = "my-certificate-${local.name_suffix}"
-  private_key = "${file("../static/ssl_cert/test.key")}"
-  certificate = "${file("../static/ssl_cert/test.crt")}"
+  name        = "my-certificate"
+  private_key = "${file("path/to/private.key")}"
+  certificate = "${file("path/to/certificate.crt")}"
 }
 
 resource "google_compute_url_map" "default" {
-  name        = "url-map-${local.name_suffix}"
+  name        = "url-map"
   description = "a description"
 
   default_service = "${google_compute_backend_service.default.self_link}"
@@ -33,7 +33,7 @@ resource "google_compute_url_map" "default" {
 }
 
 resource "google_compute_backend_service" "default" {
-  name        = "backend-service-${local.name_suffix}"
+  name        = "backend-service"
   port_name   = "http"
   protocol    = "HTTP"
   timeout_sec = 10
@@ -42,7 +42,7 @@ resource "google_compute_backend_service" "default" {
 }
 
 resource "google_compute_http_health_check" "default" {
-  name               = "http-health-check-${local.name_suffix}"
+  name               = "http-health-check"
   request_path       = "/"
   check_interval_sec = 1
   timeout_sec        = 1

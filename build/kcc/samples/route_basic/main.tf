@@ -1,5 +1,5 @@
 resource "google_compute_route" "default" {
-  name        = "network-route-${local.name_suffix}"
+  name        = "network-route"
   dest_range  = "15.0.0.0/24"
   network     = "${google_compute_network.default.name}"
   next_hop_ip = "10.132.1.5"
@@ -7,5 +7,5 @@ resource "google_compute_route" "default" {
 }
 
 resource "google_compute_network" "default" {
-  name = "compute-network-${local.name_suffix}"
+  name = "compute-network"
 }

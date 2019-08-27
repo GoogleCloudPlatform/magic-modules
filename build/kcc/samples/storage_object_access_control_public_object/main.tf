@@ -6,11 +6,11 @@ resource "google_storage_object_access_control" "public_rule" {
 }
 
 resource "google_storage_bucket" "bucket" {
-	name = "static-content-bucket-${local.name_suffix}"
+	name = "static-content-bucket"
 }
 
  resource "google_storage_bucket_object" "object" {
-	name   = "public-object-${local.name_suffix}"
+	name   = "public-object"
 	bucket = "${google_storage_bucket.bucket.name}"
-	source = "../static/header-logo.png"
+	source = "../static/img/header-logo.png"
 }

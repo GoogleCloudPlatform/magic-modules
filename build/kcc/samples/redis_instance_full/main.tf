@@ -1,5 +1,5 @@
 resource "google_redis_instance" "cache" {
-  name           = "ha-memory-cache-${local.name_suffix}"
+  name           = "ha-memory-cache"
   tier           = "STANDARD_HA"
   memory_size_gb = 1
 
@@ -19,5 +19,5 @@ resource "google_redis_instance" "cache" {
 }
 
 resource "google_compute_network" "auto-network" {
-  name = "authorized-network-${local.name_suffix}"
+  name = "authorized-network"
 }

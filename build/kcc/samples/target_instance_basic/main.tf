@@ -1,5 +1,5 @@
 resource "google_compute_target_instance" "default" {
-  name        = "target-${local.name_suffix}"
+  name        = "target"
   instance    = "${google_compute_instance.target-vm.self_link}"
 }
 
@@ -9,7 +9,7 @@ data "google_compute_image" "vmimage" {
 }
 
 resource "google_compute_instance" "target-vm" {
-  name         = "target-vm-${local.name_suffix}"
+  name         = "target-vm"
   machine_type = "n1-standard-1"
   zone         = "us-central1-a"
 

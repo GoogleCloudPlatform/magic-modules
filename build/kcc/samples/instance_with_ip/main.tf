@@ -1,5 +1,5 @@
 resource "google_compute_address" "static" {
-  name = "ipv4-address-${local.name_suffix}"
+  name = "ipv4-address"
 }
 
 data "google_compute_image" "debian_image" {
@@ -8,7 +8,7 @@ data "google_compute_image" "debian_image" {
 }
 
 resource "google_compute_instance" "instance_with_ip" {
-	name         = "vm-instance-${local.name_suffix}"
+	name         = "vm-instance"
 	machine_type = "f1-micro"
 	zone         = "us-central1-a"
 

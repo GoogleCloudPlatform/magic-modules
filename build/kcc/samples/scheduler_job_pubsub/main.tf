@@ -1,9 +1,9 @@
 resource "google_pubsub_topic" "topic" {
-  name = "job-topic-${local.name_suffix}"
+  name = "job-topic"
 }
 
 resource "google_cloud_scheduler_job" "job" {
-  name     = "test-job-${local.name_suffix}"
+  name     = "test-job"
   description = "test job"
   schedule = "*/2 * * * *"
 

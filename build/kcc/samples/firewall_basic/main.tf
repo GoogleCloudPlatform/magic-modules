@@ -1,5 +1,5 @@
 resource "google_compute_firewall" "default" {
-  name    = "test-firewall-${local.name_suffix}"
+  name    = "test-firewall"
   network = "${google_compute_network.default.name}"
 
   allow {
@@ -15,5 +15,5 @@ resource "google_compute_firewall" "default" {
 }
 
 resource "google_compute_network" "default" {
-  name = "test-network-${local.name_suffix}"
+  name = "test-network"
 }

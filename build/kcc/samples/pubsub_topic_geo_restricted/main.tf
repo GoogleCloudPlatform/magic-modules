@@ -1,5 +1,5 @@
 resource "google_pubsub_topic" "example" {
-  name = "example-topic-${local.name_suffix}"
+  name = "example-topic"
 
   message_storage_policy {
     allowed_persistence_regions = [

@@ -1,5 +1,5 @@
 resource "google_compute_region_disk" "regiondisk" {
-  name = "my-region-disk-${local.name_suffix}"
+  name = "my-region-disk"
   snapshot = "${google_compute_snapshot.snapdisk.self_link}"
   type = "pd-ssd"
   region = "us-central1"
@@ -9,7 +9,7 @@ resource "google_compute_region_disk" "regiondisk" {
 }
 
 resource "google_compute_disk" "disk" {
-  name = "my-disk-${local.name_suffix}"
+  name = "my-disk"
   image = "debian-cloud/debian-9"
   size = 50
   type = "pd-ssd"
@@ -17,7 +17,7 @@ resource "google_compute_disk" "disk" {
 }
 
 resource "google_compute_snapshot" "snapdisk" {
-  name = "my-snapshot-${local.name_suffix}"
+  name = "my-snapshot"
   source_disk = "${google_compute_disk.disk.name}"
   zone = "us-central1-a"
 }

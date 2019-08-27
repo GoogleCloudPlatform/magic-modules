@@ -1,9 +1,9 @@
 resource "google_pubsub_topic" "example" {
-  name = "example-topic-${local.name_suffix}"
+  name = "example-topic"
 }
 
 resource "google_pubsub_subscription" "example" {
-  name  = "example-subscription-${local.name_suffix}"
+  name  = "example-subscription"
   topic = "${google_pubsub_topic.example.name}"
 
   labels = {

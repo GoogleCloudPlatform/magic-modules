@@ -1,5 +1,5 @@
 resource "google_pubsub_topic" "example" {
-  name = "example-topic-${local.name_suffix}"
+  name = "example-topic"
 
   labels = {
     foo = "bar"
