@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: VpcAccess
+name: VPCAccess
 display_name: Serverless VPC Access
 versions:
   - !ruby/object:Api::Product::Version
