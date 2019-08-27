@@ -222,6 +222,10 @@ regional_node_pool:
   node_count: 1
   initial_node_count: 1
 
+org_sink:
+  name: inspec-gcp-org-sink
+  filter: resource.type = gce_instance
+  
 standardappversion:
   version_id: v2
   service: default
