@@ -51,14 +51,14 @@ objects:
         required: true
   - !ruby/object:Api::Resource
     name: 'WebTypeAppEngine'
-    base_url: 'projects/{{project}}/iap_web/appengine-{{appEngineId}}'
-    self_link: 'projects/{{project}}/iap_web/appengine-{{appEngineId}}'
+    base_url: 'projects/{{project}}/iap_web/appengine-{{appId}}'
+    self_link: 'projects/{{project}}/iap_web/appengine-{{appId}}'
     exclude_resource: true
     description: |
       Only used to generate IAM resources
     properties:
       - !ruby/object:Api::Type::String
-        name: 'appEngineId'
+        name: 'appId'
         description: Id of the App Engine application.
         required: true
   - !ruby/object:Api::Resource

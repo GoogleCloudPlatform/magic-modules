@@ -1,0 +1,8 @@
+<% params.each_with_index do |p, i| -%>
+<% if i == params.size - 1 -%>
+<% attribute = parent_resource_last_param_name -%>
+<% else -%>
+<% attribute = p.underscore -%>
+<% end -%>
+	<%= p.underscore -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= attribute -%>}"
+<% end -%>

@@ -57,8 +57,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
       test_project_name: "tf-test"
       custom_diff_suppress: 'templates/terraform/iam/iap_web_appengine_diff_suppress.go.erb'
-    id_format: "projects/{{project}}/iap_web/appengine-{{appEngineId}}"
-    import_format: ["projects/{{project}}/iap_web/appengine-{{appEngineId}}"]
+    id_format: "projects/{{project}}/iap_web/appengine-{{appId}}"
+    import_format: ["projects/{{project}}/iap_web/appengine-{{appId}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "iap_appengine"
