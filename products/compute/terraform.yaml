@@ -699,10 +699,30 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   HealthCheck: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "health_check_basic"
-        primary_resource_id: "internal-health-check"
+        name: "health_check_tcp"
+        primary_resource_id: "tcp-health-check"
         vars:
-          health_check_name: "internal-service-health-check"
+          health_check_name: "tcp-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_ssl"
+        primary_resource_id: "ssl-health-check"
+        vars:
+          health_check_name: "ssl-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_http"
+        primary_resource_id: "http-health-check"
+        vars:
+          health_check_name: "http-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_https"
+        primary_resource_id: "https-health-check"
+        vars:
+          health_check_name: "https-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_http2"
+        primary_resource_id: "http2-health-check"
+        vars:
+          health_check_name: "http2-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/health_check_type.erb
       constants: templates/terraform/constants/health_check.erb
@@ -1055,11 +1075,35 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RegionHealthCheck: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "region_health_check_basic"
-        min_version: 'beta'
-        primary_resource_id: "internal-region-health-check"
+        name: "region_health_check_tcp"
+        min_version: beta
+        primary_resource_id: "tcp-region-health-check"
         vars:
-          region_health_check_name: "internal-service-region-health-check"
+          health_check_name: "tcp-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_ssl"
+        min_version: beta
+        primary_resource_id: "ssl-region-health-check"
+        vars:
+          health_check_name: "ssl-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_http"
+        min_version: beta
+        primary_resource_id: "http-region-health-check"
+        vars:
+          health_check_name: "http-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_https"
+        min_version: beta
+        primary_resource_id: "https-region-health-check"
+        vars:
+          health_check_name: "https-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_http2"
+        min_version: beta
+        primary_resource_id: "http2-region-health-check"
+        vars:
+          health_check_name: "http2-region-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/health_check_type.erb
       resource_definition: templates/terraform/resource_definition/health_check.erb
