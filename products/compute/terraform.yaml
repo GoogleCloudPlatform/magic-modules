@@ -313,6 +313,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       sizeGb: !ruby/object:Overrides::Terraform::PropertyOverride
         name: size
         default_from_api: true
+        description: |
+          Size of the persistent disk, specified in GB. You can specify this
+          field when creating a persistent disk using the `image` or
+          `snapshot` parameter, or specify it alone to create an empty
+          persistent disk.
+
+          If you specify this field along with `image` or `snapshot`,
+          the value must not be less than the size of the image
+          or the size of the snapshot.
       sourceSnapshot: !ruby/object:Overrides::Terraform::PropertyOverride
         name: snapshot
         description: |
