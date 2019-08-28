@@ -575,7 +575,7 @@ resource "google_logging_organization_sink" "my-sink" {
 }
 
 resource "google_app_engine_standard_app_version" "default" {
-  version_id      = "${var.standardappversion["version_id"]}"
+  version_id      = "${var.standardappversion["id"]}"
   service         = "${var.standardappversion["service"]}"
   runtime         = "${var.standardappversion["runtime"]}"
   noop_on_destroy = true
@@ -588,6 +588,6 @@ resource "google_app_engine_standard_app_version" "default" {
   }
 
   env_variables = {
-    MY_ENV_VAR = "${var.cloudfunction["env_var_value"]}"
+    MY_ENV_VAR = "${var.standardappversion["env_var_value"]}"
   }
 }

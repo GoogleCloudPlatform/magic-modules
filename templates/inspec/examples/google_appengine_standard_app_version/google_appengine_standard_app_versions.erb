@@ -3,5 +3,5 @@
 <% standardappversion = grab_attributes['standardappversion'] -%>
 
 describe google_appengine_standard_app_versions(project: <%= gcp_project_id -%>, location: <%= gcp_standardappversion_region -%>,service: <%= doc_generation ? "'#{standardappversion['service']}'" : "standardappversion['service']" -%>) do
-  its('count') { should be >= 1 }
+  its('runtimes') { should include <%= doc_generation ? "'#{standardappversion['runtime']}'" : "standardappversion['runtime']" -%> }
 end

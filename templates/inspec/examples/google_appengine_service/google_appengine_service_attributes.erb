@@ -1,3 +1,0 @@
-gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
-gcp_appengine_region = attribute(:gcp_appengine_region, default: '<%= external_attribute('gcp_appengine_region') -%>', description: 'The App Engine region.')
-standardappversion = attribute('standardappversion', default: <%= JSON.pretty_generate(grab_attributes['standardappversion']) -%>, description: 'Cloud App Engine definition')

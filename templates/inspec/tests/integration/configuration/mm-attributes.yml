@@ -225,11 +225,15 @@ regional_node_pool:
 org_sink:
   name: inspec-gcp-org-sink
   filter: resource.type = gce_instance
-  
+
 standardappversion:
-  version_id: v2
+  name: apps/cio-strat-svc-acct-mgmt-238520/services/default/versions/v2
+  id: v2
   service: default
   runtime: nodejs10
   entrypoint: hello
   env_var_value: val1
+  threadsafe: true
+  libraries: nil
+  
   
