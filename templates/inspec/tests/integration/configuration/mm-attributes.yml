@@ -227,13 +227,10 @@ org_sink:
   filter: resource.type = gce_instance
 
 standardappversion:
-  name: apps/cio-strat-svc-acct-mgmt-238520/services/default/versions/v2
+  name: apps/gcp-project-name/services/default/versions/v2
   id: v2
   service: default
   runtime: nodejs10
   entrypoint: hello
   env_var_value: val1
-  threadsafe: true
-  libraries: nil
-  
   
