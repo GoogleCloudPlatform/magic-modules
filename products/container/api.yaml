@@ -414,7 +414,17 @@ objects:
                   the cluster. When enabled, it ensures that a Heapster pod is
                   running in the cluster, which is also used by the Cloud
                   Monitoring service.
-          # kubernetesDashboard is deprecated.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'kubernetesDashboard'
+            description: |
+                Configuration for the Kubernetes Dashboard. This addon is deprecated,
+                and will be disabled in 1.15. It is recommended to use the Cloud Console
+                to manage and monitor your Kubernetes clusters, workloads and applications.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'disabled'
+                description: |
+                  Whether the Kubernetes Dashboard is enabled for this cluster.
           - !ruby/object:Api::Type::NestedObject
             name: 'networkPolicyConfig'
             description: |
@@ -644,6 +654,24 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'message'
               description: Human-friendly representation of the condition
+      - !ruby/object:Api::Type::NestedObject
+        name: 'masterAuthorizedNetworksConfig'
+        description: Configuration for controlling how IPs are allocated in the cluster
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: Whether or not master authorized networks is enabled.
+          - !ruby/object:Api::Type::Array
+            name: 'cidrBlocks'
+            description: Define up to 50 external networks that could access Kubernetes master through HTTPS.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'displayName'
+                  description: Optional field used to identify cidr blocks
+                - !ruby/object:Api::Type::String
+                  name: 'cidrBlock'
+                  description: Block specified in CIDR notation
   - !ruby/object:Api::Resource
     name: 'NodePool'
     base_url: projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools
