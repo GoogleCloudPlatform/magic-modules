@@ -38,6 +38,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       metricDescriptor.labels.valueType: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+      bucketOptions.explicitBuckets: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: explicit
   OrganizationLogSink: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
 

@@ -181,13 +181,13 @@ objects:
                 description: |
                   Must be greater than 0.
           - !ruby/object:Api::Type::NestedObject
-            name: explicit
+            name: explicitBuckets
             description: |
               Specifies a set of buckets with arbitrary widths.
             properties:
               - !ruby/object:Api::Type::Array
                 name: bounds
-                item_type: Api::Type::String
+                item_type: Api::Type::Integer
                 description: |
                   The values must be monotonically increasing.
   - !ruby/object:Api::Resource
