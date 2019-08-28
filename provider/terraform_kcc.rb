@@ -119,8 +119,8 @@ module Provider
       # transform refs from {{bucket}} to {{bucketRef.name}} form
       prop_names = id_template.scan(/{{[[:word:]]+}}/).map{ |p| p.gsub('{{', '').gsub('}}', '') }
       # probably won't catch overriden names
-      object.properties.select { |p| p.is_a?(Api::Type::ResourceRef) && prop_names.include?(p.name) }.each do |prop|
-        id_template_formatted = id_template_formatted.gsub("{{#{prop.name}}}", "{{#{prop.name}Ref.name}}")
+      object.all_properties.reject { |p| p.name == 'zone' }.select { |p| p.is_a?(Api::Type::ResourceRef) && (prop_names.include?(p.name) || prop_names.include?(p.name.camelize(:lower))) }.each do |prop|
+        id_template_formatted = id_template_formatted.gsub("{{#{prop.name}}}", "{{#{prop.name}Ref.name}}").gsub("{{#{prop.name.camelize(:lower)}}}", "{{#{prop.name}Ref.name}}")
       end
       id_template_formatted
     end

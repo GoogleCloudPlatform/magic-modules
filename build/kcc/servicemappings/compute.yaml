@@ -36,6 +36,11 @@ spec:
       kind: ComputeBackendBucketSignedUrlKey
       idTemplate: "{{backend_bucket}}/{{name}}"
       metadataMapping:
+      resourceReferences:
+        - key: backendBucketRef
+          tfField: backendBucket
+          kind: ComputeBackendBucket
+          required: true
     - name: google_compute_backend_service
       kind: ComputeBackendService
       idTemplate: "{{name}}"
@@ -46,11 +51,15 @@ spec:
       idTemplate: "{{name}}"
       metadataMapping:
         name: name
-      resourceReferences:
     - name: google_compute_backend_service_signed_url_key
       kind: ComputeBackendServiceSignedUrlKey
       idTemplate: "{{backend_service}}/{{name}}"
       metadataMapping:
+      resourceReferences:
+        - key: backendServiceRef
+          tfField: backendService
+          kind: ComputeBackendService
+          required: true
     - name: google_compute_disk
       kind: ComputeDisk
       idTemplate: "{{zone}}/{{name}}"
@@ -61,6 +70,10 @@ spec:
         - key: typeRef
           tfField: type
           kind: ComputeDiskType
+          required: false
+        - key: snapshotRef
+          tfField: snapshot
+          kind: ComputeSnapshot
           required: false
     - name: google_compute_firewall
       kind: ComputeFirewall
@@ -159,6 +172,10 @@ spec:
           tfField: instance
           kind: ComputeInstance
           required: true
+        - key: networkEndpointGroupRef
+          tfField: networkEndpointGroup
+          kind: ComputeNetworkEndpointGroup
+          required: true
     - name: google_compute_network_endpoint_group
       kind: ComputeNetworkEndpointGroup
       idTemplate: "{{zone}}/{{name}}"
@@ -204,6 +221,10 @@ spec:
           tfField: type
           kind: ComputeRegionDiskType
           required: false
+        - key: snapshotRef
+          tfField: snapshot
+          kind: ComputeSnapshot
+          required: false
     - name: google_compute_route
       kind: ComputeRoute
       idTemplate: "{{name}}"
@@ -238,6 +259,11 @@ spec:
       metadataMapping:
         name: name
         labels: labels
+      resourceReferences:
+        - key: sourceDiskRef
+          tfField: sourceDisk
+          kind: ComputeDisk
+          required: true
     - name: google_compute_ssl_certificate
       kind: ComputeSslCertificate
       idTemplate: "{{name}}"

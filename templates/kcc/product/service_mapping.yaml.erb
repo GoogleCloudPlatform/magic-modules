@@ -55,15 +55,15 @@ spec:
 <%  if name != nil -%>
         name: <%= name %>
 <%  end -%>
-<%  if object.properties.map(&:name).include?("labels") -%>
+<%  if object.all_user_properties.map(&:name).include?("labels") -%>
         labels: labels
 <%  end -%>
 <%-
-    references = object.properties.select { |p| p.is_a?(Api::Type::ResourceRef) }
+    references = object.all_user_properties.select { |p| p.is_a?(Api::Type::ResourceRef) }.reject { |p| p.name == 'region' || p.name == 'zone' }
     unless references.empty?
 -%>
       resourceReferences:
-<%-   references.reject { |p| p.name == 'region' }.each do |property| -%>
+<%-   references.each do |property| -%>
         - key: <%= property.name.camelize(:lower) %>Ref
           tfField: <%= property.name %>
           kind: <%= "#{product.name}#{property.resource}" %>

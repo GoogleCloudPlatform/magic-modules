@@ -20,5 +20,10 @@ spec:
           required: true
     - name: google_spanner_database
       kind: SpannerDatabase
-      idTemplate: "{{instance}}/{{name}}"
+      idTemplate: "{{instanceRef.name}}/{{name}}"
       metadataMapping:
+      resourceReferences:
+        - key: instanceRef
+          tfField: instance
+          kind: SpannerInstance
+          required: true

@@ -14,5 +14,10 @@ spec:
         name: priority
     - name: google_app_engine_standard_app_version
       kind: AppEngineStandardAppVersion
-      idTemplate: "{{service}}/{{version_id}}"
+      idTemplate: "{{serviceRef.name}}/{{version_id}}"
       metadataMapping:
+      resourceReferences:
+        - key: serviceRef
+          tfField: service
+          kind: AppEngineService
+          required: false
