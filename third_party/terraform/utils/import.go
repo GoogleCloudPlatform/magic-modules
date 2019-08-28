@@ -126,12 +126,22 @@ func getImportIdQualifiers(idRegexes []string, d TerraformResourceData, config *
 				result[fieldName] = fieldValue
 			}
 
-			log.Printf("[DEBUG] result is %v", result)
+			defaults := getDefaultValues(idRegexes[0], d, config)
+			if err != nil {
+				return nil, err
+			}
+
+			for k, v := range defaults {
+				if _, ok := result[k]; !ok {
+					// Set any fields that are defaultable and not specified in import ID
+					result[k] = v
+				}
+			}
 
 			return result, nil
 		}
 	}
-	return getDefaultValues(idRegexes[0], d, config)
+	return nil, fmt.Errorf("Import id %q doesn't match any of the accepted formats: %v", d.Id(), idRegexes)
 }
 
 // Returns a set of default values that are contained in a regular expression
