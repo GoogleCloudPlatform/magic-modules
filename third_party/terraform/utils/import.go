@@ -126,7 +126,7 @@ func getImportIdQualifiers(idRegexes []string, d TerraformResourceData, config *
 				result[fieldName] = fieldValue
 			}
 
-			defaults := getDefaultValues(idRegexes[0], d, config)
+			defaults, err := getDefaultValues(idRegexes[0], d, config)
 			if err != nil {
 				return nil, err
 			}
