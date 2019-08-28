@@ -45,7 +45,7 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  ResourcePolicy: !ruby/object:Overrides::Inspec::ResourceOverride
+  ResourcePolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   TargetInstance:  !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
