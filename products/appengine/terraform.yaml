@@ -71,8 +71,28 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           org_id: :ORG_ID
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
-<<<<<<< HEAD
     exclude: true
+  ServiceSplitTraffic: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{service_id}}"
+    import_format: ["apps/{{project}}/services/{{service_id}}"]
+    mutex: "apps/{{project}}/services/{{service_id}}"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
+      test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'service_id'
+        ignore_read: true  
+      split.allocations: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/float64_to_string.go.erb
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "app_engine_service_split_traffic"
+        vars:
+          service_id: "default"
+          split.allocations.v1: "1"
+        test_env_vars:
+          org_id: :ORG_ID    
   DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
     self_link: 'apps/{{project}}/domainMappings/{{domain_name}}'
     id_format: 'apps/{{project}}/domainMappings/{{domain_name}}'
@@ -111,7 +131,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           bucket_name: "appengine-test-bucket"
 
-=======
     id_format: "{{service_id}}"
     import_format: ["apps/{{project}}/services/{{service_id}}"]
     mutex: "apps/{{project}}/services/{{service_id}}"
@@ -122,7 +141,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'service_id'
       split.allocations: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/float64_to_string.go.erb
->>>>>>> Appengine Service resource
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
