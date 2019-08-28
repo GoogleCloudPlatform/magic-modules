@@ -52,7 +52,7 @@ func TestAccLoggingMetric_explicitBucket(t *testing.T) {
 		CheckDestroy: testAccCheckLoggingMetricDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingMetric_update(suffix, filter),
+				Config: testAccLoggingMetric_explicitBucket(suffix, filter),
 			},
 			{
 				ResourceName:      "google_logging_metric.logging_metric",
