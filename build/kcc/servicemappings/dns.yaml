@@ -9,7 +9,7 @@ spec:
   resources:
     - name: google_dns_managed_zone
       kind: DnsManagedZone
-      idTemplate: "projects/{{project}}/managedZones/{{name}}"
+      idTemplate: "{{name}}"
       metadataMapping:
         name: name
         labels: labels

@@ -9,7 +9,7 @@ spec:
   resources:
     - name: google_tpu_node
       kind: TpuNode
-      idTemplate: "projects/{{project}}/locations/{{zone}}/nodes/{{name}}"
+      idTemplate: "{{zone}}/{{name}}"
       metadataMapping:
         name: name
         labels: labels

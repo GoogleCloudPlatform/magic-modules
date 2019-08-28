@@ -9,7 +9,7 @@ spec:
   resources:
     - name: google_spanner_instance
       kind: SpannerInstance
-      idTemplate: "projects/{{project}}/instances/{{name}}"
+      idTemplate: "{{name}}"
       metadataMapping:
         name: name
         labels: labels
@@ -20,5 +20,5 @@ spec:
           required: true
     - name: google_spanner_database
       kind: SpannerDatabase
-      idTemplate: "projects/{{project}}/instances/{{instance}}/databases/{{name}}"
+      idTemplate: "{{instance}}/{{name}}"
       metadataMapping:

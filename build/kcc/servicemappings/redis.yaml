@@ -9,7 +9,7 @@ spec:
   resources:
     - name: google_redis_instance
       kind: RedisInstance
-      idTemplate: "projects/{{project}}/locations/{{region}}/instances/{{name}}"
+      idTemplate: "{{name}}"
       metadataMapping:
         name: name
         labels: labels

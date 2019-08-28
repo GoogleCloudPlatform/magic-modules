@@ -9,5 +9,5 @@ spec:
   resources:
     - name: google_bigtable_app_profile
       kind: BigtableAppProfile
-      idTemplate: "projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}"
+      idTemplate: "{{instance}}/{{app_profile_id}}"
       metadataMapping:

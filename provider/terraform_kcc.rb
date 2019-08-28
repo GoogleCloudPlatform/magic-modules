@@ -110,15 +110,19 @@ module Provider
       end
     end
 
-    def transform_refs_in_id(id_template, object)
-      final_id_template = id_template
+    def format_id_template(id_template, object)
+      # transform from buckets/{{bucket}} to {{bucket}}
+      id_template_parts = id_template.scan(/{{[[:word:]]+}}/)
+      id_template_parts -= ['{{project}}', '{{region}}']
+      id_template_formatted = id_template_parts.join('/')
+
+      # transform refs from {{bucket}} to {{bucketRef.name}} form
       prop_names = id_template.scan(/{{[[:word:]]+}}/).map{ |p| p.gsub('{{', '').gsub('}}', '') }
       # probably won't catch overriden names
-      object.properties.reject{ |p| p.name == 'region' }.select { |p| p.is_a?(Api::Type::ResourceRef) && prop_names.include?(p.name) }.each do |prop|
-        puts "saw #{prop.name}"
-        final_id_template = final_id_template.gsub("{{#{prop.name}}}", "{{#{prop.name}Ref.name}}")
+      object.properties.select { |p| p.is_a?(Api::Type::ResourceRef) && prop_names.include?(p.name) }.each do |prop|
+        id_template_formatted = id_template_formatted.gsub("{{#{prop.name}}}", "{{#{prop.name}Ref.name}}")
       end
-      final_id_template
+      id_template_formatted
     end
   end
 end

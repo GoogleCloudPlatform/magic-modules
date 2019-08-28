@@ -9,7 +9,7 @@ spec:
   resources:
     - name: google_bigquery_dataset
       kind: BigQueryDataset
-      idTemplate: "{{project}}/{{dataset_id}}"
+      idTemplate: "{{dataset_id}}"
       metadataMapping:
         name: dataset_id
         labels: labels

@@ -9,6 +9,6 @@ spec:
   resources:
     - name: google_cloud_scheduler_job
       kind: CloudSchedulerJob
-      idTemplate: "projects/{{project}}/locations/{{region}}/jobs/{{name}}"
+      idTemplate: "{{name}}"
       metadataMapping:
         name: name

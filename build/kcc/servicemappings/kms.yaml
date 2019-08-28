@@ -9,10 +9,10 @@ spec:
   resources:
     - name: google_kms_key_ring
       kind: KmsKeyRing
-      idTemplate: "projects/{{project}}/locations/{{location}}/keyRings/{{name}}"
+      idTemplate: "{{location}}/{{name}}"
       metadataMapping:
     - name: google_kms_crypto_key
       kind: KmsCryptoKey
-      idTemplate: "{{key_ring}}/cryptoKeys/{{name}}"
+      idTemplate: "{{key_ring}}/{{name}}"
       metadataMapping:
         labels: labels
