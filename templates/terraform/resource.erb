@@ -641,13 +641,6 @@ func resource<%= resource_name -%>Decoder(d *schema.ResourceData, meta interface
 }
 <% end -%>
 
-<%
-    if object.schema_version
-          if @config.legacy_name.nil?
-            terraform_name = (product_ns + object.name).underscore
-          else
-            terraform_name = @config.legacy_name + '_' + object.name.underscore
-          end
--%>
-<%= lines(compile("templates/terraform/state_migrations/#{terraform_name}.go.erb")) -%>
+<% if object.schema_version -%>
+<%= lines(compile("templates/terraform/state_migrations/#{product_ns.underscore}_#{object.name.underscore}.go.erb")) -%>
 <%  end -%>
