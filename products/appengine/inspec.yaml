@@ -16,6 +16,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   FirewallRule: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   StandardAppVersion: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    exclude: false
   Service: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: false  
+    exclude: true  
