@@ -14,6 +14,7 @@
 require 'overrides/resources'
 require 'provider/ansible/facts_override'
 require 'provider/ansible/custom_code'
+require 'provider/ansible/tests'
 
 module Overrides
   module Ansible
@@ -49,6 +50,8 @@ module Overrides
           transport
           unwrap_resource
 
+          tests
+
           facts
         ]
       end
@@ -74,6 +77,9 @@ module Overrides
         check :template, type: ::String
         check :update, type: ::String
         check :unwrap_resource, type: :boolean, default: false
+
+        check :tests, type: Provider::Ansible::Tests,
+                      default: Provider::Ansible::Tests.new
 
         check :facts, type: Provider::Ansible::FactsOverride,
                       default: Provider::Ansible::FactsOverride.new
