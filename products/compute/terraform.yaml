@@ -1491,7 +1491,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           route_name: "route1"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
+        name: gateway_id
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false # the provider-default value will be used if not specified
         default_from_api: true
@@ -1654,6 +1654,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: false
       router: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/compute_full_url.erb'
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: tunnel_id
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/vpn_tunnel.erb
       encoder: templates/terraform/encoders/vpn_tunnel.go.erb
