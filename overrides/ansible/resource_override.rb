@@ -40,8 +40,6 @@ module Overrides
           access_api_results
           collection
           custom_code
-          custom_tests
-          has_tests
           hidden
           imports
           notes
@@ -67,8 +65,6 @@ module Overrides
         check :collection, type: ::String
         check :custom_code, type: Provider::Ansible::CustomCode,
                             default: Provider::Ansible::CustomCode.new
-        check :custom_tests, type: :boolean, default: false
-        check :has_tests, type: :boolean, default: true
         check :hidden, type: ::Array, item_type: String, default: []
         check :imports, type: ::Array, default: [], item_type: String
         check :notes, type: ::Array, item_type: String
