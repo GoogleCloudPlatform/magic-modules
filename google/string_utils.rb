@@ -14,7 +14,6 @@
 module Google
   # Helper class to process and mutate strings.
   class StringUtils
-
     # Converts string from camel case to underscore
     def self.underscore(source)
       source.gsub(/::/, '/')
