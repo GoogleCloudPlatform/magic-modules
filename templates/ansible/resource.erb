@@ -149,7 +149,7 @@ def main():
   # https://github.com/GoogleCloudPlatform/magic-modules/issues/45
 -%>
 <%= method_decl('create', ['module', 'link', ('kind' if object.kind?)]) %>
-<% if object.create.nil? -%>
+<% if object.custom_code.create.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
   create_request = if object.custom_create_resource
@@ -170,7 +170,7 @@ def main():
 -%>
     return <%= method %>
 <% else -%>
-<%= lines(indent(object.create, 4)) -%>
+<%= lines(indent(object.custom_code.create, 4)) -%>
 <% end -%>
 
 
@@ -185,7 +185,7 @@ def main():
                      'resource_to_request'
                    end
 -%>
-<% if object.update.nil? -%>
+<% if object.custom_code.update.nil? -%>
 <% unless update_props.empty? -%>
     update_fields(module, resource_to_request(module),
                   response_to_hash(module, fetch))
@@ -240,9 +240,9 @@ def main():
 -%>
     return <%= method %>
 <%   end # if object.input -%>
-<% else # object.update.nil? -%>
-<%= lines(indent(object.update, 4)) -%>
-<% end # object.update.nil? -%>
+<% else # object.custom_code.update.nil? -%>
+<%= lines(indent(object.custom_code.update, 4)) -%>
+<% end # object.custom_code.update.nil? -%>
 
 
 <% unless update_props.empty? -%>
@@ -287,7 +287,7 @@ def <%= func_name -%>(module, request, response):
   lines(method_decl('delete', ['module', 'link', ('kind' if object.kind?),
                                ('fetch' if object.access_api_results)]))
 -%>
-<% if object.delete.nil? -%>
+<% if object.custom_code.delete.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
   delete_verb = object.delete_verb.to_s.downcase
@@ -301,9 +301,9 @@ def <%= func_name -%>(module, request, response):
   )
 -%>
     return <%= method %>
-<% else # if object.delete.nil? -%>
-<%= lines(indent(object.delete, 4)) -%>
-<% end # if object.delete.nil? -%>
+<% else # if object.custom_code.delete.nil? -%>
+<%= lines(indent(object.custom_code.delete, 4)) -%>
+<% end # if object.custom_code.delete.nil? -%>
 
 
 def resource_to_request(module):
