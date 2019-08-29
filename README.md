@@ -3,7 +3,7 @@
 
 # Magic Modules
 
-<img src="images/magic-modules.svg" width="300" align="right" />
+<img src="images/magic-modules.svg" alt="Magic Modules Logo" width="300" align="right" />
 
 ## Overview
 
@@ -34,7 +34,10 @@ effect, an issue solved in one tool will be solved for each other tool.
 
 ## Getting Started with Magic Modules
 
-We've prepared a [codelab to introduce you to Magic Modules](https://codelabs.developers.google.com/codelabs/magic-modules/index.html).
+We've prepared a codelab to introduce you to Magic Modules:
+
+[![Magic Modules Codelab](images/mm-codelab.png)](https://codelabs.developers.google.com/codelabs/magic-modules/index.html)
+
 It will walk you through adding a GCP service as a product to Magic Modules.
 It's more extensive than the contents of this README, and will help you if
 you're interested in adding a new resource or if you're modifying generated ones.
