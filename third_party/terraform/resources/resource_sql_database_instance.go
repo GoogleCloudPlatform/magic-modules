@@ -451,13 +451,6 @@ func isFirstGen(d *schema.ResourceData) bool {
 	return !regexp.MustCompile("db*").Match([]byte(tier))
 }
 
-func isSqlOperationInProgressError(err error) (bool, string) {
-	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 {
-		return true, "" //"fmt.Errorf("Error, failed to create instance %s with error code 409: %s. This may be due to a name collision - SQL instance names cannot be reused within a week.", instance.Name, err)"
-	}
-	return false, ""
-}
-
 func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
