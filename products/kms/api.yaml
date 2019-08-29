@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Kms
+name: KMS
 display_name: Cloud KMS
 versions:
   - !ruby/object:Api::Product::Version

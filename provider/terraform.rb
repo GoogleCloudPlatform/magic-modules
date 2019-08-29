@@ -120,9 +120,7 @@ module Provider
     # Capitalize the first letter of a property name.
     # E.g. "creationTimestamp" becomes "CreationTimestamp".
     def titlelize_property(property)
-      p = property.name.clone
-      p[0] = p[0].capitalize
-      p
+      property.name.camelize(:upper)
     end
 
     private

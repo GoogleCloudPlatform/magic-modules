@@ -14,7 +14,7 @@
 # TODO(nelsonjr): Make all Zone and Region resource ref
 
 --- !ruby/object:Api::Product
-name: Iam
+name: IAM
 display_name: Cloud IAM
 versions:
   - !ruby/object:Api::Product::Version
