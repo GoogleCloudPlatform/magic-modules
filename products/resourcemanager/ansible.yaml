@@ -32,7 +32,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Project: !ruby/object:Overrides::Ansible::ResourceOverride
     custom_code: !ruby/object:Provider::Ansible::CustomCode
       return_if_object: |
-  <%= lines(indent(compile('products/resourcemanager/helpers/ansible/return_if_object.py'), 8)) -%>
+<%= lines(indent(compile('products/resourcemanager/helpers/ansible/return_if_object.py'), 8)) -%>
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

@@ -39,13 +39,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pre_action: |
         if 'instance' in module.params and 'name' in module.params['instance']:
           module.params['instance']['name'] = module.params['instance']['name'].split('/')[-1]
+      update: |
+        module.fail_json(msg="Spanner objects can't be updated to ensure data safety")
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
       decoder: decode_response
     provider_helpers:
       - 'products/spanner/helpers/python/database_helpers.py.erb'
-    update: |
-      module.fail_json(msg="Spanner objects can't be updated to ensure data safety")
   # Virtual => true objects that don't need dedicated resources.
   InstanceConfig: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport

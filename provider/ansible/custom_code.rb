@@ -34,19 +34,19 @@ module Provider
       # and returns a JSON body or errors out.
       attr_reader :return_if_object
 
-      # Function that grabs the resource from a different structure.
+      # Says if a custom unwrap_resource function is being used.
       attr_reader :unwrap_resource
 
-      # Different resource_to_request body sent for create calls.
+      # Says if different resource_to_request body sent for create calls.
       attr_reader :custom_create_resource
 
-      # Different resource_to_request body sent for update calls.
+      # Says if different resource_to_request body sent for update calls.
       attr_reader :custom_update_resource
 
       def validate
         check :create, type: String
-        check :custom_create_resource, type: String
-        check :custom_update_resource, type: String
+        check :custom_create_resource, type: :boolean
+        check :custom_update_resource, type: :boolean
         check :delete, type: String
         check :pre_action, type: String
         check :post_action, type: String
