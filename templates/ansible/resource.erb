@@ -74,10 +74,10 @@ def main():
                                    '<%= object.nested_query.keys.first -%>')
 <% end # object.nested_query.nil? -%>
     changed = False
-<% if object.pre_action -%>
+<% if object.custom_code.pre_action -%>
 
-<%= lines(indent(object.pre_action, 4)) -%>
-<% end # if object.pre_action -%>
+<%= lines(indent(object.custom_code.pre_action, 4)) -%>
+<% end # if object.custom_code.pre_action -%>
 
     if fetch:
         if state == 'present':
@@ -129,16 +129,16 @@ def main():
                                   ('kind' if object.kind?)])
 -%>
             fetch = <%= method %>
-<% if object.post_create -%>
-<%= lines(indent(object.post_create, 12)) -%>
-<% end # ifobject.post_create -%>
+<% if object.custom_code.post_create -%>
+<%= lines(indent(object.custom_code.post_create, 12)) -%>
+<% end # ifobject.custom_code.post_create -%>
             changed = True
         else:
             fetch = {}
 
-<% if object.post_action -%>
-<%= lines(indent(object.post_action, 4)) -%>
-<% end # ifobject.post_create -%>
+<% if object.custom_code.post_action -%>
+<%= lines(indent(object.custom_code.post_action, 4)) -%>
+<% end # ifobject.custom_code.post_create -%>
     fetch.update({'changed': changed})
 
     module.exit_json(**fetch)
@@ -152,7 +152,7 @@ def main():
 <% if object.custom_code.create.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
-  create_request = if object.custom_create_resource
+  create_request = if object.custom_code.custom_create_resource
                      'resource_to_create'
                    else
                      'resource_to_request'
@@ -179,7 +179,7 @@ def main():
                                ('fetch' if object.access_api_results || !update_props.empty? || object.update_mask)]))
 -%>
 <%
-  update_request = if object.custom_update_resource
+  update_request = if object.custom_code.custom_update_resource
                      'resource_to_update'
                    else
                      'resource_to_request'
@@ -332,7 +332,7 @@ def resource_to_request(module):
 <% else -%>
     return request
 <% end -%>
-<% if object.unwrap_resource -%>
+<% if object.custom_code.unwrap_resource -%>
 <%
   urf_code = [
     'return {',
@@ -378,9 +378,9 @@ def unwrap_resource(result, module):
                                          ('kind' if object.kind?),
                                          'allow_not_found=False']))
 -%>
-<% if object.return_if_object -%>
-<%= lines(indent(object.return_if_object, 4)) -%>
-<% else # if object.return_if_object -%>
+<% if object.custom_code.return_if_object -%>
+<%= lines(indent(object.custom_code.return_if_object, 4)) -%>
+<% else # if object.custom_code.return_if_object -%>
     # If not found, return nothing.
     if allow_not_found and response.status_code == 404:
         return None
@@ -403,7 +403,7 @@ def unwrap_resource(result, module):
         module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
 
     return result
-<% end # if object.return_if_object -%>
+<% end # if object.custom_code.return_if_object -%>
 
 
 def is_different(module, response):
