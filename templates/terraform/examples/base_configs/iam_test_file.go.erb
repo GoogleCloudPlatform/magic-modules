@@ -17,7 +17,7 @@ import (
 <% resource_name = product_ns + object.name -%>
 <% 
 individual_url = object.self_link_url
-params = individual_url.gsub('{{name}}', "{{#{object.name.underscore}}}").scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
+params = extract_identifiers(individual_url.gsub('{{name}}', "{{#{object.name.underscore}}}"))
 -%>
 <% 
   tf_product = (@config.legacy_name || product_ns).underscore

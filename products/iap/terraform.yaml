@@ -20,7 +20,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       exclude: false
       method_name_separator: ':'
       parent_resource_type: 'google_project_service'
-      fetch_iam_policy_verb: 'POST'
+      fetch_iam_policy_verb: :POST
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
       parent_resource_attribute: 'project'
     examples:
@@ -36,7 +36,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       method_name_separator: ':'
       parent_resource_type: 'google_project_service'
       parent_resource_attribute: 'project'
-      fetch_iam_policy_verb: 'POST'
+      fetch_iam_policy_verb: :POST
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
     id_format: "projects/{{project}}/iap_web/compute"
     import_format: ["projects/{{project}}/iap_web/compute"]
@@ -53,7 +53,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       method_name_separator: ':'
       parent_resource_type: 'google_app_engine_application'
       parent_resource_attribute: 'app_id'
-      fetch_iam_policy_verb: 'POST'
+      fetch_iam_policy_verb: :POST
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
       test_project_name: "tf-test"
       custom_diff_suppress: 'templates/terraform/iam/iap_web_appengine_diff_suppress.go.erb'
@@ -72,7 +72,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       method_name_separator: ':'
       parent_resource_type: 'google_compute_backend_service'
       parent_resource_attribute: 'name'
-      fetch_iam_policy_verb: 'POST'
+      fetch_iam_policy_verb: :POST
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
     id_format: "projects/{{project}}/iap_web/compute/services/{{backendServiceName}}"
     import_format: ["projects/{{project}}/iap_web/compute/services/{{backendServiceName}}"]

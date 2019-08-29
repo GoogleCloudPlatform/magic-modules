@@ -60,7 +60,7 @@ module Api
         check :exclude, type: :boolean, default: false
         check :method_name_separator, type: String, default: '/'
         check :parent_resource_type, type: String
-        check :fetch_iam_policy_verb, type: String, default: 'GET'
+        check :fetch_iam_policy_verb, type: Symbol, default: :GET, allowed: %i[GET POST]
         check :allowed_iam_role, type: String, default: 'roles/editor'
         check :parent_resource_attribute, type: String, default: 'id'
         check :test_project_name, type: String

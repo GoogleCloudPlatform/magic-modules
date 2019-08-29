@@ -69,7 +69,7 @@ See [Provider Versions](https://terraform.io/docs/providers/google/provider_vers
 
 <% markdown_escaped_name = terraform_name.gsub("_", "\\_") %>
 <% 
-params = object.self_link_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
+params = extract_identifiers(object.self_link_url)
 -%>
 <%
 url_properties = object.all_user_properties.select { |param| params.include?(param.name) }
