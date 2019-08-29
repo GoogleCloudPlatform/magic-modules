@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Dns
+name: DNS
 display_name: Cloud DNS
 versions:
   - !ruby/object:Api::Product::Version

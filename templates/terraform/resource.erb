@@ -24,11 +24,10 @@ package google
     update_body_properties = object.settable_properties
     update_body_properties = object.settable_properties.reject(&:input) if object.update_verb == :PATCH
     # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
-    client_name_camel = String.new(if @config.client_name then @config.client_name else product_ns end)
-    client_name_camel[0] = client_name_camel[0].downcase
-    client_name_pascal = String.new(client_name_camel)
-    client_name_pascal[0] = client_name_pascal[0].upcase
-    client_name_lower = client_name_camel.downcase
+    client_name = @config.client_name || product_ns
+    client_name_camel = client_name.camelize(:lower)
+    client_name_pascal = client_name.camelize(:upper)
+    client_name_lower = client_name.downcase
     has_project = object.base_url.include?('{{project}}')
     has_region = object.base_url.include?('{{region}}') && object.parameters.any?{ |p| p.name == 'region' && p.ignore_read }
     timeouts = object.async.nil? ? Api::Timeouts.new : object.timeouts
