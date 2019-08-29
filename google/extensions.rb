@@ -18,14 +18,6 @@ class String
     Google::StringUtils.underscore(self)
   end
 
-  def camelize(style = :lower)
-    Google::StringUtils.camelize(self, style)
-  end
-
-  def uncombine
-    Google::StringUtils.uncombine(self)
-  end
-
   def symbolize
     Google::StringUtils.symbolize(self)
   end

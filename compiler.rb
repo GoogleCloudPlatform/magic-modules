@@ -23,6 +23,7 @@ Dir.chdir(File.dirname(__FILE__))
 # generation.
 ENV['TZ'] = 'UTC'
 
+require 'active_support/inflector'
 require 'api/compiler'
 require 'google/logger'
 require 'optparse'
@@ -85,6 +86,17 @@ OptionParser.new do |opt|
   end
 end.parse!
 # rubocop:enable Metrics/BlockLength
+
+# We use ActiveSupport Inflections to perform common string operations like
+# going from camelCase/PascalCase -> snake_case -> Title Case.
+# In order to not break the world, they've frozen the list of inflections the
+# library uses by default.
+# Particularly for initialisms, it may need a little help to generate great
+# code.
+ActiveSupport::Inflector.inflections(:en) do |inflect|
+  inflect.acronym 'TPU'
+  inflect.acronym 'VPC'
+end
 
 raise 'Cannot use -p/--products and -a/--all simultaneously' \
   if products_to_generate && all_products
