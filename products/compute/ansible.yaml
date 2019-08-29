@@ -187,14 +187,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       instances: !ruby/object:Overrides::Ansible::PropertyOverride
         exclude: false
-    update: |
-      instance = InstanceLogic(module)
-      instance.run()
-    post_action: |
-      if fetch:
-          instance = InstanceLogic(module)
-          instance.run()
-          fetch.update({'instances': instance.list_instances()})
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      update: |
+        instance = InstanceLogic(module)
+        instance.run()
+      post_action: |
+        if fetch:
+            instance = InstanceLogic(module)
+            instance.run()
+            fetch.update({'instances': instance.list_instances()})
     provider_helpers:
       - 'products/compute/helpers/python/instancegroup_instances.py'
   Instance: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -204,12 +205,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     hidden:
       - deletion_protection_update
       - shielded_instance_config_update
-    post_action: |
-      if fetch:
-          instance = InstancePower(module, fetch.get('status'))
-          instance.run()
-          if module.params.get('status'):
-              fetch.update({'status': module.params['status']})
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      post_action: |
+        if fetch:
+            instance = InstancePower(module, fetch.get('status'))
+            instance.run()
+            if module.params.get('status'):
+                fetch.update({'status': module.params['status']})
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
       - 'products/compute/helpers/python/instance_metadata.py'

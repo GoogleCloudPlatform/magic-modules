@@ -332,7 +332,7 @@ def resource_to_request(module):
 <% else -%>
     return request
 <% end -%>
-<% if object.custom_code.unwrap_resource -%>
+<% if object.unwrap_resource -%>
 <%
   urf_code = [
     'return {',

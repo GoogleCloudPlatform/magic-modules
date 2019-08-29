@@ -26,17 +26,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       decoder: decode_response
-    custom_create_resource: true
-    custom_update_resource: true
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      custom_create_resource: true
+      custom_update_resource: true
+      update: |
+        module.fail_json(msg="Spanner objects can't be updated to ensure data safety")
     provider_helpers:
       - 'products/spanner/helpers/python/instance_helpers.py.erb'
-    update: |
-      module.fail_json(msg="Spanner objects can't be updated to ensure data safety")
   Database: !ruby/object:Overrides::Ansible::ResourceOverride
-    # Instances return partial self-link as name, but we need the name
-    pre_action: |
-      if 'instance' in module.params and 'name' in module.params['instance']:
-        module.params['instance']['name'] = module.params['instance']['name'].split('/')[-1]
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      # Instances return partial self-link as name, but we need the name
+      pre_action: |
+        if 'instance' in module.params and 'name' in module.params['instance']:
+          module.params['instance']['name'] = module.params['instance']['name'].split('/')[-1]
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
       decoder: decode_response
