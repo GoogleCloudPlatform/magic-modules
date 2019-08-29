@@ -224,7 +224,7 @@ Google::LOGGER.info "Compiling common files for #{provider_name}"
 common_compile_file = "provider/#{provider_name}/common~compile.yaml"
 provider&.compile_common_files(
   output_path,
-  products_for_version.sort_by { |p| p[:definitions].name },
+  products_for_version.sort_by { |p| p[:definitions].name.downcase },
   common_compile_file
 )
 if override_dir
@@ -232,7 +232,7 @@ if override_dir
   common_compile_file = "#{override_dir}/common~compile.yaml"
   provider&.compile_common_files(
     output_path,
-    products_for_version.sort_by { |p| p[:definitions].name },
+    products_for_version.sort_by { |p| p[:definitions].name.downcase },
     common_compile_file,
     override_dir
   )
