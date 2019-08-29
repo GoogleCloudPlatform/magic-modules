@@ -53,6 +53,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         aliases: ['nodeLocations']
       location: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ['zone']
+      addonsConfig.kubernetesDashboard: !ruby/object:Overrides::Ansible::PropertyOverride
+        exclude: true
     post_create: |
       delete_default_node_pool(module)
     post_action: |
