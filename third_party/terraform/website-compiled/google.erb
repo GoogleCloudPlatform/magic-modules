@@ -396,6 +396,17 @@
     </li>
 
 <% unless version == 'ga' %>
+    <li<%%= sidebar_current("docs-google-cloud-run") %>>
+    <a href="#">Google Cloud Run Resources</a>
+    <ul class="nav nav-visible">
+      <li<%%= sidebar_current("docs-google-cloud-run-service") %>>
+      <a href="/docs/providers/google/r/cloud_run_service.html">google_cloud_run_service</a>
+      </li>
+    </ul>
+    </li>
+<% end -%>
+
+<% unless version == 'ga' %>
     <li<%%= sidebar_current("docs-google-cloud-scheduler") %>>
     <a href="#">Google Cloud Scheduler Resources</a>
     <ul class="nav nav-visible">
