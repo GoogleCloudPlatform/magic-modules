@@ -63,6 +63,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/http_headers.erb'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateHttpHeaders()'
+      appEngineHttpTarget.appEngineRouting:
+        custom_flatten: cloudscheduler_job_appenginerouting.go.erb
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         ignore_read: true
