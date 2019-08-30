@@ -11,6 +11,7 @@ spec:
       kind: KMSKeyRing
       idTemplate: "{{location}}/{{name}}"
       metadataMapping:
+        name: name
     - name: google_kms_crypto_key
       kind: KMSCryptoKey
       idTemplate: "{{key_ring}}/{{name}}"

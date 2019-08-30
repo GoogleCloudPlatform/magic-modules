@@ -101,7 +101,8 @@ module Provider
       final_import_parts = import_id_formats(object)[-1].scan(/{{[[:word:]]+}}/)
 
       # remove {{project}}, {{region}} if present, KCC handles them specially
-      final_import_parts -= ['{{project}}', '{{region}}']
+      # {{location}} is (generally) a region, so it can be removed as well.
+      final_import_parts -= ['{{project}}', '{{region}}', '{{location}}']
 
       final_import_parts.first.gsub('{{', '').gsub('}}', '') if final_import_parts.length == 1
     end
