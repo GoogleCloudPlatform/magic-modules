@@ -212,6 +212,7 @@ objects:
       Standard App Version resource to create a new version of standard GAE Application.
       Currently supporting Zip and File Containers.
       Currently does not support async operation checking.
+    collection_url_key: 'versions'
     base_url: 'apps/{{project}}/services/{{service}}/versions'
     delete_url: 'apps/{{project}}/services/{{service}}/versions/{{version_id}}'
     delete_verb: :DELETE

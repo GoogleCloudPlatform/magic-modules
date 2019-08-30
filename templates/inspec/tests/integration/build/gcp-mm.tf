@@ -574,20 +574,33 @@ resource "google_logging_organization_sink" "my-sink" {
   filter      = "${var.org_sink.filter}"
 }
 
+resource "google_storage_bucket" "bucket" {
+    name = "appengine-static-content"
+}
+
+resource "google_storage_bucket_object" "object" {
+    name   = "hello-world.zip"
+    bucket = "${google_storage_bucket.bucket.name}"
+    source = "./test-fixtures/appengine/hello-world.zip"
+}
+
 resource "google_app_engine_standard_app_version" "default" {
+  project         = "${var.gcp_project_id}"
   version_id      = "${var.standardappversion["id"]}"
   service         = "${var.standardappversion["service"]}"
   runtime         = "${var.standardappversion["runtime"]}"
   noop_on_destroy = true
-  entrypoint      = "${var.standardappversion["entrypoint"]}"
+  entrypoint {
+    shell         = "${var.standardappversion["entrypoint"]}"
+  }
 
   deployment {
     zip {
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.generic-storage-bucket.name}/hello-world.zip"
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/hello-world.zip"
     }
   }
 
   env_variables = {
-    MY_ENV_VAR = "${var.standardappversion["env_var_value"]}"
+    port          = "${var.standardappversion["port"]}"
   }
 }
