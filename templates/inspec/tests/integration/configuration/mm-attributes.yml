@@ -231,6 +231,6 @@ standardappversion:
   id: v2
   service: default
   runtime: nodejs10
-  entrypoint: hello
-  env_var_value: val1
+  entrypoint: "node ./app.js"
+  port: "8080"
   
