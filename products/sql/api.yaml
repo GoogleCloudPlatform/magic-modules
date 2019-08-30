@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Sql
+name: SQL
 display_name: Cloud SQL
 versions:
   - !ruby/object:Api::Product::Version

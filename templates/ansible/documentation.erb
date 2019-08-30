@@ -43,7 +43,7 @@ DOCUMENTATION = '''
 
 <% if example -%>
 EXAMPLES = '''
-<% res_readable_name = object.name.uncombine -%>
+<% res_readable_name = object.name.titleize -%>
 <% if example.dependencies -%>
 <%   example.dependencies.each do |depend| -%>
 <%= lines(depend.build_test('present', object, false), 1) -%>

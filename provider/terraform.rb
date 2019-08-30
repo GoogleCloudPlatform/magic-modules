@@ -120,9 +120,7 @@ module Provider
     # Capitalize the first letter of a property name.
     # E.g. "creationTimestamp" becomes "CreationTimestamp".
     def titlelize_property(property)
-      p = property.name.clone
-      p[0] = p[0].capitalize
-      p
+      property.name.camelize(:upper)
     end
 
     private
@@ -151,7 +149,7 @@ module Provider
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
       name = data.object.name.underscore
-      product_name = data.product.name.underscore
+      product_name = @config.legacy_name || data.product.name.underscore
 
       filepath =
         File.join(target_folder, "#{product_name}_#{name}.html.markdown")
@@ -209,13 +207,16 @@ module Provider
 
       data.generate('templates/terraform/iam_policy.go.erb', filepath, self)
 
-      generated_test_name = "iam_#{product_name}_#{name}_generated_test.go"
-      filepath = File.join(target_folder, generated_test_name)
-      data.generate(
-        'templates/terraform/examples/base_configs/iam_test_file.go.erb',
-        filepath,
-        self
-      )
+      # Only generate test if testable examples exist.
+      unless data.object.examples.reject(&:skip_test).empty?
+        generated_test_name = "iam_#{product_name}_#{name}_generated_test.go"
+        filepath = File.join(target_folder, generated_test_name)
+        data.generate(
+          'templates/terraform/examples/base_configs/iam_test_file.go.erb',
+          filepath,
+          self
+        )
+      end
 
       generate_iam_documentation(data)
     end
@@ -225,7 +226,7 @@ module Provider
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
       name = data.object.name.underscore
-      product_name = data.product.name.underscore
+      product_name = @config.legacy_name || data.product.name.underscore
 
       filepath =
         File.join(target_folder, "#{product_name}_#{name}_iam.html.markdown")

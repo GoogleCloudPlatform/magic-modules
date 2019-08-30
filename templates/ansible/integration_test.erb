@@ -8,7 +8,7 @@
 <% end # if example.dependencies -%>
 <%= lines(example.task.build_test('absent', object, false)) -%>
 #----------------------------------------------------------
-<% resource_name = object.name.uncombine.downcase -%>
+<% resource_name = object.name.titleize.downcase -%>
 <%= lines(example.task.build_test('present', object, false)) -%>
   register: result
 <% if object.readonly -%>

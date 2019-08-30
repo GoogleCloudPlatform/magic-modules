@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Tpu
+name: TPU
 display_name: Google Cloud TPU
 versions:
   - !ruby/object:Api::Product::Version
