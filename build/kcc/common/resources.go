@@ -272,7 +272,7 @@ var SupportedResources = []schema.GroupVersionKind{
 	{
 		Group:   "dns.cnrm.cloud.google.com",
 		Version: "v1alpha2",
-		Kind:    "DnsManagedZone",
+		Kind:    "DNSManagedZone",
 	},
 	{
 		Group:   "filestore.cnrm.cloud.google.com",
@@ -287,12 +287,12 @@ var SupportedResources = []schema.GroupVersionKind{
 	{
 		Group:   "kms.cnrm.cloud.google.com",
 		Version: "v1alpha2",
-		Kind:    "KmsKeyRing",
+		Kind:    "KMSKeyRing",
 	},
 	{
 		Group:   "kms.cnrm.cloud.google.com",
 		Version: "v1alpha2",
-		Kind:    "KmsCryptoKey",
+		Kind:    "KMSCryptoKey",
 	},
 	{
 		Group:   "logging.cnrm.cloud.google.com",
@@ -367,7 +367,7 @@ var SupportedResources = []schema.GroupVersionKind{
 	{
 		Group:   "sql.cnrm.cloud.google.com",
 		Version: "v1alpha2",
-		Kind:    "SqlDatabase",
+		Kind:    "SQLDatabase",
 	},
 	{
 		Group:   "storage.cnrm.cloud.google.com",
@@ -382,6 +382,6 @@ var SupportedResources = []schema.GroupVersionKind{
 	{
 		Group:   "tpu.cnrm.cloud.google.com",
 		Version: "v1alpha2",
-		Kind:    "TpuNode",
+		Kind:    "TPUNode",
 	},
 }

@@ -4,11 +4,11 @@ metadata:
   name: dns.cnrm.cloud.google.com
   namespace: cnrm-system
 spec:
-  name: Dns
+  name: DNS
   version: v1alpha1
   resources:
     - name: google_dns_managed_zone
-      kind: DnsManagedZone
+      kind: DNSManagedZone
       idTemplate: "{{name}}"
       metadataMapping:
         name: name

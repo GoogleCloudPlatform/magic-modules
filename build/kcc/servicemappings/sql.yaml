@@ -4,11 +4,11 @@ metadata:
   name: sql.cnrm.cloud.google.com
   namespace: cnrm-system
 spec:
-  name: Sql
+  name: SQL
   version: v1alpha1
   resources:
     - name: google_sql_database
-      kind: SqlDatabase
+      kind: SQLDatabase
       idTemplate: "{{instance}}/{{name}}"
       metadataMapping:
         name: name
