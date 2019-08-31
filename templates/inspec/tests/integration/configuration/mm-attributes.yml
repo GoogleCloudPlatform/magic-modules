@@ -227,8 +227,7 @@ org_sink:
   filter: resource.type = gce_instance
 
 standardappversion:
-  name: apps/gcp-project-name/services/default/versions/v2
-  id: v2
+  version_id: v2
   service: default
   runtime: nodejs10
   entrypoint: "node ./app.js"

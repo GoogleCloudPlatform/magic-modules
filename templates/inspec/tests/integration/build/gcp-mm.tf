@@ -586,7 +586,7 @@ resource "google_storage_bucket_object" "object" {
 
 resource "google_app_engine_standard_app_version" "default" {
   project         = "${var.gcp_project_id}"
-  version_id      = "${var.standardappversion["id"]}"
+  version_id      = "${var.standardappversion["version_id"]}"
   service         = "${var.standardappversion["service"]}"
   runtime         = "${var.standardappversion["runtime"]}"
   noop_on_destroy = true
