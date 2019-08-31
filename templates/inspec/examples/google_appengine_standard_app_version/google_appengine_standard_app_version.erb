@@ -5,10 +5,6 @@
 describe google_appengine_standard_app_version(project: <%= gcp_project_id -%>, location: <%= gcp_location -%>, version_id: <%= doc_generation ? "'#{standardappversion['version_id']}'" : "standardappversion['version_id']" -%>, service: <%= doc_generation ? "'#{standardappversion['service']}'" : "standardappversion['service']" -%>) do
   it { should exist }
   its('service') { should eq <%= doc_generation ? "'#{standardappversion['service']}'" : "standardappversion['service']" -%> }
-  its('name') { should eq <%= doc_generation ? "'#{standardappversion['name']}'" : "standardappversion['name']" -%> }
-  its('id') { should eq <%= doc_generation ? "'#{standardappversion['version_id']}'" : "standardappversion['version_id']" -%> }
-  its('env_variables') { should eq <%= doc_generation ? "'#{standardappversion['env_var_value']}'" : "standardappversion['env_var_value']" -%> }
-  its('runtime_api_version') { should eq <%= doc_generation ? "'#{standardappversion['runtime_api_version']}'" : "standardappversion['runtime_api_version']" -%> }
+  its('version_id') { should eq <%= doc_generation ? "'#{standardappversion['version_id']}'" : "standardappversion['version_id']" -%> }
   its('runtime') { should eq <%= doc_generation ? "'#{standardappversion['runtime']}'" : "standardappversion['runtime']" -%> }
-  its('entrypoint') { should eq <%= doc_generation ? "'#{standardappversion['entrypoint']}'" : "standardappversion['entrypoint']" -%> }
 end
