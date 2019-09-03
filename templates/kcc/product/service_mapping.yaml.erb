@@ -62,11 +62,11 @@ spec:
     id_template = format_id_template(import_id_formats(object)[0], object)
     name = guess_metadata_mapping_name(object)
 -%>
-<%  if id_template != nil && id_template != "" -%>
+<%  if !id_template.nil? && id_template != "" -%>
       idTemplate: "<%= id_template %>"
 <%  end -%>
       metadataMapping:
-<%  if name != nil -%>
+<%  unless name.nil? -%>
         name: <%= name %>
 <%  end -%>
 <%  if object.all_user_properties.map(&:name).include?("labels") -%>
@@ -81,11 +81,7 @@ spec:
         - key: <%= property.name.camelize(:lower) %>Ref
           tfField: <%= property.name %>
           kind: <%= "#{product.name}#{property.resource}" %>
-<%-     if property.required -%>
-          required: true
-<%      else -%>
-          required: false
-<%      end -%>
+          required: <%= property.required ? "true" : "false" -%>
 <%    end -%>
 <%  end -%>
 <% end -%>

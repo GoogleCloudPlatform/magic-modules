@@ -26,6 +26,9 @@ module Provider
     end
 
     # Create a directory of samples per resource
+    # Filter out samples that have no test and don't necessarily run, use
+    # externally injected values (env vars), and that don't match the current
+    # product version.
     def generate_resource(data)
       examples = data.object.examples
                      .reject(&:skip_test)
@@ -84,10 +87,7 @@ module Provider
                         ], file_template)
     end
 
-    def copy_common_files(output_folder)
-      Google::LOGGER.info 'Copying common files.'
-      copy_file_list(output_folder, [])
-    end
+    def copy_common_files(output_folder) end
 
     # A strict mapping from K8S name -> Terraform resource "name" doesn't make
     # sense for some resources but we can approximate this well enough for most
@@ -95,8 +95,8 @@ module Provider
     # else.
     # If {{name}} is part of a resource id, it should be the last import format.
     # Otherwise, {{value}} or values/{{value}} are also valid. If the final id
-    # has multiple terms, we can reject it as we can't create a 1:1 mapping from
-    # K8S resource name : Terraform field.
+    # has multiple terms, we can reject it (by returning nil) as we can't create
+    # a 1:1 mapping from K8S resource name : Terraform field.
     def guess_metadata_mapping_name(object)
       final_import_parts = import_id_formats(object)[-1].scan(/{{[[:word:]]+}}/)
 
