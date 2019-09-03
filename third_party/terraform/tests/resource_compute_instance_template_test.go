@@ -1903,7 +1903,6 @@ resource "google_compute_instance_template" "foobar" {
 	}
 
 	disk {
-		source_image = "${data.google_compute_image.my_image.self_link}"
 		auto_delete = true
 		type = "SCRATCH"
 		disk_type = "local-ssd"
