@@ -94,7 +94,7 @@
     <% end -%>
   <% elsif property.item_type.is_a?(String) # Basic type like Api::Type::String -%>
       Elem: &schema.Schema{
-        Type: <%= tf_types[Object.const_get(property.item_type)] -%>,
+        Type: <%= tf_types[property.item_type] -%>,
       },
   <% else # array of basic types -%>
       Elem: &schema.Schema{
