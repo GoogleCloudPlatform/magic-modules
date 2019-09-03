@@ -55,11 +55,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         aliases: ['zone']
       addonsConfig.kubernetesDashboard: !ruby/object:Overrides::Ansible::PropertyOverride
         exclude: true
-    post_create: |
-      delete_default_node_pool(module)
-    post_action: |
-      if module.params.get('kubectl_path'):
-          Kubectl(module).write_file()
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      post_create: |
+        delete_default_node_pool(module)
+      post_action: |
+        if module.params.get('kubectl_path'):
+            Kubectl(module).write_file()
     provider_helpers:
       - 'products/container/helpers/python/provider_cluster.py'
       - 'products/container/helpers/python/kubectl.py'

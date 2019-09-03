@@ -24,7 +24,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
   Role: !ruby/object:Overrides::Ansible::ResourceOverride
-    custom_create_resource: true
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      custom_create_resource: true
     transport: !ruby/object:Overrides::Ansible::Transport
       decoder: decode_response
     provider_helpers:
