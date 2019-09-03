@@ -89,8 +89,8 @@ resource "google_logging_metric" "logging_metric" {
   value_extractor = "EXTRACT(jsonPayload.metrics.running_jobs)"
 
   bucket_options {
-    explicit {
-      bounds = ["0","1","2","3","4"]
+    explicit_buckets {
+      bounds = [0,1,2,3,4]
     }
   }
 }`, suffix, filter)

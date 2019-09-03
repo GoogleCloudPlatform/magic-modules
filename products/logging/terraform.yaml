@@ -35,12 +35,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
-      decoder: templates/terraform/decoders/logging_metric_float_to_string.go.erb
     properties:
       metricDescriptor.labels.valueType: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
-      bucketOptions.explicitBuckets: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: explicit
   OrganizationLogSink: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
 
