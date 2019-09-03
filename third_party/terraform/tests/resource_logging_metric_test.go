@@ -90,7 +90,7 @@ resource "google_logging_metric" "logging_metric" {
 
   bucket_options {
     explicit_buckets {
-      bounds = [0,1,2,3,4]
+      bounds = [0,1,2,3,4.2]
     }
   }
 }`, suffix, filter)
