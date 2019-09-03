@@ -363,11 +363,10 @@ module Api
       end
 
       def item_type_class
-        if @item_type.class == Class
-          return @item_type
-        end
+        return @item_type \
+          if @item_type.class == Class
 
-        return Object.const_get(@item_type)
+        Object.const_get(@item_type)
       end
     end
 
