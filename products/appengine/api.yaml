@@ -189,9 +189,9 @@ objects:
       For example, an application that handles customer requests might include separate services to handle tasks such as backend data analysis or API requests from mobile devices. 
       Each service has a collection of versions that define a specific set of code used to implement the functionality of that service.
     base_url: 'apps/{{project}}/services'
-    create_url: 'apps/{{project}}/services/{{service_id}}?{{migrateTraffic}}&updateMask=split'
+    create_url: 'apps/{{project}}/services/{{service_id}}?migrateTraffic={{migrate_traffic}}&updateMask=split'
     create_verb: :PATCH
-    update_url: 'apps/{{project}}/services/{{service_id}}?{{migrateTraffic}}'
+    update_url: 'apps/{{project}}/services/{{service_id}}?migrateTraffic={{migrate_traffic}}'
     update_verb: :PATCH
     update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -215,8 +215,8 @@ objects:
         path: 'error/errors'
         message: 'message'
     parameters:
-      - !ruby/object:Api::Type::String
-        name: 'migrateTraffic'
+      - !ruby/object:Api::Type::Boolean
+        name: 'migrate_traffic'
         url_param_only: true
         description: |
           If set to true traffic will be migrated to this version.
