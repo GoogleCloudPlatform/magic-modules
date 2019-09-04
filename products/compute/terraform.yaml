@@ -28,6 +28,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           address_name: "my-internal-address"
           network_name: "my-network"
           subnetwork_name: "my-subnet"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "address_with_gce_endpoint"
+        primary_resource_id: "internal_with_gce_endpoint"
+        vars:
+          address_name: "my-internal-address-"
       # TODO(rileykarson): Remove this example when instance is supported
       - !ruby/object:Provider::Terraform::Examples
         name: "instance_with_ip"
@@ -40,6 +45,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       addressType: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+      purpose: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: addressDiffSuppress
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       labelFingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -63,6 +70,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           * `address` - The IP of the created resource.
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
+      constants: templates/terraform/constants/address.go.erb
   Autoscaler: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{zone}}/{{name}}"
     examples:

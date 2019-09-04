@@ -1,0 +1,12 @@
+func addressDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+    if k == "purpose" {
+        addressType := d.Get("address_type")
+
+        if addressType == "INTERNAL" && old == "GCE_ENDPOINT" &&
+          new == "" {
+            return true
+        }
+    }
+
+    return false
+}
