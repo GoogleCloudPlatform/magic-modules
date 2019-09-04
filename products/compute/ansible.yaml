@@ -246,6 +246,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The source snapshot used to create this disk. You can provide this as
           a partial or full URL to the resource.
+  ResourcePolicy: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   Route: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       nextHopGateway: !ruby/object:Overrides::Ansible::PropertyOverride
