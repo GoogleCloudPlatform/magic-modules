@@ -189,7 +189,7 @@ objects:
       For example, an application that handles customer requests might include separate services to handle tasks such as backend data analysis or API requests from mobile devices. 
       Each service has a collection of versions that define a specific set of code used to implement the functionality of that service.
     base_url: 'apps/{{project}}/services'
-    create_url: 'apps/{{project}}/services/{{service_id}}?{{migrateTraffic}}'
+    create_url: 'apps/{{project}}/services/{{service_id}}?{{migrateTraffic}}&updateMask=split'
     create_verb: :PATCH
     update_url: 'apps/{{project}}/services/{{service_id}}?{{migrateTraffic}}'
     update_verb: :PATCH
@@ -248,6 +248,7 @@ objects:
               - :RANDOM
           - !ruby/object:Api::Type::KeyValuePairs
             name: 'allocations'
+            required: true
             description: |
               Mapping from version IDs within the service to fractional (0.000, 1] allocations of traffic for that version. Each version can be specified only once, but some versions in the service may not have any traffic allocation. Services that have traffic allocated cannot be deleted until either the service is deleted or their traffic allocation is removed. Allocations must sum to 1. Up to two decimal place precision is supported for IP-based splits and up to three decimal places is supported for cookie-based splits.           
   - !ruby/object:Api::Resource
