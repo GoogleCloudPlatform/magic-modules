@@ -28,9 +28,12 @@ resource "google_app_engine_standard_app_version" "default" {
 }
 resource "google_app_engine_service_split_traffic" "default" {
   service_id = "default"
+  migrate_traffic = true
   split {
+    shard_by = "IP"
     allocations {
-      v2 = 1
+      v1 = 0.25
+      v2 = 0.75
     }
   }
 }
