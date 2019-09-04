@@ -46,7 +46,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       addressType: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       purpose: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: addressDiffSuppress
+        default_from_api: true
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       labelFingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -70,7 +70,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           * `address` - The IP of the created resource.
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
-      constants: templates/terraform/constants/address.go.erb
   Autoscaler: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{zone}}/{{name}}"
     examples:
