@@ -1,7 +1,12 @@
 obj = make(map[string]interface{})
-nameProp, err := expandComputeDiskResourcePolicyAttachmentName(d.Get("name"), d, config)
+
+// projects/{project}/regions/{region}/resourcePolicies/{resourceId}
+zone := d.Get("zone").(string)
+region := zone[:len(zone)-2]
+
+name, err := expandComputeDiskResourcePolicyAttachmentName(d.Get("name"), d, config)
 if err != nil {
   return err
-} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
-  obj["resourcePolicies"] = []interface{}{nameProp}
+} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(name)) && (ok || !reflect.DeepEqual(v, name)) {
+  obj["resourcePolicies"] = []interface{}{fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", project, region, name)}
 }

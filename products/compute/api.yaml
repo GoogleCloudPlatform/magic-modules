@@ -1334,7 +1334,7 @@ objects:
         name: 'name'
         description: |
           The resource policy to be attached to the disk for scheduling snapshot
-          creation.
+          creation. Do not specify the self link.
         required: true
   - !ruby/object:Api::Resource
     name: 'Disk'

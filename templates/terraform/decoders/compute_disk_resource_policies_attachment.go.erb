@@ -1,0 +1,19 @@
+config := meta.(*Config)
+project, err := getProject(d, config)
+if err != nil {
+  return nil, err
+}
+
+zone := d.Get("zone").(string)
+region := zone[:len(zone)-2]
+
+name := d.Get("name")
+
+if v, ok := res["name"]; ok {
+  selfLink := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/regions/%s/resourcePolicies/%s", project, region, name)
+  if selfLink == v {
+    res["name"] = name
+  }
+}
+
+return res, nil

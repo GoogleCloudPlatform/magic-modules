@@ -303,8 +303,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         Because the API does not return the sensitive key value,
         we cannot confirm or reverse changes to a key outside of Terraform.
   DiskResourcePolicyAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{project}}/{{zone}}/{{disk}}/{{name}}"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/compute_disk_resource_policies_attachment.go.erb
+      decoder: templates/terraform/decoders/compute_disk_resource_policies_attachment.go.erb
       pre_delete: templates/terraform/pre_delete/compute_disk_resource_policies_attachment.go.erb
   Disk: !ruby/object:Overrides::Terraform::ResourceOverride
     # Larger disks were timing out at creation. Bumping up to 5 minutes.

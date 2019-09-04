@@ -81,6 +81,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - timeout_seconds
   RegionBackendService: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  DiskResourcePolicyAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   Disk: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       sourceSnapshot: !ruby/object:Overrides::Ansible::PropertyOverride
