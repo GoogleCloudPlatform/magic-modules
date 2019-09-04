@@ -19,12 +19,13 @@ datasources: !ruby/object:Overrides::ResourceOverrides
       has_filters: false
 overrides: !ruby/object:Overrides::ResourceOverrides
   CloudFunction: !ruby/object:Overrides::Ansible::ResourceOverride
-    pre_action: |
-      # Need to set triggerHttps to {} if boolean true.
-      if fetch and fetch.get('httpsTrigger') and module.params['trigger_http']:
-        module.params['https_trigger'] = fetch.get('httpsTrigger')
-      elif module.params['trigger_http']:
-        module.params['https_trigger'] = {}
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      pre_action: |
+        # Need to set triggerHttps to {} if boolean true.
+        if fetch and fetch.get('httpsTrigger') and module.params['trigger_http']:
+          module.params['https_trigger'] = fetch.get('httpsTrigger')
+        elif module.params['trigger_http']:
+          module.params['https_trigger'] = {}
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
       remove_nones_post_encoder: false
