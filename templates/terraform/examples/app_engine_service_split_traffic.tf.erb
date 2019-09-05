@@ -13,11 +13,11 @@ resource "google_app_engine_standard_app_version" "default" {
   service = "default"
   runtime = "nodejs10"
   noop_on_destroy = true
-  entrypoint {
+  entrypoint = {
     shell = "node ./app.js"
   }
   deployment {
-    zip {
+    zip = {
       source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/hello-world.zip"
     }  
   }
@@ -29,9 +29,9 @@ resource "google_app_engine_standard_app_version" "default" {
 resource "google_app_engine_service_split_traffic" "default" {
   service_id = "default"
   migrate_traffic = false
-  split {
+  split  {
     shard_by = "IP"
-    allocations {
+    allocations = {
       v1 = 0.25
       v2 = 0.75
     }
