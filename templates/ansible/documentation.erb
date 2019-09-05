@@ -16,7 +16,7 @@ DOCUMENTATION = '''
   'module' => module_name(object),
   'description' => format_description(object.description),
   'short_description' => "Creates a GCP #{object.name}",
-  'version_added' => version_added(object).to_f,
+  'version_added' => version_added(object),
   'author' => "Google Inc. (@googlecloudplatform)",
   'requirements' => ["python >= 2.6", "requests >= 2.18.4", "google-auth >= 1.3.0"],
   'options' => [
