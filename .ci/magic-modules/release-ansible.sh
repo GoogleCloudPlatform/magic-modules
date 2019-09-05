@@ -49,8 +49,11 @@ git remote add upstream git@github.com:ansible/ansible.git
 git remote add magician git@github.com:modular-magician/ansible.git
 echo "Remotes setup properly"
 
-# Create a commit on our fork using the code from the collection.
-
+# ansible_collections_google currently has the most up-to-date code.
+# Ansible core still requires very specically formatted PRs (< 50 files to a PR, new modules in separate PRs).
+# as well as PRs coming from a branch in a ansible core fork.
+# We need to copy over all the modules/tests from the collection to our ansible core fork, so that we can make PRs
+# against our ansible core fork.
 popd
 git clone git@github.com:ansible/ansible_collections_google.git
 cp ansible_collections_google/plugins/modules/gcp_* magic-modules-gcp/build/ansible/lib/ansible/modules/cloud/google/
