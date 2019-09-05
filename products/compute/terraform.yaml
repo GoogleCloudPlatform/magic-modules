@@ -1160,6 +1160,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           nat_name: "my-router-nat"
           network_name: "my-network"
           subnet_name: "my-subnetwork"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_nat_manual_ips"
+        primary_resource_id: "nat_manual"
+        skip_test: true
+        vars:
+          router_name: "my-router"
+          nat_name: "my-router-nat"
+          network_name: "my-network"
+          subnet_name: "my-subnetwork"
+          address_name: "nat-manual-ip"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
