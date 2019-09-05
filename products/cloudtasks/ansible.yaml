@@ -18,12 +18,13 @@ datasources: !ruby/object:Overrides::ResourceOverrides
       has_filters: false
 overrides: !ruby/object:Overrides::ResourceOverrides
   Queue: !ruby/object:Overrides::Ansible::ResourceOverride
-    post_action: |
-      if fetch:
-          instance = QueueStatus(module, fetch.get('state'))
-          instance.run()
-          if module.params.get('status'):
-              fetch.update({'status': module.params['status']})
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      post_action: |
+        if fetch:
+            instance = QueueStatus(module, fetch.get('state'))
+            instance.run()
+            if module.params.get('status'):
+                fetch.update({'status': module.params['status']})
     provider_helpers:
       - 'products/cloudtasks/helpers/ansible/queue_status.py'
 files: !ruby/object:Provider::Config::Files

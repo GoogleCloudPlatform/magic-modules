@@ -28,6 +28,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           address_name: "my-internal-address"
           network_name: "my-network"
           subnetwork_name: "my-subnet"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "address_with_gce_endpoint"
+        primary_resource_id: "internal_with_gce_endpoint"
+        vars:
+          address_name: "my-internal-address-"
       # TODO(rileykarson): Remove this example when instance is supported
       - !ruby/object:Provider::Terraform::Examples
         name: "instance_with_ip"
@@ -40,6 +45,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       addressType: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+      purpose: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       labelFingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1381,6 +1388,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           subnetwork_name: "log-test-subnetwork"
           network_name: "log-test-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "subnetwork_internal_l7lb"
+        primary_resource_id: "network-for-l7lb"
+        min_version: beta
+        vars:
+          subnetwork_name: "l7lb-test-subnetwork"
+          network_name: "l7lb-test-network"
   TargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
