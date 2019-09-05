@@ -17,5 +17,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   StandardAppVersion: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: false
+    properties:
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "version_id"
   Service: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true  
