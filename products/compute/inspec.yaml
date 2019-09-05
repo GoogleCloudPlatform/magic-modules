@@ -70,6 +70,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  RouterNat: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   Subnetwork: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude_resource: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
