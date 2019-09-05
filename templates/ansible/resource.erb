@@ -120,7 +120,7 @@ def main():
     create_link = 'create_link(module)'
   elsif object.create_verb.nil? || object.create_verb == :POST
       create_link = 'collection(module)'
-  elsif object.create_verb == :PUT
+  elsif object.create_verb == :PUT || object.create_verb == :PATCH
       create_link = 'self_link(module)'
   end
 

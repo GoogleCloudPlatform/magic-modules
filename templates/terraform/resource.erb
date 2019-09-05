@@ -168,6 +168,13 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 
     log.Printf("[DEBUG] Creating new <%= object.name -%>: %#v", obj)
+<%  if object.nested_query&.modify_by_patch -%>
+<%# Keep this after mutex - patch request data relies on current resource state %>
+    obj, err = resource<%= resource_name -%>PatchCreateEncoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+<%  end -%>
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
@@ -465,6 +472,13 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
 <%= lines(compile('templates/terraform/update_mask.erb')) if object.update_mask -%>
 <%= lines(compile(object.custom_code.pre_update)) if object.custom_code.pre_update -%>
+<%  if object.nested_query&.modify_by_patch -%>
+<%# Keep this after mutex - patch request data relies on current resource state %>
+    obj, err = resource<%= resource_name -%>PatchUpdateEncoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+<%  end -%>
 <%  if object.async.nil? -%>
     _, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate))
 <%  else -%>
@@ -534,6 +548,13 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%# If the deletion of the object requires sending a request body, the custom code will set 'obj' -%>
     var obj map[string]interface{}
 <%= lines(compile(object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
+<%  if object.nested_query&.modify_by_patch -%>
+<%# Keep this after mutex - patch request data relies on current resource state %>
+    obj, err = resource<%= resource_name -%>PatchDeleteEncoder(d, meta, obj)
+    if err != nil {
+        return handleNotFoundError(err, d, "<%= object.name -%>")
+    }
+<%  end -%>
     log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
 
     res, err := sendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", <% if has_project %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutDelete))
@@ -624,14 +645,10 @@ func resource<%= resource_name -%>UpdateEncoder(d *schema.ResourceData, meta int
 <% end -%>
 
 <%  if object.nested_query -%>
-<%# Note that if both nested_query and custom_code.decoder are provided,
-  #the decoder will be included via nested_query.go.erb -%>
-func flattenNested<%= resource_name -%>(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
-    <%=     compile_template('templates/terraform/nested_query.go.erb',
-                         object: object,
-                         settable_properties: object.settable_properties,
-                         resource_name: resource_name) -%>
-}
+<%= compile_template('templates/terraform/nested_query.go.erb',
+                 object: object,
+                 settable_properties: object.settable_properties,
+                 resource_name: resource_name) -%>
 <% end -%>
 
 <% if object.custom_code.decoder -%>
