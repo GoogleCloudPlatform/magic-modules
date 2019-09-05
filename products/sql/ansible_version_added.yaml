@@ -63,6 +63,12 @@
         :version_added: '2.7'
     :settings:
       :version_added: '2.7'
+      :databaseFlags:
+        :version_added: '2.9'
+        :name:
+          :version_added: '2.9'
+        :value:
+          :version_added: '2.9'
       :ipConfiguration:
         :version_added: '2.7'
         :ipv4Enabled:
