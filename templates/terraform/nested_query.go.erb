@@ -100,7 +100,7 @@ func resource<%= resource_name -%>PatchCreateEncoder(d *schema.ResourceData, met
 
   // Return error if item already created.
   if found != nil {
-    return nil, fmt.Errorf("Unable to create <%= object.name %>, existing object already found: %+v", item)
+    return nil, fmt.Errorf("Unable to create <%= object.name %>, existing object already found: %+v", found)
   }
 
   // Return list with the resource to create appended
