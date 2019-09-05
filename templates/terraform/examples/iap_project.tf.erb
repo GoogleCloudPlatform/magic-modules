@@ -5,6 +5,6 @@ resource "google_project" "project" {
 }
 
 resource "google_project_service" "project_service" {
-	project = "${google_project.project.id}"
+	project = "${google_project.project.project_id}"
 	service = "iap.googleapis.com"
 }
