@@ -52,7 +52,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           for inputs.
 files: !ruby/object:Provider::Config::Files
   copy:
-    'tests/integration/gcp_kms_key_ring/tasks/main.yml': products/kms/helpers/python/key_ring_test.yaml
-    'tests/integration/gcp_kms_crypto_key/tasks/main.yml': products/kms/helpers/python/crypto_key_test.yaml
+    'tests/integration/targets/gcp_kms_key_ring/tasks/main.yml': products/kms/helpers/python/key_ring_test.yaml
+    'tests/integration/targets/gcp_kms_crypto_key/tasks/main.yml': products/kms/helpers/python/crypto_key_test.yaml
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

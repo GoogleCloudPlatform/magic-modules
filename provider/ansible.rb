@@ -257,7 +257,7 @@ module Provider
 
         name = module_name(data.object)
         path = File.join(target_folder,
-                         "tests/integration/#{name}/tasks/main.yml")
+                         "tests/integration/targets/#{name}/tasks/main.yml")
         unless data.object.custom_tests
           data.generate(
             'templates/ansible/integration_test.erb',
@@ -268,7 +268,7 @@ module Provider
 
         # Generate 'defaults' file that contains variables.
         path = File.join(target_folder,
-                         "tests/integration/#{name}/defaults/main.yml")
+                         "tests/integration/targets/#{name}/defaults/main.yml")
         data.generate(
           'templates/ansible/integration_test_variables.erb',
           path,
