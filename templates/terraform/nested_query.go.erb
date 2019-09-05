@@ -34,10 +34,9 @@ func flattenNested<%= resource_name -%>(d *schema.ResourceData, meta interface{}
 }
 
 func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, meta interface{}, items []interface{}) (index int, item map[string]interface{}, err error) {
-  config := meta.(*Config)
   <% object.identity.each do |id_prop| -%>
   <%   if settable_properties.include?(id_prop) -%>
-  expected<%= titlelize_property(id_prop) -%>, err := expand<%= resource_name -%><%= titlelize_property(id_prop) -%>(d.Get("<%= id_prop.name.underscore -%>"), d, config)
+  expected<%= titlelize_property(id_prop) -%>, err := expand<%= resource_name -%><%= titlelize_property(id_prop) -%>(d.Get("<%= id_prop.name.underscore -%>"), d, meta.(*Config))
   if err != nil {
     return -1, nil, err
   }
