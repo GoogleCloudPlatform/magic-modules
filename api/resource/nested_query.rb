@@ -33,10 +33,10 @@ module Api
       # rather than a list of the actual key objects
       attr_reader :is_list_of_ids
 
-      # If true, the resource is create/updated/deleted by patching 
+      # If true, the resource is create/updated/deleted by patching
       # the parent resource and appropriate encoders/update_encoders/pre_delete
-      # custom code will be included automatically. Only use if parent resource 
-      # does not have a separate endpoint (set as create/delete/update_urls) 
+      # custom code will be included automatically. Only use if parent resource
+      # does not have a separate endpoint (set as create/delete/update_urls)
       # for updating this resource.
       # The resulting encoded data will be mapped as
       # {
