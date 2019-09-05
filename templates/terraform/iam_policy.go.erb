@@ -29,12 +29,12 @@ import (
 <% resource_name = product_ns + object.name -%>
 <% 
 resource_uri = object.self_link_url
-resource_params = resource_uri.gsub('{{name}}', "{{#{object.name.underscore}}}").scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
+resource_params = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{object.name.underscore}}}"))
 -%>
 
 var <%= resource_name -%>IamSchema = map[string]*schema.Schema{
-<% resource_params.each do |param| -%>
-	"<%= param -%>": {
+<% resource_params.each_with_index do |param, i| -%>
+	"<%= param.underscore -%>": {
 		Type:             schema.TypeString,
 <% if ['project', 'zone', 'region', 'location'].include?(param) -%>
 		Computed: true,
@@ -43,16 +43,25 @@ var <%= resource_name -%>IamSchema = map[string]*schema.Schema{
 		Required: true,
 <% end # if ...include?(param) -%>
 		ForceNew:         true,
-<% if param == object.name.underscore -%>
+<%# The last parameter can be used as a long name for IAM policies -%>
+<% if i == resource_params.size - 1 -%>
+<% if object.iam_policy.custom_diff_suppress.nil? -%>
 		DiffSuppressFunc: compareSelfLinkOrResourceName,
+<% else -%>
+		DiffSuppressFunc: <%= resource_name -%>DiffSuppress,
+<% end -%>
 <% end # param == object.name -%>
 	},
-<% end # resource_params.each -%>
+<% end # i == resource_params.size - 1 -%>
 }
+
+<% unless object.iam_policy.custom_diff_suppress.nil? -%>
+<%= lines(compile(object.iam_policy.custom_diff_suppress)) -%>
+<% end -%>
 
 type <%= resource_name -%>IamUpdater struct {
 <% resource_params.each do |param| -%>
-	<%= param -%> string
+	<%= param.camelize(:lower) -%> string
 <% end # resource_params.each -%>
 	d       *schema.ResourceData
 	Config  *Config
@@ -73,7 +82,8 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 	values["project"] = project
 <% end -%>
 
-	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Get("<%= object.name.downcase -%>").(string))
+	// We may have gotten either a long or short name, so attempt to parse long name if possible
+	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Get("<%= resource_params.last.underscore -%>").(string))
 	if err != nil {
 		return nil, err
 	}
@@ -84,11 +94,26 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 
 	u := &<%= resource_name -%>IamUpdater{
 <% resource_params.each do |param| -%>
-		<%= param -%>: values["<%= param -%>"],
+		<%= param.camelize(:lower) -%>: values["<%= param -%>"],
 <% end -%>
 		d:       d,
 		Config:  config,
 	}
+
+<%# Set all URL qualifiers in state so that we have consistent storage of needed fields -%>
+<% resource_params.each_with_index do |param, i| -%>
+<% if i == resource_params.size - 1 -%>
+<% if param == 'project' -%>
+	d.Set("project", u.project)
+<% else -%>
+<%# Set the last parameter as the long name (unless it is project) -%>
+	d.Set("<%= resource_params.last.underscore -%>", u.GetResourceId())
+<% end -%>
+<% else -%>
+	d.Set("<%= param.underscore -%>", u.<%= param.camelize(:lower) -%>)
+<% end -%>
+<% end -%>
+
 	d.SetId(u.GetResourceId())
 
 	return u, nil
@@ -117,12 +142,18 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 
 	u := &<%= resource_name -%>IamUpdater{
 <% resource_params.each do |param| -%>
-		<%= param -%>: values["<%= param -%>"],
+		<%= param.camelize(:lower) -%>: values["<%= param -%>"],
 <% end -%>
 		d:       d,
 		Config:  config,
 	}
-	d.Set("<%= object.name.underscore -%>", u.GetResourceId())
+<% if resource_params.last == 'project' -%>
+<%# Resource is only identified by project, so only set project -%>
+	d.Set("project", u.project)
+<% else -%>
+<%# Set resource long name in state, this has all the information that we need to identify it -%>
+	d.Set("<%= resource_params.last.underscore -%>", u.GetResourceId())
+<% end -%>
 	d.SetId(u.GetResourceId())
 	return nil
 }
@@ -137,7 +168,7 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 	}
 <% end -%>
 
-	policy, err := sendRequest(u.Config, "GET", <% if resource_params.include?('project')  %>project<% else %>""<% end %>, url, nil)
+	policy, err := sendRequest(u.Config, "<%= object.iam_policy.fetch_iam_policy_verb.to_s.upcase -%>", <% if resource_params.include?('project')  %>project<% else %>""<% end %>, url, nil)
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
@@ -178,7 +209,8 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 }
 
 <% import_url = resource_uri.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '') -%>
-<% string_qualifiers = resource_params.map{|param| "u.#{param}"}.join(', ') -%>
+<% string_qualifiers = resource_params.map{|param| "u.#{param.camelize(:lower)}"}.join(', ') -%>
+<%# TODO(slevenick): this should use normal resource qualify methods to replace base_url -%>
 func (u *<%= resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodIdentifier string) string {
 	return fmt.Sprintf("<%= object.__product.base_url -%>%s<%= object.iam_policy.method_name_separator -%>%s", fmt.Sprintf("<%= import_url -%>", <%= string_qualifiers -%>), methodIdentifier)
 }
