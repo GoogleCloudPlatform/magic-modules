@@ -704,7 +704,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           health_check_name: "tcp-health-check"
       - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_tcp_full"
+        primary_resource_id: "tcp-health-check"
+        vars:
+          health_check_name: "tcp-health-check"
+      - !ruby/object:Provider::Terraform::Examples
         name: "health_check_ssl"
+        primary_resource_id: "ssl-health-check"
+        vars:
+          health_check_name: "ssl-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_ssl_full"
         primary_resource_id: "ssl-health-check"
         vars:
           health_check_name: "ssl-health-check"
@@ -714,12 +724,27 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           health_check_name: "http-health-check"
       - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_http_full"
+        primary_resource_id: "http-health-check"
+        vars:
+          health_check_name: "http-health-check"
+      - !ruby/object:Provider::Terraform::Examples
         name: "health_check_https"
         primary_resource_id: "https-health-check"
         vars:
           health_check_name: "https-health-check"
       - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_https_full"
+        primary_resource_id: "https-health-check"
+        vars:
+          health_check_name: "https-health-check"
+      - !ruby/object:Provider::Terraform::Examples
         name: "health_check_http2"
+        primary_resource_id: "http2-health-check"
+        vars:
+          health_check_name: "http2-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_http2_full"
         primary_resource_id: "http2-health-check"
         vars:
           health_check_name: "http2-health-check"
@@ -1081,7 +1106,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           health_check_name: "tcp-region-health-check"
       - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_tcp_full"
+        min_version: beta
+        primary_resource_id: "tcp-region-health-check"
+        vars:
+          health_check_name: "tcp-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
         name: "region_health_check_ssl"
+        min_version: beta
+        primary_resource_id: "ssl-region-health-check"
+        vars:
+          health_check_name: "ssl-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_ssl_full"
         min_version: beta
         primary_resource_id: "ssl-region-health-check"
         vars:
@@ -1093,13 +1130,31 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           health_check_name: "http-region-health-check"
       - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_http_full"
+        min_version: beta
+        primary_resource_id: "http-region-health-check"
+        vars:
+          health_check_name: "http-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
         name: "region_health_check_https"
         min_version: beta
         primary_resource_id: "https-region-health-check"
         vars:
           health_check_name: "https-region-health-check"
       - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_https_full"
+        min_version: beta
+        primary_resource_id: "https-region-health-check"
+        vars:
+          health_check_name: "https-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
         name: "region_health_check_http2"
+        min_version: beta
+        primary_resource_id: "http2-region-health-check"
+        vars:
+          health_check_name: "http2-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_http2_full"
         min_version: beta
         primary_resource_id: "http2-region-health-check"
         vars:

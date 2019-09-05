@@ -2965,7 +2965,7 @@ objects:
           - tcpHealthCheck
         properties:
             - !ruby/object:Api::Type::String
-              name: 'requestPath'
+              name: 'request'
               description: |
                 The application data to send once the SSL connection has been
                 established (default value is empty). If both request and response are
@@ -6474,7 +6474,7 @@ objects:
               name: 'port'
               description: |
                 The TCP port number for the TCP health check request.
-                The default value is 443.
+                The default value is 80.
             - !ruby/object:Api::Type::String
               name: 'portName'
               description: |
