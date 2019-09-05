@@ -8,16 +8,16 @@ resource "google_storage_bucket_object" "object" {
 	source = "./test-fixtures/appengine/hello-world.zip"
 }
 
-resource "google_app_engine_standard_app_version" "default" {
-  version_id = "v2"
-  service = "default"
+resource "google_app_engine_standard_app_version" "myapp_v1" {
+  version_id = "v1"
+  service = "myapp2"
   runtime = "nodejs10"
   noop_on_destroy = true
-  entrypoint = {
+  entrypoint {
     shell = "node ./app.js"
   }
   deployment {
-    zip = {
+    zip {
       source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/hello-world.zip"
     }  
   }
@@ -26,14 +26,33 @@ resource "google_app_engine_standard_app_version" "default" {
   } 
 
 }
-resource "google_app_engine_service_split_traffic" "default" {
-  service_id = "default"
+resource "google_app_engine_standard_app_version" "myapp_v2" {
+  version_id = "v2"
+  service = "myapp2"
+  runtime = "nodejs10"
+  noop_on_destroy = true
+  entrypoint {
+    shell = "node ./app.js"
+  }
+  deployment {
+    zip {
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/hello-world.zip"
+    }  
+  }
+  env_variables = {
+    port = "8080"
+  } 
+
+}
+
+resource "google_app_engine_service_split_traffic" "myapp2" {
+  service_id = "${google_app_engine_standard_app_version.myapp_v2.service}"
   migrate_traffic = false
-  split  {
+  split {
     shard_by = "IP"
     allocations = {
-      v1 = 0.25
-      v2 = 0.75
+      v1 = 0.75
+      v2 = 0.25
     }
   }
 }
