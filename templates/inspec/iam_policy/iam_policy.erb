@@ -18,7 +18,7 @@ class <%= object.name -%>IamPolicy < GcpResourceBase
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
     @params = params
-    @fetched = @connection.fetch(product_url, resource_base_url, params, <%= object.iam_policy.fetch_iam_policy_verb.downcase.capitalize -%>)
+    @fetched = @connection.fetch(product_url, resource_base_url, params, <%= object.iam_policy.fetch_iam_policy_verb.capitalize -%>)
     parse unless @fetched.nil?
   end
 
