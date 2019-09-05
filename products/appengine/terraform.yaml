@@ -134,6 +134,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{service_id}}"
     import_format: ["apps/{{project}}/services/{{service_id}}"]
     mutex: "apps/{{project}}/services/{{service_id}}"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
+      test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'service_id'
