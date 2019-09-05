@@ -38,6 +38,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       metricDescriptor.labels.valueType: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+      metricDescriptor.unit: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   OrganizationLogSink: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
 
