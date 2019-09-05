@@ -105,7 +105,7 @@ func resource<%= resource_name -%>PatchCreateEncoder(d *schema.ResourceData, met
   // Return list with the resource to create appended
   return map[string]interface{}{
     "<%= list_key %>": append(currItems, obj),
-  }, nil 
+  }, nil
 }
 
 // PatchUpdateEncoder handles creating request data to PATCH parent resource
