@@ -72,7 +72,7 @@ resources:
     - name: ansible-intermediate
       type: git-branch
       source:
-          uri: git@github.com:((github-account.username))/ansible.git
+          uri: git@github.com:((github-account.username))/ansible_collections_google.git
           private_key: ((repo-key.private_key))
 
     - name: inspec-intermediate
@@ -264,29 +264,6 @@ jobs:
                 params:
                   status: failure
                   context: terraform-tests
-                  path: magic-modules-new-prs
-                get_params:
-                  skip_clone: true
-
-    - name: ansible-test
-      plan:
-        - get: magic-modules
-          version: every
-          trigger: true
-          params:
-              submodules: [build/ansible]
-          passed: [mm-generate]
-        - task: test
-          file: magic-modules/.ci/unit-tests/ansible.yml
-          timeout: 30m
-          on_failure:
-              do:
-              - get: magic-modules-new-prs
-                passed: [mm-generate]
-              - put: magic-modules-new-prs
-                params:
-                  status: failure
-                  context: ansible-tests
                   path: magic-modules-new-prs
                 get_params:
                   skip_clone: true
