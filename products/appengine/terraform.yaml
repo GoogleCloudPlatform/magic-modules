@@ -77,7 +77,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           domain: "dm-test-"
     custom_code:  !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/domain_mapping.erb
-      pre_update: templates/terraform/pre_update/app_engine_domain_mapping.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'domainName'
@@ -85,6 +84,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       sslSettings: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'sslSettingsDiffSuppress'
+        update_mask_fields:
+          - "ssl_settings.certificate_id"
+          - "ssl_settings.ssl_management_type"
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

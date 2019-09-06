@@ -16,7 +16,7 @@ func TestAccAppEngineDomainMapping_update(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigtableAppProfileDestroy,
+		CheckDestroy: testAccCheckAppEngineDomainMappingDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAppEngineDomainMapping_basic(domainName),

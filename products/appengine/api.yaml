@@ -28,6 +28,7 @@ objects:
     base_url: 'apps/{{project}}/domainMappings'
     self_link: 'apps/{{project}}/domainMappings/{{id}}'
     update_verb: :PATCH
+    update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
