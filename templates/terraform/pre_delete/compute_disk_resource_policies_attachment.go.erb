@@ -1,8 +1,7 @@
 obj = make(map[string]interface{})
 
 // projects/{project}/regions/{region}/resourcePolicies/{resourceId}
-zone := d.Get("zone").(string)
-region := zone[:len(zone)-2]
+region := getRegionFromZone(d.Get("zone").(string))
 
 name, err := expandComputeDiskResourcePolicyAttachmentName(d.Get("name"), d, config)
 if err != nil {
