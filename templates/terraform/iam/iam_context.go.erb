@@ -1,0 +1,12 @@
+context := map[string]interface{}{
+	"random_suffix": acctest.RandString(10),
+	"role":          "<%= object.iam_policy.allowed_iam_role -%>",
+<% unless object.iam_policy.test_project_name.nil? -%>
+	"project_id" : fmt.Sprintf("<%= object.iam_policy.test_project_name -%>%s", acctest.RandString(10)),
+<% end -%>
+<% example.test_env_vars&.each do |var_name, var_type| -%>
+<% if var_type == :ORG_ID  -%>
+	"<%= var_name -%>": getTestOrgFromEnv(t),
+<% end -%>
+<% end -%>
+}

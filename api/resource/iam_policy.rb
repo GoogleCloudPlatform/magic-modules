@@ -30,11 +30,40 @@ module Api
       # While Compute subnetwork uses {resource}/getIamPolicy
       attr_reader :method_name_separator
 
+      # The terraform type of the parent resource if it is not the same as the
+      # IAM resource. The IAP product needs these as its IAM policies refer
+      # to compute resources
+      attr_reader :parent_resource_type
+
+      # Some resources allow retrieving the IAM policy with GET requests,
+      # others expect POST requests
+      attr_reader :fetch_iam_policy_verb
+
+      # Certain resources allow different sets of roles to be set with IAM policies
+      # This is a role that is acceptable for the given IAM policy resource for use in tests
+      attr_reader :allowed_iam_role
+
+      # Certain resources need an attribute other than "id" from their parent resource
+      # Especially when a parent is not the same type as the IAM resource
+      attr_reader :parent_resource_attribute
+
+      # If the IAM resource test needs a new project to be created, this is the name of the project
+      attr_reader :test_project_name
+
+      # Resource name may need a custom diff suppress function. Default is to use
+      # compareSelfLinkOrResourceName
+      attr_reader :custom_diff_suppress
+
       def validate
         super
 
         check :exclude, type: :boolean, default: false
         check :method_name_separator, type: String, default: '/'
+        check :parent_resource_type, type: String
+        check :fetch_iam_policy_verb, type: Symbol, default: :GET, allowed: %i[GET POST]
+        check :allowed_iam_role, type: String, default: 'roles/viewer'
+        check :parent_resource_attribute, type: String, default: 'id'
+        check :test_project_name, type: String
       end
     end
   end
