@@ -10,7 +10,7 @@ A `<%= iam_resource_name -%>` is used to test a Google <%= object.name -%> Iam P
 ## Examples
 <%
 identifiers = extract_identifiers(format_url(object.self_link_url))
-identifiers_out = identifiers.map { |id| "#{id}: #{id.inspect}" }.join(', ')
+identifiers_out = identifiers.map { |id| "#{id.underscore}: #{id.inspect}" }.join(', ')
 -%>
 ```
 describe <%= iam_resource_name -%>(<%= identifiers_out -%>) do
