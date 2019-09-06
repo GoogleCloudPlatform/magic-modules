@@ -1152,6 +1152,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{project}}/{{region}}/{{router}}/{{name}}"
     mutex: router/{{region}}/{{router}}
     examples:
+      # These examples are not used to autogenerate tests, as fine-grained
+      # resources do not fit the normal test flow - we need to test deletion
+      # in a test step while parent resource still exists vs in CheckDestroy
+      # when all resources have been deleted.
       - !ruby/object:Provider::Terraform::Examples
         name: "router_nat_basic"
         primary_resource_id: "nat"
@@ -1187,16 +1191,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-      minPortsPerVm: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      udpIdleTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      icmpIdleTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      tcpEstablishedIdleTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      tcpTransitoryIdleTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
   Snapshot: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 5

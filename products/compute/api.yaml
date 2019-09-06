@@ -6643,7 +6643,7 @@ objects:
         name: 'natIpAllocateOption'
         required: true
         description: |
-          How external IPs should be allocated for this NAT. Valid values are 
+          How external IPs should be allocated for this NAT. Valid values are
           `AUTO_ONLY` for only allowing NAT IPs allocated by Google Cloud
           Platform, or `MANUAL_ONLY` for only user-allocated NAT IP addresses.
         values:
@@ -6651,7 +6651,9 @@ objects:
           - :AUTO_ONLY
       - !ruby/object:Api::Type::Array
         name: 'natIps'
-        description: 'Self-links of NAT IPs'
+        description: |
+          Self-links of NAT IPs. Only valid if natIpAllocateOption
+          is set to MANUAL_ONLY.
         send_empty_value: true
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'address'
@@ -6664,12 +6666,12 @@ objects:
         description: |
           How NAT should be configured per Subnetwork.
           If `ALL_SUBNETWORKS_ALL_IP_RANGES`, all of the
-          IP ranges in every Subnetwork are allowed to Nat. 
-          If `ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES`, all of the primary IP 
+          IP ranges in every Subnetwork are allowed to Nat.
+          If `ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES`, all of the primary IP
           ranges in every Subnetwork are allowed to Nat.
-          `LIST_OF_SUBNETWORKS`: A list of Subnetworks are allowed to Nat 
+          `LIST_OF_SUBNETWORKS`: A list of Subnetworks are allowed to Nat
           (specified in the field subnetwork below). Note that if this field
-          contains ALL_SUBNETWORKS_ALL_IP_RANGES or 
+          contains ALL_SUBNETWORKS_ALL_IP_RANGES or
           ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES, then there should not be any
           other RouterNat section in any Router for this network in this region.
         values:
@@ -6695,7 +6697,7 @@ objects:
               name: 'sourceIpRangesToNat'
               description: |
                 List of options for which source IPs in the subnetwork
-                should have NAT enabled. Supported values include: 
+                should have NAT enabled. Supported values include:
                 `ALL_IP_RANGES`, `LIST_OF_SECONDARY_IP_RANGES`,
                 `PRIMARY_IP_RANGE`.
               required: true
@@ -6705,8 +6707,8 @@ objects:
               name: 'secondaryIpRangeNames'
               description: |
                 List of the secondary ranges of the subnetwork that are allowed
-                to use NAT. This can be populated only if 
-                `LIST_OF_SECONDARY_IP_RANGES` is one of the values in 
+                to use NAT. This can be populated only if
+                `LIST_OF_SECONDARY_IP_RANGES` is one of the values in
                 sourceIpRangesToNat
               item_type: Api::Type::String
       - !ruby/object:Api::Type::Integer
@@ -6717,20 +6719,24 @@ objects:
         name: udpIdleTimeoutSec
         description: |
           Timeout (in seconds) for UDP connections. Defaults to 30s if not set.
+        default_value: 30
       - !ruby/object:Api::Type::Integer
         name: icmpIdleTimeoutSec
         description: |
           Timeout (in seconds) for ICMP connections. Defaults to 30s if not set.
+        default_value: 30
       - !ruby/object:Api::Type::Integer
         name: tcpEstablishedIdleTimeoutSec
         description: |
           Timeout (in seconds) for TCP established connections.
           Defaults to 1200s if not set.
+        default_value: 1200
       - !ruby/object:Api::Type::Integer
         name: tcpTransitoryIdleTimeoutSec
         description: |
           Timeout (in seconds) for TCP transitory connections.
           Defaults to 30s if not set.
+        default_value: 30
       - !ruby/object:Api::Type::NestedObject
         name: logConfig
         description: |
@@ -6744,7 +6750,8 @@ objects:
           - !ruby/object:Api::Type::Enum
             name: 'filter'
             description: |
-              Specifies the desired filtering of logs on this NAT.
+              Specifies the desired filtering of logs on this NAT. Valid
+              values are: `"ERRORS_ONLY"`, `"TRANSLATIONS_ONLY"`, `"ALL"`
             required: true
             values:
               - :ERRORS_ONLY
