@@ -137,6 +137,16 @@
       :version_added: '2.9'
     :tpuIpv4CidrBlock:
       :version_added: '2.9'
+    :masterAuthorizedNetworksConfig:
+      :version_added: '2.9'
+      :enabled:
+        :version_added: '2.9'
+      :cidrBlocks:
+        :version_added: '2.9'
+        :displayName:
+          :version_added: '2.9'
+        :cidrBlock:
+          :version_added: '2.9'
     :location:
       :version_added: '2.8'
     :kubectlPath:
