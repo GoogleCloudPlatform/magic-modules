@@ -16,7 +16,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Lien: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Project: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    self_link: projects/{{projectId}}
+    exclude_resource: true
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
   Organization: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Folder: !ruby/object:Overrides::Inspec::ResourceOverride
