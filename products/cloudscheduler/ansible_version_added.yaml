@@ -61,5 +61,17 @@
         :version_added: '2.9'
       :headers:
         :version_added: '2.9'
+      :oauthToken:
+        :version_added: '2.9'
+        :serviceAccountEmail:
+          :version_added: '2.9'
+        :scope:
+          :version_added: '2.9'
+      :oidcToken:
+        :version_added: '2.9'
+        :serviceAccountEmail:
+          :version_added: '2.9'
+        :audience:
+          :version_added: '2.9'
     :region:
       :version_added: '2.9'
