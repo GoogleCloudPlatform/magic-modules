@@ -40,9 +40,10 @@ DOCUMENTATION = '''
         'type' => python_type(object.facts.filter)
       }
     } if object.facts.has_filters),
-    uri_props.map { |p| documentation_for_property(p) }
+    uri_props.map { |p| documentation_for_property(p) },
+    auth_docs
   ].flatten.compact.reduce({}, :merge),
-  'extends_documentation_fragment' => 'gcp'
+  'notes' => auth_notes
 })-%>
 '''
 
