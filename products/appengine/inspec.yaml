@@ -20,5 +20,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       id: !ruby/object:Overrides::Inspec::PropertyOverride
         name: "version_id"
+      runtimeApiVersion: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true  
+      handlers: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true  
+      libraries: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true  
+      envVariables: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true
+      deployment: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true
+      entrypoint: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true
+      service: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true    
   Service: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true  
+  
