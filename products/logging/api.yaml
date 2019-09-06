@@ -66,6 +66,13 @@ objects:
           The metric descriptor associated with the logs-based metric.
         required: true
         properties:
+          - !ruby/object:Api::Type::String
+            name: unit
+            description: |
+              The unit in which the metric value is reported. It is only applicable if the valueType is
+              `INT64`, `DOUBLE`, or `DISTRIBUTION`. The supported units are a subset of
+              [The Unified Code for Units of Measure](http://unitsofmeasure.org/ucum.html) standard
+            default_value: "1"
           - !ruby/object:Api::Type::Enum
             name: valueType
             description: |

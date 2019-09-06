@@ -17,7 +17,7 @@ pushd magic-modules-branched
 COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
 
 # Remove all modules so that old files are removed in process.
-rm build/ansible/lib/ansible/modules/cloud/google/gcp_*
+rm build/ansible/plugins/modules/gcp_*
 
 bundle exec compiler -a -e ansible -o "build/ansible/"
 
@@ -34,7 +34,7 @@ git add -A
 git commit -m "$ANSIBLE_COMMIT_MSG" --author="$COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
 
-apply_patches "$PATCH_DIR/modular-magician/ansible" "$ANSIBLE_COMMIT_MSG" "$COMMIT_AUTHOR" "devel"
+apply_patches "$PATCH_DIR/modular-magician/ansible" "$ANSIBLE_COMMIT_MSG" "$COMMIT_AUTHOR" "master"
 
 popd
 popd
