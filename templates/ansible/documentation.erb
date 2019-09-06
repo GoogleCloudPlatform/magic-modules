@@ -28,13 +28,14 @@ DOCUMENTATION = '''
         'type' => 'str'
       },
     },
-    object.all_user_properties.reject(&:output).map { |p| documentation_for_property(p) }
+    object.all_user_properties.reject(&:output).map { |p| documentation_for_property(p) },
+    auth_docs,
   ].flatten.compact.reduce({}, :merge),
-  'extends_documentation_fragment' => 'gcp',
   'notes' => (
     [
       ("API Reference: U(#{object.references.api})" if object.references.api),
       (object.references.guides.map { |guide, link| "#{guide}: U(#{link})" } if object.references),
+      auth_notes,
       (object.notes if object.notes)
     ].flatten.compact if object.references
   )
