@@ -4,7 +4,6 @@
 
 describe google_appengine_standard_app_version(project: <%= gcp_project_id -%>, location: <%= gcp_location -%>, version_id: <%= doc_generation ? "'#{standardappversion['version_id']}'" : "standardappversion['version_id']" -%>, service: <%= doc_generation ? "'#{standardappversion['service']}'" : "standardappversion['service']" -%>) do
   it { should exist }
-  its('service') { should eq <%= doc_generation ? "'#{standardappversion['service']}'" : "standardappversion['service']" -%> }
   its('version_id') { should eq <%= doc_generation ? "'#{standardappversion['version_id']}'" : "standardappversion['version_id']" -%> }
   its('runtime') { should eq <%= doc_generation ? "'#{standardappversion['runtime']}'" : "standardappversion['runtime']" -%> }
 end
