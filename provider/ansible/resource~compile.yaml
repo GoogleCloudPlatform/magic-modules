@@ -13,5 +13,5 @@
 # These files contains code that needs to be compiled before being delivered to
 # the final module tree structure:
 
-'test/integration/targets/%s/aliases': 'templates/ansible/aliases'
-'test/integration/targets/%s/meta/main.yml': 'provider/ansible/blank_file.yaml'
+'tests/integration/targets/%s/aliases': 'templates/ansible/aliases'
+'tests/integration/targets/%s/meta/main.yml': 'provider/ansible/blank_file.yaml'
