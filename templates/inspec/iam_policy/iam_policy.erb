@@ -18,7 +18,7 @@ class <%= object.name -%>IamPolicy < GcpResourceBase
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
     @params = params
-    @fetched = @connection.fetch(product_url, resource_base_url, params, <%= object.iam_policy.fetch_iam_policy_verb.capitalize -%>)
+    @fetched = @connection.fetch(product_url, resource_base_url, params, '<%= object.iam_policy.fetch_iam_policy_verb.capitalize -%>')
     parse unless @fetched.nil?
   end
 
@@ -31,8 +31,12 @@ class <%= object.name -%>IamPolicy < GcpResourceBase
     !@fetched.nil?
   end
 
+<%
+individual_url = object.self_link || object.base_url + '/{{name}}' 
+identifiers = extract_identifiers(individual_url)
+-%>
   def to_s
-    "<%= object.name -%> IamPolicy #{@params[:name]}"
+    "<%= object.name -%> IamPolicy #{@params[:<%= identifiers.last.underscore -%>]}"
   end
 
   private
@@ -42,8 +46,6 @@ class <%= object.name -%>IamPolicy < GcpResourceBase
   end
 
 <%
-individual_url = object.self_link || object.base_url + '/{{name}}' 
-identifiers = extract_identifiers(individual_url)
 # snake_case all identifiers in the URL
 identifiers.each do |identifier|
   individual_url = individual_url.gsub("{{#{identifier}}}", "{{#{identifier.underscore}}}")
