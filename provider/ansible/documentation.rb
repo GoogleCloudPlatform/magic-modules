@@ -124,6 +124,7 @@ module Provider
         }x, 'U(\\0)').gsub('.)', ').')
       end
 
+      # rubocop:disable Metrics/LineLength
       # Documentation choices for auth
       def auth_docs
         {
@@ -135,7 +136,7 @@ module Provider
             'description' => ['The type of credential used.'],
             'type' => 'str',
             'required' => true,
-            'choices' => ['application', 'machineaccount', 'serviceaccount']
+            'choices' => %w[application machineaccount serviceaccount]
           },
           'service_account_contents' => {
             'description' => ['The contents of a Service Account JSON file, either in a dictionary or as a JSON string that represents it.'],
@@ -176,6 +177,7 @@ module Provider
           'The I(service_account_email) and I(service_account_file) options are mutually exclusive.'
         ]
       end
+      # rubocop:enable Metrics/LineLength
     end
   end
 end
