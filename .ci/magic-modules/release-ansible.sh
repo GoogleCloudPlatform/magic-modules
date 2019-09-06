@@ -15,7 +15,7 @@ get_all_modules() {
   file_name=$remote_name
   ssh-agent bash -c "ssh-add ~/github_private_key; git fetch $remote_name"
   git checkout $remote_name/devel
-  git ls-files -- lib/ansible/modules/cloud/google/gcp_* | cut -d/ -f 6 | cut -d. -f 1 > $file_name
+  git ls-files -- plugins/modules/gcp_* | cut -d/ -f 6 | cut -d. -f 1 > $file_name
   
   for i in "${ignored_modules[@]}"; do
     sed -i "/$i/d" $file_name
@@ -48,6 +48,20 @@ git remote add origin git@github.com:modular-magician/ansible.git
 git remote add upstream git@github.com:ansible/ansible.git
 git remote add magician git@github.com:modular-magician/ansible.git
 echo "Remotes setup properly"
+
+# ansible_collections_google currently has the most up-to-date code.
+# Ansible core still requires very specically formatted PRs (< 50 files to a PR, new modules in separate PRs).
+# as well as PRs coming from a branch in a ansible core fork.
+# We need to copy over all the modules/tests from the collection to our ansible core fork, so that we can make PRs
+# against our ansible core fork.
+popd
+git clone git@github.com:ansible/ansible_collections_google.git
+cp ansible_collections_google/plugins/modules/gcp_* magic-modules-gcp/build/ansible/lib/ansible/modules/cloud/google/
+cp -r ansible_collections_google/tests/integration magic-modules-gcp/build/ansible/test/integration/targets
+pushd "magic-modules-gcp/build/ansible"
+git add lib/ansible/modules/cloud/google/gcp_* test/integration/targets/gcp_*
+git commit -m "Migrating code from collection"
+ssh-agent bash -c "ssh-add ~/github_private_key; git push origin devel"
 
 set -e
 

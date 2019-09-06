@@ -233,7 +233,7 @@ module Provider
         target_folder = data.output_folder
         name = module_name(data.object)
         path = File.join(target_folder,
-                         "lib/ansible/modules/cloud/google/#{name}.py")
+                         "plugins/modules/#{name}.py")
         data.generate(
           data.object.template || 'templates/ansible/resource.erb',
           path,
@@ -257,7 +257,7 @@ module Provider
 
         name = module_name(data.object)
         path = File.join(target_folder,
-                         "test/integration/targets/#{name}/tasks/main.yml")
+                         "tests/integration/targets/#{name}/tasks/main.yml")
         unless data.object.custom_tests
           data.generate(
             'templates/ansible/integration_test.erb',
@@ -268,7 +268,7 @@ module Provider
 
         # Generate 'defaults' file that contains variables.
         path = File.join(target_folder,
-                         "test/integration/targets/#{name}/defaults/main.yml")
+                         "tests/integration/targets/#{name}/defaults/main.yml")
         data.generate(
           'templates/ansible/integration_test_variables.erb',
           path,
@@ -281,14 +281,14 @@ module Provider
         name = module_name(data.object)
         data.generate('templates/ansible/facts.erb',
                       File.join(target_folder,
-                                "lib/ansible/modules/cloud/google/#{name}_info.py"),
+                                "plugins/modules/#{name}_info.py"),
                       self)
 
         # Generate symlink for old `facts` modules.
         return if version_added(data.object, :facts) >= '2.9'
 
         deprecated_facts_path = File.join(target_folder,
-                                          "lib/ansible/modules/cloud/google/_#{name}_facts.py")
+                                          "plugins/modules/_#{name}_facts.py")
         return if File.exist?(deprecated_facts_path)
 
         File.symlink "#{name}_info.py", deprecated_facts_path
