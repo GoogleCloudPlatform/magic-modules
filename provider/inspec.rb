@@ -67,13 +67,13 @@ module Provider
 
       data.generate(
         'templates/inspec/singular_resource.erb',
-        File.join(target_folder, "google_#{data.product.api_name}_#{name}.rb"),
+        File.join(target_folder, "#{resource_name(data.object, data.product)}.rb"),
         self
       )
 
       data.generate(
         'templates/inspec/plural_resource.erb',
-        File.join(target_folder, "google_#{data.product.api_name}_#{name}".pluralize + '.rb'),
+        File.join(target_folder, resource_name(data.object, data.product).pluralize + '.rb'),
         self
       )
 
@@ -88,7 +88,7 @@ module Provider
       target_folder = File.join(data.output_folder, 'libraries')
       name = data.object.name.underscore
 
-      iam_policy_resource_name = "google_#{data.product.api_name}_#{name}_iam_policy"
+      iam_policy_resource_name = "#{resource_name(data.object, data.product)}_iam_policy"
       data.generate(
         'templates/inspec/iam_policy/iam_policy.erb',
         File.join(target_folder, "#{iam_policy_resource_name}.rb"),
@@ -153,9 +153,13 @@ module Provider
       data.name = name
       data.plural = plural
       data.doc_generation = true
+      file_name = resource_name(data.object, data.product)
+      if plural
+        file_name = file_name.pluralize
+      end
       data.generate(
         'templates/inspec/doc_template.md.erb',
-        File.join(docs_folder, "google_#{data.product.api_name}_#{name}.md"),
+        File.join(docs_folder, "#{file_name}.md"),
         self
       )
     end
@@ -174,7 +178,7 @@ module Provider
 
       FileUtils.cp_r 'templates/inspec/tests/.', target_folder
 
-      name = "google_#{data.product.api_name}_#{data.object.name.underscore}"
+      name = resource_name(data.object, data.product)
 
       generate_inspec_test(data.clone, name, target_folder, name)
 
@@ -254,8 +258,8 @@ module Provider
       ).downcase
     end
 
-    def resource_name(object, product_ns)
-      "google_#{product_ns.downcase}_#{object.name.underscore}"
+    def resource_name(object, product)
+      "google_#{@config.legacy_name || product.name.underscore}_#{object.name.underscore}"
     end
 
     def sub_property_descriptions(property)

@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2019 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,5 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Inspec::Config
-legacy_name: sourcerepo
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Model: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: false
+  Version: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true

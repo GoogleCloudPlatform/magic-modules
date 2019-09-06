@@ -12,6 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Inspec::Config
+legacy_name: resourcemanager
 overrides: !ruby/object:Overrides::ResourceOverrides
   Lien: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
