@@ -30,7 +30,8 @@ package google
     client_name_lower = client_name.downcase
     has_project = object.base_url.include?('{{project}}')
     has_region = object.base_url.include?('{{region}}') && object.parameters.any?{ |p| p.name == 'region' && p.ignore_read }
-    timeouts = object&.async&.operation&.timeouts
+    timeouts = object.timeouts
+    timeouts ||= object&.async&.operation&.timeouts
     timeouts ||= Api::Timeouts.new
 -%>
 
@@ -59,7 +60,7 @@ func resource<%= resource_name -%>() *schema.Resource {
 <%      end -%>
 
         Timeouts: &schema.ResourceTimeout {
-            Create: schema.DefaultTimeout(<%= timeouts.insert_minutes  -%> * time.Minute),
+            Create: schema.DefaultTimeout(<%= timeouts.insert_minutes -%> * time.Minute),
 <%      if updatable?(object, properties) -%>
             Update: schema.DefaultTimeout(<%= timeouts.update_minutes -%> * time.Minute),
 <%      end -%>
