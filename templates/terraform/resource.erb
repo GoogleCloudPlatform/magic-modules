@@ -30,7 +30,8 @@ package google
     client_name_lower = client_name.downcase
     has_project = object.base_url.include?('{{project}}')
     has_region = object.base_url.include?('{{region}}') && object.parameters.any?{ |p| p.name == 'region' && p.ignore_read }
-    timeouts = object.async.nil? ? Api::Timeouts.new : object.timeouts
+    timeouts = object&.async&.operation&.timeouts
+    timeouts ||= Api::Timeouts.new
 -%>
 
 func resource<%= resource_name -%>() *schema.Resource {
