@@ -315,6 +315,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/compute_disk_resource_policies_attachment.go.erb
       decoder: templates/terraform/decoders/compute_disk_resource_policies_attachment.go.erb
       pre_delete: templates/terraform/pre_delete/compute_disk_resource_policies_attachment.go.erb
+    properties:
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
   Disk: !ruby/object:Overrides::Terraform::ResourceOverride
     # Larger disks were timing out at creation. Bumping up to 5 minutes.
     # https://github.com/terraform-providers/terraform-provider-google/issues/703
