@@ -13,6 +13,8 @@
 
 --- !ruby/object:Provider::Inspec::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  DomainMapping: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   FirewallRule: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   StandardAppVersion: !ruby/object:Overrides::Inspec::ResourceOverride
