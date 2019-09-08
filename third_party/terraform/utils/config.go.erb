@@ -157,7 +157,6 @@ type Config struct {
 
 	clientBigQuery   *bigquery.Service
 
-	CloudFunctionsBasePath string
 	clientCloudFunctions   *cloudfunctions.Service
 
 	CloudIoTBasePath string
@@ -677,7 +676,6 @@ func ConfigureBasePaths(c *Config) {
 	c.ServiceNetworkingBasePath = ServiceNetworkingDefaultBasePath
 	c.ServiceUsageBasePath = ServiceUsageDefaultBasePath
 	c.BigQueryBasePath = BigQueryDefaultBasePath
-	c.CloudFunctionsBasePath = CloudFunctionsDefaultBasePath
 	c.CloudIoTBasePath = CloudIoTDefaultBasePath
 	c.StorageTransferBasePath = StorageTransferDefaultBasePath
 	c.BigtableAdminBasePath = BigtableAdminDefaultBasePath
