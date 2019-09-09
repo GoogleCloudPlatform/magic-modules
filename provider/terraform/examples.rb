@@ -181,6 +181,7 @@ module Provider
         )
       end
 
+      # rubocop:disable Style/FormatStringToken
       def substitute_test_paths(config)
         config.gsub!('../static/img/header-logo.png', 'test-fixtures/header-logo.png')
         config.gsub!('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
@@ -195,6 +196,7 @@ module Provider
         config.gsub!('path/to/certificate.crt', '../static/ssl_cert/test.crt')
         config
       end
+      # rubocop:enable Style/FormatStringToken
 
       def validate
         super
