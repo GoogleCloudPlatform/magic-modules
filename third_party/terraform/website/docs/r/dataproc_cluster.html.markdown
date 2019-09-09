@@ -72,6 +72,17 @@ resource "google_dataproc_cluster" "mycluster" {
         gce_cluster_config {
             #network = "${google_compute_network.dataproc_network.name}"
             tags    = ["foo", "bar"]
+			service_account_scopes = [
+				#	User supplied scopes
+				"https://www.googleapis.com/auth/monitoring",
+
+				#	The following scopes necessary for the cluster to function properly are
+				#	always added, even if not explicitly specified:
+				#		useraccounts-ro: https://www.googleapis.com/auth/cloud.useraccounts.readonly
+				#		storage-rw:      https://www.googleapis.com/auth/devstorage.read_write
+				#		logging-write:   https://www.googleapis.com/auth/logging.write
+				"useraccounts-ro","storage-rw","logging-write"
+			]
         }
 
         # You can define multiple initialization_action blocks
@@ -211,8 +222,9 @@ The `cluster_config.gce_cluster_config` block supports:
 
 * `service_account_scopes` - (Optional, Computed) The set of Google API scopes to be made available
 	on all of the node VMs under the `service_account` specified. These can be
-	either FQDNs, or scope aliases. The following scopes are necessary to ensure
-	the correct functioning of the cluster:
+	either FQDNs, or scope aliases. The following scopes msut be set if any
+	other scopes are se. They're necessary to ensure the correct functioning of
+	the cluster, and are set automatically by the API:
 
   * `useraccounts-ro` (`https://www.googleapis.com/auth/cloud.useraccounts.readonly`)
   * `storage-rw`      (`https://www.googleapis.com/auth/devstorage.read_write`)
