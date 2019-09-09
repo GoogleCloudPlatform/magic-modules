@@ -63,13 +63,13 @@ objects:
         required: true
   - !ruby/object:Api::Resource
     name: 'WebBackendService'
-    base_url: 'projects/{{project}}/iap_web/compute/services/{{backendServiceName}}'
-    self_link: 'projects/{{project}}/iap_web/compute/services/{{backendServiceName}}'
+    base_url: 'projects/{{project}}/iap_web/compute/services/{{name}}'
+    self_link: 'projects/{{project}}/iap_web/compute/services/{{name}}'
     exclude_resource: true
     description: |
       Only used to generate IAM resources
     properties:
       - !ruby/object:Api::Type::String
-        name: 'backendServiceName'
+        name: 'name'
         description: Name or self link of a backend service.
         required: true
