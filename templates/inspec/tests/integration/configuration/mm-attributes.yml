@@ -225,3 +225,11 @@ regional_node_pool:
 org_sink:
   name: inspec-gcp-org-sink
   filter: resource.type = gce_instance
+
+standardappversion:
+  version_id: v2
+  service: default
+  runtime: nodejs10
+  entrypoint: "node ./app.js"
+  port: "8080"
+  

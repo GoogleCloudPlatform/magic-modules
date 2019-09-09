@@ -20,6 +20,10 @@ versions:
     base_url: https://appengine.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: App Engine Admin API
+    url: https://console.cloud.google.com/apis/library/appengine.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
     name: 'DomainMapping'
@@ -208,6 +212,7 @@ objects:
       Standard App Version resource to create a new version of standard GAE Application.
       Currently supporting Zip and File Containers.
       Currently does not support async operation checking.
+    collection_url_key: 'versions'
     base_url: 'apps/{{project}}/services/{{service}}/versions'
     delete_url: 'apps/{{project}}/services/{{service}}/versions/{{version_id}}'
     delete_verb: :DELETE
