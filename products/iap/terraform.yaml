@@ -71,7 +71,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       exclude: false
       method_name_separator: ':'
       parent_resource_type: 'google_compute_backend_service'
-      parent_resource_attribute: 'backend_service_name'
+      parent_resource_attribute: 'web_backend_service'
       fetch_iam_policy_verb: :POST
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
     id_format: "projects/{{project}}/iap_web/compute/services/{{name}}"
