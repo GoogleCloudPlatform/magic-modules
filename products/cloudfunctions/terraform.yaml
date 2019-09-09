@@ -23,11 +23,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudfunctions_cloud_function"
-        skip_test: true
         primary_resource_id: "function"
+        primary_resource_name: "fmt.Sprintf(\"my-function%s\", context[\"random_suffix\"])"
         vars:
-          archive_object_source: "path/to/index.zip"
           function_name: "my-function"
+          bucket_name: "tf-cloudfunctions-function-example-bucket"
+        test_custom_context:
+          zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
     properties:
       location: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'region'
