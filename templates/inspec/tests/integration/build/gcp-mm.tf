@@ -579,13 +579,14 @@ resource "google_logging_organization_sink" "my-sink" {
 }
 
 resource "google_storage_bucket" "bucket" {
-    name = "appengine-static-content"
+  name    = "inspec-gcp-static-${var.gcp_project_id}"
+  project = var.gcp_project_id
 }
 
 resource "google_storage_bucket_object" "object" {
-    name   = "hello-world.zip"
-    bucket = "${google_storage_bucket.bucket.name}"
-    source = "./test-fixtures/appengine/hello-world.zip"
+  name   = "hello-world.zip"
+  bucket = "${google_storage_bucket.bucket.name}"
+  source = "./test-fixtures/appengine/hello-world.zip"
 }
 
 resource "google_app_engine_standard_app_version" "default" {
