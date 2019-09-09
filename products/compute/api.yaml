@@ -6570,6 +6570,194 @@ objects:
                       User-specified description for the IP range.
                     send_empty_value: true
   - !ruby/object:Api::Resource
+    name: 'RouterNat'
+    base_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+    self_link: projects/{{project}}/regions/{{region}}/routers/{{router}}
+    create_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+    update_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+    delete_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+    create_verb: :PATCH
+    update_verb: :PATCH
+    delete_verb: :PATCH
+    identity:
+      - name
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      modify_by_patch: true
+      keys:
+        - nats
+    description: |
+      A NAT service created in a router.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Google Cloud Router': 'https://cloud.google.com/router/docs/'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 10
+          update_minutes: 10
+          delete_minutes: 10
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'router'
+        resource: 'Router'
+        imports: 'name'
+        description: |
+          The name of the Cloud Router in which this NAT will be configured.
+        required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: region
+        resource: Region
+        imports: name
+        description: Region where the router and NAT reside.
+        input: true
+        required: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the NAT service. The name must be 1-63 characters long and
+          comply with RFC1035.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::Enum
+        name: 'natIpAllocateOption'
+        required: true
+        description: |
+          How external IPs should be allocated for this NAT. Valid values are
+          `AUTO_ONLY` for only allowing NAT IPs allocated by Google Cloud
+          Platform, or `MANUAL_ONLY` for only user-allocated NAT IP addresses.
+        values:
+          - :MANUAL_ONLY
+          - :AUTO_ONLY
+      - !ruby/object:Api::Type::Array
+        name: 'natIps'
+        description: |
+          Self-links of NAT IPs. Only valid if natIpAllocateOption
+          is set to MANUAL_ONLY.
+        send_empty_value: true
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'address'
+          resource: 'Address'
+          imports: 'selfLink'
+          description: 'A reference to an address associated with this NAT'
+      - !ruby/object:Api::Type::Enum
+        name: 'sourceSubnetworkIpRangesToNat'
+        required: true
+        description: |
+          How NAT should be configured per Subnetwork.
+          If `ALL_SUBNETWORKS_ALL_IP_RANGES`, all of the
+          IP ranges in every Subnetwork are allowed to Nat.
+          If `ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES`, all of the primary IP
+          ranges in every Subnetwork are allowed to Nat.
+          `LIST_OF_SUBNETWORKS`: A list of Subnetworks are allowed to Nat
+          (specified in the field subnetwork below). Note that if this field
+          contains ALL_SUBNETWORKS_ALL_IP_RANGES or
+          ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES, then there should not be any
+          other RouterNat section in any Router for this network in this region.
+        values:
+          - :ALL_SUBNETWORKS_ALL_IP_RANGES
+          - :ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES
+          - :LIST_OF_SUBNETWORKS
+      - !ruby/object:Api::Type::Array
+        name: subnetwork
+        api_name: 'subnetworks'
+        send_empty_value: true
+        description: |
+          One or more subnetwork NAT configurations. Only used if
+          `source_subnetwork_ip_ranges_to_nat` is set to `LIST_OF_SUBNETWORKS`
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::ResourceRef
+              name: 'name'
+              resource: 'Subnetwork'
+              imports: 'selfLink'
+              description: 'Self-link of subnetwork to NAT'
+              required: true
+            - !ruby/object:Api::Type::Array
+              name: 'sourceIpRangesToNat'
+              description: |
+                List of options for which source IPs in the subnetwork
+                should have NAT enabled. Supported values include:
+                `ALL_IP_RANGES`, `LIST_OF_SECONDARY_IP_RANGES`,
+                `PRIMARY_IP_RANGE`.
+              required: true
+              min_size: 1
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: 'secondaryIpRangeNames'
+              description: |
+                List of the secondary ranges of the subnetwork that are allowed
+                to use NAT. This can be populated only if
+                `LIST_OF_SECONDARY_IP_RANGES` is one of the values in
+                sourceIpRangesToNat
+              item_type: Api::Type::String
+      - !ruby/object:Api::Type::Integer
+        name: minPortsPerVm
+        description: |
+          Minimum number of ports allocated to a VM from this NAT.
+      - !ruby/object:Api::Type::Integer
+        name: udpIdleTimeoutSec
+        description: |
+          Timeout (in seconds) for UDP connections. Defaults to 30s if not set.
+        default_value: 30
+      - !ruby/object:Api::Type::Integer
+        name: icmpIdleTimeoutSec
+        description: |
+          Timeout (in seconds) for ICMP connections. Defaults to 30s if not set.
+        default_value: 30
+      - !ruby/object:Api::Type::Integer
+        name: tcpEstablishedIdleTimeoutSec
+        description: |
+          Timeout (in seconds) for TCP established connections.
+          Defaults to 1200s if not set.
+        default_value: 1200
+      - !ruby/object:Api::Type::Integer
+        name: tcpTransitoryIdleTimeoutSec
+        description: |
+          Timeout (in seconds) for TCP transitory connections.
+          Defaults to 30s if not set.
+        default_value: 30
+      - !ruby/object:Api::Type::NestedObject
+        name: logConfig
+        description: |
+          Configuration for logging on NAT
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enable'
+            description: |
+              Indicates whether or not to export logs.
+            required: true
+          - !ruby/object:Api::Type::Enum
+            name: 'filter'
+            description: |
+              Specifies the desired filtering of logs on this NAT. Valid
+              values are: `"ERRORS_ONLY"`, `"TRANSLATIONS_ONLY"`, `"ALL"`
+            required: true
+            values:
+              - :ERRORS_ONLY
+              - :TRANSLATIONS_ONLY
+              - :ALL
+  - !ruby/object:Api::Resource
     name: 'Snapshot'
     kind: 'compute#snapshot'
     input: true

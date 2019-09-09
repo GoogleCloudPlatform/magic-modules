@@ -58,11 +58,11 @@ module Api
       #
       # [Optional] The "identity" URL of the resource. Defaults to:
       # * base_url when the create_verb is :POST
-      # * self_link when the create_verb is :PUT
+      # * self_link when the create_verb is :PUT  or :PATCH
       attr_reader :self_link
       # [Optional] The URL used to creating the resource. Defaults to:
       # * collection url when the create_verb is :POST
-      # * self_link when the create_verb is :PUT
+      # * self_link when the create_verb is :PUT or :PATCH
       attr_reader :create_url
       # [Optional] The URL used to delete the resource. Defaults to the self
       # link.
@@ -94,9 +94,12 @@ module Api
       # If you're writing a fine-grained resource (eg with nested_query) a value
       # must be set.
       attr_reader :identity
+
       # [Optional] (Api::Resource::NestedQuery) This is useful in case you need
       # to change the query made for GET requests only. In particular, this is
       # often used to extract an object from a parent object or a collection.
+      # Note that if both nested_query and custom_code.decoder are provided,
+      # the decoder will be included within the code handling the nested query.
       attr_reader :nested_query
 
       # ====================
@@ -151,7 +154,7 @@ module Api
 
       check :collection_url_key, default: @name.pluralize.camelize(:lower)
 
-      check :create_verb, type: Symbol, default: :POST, allowed: %i[POST PUT]
+      check :create_verb, type: Symbol, default: :POST, allowed: %i[POST PUT PATCH]
       check :read_verb, type: Symbol, default: :GET, allowed: %i[GET POST]
       check :delete_verb, type: Symbol, default: :DELETE, allowed: %i[POST PUT PATCH DELETE]
       check :update_verb, type: Symbol, default: :PUT, allowed: %i[POST PUT PATCH]
@@ -341,10 +344,8 @@ module Api
       if @create_url.nil?
         if @create_verb.nil? || @create_verb == :POST
           collection_uri
-        elsif @create_verb == :PUT
-          self_link_uri
         else
-          raise "unsupported create verb #{@create_verb}"
+          self_link_uri
         end
       else
         @create_url
