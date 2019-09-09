@@ -42,6 +42,7 @@ module Provider
       # It will use the provided value as a prefix for generated tests, and
       # insert it into the docs verbatim.
       attr_reader :vars
+
       # Some variables need to hold special values during tests, and cannot
       # be inferred by Open in Cloud Shell.  For instance, org_id
       # needs to be the correct value during integration tests, or else
@@ -60,6 +61,9 @@ module Provider
       #  - :SERVICE_ACCT
       # This list corresponds to the `get*FromEnv` methods in provider_test.go.
       attr_reader :test_env_vars
+
+      # Hash to provider custom context for generating test config
+      attr_reader :test_custom_context
 
       # The version name of of the example's version if it's different than the
       # resource version, eg. `beta`
@@ -178,15 +182,18 @@ module Provider
       end
 
       def substitute_test_paths(config)
-        config = config.gsub('../static/img/header-logo.png', 'test-fixtures/header-logo.png')
-        config = config.gsub('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
-        config.gsub('path/to/certificate.crt', 'test-fixtures/ssl_cert/test.crt')
+        config.gsub!('../static/img/header-logo.png', 'test-fixtures/header-logo.png')
+        config.gsub!('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
+        config.gsub!('path/to/certificate.crt', 'test-fixtures/ssl_cert/test.crt')
+        config.gsub!('path/to/index.zip', '%{zip_path}')
+        config
       end
 
       def substitute_example_paths(config)
-        config = config.gsub('../static/img/header-logo.png', '../static/header-logo.png')
-        config = config.gsub('path/to/private.key', '../static/ssl_cert/test.key')
-        config.gsub('path/to/certificate.crt', '../static/ssl_cert/test.crt')
+        config.gsub!('../static/img/header-logo.png', '../static/header-logo.png')
+        config.gsub!('path/to/private.key', '../static/ssl_cert/test.key')
+        config.gsub!('path/to/certificate.crt', '../static/ssl_cert/test.crt')
+        config
       end
 
       def validate
@@ -196,6 +203,7 @@ module Provider
         check :min_version, type: String
         check :vars, type: Hash
         check :test_env_vars, type: Hash
+        check :test_config_context, type: Hash
         check :ignore_read_extra, type: Array, item_type: String, default: []
         check :primary_resource_name, type: String
         check :skip_test, type: TrueClass

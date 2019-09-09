@@ -15,13 +15,14 @@ import (
          .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
          .first -%>
 <% resource_name = product_ns + object.name -%>
-<% 
+<%
 individual_url = object.self_link_url
 params = extract_identifiers(individual_url.gsub('{{name}}', "{{#{object.name.underscore}}}"))
 -%>
-<% 
+<%
   tf_product = (@config.legacy_name || product_ns).underscore
-  terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
+  resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
+  resource_ns_iam = resource_ns + '_iam'
 -%>
 <% import_url = individual_url.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '') -%>
 <% import_str = Array.new(params.length, '%s').join('/') -%>
@@ -55,7 +56,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 				Config: testAcc<%= resource_name -%>IamBinding_basicGenerated(context),
 			},
 			{
-				ResourceName:      "<%= terraform_name -%>_iam_binding.foo",
+				ResourceName:      "<%= resource_ns_iam -%>_binding.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -65,7 +66,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 				Config: testAcc<%= resource_name -%>IamBinding_updateGenerated(context),
 			},
 			{
-				ResourceName:      "<%= terraform_name -%>_iam_binding.foo",
+				ResourceName:      "<%= resource_ns_iam -%>_binding.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -88,7 +89,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 				Config: testAcc<%= resource_name -%>IamMember_basicGenerated(context),
 			},
 			{
-				ResourceName:      "<%= terraform_name -%>_iam_member.foo",
+				ResourceName:      "<%= resource_ns_iam -%>_member.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -110,7 +111,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 				Config: testAcc<%= resource_name -%>IamPolicy_basicGenerated(context),
 			},
 			{
-				ResourceName:      "<%= terraform_name -%>_iam_policy.foo",
+				ResourceName:      "<%= resource_ns_iam -%>_policy.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -123,7 +124,7 @@ func testAcc<%= resource_name -%>IamMember_basicGenerated(context map[string]int
 	return Nprintf(`
 <%= example.config_test_body -%>
 
-resource "<%= terraform_name -%>_iam_member" "foo" {
+resource "<%= resource_ns_iam -%>_member" "foo" {
 <%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
 	role = "%{role}"
 	member = "user:admin@hashicorptest.com"
@@ -142,7 +143,7 @@ data "google_iam_policy" "foo" {
 	}
 }
 
-resource "<%= terraform_name -%>_iam_policy" "foo" {
+resource "<%= resource_ns_iam -%>_policy" "foo" {
 <%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
 	policy_data = "${data.google_iam_policy.foo.policy_data}"
 }
@@ -153,7 +154,7 @@ func testAcc<%= resource_name -%>IamBinding_basicGenerated(context map[string]in
 	return Nprintf(`
 <%= example.config_test_body -%>
 
-resource "<%= terraform_name -%>_iam_binding" "foo" {
+resource "<%= resource_ns_iam -%>_binding" "foo" {
 <%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
 	role = "%{role}"
 	members = ["user:admin@hashicorptest.com"]
@@ -165,7 +166,7 @@ func testAcc<%= resource_name -%>IamBinding_updateGenerated(context map[string]i
 	return Nprintf(`
 <%= example.config_test_body -%>
 
-resource "<%= terraform_name -%>_iam_binding" "foo" {
+resource "<%= resource_ns_iam -%>_binding" "foo" {
 <%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
 	role = "%{role}"
 	members = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
