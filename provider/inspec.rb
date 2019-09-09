@@ -86,7 +86,6 @@ module Provider
     # IAM policies separately from the resource itself
     def generate_iam_policy(data)
       target_folder = File.join(data.output_folder, 'libraries')
-      name = data.object.name.underscore
 
       iam_policy_resource_name = "#{resource_name(data.object, data.product)}_iam_policy"
       data.generate(
@@ -154,9 +153,7 @@ module Provider
       data.plural = plural
       data.doc_generation = true
       file_name = resource_name(data.object, data.product)
-      if plural
-        file_name = file_name.pluralize
-      end
+      file_name = file_name.pluralize if plural
       data.generate(
         'templates/inspec/doc_template.md.erb',
         File.join(docs_folder, "#{file_name}.md"),
