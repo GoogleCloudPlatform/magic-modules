@@ -18,7 +18,7 @@
 require 'gcp_backend'
 class <%= object.name -%>s < GcpResourceBase
 <%
-name = "google_#{product_ns.downcase}_#{object.name.underscore}"
+name = resource_name(object, product)
 -%>
   name '<%= name.pluralize -%>'
   desc '<%= object.name -%> plural resource'

@@ -12,6 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Inspec::Config
+legacy_name: appengine
 overrides: !ruby/object:Overrides::ResourceOverrides
   DomainMapping: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
