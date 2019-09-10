@@ -27,7 +27,7 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 <% resource_name = product_ns + object.name -%>
-<% 
+<%
 resource_uri = object.self_link_url
 resource_params = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{object.name.underscore}}}"))
 -%>
@@ -69,17 +69,38 @@ type <%= resource_name -%>IamUpdater struct {
 
 func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Config) (ResourceIamUpdater, error) {
 	values := make(map[string]string)
-	
+
 <% if resource_params.include?('project') -%>
 	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err
 	}
-
-	// While this may be overridden by the "project" value from getImportIdQualifiers below,
-	// setting project here ensures the value is set even if the value set in config is the short
-	// name or otherwise doesn't include the project.
 	values["project"] = project
+
+<% end -%>
+<% if resource_params.include?('location') -%>
+	location, err := getLocation(d, config)
+	if err != nil {
+		return nil, err
+	}
+	values["location"] = location
+
+<% end -%>
+<% if resource_params.include?('zone') -%>
+	zone, err := getZone(d, config)
+	if err != nil {
+		return nil, err
+	}
+	values["zone"] = zone
+
+<% end -%>
+<% if resource_params.include?('region') -%>
+	region, err := getRegion(d, config)
+	if err != nil {
+		return nil, err
+	}
+	values["region"] = region
+
 <% end -%>
 
 	// We may have gotten either a long or short name, so attempt to parse long name if possible
@@ -121,14 +142,38 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 
 func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) error {
 	values := make(map[string]string)
-	
+
 <% if resource_params.include?('project') -%>
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
-
 	values["project"] = project
+
+<% end -%>
+<% if resource_params.include?('location') -%>
+	location, err := getLocation(d, config)
+	if err != nil {
+		return err
+	}
+	values["location"] = location
+
+<% end -%>
+<% if resource_params.include?('zone') -%>
+	zone, err := getZone(d, config)
+	if err != nil {
+		return err
+	}
+	values["zone"] = zone
+
+<% end -%>
+<% if resource_params.include?('region') -%>
+	region, err := getRegion(d, config)
+	if err != nil {
+		return err
+	}
+	values["region"] = region
+
 <% end -%>
 
 	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Id())

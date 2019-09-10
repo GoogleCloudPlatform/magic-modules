@@ -9,4 +9,9 @@ context := map[string]interface{}{
 	"<%= var_name -%>": getTestOrgFromEnv(t),
 <% end -%>
 <% end -%>
+<% unless example.test_custom_context.nil? -%>
+<% example.test_custom_context.each do |var_name, custom_val| -%>
+	"<%= var_name %>": <%= custom_val %>,
+<% end -%>
+<% end -%>
 }
