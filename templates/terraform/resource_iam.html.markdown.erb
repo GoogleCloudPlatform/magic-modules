@@ -38,7 +38,7 @@
 <%
   tf_product = (@config.legacy_name || product_ns).underscore
   resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
-  terraform_name = "#{resource_ns}_iam"
+  resource_ns_iam = "#{resource_ns}_iam"
   properties = object.all_user_properties
 
   # In order of preference, use TF override,
@@ -50,8 +50,8 @@
 ---
 <%= lines(autogen_notice :yaml) -%>
 layout: "google"
-page_title: "Google: <%= terraform_name -%>"
-sidebar_current: "docs-<%= terraform_name.gsub("_", "-") -%>"
+page_title: "Google: <%= resource_ns_iam -%>"
+sidebar_current: "docs-<%= resource_ns_iam.gsub("_", "-") -%>"
 description: |-
   Collection of resources to manage IAM policy for <%= "#{product_ns}#{object.name}" %>
 ---
@@ -59,25 +59,25 @@ description: |-
 # IAM policy for <%= "#{product_ns}#{object.name}" %>
 Three different resources help you manage your IAM policy for <%= product_ns -%> <%= object.name -%>. Each of these resources serves a different use case:
 
-* `<%= terraform_name -%>_policy`: Authoritative. Sets the IAM policy for the <%= object.name.downcase -%> and replaces any existing policy already attached.
-* `<%= terraform_name -%>_binding`: Authoritative for a given role. Updates the IAM policy to grant a role to a list of members. Other roles within the IAM policy for the <%= object.name.downcase -%> are preserved.
-* `<%= terraform_name -%>_member`: Non-authoritative. Updates the IAM policy to grant a role to a new member. Other members for the role for the <%= object.name.downcase -%> are preserved.
+* `<%= resource_ns_iam -%>_policy`: Authoritative. Sets the IAM policy for the <%= object.name.downcase -%> and replaces any existing policy already attached.
+* `<%= resource_ns_iam -%>_binding`: Authoritative for a given role. Updates the IAM policy to grant a role to a list of members. Other roles within the IAM policy for the <%= object.name.downcase -%> are preserved.
+* `<%= resource_ns_iam -%>_member`: Non-authoritative. Updates the IAM policy to grant a role to a new member. Other members for the role for the <%= object.name.downcase -%> are preserved.
 
-~> **Note:** `<%= terraform_name -%>_policy` **cannot** be used in conjunction with `<%= terraform_name -%>_binding` and `<%= terraform_name -%>_member` or they will fight over what your policy should be.
+~> **Note:** `<%= resource_ns_iam -%>_policy` **cannot** be used in conjunction with `<%= resource_ns_iam -%>_binding` and `<%= resource_ns_iam -%>_member` or they will fight over what your policy should be.
 
-~> **Note:** `<%= terraform_name -%>_binding` resources **can be** used in conjunction with `<%= terraform_name -%>_member` resources **only if** they do not grant privilege to the same role.
+~> **Note:** `<%= resource_ns_iam -%>_binding` resources **can be** used in conjunction with `<%= resource_ns_iam -%>_member` resources **only if** they do not grant privilege to the same role.
 
 <% if object.min_version.name == 'beta' -%>
 ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta resources.
 <% end -%>
 
-<% markdown_escaped_name = terraform_name.gsub("_", "\\_") %>
-<% 
-params = extract_identifiers(object.self_link_url)
--%>
+<% markdown_escaped_name = resource_ns_iam.gsub("_", "\\_") %>
+<% params = extract_identifiers(object.self_link_url) -%>
 <%
-url_properties = object.all_user_properties.select { |param| params.include?(param.name) }
+url_properties = object.all_user_properties.select do
+  |param| params.include?(param.name)
+end
 -%>
 ## <%= markdown_escaped_name -%>\_policy
 
@@ -91,7 +91,7 @@ data "google_iam_policy" "admin" {
 	}
 }
 
-resource "<%= terraform_name -%>_policy" "editor" {
+resource "<%= resource_ns_iam -%>_policy" "editor" {
 <%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
 	policy_data = "${data.google_iam_policy.admin.policy_data}"
 }
@@ -100,7 +100,7 @@ resource "<%= terraform_name -%>_policy" "editor" {
 ## <%= markdown_escaped_name -%>\_binding
 
 ```hcl
-resource "<%= terraform_name -%>_binding" "editor" {
+resource "<%= resource_ns_iam -%>_binding" "editor" {
 <%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
 	role = "<%= object.iam_policy.allowed_iam_role -%>"
 	members = [
@@ -112,7 +112,7 @@ resource "<%= terraform_name -%>_binding" "editor" {
 ## <%= markdown_escaped_name -%>\_member
 
 ```hcl
-resource "<%= terraform_name -%>_member" "editor" {
+resource "<%= resource_ns_iam -%>_member" "editor" {
 <%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
 	role = "<%= object.iam_policy.allowed_iam_role -%>"
 	member = "user:jane@example.com"
@@ -147,10 +147,10 @@ The following arguments are supported:
   * **domain:{domain}**: A G Suite domain (primary, instead of alias) name that represents all the users of that domain. For example, google.com or example.com.
 
 * `role` - (Required) The role that should be applied. Only one
-    `<%= terraform_name -%>_binding` can be used per role. Note that custom roles must be of the format
+    `<%= resource_ns_iam -%>_binding` can be used per role. Note that custom roles must be of the format
     `[projects|organizations]/{parent-name}/roles/{role-name}`.
 
-* `policy_data` - (Required only by `<%= terraform_name -%>_policy`) The policy data generated by
+* `policy_data` - (Required only by `<%= resource_ns_iam -%>_policy`) The policy data generated by
   a `google_iam_policy` data source.
 
 ## Attributes Reference
@@ -165,11 +165,11 @@ exported:
 <%= product_ns -%> <%= object.name.downcase -%> IAM resources can be imported using the project, resource identifiers, role and member.
 
 ```
-$ terraform import <%= terraform_name -%>_policy.editor <%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") %>
+$ terraform import <%= resource_ns_iam -%>_policy.editor <%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") %>
 
-$ terraform import <%= terraform_name -%>_binding.editor "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%>"
+$ terraform import <%= resource_ns_iam -%>_binding.editor "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%>"
 
-$ terraform import <%= terraform_name -%>_member.editor "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%> jane@example.com"
+$ terraform import <%= resource_ns_iam -%>_member.editor "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%> jane@example.com"
 ```
 
 -> If you're importing a resource with beta features, make sure to include `-provider=google-beta`

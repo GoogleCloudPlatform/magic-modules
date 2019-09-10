@@ -66,6 +66,11 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			"<%= var_name -%>": getTestFirestoreProjectFromEnv(t),
 		<% end -%>
 	<% end -%>
+	<% unless example.test_custom_context.nil? -%>
+	<% example.test_custom_context.each do |var_name, custom_val| -%>
+			"<%= var_name %>": <%= custom_val %>,
+	<% end -%>
+	<% end -%>
 			"random_suffix": acctest.RandString(10),
 	}
 
