@@ -71,6 +71,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           org_id: :ORG_ID
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
+<<<<<<< HEAD
     exclude: true
   DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
     self_link: 'apps/{{project}}/domainMappings/{{domain_name}}'
@@ -110,6 +111,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           bucket_name: "appengine-test-bucket"
 
+=======
+    id_format: "{{service_id}}"
+    import_format: ["apps/{{project}}/services/{{service_id}}"]
+    mutex: "apps/{{project}}/services/{{service_id}}"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_create: templates/terraform/custom_create/noop_on_create_appengine_version.go.erb
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'service_id'
+      split.allocations: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/float64_to_string.go.erb
+>>>>>>> Appengine Service resource
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

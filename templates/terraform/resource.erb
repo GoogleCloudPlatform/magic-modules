@@ -131,9 +131,9 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 <% end -%>
 
 func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
-<%  if object.custom_code.custom_create -%>
-    <%= lines(compile(object.custom_code.custom_create))  -%>
-<%  else  -%>
+    <% if object.custom_code.custom_create -%>
+        <%= lines(compile(object.custom_code.custom_create)) -%>
+    <% else -%>    
     config := meta.(*Config)
 
     obj := make(map[string]interface{})
@@ -306,8 +306,8 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
 <%= lines(compile(object.custom_code.post_create)) if object.custom_code.post_create -%>
 
-    return resource<%= resource_name -%>Read(d, meta)
-<%  end # if custom_create  -%>
+<%  end -%>
+return resource<%= resource_name -%>Read(d, meta)
 }
 
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {

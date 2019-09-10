@@ -104,6 +104,10 @@ module Provider
       # method's function header can't be changed, the template
       # inserts that for you - do not include it in your custom code.
       attr_reader :custom_delete
+      # This code replaces the entire create method.  Since the create
+      # method's function header can't be changed, the template
+      # inserts that for you - do not include it in your custom code.
+      attr_reader :custom_create
       # This code replaces the entire import method.  Since the import
       # method's function header can't be changed, the template
       # inserts that for you - do not include it in your custom code.

@@ -29,6 +29,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - priority
   Service: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  ServiceSplitTraffic: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   StandardAppVersion: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   DomainMapping: !ruby/object:Overrides::Ansible::ResourceOverride

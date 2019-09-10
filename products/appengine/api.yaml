@@ -189,24 +189,58 @@ objects:
       For example, an application that handles customer requests might include separate services to handle tasks such as backend data analysis or API requests from mobile devices. 
       Each service has a collection of versions that define a specific set of code used to implement the functionality of that service.
     base_url: 'apps/{{project}}/services'
-    self_link: 'apps/{{project}}/services/{{id}}'
+    update_url: 'apps/{{project}}/services/{{service_id}}?migrateTraffic=False&updateMask=split'
+    update_verb: :PATCH
     references: !ruby/object:Api::Resource::ReferenceLinks
-      guides:
-        'Official Documentation':
-          'https://cloud.google.com/appengine/docs/admin-api/deploying-overview'
       api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services'
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'appengine#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
-        output: true
         description: |
           Full path to the Service resource in the API. Example apps/myapp/services/default.
           This field is used in responses only. Any value specified here in a request is ignored.
       - !ruby/object:Api::Type::String
         name: 'id'
-        output: true
         description: |
            Relative name of the service within the application. Example default.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'split'
+        description: |
+           Mapping that defines fractional HTTP traffic diversion to different versions within the service.
+        required: false
+        properties:      
+          - !ruby/object:Api::Type::Enum
+            name: 'shardBy'
+            required: false
+            description: |
+              Mechanism used to determine which version a request is sent to. The traffic selection algorithm will be stable for either type until allocations are changed.
+            values:
+              - :UNSPECIFIED
+              - :COOKIE
+              - :IP
+              - :RANDOM
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'allocations'
+            description: |
+              Mapping from version IDs within the service to fractional (0.000, 1] allocations of traffic for that version. Each version can be specified only once, but some versions in the service may not have any traffic allocation. Services that have traffic allocated cannot be deleted until either the service is deleted or their traffic allocation is removed. Allocations must sum to 1. Up to two decimal place precision is supported for IP-based splits and up to three decimal places is supported for cookie-based splits.           
   - !ruby/object:Api::Resource
     name: 'StandardAppVersion'
     description: |
