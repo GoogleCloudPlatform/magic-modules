@@ -14,6 +14,7 @@
 require 'overrides/resources'
 require 'provider/ansible/facts_override'
 require 'provider/ansible/custom_code'
+require 'provider/ansible/tests'
 
 module Overrides
   module Ansible
@@ -39,8 +40,6 @@ module Overrides
           access_api_results
           collection
           custom_code
-          custom_tests
-          has_tests
           hidden
           imports
           notes
@@ -48,6 +47,8 @@ module Overrides
           template
           transport
           unwrap_resource
+
+          tests
 
           facts
         ]
@@ -64,8 +65,6 @@ module Overrides
         check :collection, type: ::String
         check :custom_code, type: Provider::Ansible::CustomCode,
                             default: Provider::Ansible::CustomCode.new
-        check :custom_tests, type: :boolean, default: false
-        check :has_tests, type: :boolean, default: true
         check :hidden, type: ::Array, item_type: String, default: []
         check :imports, type: ::Array, default: [], item_type: String
         check :notes, type: ::Array, item_type: String
@@ -74,6 +73,9 @@ module Overrides
         check :template, type: ::String
         check :update, type: ::String
         check :unwrap_resource, type: :boolean, default: false
+
+        check :tests, type: Provider::Ansible::Tests,
+                      default: Provider::Ansible::Tests.new
 
         check :facts, type: Provider::Ansible::FactsOverride,
                       default: Provider::Ansible::FactsOverride.new

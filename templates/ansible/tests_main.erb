@@ -1,0 +1,2 @@
+---
+<%= ansible_style_yaml(object.tests.tests.map { |t| { "include_tasks" => "#{t.name}.yml" } }) -%>
