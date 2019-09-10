@@ -63,9 +63,7 @@ objects:
         name: 'trigger_http'
         description: 'Use HTTP to trigger this function'
     iam_policy: !ruby/object:Api::Resource::IamPolicy
-      parent_resource_attribute: 'cloud_function'
       exclude: true
-      method_name_separator: ':'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

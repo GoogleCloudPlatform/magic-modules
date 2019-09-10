@@ -35,6 +35,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'region'
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       parent_resource_attribute: 'cloud_function'
+      method_name_separator: ':'
       exclude: false
 
 # This is for copying files over
