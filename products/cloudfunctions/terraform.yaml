@@ -33,6 +33,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       location: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'region'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      parent_resource_attribute: 'cloud_function'
+      exclude: false
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
