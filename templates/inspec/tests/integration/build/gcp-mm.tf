@@ -149,6 +149,10 @@ variable "standardappversion" {
   type = "map"
 }
 
+variable "ml_model" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -575,13 +579,14 @@ resource "google_logging_organization_sink" "my-sink" {
 }
 
 resource "google_storage_bucket" "bucket" {
-    name = "appengine-static-content"
+  name    = "inspec-gcp-static-${var.gcp_project_id}"
+  project = var.gcp_project_id
 }
 
 resource "google_storage_bucket_object" "object" {
-    name   = "hello-world.zip"
-    bucket = "${google_storage_bucket.bucket.name}"
-    source = "./test-fixtures/appengine/hello-world.zip"
+  name   = "hello-world.zip"
+  bucket = "${google_storage_bucket.bucket.name}"
+  source = "../configuration/hello-world.zip"
 }
 
 resource "google_app_engine_standard_app_version" "default" {
@@ -603,4 +608,13 @@ resource "google_app_engine_standard_app_version" "default" {
   env_variables = {
     port          = "${var.standardappversion["port"]}"
   }
+}
+
+resource "google_ml_engine_model" "inspec-gcp-model" {
+  project                           = var.gcp_project_id
+  name                              = var.ml_model["name"]
+  description                       = var.ml_model["description"]
+  regions                           = ["${var.ml_model["region"]}"]
+  online_prediction_logging         = var.ml_model["online_prediction_logging"]
+  online_prediction_console_logging = var.ml_model["online_prediction_console_logging"]
 }

@@ -12,6 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Inspec::Config
+legacy_name: cloudfunctions
 overrides: !ruby/object:Overrides::ResourceOverrides
   CloudFunction: !ruby/object:Overrides::Inspec::ResourceOverride
     properties:

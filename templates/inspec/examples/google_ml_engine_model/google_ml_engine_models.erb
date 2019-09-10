@@ -1,0 +1,8 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
+<% ml_model = grab_attributes['ml_model'] -%>
+describe google_ml_engine_models(project: <%= gcp_project_id -%>) do
+  its('descriptions') { should include <%= doc_generation ? "'#{ml_model['description']}'" : "ml_model['description']" -%> }
+  its('online_prediction_loggings') { should include <%= doc_generation ? "'#{ml_model['online_prediction_logging']}'" : "ml_model['online_prediction_logging']" -%> }
+  its('online_prediction_console_loggings') { should include <%= doc_generation ? "'#{ml_model['online_prediction_console_logging']}'" : "ml_model['online_prediction_console_logging']" -%> }
+end

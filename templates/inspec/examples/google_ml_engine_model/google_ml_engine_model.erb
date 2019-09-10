@@ -1,0 +1,13 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% ml_model = grab_attributes['ml_model'] -%>
+describe google_ml_engine_model(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{ml_model['name']}'" : "ml_model['name']" -%>) do
+  it { should exist }
+  its('description') { should cmp <%= doc_generation ? "'#{ml_model['description']}'" : "ml_model['description']" -%> }
+  its('regions') { should include <%= doc_generation ? "'us-central1'" : "ml_model['region']" -%> }
+  its('online_prediction_logging') { should cmp <%= doc_generation ? "'#{ml_model['online_prediction_logging']}'" : "ml_model['online_prediction_logging']" -%> }
+  its('online_prediction_console_logging') { should cmp <%= doc_generation ? "'#{ml_model['online_prediction_console_logging']}'" : "ml_model['online_prediction_console_logging']" -%> }
+end
+
+describe google_ml_engine_model(project: <%= gcp_project_id -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

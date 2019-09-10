@@ -28,7 +28,7 @@
 
 # A provider to manage <%= @api.product_full_name -%> resources.
 class <%= object.name -%> < GcpResourceBase
-  name '<%= resource_name(object, product_ns) -%>'
+  name '<%= resource_name(object, product) -%>'
   desc '<%= object.name -%>'
   supports platform: 'gcp'
 
