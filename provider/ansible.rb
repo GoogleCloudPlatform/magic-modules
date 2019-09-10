@@ -246,21 +246,27 @@ module Provider
         path = ["products/#{data.product.api_name}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 
-        return unless data.object.has_tests
-        # Unlike other providers, all resources will not be built at once or
-        # in close timing to each other (due to external PRs).
-        # This means that examples might not be built out for every resource
-        # in a GCP product.
-        return unless File.file?(path)
+        return if data.object.tests.tests.empty?
 
         target_folder = data.output_folder
 
         name = module_name(data.object)
+
+        # Generate the main file with a list of tests.
         path = File.join(target_folder,
                          "tests/integration/targets/#{name}/tasks/main.yml")
-        unless data.object.custom_tests
+        data.generate(
+          'templates/ansible/tests_main.erb',
+          path,
+          self
+        )
+
+        # Generate each of the tests individually
+        data.object.tests.tests.each do |t|
+          path = File.join(target_folder,
+                           "tests/integration/targets/#{name}/tasks/#{t.name}.yml")
           data.generate(
-            'templates/ansible/integration_test.erb',
+            t.path,
             path,
             self
           )
