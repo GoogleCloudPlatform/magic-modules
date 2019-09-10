@@ -91,6 +91,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           service_id: "default"
           split.allocations.v1: "1"
+          bucket_name: "appengine-static-content"
         test_env_vars:
           org_id: :ORG_ID    
   DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
