@@ -47,6 +47,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   ResourcePolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   TargetInstance:  !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -271,14 +273,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   TargetVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: false
   # Not yet implemented.
-  BackendBucketSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  BackendServiceSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   # Ansible tasks must alter infrastructure.
   # This means that virtual objects are a poor fit.
+  BackendBucketSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  BackendServiceSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   DiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -298,6 +300,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Region: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   TargetInstance:  !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true

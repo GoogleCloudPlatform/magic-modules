@@ -1159,6 +1159,50 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  RouterNat: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude_validator: true
+    id_format: "{{project}}/{{region}}/{{router}}/{{name}}"
+    mutex: router/{{region}}/{{router}}
+    examples:
+      # These examples are not used to autogenerate tests, as fine-grained
+      # resources do not fit the normal test flow - we need to test deletion
+      # in a test step while parent resource still exists vs in CheckDestroy
+      # when all resources have been deleted.
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_nat_basic"
+        primary_resource_id: "nat"
+        skip_test: true
+        vars:
+          router_name: "my-router"
+          nat_name: "my-router-nat"
+          network_name: "my-network"
+          subnet_name: "my-subnetwork"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_nat_manual_ips"
+        primary_resource_id: "nat_manual"
+        skip_test: true
+        vars:
+          router_name: "my-router"
+          nat_name: "my-router-nat"
+          network_name: "my-network"
+          subnet_name: "my-subnetwork"
+          address_name: "nat-manual-ip"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateRFC1035Name(2, 63)'
+      natIps: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      subnetwork: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      subnetwork.sourceIpRangesToNat: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      subnetwork.secondaryIpRangeNames: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   Snapshot: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 5
@@ -1382,6 +1426,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      purpose: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/subnetwork.erb

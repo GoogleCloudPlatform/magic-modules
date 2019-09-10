@@ -40,7 +40,12 @@
   resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   terraform_name = "#{resource_ns}_iam"
   properties = object.all_user_properties
-  timeouts = object.async.nil? ? Api::Timeouts.new : object.timeouts
+
+  # In order of preference, use TF override,
+  # general defined timeouts, or default Timeouts
+  timeouts = object.timeouts
+  timeouts ||= object&.async&.operation&.timeouts
+  timeouts ||= Api::Timeouts.new
 -%>
 ---
 <%= lines(autogen_notice :yaml) -%>

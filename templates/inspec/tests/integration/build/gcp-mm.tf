@@ -145,6 +145,14 @@ variable "org_sink" {
   type = "map"
 }
 
+variable "standardappversion" {
+  type = "map"
+}
+
+variable "ml_model" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -568,4 +576,45 @@ resource "google_logging_organization_sink" "my-sink" {
 
   # Log all WARN or higher severity messages relating to instances
   filter      = "${var.org_sink.filter}"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name    = "inspec-gcp-static-${var.gcp_project_id}"
+  project = var.gcp_project_id
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "hello-world.zip"
+  bucket = "${google_storage_bucket.bucket.name}"
+  source = "../configuration/hello-world.zip"
+}
+
+resource "google_app_engine_standard_app_version" "default" {
+  project         = "${var.gcp_project_id}"
+  version_id      = "${var.standardappversion["version_id"]}"
+  service         = "${var.standardappversion["service"]}"
+  runtime         = "${var.standardappversion["runtime"]}"
+  noop_on_destroy = true
+  entrypoint {
+    shell         = "${var.standardappversion["entrypoint"]}"
+  }
+
+  deployment {
+    zip {
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/hello-world.zip"
+    }
+  }
+
+  env_variables = {
+    port          = "${var.standardappversion["port"]}"
+  }
+}
+
+resource "google_ml_engine_model" "inspec-gcp-model" {
+  project                           = var.gcp_project_id
+  name                              = var.ml_model["name"]
+  description                       = var.ml_model["description"]
+  regions                           = ["${var.ml_model["region"]}"]
+  online_prediction_logging         = var.ml_model["online_prediction_logging"]
+  online_prediction_console_logging = var.ml_model["online_prediction_console_logging"]
 }
