@@ -154,7 +154,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 <% if resource_params.include?('location') -%>
 	location, err := getLocation(d, config)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	values["location"] = location
 
@@ -162,7 +162,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 <% if resource_params.include?('zone') -%>
 	zone, err := getZone(d, config)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	values["zone"] = zone
 
@@ -170,7 +170,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 <% if resource_params.include?('region') -%>
 	region, err := getRegion(d, config)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	values["region"] = region
 
