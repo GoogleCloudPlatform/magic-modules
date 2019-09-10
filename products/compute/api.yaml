@@ -2094,6 +2094,15 @@ objects:
           addressed to any ports to be forwarded to the backends configured
           with this forwarding rule. Used with backend service. Cannot be set
           if port or portRange are set.
+      - !ruby/object:Api::Type::Boolean
+        name: 'allowGlobalAccess'
+        description: |
+          If true, clients can access ILB from all regions.
+          Otherwise only allows from the local region the ILB is located at.
+        send_empty_value: true
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
+        min_version: beta
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
         description: |
