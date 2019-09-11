@@ -83,6 +83,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'service_id'
         ignore_read: true  
+      split: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true    
       split.allocations: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/float64_to_string.go.erb
     examples:

@@ -10,7 +10,7 @@ resource "google_storage_bucket_object" "object" {
 
 resource "google_app_engine_standard_app_version" "myapp_v1" {
   version_id = "v1"
-  service = "myapp2"
+  service = "myapp"
   runtime = "nodejs10"
   noop_on_destroy = true
   entrypoint {
@@ -28,7 +28,7 @@ resource "google_app_engine_standard_app_version" "myapp_v1" {
 }
 resource "google_app_engine_standard_app_version" "myapp_v2" {
   version_id = "v2"
-  service = "myapp2"
+  service = "myapp"
   runtime = "nodejs10"
   noop_on_destroy = true
   entrypoint {
@@ -45,7 +45,7 @@ resource "google_app_engine_standard_app_version" "myapp_v2" {
 
 }
 
-resource "google_app_engine_service_split_traffic" "myapp2" {
+resource "google_app_engine_service_split_traffic" "myapp" {
   service_id = "${google_app_engine_standard_app_version.myapp_v2.service}"
   migrate_traffic = false
   split {
