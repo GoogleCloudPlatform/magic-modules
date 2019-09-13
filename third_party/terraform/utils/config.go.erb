@@ -128,7 +128,6 @@ type Config struct {
 	ResourceManagerV2Beta1BasePath string
 	clientResourceManagerV2Beta1   *resourceManagerV2Beta1.Service
 
-	RuntimeconfigBasePath string
 	clientRuntimeconfig   *runtimeconfig.Service
 
 	clientSpanner   *spanner.Service
@@ -670,7 +669,6 @@ func ConfigureBasePaths(c *Config) {
 	c.DnsBetaBasePath = DnsBetaDefaultBasePath
 	c.IamCredentialsBasePath = IamCredentialsDefaultBasePath
 	c.ResourceManagerV2Beta1BasePath = ResourceManagerV2Beta1DefaultBasePath
-	c.RuntimeconfigBasePath = RuntimeconfigDefaultBasePath
 	c.IAMBasePath = IAMDefaultBasePath
 	c.ServiceManagementBasePath = ServiceManagementDefaultBasePath
 	c.ServiceNetworkingBasePath = ServiceNetworkingDefaultBasePath
