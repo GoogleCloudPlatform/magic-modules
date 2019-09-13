@@ -183,6 +183,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_service_name: "backend-service"
           http_health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_log_config"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+          http_health_check_name: "health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/backend_service.go.erb'
       encoder: 'templates/terraform/encoders/backend_service.go.erb'
@@ -244,6 +251,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_basic"
+        primary_resource_id: "default"
+        vars:
+          region_backend_service_name: "region-backend-service"
+          health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_backend_service_log_config"
+        min_version: beta
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-backend-service"
