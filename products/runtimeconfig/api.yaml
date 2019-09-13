@@ -38,15 +38,6 @@ objects:
       exclude: false
     parameters:
       - !ruby/object:Api::Type::String
-        name: 'project'
-        api_name: 'project'
-        description: |
-          The unique, user-assigned ID of the Project. It must be 6 to 30
-          lowercase letters, digits, or hyphens. It must start with a letter.
-          Trailing hyphens are prohibited.
-        required: true
-        input: true
-      - !ruby/object:Api::Type::String
         name: 'name'
         description: |
           The name of the RuntimeConfig resource
