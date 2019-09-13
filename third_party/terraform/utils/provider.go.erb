@@ -219,7 +219,7 @@ iam_resource_count = 0
 products.each do |product|
   product_definition = product[:definitions]
   product_definition.objects.reject { |r| r.exclude || r.not_in_version?(product_definition.version_obj_or_closest(version)) }.each do |object|
-    resource_count += 1
+    resource_count += 1 unless object&.exclude_resource
     iam_policy = object&.iam_policy
     unless iam_policy.nil? || iam_policy.exclude
       iam_resource_count += 3
