@@ -363,10 +363,11 @@ resource "google_compute_network" "test" {
 }
 
 resource "google_compute_subnetwork" "test" {
-	name          = "%s"
-	ip_cidr_range = "10.2.0.0/16"
-	region        = "us-central1"
-	network       = "${google_compute_network.test.self_link}"
+	name                     = "%s"
+	ip_cidr_range            = "10.2.0.0/16"
+	region                   = "us-central1"
+	network                  = "${google_compute_network.test.self_link}"
+	private_ip_google_access = true
 }
 `, name, network, subnetwork)
 }
