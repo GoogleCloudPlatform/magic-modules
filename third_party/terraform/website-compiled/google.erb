@@ -238,6 +238,14 @@
     </ul>
     </li>
 
+    <li<%%= sidebar_current("docs-google-bigquery-data-transfer") %>>
+    <a href="#">Google BigQuery Data Transfer Resources</a>
+    <ul class="nav nav-visible">
+      <li<%%= sidebar_current("docs-google-bigquery-data-transfer-config") %>>
+      <a href="/docs/providers/google/r/bigquery_data_transfer_config.html">google_bigquery_data_transfer_config</a>
+    </ul>
+    </li>
+
     <li<%%= sidebar_current("docs-google-bigtable") %>>
     <a href="#">Google Bigtable Resources</a>
     <ul class="nav nav-visible">
@@ -619,6 +627,10 @@
 
       <li<%%= sidebar_current("docs-google-compute-region-instance-group-manager") %>>
       <a href="/docs/providers/google/r/compute_region_instance_group_manager.html">google_compute_region_instance_group_manager</a>
+      </li>
+
+      <li<%%= sidebar_current("docs-google-compute-reservation") %>>
+      <a href="/docs/providers/google/r/compute_reservation.html">google_compute_reservation</a>
       </li>
 
 <% unless version == 'ga' %>

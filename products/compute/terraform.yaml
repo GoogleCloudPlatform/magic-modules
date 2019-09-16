@@ -230,6 +230,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         sensitive: true
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       portName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       protocol: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -437,12 +439,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         set_hash_func: 'resourceComputeFirewallRuleHash'
       allowed.ip_protocol: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'protocol'
+        diff_suppress_func: 'compareCaseInsensitive'
       denied: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'deny'
         is_set: true
         set_hash_func: 'resourceComputeFirewallRuleHash'
       denied.ip_protocol: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'protocol'
+        diff_suppress_func: 'compareCaseInsensitive'
       destinationRanges: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         default_from_api: true
@@ -1078,6 +1082,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
       snapshotSchedulePolicy.snapshotProperties.storageLocations: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+  Reservation: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "reservation_basic"
+        primary_resource_id: "gce_reservation"
+        vars:
+          reservation_name: "gce-reservation"
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      specificReservation.instanceProperties.minCpuPlatform: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
