@@ -521,7 +521,7 @@ resource "google_sourcerepo_repository" "gcp-inspec-sourcerepo-repository" {
 }
 
 resource "google_folder" "inspec-gcp-folder" {
-  count = "${var.gcp_organization_id == "none" ? 0 : var.gcp_enable_privileged_resources}"
+  count = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
   display_name = "${var.folder["display_name"]}"
   parent       = "organizations/${var.gcp_organization_id}"
 }
@@ -567,7 +567,7 @@ resource "google_container_node_pool" "inspec-gcp-regional-node-pool" {
 }
 
 resource "google_logging_organization_sink" "my-sink" {
-  count       = "${var.gcp_organization_id == "none" ? 0 : var.gcp_enable_privileged_resources}"
+  count       = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
   name        = "${var.org_sink.name}"
   org_id      = "${var.gcp_organization_id}"
 
