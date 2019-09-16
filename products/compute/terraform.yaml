@@ -1080,7 +1080,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      minCpuPlatform: !ruby/object:Overrides::Terraform::PropertyOverride
+      specificReservation.instanceProperties.minCpuPlatform: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
