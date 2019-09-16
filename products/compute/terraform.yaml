@@ -230,6 +230,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         sensitive: true
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       portName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       protocol: !ruby/object:Overrides::Terraform::PropertyOverride

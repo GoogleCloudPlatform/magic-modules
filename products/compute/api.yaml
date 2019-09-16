@@ -932,6 +932,24 @@ objects:
         description: |
           How many seconds to wait for the backend before considering it a
           failed request. Default is 30 seconds. Valid range is [1, 86400].
+      - !ruby/object:Api::Type::NestedObject
+        name: 'logConfig'
+        min_version: beta
+        description: |
+          This field denotes the logging options for the load balancer traffic served by this backend service.
+          If logging is enabled, logs will be exported to Stackdriver.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enable'
+            description: |
+              Whether to enable logging for the load balancer traffic served by this backend service.
+          - !ruby/object:Api::Type::Double
+            name: 'sampleRate'
+            description: |
+              This field can only be specified if logging is enabled for this backend service. The value of
+              the field must be in [0, 1]. This configures the sampling rate of requests to the load balancer
+              where 1.0 means all logged requests are reported and 0.0 means no logged requests are reported.
+              The default value is 1.0.
   - !ruby/object:Api::Resource
     name: 'RegionBackendService'
     kind: 'compute#backendService'
