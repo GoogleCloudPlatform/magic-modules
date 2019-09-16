@@ -1886,10 +1886,12 @@ resource "google_compute_instance_template" "foobar" {
 
 func testAccComputeInstanceTemplate_invalidDiskType() string {
 	return fmt.Sprintf(`
-data "google_compute_image" "my_image" {
-	family  = "centos-7"
-	project = "gce-uefi-images"
-}
+# Use this datasource insead of hardcoded values when https://github.com/hashicorp/terraform/issues/22679
+# is resolved.
+# data "google_compute_image" "my_image" {
+# 	family  = "centos-7"
+# 	project = "gce-uefi-images"
+# }
 
 resource "google_compute_instance_template" "foobar" {
 	name = "instancet-test-%s"
@@ -1897,7 +1899,7 @@ resource "google_compute_instance_template" "foobar" {
 	can_ip_forward = false
 
 	disk {
-		source_image = "${data.google_compute_image.my_image.self_link}"
+		source_image = "https://www.googleapis.com/compute/v1/projects/gce-uefi-images/global/images/centos-7-v20190729"
 		auto_delete = true
 		boot = true
 	}
@@ -1909,7 +1911,7 @@ resource "google_compute_instance_template" "foobar" {
 	}
 
 	disk {
-		source_image = "${data.google_compute_image.my_image.self_link}"
+		source_image = "https://www.googleapis.com/compute/v1/projects/gce-uefi-images/global/images/centos-7-v20190729"
 		auto_delete = true
 		type = "SCRATCH"
 	}
