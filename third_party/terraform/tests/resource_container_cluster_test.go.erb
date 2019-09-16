@@ -1978,7 +1978,6 @@ resource "google_container_cluster" "with_master_authorized_networks" {
 }
 
 func testAccContainerCluster_removeMasterAuthorizedNetworksConfig(clusterName string) string {
-
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_master_authorized_networks" {
 	name = "%s"
