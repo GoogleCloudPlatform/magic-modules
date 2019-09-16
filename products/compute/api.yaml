@@ -7239,9 +7239,6 @@ objects:
                   The name of the machine type to reserve.
               - !ruby/object:Api::Type::String
                 name: 'minCpuPlatform'
-                # Not really required, but CPU platforms vary by zone so we
-                # can't provide a default_value.
-                required: true
                 description: |
                   The minimum CPU platform for the reservation. For example,
                   `"Intel Skylake"`. See
