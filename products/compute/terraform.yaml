@@ -425,12 +425,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         set_hash_func: 'resourceComputeFirewallRuleHash'
       allowed.ip_protocol: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'protocol'
+        diff_suppress_func: 'compareCaseInsensitive'
       denied: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'deny'
         is_set: true
         set_hash_func: 'resourceComputeFirewallRuleHash'
       denied.ip_protocol: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'protocol'
+        diff_suppress_func: 'compareCaseInsensitive'
       destinationRanges: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         default_from_api: true
