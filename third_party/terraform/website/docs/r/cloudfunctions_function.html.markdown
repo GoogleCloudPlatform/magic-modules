@@ -13,6 +13,12 @@ Creates a new Cloud Function. For more information see
 and
 [API](https://cloud.google.com/functions/docs/apis).
 
+~> **Warning:** As of November 1, 2019, newly created Functions are
+private-by-default and will require [appropriate IAM permissions](https://cloud.google.com/functions/docs/reference/iam/roles)
+to be invoked. See below examples for how to set up the appropriate permissions,
+or view the Terraform [IAM resources](/docs/r/cloudfunctions_cloud_function_iam.html)
+for Cloud Functions.
+
 ## Example Usage
 
 ```hcl
@@ -40,10 +46,20 @@ resource "google_cloudfunctions_function" "function" {
   labels = {
     my-label = "my-label-value"
   }
-  
+
   environment_variables = {
     MY_ENV_VAR = "my-env-var-value"
   }
+}
+
+# Add IAM member for a user who can invoke the function (no admin actions)
+resource "google_cloudfunctions_function_iam_member" "invoker" {
+  project = "${google_cloudfunctions_function.function.project}"
+  region = "${google_cloudfunctions_function.function.region}"
+  cloud_function = "${google_cloudfunctions_function.function.name}"
+
+  role = "roles/cloudfunctions.invoker"
+  member = "user:myFunctionInvoker@example.com"
 }
 ```
 
