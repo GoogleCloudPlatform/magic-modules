@@ -529,6 +529,10 @@ func resourceComputeInstanceTemplateScratchDiskCustomizeDiff(diff *schema.Resour
 		if typee == "SCRATCH" && diskType != "local-ssd" {
 			return fmt.Errorf("SCRATCH disks must have a disk_type of local-ssd. disk %d has disk_type %s", i, diskType)
 		}
+
+		if diskType == "local-ssd" && typee != "SCRATCH" {
+			return fmt.Errorf("disks with a disk_type of local-ssd must be SCRATCH disks. disk %d is a %s disk", i, typee)
+		}
 	}
 
 	return nil
