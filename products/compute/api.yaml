@@ -726,13 +726,19 @@ objects:
                 range is [0.0, 1.0].
       - !ruby/object:Api::Type::NestedObject
         name: 'circuitBreakers'
+        description: |
+          Settings controlling the volume of connections to a backend service. This field
+          is applicable only when the load_balancing_scheme is set to INTERNAL_SELF_MANAGED.
         min_version: beta
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'connectTimeout'
+            description: |
+              The timeout for new network connections to hosts.
             properties:
               - !ruby/object:Api::Type::Integer
                 name: 'seconds'
+                required: true
                 description: |
                   Span of time at a resolution of a second.
                   Must be from 0 to 315,576,000,000 inclusive.
@@ -743,8 +749,6 @@ objects:
                   resolution. Durations less than one second are represented
                   with a 0 seconds field and a positive nanos field. Must
                   be from 0 to 999,999,999 inclusive.
-            description: |
-              The timeout for new network connections to hosts.
           - !ruby/object:Api::Type::Integer
             name: 'maxRequestsPerConnection'
             description: |
@@ -754,28 +758,28 @@ objects:
               will effectively disable keep alive.
           - !ruby/object:Api::Type::Integer
             name: 'maxConnections'
+            default_value: 1024
             description: |
               The maximum number of connections to the backend cluster.
-              If not specified, the default is 1024.
-            default_value: 1024
+              Defaults to 1024.
           - !ruby/object:Api::Type::Integer
             name: 'maxPendingRequests'
+            default_value: 1024
             description: |
               The maximum number of pending requests to the backend cluster.
-              If not specified, the default is 1024.
-            default_value: 1024
+              Defaults to 1024.
           - !ruby/object:Api::Type::Integer
             name: 'maxRequests'
+            default_value: 1024
             description: |
               The maximum number of parallel requests to the backend cluster.
-              If not specified, the default is 1024.
-            default_value: 1024
+              Defaults to 1024.
           - !ruby/object:Api::Type::Integer
             name: 'maxRetries'
+            default_value: 3
             description: |
               The maximum number of parallel retries to the backend cluster.
-              If not specified, the default is 3.
-            default_value: 3
+              Defaults to 3.
       - !ruby/object:Api::Type::NestedObject
         name: 'consistentHash'
         description: |
@@ -784,21 +788,27 @@ objects:
           policy is applicable only for HTTP connections. The affinity to a particular
           destination host will be lost when one or more hosts are added/removed from the
           destination service. This field specifies parameters that control consistent
-          hashing. This field is only applicable when localityLbPolicy is set to MAGLEV or
-          RING_HASH.  This field is applicable to either:   - A regional backend service
-          with the service_protocol set to HTTP, HTTPS, or HTTP2, and
-          load_balancing_scheme set to INTERNAL_MANAGED.  - A global backend service with
-          the load_balancing_scheme set to INTERNAL_SELF_MANAGED.
+          hashing. This field only applies if the load_balancing_scheme is set to
+          INTERNAL_SELF_MANAGED. This field is only applicable when locality_lb_policy is
+          set to MAGLEV or RING_HASH.
         min_version: beta
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'httpCookie'
+            description: |
+              Hash is based on HTTP Cookie. This field describes a HTTP cookie
+              that will be used as the hash key for the consistent hash load
+              balancer. If the cookie is not present, it will be generated.
+              This field is applicable if the sessionAffinity is set to HTTP_COOKIE.
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'ttl'
+                description: |
+                  Liftime of the cookie.
                 properties:
                   - !ruby/object:Api::Type::Integer
                     name: 'seconds'
+                    required: true
                     description: |
                       Span of time at a resolution of a second.
                       Must be from 0 to 315,576,000,000 inclusive.
@@ -809,8 +819,6 @@ objects:
                       resolution. Durations less than one second are represented
                       with a 0 seconds field and a positive nanos field. Must
                       be from 0 to 999,999,999 inclusive.
-                description: |
-                  Liftime of the cookie.
               - !ruby/object:Api::Type::String
                 name: 'name'
                 description: |
@@ -819,11 +827,6 @@ objects:
                 name: 'path'
                 description: |
                   Path to set for the cookie.
-            description: |
-              Hash is based on HTTP Cookie. This field describes a HTTP cookie
-              that will be used as the hash key for the consistent hash load
-              balancer. If the cookie is not present, it will be generated.
-              This field is applicable if the sessionAffinity is set to HTTP_COOKIE.
           - !ruby/object:Api::Type::String
             name: 'httpHeaderName'
             description: |
@@ -831,12 +834,14 @@ objects:
               This field is applicable if the sessionAffinity is set to HEADER_FIELD.
           - !ruby/object:Api::Type::Integer
             name: 'minimumRingSize'
+            default_value: 1024
             description: |
               The minimum number of virtual nodes to use for the hash ring.
-              Defaults to 1024. Larger ring sizes result in more granular load
+              Larger ring sizes result in more granular load
               distributions. If the number of hosts in the load balancing pool
               is larger than the ring size, each host will be assigned a single
               virtual node.
+              Defaults to 1024.
       - !ruby/object:Api::Type::NestedObject
         name: 'cdnPolicy'
         description: 'Cloud CDN configuration for this BackendService.'
@@ -989,6 +994,7 @@ objects:
           - :INTERNAL_SELF_MANAGED
       - !ruby/object:Api::Type::Enum
         name: 'localityLbPolicy'
+        input: true
         min_version: beta
         values:
           - :ROUND_ROBIN
@@ -1025,11 +1031,8 @@ objects:
                    build times and host selection times. For more information about
                    Maglev, refer to https://ai.google/research/pubs/pub44824
 
-          This field is applicable to either -
-
-          A regional backend service with the serviceProtocol set to HTTP, HTTPS,
-          or HTTP2, and loadBalancingScheme set to INTERNAL_MANAGED.
-          A global backend service with the loadBalancingScheme set to INTERNAL_SELF_MANAGED.
+          This field is applicable only when the load_balancing_scheme is set to
+          INTERNAL_SELF_MANAGED.
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
@@ -1047,9 +1050,7 @@ objects:
         min_version: beta
         description: |
           Settings controlling eviction of unhealthy hosts from the load balancing pool.
-          This field is applicable to either a regional backend service with the
-          service_protocol set to HTTP, HTTPS, or HTTP2, and load_balancing_scheme set to
-          INTERNAL_MANAGED or a global backend service with the load_balancing_scheme set
+          This field is applicable only when the load_balancing_scheme is set
           to INTERNAL_SELF_MANAGED.
         properties:
           - !ruby/object:Api::Type::NestedObject
@@ -1060,16 +1061,17 @@ objects:
               30000ms or 30s.
             properties:
               - !ruby/object:Api::Type::Integer
+                name: 'seconds'
+                required: true
+                description: |
+                  Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
+                  inclusive.
+              - !ruby/object:Api::Type::Integer
                 name: 'nanos'
                 description: |
                   Span of time that's a fraction of a second at nanosecond resolution. Durations
                   less than one second are represented with a 0 `seconds` field and a positive
                   `nanos` field. Must be from 0 to 999,999,999 inclusive.
-              - !ruby/object:Api::Type::Integer
-                name: 'seconds'
-                description: |
-                  Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
-                  inclusive.
           - !ruby/object:Api::Type::Integer
             name: 'consecutiveErrors'
             default_value: 5
@@ -1112,16 +1114,17 @@ objects:
               ejections as well as hosts being returned to service. Defaults to 10 seconds.
             properties:
               - !ruby/object:Api::Type::Integer
+                name: 'seconds'
+                required: true
+                description: |
+                  Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
+                  inclusive.
+              - !ruby/object:Api::Type::Integer
                 name: 'nanos'
                 description: |
                   Span of time that's a fraction of a second at nanosecond resolution. Durations
                   less than one second are represented with a 0 `seconds` field and a positive
                   `nanos` field. Must be from 0 to 999,999,999 inclusive.
-              - !ruby/object:Api::Type::Integer
-                name: 'seconds'
-                description: |
-                  Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
-                  inclusive.
           - !ruby/object:Api::Type::Integer
             name: 'maxEjectionPercent'
             default_value: 10
@@ -1187,18 +1190,7 @@ objects:
         name: 'sessionAffinity'
         description: |
           Type of session affinity to use. The default is NONE. Session affinity is
-          not applicable if the --protocol is UDP.
-
-          When the loadBalancingScheme is EXTERNAL, possible values are NONE,
-          CLIENT_IP, or GENERATED_COOKIE. You can use GENERATED_COOKIE if the
-          protocol is HTTP or HTTPS.
-
-          When the loadBalancingScheme is INTERNAL, possible values are NONE,
-          CLIENT_IP, CLIENT_IP_PROTO, or CLIENT_IP_PORT_PROTO.
-
-          When the loadBalancingScheme is INTERNAL_SELF_MANAGED, possible values
-          are NONE, CLIENT_IP, GENERATED_COOKIE, or (google-beta provider only)
-          HEADER_FIELD, or HTTP_COOKIE.
+          not applicable if the protocol is UDP.
         values:
           - :NONE
           - :CLIENT_IP
@@ -1206,7 +1198,7 @@ objects:
           - :CLIENT_IP_PROTO
           - :GENERATED_COOKIE
           - :HEADER_FIELD
-          - :GENERATED_COOKIE
+          - :HTTP_COOKIE
       - !ruby/object:Api::Type::Integer
         name: 'timeoutSec'
         description: |

@@ -184,7 +184,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           backend_service_name: "backend-service"
           http_health_check_name: "health-check"
       - !ruby/object:Provider::Terraform::Examples
-        name: "backend_service_traffic_director"
+        name: "backend_service_traffic_director_round_robin"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+          health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_traffic_director_ring_hash"
         min_version: beta
         primary_resource_id: "default"
         vars:
