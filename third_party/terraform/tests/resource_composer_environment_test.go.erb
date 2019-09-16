@@ -312,6 +312,7 @@ resource "google_composer_environment" "test" {
 		node_config {
 			network    = "${google_compute_network.test.self_link}"
 			subnetwork = "${google_compute_subnetwork.test.self_link}"
+			zone       = "us-central1-a"
 		}
 	}
 }
@@ -384,6 +385,7 @@ resource "google_composer_environment" "test" {
 		node_config {
 			network    = "${google_compute_network.test.self_link}"
 			subnetwork = "${google_compute_subnetwork.test.self_link}"
+			zone       = "us-central1-a"
 		}
 
 		software_config {
@@ -479,6 +481,7 @@ resource "google_composer_environment" "test" {
 		node_config {
 			network    = "${google_compute_network.test.self_link}"
 			subnetwork =  "${google_compute_subnetwork.test.self_link}"
+			zone       = "us-central1-a"
 		}
 		software_config {
 			image_version  = "${data.google_composer_image_versions.all.image_versions.0.image_version_id}"
@@ -512,6 +515,7 @@ resource "google_composer_environment" "test" {
 		node_config {
 			network    = "${google_compute_network.test.self_link}"
 			subnetwork =  "${google_compute_subnetwork.test.self_link}"
+			zone       = "us-central1-a"
 		}
 		software_config {
 			pypi_packages = {
