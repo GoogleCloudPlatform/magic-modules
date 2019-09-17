@@ -15,7 +15,7 @@ get_all_modules() {
   file_name=$remote_name
   ssh-agent bash -c "ssh-add ~/github_private_key; git fetch $remote_name"
   git checkout $remote_name/devel
-  git ls-files -- plugins/modules/gcp_* | cut -d/ -f 6 | cut -d. -f 1 > $file_name
+  git ls-files -- lib/ansible/modules/cloud/gcp_* | cut -d/ -f 6 | cut -d. -f 1 > $file_name
   
   for i in "${ignored_modules[@]}"; do
     sed -i "/$i/d" $file_name
