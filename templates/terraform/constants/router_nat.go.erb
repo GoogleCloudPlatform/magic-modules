@@ -27,8 +27,10 @@ func resourceNameSetFromSelfLinkSet(v interface{}) *schema.Set {
 	return schema.NewSet(schema.HashString, ls)
 }
 
-// drainNatIps can only be set in update, and must have been a value in natIps prior.
-// This CustomDiff validate that drainNatIps is only set on update.
+// drain_nat_ips MUST be set from (just set) previous values of nat_ips
+// so this customizeDiff func makes sure drainNatIps values:
+//   - aren't set at creation time
+//   - are in old value of nat_ips but not in new values
 func resourceComputeRouterNatDrainNatIpsCustomDiff(diff *schema.ResourceDiff, meta interface{}) error {
 	o, n := diff.GetChange("drain_nat_ips")
 	oSet := resourceNameSetFromSelfLinkSet(o)
