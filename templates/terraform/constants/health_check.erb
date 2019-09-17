@@ -32,6 +32,9 @@ func healthCheckCustomizeDiff(diff *schema.ResourceDiff, v interface{}) error {
     if diff.Get("https_health_check") != nil {
         return validatePortSpec(diff, "https_health_check")
     }
+    if diff.Get("http2_health_check") != nil {
+        return validatePortSpec(diff, "http2_health_check")
+    }
     if diff.Get("tcp_health_check") != nil {
         return validatePortSpec(diff, "tcp_health_check")
     }
@@ -56,6 +59,8 @@ func portDiffSuppress(k, old, new string, _ *schema.ResourceData) bool {
             case "http_health_check":
                 defaultPort = 80
             case "https_health_check":
+                defaultPort = 443
+            case "http2_health_check":
                 defaultPort = 443
             case "tcp_health_check":
                 defaultPort = 80
