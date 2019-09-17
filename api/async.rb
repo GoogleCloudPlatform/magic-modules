@@ -57,6 +57,7 @@ module Api
         check :path, type: String, required: true
         check :base_url, type: String
         check :wait_ms, type: Integer, required: true
+        check :timeouts, type: Api::Timeouts
 
         check :full_url, type: String
 
