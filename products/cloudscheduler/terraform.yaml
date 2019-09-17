@@ -64,6 +64,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateHttpHeaders()'
       appEngineHttpTarget.appEngineRouting: !ruby/object:Overrides::Terraform::PropertyOverride
+        # This is _correct_, but we don't support ignore_read on nested fields
+        # so we use a custom_flatten for now.
+        # https://github.com/GoogleCloudPlatform/magic-modules/issues/1019
+        ignore_read: true
         custom_flatten: templates/terraform/custom_flatten/cloudscheduler_job_appenginerouting.go.erb
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
