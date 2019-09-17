@@ -1,6 +1,4 @@
 
-log.Printf("[DEBUG] Versions found for service  %q: %#v", d.Id(), versions)
-
 if d.Get("noop_on_destroy") == true {
 	log.Printf("[DEBUG] Keeping the StandardAppVersion %q", d.Id())
 	return nil
@@ -37,35 +35,27 @@ if d.Get("noop_on_destroy") == true {
 	return nil
 	return nil
 } else {	
-
-
 	config := meta.(*Config)
-
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
-
 	lockName, err := replaceVars(d, config, "apps/{{project}}/services/{{service}}")
 	if err != nil {
 		return err
 	}
 	mutexKV.Lock(lockName)
 	defer mutexKV.Unlock(lockName)
-
 	url, err := replaceVars(d, config, "{{AppEngineBasePath}}apps/{{project}}/services/{{service}}/versions/{{version_id}}")
 	if err != nil {
 		return err
 	}
-
 	var obj map[string]interface{}
 	log.Printf("[DEBUG] Deleting StandardAppVersion %q", d.Id())
-
 	res, err := sendRequestWithTimeout(config, "DELETE", project, url, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return handleNotFoundError(err, d, "StandardAppVersion")
 	}
-
 	op := &appengine.Operation{}
 	err = Convert(res, op)
 	if err != nil {
