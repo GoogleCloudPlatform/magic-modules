@@ -777,7 +777,7 @@ resource "google_container_node_pool" "np" {
 	cluster  = "${google_container_cluster.cluster.name}"
 
 	initial_node_count = 1
-  node_locations     = ["us-central1-a", "us-central1-c"]
+	node_locations     = ["us-central1-a", "us-central1-c"]
 }`, cluster, cluster, np)
 }
 <% end -%>

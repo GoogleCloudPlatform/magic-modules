@@ -131,10 +131,11 @@ this will force recreation of the resource.
     See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/flexible-pod-cidr)
     for more information.
 
-* `node_locations` - (Optional) The list of zones in which the node pool's nodes
-should be located. Nodes must be in the region of their regional cluster or in
-the same region as their cluster's zone for zonal clusters. If unspecified, the
-cluster-level `node_locations` will be used.
+* `node_locations` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html))
+The list of zones in which the node pool's nodes should be located. Nodes must
+be in the region of their regional cluster or in the same region as their
+cluster's zone for zonal clusters. If unspecified, the cluster-level
+`node_locations` will be used.
 
 -> Note: `node_locations` will not revert to the cluster's default set of zones
 upon being unset. You must manually reconcile the list of zones with your
