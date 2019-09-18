@@ -170,7 +170,7 @@ var RuntimeconfigCustomEndpointEntry = &schema.Schema{
 	ValidateFunc: validateCustomEndpoint,
 	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 		"GOOGLE_RUNTIMECONFIG_CUSTOM_ENDPOINT",
-	}, RuntimeconfigDefaultBasePath),
+	}, RuntimeConfigDefaultBasePath),
 }
 
 var ServiceManagementDefaultBasePath = "https://servicemanagement.googleapis.com/v1/"
