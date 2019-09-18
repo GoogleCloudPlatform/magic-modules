@@ -440,3 +440,61 @@ objects:
             name: 'shell'
             description: |
               The format should be a shell command that can be fed to bash -c.
+  - !ruby/object:Api::Resource
+    name: 'UrlDispatchRule'
+    description: |
+      Rules to match an HTTP request and dispatch that request to a service.
+    base_url: 'apps/{{project}}'
+    create_url: 'apps/{{project}}/services/{{service_id}}?&updateMask=dispatchRules'
+    create_verb: :PATCH
+    update_url: 'apps/{{project}}/services/{{service_id}}'
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps'
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'appengine#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'service_id'
+        url_param_only: true
+        resource: 'Service'
+        imports: 'name'
+        description: |
+          AppEngine service resource
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'dispatchRules'
+        description: |
+          Rules to match an HTTP request and dispatch that request to a service.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'domain'
+            description: |
+               Domain name to match against. The wildcard "*" is supported if specified before a period: "*.".
+               Defaults to matching all domains: "*".
+          - !ruby/object:Api::Type::String
+            name: 'path'
+            description: |
+               Pathname within the host. Must start with a "/". A single "*" can be included at the end of the path.
+               The sum of the lengths of the domain and path may not exceed 100 characters.
+          - !ruby/object:Api::Type::String
+            name: 'service'
+            description: |
+               Resource ID of a service in this application that should serve the matched request. The service must already exist. Example: default
