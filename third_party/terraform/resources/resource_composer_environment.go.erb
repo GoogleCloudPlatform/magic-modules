@@ -17,9 +17,7 @@ import (
 const (
 	composerEnvironmentEnvVariablesRegexp          = "[a-zA-Z_][a-zA-Z0-9_]*."
 	composerEnvironmentReservedAirflowEnvVarRegexp = "AIRFLOW__[A-Z0-9_]+__[A-Z0-9_]+"
-<% unless version == 'ga' -%>
 	composerEnvironmentVersionRegexp               = `composer-([0-9]+\.[0-9]+\.[0-9]+|latest)-airflow-([0-9]+\.[0-9]+(\.[0-9]+.*)?)`
-<% end -%>
 )
 
 var composerEnvironmentReservedEnvVar = map[string]struct{}{
@@ -227,7 +225,6 @@ func resourceComposerEnvironment() *schema.Resource {
 									"image_version": {
 										Type:     schema.TypeString,
 										Computed: true,
-<% unless version == 'ga' -%>
 										Optional: true,
 										ValidateFunc: validateRegexp(composerEnvironmentVersionRegexp),
 										DiffSuppressFunc: composerImageVersionDiffSuppress,
@@ -237,7 +234,6 @@ func resourceComposerEnvironment() *schema.Resource {
 										Optional: true,
 										Computed: true,
 										ForceNew: true,
-<% end -%>
 									},
 								},
 							},
@@ -399,7 +395,6 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			return err
 		}
 
-<% unless version == 'ga' -%>
 		if d.HasChange("config.0.software_config.0.image_version") {
 			patchObj := &composer.Environment{
 				Config: &composer.EnvironmentConfig{
@@ -415,7 +410,6 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 			d.SetPartial("config")
 		}
-<% end -%>
 
 		if d.HasChange("config.0.software_config.0.airflow_config_overrides") {
 			patchObj := &composer.Environment{
@@ -669,9 +663,7 @@ func flattenComposerEnvironmentConfigSoftwareConfig(softwareCfg *composer.Softwa
 	}
 	transformed := make(map[string]interface{})
 	transformed["image_version"] = softwareCfg.ImageVersion
-<% unless version == 'ga' -%>
 	transformed["python_version"] = softwareCfg.PythonVersion
-<% end -%>
 	transformed["airflow_config_overrides"] = softwareCfg.AirflowConfigOverrides
 	transformed["pypi_packages"] = softwareCfg.PypiPackages
 	transformed["env_variables"] = softwareCfg.EnvVariables
@@ -945,9 +937,7 @@ func expandComposerEnvironmentConfigSoftwareConfig(v interface{}, d *schema.Reso
 	transformed := &composer.SoftwareConfig{}
 
 	transformed.ImageVersion = original["image_version"].(string)
-<% unless version == 'ga' -%>
 	transformed.PythonVersion = original["python_version"].(string)
-<% end -%>
 	transformed.AirflowConfigOverrides = expandComposerEnvironmentConfigSoftwareConfigStringMap(original, "airflow_config_overrides")
 	transformed.PypiPackages = expandComposerEnvironmentConfigSoftwareConfigStringMap(original, "pypi_packages")
 	transformed.EnvVariables = expandComposerEnvironmentConfigSoftwareConfigStringMap(original, "env_variables")
@@ -1113,7 +1103,6 @@ func validateServiceAccountRelativeNameOrEmail(v interface{}, k string) (ws []st
 	return
 }
 
-<% unless version == 'ga' -%>
 func composerImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	versionRe := regexp.MustCompile(composerEnvironmentVersionRegexp)
 	oldVersions := versionRe.FindStringSubmatch(old)
@@ -1169,4 +1158,3 @@ func versionsEqual(old, new string) (bool, error) {
 	}
 	return o.Equal(n), nil
 }
-<% end -%>
