@@ -28,24 +28,16 @@ resource "google_app_engine_standard_app_version" "myapp_v1" {
 
 }
 
-resource "google_app_engine_application_url_dispatch_rules" "service_rules" {
+resource "google_app_engine_application_url_dispatch_rule" "service_rules" {
   # project = "my-project"
-
   dispatch_rule {
-    host    = "*"
-    path    = "/users/billing"
-    service = "billing-service"
+    domain = "*"
+    path = "/default/*"
+    service = "default"
   }
-
   dispatch_rule {
-    host    = "*"
-    path    = "/users/*"
-    service = "${google_app_engine_standard_app_version.myapp_v2.service}"
-  }
-
-  dispatch_rule {
-    host    = "admin-console.foobar.com"
-    path    = "/*"
-    service = ""
+    domain = "*"
+    path = "/myapp/*"
+    service = "myapp"
   }
 }
