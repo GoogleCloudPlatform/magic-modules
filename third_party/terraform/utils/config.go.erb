@@ -356,14 +356,14 @@ func (c *Config) LoadAndValidate() error {
 	c.clientResourceManagerV2Beta1.UserAgent = userAgent
 	c.clientResourceManagerV2Beta1.BasePath = resourceManagerV2Beta1BasePath
 
-	runtimeconfigClientBasePath := removeBasePathVersion(c.RuntimeconfigBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud Runtimeconfig client for path %s", runtimeconfigClientBasePath)
+	runtimeConfigClientBasePath := removeBasePathVersion(c.RuntimeConfigBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud Runtimeconfig client for path %s", runtimeConfigClientBasePath)
 	c.clientRuntimeconfig, err = runtimeconfig.NewService(context, option.WithHTTPClient(client))
 	if err != nil {
 		return err
 	}
 	c.clientRuntimeconfig.UserAgent = userAgent
-	c.clientRuntimeconfig.BasePath = runtimeconfigClientBasePath
+	c.clientRuntimeconfig.BasePath = runtimeConfigClientBasePath
 
 	iamClientBasePath := removeBasePathVersion(c.IAMBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud IAM client for path %s", iamClientBasePath)
