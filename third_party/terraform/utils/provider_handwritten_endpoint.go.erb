@@ -163,8 +163,8 @@ var ResourceManagerV2Beta1CustomEndpointEntry = &schema.Schema{
 	}, ResourceManagerV2Beta1DefaultBasePath),
 }
 
-var RuntimeconfigCustomEndpointEntryKey = "runtimeconfig_custom_endpoint"
-var RuntimeconfigCustomEndpointEntry = &schema.Schema{
+var RuntimeConfigCustomEndpointEntryKey = "runtimeconfig_custom_endpoint"
+var RuntimeConfigCustomEndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
 	Optional:     true,
 	ValidateFunc: validateCustomEndpoint,
