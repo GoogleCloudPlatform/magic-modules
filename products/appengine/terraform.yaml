@@ -96,7 +96,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "app_engine_application_url_dispatch_rules"
+        name: "app_engine_application_url_dispatch_rule"
         vars:
           project_id: "test-project"
 # This is for copying files over
