@@ -110,14 +110,14 @@ resource "google_compute_region_backend_service" "foobar" {
 }
 
 resource "google_compute_region_health_check" "zero" {
-	region        = "us-central1"
-	name               = "regionurlmap-test-%s"
+	region = "us-central1"
+	name   = "regionurlmap-test-%s"
 	http_health_check {
 	}
 }
 
 resource "google_compute_region_url_map" "foobar" {
-	region        = "us-central1"
+	region          = "us-central1"
 	name            = "regionurlmap-test-%s"
 	default_service = "${google_compute_region_backend_service.foobar.self_link}"
 
@@ -155,14 +155,14 @@ resource "google_compute_region_backend_service" "foobar" {
 }
 
 resource "google_compute_region_health_check" "zero" {
-	region        = "us-central1"
-	name               = "regionurlmap-test-%s"
+	region = "us-central1"
+	name   = "regionurlmap-test-%s"
 	http_health_check {
 	}
 }
 
 resource "google_compute_region_url_map" "foobar" {
-	region        = "us-central1"
+	region          = "us-central1"
 	name            = "regionurlmap-test-%s"
 	default_service = "${google_compute_region_backend_service.foobar.self_link}"
 
@@ -200,14 +200,14 @@ resource "google_compute_region_backend_service" "foobar" {
 }
 
 resource "google_compute_region_health_check" "zero" {
-	region        = "us-central1"
-	name               = "regionurlmap-test-%s"
+	region = "us-central1"
+	name   = "regionurlmap-test-%s"
 	http_health_check {
 	}
 }
 
 resource "google_compute_region_url_map" "foobar" {
-	region        = "us-central1"
+	region          = "us-central1"
 	name            = "regionurlmap-test-%s"
 	default_service = "${google_compute_region_backend_service.foobar.self_link}"
 
@@ -254,14 +254,14 @@ resource "google_compute_region_backend_service" "foobar" {
 }
 
 resource "google_compute_region_health_check" "zero" {
-	region        = "us-central1"
-	name               = "regionurlmap-test-%s"
+	region = "us-central1"
+	name = "regionurlmap-test-%s"
 	http_health_check {
 	}
 }
 
 resource "google_compute_region_url_map" "foobar" {
-	region        = "us-central1"
+	region          = "us-central1"
 	name            = "regionurlmap-test-%s"
 	default_service = "${google_compute_region_backend_service.foobar.self_link}"
 
@@ -328,14 +328,14 @@ resource "google_compute_region_backend_service" "foobar" {
 }
 
 resource "google_compute_region_health_check" "zero" {
-	region        = "us-central1"
-	name               = "regionurlmap-test-%s"
+	region = "us-central1"
+	name   = "regionurlmap-test-%s"
 	http_health_check {
 	}
 }
 
 resource "google_compute_region_url_map" "foobar" {
-	region        = "us-central1"
+	region          = "us-central1"
 	name            = "regionurlmap-test-%s"
 	default_service = "${google_compute_region_backend_service.foobar.self_link}"
 
