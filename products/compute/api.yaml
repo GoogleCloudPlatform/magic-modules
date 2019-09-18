@@ -6594,7 +6594,6 @@ objects:
           create the disk. Provide this when creating the disk.
   - !ruby/object:Api::Resource
     name: 'RegionUrlMap'
-    min_version: beta
     kind: 'compute#urlMap'
     base_url: projects/{{project}}/regions/{{region}}/urlMaps
     collection_url_key: 'items'
@@ -6625,7 +6624,7 @@ objects:
         name: 'region'
         resource: 'Region'
         imports: 'name'
-        description: 'A reference to the region where the disk resides.'
+        description: 'A reference to the region where the url map resides.'
         required: true
     properties:
       - !ruby/object:Api::Type::Time
@@ -6764,7 +6763,6 @@ objects:
                 should be mapped to.
   - !ruby/object:Api::Resource
     name: 'RegionHealthCheck'
-    min_version: beta
     kind: 'compute#healthCheck'
     base_url: projects/{{project}}/regions/{{region}}/healthChecks
     collection_url_key: 'items'
@@ -8196,6 +8194,82 @@ objects:
           Expire time of the certificate.
         output: true
   - !ruby/object:Api::Resource
+    name: 'RegionSslCertificate'
+    kind: 'compute#sslCertificate'
+    base_url: projects/{{project}}/regions/{{region}}/sslCertificates
+    collection_url_key: 'items'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionSslCertificates'
+    input: true
+    has_self_link: true
+    description: |
+      A RegionSslCertificate resource, used for HTTPS load balancing. This resource
+      provides a mechanism to upload an SSL key and certificate to
+      the load balancer to serve secure connections from the user.
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        required: true
+        input: true
+        description: |
+          The region where the regional ssl certificate resides.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'certificate'
+        description: |
+          The certificate in PEM format.
+          The certificate chain must be no greater than 5 certs long.
+          The chain must include at least one intermediate cert.
+        required: true
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource. Provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+      - !ruby/object:Api::Type::String
+        name: 'privateKey'
+        description: 'The write-only private key in PEM format.'
+        required: true
+        input: true
+  - !ruby/object:Api::Resource
     name: 'Reservation'
     base_url: projects/{{project}}/zones/{{zone}}/reservations
     collection_url_key: 'items'
@@ -8599,7 +8673,6 @@ objects:
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
       - !ruby/object:Api::Type::Enum
         name: 'purpose'
-        min_version: 'beta'
         input: true
         values:
           - :INTERNAL_HTTPS_LOAD_BALANCER
@@ -8614,7 +8687,6 @@ objects:
           If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set the role.
       - !ruby/object:Api::Type::Enum
         name: 'role'
-        min_version: 'beta'
         update_verb: :PATCH
         update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
         values:
@@ -8718,7 +8790,6 @@ objects:
         'Cloud Networking':
           'https://cloud.google.com/vpc/docs/using-vpc'
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/subnetworks'
-
   - !ruby/object:Api::Resource
     name: 'TargetHttpProxy'
     kind: 'compute#targetHttpProxy'
@@ -8894,6 +8965,205 @@ objects:
         required: true
         update_verb: :POST
         update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setUrlMap'
+  - !ruby/object:Api::Resource
+    name: 'RegionTargetHttpProxy'
+    kind: 'compute#targetHttpProxy'
+    base_url: projects/{{project}}/regions/{{region}}/targetHttpProxies
+    collection_url_key: 'items'
+    has_self_link: true
+    input: true
+    description: |
+      Represents a RegionTargetHttpProxy resource, which is used by one or more
+      forwarding rules to route incoming HTTP requests to a URL map.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionTargetHttpProxies'
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        required: true
+        input: true
+        description: |
+          The region where the regional proxy resides.
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource. Provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        required: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'urlMap'
+        resource: 'RegionUrlMap'
+        imports: 'selfLink'
+        description: |
+          A reference to the UrlMap resource that defines the mapping from URL
+          to the BackendService.
+        required: true
+        update_verb: :POST
+        update_url: 'projects/{{project}}/regions/{{region}}/targetHttpProxies/{{name}}/setUrlMap'
+  - !ruby/object:Api::Resource
+    name: 'RegionTargetHttpsProxy'
+    kind: 'compute#targetHttpsProxy'
+    base_url: projects/{{project}}/regions/{{region}}/targetHttpsProxies
+    collection_url_key: 'items'
+    has_self_link: true
+    input: true
+    description: |
+      Represents a RegionTargetHttpsProxy resource, which is used by one or more
+      forwarding rules to route incoming HTTPS requests to a URL map.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionTargetHttpsProxies'
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        input: true
+        required: true
+        description: |
+          The region where the regional proxy resides.
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional description of this resource.'
+        input: true
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource. Provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        input: true
+        required: true
+     # This field is present in the schema but as of 2019 Sep 23 attempting to set it fails with
+     # a 400 "QUIC override is supported only with global TargetHttpsProxy". jamessynge@ said in an
+     # email sent on 2019 Sep 20 that support for this "is probably far in the future."
+     #- !ruby/object:Api::Type::Enum
+     #  name: 'quicOverride'
+     #  description: |
+     #    Specifies the QUIC override policy for this resource. This determines
+     #    whether the load balancer will attempt to negotiate QUIC with clients
+     #    or not. Can specify one of NONE, ENABLE, or DISABLE. If NONE is
+     #    specified, uses the QUIC policy with no user overrides, which is
+     #    equivalent to DISABLE. Not specifying this field is equivalent to
+     #    specifying NONE.
+     #  values:
+     #    - :NONE
+     #    - :ENABLE
+     #    - :DISABLE
+     #  update_verb: :POST
+     #  update_url:
+     #    'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setQuicOverride'
+      - !ruby/object:Api::Type::Array
+        name: 'sslCertificates'
+        description: |
+          A list of SslCertificate resources that are used to authenticate
+          connections between users and the load balancer. Currently, exactly
+          one SSL certificate must be specified.
+        required: true
+        update_verb: :POST
+        update_url:
+          'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslCertificates'
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'sslCertificate'
+          resource: 'RegionSslCertificate'
+          imports: 'selfLink'
+          description: 'The SSL certificates used by this TargetHttpsProxy'
+     # This field is present in the schema but as of 2019 Sep 23 attempting to set it fails with
+     # a 400 "SSL policy is supported only with global TargetHttpsProxy". jamessynge@ said in an
+     # email sent on 2019 Sep 20 that they hope to support this "in the next 6 months I hope."
+     #- !ruby/object:Api::Type::ResourceRef
+     #  name: 'sslPolicy'
+     #  resource: 'SslPolicy'
+     #  imports: 'selfLink'
+     #  description: |
+     #    A reference to the SslPolicy resource that will be associated with
+     #    the TargetHttpsProxy resource. If not set, the TargetHttpsProxy
+     #    resource will not have any SSL policy configured.
+     #  update_verb: :POST
+     #  update_url:
+     #    'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslPolicy'
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'urlMap'
+        resource: 'RegionUrlMap'
+        imports: 'selfLink'
+        description: |
+          A reference to the RegionUrlMap resource that defines the mapping from URL
+          to the RegionBackendService.
+        required: true
+        update_verb: :POST
+        update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setUrlMap'
   - !ruby/object:Api::Resource
     name: 'TargetInstance'
     kind: 'compute#targetInstance'

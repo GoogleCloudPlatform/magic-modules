@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-<% unless version == 'ga' -%>
 func TestAccComputeRegionUrlMap_update_path_matcher(t *testing.T) {
 	t.Parallel()
 
@@ -358,4 +357,3 @@ resource "google_compute_region_url_map" "foobar" {
 }
 `, randomSuffix, randomSuffix, randomSuffix)
 }
-<% end -%>
