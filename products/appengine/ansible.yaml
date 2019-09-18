@@ -31,6 +31,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   DomainMapping: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  UrlDispatchRule: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

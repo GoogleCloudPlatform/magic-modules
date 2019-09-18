@@ -36,7 +36,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       entrypoint: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
       service: !ruby/object:Overrides::Inspec::PropertyOverride
-        exclude: true    
+        exclude: true  
   Service: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true  
+  UrlDispatchRule: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true 
   
