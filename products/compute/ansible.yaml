@@ -22,6 +22,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  DiskResourcePolicyAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   # Readonly resources.
   DiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -44,6 +46,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Reservation: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  ResourcePolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -80,6 +84,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         aliases:
           - timeout_seconds
   RegionBackendService: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  DiskResourcePolicyAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Disk: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
@@ -247,6 +253,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The source snapshot used to create this disk. You can provide this as
           a partial or full URL to the resource.
+  ResourcePolicy: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   Route: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       nextHopGateway: !ruby/object:Overrides::Ansible::PropertyOverride
