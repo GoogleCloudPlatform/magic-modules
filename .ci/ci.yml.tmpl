@@ -364,14 +364,6 @@ jobs:
                   path: mm-initial-pr
               get_params:
                   skip_clone: true
-          # TODO(emilymye): Aggregate or add into create-or-update-pr
-          # to group updates to downstreams
-          - task: downstream-changelog-metadata
-            file: magic-modules/.ci/magic-modules/downstream-changelog-metadata.yml
-            params:
-              GITHUB_TOKEN: ((github-account.password))
-              DOWNSTREAM_REPOS: "{{','.join(vars.downstreams_with_changelogs)}}"
-
           - put: magic-modules
             params:
               repository: magic-modules/
@@ -380,7 +372,6 @@ jobs:
               force: true
             get_params:
                 skip_clone: true
-
           # Once everything is done and working, post the updated information to the
           # magic-modules PR.
           - put: magic-modules-new-prs
@@ -392,7 +383,12 @@ jobs:
                 label_file: magic-modules-with-comment/label_file
             get_params:
                 skip_clone: true
-
+          # Downstream changelog metadata
+          - task: downstream-changelog-metadata
+            file: magic-modules-with-comment/.ci/magic-modules/downstream-changelog-metadata.yml
+            params:
+              GITHUB_TOKEN: ((github-account.password))
+              DOWNSTREAM_REPOS: "{{','.join(vars.downstreams_with_changelogs)}}"
     - name: terraform-acceptance-tests
       plan:
         - get: magic-modules
