@@ -5837,6 +5837,7 @@ objects:
       error: !ruby/object:Api::Async::Error
         path: 'error/errors'
         message: 'message'
+    collection_url_key: 'items'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'

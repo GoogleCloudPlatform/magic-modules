@@ -38,6 +38,8 @@
     :version_added: '2.8'
   :Network:
     :version_added: '2.7'
+  :NodeTemplate:
+    :version_added: '2.10'
   :RegionDisk:
     :version_added: '2.8'
   :Route:
@@ -79,6 +81,8 @@
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
+    :purpose:
+      :version_added: '2.10'
     :networkTier:
       :version_added: '2.8'
     :subnetwork:
@@ -479,6 +483,22 @@
         :version_added: '2.6'
       :portSpecification:
         :version_added: '2.9'
+    :http2HealthCheck:
+      :version_added: '2.10'
+      :host:
+        :version_added: '2.10'
+      :requestPath:
+        :version_added: '2.10'
+      :response:
+        :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+      :portName:
+        :version_added: '2.10'
+      :proxyHeader:
+        :version_added: '2.10'
+      :portSpecification:
+        :version_added: '2.10'
   :InstanceTemplate:
     :version_added: '2.6'
     :description:
@@ -827,6 +847,24 @@
       :version_added: '2.8'
       :routingMode:
         :version_added: '2.8'
+  :NodeTemplate:
+    :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :nodeAffinityLabels:
+      :version_added: '2.10'
+    :nodeType:
+      :version_added: '2.10'
+    :nodeTypeFlexibility:
+      :version_added: '2.10'
+      :cpus:
+        :version_added: '2.10'
+      :memory:
+        :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
   :RegionDisk:
     :version_added: '2.8'
     :description:
