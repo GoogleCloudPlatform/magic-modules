@@ -94,6 +94,8 @@ module Provider
         check :name, type: String, required: true
         check :code, type: Hash, required: true
         check :scopes, type: Array, item_type: ::String
+
+        @name = "google.cloud.#{@name}"
       end
 
       def build_test(state, object, noop = false)
