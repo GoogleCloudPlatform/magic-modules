@@ -1276,6 +1276,7 @@
     </ul>
     </li>
 
+<% unless version == 'ga' %>
     <li<%%= sidebar_current("docs-google-vpc") %>>
     <a href="#">Google Serverless VPC Access Resources</a>
     <ul class="nav nav-visible">
@@ -1284,6 +1285,7 @@
       </li>
     </ul>
     </li>
+<% end -%>
 
   </ul>
 </div>
