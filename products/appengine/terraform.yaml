@@ -88,13 +88,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "ssl_settings.certificate_id"
           - "ssl_settings.ssl_management_type"
   UrlDispatchRule: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{service_id}}"
-    import_format: ["apps/{{project}}/services/{{service_id}}"]
+    self_link: 'dispatch/update?app_id={{project}}'
+    id_format: "dispatch/update?app_id={{project}}"
+    import_format: ["dispatch/update?app_id={{project}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_application_url_dispatch_rule"
         vars:
-          project_id: "test-project"
+          project: "my-project"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
