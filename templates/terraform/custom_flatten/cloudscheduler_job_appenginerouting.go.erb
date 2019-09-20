@@ -17,8 +17,8 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	if v == nil {
 		return nil
 	}
-	if targets := d.Get("app_engine_http_target").([]interface{}); len(targets) > 0 {
-		return targets[0].(map[string]interface{})["app_engine_routing"]
+	if v, ok := d.GetOK("app_engine_http_target"); ok && len(v.([]interface{})) > 0 {
+		return d.Get("app_engine_http_target.0.app_engine_routing")
 	}
 	return nil
 }
