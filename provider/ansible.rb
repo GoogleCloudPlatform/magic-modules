@@ -54,13 +54,9 @@ module Provider
         attr_accessor :example
       end
 
-      def api_version_setup(version_name)
-        version = @api.version_obj_or_closest(version_name)
-        @api.set_properties_based_on_version(version)
-
-        # Generate version_added_file
+      def initialize(config, api, version_name, start_time)
+        super(config, api, version_name, start_time)
         @version_added = build_version_added
-        version
       end
 
       # Returns a string representation of the corresponding Python type
@@ -159,7 +155,7 @@ module Provider
 
       def rrefs_in_link(link, object)
         props_in_link = link.scan(/{([a-z_]*)}/).flatten
-        (object.parameters || []).select do |p|
+        (object.all_user_properties || []).select do |p|
           props_in_link.include?(p.name.underscore) && \
             p.is_a?(Api::Type::ResourceRef) && !p.resource_ref.readonly
         end.any?
@@ -169,7 +165,7 @@ module Provider
         props_in_link = link.scan(/{([a-z_]*)}/).flatten
         props = props_in_link.map do |p|
           # Select a resourceref if it exists.
-          rref = (object.parameters || []).select do |prop|
+          rref = (object.all_user_properties || []).select do |prop|
             prop.name.underscore == p && \
               prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly
           end
@@ -237,7 +233,7 @@ module Provider
         target_folder = data.output_folder
         name = module_name(data.object)
         path = File.join(target_folder,
-                         "lib/ansible/modules/cloud/google/#{name}.py")
+                         "plugins/modules/#{name}.py")
         data.generate(
           data.object.template || 'templates/ansible/resource.erb',
           path,
@@ -250,21 +246,27 @@ module Provider
         path = ["products/#{data.product.api_name}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 
-        return unless data.object.has_tests
-        # Unlike other providers, all resources will not be built at once or
-        # in close timing to each other (due to external PRs).
-        # This means that examples might not be built out for every resource
-        # in a GCP product.
-        return unless File.file?(path)
+        return if data.object.tests.tests.empty?
 
         target_folder = data.output_folder
 
         name = module_name(data.object)
+
+        # Generate the main file with a list of tests.
         path = File.join(target_folder,
-                         "test/integration/targets/#{name}/tasks/main.yml")
-        unless data.object.custom_tests
+                         "tests/integration/targets/#{name}/tasks/main.yml")
+        data.generate(
+          'templates/ansible/tests_main.erb',
+          path,
+          self
+        )
+
+        # Generate each of the tests individually
+        data.object.tests.tests.each do |t|
+          path = File.join(target_folder,
+                           "tests/integration/targets/#{name}/tasks/#{t.name}.yml")
           data.generate(
-            'templates/ansible/integration_test.erb',
+            t.path,
             path,
             self
           )
@@ -272,7 +274,7 @@ module Provider
 
         # Generate 'defaults' file that contains variables.
         path = File.join(target_folder,
-                         "test/integration/targets/#{name}/defaults/main.yml")
+                         "tests/integration/targets/#{name}/defaults/main.yml")
         data.generate(
           'templates/ansible/integration_test_variables.erb',
           path,
@@ -285,20 +287,20 @@ module Provider
         name = module_name(data.object)
         data.generate('templates/ansible/facts.erb',
                       File.join(target_folder,
-                                "lib/ansible/modules/cloud/google/#{name}_info.py"),
+                                "plugins/modules/#{name}_info.py"),
                       self)
 
         # Generate symlink for old `facts` modules.
         return if version_added(data.object, :facts) >= '2.9'
 
         deprecated_facts_path = File.join(target_folder,
-                                          "lib/ansible/modules/cloud/google/_#{name}_facts.py")
+                                          "plugins/modules/_#{name}_facts.py")
         return if File.exist?(deprecated_facts_path)
 
         File.symlink "#{name}_info.py", deprecated_facts_path
       end
 
-      def generate_objects(output_folder, types, version_name)
+      def generate_objects(output_folder, types)
         # We have two sets of overrides - one for regular modules, one for
         # datasources.
         # When building regular modules, we will potentially need some
@@ -360,8 +362,8 @@ module Provider
       compile_file_list(data.output_folder, files, file_template)
     end
 
-    def copy_common_files(output_folder, version_name = 'ga', provider_name = 'ansible')
-      super(output_folder, version_name, provider_name)
+    def copy_common_files(output_folder, provider_name = 'ansible')
+      super(output_folder, provider_name)
     end
   end
 end

@@ -63,7 +63,7 @@ var schemaNodeConfig = &schema.Schema{
 							Type:             schema.TypeString,
 							Required:         true,
 							ForceNew:         true,
-							DiffSuppressFunc: linkDiffSuppress,
+							DiffSuppressFunc: compareSelfLinkOrResourceName,
 						},
 					},
 				},
@@ -314,7 +314,8 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 	if v, ok := nodeConfig["min_cpu_platform"]; ok {
 		nc.MinCpuPlatform = v.(string)
 	}
-<% unless version.nil? || version == 'ga' -%>
+
+<% unless version == 'ga' -%>
 	if v, ok := nodeConfig["taint"]; ok && len(v.([]interface{})) > 0 {
 		taints := v.([]interface{})
 		nodeTaints := make([]*containerBeta.NodeTaint, 0, len(taints))
@@ -329,7 +330,9 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 		}
 		nc.Taints = nodeTaints
 	}
+<% end -%>
 
+<% unless version == 'ga' -%>
 	if v, ok := nodeConfig["workload_metadata_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.WorkloadMetadataConfig = &containerBeta.WorkloadMetadataConfig{
@@ -368,7 +371,7 @@ func flattenNodeConfig(c *containerBeta.NodeConfig) []map[string]interface{} {
 		"tags":                     c.Tags,
 		"preemptible":              c.Preemptible,
 		"min_cpu_platform":         c.MinCpuPlatform,
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 		"taint":                    flattenTaints(c.Taints),
 		"workload_metadata_config": flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
 		"sandbox_config": 			flattenSandboxConfig(c.SandboxConfig),

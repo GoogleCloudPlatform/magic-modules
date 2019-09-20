@@ -24,6 +24,12 @@ module Overrides
     class ResourceOverride < Overrides::ResourceOverride
       def self.attributes
         [
+          # If non-empty, overrides the full given resource name.
+          # i.e. 'google_project' for resourcemanager.Project
+          # Use Provider::Terraform::Config.legacy_name to override just
+          # product name.
+          :legacy_name,
+
           # The Terraform resource id format used when calling #setId(...).
           # For instance, `{{name}}` means the id will be the resource name.
           :id_format,
@@ -69,6 +75,7 @@ module Overrides
 
         @examples ||= []
 
+        check :legacy_name, type: String
         check :id_format, type: String, default: '{{name}}'
         check :examples, item_type: Provider::Terraform::Examples, type: Array, default: []
         check :virtual_fields,
@@ -83,7 +90,7 @@ module Overrides
         check :autogen_async, type: :boolean, default: false
         check :exclude_import, type: :boolean, default: false
 
-        check :timeouts, type: Api::Timeouts, default: Api::Timeouts.new
+        check :timeouts, type: Api::Timeouts
         check :error_retry_predicates, type: Array, item_type: String
         check :schema_version, type: Integer
       end

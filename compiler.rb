@@ -23,6 +23,7 @@ Dir.chdir(File.dirname(__FILE__))
 # generation.
 ENV['TZ'] = 'UTC'
 
+require 'active_support/inflector'
 require 'api/compiler'
 require 'google/logger'
 require 'optparse'
@@ -34,7 +35,7 @@ require 'provider/terraform_oics'
 require 'provider/terraform_object_library'
 require 'pp' if ENV['COMPILER_DEBUG']
 
-products_to_compile = nil
+products_to_generate = nil
 all_products = false
 yaml_dump = false
 output_path = nil
@@ -49,8 +50,8 @@ Google::LOGGER.level = Logger::INFO
 
 # rubocop:disable Metrics/BlockLength
 OptionParser.new do |opt|
-  opt.on('-p', '--product PRODUCT', Array, 'Folder[,Folder...] with product catalog') do |p|
-    products_to_compile = p
+  opt.on('-p', '--product PRODUCT', Array, 'Folder[,Folder...] to generate resources from') do |p|
+    products_to_generate = p
   end
   opt.on('-a', '--all', 'Build all products. Cannot be used with --product.') do
     all_products = true
@@ -86,10 +87,21 @@ OptionParser.new do |opt|
 end.parse!
 # rubocop:enable Metrics/BlockLength
 
+# We use ActiveSupport Inflections to perform common string operations like
+# going from camelCase/PascalCase -> snake_case -> Title Case.
+# In order to not break the world, they've frozen the list of inflections the
+# library uses by default.
+# Particularly for initialisms, it may need a little help to generate great
+# code.
+ActiveSupport::Inflector.inflections(:en) do |inflect|
+  inflect.acronym 'TPU'
+  inflect.acronym 'VPC'
+end
+
 raise 'Cannot use -p/--products and -a/--all simultaneously' \
-  if products_to_compile && all_products
+  if products_to_generate && all_products
 raise 'Either -p/--products OR -a/--all must be present' \
-  if products_to_compile.nil? && !all_products
+  if products_to_generate.nil? && !all_products
 raise 'Option -o/--output is a required parameter' if output_path.nil?
 raise 'Option -e/--engine is a required parameter' if provider_name.nil?
 
@@ -105,11 +117,12 @@ if override_dir
   end
 end
 
-products_to_compile = all_product_files if all_products
-
-raise 'No api.yaml files found. Check provider/engine name.' if products_to_compile.empty?
+products_to_generate = all_product_files if all_products
+raise 'No api.yaml files found. Check your provider (-e) name.' if products_to_generate.empty?
 
 start_time = Time.now
+Google::LOGGER.info "Generating MM output to '#{output_path}'"
+Google::LOGGER.info "Using #{version} version"
 
 # products_for_version entries are a hash of product definitions (:definitions)
 # and provider config (:overrides) for the product
@@ -118,15 +131,16 @@ provider = nil
 # rubocop:disable Metrics/BlockLength
 all_product_files.each do |product_name|
   product_override_path = ''
-  provider_override_path = ''
   product_override_path = File.join(override_dir, product_name, 'api.yaml') if override_dir
   product_yaml_path = File.join(product_name, 'api.yaml')
+
+  provider_override_path = ''
   provider_override_path = File.join(override_dir, product_name, "#{provider_name}.yaml") \
     if override_dir
   provider_yaml_path = File.join(product_name, "#{provider_name}.yaml")
 
   unless File.exist?(product_yaml_path) || File.exist?(product_override_path)
-    raise "Product '#{product_name}' does not have an api.yaml file"
+    raise "#{product_name} does not contain an api.yaml file"
   end
 
   if File.exist?(product_override_path)
@@ -141,14 +155,12 @@ all_product_files.each do |product_name|
   end
 
   unless File.exist?(provider_yaml_path) || File.exist?(provider_override_path)
-    Google::LOGGER.info "Skipping product '#{product_name}' as no #{provider_name}.yaml file exists"
+    Google::LOGGER.info "#{product_name}: Skipped as no #{provider_name}.yaml file exists"
     next
   end
 
   raise "Output path '#{output_path}' does not exist or is not a directory" \
     unless Dir.exist?(output_path)
-
-  Google::LOGGER.info "Loading '#{product_name}' (at #{version})'"
 
   product_api = Api::Compiler.new(product_yaml).run
   product_api.validate
@@ -169,22 +181,12 @@ all_product_files.each do |product_name|
     product_api, provider_config, = \
       Provider::Config.parse(provider_override_path, product_api, version, override_dir)
   end
-  products_for_version.push(definitions: product_api, overrides: provider_config)
 
-  unless products_to_compile.include?(product_name)
-    Google::LOGGER.info "Skipping product '#{product_name}' as it was not specified to be compiled"
-    next
-  end
-
-  Google::LOGGER.info "Compiling '#{product_name}' (at #{version}) output to '#{output_path}'"
-  Google::LOGGER.info \
-    "Generating types: #{types_to_generate.empty? ? 'ALL' : types_to_generate}"
-
+  Google::LOGGER.info "#{product_name}: Compiling provider config"
   pp provider_config if ENV['COMPILER_DEBUG']
 
   if force_provider.nil?
-    provider = provider_config.provider.new(provider_config, product_api, start_time)
-
+    provider = provider_config.provider.new(provider_config, product_api, version, start_time)
   else
     override_providers = {
       'oics' => Provider::TerraformOiCS,
@@ -198,22 +200,31 @@ all_product_files.each do |product_name|
     end
 
     provider = \
-      override_providers[force_provider].new(provider_config, product_api, start_time)
+      override_providers[force_provider].new(provider_config, product_api, version, start_time)
   end
 
-  provider.generate output_path, types_to_generate, version, product_name, yaml_dump
+  # provider_config is mutated by instantiating a provider
+  products_for_version.push(definitions: product_api, overrides: provider_config)
+
+  unless products_to_generate.include?(product_name)
+    Google::LOGGER.info "#{product_name}: Not specified, skipping generation"
+    next
+  end
+
+  Google::LOGGER.info \
+    "#{product_name}: Generating types: #{types_to_generate.empty? ? 'ALL' : types_to_generate}"
+  provider.generate output_path, types_to_generate, product_name, yaml_dump
 end
 
 # In order to only copy/compile files once per provider this must be called outside
 # of the products loop. This will get called with the provider from the final iteration
 # of the loop
-provider&.copy_common_files(output_path, version)
+provider&.copy_common_files(output_path)
 Google::LOGGER.info "Compiling common files for #{provider_name}"
 common_compile_file = "provider/#{provider_name}/common~compile.yaml"
 provider&.compile_common_files(
   output_path,
-  version,
-  products_for_version.sort_by { |p| p[:definitions].name },
+  products_for_version.sort_by { |p| p[:definitions].name.downcase },
   common_compile_file
 )
 if override_dir
@@ -221,8 +232,7 @@ if override_dir
   common_compile_file = "#{override_dir}/common~compile.yaml"
   provider&.compile_common_files(
     output_path,
-    version,
-    products_for_version.sort_by { |p| p[:definitions].name },
+    products_for_version.sort_by { |p| p[:definitions].name.downcase },
     common_compile_file,
     override_dir
   )

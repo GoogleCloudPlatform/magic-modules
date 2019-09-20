@@ -17,12 +17,20 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: false
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
+  DomainMapping: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
   FirewallRule: !ruby/object:Overrides::Ansible::ResourceOverride
     # Because of lack of state, Ansible treats identity
     # differently than Terraform.
     identity:
       - priority
+  Service: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  StandardAppVersion: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  DomainMapping: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

@@ -1,0 +1,11 @@
+obj = make(map[string]interface{})
+
+// projects/{project}/regions/{region}/resourcePolicies/{resourceId}
+region := getRegionFromZone(d.Get("zone").(string))
+
+name, err := expandComputeDiskResourcePolicyAttachmentName(d.Get("name"), d, config)
+if err != nil {
+  return err
+} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(name)) && (ok || !reflect.DeepEqual(v, name)) {
+  obj["resourcePolicies"] = []interface{}{fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", project, region, name)}
+}

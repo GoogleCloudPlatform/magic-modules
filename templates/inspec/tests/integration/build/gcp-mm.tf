@@ -141,6 +141,18 @@ variable "region_backend_service" {
   type = "map"
 }
 
+variable "org_sink" {
+  type = "map"
+}
+
+variable "standardappversion" {
+  type = "map"
+}
+
+variable "ml_model" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -202,7 +214,7 @@ resource "google_compute_autoscaler" "gcp-inspec-autoscaler" {
   zone    = "${var.gcp_zone}"
   target  = "${google_compute_instance_group_manager.gcp-inspec-igm.self_link}"
 
-  autoscaling_policy = {
+  autoscaling_policy {
     max_replicas    = "${var.autoscaler["max_replicas"]}"
     min_replicas    = "${var.autoscaler["min_replicas"]}"
     cooldown_period = "${var.autoscaler["cooldown_period"]}"
@@ -224,10 +236,10 @@ resource "google_compute_target_pool" "gcp-inspec-target-pool" {
 }
 
 resource "google_cloudbuild_trigger" "gcp-inspec-cloudbuild-trigger" {
-  project = "${var.gcp_project_id}"
+  project = var.gcp_project_id
   trigger_template {
     branch_name = "${var.trigger["trigger_template_branch"]}"
-    project     = "${var.trigger["trigger_template_project"]}"
+    project_id  = "${var.trigger["trigger_template_project"]}"
     repo_name   = "${var.trigger["trigger_template_repo"]}"
   }
   filename = "${var.trigger["filename"]}"
@@ -509,9 +521,9 @@ resource "google_sourcerepo_repository" "gcp-inspec-sourcerepo-repository" {
 }
 
 resource "google_folder" "inspec-gcp-folder" {
-  count = "${var.gcp_organization_id == "none" ? 0 : var.gcp_enable_privileged_resources}"
+  count = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
   display_name = "${var.folder["display_name"]}"
-  parent       = "${var.gcp_organization_id}"
+  parent       = "organizations/${var.gcp_organization_id}"
 }
 
 resource "google_storage_bucket_object" "archive" {
@@ -552,4 +564,57 @@ resource "google_container_node_pool" "inspec-gcp-regional-node-pool" {
   region     = "${var.gcp_location}"
   cluster    = "${google_container_cluster.gcp-inspec-regional-cluster.name}"
   node_count = "${var.regional_node_pool["node_count"]}"
+}
+
+resource "google_logging_organization_sink" "my-sink" {
+  count       = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  name        = "${var.org_sink.name}"
+  org_id      = "${var.gcp_organization_id}"
+
+  # Can export to pubsub, cloud storage, or bigquery
+  destination = "storage.googleapis.com/${google_storage_bucket.generic-storage-bucket.name}"
+
+  # Log all WARN or higher severity messages relating to instances
+  filter      = "${var.org_sink.filter}"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name    = "inspec-gcp-static-${var.gcp_project_id}"
+  project = var.gcp_project_id
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "hello-world.zip"
+  bucket = "${google_storage_bucket.bucket.name}"
+  source = "../configuration/hello-world.zip"
+}
+
+resource "google_app_engine_standard_app_version" "default" {
+  project         = "${var.gcp_project_id}"
+  version_id      = "${var.standardappversion["version_id"]}"
+  service         = "${var.standardappversion["service"]}"
+  runtime         = "${var.standardappversion["runtime"]}"
+  noop_on_destroy = true
+  entrypoint {
+    shell         = "${var.standardappversion["entrypoint"]}"
+  }
+
+  deployment {
+    zip {
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/hello-world.zip"
+    }
+  }
+
+  env_variables = {
+    port          = "${var.standardappversion["port"]}"
+  }
+}
+
+resource "google_ml_engine_model" "inspec-gcp-model" {
+  project                           = var.gcp_project_id
+  name                              = var.ml_model["name"]
+  description                       = var.ml_model["description"]
+  regions                           = ["${var.ml_model["region"]}"]
+  online_prediction_logging         = var.ml_model["online_prediction_logging"]
+  online_prediction_console_logging = var.ml_model["online_prediction_console_logging"]
 }

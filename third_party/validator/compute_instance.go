@@ -226,8 +226,18 @@ func expandBootDisk(d TerraformResourceData, config *Config, project string) (*c
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.disk_encryption_key_raw"); ok {
-		disk.DiskEncryptionKey = &computeBeta.CustomerEncryptionKey{
-			RawKey: v.(string),
+		if v != "" {
+			disk.DiskEncryptionKey = &computeBeta.CustomerEncryptionKey{
+				RawKey: v.(string),
+			}
+		}
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.kms_key_self_link"); ok {
+		if v != "" {
+			disk.DiskEncryptionKey = &computeBeta.CustomerEncryptionKey{
+				KmsKeyName: v.(string),
+			}
 		}
 	}
 
@@ -264,6 +274,14 @@ func expandBootDisk(d TerraformResourceData, config *Config, project string) (*c
 
 			disk.InitializeParams.SourceImage = imageUrl
 		}
+
+		if _, ok := d.GetOk("boot_disk.0.initialize_params.0.labels"); ok {
+			disk.InitializeParams.Labels = expandStringMap(d, "boot_disk.0.initialize_params.0.labels")
+		}
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.mode"); ok {
+		disk.Mode = v.(string)
 	}
 
 	return disk, nil

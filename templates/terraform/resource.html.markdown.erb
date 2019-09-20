@@ -35,14 +35,15 @@
     is generated from a ruby function, but skip it on anything that is
     directly inserted from YAML.
 -%>
-<%
-  if @config.legacy_name.nil?
-    terraform_name = "google_" + (product_ns + object.name).underscore
-  else
-    terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
-  end
+<% 
+  tf_product = (@config.legacy_name || product_ns).underscore
+  terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   properties = object.all_user_properties
-  timeouts = object.async.nil? ? Api::Timeouts.new : object.timeouts
+  # In order of preference, use TF override,
+  # general defined timeouts, or default Timeouts
+  timeouts = object.timeouts
+  timeouts ||= object&.async&.operation&.timeouts
+  timeouts ||= Api::Timeouts.new
 -%>
 ---
 <%= lines(autogen_notice :yaml) -%>
@@ -91,7 +92,7 @@ To get more information about <%= object.name -%>, see:
   </a>
 </div>
     <%- end -%>
-## Example Usage - <%= example.name.camelize(:upper).uncombine %>
+## Example Usage - <%= example.name.camelize(:upper).titleize %>
 
 
 <%= example.config_documentation -%>

@@ -127,6 +127,9 @@ module Compile
       compiled = input.result(ctx)
       ctx.local_variable_set(:_erbout, content) if has_erbout # restore code
       compiled
+    rescue StandardError
+      Google::LOGGER.fatal "Error compiling #{file}"
+      raise
     end
 
     def ansible_style_yaml(obj, options = {})

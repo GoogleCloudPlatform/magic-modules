@@ -4,6 +4,7 @@ resource "google_logging_metric" "<%= ctx[:primary_resource_id] %>" {
   metric_descriptor {
     metric_kind = "DELTA"
     value_type = "DISTRIBUTION"
+    unit = "1"
     labels {
         key = "mass"
         value_type = "STRING"

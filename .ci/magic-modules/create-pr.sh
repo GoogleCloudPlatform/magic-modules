@@ -103,7 +103,7 @@ if [ -n "$ANSIBLE_REPO_USER" ]; then
   fi
 
   git checkout -b "$BRANCH_NAME"
-  if hub pull-request -b "$ANSIBLE_REPO_USER/ansible:devel" -h "$ORIGINAL_PR_BRANCH" -F ./downstream_body > ./ansible_pr 2> ./ansible_pr_err ; then
+  if hub pull-request -b "$ANSIBLE_REPO_USER/ansible_collections_google:master" -h "$ORIGINAL_PR_BRANCH" -F ./downstream_body > ./ansible_pr 2> ./ansible_pr_err ; then
     DEPENDENCIES="${DEPENDENCIES}depends: $(cat ./ansible_pr) ${NEWLINE}"
     LABELS="${LABELS}ansible,"
   else

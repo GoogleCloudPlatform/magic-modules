@@ -19,6 +19,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  DiskResourcePolicyAttachment: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   DiskType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   ExternalVpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
@@ -69,6 +71,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RegionDisk: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  RegionUrlMap: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  Reservation: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  ResourcePolicy: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  RouterNat: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Subnetwork: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude_resource: true

@@ -1,0 +1,9 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
+<% standardappversion = grab_attributes['standardappversion'] -%>
+
+describe google_appengine_standard_app_version(project: <%= gcp_project_id -%>, location: <%= gcp_location -%>, version_id: <%= doc_generation ? "'#{standardappversion['version_id']}'" : "standardappversion['version_id']" -%>, service: <%= doc_generation ? "'#{standardappversion['service']}'" : "standardappversion['service']" -%>) do
+  it { should exist }
+  its('version_id') { should eq <%= doc_generation ? "'#{standardappversion['version_id']}'" : "standardappversion['version_id']" -%> }
+  its('runtime') { should eq <%= doc_generation ? "'#{standardappversion['runtime']}'" : "standardappversion['runtime']" -%> }
+end

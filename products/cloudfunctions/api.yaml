@@ -62,6 +62,8 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'trigger_http'
         description: 'Use HTTP to trigger this function'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

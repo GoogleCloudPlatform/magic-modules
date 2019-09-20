@@ -15,6 +15,10 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Topic: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/topics/{{name}}"
+    error_retry_predicates: ["pubsubTopicProjectNotReady"]
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      parent_resource_attribute: 'topic'
+      method_name_separator: ':'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "pubsub_topic_basic"

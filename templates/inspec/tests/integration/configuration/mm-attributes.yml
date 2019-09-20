@@ -221,3 +221,21 @@ regional_node_pool:
   cluster_name: inspec-gcp-regional-node-pool-cluster
   node_count: 1
   initial_node_count: 1
+
+org_sink:
+  name: inspec-gcp-org-sink
+  filter: resource.type = gce_instance
+
+standardappversion:
+  version_id: v2
+  service: default
+  runtime: nodejs10
+  entrypoint: "node ./app.js"
+  port: "8080"
+  
+ml_model:
+  name: ml_model
+  region: us-central1
+  description: My awesome ML model
+  online_prediction_logging: true
+  online_prediction_console_logging: true
