@@ -75,6 +75,41 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 	})
 }
 
+func TestAccBigtableInstance_cluster_resize(t *testing.T) {
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigtableInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigtableInstance_one_in_the_cluster(instanceName, 3),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBigtableInstanceExists(
+						"google_bigtable_instance.instance", 3),
+				),
+			},
+			{
+				Config: testAccBigtableInstance_cluster(instanceName, 3),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBigtableInstanceExists(
+						"google_bigtable_instance.instance", 3),
+				),
+			},
+			{
+				Config: testAccBigtableInstance_two_in_the_cluster(instanceName, 3),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBigtableInstanceExists(
+						"google_bigtable_instance.instance", 3),
+				),
+			},
+		},
+	})
+}
+
 func TestAccBigtableInstance_development(t *testing.T) {
 	t.Parallel()
 
@@ -191,6 +226,40 @@ resource "google_bigtable_instance" "instance" {
 	name = "%s"
 }
 `, instanceName)
+}
+
+func testAccBigtableInstance_one_in_the_cluster(instanceName string, numNodes int) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+	name = "%s"
+	cluster {
+		cluster_id   = "%s-a"
+		zone         = "us-central1-a"
+		num_nodes    = %d
+		storage_type = "HDD"
+	}
+}
+`, instanceName, instanceName, numNodes)
+}
+
+func testAccBigtableInstance_two_in_the_cluster(instanceName string, numNodes int) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+	name = "%s"
+	cluster {
+		cluster_id   = "%s-a"
+		zone         = "us-central1-a"
+		num_nodes    = %d
+		storage_type = "HDD"
+	}
+	cluster {
+		cluster_id   = "%s-b"
+		zone         = "us-central1-b"
+		num_nodes    = %d
+		storage_type = "HDD"
+	}
+}
+`, instanceName, instanceName, numNodes, instanceName, numNodes)
 }
 
 func testAccBigtableInstance_cluster(instanceName string, numNodes int) string {
