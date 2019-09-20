@@ -12,9 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-// An `appEngineRouting` filed of CloudScheduler API only contains output-only `host` field,
-// so we set config values rather than api response to state.
-// https://cloud.google.com/scheduler/docs/reference/rest/v1/projects.locations.jobs#AppEngineRouting
+// An `appEngineRouting` in API response is useless, so we set config values rather than api response to state.
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
 	if v == nil {
 		return nil
