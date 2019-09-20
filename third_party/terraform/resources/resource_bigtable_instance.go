@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"reflect"
 
+	"cloud.google.com/go/bigtable"
 	"github.com/hashicorp/terraform/helper/customdiff"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
-
-	"cloud.google.com/go/bigtable"
 )
 
 func resourceBigtableInstance() *schema.Resource {
@@ -22,6 +22,7 @@ func resourceBigtableInstance() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			resourceBigtableInstanceValidateDevelopment,
 			resourceBigtableInstanceClusterReorderTypeList,
+			resourceResize,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -40,12 +41,10 @@ func resourceBigtableInstance() *schema.Resource {
 						"cluster_id": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: true,
 						},
 						"zone": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: true,
 						},
 						"num_nodes": {
 							Type:         schema.TypeInt,
@@ -56,7 +55,6 @@ func resourceBigtableInstance() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Default:      "SSD",
-							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{"SSD", "HDD"}, false),
 						},
 					},
@@ -236,8 +234,12 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 		clusterMap[cluster.Name] = cluster
 	}
 
+	clusterTodoMap := make(map[string]interface{}, d.Get("cluster.#").(int))
+	var storageTypeShort string
 	for _, cluster := range d.Get("cluster").([]interface{}) {
 		config := cluster.(map[string]interface{})
+		storageTypeShort = config["storage_type"].(string)
+		clusterTodoMap[config["cluster_id"].(string)] = config
 		cluster_id := config["cluster_id"].(string)
 		if cluster, ok := clusterMap[cluster_id]; ok {
 			if cluster.ServeNodes != config["num_nodes"].(int) {
@@ -246,8 +248,45 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 					return fmt.Errorf("Error updating cluster %s for instance %s", cluster.Name, d.Get("name").(string))
 				}
 			}
+		} else {
+			//  new cluster to be added
+			var newStorageType bigtable.StorageType
+			switch config["storage_type"].(string) {
+			case "SSD":
+				newStorageType = bigtable.SSD
+			case "HDD":
+				newStorageType = bigtable.HDD
+			}
+			conf := &bigtable.ClusterConfig{
+				InstanceID:  d.Get("name").(string),
+				ClusterID:   cluster_id,
+				Zone:        config["zone"].(string),
+				NumNodes:    int32(config["num_nodes"].(int)),
+				StorageType: newStorageType,
+			}
+			c.CreateCluster(ctx, conf)
 		}
 	}
+
+	for name := range clusterMap {
+		if _, ok := clusterTodoMap[name]; !ok {
+			// cluster is running, but TF will have to remove it
+			err = c.DeleteCluster(ctx, d.Get("name").(string), name)
+			if err != nil {
+				return fmt.Errorf("Error deleting cluster %s for instance %s", name, d.Get("name").(string))
+			}
+		}
+	}
+	// build current list of clusters after the change
+	clusterState := []map[string]interface{}{}
+	clustersOnline, err := c.Clusters(ctx, d.Get("name").(string))
+	if err != nil {
+		return fmt.Errorf("Error retrieving clusters %q: %s", d.Get("name").(string), err.Error())
+	}
+	for _, ci := range clustersOnline {
+		clusterState = append(clusterState, flattenBigtableCluster(ci, storageTypeShort))
+	}
+	err = d.Set("cluster", clusterState)
 
 	return resourceBigtableInstanceRead(d, meta)
 }
@@ -335,28 +374,42 @@ func resourceBigtableInstanceClusterReorderTypeList(diff *schema.ResourceDiff, m
 		return fmt.Errorf("config is invalid: Too many cluster blocks: No more than 4 \"cluster\" blocks are allowed")
 	}
 
-	if old_count.(int) != new_count.(int) {
-		return nil
-	}
-
 	var old_ids []string
 	clusters := make(map[string]interface{}, new_count.(int))
 
-	for i := 0; i < new_count.(int); i++ {
+	for i := 0; i < new_count.(int) || i < old_count.(int); i++ {
 		old_id, new_id := diff.GetChange(fmt.Sprintf("cluster.%d.cluster_id", i))
+		_, c := diff.GetChange(fmt.Sprintf("cluster.%d", i))
 		if old_id != nil && old_id != "" {
 			old_ids = append(old_ids, old_id.(string))
 		}
-		_, c := diff.GetChange(fmt.Sprintf("cluster.%d", i))
 		clusters[new_id.(string)] = c
 	}
 
 	// reorder clusters according to the old cluster order
+	matching_ids := make(map[string]interface{}, new_count.(int))
 	var old_cluster_order []interface{}
+
 	for _, id := range old_ids {
 		if c, ok := clusters[id]; ok {
+			matching_ids[id] = c
+			delete(clusters, id)
+		}
+	}
+
+	for _, id := range old_ids {
+		if c, ok := matching_ids[id]; ok {
+			old_cluster_order = append(old_cluster_order, c)
+		} else {
+			// todo empty clusters
+			keys := reflect.ValueOf(clusters).MapKeys()
+			c := clusters[keys[0].Interface().(string)]
+			delete(clusters, keys[0].Interface().(string))
 			old_cluster_order = append(old_cluster_order, c)
 		}
+	}
+	for _, value := range clusters {
+		old_cluster_order = append(old_cluster_order, value)
 	}
 
 	err := diff.SetNew("cluster", old_cluster_order)
@@ -364,5 +417,36 @@ func resourceBigtableInstanceClusterReorderTypeList(diff *schema.ResourceDiff, m
 		return fmt.Errorf("Error setting cluster diff: %s", err)
 	}
 
+	return nil
+}
+
+func resourceResize(diff *schema.ResourceDiff, meta interface{}) error {
+	old_count, new_count := diff.GetChange("cluster.#")
+	if old_count.(int) != new_count.(int) {
+		log.Printf("[DEBUG] resize from %d to %d", old_count, new_count)
+	}
+
+	for i := 0; i < old_count.(int) || i < new_count.(int); i++ {
+		cluster_old, cluster_new := diff.GetChange(fmt.Sprintf("cluster.%d", i))
+		cluster_old_map := cluster_old.(map[string]interface{})
+		cluster_new_map := cluster_new.(map[string]interface{})
+		if cluster_old_map["cluster_id"] == nil {
+			log.Printf("[DEBUG] new [%s] will be added", cluster_new_map["cluster_id"].(string))
+		} else if cluster_new_map["cluster_id"] == "" {
+			log.Printf("[DEBUG] old [%s] will be removed", cluster_old_map["cluster_id"].(string))
+		} else {
+			log.Printf("[DEBUG] changes from %s to %s", cluster_old_map["cluster_id"].(string), cluster_new_map["cluster_id"].(string))
+			if cluster_old_map["storage_type"].(string) != cluster_new_map["storage_type"].(string) {
+				diff.ForceNew(fmt.Sprintf("cluster.%d.storage_type", i))
+			}
+			if cluster_old_map["zone"].(string) != cluster_new_map["zone"].(string) {
+				diff.ForceNew(fmt.Sprintf("cluster.%d.zone", i))
+			}
+			if cluster_old_map["cluster_id"].(string) != cluster_new_map["cluster_id"].(string) {
+				diff.ForceNew(fmt.Sprintf("cluster.%d.cluster_id", i))
+			}
+		}
+
+	}
 	return nil
 }
