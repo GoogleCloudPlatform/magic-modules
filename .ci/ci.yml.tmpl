@@ -64,6 +64,16 @@ resources:
           no_label: automerged
           base: master
 
+    - name: magic-modules-3.0-prs
+      type: github-pull-request
+      source:
+          repo: GoogleCloudPlatform/magic-modules
+          private_key: ((repo-key.private_key))
+          access_token: ((github-account.password))
+          authorship_restriction: true
+          no_label: automerged
+          base: 3.0.0
+
 {% for v in vars.terraform_v.itervalues() %}
     - name: {{ v.short_name }}-intermediate
       type: git-branch
@@ -132,6 +142,50 @@ jobs:
                 path: magic-modules-external-prs
             get_params:
                 skip_clone: true
+
+    - name: mm-3.0-diff
+      plan:
+          - get: magic-modules
+            resource: magic-modules-3.0-prs
+            version: every
+            trigger: true
+            attempts: 2
+            params:
+              fetch_merge: true
+            # This isn't strictly-speaking necessary - we aren't actually
+            # pushing this anywhere - but it lets us reuse all the other
+            # generation stuff.
+          - aggregate:
+            - get: patches
+              resource: merged-prs
+              # consumes: magic-modules (detached HEAD)
+              # produces: magic-modules-branched (new branch, with submodule)
+            - task: branch-magic-modules
+              file: magic-modules/.ci/magic-modules/branch.yml
+              params:
+                GH_TOKEN: ((github-account.password))
+                CREDS: ((repo-key.private_key))
+                ALL_SUBMODULES: {{' '.join(vars.all_submodules)}}
+            - put: magic-modules-new-prs
+              params:
+                status: pending
+                path: magic-modules
+              get_params:
+                skip_clone: true
+
+          - aggregate:
+{% for k, v in vars.terraform_v.iteritems() %}
+                # consumes: magic-modules-branched
+                # produces: terraform-generated
+                - task: diff-{{v.short_name}}
+                  file: magic-modules-branched/.ci/magic-modules/diff-terraform.yml
+                  params:
+                    VERSION: {{k}}
+                    PROVIDER_NAME: {{v.provider_name}}
+                    SHORT_NAME: {{v.short_name}}
+                    GITHUB_ORG: {{v.github_org}}
+                    OVERRIDE_PROVIDER: {{v.override_provider}}
+{% endfor %}
 
     - name: mm-generate
       plan:
