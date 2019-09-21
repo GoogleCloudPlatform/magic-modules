@@ -467,20 +467,6 @@ objects:
               nodes, and controllers, will have statically granted permissions
               beyond those provided by the RBAC configuration or IAM.
       - !ruby/object:Api::Type::NestedObject
-        name: 'releaseChannel'
-        min_version: beta
-        description: |
-          Release channel configuration.
-        properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'channel'
-            description: channel specifies which release channel the cluster is subscribed to.
-            values:
-              - "UNSPECIFIED"
-              - "RAPID"
-              - "REGULAR"
-              - "STABLE"
-      - !ruby/object:Api::Type::NestedObject
         name: 'networkPolicy'
         description: |
           Configuration options for the NetworkPolicy feature.
