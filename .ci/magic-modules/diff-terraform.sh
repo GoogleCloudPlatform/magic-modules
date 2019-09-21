@@ -71,14 +71,15 @@ git add -A
 git commit -m "$TERRAFORM_COMMIT_MSG" --author="$COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
 
+OLD_COMMIT_SHA="$(git merge-base HEAD master)"
 apply_patches "$PATCH_DIR/$GITHUB_ORG/$PROVIDER_NAME" "$TERRAFORM_COMMIT_MSG" "$COMMIT_AUTHOR" "master"
 
 # This is the only place that we differ from generate-terraform.sh - we don't bother to write the output
 # anywhere, we only check to see if there was a diff and write it.  Otherwise, we write that there isn't.
 NEWLINE=$'\n'
 MESSAGE="# $PROVIDER_NAME diff report$NEWLINE"
-if [ "$(git log --format=%B -n 1)" == "$TERRAFORM_COMMIT_MSG" ]; then
-    MESSAGE="${MESSAGE}$(git diff HEAD HEAD~)"
+if [ "$(git rev-parse HEAD)" != "$OLD_COMMIT_SHA" ]; then
+    MESSAGE="${MESSAGE}\`\`\`diff$NEWLINE$(git diff HEAD~ HEAD)$NEWLINE\`\`\`$NEWLINE"
 else
     MESSAGE="${MESSAGE}No diff detected.$NEWLINE"
 fi
