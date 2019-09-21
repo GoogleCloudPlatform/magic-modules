@@ -75,11 +75,12 @@ apply_patches "$PATCH_DIR/$GITHUB_ORG/$PROVIDER_NAME" "$TERRAFORM_COMMIT_MSG" "$
 
 # This is the only place that we differ from generate-terraform.sh - we don't bother to write the output
 # anywhere, we only check to see if there was a diff and write it.  Otherwise, we write that there isn't.
-MESSAGE="# $PROVIDER_NAME diff report\n"
+NEWLINE=$'\n'
+MESSAGE="# $PROVIDER_NAME diff report$NEWLINE"
 if [ "$(git log --format=%B -n 1)" == "$TERRAFORM_COMMIT_MSG" ]; then
     MESSAGE="${MESSAGE}$(git diff HEAD HEAD~)"
 else
-    MESSAGE="${MESSAGE}No diff detected.\n"
+    MESSAGE="${MESSAGE}No diff detected.$NEWLINE"
 fi
 
 popd

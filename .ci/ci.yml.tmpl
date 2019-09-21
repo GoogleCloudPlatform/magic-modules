@@ -175,6 +175,7 @@ jobs:
 
           - aggregate:
 {% for k, v in vars.terraform_v.iteritems() %}
+            - do:
                 # consumes: magic-modules-branched
                 # produces: terraform-generated
                 - task: diff-{{v.short_name}}
@@ -185,7 +186,17 @@ jobs:
                     SHORT_NAME: {{v.short_name}}
                     GITHUB_ORG: {{v.github_org}}
                     OVERRIDE_PROVIDER: {{v.override_provider}}
+
+                - put: magic-modules-3.0-prs
+                  params:
+                      status: success
+                      path: magic-modules
+                      comment: terraform-diff/{{v.short_name}}_comment.txt
+                  get_params:
+                      skip_clone: true
+
 {% endfor %}
+
 
     - name: mm-generate
       plan:
