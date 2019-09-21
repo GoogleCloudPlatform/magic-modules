@@ -23,7 +23,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudfunctions_cloud_function"
-        primary_resource_id: "function"
+        primary_resource_id: "a_fake_change_to_check_if_the_diffs_look_good"
         primary_resource_name: "fmt.Sprintf(\"my-function%s\", context[\"random_suffix\"])"
         vars:
           function_name: "my-function"
