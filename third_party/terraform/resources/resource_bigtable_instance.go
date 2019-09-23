@@ -21,7 +21,7 @@ func resourceBigtableInstance() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			resourceBigtableInstanceValidateDevelopment,
-			resourceBigtableInstanceClusterReorderTypeList,
+			//	resourceBigtableInstanceClusterReorderTypeList,
 			resourceResize,
 		),
 
@@ -235,21 +235,19 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	clusterTodoMap := make(map[string]interface{}, d.Get("cluster.#").(int))
-	var storageTypeShort string
 	for _, cluster := range d.Get("cluster").([]interface{}) {
 		config := cluster.(map[string]interface{})
-		storageTypeShort = config["storage_type"].(string)
 		clusterTodoMap[config["cluster_id"].(string)] = config
 		cluster_id := config["cluster_id"].(string)
 		if cluster, ok := clusterMap[cluster_id]; ok {
 			if cluster.ServeNodes != config["num_nodes"].(int) {
+				log.Printf("[DEBUG] updating size - %s", d.Get("name").(string))
 				err = c.UpdateCluster(ctx, d.Get("name").(string), cluster.Name, int32(config["num_nodes"].(int)))
 				if err != nil {
 					return fmt.Errorf("Error updating cluster %s for instance %s", cluster.Name, d.Get("name").(string))
 				}
 			}
 		} else {
-			//  new cluster to be added
 			var newStorageType bigtable.StorageType
 			switch config["storage_type"].(string) {
 			case "SSD":
@@ -264,6 +262,7 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 				NumNodes:    int32(config["num_nodes"].(int)),
 				StorageType: newStorageType,
 			}
+			log.Printf("[DEBUG] creating new - %s", d.Get("name").(string))
 			c.CreateCluster(ctx, conf)
 		}
 	}
@@ -271,22 +270,13 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 	for name := range clusterMap {
 		if _, ok := clusterTodoMap[name]; !ok {
 			// cluster is running, but TF will have to remove it
+			log.Printf("[DEBUG] removal of - %s", d.Get("name").(string))
 			err = c.DeleteCluster(ctx, d.Get("name").(string), name)
 			if err != nil {
 				return fmt.Errorf("Error deleting cluster %s for instance %s", name, d.Get("name").(string))
 			}
 		}
 	}
-	// build current list of clusters after the change
-	clusterState := []map[string]interface{}{}
-	clustersOnline, err := c.Clusters(ctx, d.Get("name").(string))
-	if err != nil {
-		return fmt.Errorf("Error retrieving clusters %q: %s", d.Get("name").(string), err.Error())
-	}
-	for _, ci := range clustersOnline {
-		clusterState = append(clusterState, flattenBigtableCluster(ci, storageTypeShort))
-	}
-	err = d.Set("cluster", clusterState)
 
 	return resourceBigtableInstanceRead(d, meta)
 }
@@ -426,16 +416,28 @@ func resourceResize(diff *schema.ResourceDiff, meta interface{}) error {
 		log.Printf("[DEBUG] resize from %d to %d", old_count, new_count)
 	}
 
+	new_clusters := make(map[string]interface{}, new_count.(int))
+	old_clusters := make(map[string]interface{}, old_count.(int))
+
+	for i := 0; i < new_count.(int) || i < old_count.(int); i++ {
+		old_id, new_id := diff.GetChange(fmt.Sprintf("cluster.%d.cluster_id", i))
+		o, n := diff.GetChange(fmt.Sprintf("cluster.%d", i))
+		if old_id != nil && old_id != "" {
+			old_clusters[old_id.(string)] = o
+		}
+		if new_id != nil && new_id != "" {
+			new_clusters[old_id.(string)] = n
+		}
+	}
+
 	for i := 0; i < old_count.(int) || i < new_count.(int); i++ {
-		cluster_old, cluster_new := diff.GetChange(fmt.Sprintf("cluster.%d", i))
-		cluster_old_map := cluster_old.(map[string]interface{})
+		_, cluster_new := diff.GetChange(fmt.Sprintf("cluster.%d", i))
+		// cluster_old_map := cluster_old.(map[string]interface{})
 		cluster_new_map := cluster_new.(map[string]interface{})
-		if cluster_old_map["cluster_id"] == nil {
-			log.Printf("[DEBUG] new [%s] will be added", cluster_new_map["cluster_id"].(string))
-		} else if cluster_new_map["cluster_id"] == "" {
-			log.Printf("[DEBUG] old [%s] will be removed", cluster_old_map["cluster_id"].(string))
-		} else {
-			log.Printf("[DEBUG] changes from %s to %s", cluster_old_map["cluster_id"].(string), cluster_new_map["cluster_id"].(string))
+
+		if c, ok := old_clusters[cluster_new_map["cluster_id"].(string)]; ok {
+			log.Printf("[DEBUG] changes for  %s", cluster_new_map["cluster_id"].(string))
+			cluster_old_map := c.(map[string]interface{})
 			if cluster_old_map["storage_type"].(string) != cluster_new_map["storage_type"].(string) {
 				diff.ForceNew(fmt.Sprintf("cluster.%d.storage_type", i))
 			}
@@ -445,6 +447,13 @@ func resourceResize(diff *schema.ResourceDiff, meta interface{}) error {
 			if cluster_old_map["cluster_id"].(string) != cluster_new_map["cluster_id"].(string) {
 				diff.ForceNew(fmt.Sprintf("cluster.%d.cluster_id", i))
 			}
+		} else {
+			if cluster_new_map["cluster_id"] == "" {
+				log.Printf("[DEBUG] removal - %s", cluster_new_map["cluster_id"].(string))
+			} else {
+				log.Printf("[DEBUG] new cluster - %s", cluster_new_map["cluster_id"].(string))
+			}
+
 		}
 
 	}
