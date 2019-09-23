@@ -1220,6 +1220,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_url_map_basic"
+        min_version: beta
         primary_resource_id: "regionurlmap"
         vars:
           region_url_map_name: "regionurlmap"
