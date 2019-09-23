@@ -24,9 +24,9 @@ Otherwise, fill the template out below
 ```
 
 <!-- GUIDE FOR WRITING RELEASE NOTES
-Release notes should be formatted with one of the following headings. If
-you need a new type, preface your block with "release-note:my-category"
+Release notes should be formatted with one of the following headings.
 - release-note:bug
+- release-note:note
 - release-note:new-resource
 - release-note:new-datasource
 - release-note:deprecation
@@ -40,7 +40,7 @@ Notes SHOULD:
 - Only use present tense in imperative sentences to suggest future behavior for
   breaking changes/deprecations ("Use X" vs "You should use X" or "Users should use X")
 - Impersonal third person (no “I”, “you”, etc.)
-- Start with `service` if changing an existing resource (see compute exampels below)
+- Start with `{{service}}` if changing an existing resource (see exampels below)
 
 DO:
 
@@ -56,7 +56,7 @@ container: fixed perma-diff in `google_container_cluster`
 project: made `iam_policy` authoritative
 ```
 
-```release-note:breaking-change
+```release-note:deprecation
 container: deprecated `region` and `zone` on `google_container_unicorn`. Use `location` instead.
 ```
 
