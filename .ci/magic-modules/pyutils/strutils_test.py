@@ -32,53 +32,82 @@ class TestStringUtils(unittest.TestCase):
         self.assertEquals(result[0], expected[0])
         self.assertEquals(int(result[1]), expected[1])
 
-  def test_get_release_note(self):
-    upstream_body = """
-      ```releasenote
-      This is a release note
-      ```
-    """
-    test_cases = {
-      ("releasenote text not found", ""),
-      ("""
-        Empty release note:
-        ```releasenote
-        ```
-        """, ""),
-      ("""
-        Random code block
-        ```
-        This is not a release note
-        ```
-        """, ""),
-      ("""
-        Empty release note with non-empty code block:
-        ```releasenote
-        ```
+  def test_get_release_notes(self):
+    test_cases = [
+      ("releasenote text not found", []),
+      (
+"""Empty release note:
+```release-note:test
 
-        ```
-        This is not a release note
-        ```
-        """, ""),
+```
+""", []),
       ("""
-        Empty code block with non-empty release note:
+Random code block
+```
+This is not a release note
+```
+""", []),
+      ("""
+Empty release note with non-empty code block:
+```release-note:test
 
-        ```invalid
-        ```
+```
 
-        ```releasenote
-        This is a release note
-        ```
-        """, "This is a release note"),
-      ("""```releasenote
-        This is a release note
-        ```
-        """, "This is a release note"),
-    }
-    for k, v in test_cases:
-      self.assertEqual(get_release_note(k), v)
+```
+This is not a release note
+```
+""", []),
+      ("""
+Empty code block with non-empty release note:
 
-  def test_set_release_note(self):
+```invalid
+
+```
+
+```release-note:test
+This is a release note
+```
+""", [("release-note:test", "This is a release note")]),
+      ("""
+Single release notes
+```release-note:test
+This is a release note
+```
+""", [("release-note:test", "This is a release note")])
+      # ("""
+      #   Multiple release notes
+      #   ```release-note:foo
+      #   note foo
+      #   ```
+
+      #   ```release-note:bar
+      #   note bar
+      #   ```
+
+      #   ```release-note:baz
+      #   note baz
+      #   ```
+      #   """, [
+      #     ("release-note:foo", "note foo"),
+      #     ("release-note:bar", "note bar"),
+      #     ("release-note:baz", "note baz"),
+      # ]),
+    ]
+    for k, expected in test_cases:
+      actual = get_release_notes(k)
+      self.assertEqual(len(actual), len(expected),
+        "test %s\n: expected %d items, got %d: %s" % (k, len(expected), len(actual), actual))
+      for idx, note_tuple in enumerate(expected):
+        self.assertEqual(actual[idx][0], note_tuple[0],
+          "test %s\n: expected note type %s, got %s" % (
+            k, note_tuple[0], actual[idx][0]))
+
+        self.assertEqual(actual[idx][1], note_tuple[1],
+          "test %s\n: expected note type %s, got %s" % (
+            k, note_tuple[1], actual[idx][1]))
+
+
+  def test_set_release_notes(self):
     downstream_body = """
       All of the blocks below should be replaced
 
@@ -94,19 +123,26 @@ class TestStringUtils(unittest.TestCase):
       ```test
       ```
       """
-    release_note = "The release note was replaced"
+    release_notes = [
+      ("release-note:foo", "new message foo"),
+      ("release-note:bar", "new message bar"),
+    ]
 
-    replaced = set_release_note(release_note, downstream_body)
-    self.assertIn(
-      "```releasenote\nThe release note was replaced\n```\n",
-      replaced)
+    replaced = set_release_notes(release_notes, downstream_body)
 
-    self.assertEqual(len(re.findall("```releasenote", replaced)), 1,
-      "expected only one release note block in text. Result:\n%s" % replaced)
-
-    self.assertNotIn("This should be replaced", replaced)
+    # Existing non-code-block text should still be in body
     self.assertIn("All of the blocks below should be replaced\n", replaced)
     self.assertIn("More text\n", replaced)
+
+    # New release notes should have been added.
+    self.assertIn("```release-note:foo\nnew message foo\n```\n", replaced)
+    self.assertIn("```release-note:bar\nnew message bar\n```\n", replaced)
+
+    # Old release notes and code blocks should be removed.
+    self.assertEqual(len(re.findall("```.+\n", replaced)), 2,
+      "expected only two release note blocks in text. Result:\n%s" % replaced)
+    self.assertNotIn("This should be replaced", replaced)
+
 
   def test_find_prefixed_labels(self):
     self.assertFalse(find_prefixed_labels([], "test: "))
