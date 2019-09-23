@@ -1,7 +1,7 @@
 import re
-from bs4 import BeautifulSoup
-import mistune
 
+RELEASE_NOTE_RE = r'`{3}releasenote(?P<release_note>.*?)`{3}'
+RELEASE_NOTE_SUB_RE = r'`{3}releasenote'
 def find_dependency_urls_in_comment(body):
   """Util to parse downstream dependencies from a given comment body.
 
@@ -39,65 +39,62 @@ def parse_github_url(gh_url):
     return (repo, int(prnum))
   return None
 
-def get_release_notes(body):
-  """Parse release note blocks from a given text block.
+def get_release_note(body):
+  """Parse release note block from a given text block.
 
-  Each code-block with a "release-note:..." language class.
+  Finds the first markdown code block with a "releasenote" language class.
   Example:
-    ```release-note:new-resource
-    a_new_resource
+    ```releasenote
+    This is the release note
     ```
 
-    ```release-note:bug
-    Fixed a bug
-    ```
   Args:
     body (string): PR body to pull release note block from
 
   Returns:
-    List of tuples of (`release-note` heading, release note)
+    Release note if found or empty string.
   """
-  release_notes = []
+  m = re.search(RELEASE_NOTE_RE, body, re.S)
+  return m.groupdict("")["release_note"].strip() if m else ""
 
-  # Parse markdown and find all code blocks
-  md = mistune.markdown(body)
-  soup = BeautifulSoup(md, 'html.parser')
-  for codeblock in soup.find_all('code'):
-    block_classes = codeblock.get('class')
-    if not block_classes:
-      continue
-
-    note_type = get_release_note_type_from_class(block_classes[0])
-    note_text = codeblock.get_text().strip()
-    if note_type and note_text:
-      release_notes.append((note_type, note_text))
-
-  return release_notes
-
-def get_release_note_type_from_class(class_str):
-  # expected class is 'lang-release-note:...' for release notes
-  prefix_len = len("lang-release-note:")
-  if class_str[:prefix_len] == "lang-release-note:":
-    return class_str[len("lang-"):]
-  return None
-
-def set_release_notes(release_notes, body):
+def set_release_note(release_note, body):
   """Sanitize and adds the given release note block for PR body text.
 
   For a given text block, removes any existing "releasenote" markdown code
-  blocks and adds the given release notes at the end.
+  blocks and adds the given release note at the end.
+```releasenote
+      This should be replaced
+      ```
+  Example:
+    # Set a release note
+    > print set_release_note(
+        "This is the new release note",
+        "``releasenote\nChanges to downstream\n```\n")
+    "```releasenote\nThis is the new release note\n```\n"
+
+    # Remove for empty release note
+    > print set_release_note("",
+        "PR description\n```releasenote\nChanges to downstream\n```\n")
+    "PR description\n"
 
   Args:
-    release_note (list(Tuple(string)): List of
-      (release-note heading, release note)
+    release_note (string): Release note to add
     body (string): Text body to find and edit release note blocks in
 
   Returns:
     Modified text
   """
-  edited = re.sub(r'`{3}[^`]*`{3}', "", body, flags=re.DOTALL)
-  for heading, note in release_notes:
-    edited += "\n```%s\n%s\n```\n" % (heading, note.strip())
+  edited = body
+  tkns = re.split(RELEASE_NOTE_SUB_RE, body, re.S)
+  if len(tkns) > 1:
+    edited = tkns[0]
+    for tkn in tkns[1:]:
+      idx = tkn.find("```")
+      edited += tkn if idx < 0 else tkn[idx+3:]
+
+  release_note = release_note.strip()
+  if release_note:
+    edited += "\n```releasenote\n%s\n```\n" % release_note.strip()
   return edited
 
 def find_prefixed_labels(labels, prefix):
