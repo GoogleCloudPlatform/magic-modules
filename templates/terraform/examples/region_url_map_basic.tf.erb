@@ -1,7 +1,9 @@
 resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
+  provider    = "google-beta"
+  region      = "us-central1"
+
   name        = "<%= ctx[:vars]['region_url_map_name'] %>"
   description = "a description"
-  region      = "us-central1"
 
   default_service = "${google_compute_region_backend_service.home.self_link}"
 
@@ -33,8 +35,10 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_compute_region_backend_service" "login" {
-  name        = "<%= ctx[:vars]['login_region_backend_service_name'] %>"
+  provider    = "google-beta"
   region      = "us-central1"
+
+  name        = "<%= ctx[:vars]['login_region_backend_service_name'] %>"
   protocol    = "HTTP"
   timeout_sec = 10
 
@@ -42,8 +46,10 @@ resource "google_compute_region_backend_service" "login" {
 }
 
 resource "google_compute_region_backend_service" "home" {
-  name        = "<%= ctx[:vars]['home_region_backend_service_name'] %>"
+  provider    = "google-beta"
   region      = "us-central1"
+
+  name        = "<%= ctx[:vars]['home_region_backend_service_name'] %>"
   protocol    = "HTTP"
   timeout_sec = 10
 
@@ -51,8 +57,10 @@ resource "google_compute_region_backend_service" "home" {
 }
 
 resource "google_compute_region_health_check" "default" {
+  provider           = "google-beta"
+  region	     = "us-central1"
+
   name               = "<%= ctx[:vars]['region_health_check_name'] %>"
-  region             = "us-central1"
   check_interval_sec = 1
   timeout_sec        = 1
   http_health_check  {
