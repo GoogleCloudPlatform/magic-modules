@@ -164,7 +164,6 @@ func TestAccCloudIoTRegistry_eventNotificationConfigMultiple(t *testing.T) {
 		CheckDestroy: testAccCheckCloudIoTRegistryDestroy,
 		Steps: []resource.TestStep{
 			{
-				// Use deprecated field (event_notification_config) to create
 				Config: testAccCloudIoTRegistry_multipleEventNotificationConfigs(topic, registryName),
 			},
 			{
