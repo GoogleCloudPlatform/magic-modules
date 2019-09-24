@@ -1,0 +1,27 @@
+---
+# This file takes two inputs: magic-modules-branched in detached-HEAD state, and the list of patches.
+# It spits out "terraform-diff/pr_comment.txt", which contains the markdown-format diff.
+platform: linux
+
+image_resource:
+    type: docker-image
+    source:
+        repository: gcr.io/magic-modules/go-ruby-python
+        tag: '1.11.5-2.6.0-2.7-v4'
+
+inputs:
+    - name: magic-modules-branched
+    - name: patches
+
+outputs:
+    - name: terraform-diff
+
+run:
+    path: magic-modules-branched/.ci/magic-modules/diff-terraform.sh
+
+params:
+    VERSION: ""
+    PROVIDER_NAME: ""
+    SHORT_NAME: ""
+    OVERRIDE_PROVIDER: ""
+    GITHUB_ORG: "terraform-providers"
