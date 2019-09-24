@@ -153,6 +153,10 @@ variable "ml_model" {
   type = "map"
 }
 
+variable "dataproc_cluster" {
+  type = any
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -579,8 +583,9 @@ resource "google_logging_organization_sink" "my-sink" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name    = "inspec-gcp-static-${var.gcp_project_id}"
-  project = var.gcp_project_id
+  name          = "inspec-gcp-static-${var.gcp_project_id}"
+  project       = var.gcp_project_id
+  force_destroy = true
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -617,4 +622,45 @@ resource "google_ml_engine_model" "inspec-gcp-model" {
   regions                           = ["${var.ml_model["region"]}"]
   online_prediction_logging         = var.ml_model["online_prediction_logging"]
   online_prediction_console_logging = var.ml_model["online_prediction_console_logging"]
+}
+
+resource "google_dataproc_cluster" "mycluster" {
+  project = var.gcp_project_id
+  region  = var.gcp_location
+  name    = var.dataproc_cluster["name"]
+
+  labels = {
+    "${var.dataproc_cluster["label_key"]}" = "${var.dataproc_cluster["label_value"]}"
+  }
+
+  cluster_config {
+    master_config {
+      num_instances = var.dataproc_cluster["config"]["master_config"]["num_instances"]
+      machine_type  = var.dataproc_cluster["config"]["master_config"]["machine_type"]
+      disk_config {
+        boot_disk_type    = var.dataproc_cluster["config"]["master_config"]["boot_disk_type"]
+        boot_disk_size_gb = var.dataproc_cluster["config"]["master_config"]["boot_disk_size_gb"]
+      }
+    }
+
+    worker_config {
+      num_instances    = var.dataproc_cluster["config"]["worker_config"]["num_instances"]
+      machine_type     = var.dataproc_cluster["config"]["worker_config"]["machine_type"]
+      disk_config {
+        boot_disk_size_gb = var.dataproc_cluster["config"]["worker_config"]["boot_disk_size_gb"]
+        num_local_ssds    = var.dataproc_cluster["config"]["worker_config"]["num_local_ssds"]
+      }
+    }
+
+    # Override or set some custom properties
+    software_config {
+      override_properties = {
+        "${var.dataproc_cluster["config"]["software_config"]["prop_key"]}" = "${var.dataproc_cluster["config"]["software_config"]["prop_value"]}"
+      }
+    }
+
+    gce_cluster_config {
+      tags    = [var.dataproc_cluster["config"]["gce_cluster_config"]["tag"]]
+    }
+  }
 }
