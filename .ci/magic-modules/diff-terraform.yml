@@ -1,6 +1,7 @@
 ---
-# This file takes two inputs: magic-modules-branched in detached-HEAD state, and the list of patches.
-# It spits out "terraform-diff/pr_comment.txt", which contains the markdown-format diff.
+# This file takes two inputs: magic-modules-branched in detached-HEAD state, and magic-modules-previous.
+# It spits out "terraform-diff/comment.txt", which contains the markdown-format diff, as well as
+# "terraform-diff/old" and "terraform-diff/new".
 platform: linux
 
 image_resource:
@@ -11,7 +12,7 @@ image_resource:
 
 inputs:
     - name: magic-modules-branched
-    - name: patches
+    - name: magic-modules-previous
 
 outputs:
     - name: terraform-diff
