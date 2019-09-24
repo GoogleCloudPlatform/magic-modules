@@ -259,19 +259,11 @@ module Provider
       "google_#{@config.legacy_name || product.name.underscore}_#{object.name.underscore}"
     end
 
-    def sub_property_descriptions(property)
-      if nested_object?(property)
-        property.properties.map { |prop| markdown_format(prop) }.join("\n\n") + "\n\n"
-      elsif typed_array?(property)
-        property.item_type.properties.map { |prop| markdown_format(prop) }.join("\n\n") + "\n\n"
-      end
-    end
-
     # Recursively calls itself on any arrays or nested objects within this property, indenting
     # further for each call
     def markdown_format(property, indent = 1)
       prop_description = "`#{property.out_name}`: #{property.description.split("\n").join(' ')}"
-      description = "#{'    ' * indent}* #{prop_description}"
+      description = "#{'  ' * indent}* #{prop_description}"
       if nested_object?(property)
         description_arr = [description]
         description_arr += property.properties.map { |prop| markdown_format(prop, indent + 1) }
