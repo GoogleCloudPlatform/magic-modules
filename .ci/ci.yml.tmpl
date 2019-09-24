@@ -43,6 +43,7 @@ resources:
           access_token: ((github-account.password))
           community_only: true
           no_label: community
+          base: master
 
     - name: magic-modules-external-prs
       type: github-pull-request
@@ -51,6 +52,7 @@ resources:
           private_key: ((repo-key.private_key))
           access_token: ((github-account.password))
           community_only: true
+          base: master
 
     - name: magic-modules-new-prs
       type: github-pull-request
@@ -60,6 +62,7 @@ resources:
           access_token: ((github-account.password))
           authorship_restriction: true
           no_label: automerged
+          base: master
 
 {% for v in vars.terraform_v.itervalues() %}
     - name: {{ v.short_name }}-intermediate
@@ -91,6 +94,7 @@ resources:
           require_review_approval: true
           check_dependent_prs: true
           label: downstream-generated
+          base: master
 
     - name: merged-prs
       type: merged-downstreams
