@@ -78,7 +78,7 @@ apply_patches "$PATCH_DIR/$GITHUB_ORG/$PROVIDER_NAME" "$TERRAFORM_COMMIT_MSG" "$
 NEWLINE=$'\n'
 MESSAGE="## $PROVIDER_NAME diff report$NEWLINE"
 if [ "$(git rev-parse HEAD)" != "$OLD_COMMIT_SHA" ]; then
-    MESSAGE="${MESSAGE}(View Diff)[https://github.com/$GITHUB_ORG/$PROVIDER_NAME/$OLD_COMMIT_SHA...modular-magician:$BRANCH_NAME]"
+    MESSAGE="${MESSAGE}[View Diff](https://github.com/$GITHUB_ORG/$PROVIDER_NAME/compare/$OLD_COMMIT_SHA...modular-magician:$BRANCH_NAME)"
 else
     MESSAGE="${MESSAGE}No diff generated."
 fi
