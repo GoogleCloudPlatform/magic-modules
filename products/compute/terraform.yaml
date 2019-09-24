@@ -815,6 +815,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       guestOsFeatures: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        is_set: true
       imageEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       licenses: !ruby/object:Overrides::Terraform::PropertyOverride
