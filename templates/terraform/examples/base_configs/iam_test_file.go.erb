@@ -125,6 +125,15 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAcc<%= resource_name -%>IamPolicy_emptyBinding(context),
+			},
+			{
+				ResourceName:      "<%= resource_ns_iam -%>_policy.foo",
+				ImportStateId:     fmt.Sprintf("<%= import_url -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -288,6 +297,20 @@ data "google_iam_policy" "foo" {
 resource "<%= resource_ns_iam -%>_policy" "foo" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
   policy_data = "${data.google_iam_policy.foo.policy_data}"
+}
+`, context)
+}
+
+func testAcc<%= resource_name -%>IamPolicy_emptyBinding(context map[string]interface{}) string {
+	return Nprintf(`
+<%= example.config_test_body -%>
+
+data "google_iam_policy" "foo" {
+}
+
+resource "<%= resource_ns_iam -%>_policy" "foo" {
+<%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
+	policy_data = "${data.google_iam_policy.foo.policy_data}"
 }
 `, context)
 }
