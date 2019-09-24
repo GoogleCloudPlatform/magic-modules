@@ -269,7 +269,6 @@ func getFolderIamPolicyByParentAndDisplayName(parent, displayName string, config
 	return getFolderIamPolicyByFolderName(folders[0].Name, config)
 }
 
-
 func testAccFolderIamBasic(org, fname string) string {
 	return fmt.Sprintf(`
 resource "google_folder" "acceptance" {
