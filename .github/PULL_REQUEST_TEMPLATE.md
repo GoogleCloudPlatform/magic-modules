@@ -44,31 +44,26 @@ Notes SHOULD:
 
 DO:
 
-```release-note:enhancement
+HEADER: release-note:enhancement
 compute: added `foo_bar` field to `google_compute_foo` resource
-```
 
-```release-note:bug
-container: fixed perma-diff in `google_container_cluster`
-```
+HEADER: release-note:bug
+NOTE: container: fixed perma-diff in `google_container_cluster`
 
-```release-note:breaking-change
-project: made `iam_policy` authoritative
-```
 
-```release-note:deprecation
-container: deprecated `region` and `zone` on `google_container_unicorn`. Use `location` instead.
-```
+HEADER: release-note:breaking-change
+NOTE: project: made `iam_policy` authoritative
+
+HEADER: release-note:deprecation
+NOTE: container: deprecated `region` and `zone` on `google_container_unicorn`. Use `location` instead.
 
 Note no service name or *New Resource* tag:
-```release-note:new-resource
-`google_compute_new_resource`
-```
+HEADER: release-note:new-resource
+NOTE: `google_compute_new_resource`
 
 Note no service name or *New Datasource* tag:
-```release-note:new-datasource
-`google_compute_new_datasource`
-```
+HEADER: release-note:new-datasource
+NOTE: `google_compute_new_datasource`
 
 DON'T DO:
 - Add compute_instance resource
