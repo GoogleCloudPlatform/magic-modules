@@ -112,26 +112,3 @@ func getFolderIamPolicyByFolderName(folderName string, config *Config) (*cloudre
 
 	return v1Policy, nil
 }
-
-// only used in tests
-func getFolderIamPolicyByParentAndDisplayName(parent, displayName string, config *Config) (*cloudresourcemanager.Policy, error) {
-	queryString := fmt.Sprintf("lifecycleState=ACTIVE AND parent=%s AND displayName=%s", parent, displayName)
-	searchRequest := &resourceManagerV2Beta1.SearchFoldersRequest{
-		Query: queryString,
-	}
-	searchResponse, err := config.clientResourceManagerV2Beta1.Folders.Search(searchRequest).Do()
-	if err != nil {
-		if isGoogleApiErrorWithCode(err, 404) {
-			return nil, fmt.Errorf("Folder not found: %s,%s", parent, displayName)
-		}
-
-		return nil, errwrap.Wrapf("Error reading folders: {{err}}", err)
-	}
-
-	folders := searchResponse.Folders
-	if len(folders) != 1 {
-		return nil, fmt.Errorf("expected exactly 1 folder, found %d", len(folders))
-	}
-
-	return getFolderIamPolicyByFolderName(folders[0].Name, config)
-}
