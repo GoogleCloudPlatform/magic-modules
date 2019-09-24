@@ -18,7 +18,8 @@ please add the "changelog: no-release-note" label to this PR.
 Otherwise, fill the template out below
 -->
 
-# Release Note Template for Downstream PRs (will be copied)
+**Release Note Template for Downstream PRs (will be copied)**
+
 ```release-note:enhancement
 
 ```
