@@ -444,23 +444,20 @@ objects:
     name: 'UrlDispatchRule'
     description: |
       Rules to match an HTTP request and dispatch that request to a service.
-    base_url: 'dispatch/'
-    create_url: 'dispatch/update?app_id={{project}}'
+    base_url: ''
+    create_url: 'apps/{{project}}?updateMask=dispatch_rules'
     create_verb: :PATCH
-    update_url: 'dispatch/update?app_id={{project}}'
+    update_url: 'apps/{{project}}'
     update_verb: :PATCH
     update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps#UrlDispatchRule'
     properties:
-      - !ruby/object:Api::Type::Map    
+      - !ruby/object:Api::Type::Array   
         name: 'dispatchRules'
         description: |
           Rules to match an HTTP request and dispatch that request to a service.
-        key_name: 'service'
-        key_description: |
-          Resource ID of a service in this application that should serve the matched request. The service must already exist. Example: default
-        value_type: !ruby/object:Api::Type::NestedObject
+        item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
               name: 'domain'
@@ -472,3 +469,7 @@ objects:
               description: |
                 Pathname within the host. Must start with a "/". A single "*" can be included at the end of the path.
                 The sum of the lengths of the domain and path may not exceed 100 characters.
+            - !ruby/object:Api::Type::String
+              name: 'service'
+              description: |
+                Resource ID of a service in this application that should serve the matched request. The service must already exist. Example: default.
