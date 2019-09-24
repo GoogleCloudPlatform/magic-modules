@@ -1471,13 +1471,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "managed_ssl_certificate_basic"
         primary_resource_id: "default"
         vars:
-          region_cert_name: "test-cert"
-          region_proxy_name: "test-proxy"
-          region_url_map_name: "url-map"
-          region_backend_service_name: "backend-service"
+          cert_name: "test-cert"
+          proxy_name: "test-proxy"
+          url_map_name: "url-map"
+          backend_service_name: "backend-service"
           dns_zone_name: "dnszone"
           forwarding_rule_name: "forwarding-rule"
-          region_health_check_name: "http-health-check"
+          http_health_check_name: "http-health-check"
     description: |
       {{description}}
       For a resource where you provide the key, see the
