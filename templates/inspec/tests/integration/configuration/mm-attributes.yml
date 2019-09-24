@@ -239,3 +239,26 @@ ml_model:
   description: My awesome ML model
   online_prediction_logging: true
   online_prediction_console_logging: true
+
+dataproc_cluster:
+  name: inspec-dataproc-cluster
+  label_key: label
+  label_value: value
+  config:
+    master_config:
+      num_instances: 1
+      machine_type: n1-standard-1
+      boot_disk_type: pd-ssd
+      boot_disk_size_gb: 15
+    worker_config:
+      num_instances: 2
+      machine_type: n1-standard-1
+      boot_disk_size_gb: 20
+      num_local_ssds: 1
+    preemptible_worker_config:
+      num_instances: 0
+    software_config:
+      prop_key: "dataproc:dataproc.allow.zero.workers"
+      prop_value: "true"
+    gce_cluster_config:
+      tag: foo
