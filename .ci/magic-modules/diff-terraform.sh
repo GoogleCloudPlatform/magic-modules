@@ -59,6 +59,7 @@ else
 fi
 
 TERRAFORM_COMMIT_MSG="$(cat .git/title)"
+BRANCH_NAME="$(cat branchname)"
 
 pushd "build/$SHORT_NAME"
 
@@ -69,17 +70,17 @@ git config --global user.name "Modular Magician"
 git add -A
 
 git commit -m "$TERRAFORM_COMMIT_MSG" --author="$COMMIT_AUTHOR" || true  # don't crash if no changes
-git checkout -B "$(cat ../../branchname)"
+git checkout -B "$BRANCH_NAME"
 
 OLD_COMMIT_SHA="$(git merge-base HEAD master)"
 apply_patches "$PATCH_DIR/$GITHUB_ORG/$PROVIDER_NAME" "$TERRAFORM_COMMIT_MSG" "$COMMIT_AUTHOR" "master"
 
 NEWLINE=$'\n'
-MESSAGE="# $PROVIDER_NAME diff report$NEWLINE"
+MESSAGE="## $PROVIDER_NAME diff report$NEWLINE"
 if [ "$(git rev-parse HEAD)" != "$OLD_COMMIT_SHA" ]; then
-    MESSAGE="${MESSAGE} https://github.com/$GITHUB_ORG/$PROVIDER_NAME/$OLD_COMMIT_SHA...$(git rev-parse HEAD)"
+    MESSAGE="${MESSAGE}(View Diff)[https://github.com/$GITHUB_ORG/$PROVIDER_NAME/$OLD_COMMIT_SHA...modular-magician:$BRANCH_NAME]"
 else
-    MESSAGE="${MESSAGE}"
+    MESSAGE="${MESSAGE}No diff generated."
 fi
 
 popd
