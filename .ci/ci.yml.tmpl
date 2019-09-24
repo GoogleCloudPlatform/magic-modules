@@ -187,6 +187,15 @@ jobs:
                     GITHUB_ORG: {{v.github_org}}
                     OVERRIDE_PROVIDER: {{v.override_provider}}
 
+                - put: {{v.short_name}}-intermediate
+                  params:
+                      repository: terraform-diff/{{k}}
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                  get_params:
+                      skip_clone: true
+
                 - put: magic-modules-3.0-prs
                   params:
                       status: success

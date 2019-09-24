@@ -74,17 +74,16 @@ git checkout -B "$(cat ../../branchname)"
 OLD_COMMIT_SHA="$(git merge-base HEAD master)"
 apply_patches "$PATCH_DIR/$GITHUB_ORG/$PROVIDER_NAME" "$TERRAFORM_COMMIT_MSG" "$COMMIT_AUTHOR" "master"
 
-# This is the only place that we differ from generate-terraform.sh - we don't bother to write the output
-# anywhere, we only check to see if there was a diff and write it.  Otherwise, we write that there isn't.
 NEWLINE=$'\n'
 MESSAGE="# $PROVIDER_NAME diff report$NEWLINE"
 if [ "$(git rev-parse HEAD)" != "$OLD_COMMIT_SHA" ]; then
-    MESSAGE="${MESSAGE}\`\`\`diff$NEWLINE$(git diff HEAD~ HEAD)$NEWLINE\`\`\`$NEWLINE"
+    MESSAGE="${MESSAGE} https://github.com/$GITHUB_ORG/$PROVIDER_NAME/$OLD_COMMIT_SHA...$(git rev-parse HEAD)"
 else
-    MESSAGE="${MESSAGE}No diff detected.$NEWLINE"
+    MESSAGE="${MESSAGE}"
 fi
 
 popd
 popd
 
-echo "$MESSAGE" > terraform-diff/"${SHORT_NAME}"_comment.txt
+echo "$MESSAGE" > "terraform-diff/${SHORT_NAME}_comment.txt"
+git clone "magic-modules-branched/build/$SHORT_NAME" "./terraform-diff/$VERSION"
