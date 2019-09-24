@@ -447,7 +447,9 @@ objects:
     base_url: ''
     create_url: 'apps/{{project}}?updateMask=dispatch_rules'
     create_verb: :PATCH
-    update_url: 'apps/{{project}}'
+    delete_url: 'apps/{{project}}?updateMask=dispatch_rules'
+    delete_verb: :DELETE
+    update_url: 'apps/{{project}}?updateMask=dispatch_rules'
     update_verb: :PATCH
     update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -472,4 +474,5 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'service'
               description: |
-                Resource ID of a service in this application that should serve the matched request. The service must already exist. Example: default.
+                Pathname within the host. Must start with a "/". A single "*" can be included at the end of the path.
+                The sum of the lengths of the domain and path may not exceed 100 characters.

@@ -30,12 +30,12 @@ resource "google_app_engine_standard_app_version" "myapp_v1" {
 
 resource "google_app_engine_application_url_dispatch_rule" "service_rules" {
   # project = "my-project"
-  dispatch_rule {
+  dispatch_rules {
     domain = "*"
     path = "/default/*"
     service = "default"
   }
-  dispatch_rule {
+  dispatch_rules {
     domain = "*"
     path = "/myapp/*"
     service = "myapp"
