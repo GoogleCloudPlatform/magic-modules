@@ -183,6 +183,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_service_name: "backend-service"
           http_health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_traffic_director_round_robin"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+          health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_traffic_director_ring_hash"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+          health_check_name: "health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/backend_service.go.erb'
       encoder: 'templates/terraform/encoders/backend_service.go.erb'
@@ -799,6 +813,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       deprecated: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      guestOsFeatures: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       imageEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       licenses: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1200,6 +1216,40 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'portDiffSuppress'
       sslHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+  RegionUrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_url_map_basic"
+        min_version: beta
+        primary_resource_id: "regionurlmap"
+        vars:
+          region_url_map_name: "regionurlmap"
+          login_region_backend_service_name: "login"
+          home_region_backend_service_name: "home"
+          region_health_check_name: "health-check"
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        required: false
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        description: |
+          The Region in which the url map should reside.
+          If it is not provided, the provider region is used.
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: "map_id"
+      hostRules: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: "host_rule"
+        is_set: true
+      hostRules.hosts: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      pathMatchers: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: "path_matcher"
+      pathMatchers.pathRules: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: "path_rule"
+      pathMatchers.pathRules.paths: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      tests: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: "test"
   ResourcePolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
