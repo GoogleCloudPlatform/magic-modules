@@ -93,6 +93,32 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 										Required:     true,
 										ValidateFunc: validation.StringInSlice([]string{"SRC_IPS_V1"}, false),
 									},
+
+									"expr": {
+										Type:     schema.TypeList,
+										Optional: true,
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"title": {
+													Type:     schema.TypeString,
+													Optional: true,
+												},
+												"description": {
+													Type:     schema.TypeString,
+													Optional: true,
+												},
+												"expression": {
+													Type:     schema.TypeString,
+													Required: true,
+												},
+												"location": {
+													Type:     schema.TypeString,
+													Optional: true,
+												},
+											},
+										},
+									},
 								},
 							},
 						},
@@ -330,6 +356,7 @@ func expandSecurityPolicyMatch(configured []interface{}) *compute.SecurityPolicy
 	return &compute.SecurityPolicyRuleMatcher{
 		VersionedExpr: data["versioned_expr"].(string),
 		Config:        expandSecurityPolicyMatchConfig(data["config"].([]interface{})),
+		Expr:          expandSecurityPolicyMatchExpr(data["expr"].([]interface{})),
 	}
 }
 
@@ -341,6 +368,20 @@ func expandSecurityPolicyMatchConfig(configured []interface{}) *compute.Security
 	data := configured[0].(map[string]interface{})
 	return &compute.SecurityPolicyRuleMatcherConfig{
 		SrcIpRanges: convertStringArr(data["src_ip_ranges"].(*schema.Set).List()),
+	}
+}
+
+func expandSecurityPolicyMatchExpr(expr []interface{}) *compute.Expr {
+	if len(expr) == 0 || expr[0] == nil {
+		return nil
+	}
+
+	data := expr[0].(map[string]interface{})
+	return &compute.Expr{
+		Title:       data["title"].(string),
+		Description: data["description"].(string),
+		Expression:  data["expression"].(string),
+		Location:    data["location"].(string),
 	}
 }
 
@@ -358,6 +399,14 @@ func flattenSecurityPolicyRules(rules []*compute.SecurityPolicyRule) []map[strin
 					"config": []map[string]interface{}{
 						{
 							"src_ip_ranges": schema.NewSet(schema.HashString, convertStringArrToInterface(rule.Match.Config.SrcIpRanges)),
+						},
+					},
+					"expr": []map[string]interface{}{
+						{
+							"title":       rule.Match.Expr.Title,
+							"description": rule.Match.Expr.Description,
+							"expression":  rule.Match.Expr.Expression,
+							"location":    rule.Match.Expr.Location,
 						},
 					},
 				},
