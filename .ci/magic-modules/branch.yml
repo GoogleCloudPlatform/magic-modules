@@ -17,12 +17,14 @@ inputs:
 
 outputs:
     - name: magic-modules-branched
+    - name: magic-modules-previous
 
 params:
   USE_SHA: ""
   GH_TOKEN: ""
   CREDS: ""
   ALL_SUBMODULES: ""
+  INCLUDE_PREVIOUS: ""
 
 run:
     path: magic-modules/.ci/magic-modules/branch-magic-modules.sh
