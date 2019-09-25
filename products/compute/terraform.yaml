@@ -1700,6 +1700,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_name: "log-test-network"
       - !ruby/object:Provider::Terraform::Examples
         name: "subnetwork_internal_l7lb"
+        min_version: beta
         primary_resource_id: "network-for-l7lb"
         vars:
           subnetwork_name: "l7lb-test-subnetwork"

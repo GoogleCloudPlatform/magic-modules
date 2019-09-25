@@ -6594,6 +6594,7 @@ objects:
           create the disk. Provide this when creating the disk.
   - !ruby/object:Api::Resource
     name: 'RegionUrlMap'
+    min_version: beta
     kind: 'compute#urlMap'
     base_url: projects/{{project}}/regions/{{region}}/urlMaps
     collection_url_key: 'items'
@@ -6763,6 +6764,7 @@ objects:
                 should be mapped to.
   - !ruby/object:Api::Resource
     name: 'RegionHealthCheck'
+    min_version: beta
     kind: 'compute#healthCheck'
     base_url: projects/{{project}}/regions/{{region}}/healthChecks
     collection_url_key: 'items'
@@ -8195,6 +8197,7 @@ objects:
         output: true
   - !ruby/object:Api::Resource
     name: 'RegionSslCertificate'
+    min_version: beta
     kind: 'compute#sslCertificate'
     base_url: projects/{{project}}/regions/{{region}}/sslCertificates
     collection_url_key: 'items'
@@ -8673,6 +8676,7 @@ objects:
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
       - !ruby/object:Api::Type::Enum
         name: 'purpose'
+        min_version: beta
         input: true
         values:
           - :INTERNAL_HTTPS_LOAD_BALANCER
@@ -8687,6 +8691,7 @@ objects:
           If set to INTERNAL_HTTPS_LOAD_BALANCER you must also set the role.
       - !ruby/object:Api::Type::Enum
         name: 'role'
+        min_version: beta
         update_verb: :PATCH
         update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
         values:
@@ -8967,6 +8972,7 @@ objects:
         update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setUrlMap'
   - !ruby/object:Api::Resource
     name: 'RegionTargetHttpProxy'
+    min_version: beta
     kind: 'compute#targetHttpProxy'
     base_url: projects/{{project}}/regions/{{region}}/targetHttpProxies
     collection_url_key: 'items'
@@ -9035,13 +9041,14 @@ objects:
         resource: 'RegionUrlMap'
         imports: 'selfLink'
         description: |
-          A reference to the UrlMap resource that defines the mapping from URL
+          A reference to the RegionUrlMap resource that defines the mapping from URL
           to the BackendService.
         required: true
         update_verb: :POST
         update_url: 'projects/{{project}}/regions/{{region}}/targetHttpProxies/{{name}}/setUrlMap'
   - !ruby/object:Api::Resource
     name: 'RegionTargetHttpsProxy'
+    min_version: beta
     kind: 'compute#targetHttpsProxy'
     base_url: projects/{{project}}/regions/{{region}}/targetHttpsProxies
     collection_url_key: 'items'
@@ -9128,7 +9135,7 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'sslCertificates'
         description: |
-          A list of SslCertificate resources that are used to authenticate
+          A list of RegionSslCertificate resources that are used to authenticate
           connections between users and the load balancer. Currently, exactly
           one SSL certificate must be specified.
         required: true
@@ -9142,7 +9149,7 @@ objects:
           description: 'The SSL certificates used by this TargetHttpsProxy'
      # This field is present in the schema but as of 2019 Sep 23 attempting to set it fails with
      # a 400 "SSL policy is supported only with global TargetHttpsProxy". jamessynge@ said in an
-     # email sent on 2019 Sep 20 that they hope to support this "in the next 6 months I hope."
+     # email sent on 2019 Sep 20 that will support this "in the next 6 months I hope."
      #- !ruby/object:Api::Type::ResourceRef
      #  name: 'sslPolicy'
      #  resource: 'SslPolicy'

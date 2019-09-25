@@ -1,5 +1,7 @@
+<% autogen_exception -%>
 package google
 
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"testing"
@@ -222,3 +224,4 @@ resource "google_compute_region_ssl_certificate" "foobar2" {
 }
 `, id, id, id, id, id, id, id, id, id)
 }
+<% end -%>

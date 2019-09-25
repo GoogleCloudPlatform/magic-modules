@@ -1,5 +1,7 @@
+<% autogen_exception -%>
 package google
 
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"testing"
@@ -171,3 +173,4 @@ func testAccComputeRegionTargetHttpProxy_basic2(target, backend, hc, urlmap1, ur
 	}
 	`, target, backend, hc, urlmap1, urlmap2)
 }
+<% end -%>

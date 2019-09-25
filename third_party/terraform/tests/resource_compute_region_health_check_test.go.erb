@@ -1,6 +1,7 @@
 <% autogen_exception -%>
 package google
 
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"regexp"
@@ -339,3 +340,4 @@ resource "google_compute_region_health_check" "foobar" {
 }
 `, hckName)
 }
+<% end -%>
