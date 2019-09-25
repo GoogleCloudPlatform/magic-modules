@@ -65,37 +65,49 @@ See examples below for good release notes.
 
 **Enhancements:** adding fields or new features to existing resources
 
+~~~
 ```release-note:enhancement
 `compute`: added `foo_bar` field to `google_compute_foo` resource
 ```
+~~~
 **Bugs:** fixing existing resources
 
+~~~
 ```release-note:bug
 `container`: fixed perma-diff in `google_container_cluster`
 ```
+~~~
 
 **Breaking Changes:** changes to existing resources that may require users to change their config
 
+~~~
 ```release-note:breaking-change
 `project`: made `iam_policy` authoritative
 ```
+~~~
 
 **Deprecations:** Announce deprecations when fields/resources are marked as deprecated, not removed
 
+~~~
 ``` release-note:deprecation
 `container`: deprecated `region` and `zone` on `google_container_unicorn`. Use `location` instead.
 ```
+~~~
 
 **New Resources And Datasources:**
 (note no service name or *New Resource* tag)
 
+~~~
 ```release-note:new-resource
 `google_compute_new_resource`
 ```
+~~~
 
+~~~
 ```release-note:new-datasource
 `google_compute_new_datasource`
 ```
+~~~
 
 Notes: General tag for things that don’t have changes in provider but may be important to users. Syntax is slightly more flexible here. 
 
