@@ -10,8 +10,8 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"google.golang.org/api/dataproc/v1"
 	"google.golang.org/api/googleapi"
