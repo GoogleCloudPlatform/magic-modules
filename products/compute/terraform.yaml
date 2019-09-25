@@ -1133,61 +1133,51 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_health_check_tcp"
-        min_version: beta
         primary_resource_id: "tcp-region-health-check"
         vars:
           health_check_name: "tcp-region-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_health_check_tcp_full"
-        min_version: beta
         primary_resource_id: "tcp-region-health-check"
         vars:
           health_check_name: "tcp-region-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_health_check_ssl"
-        min_version: beta
         primary_resource_id: "ssl-region-health-check"
         vars:
           health_check_name: "ssl-region-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_health_check_ssl_full"
-        min_version: beta
         primary_resource_id: "ssl-region-health-check"
         vars:
           health_check_name: "ssl-region-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_health_check_http"
-        min_version: beta
         primary_resource_id: "http-region-health-check"
         vars:
           health_check_name: "http-region-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_health_check_http_full"
-        min_version: beta
         primary_resource_id: "http-region-health-check"
         vars:
           health_check_name: "http-region-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_health_check_https"
-        min_version: beta
         primary_resource_id: "https-region-health-check"
         vars:
           health_check_name: "https-region-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_health_check_https_full"
-        min_version: beta
         primary_resource_id: "https-region-health-check"
         vars:
           health_check_name: "https-region-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_health_check_http2"
-        min_version: beta
         primary_resource_id: "http2-region-health-check"
         vars:
           health_check_name: "http2-region-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_health_check_http2_full"
-        min_version: beta
         primary_resource_id: "http2-region-health-check"
         vars:
           health_check_name: "http2-region-health-check"
@@ -1221,7 +1211,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_url_map_basic"
-        min_version: beta
         primary_resource_id: "regionurlmap"
         vars:
           region_url_map_name: "regionurlmap"
@@ -1549,6 +1538,58 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
         custom_flatten: 'templates/terraform/custom_flatten/sha256.erb'
         diff_suppress_func: 'sha256DiffSuppress'
+  RegionSslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |
+        * `name_prefix` - (Optional) Creates a unique name beginning with the
+         specified prefix. Conflicts with `name`.
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_ssl_certificate_basic"
+        primary_resource_id: "default"
+        ignore_read_extra:
+          - "name_prefix"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_ssl_certificate_random_provider"
+        primary_resource_id: "default"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_ssl_certificate_target_https_proxies"
+        primary_resource_id: "default"
+        vars:
+          region_target_https_proxy_name: "test-proxy"
+          region_url_map_name: "url-map"
+          region_backend_service_name: "backend-service"
+          region_health_check_name: "http-health-check"
+        ignore_read_extra:
+          - "name_prefix"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      extra_schema_entry: templates/terraform/extra_schema_entry/ssl_certificate.erb
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        required: false
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        description: |
+          The Region in which the created regional ssl certificate should reside.
+          If it is not provided, the provider region is used.
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+        description: |
+          {{description}}
+
+          These are in the same namespace as the managed SSL certificates.
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'certificate_id'
+      certificate: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+      privateKey: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+        ignore_read: true
+        custom_flatten: 'templates/terraform/custom_flatten/sha256.erb'
+        diff_suppress_func: 'sha256DiffSuppress'
   SslPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1659,8 +1700,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_name: "log-test-network"
       - !ruby/object:Provider::Terraform::Examples
         name: "subnetwork_internal_l7lb"
-        primary_resource_id: "network-for-l7lb"
         min_version: beta
+        primary_resource_id: "network-for-l7lb"
         vars:
           subnetwork_name: "l7lb-test-subnetwork"
           network_name: "l7lb-test-network"
@@ -1689,6 +1730,47 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           backend_service_name: "backend-service"
           http_health_check_name: "http-health-check"
     properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: proxyId
+  RegionTargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_target_http_proxy_basic"
+        primary_resource_id: "default"
+        vars:
+          region_target_http_proxy_name: "test-proxy"
+          region_url_map_name: "url-map"
+          region_backend_service_name: "backend-service"
+          region_health_check_name: "http-health-check"
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        required: false
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        description: |
+          The Region in which the created target https proxy should reside.
+          If it is not provided, the provider region is used.
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: proxyId
+  RegionTargetHttpsProxy: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_target_https_proxy_basic"
+        primary_resource_id: "default"
+        vars:
+          region_target_https_proxy_name: "test-proxy"
+          region_ssl_certificate_name: "my-certificate"
+          region_url_map_name: "url-map"
+          region_backend_service_name: "backend-service"
+          region_health_check_name: "http-health-check"
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        required: false
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        description: |
+          The Region in which the created target https proxy should reside.
+          If it is not provided, the provider region is used.
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
   TargetInstance: !ruby/object:Overrides::Terraform::ResourceOverride
