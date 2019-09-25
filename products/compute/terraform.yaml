@@ -1402,6 +1402,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
       subnetwork: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+        set_hash_func: computeRouterNatSubnetworkHash
       subnetwork.sourceIpRangesToNat: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       subnetwork.secondaryIpRangeNames: !ruby/object:Overrides::Terraform::PropertyOverride
