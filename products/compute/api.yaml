@@ -664,6 +664,7 @@ objects:
                 Note that you must specify an Instance Group or Network Endpoint
                 Group resource using the fully-qualified URL, rather than a
                 partial URL.
+              required: true
             - !ruby/object:Api::Type::Integer
               name: 'maxConnections'
               description: |
