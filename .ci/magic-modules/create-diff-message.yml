@@ -1,0 +1,19 @@
+---
+platform: linux
+
+image_resource:
+    type: docker-image
+    source:
+        # This task requires a container with 'git', 'python', and the pip
+        # package 'pygithub'.
+        repository: gcr.io/magic-modules/python
+        tag: '1.0'
+
+inputs:
+    - name: magic-modules-branched
+
+outputs:
+    - name: message
+
+run:
+    path: magic-modules-branched/.ci/magic-modules/create-diff-message.sh

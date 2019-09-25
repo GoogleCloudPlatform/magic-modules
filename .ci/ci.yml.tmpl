@@ -156,8 +156,6 @@ jobs:
             # pushing this anywhere - but it lets us reuse all the other
             # generation stuff.
           - aggregate:
-            - get: patches
-              resource: merged-prs
               # consumes: magic-modules (detached HEAD)
               # produces: magic-modules-branched (new branch, with submodule)
             - task: branch-magic-modules
@@ -166,6 +164,7 @@ jobs:
                 GH_TOKEN: ((github-account.password))
                 CREDS: ((repo-key.private_key))
                 ALL_SUBMODULES: {{' '.join(vars.all_submodules)}}
+                INCLUDE_PREVIOUS: true
             - put: magic-modules-3.0-prs
               params:
                 status: pending
@@ -189,21 +188,33 @@ jobs:
 
                 - put: {{v.short_name}}-intermediate
                   params:
-                      repository: terraform-diff/{{k}}
+                      repository: terraform-diff/new
                       branch_file: magic-modules-branched/branchname
                       force: true
                   get_params:
                       skip_clone: true
 
-                - put: magic-modules-3.0-prs
+                - put: {{v.short_name}}-intermediate
                   params:
-                      status: success
-                      path: magic-modules
-                      comment: terraform-diff/{{v.short_name}}_comment.txt
+                      repository: terraform-diff/old
+                      branch_file: magic-modules-previous/branchname
+                      force: true
                   get_params:
                       skip_clone: true
 
 {% endfor %}
+
+          - task: create-message
+            file: magic-modules-branched/.ci/magic-modules/create-diff-message.yml
+
+          - put: magic-modules-3.0-prs
+            params:
+                status: success
+                path: magic-modules
+                comment: message/message.txt
+            get_params:
+                skip_clone: true
+
 
 
     - name: mm-generate
