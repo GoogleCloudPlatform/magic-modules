@@ -1,9 +1,8 @@
-<!-- AUTOCHANGELOG for Downstream PRs. -->
-<!-- EXTERNAL CONTRIBUTORS please disregard - your reviewer will handle it. -->
+<!-- AUTOCHANGELOG for Downstream PRs.
 
-<!--
-INTERNAL CONTRIBUTORS AND REVIEWERS: See guide at
-https://docs.google.com/document/d/1nmt9LWKnz3XM_9Vm0zzMMN_jUs3rXd65dvbrkgrt8mk/edit?usp=sharing
+EXTERNAL CONTRIBUTORS: Ignore please - your reviewer will handle.
+
+INTERNAL CONTRIBUTORS AND REVIEWERS: See .ci/RELEASE_NOTES_GUIDE.md
 for writing good release notes.
 
 NO CHANGELOG NOTE: Please add "changelog: no-release-note" label to this PR.
