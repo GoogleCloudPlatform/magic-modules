@@ -506,6 +506,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'entityId'
         description: 'The ID for the entity'
+        output: true
       # | 'etag' is not applicable for state convergence.
       - !ruby/object:Api::Type::String
         name: 'id'
@@ -514,6 +515,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'projectTeam'
         description: 'The project team associated with the entity'
+        output: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'projectNumber'
