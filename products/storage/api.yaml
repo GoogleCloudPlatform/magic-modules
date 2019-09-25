@@ -474,6 +474,7 @@ objects:
         imports: 'name'
         description: 'The name of the bucket.'
         required: true
+        input: true
       - !ruby/object:Api::Type::String
         name: 'domain'
         description: 'The domain associated with the entity.'
@@ -501,6 +502,7 @@ objects:
             To refer to all members of the Google Apps for Business domain
             example.com, the entity would be domain-example.com.
         required: true
+        input: true
       - !ruby/object:Api::Type::String
         name: 'entityId'
         description: 'The ID for the entity'

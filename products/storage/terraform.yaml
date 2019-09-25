@@ -29,6 +29,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       bucket: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
+      entityId: !ruby/object:Overrides::Terraform::PropertyOverride
+        output: true
+      projectTeam: !ruby/object:Overrides::Terraform::PropertyOverride
+        output: true
   ObjectAccessControl: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
     - !ruby/object:Provider::Terraform::Examples
