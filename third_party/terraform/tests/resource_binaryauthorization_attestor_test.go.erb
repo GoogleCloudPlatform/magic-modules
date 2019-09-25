@@ -1,6 +1,5 @@
 <% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -209,7 +208,3 @@ resource "google_binary_authorization_attestor" "attestor" {
   }
 }`, kmsKey, attestorName, attestorName)
 }
-<% else %>
-// Because Container Analysis is still in beta, we can't run any of the tests that call that
-// resource without vendoring in the full beta provider.
-<% end -%>
