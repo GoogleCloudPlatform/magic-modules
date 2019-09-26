@@ -17,8 +17,16 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	if v == nil {
 		return nil
 	}
-	if v, ok := d.GetOk("app_engine_http_target"); ok && len(v.([]interface{})) > 0 {
+	if stateV, ok := d.GetOk("app_engine_http_target"); ok && len(stateV.([]interface{})) > 0 {
 		return d.Get("app_engine_http_target.0.app_engine_routing")
 	}
-	return nil
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["service"] = original["service"]
+	transformed["version"] = original["version"]
+	transformed["instance"] = original["instance"]
+	return []interface{}{transformed}
 }
