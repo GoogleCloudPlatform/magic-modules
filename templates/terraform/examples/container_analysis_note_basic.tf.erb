@@ -1,15 +1,8 @@
 resource "google_container_analysis_note" "<%= ctx[:primary_resource_id] %>" {
-  provider = "google-beta"
-
   name = "<%= ctx[:vars]["note_name"] %>"
   attestation_authority {
     hint {
       human_readable_name = "Attestor Note"
     }
   }
-}
-
-provider "google-beta"{
-  region = "us-central1"
-  zone   = "us-central1-a"
 }

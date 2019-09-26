@@ -1,6 +1,5 @@
 <% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -113,32 +112,6 @@ func TestAccBinaryAuthorizationAttestor_update(t *testing.T) {
 	})
 }
 
-func testAccCheckBinaryAuthorizationAttestorDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_binary_authorization_attestor" {
-			continue
-		}
-
-		project, err := getTestProject(rs.Primary, config)
-		if err != nil {
-			return err
-		}
-
-		name := rs.Primary.Attributes["name"]
-
-		url := fmt.Sprintf("https://binaryauthorization.googleapis.com/v1beta1/projects/%s/attestors/%s", project, name)
-		_, err = sendRequest(config, "GET", "", url, nil)
-
-		if err == nil {
-			return fmt.Errorf("Error, attestor %s still exists", name)
-		}
-	}
-
-	return nil
-}
-
 func testAccBinaryAuthorizationAttestorBasic(name string) string {
 	return fmt.Sprintf(`
 resource "google_container_analysis_note" "note" {
@@ -235,7 +208,3 @@ resource "google_binary_authorization_attestor" "attestor" {
   }
 }`, kmsKey, attestorName, attestorName)
 }
-<% else %>
-// Because Container Analysis is still in beta, we can't run any of the tests that call that
-// resource without vendoring in the full beta provider.
-<% end -%>
