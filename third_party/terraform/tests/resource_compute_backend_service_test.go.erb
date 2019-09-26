@@ -851,6 +851,7 @@ func TestAccComputeBackendService_trafficDirectorUpdateFull(t *testing.T) {
 }
 <% end -%>
 
+<% unless version == 'ga' -%>
 func testAccComputeBackendService_trafficDirectorBasic(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
@@ -885,7 +886,9 @@ resource "google_compute_health_check" "health_check" {
 }
 `, serviceName, checkName)
 }
+<% end -%>
 
+<% unless version == 'ga' -%>
 func testAccComputeBackendService_trafficDirectorUpdateBasic(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
@@ -911,8 +914,9 @@ resource "google_compute_health_check" "health_check" {
 }
 `, serviceName, checkName)
 }
+<% end -%>
 
-
+<% unless version == 'ga' -%>
 func testAccComputeBackendService_trafficDirectorFull(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
@@ -947,7 +951,9 @@ resource "google_compute_health_check" "health_check" {
 }
 `, serviceName, checkName)
 }
+<% end -%>
 
+<% unless version == 'ga' -%>
 func testAccComputeBackendService_trafficDirectorUpdateFull(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
@@ -1006,6 +1012,7 @@ resource "google_compute_health_check" "health_check" {
 }
 `, serviceName, checkName)
 }
+<% end -%>
 
 func testAccComputeBackendService_basic(serviceName, checkName string) string {
 	return fmt.Sprintf(`
