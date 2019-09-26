@@ -39,7 +39,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-        custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
+        custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestor_name.erb'
       attestationAuthorityNote.noteReference: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/container_analysis_note.erb'
         diff_suppress_func: 'compareSelfLinkOrResourceName'

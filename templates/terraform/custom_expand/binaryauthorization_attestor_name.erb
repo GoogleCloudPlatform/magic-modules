@@ -1,0 +1,40 @@
+<%# The license inside this block applies to this file.
+	# Copyright 2019 Google Inc.
+	# Licensed under the Apache License, Version 2.0 (the "License");
+	# you may not use this file except in compliance with the License.
+	# You may obtain a copy of the License at
+	#
+	#     http://www.apache.org/licenses/LICENSE-2.0
+	#
+	# Unless required by applicable law or agreed to in writing, software
+	# distributed under the License is distributed on an "AS IS" BASIS,
+	# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	# See the License for the specific language governing permissions and
+	# limitations under the License.
+-%>
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+  // This method returns a full self link from a partial self link.
+  if v == nil || v.(string) == "" {
+    // It does not try to construct anything from empty.
+    return "", nil
+  } else if strings.HasPrefix(v.(string), "https://") {
+    // Anything that starts with a URL scheme is assumed to be a self link worth using.
+    return v, nil
+  } else if strings.HasPrefix(v.(string), "projects/") {
+    // If the self link references a project, we'll just stick the binary_authorization v1 prefix on it.
+    return "https://binaryauthorization.googleapis.com/v1/" + v.(string), nil
+  } else if strings.HasPrefix(v.(string), "attestors/") {
+    // For regional or zonal resources which include their region or zone, just put the project in front.
+    url, err := replaceVars(d, config, "{{BinaryAuthorizationBasePath}}projects/{{project}}/")
+    if err != nil {
+      return nil, err
+    }
+    return url + v.(string), nil
+  }
+  // Anything else is assumed to begin with the resource name.
+  url, err := replaceVars(d, config, "{{BinaryAuthorizationBasePath}}projects/{{project}}/attestors/{{attestor}}")
+  if err != nil {
+    return nil, err
+  }
+  return url + v.(string), nil
+}
