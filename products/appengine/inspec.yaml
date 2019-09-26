@@ -40,5 +40,4 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Service: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true  
   UrlDispatchRule: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true 
-  
+    exclude: true

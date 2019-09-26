@@ -448,7 +448,7 @@ objects:
     create_url: 'apps/{{project}}?updateMask=dispatch_rules'
     create_verb: :PATCH
     delete_url: 'apps/{{project}}?updateMask=dispatch_rules'
-    delete_verb: :DELETE
+    delete_verb: :PATCH
     update_url: 'apps/{{project}}?updateMask=dispatch_rules'
     update_verb: :PATCH
     update_mask: true
