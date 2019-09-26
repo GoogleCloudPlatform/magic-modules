@@ -67,41 +67,25 @@ type <%= resource_name -%>IamUpdater struct {
 	Config  *Config
 }
 
+<% provider_default_values = ['project', 'location', 'region', 'zone'] -%>
 func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Config) (ResourceIamUpdater, error) {
 	values := make(map[string]string)
 
-<% if resource_params.include?('project') -%>
-	project, err := getProject(d, config)
+<% resource_params.each do |param| -%>
+<% if provider_default_values.include?(param) -%>
+	<%= param -%>, err := get<%= param.capitalize -%>(d, config)
 	if err != nil {
 		return nil, err
 	}
-	values["project"] = project
+	values["<%= param -%>"] = <%= param -%>
 
-<% end -%>
-<% if resource_params.include?('location') -%>
-	location, err := getLocation(d, config)
-	if err != nil {
-		return nil, err
+<% else -%>
+	if v, ok := d.GetOk("<%= param.underscore -%>"); ok {
+		values["<%= param -%>"] = v.(string)
 	}
-	values["location"] = location
 
-<% end -%>
-<% if resource_params.include?('zone') -%>
-	zone, err := getZone(d, config)
-	if err != nil {
-		return nil, err
-	}
-	values["zone"] = zone
-
-<% end -%>
-<% if resource_params.include?('region') -%>
-	region, err := getRegion(d, config)
-	if err != nil {
-		return nil, err
-	}
-	values["region"] = region
-
-<% end -%>
+<% end # if provider_default_values.include? -%>
+<% end # resource_params.each -%>
 
 	// We may have gotten either a long or short name, so attempt to parse long name if possible
 	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Get("<%= resource_params.last.underscore -%>").(string))
@@ -143,38 +127,16 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) error {
 	values := make(map[string]string)
 
-<% if resource_params.include?('project') -%>
-	project, err := getProject(d, config)
+<% resource_params.each do |param| -%>
+<% if provider_default_values.include?(param) -%>
+	<%= param -%>, err := get<%= param.capitalize -%>(d, config)
 	if err != nil {
 		return err
 	}
-	values["project"] = project
+	values["<%= param -%>"] = <%= param -%>
 
-<% end -%>
-<% if resource_params.include?('location') -%>
-	location, err := getLocation(d, config)
-	if err != nil {
-		return err
-	}
-	values["location"] = location
-
-<% end -%>
-<% if resource_params.include?('zone') -%>
-	zone, err := getZone(d, config)
-	if err != nil {
-		return err
-	}
-	values["zone"] = zone
-
-<% end -%>
-<% if resource_params.include?('region') -%>
-	region, err := getRegion(d, config)
-	if err != nil {
-		return err
-	}
-	values["region"] = region
-
-<% end -%>
+<% end # if provider_default_values.include? -%>
+<% end # resource_params.each -%>
 
 	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Id())
 	if err != nil {
