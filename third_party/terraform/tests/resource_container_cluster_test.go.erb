@@ -754,7 +754,7 @@ func TestAccContainerCluster_withNodeConfigTaints(t *testing.T) {
 }
 <% end -%>
 
-func TestAccContainerCluster_withNodeConfigShieldedInstance(t *testing.T) {
+func TestAccContainerCluster_withNodeConfigShieldedInstanceConfig(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("cluster-test-%s", acctest.RandString(10))
@@ -765,13 +765,13 @@ func TestAccContainerCluster_withNodeConfigShieldedInstance(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withNodeConfigShieldedInstance(clusterName),
+				Config: testAccContainerCluster_withNodeConfigShieldedInstanceConfig(clusterName),
 			},
 			{
-				ResourceName:		 "google_container_cluster.with_node_config",
+				ResourceName:        "google_container_cluster.with_node_config",
 				ImportStateIdPrefix: "us-central1-f/",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
+				ImportState:         true,
+				ImportStateVerify:   true,
 			},
 		},
 	})
@@ -2340,7 +2340,7 @@ resource "google_container_cluster" "with_node_config" {
 <% end -%>
 
 
-func testAccContainerCluster_withNodeConfigShieldedInstance(clusterName string) string {
+func testAccContainerCluster_withNodeConfigShieldedInstanceConfig(clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_node_config" {
 	name = "%s"

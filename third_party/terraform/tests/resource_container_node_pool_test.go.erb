@@ -649,7 +649,7 @@ func TestAccContainerNodePool_EmptyGuestAccelerator(t *testing.T) {
 	})
 }
 
-func TestAccContainerNodePool_shieldedInstance(t *testing.T) {
+func TestAccContainerNodePool_shieldedInstanceConfig(t *testing.T) {
 	t.Parallel()
 
 	cluster := fmt.Sprintf("tf-nodepool-test-%s", acctest.RandString(10))
@@ -661,12 +661,12 @@ func TestAccContainerNodePool_shieldedInstance(t *testing.T) {
 		CheckDestroy: testAccCheckContainerNodePoolDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccContainerNodePool_shieldedInstance(cluster, np),
+				Config: testAccContainerNodePool_shieldedInstanceConfig(cluster, np),
 			},
 			resource.TestStep{
-				ResourceName:      "google_container_node_pool.np",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_container_node_pool.np",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"max_pods_per_node"},
 			},
 		},
@@ -1445,7 +1445,7 @@ resource "google_container_node_pool" "np" {
 }`, cluster, np)
 }
 
-func testAccContainerNodePool_shieldedInstance(cluster, np string) string {
+func testAccContainerNodePool_shieldedInstanceConfig(cluster, np string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
 	name               = "%s"
