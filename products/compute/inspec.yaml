@@ -72,6 +72,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  RegionUrlMap: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   Reservation: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   ResourcePolicy: !ruby/object:Overrides::Inspec::ResourceOverride

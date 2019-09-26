@@ -43,10 +43,9 @@ This resource supports all of the above properties as filter criteria, which can
 with `where` as a block or a method.
 <% else # if plural -%>
 <% object.all_user_properties.each do |prop| -%>
-  * `<%= "#{prop.out_name}" -%>`: <%= "#{prop.description.split("\n").join(' ')}" -%>
 
+<%= markdown_format(prop) -%>
 
-<%= sub_property_descriptions(prop) -%>
 <% end -%>
 
 <% end # if plural -%>
