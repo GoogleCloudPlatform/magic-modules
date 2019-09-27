@@ -37,13 +37,19 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   NodeGroup: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  NodeTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   RegionBackendService: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionHealthCheck: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionTargetHttpProxy: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionTargetHttpsProxy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionUrlMap: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -300,11 +306,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   NodeGroup: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  NodeTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   Region: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionHealthCheck: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionTargetHttpProxy: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionTargetHttpsProxy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionUrlMap: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true

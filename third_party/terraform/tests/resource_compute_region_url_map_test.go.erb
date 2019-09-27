@@ -1,13 +1,14 @@
 <% autogen_exception -%>
 package google
 
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccComputeRegionUrlMap_update_path_matcher(t *testing.T) {
@@ -357,3 +358,4 @@ resource "google_compute_region_url_map" "foobar" {
 }
 `, randomSuffix, randomSuffix, randomSuffix)
 }
+<% end -%>

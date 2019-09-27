@@ -2,11 +2,11 @@ package google
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"regexp"
 	"strings"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"google.golang.org/api/cloudiot/v1"
 )
 
@@ -178,12 +178,17 @@ func buildEventNotificationConfigs(v []interface{}) []*cloudiot.EventNotificatio
 }
 
 func buildEventNotificationConfig(config map[string]interface{}) *cloudiot.EventNotificationConfig {
-	if v, ok := config["pubsub_topic_name"]; ok {
-		return &cloudiot.EventNotificationConfig{
-			PubsubTopicName: v.(string),
-		}
+	if len(config) == 0 {
+		return nil
 	}
-	return nil
+	cfg := &cloudiot.EventNotificationConfig{}
+	if v, ok := config["pubsub_topic_name"]; ok {
+		cfg.PubsubTopicName = v.(string)
+	}
+	if v, ok := config["subfolder_matches"]; ok {
+		cfg.SubfolderMatches = v.(string)
+	}
+	return cfg
 }
 
 func buildStateNotificationConfig(config map[string]interface{}) *cloudiot.StateNotificationConfig {

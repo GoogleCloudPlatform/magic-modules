@@ -43,6 +43,7 @@ resources:
           access_token: ((github-account.password))
           community_only: true
           no_label: community
+          base: master
 
     - name: magic-modules-external-prs
       type: github-pull-request
@@ -51,6 +52,7 @@ resources:
           private_key: ((repo-key.private_key))
           access_token: ((github-account.password))
           community_only: true
+          base: master
 
     - name: magic-modules-new-prs
       type: github-pull-request
@@ -60,6 +62,17 @@ resources:
           access_token: ((github-account.password))
           authorship_restriction: true
           no_label: automerged
+          base: master
+
+    - name: magic-modules-3.0-prs
+      type: github-pull-request
+      source:
+          repo: GoogleCloudPlatform/magic-modules
+          private_key: ((repo-key.private_key))
+          access_token: ((github-account.password))
+          authorship_restriction: true
+          no_label: automerged
+          base: 3.0.0
 
 {% for v in vars.terraform_v.itervalues() %}
     - name: {{ v.short_name }}-intermediate
@@ -91,6 +104,7 @@ resources:
           require_review_approval: true
           check_dependent_prs: true
           label: downstream-generated
+          base: master
 
     - name: merged-prs
       type: merged-downstreams
@@ -128,6 +142,80 @@ jobs:
                 path: magic-modules-external-prs
             get_params:
                 skip_clone: true
+
+    - name: mm-3.0-diff
+      plan:
+          - get: magic-modules
+            resource: magic-modules-3.0-prs
+            version: every
+            trigger: true
+            attempts: 2
+            params:
+              fetch_merge: true
+            # This isn't strictly-speaking necessary - we aren't actually
+            # pushing this anywhere - but it lets us reuse all the other
+            # generation stuff.
+          - aggregate:
+              # consumes: magic-modules (detached HEAD)
+              # produces: magic-modules-branched (new branch, with submodule)
+            - task: branch-magic-modules
+              file: magic-modules/.ci/magic-modules/branch.yml
+              params:
+                GH_TOKEN: ((github-account.password))
+                CREDS: ((repo-key.private_key))
+                ALL_SUBMODULES: {{' '.join(vars.all_submodules)}}
+                INCLUDE_PREVIOUS: true
+            - put: magic-modules-3.0-prs
+              params:
+                status: pending
+                path: magic-modules
+              get_params:
+                skip_clone: true
+
+          - aggregate:
+{% for k, v in vars.terraform_v.iteritems() %}
+            - do:
+                # consumes: magic-modules-branched
+                # produces: terraform-generated
+                - task: diff-{{v.short_name}}
+                  file: magic-modules-branched/.ci/magic-modules/diff-terraform.yml
+                  params:
+                    VERSION: {{k}}
+                    PROVIDER_NAME: {{v.provider_name}}
+                    SHORT_NAME: {{v.short_name}}
+                    GITHUB_ORG: {{v.github_org}}
+                    OVERRIDE_PROVIDER: {{v.override_provider}}
+
+                - put: {{v.short_name}}-intermediate
+                  params:
+                      repository: terraform-diff/new
+                      branch_file: magic-modules-branched/branchname
+                      force: true
+                  get_params:
+                      skip_clone: true
+
+                - put: {{v.short_name}}-intermediate
+                  params:
+                      repository: terraform-diff/old
+                      branch_file: magic-modules-previous/branchname
+                      force: true
+                  get_params:
+                      skip_clone: true
+
+{% endfor %}
+
+          - task: create-message
+            file: magic-modules-branched/.ci/magic-modules/create-diff-message.yml
+
+          - put: magic-modules-3.0-prs
+            params:
+                status: success
+                path: magic-modules
+                comment: message/message.txt
+            get_params:
+                skip_clone: true
+
+
 
     - name: mm-generate
       plan:

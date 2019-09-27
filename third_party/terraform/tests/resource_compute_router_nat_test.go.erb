@@ -6,9 +6,9 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccComputeRouterNat_basic(t *testing.T) {
@@ -395,7 +395,7 @@ resource "google_compute_router_nat" "foobar" {
 	nat_ips                            = ["${google_compute_address.foobar.self_link}"]
 	source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
 	subnetwork {
-	  name                    = "${google_compute_subnetwork.foobar.self_link}"
+	  name                    = "${google_compute_subnetwork.foobar.name}"
 	  source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
 	}
 }`, testId, testId, testId, testId, testId)
@@ -488,28 +488,6 @@ resource "google_compute_router_nat" "foobar" {
 		"${google_compute_address.addr3.self_link}"
 	]
 }
-`, testAccComputeRouterNatBaseResourcesWithNatIps(testId), testId)
-}
-
-func testAccComputeRouterNatRemovedDrainedNatIps(testId string) string {
-	return fmt.Sprintf(`
-%s
-
-resource "google_compute_router_nat" "foobar" {
-	name                               = "router-nat-test-%s"
-	router                             = "${google_compute_router.foobar.name}"
-	region                             = "${google_compute_router.foobar.region}"
-
-	source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
-	subnetwork {
-	  name                    = "${google_compute_subnetwork.foobar.self_link}"
-	  source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
-	}
-
-	nat_ip_allocate_option             = "MANUAL_ONLY"
-	nat_ips                            = [
-		"${google_compute_address.addr2.self_link}"
-	]
 `, testAccComputeRouterNatBaseResourcesWithNatIps(testId), testId)
 }
 

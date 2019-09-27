@@ -30,6 +30,10 @@ objects:
     self_link: projects/{{project}}/attestors/{{name}}
     description: |
       An attestor that attests to container image artifacts.
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      parent_resource_attribute: 'attestor'
+      method_name_separator: ':'
+      exclude: false
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
