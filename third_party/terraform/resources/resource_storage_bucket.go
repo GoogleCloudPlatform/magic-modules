@@ -82,13 +82,6 @@ func resourceStorageBucket() *schema.Resource {
 				},
 			},
 
-			"predefined_acl": {
-				Type:     schema.TypeString,
-				Removed:  "Please use resource \"storage_bucket_acl.predefined_acl\" instead.",
-				Optional: true,
-				ForceNew: true,
-			},
-
 			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
