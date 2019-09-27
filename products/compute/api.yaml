@@ -426,7 +426,7 @@ objects:
       An HTTP(S) load balancer can direct traffic to specified URLs to a
       backend bucket rather than a backend service. It can send requests for
       static content to a Cloud Storage bucket and requests for dynamic content
-      a virtual machine instance.
+      to a virtual machine instance.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Using a Cloud Storage bucket as a load balancer backend': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-bucket'
