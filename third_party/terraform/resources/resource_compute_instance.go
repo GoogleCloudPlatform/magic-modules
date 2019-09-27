@@ -216,12 +216,6 @@ func resourceComputeInstance() *schema.Resource {
 										ValidateFunc: validation.StringInSlice([]string{"PREMIUM", "STANDARD"}, false),
 									},
 
-									"assigned_nat_ip": {
-										Type:     schema.TypeString,
-										Computed: true,
-										Removed:  "Use network_interface.access_config.nat_ip instead.",
-									},
-
 									"public_ptr_domain_name": {
 										Type:     schema.TypeString,
 										Optional: true,
@@ -246,14 +240,6 @@ func resourceComputeInstance() *schema.Resource {
 									},
 								},
 							},
-						},
-
-						"address": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-							Computed: true,
-							Removed:  "Please use network_ip",
 						},
 					},
 				},
@@ -326,72 +312,6 @@ func resourceComputeInstance() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
-			},
-
-			"disk": {
-				Type:     schema.TypeList,
-				Optional: true,
-				ForceNew: true,
-				Removed:  "Use boot_disk, scratch_disk, and attached_disk instead",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						// TODO(mitchellh): one of image or disk is required
-
-						"disk": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-						},
-
-						"image": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-						},
-
-						"type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-						},
-
-						"scratch": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							ForceNew: true,
-						},
-
-						"auto_delete": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
-							ForceNew: true,
-						},
-
-						"size": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							ForceNew: true,
-						},
-
-						"device_name": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-
-						"disk_encryption_key_raw": {
-							Type:      schema.TypeString,
-							Optional:  true,
-							ForceNew:  true,
-							Sensitive: true,
-						},
-
-						"disk_encryption_key_sha256": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
 			},
 
 			"enable_display": {
