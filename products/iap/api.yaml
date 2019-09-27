@@ -63,8 +63,8 @@ objects:
         required: true
   - !ruby/object:Api::Resource
     name: 'AppEngineVersion'
-    base_url: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{version}}'
-    self_link: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{version}}'
+    base_url: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
+    self_link: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
     exclude_resource: true
     description: |
       Only used to generate IAM resources
