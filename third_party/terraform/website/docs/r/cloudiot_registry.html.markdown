@@ -66,8 +66,6 @@ The following arguments are supported:
 
 * `region` - (Optional) The Region in which the created address should reside. If it is not provided, the provider region is used.
 
-* `event_notification_config` - (Deprecated) Use `event_notification_configs` instead.
-
 * `event_notification_configs` - (Optional) List of configurations for event notification, such as
 PubSub topics to publish device events to. Structure is documented below.
 
