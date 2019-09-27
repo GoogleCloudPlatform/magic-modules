@@ -82,6 +82,22 @@ objects:
         description: Version id of the App Engine application
         required: true
   - !ruby/object:Api::Resource
+    name: 'AppEngineService'
+    base_url: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}'
+    self_link: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}'
+    exclude_resource: true
+    description: |
+      Only used to generate IAM resources
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'appId'
+        description: Id of the App Engine application.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'service'
+        description: Service id of the App Engine application
+        required: true
+  - !ruby/object:Api::Resource
     name: 'WebBackendService'
     base_url: 'projects/{{project}}/iap_web/compute/services/{{name}}'
     self_link: 'projects/{{project}}/iap_web/compute/services/{{name}}'

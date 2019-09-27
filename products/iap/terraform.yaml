@@ -86,6 +86,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           org_id: :ORG_ID
           billing_account: :BILLING_ACCT
+  AppEngineService: !ruby/object:Overrides::Terraform::ResourceOverride
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      parent_resource_type: 'google_app_engine_standard_app_version'
+      parent_resource_attribute: 'service'
+      fetch_iam_policy_verb: :POST
+      allowed_iam_role: 'roles/iap.httpsResourceAccessor'
+      test_project_name: "tf-test"
+      custom_test_attributes: 'templates/terraform/iam/custom_test_attributes/app_engine_service.tf.erb'
+    id_format: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}'
+    import_format: ['projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}', '{{service}}']
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iap_app_engine_version"
+        primary_resource_id: "version"
+        primary_resource_name: "context[\"project_id\"], \"default\""
+        test_env_vars:
+          org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
   WebBackendService: !ruby/object:Overrides::Terraform::ResourceOverride
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
