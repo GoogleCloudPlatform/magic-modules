@@ -157,10 +157,12 @@ var schemaNodeConfig = &schema.Schema{
 						"enable_secure_boot": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Default:  false,
 						},
 						"enable_integrity_monitoring": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Default:  true,
 						},
 					},
 				},

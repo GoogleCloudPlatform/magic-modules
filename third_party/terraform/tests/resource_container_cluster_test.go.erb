@@ -1426,6 +1426,38 @@ func TestAccContainerCluster_withBinaryAuthorization(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withShieldedNodes(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("cluster-test-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:	  func() { testAccPreCheck(t) },
+		Providers:	  testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withShieldedNodes(clusterName, true),
+			},
+			{
+				ResourceName:		 "google_container_cluster.with_shielded_nodes",
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:		 true,
+				ImportStateVerify:	 true,
+			},
+			{
+				Config: testAccContainerCluster_withShieldedNodes(clusterName, false),
+			},
+			{
+				ResourceName:		 "google_container_cluster.with_shielded_nodes",
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:		 true,
+				ImportStateVerify:	 true,
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withFlexiblePodCIDR(t *testing.T) {
 	t.Parallel()
 
@@ -3185,6 +3217,18 @@ resource "google_container_cluster" "with_binary_authorization" {
 	initial_node_count = 1
 
 	enable_binary_authorization = %v
+}
+`, clusterName, enabled)
+}
+
+func testAccContainerCluster_withShieldedNodes(clusterName string, enabled bool) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_shielded_nodes" {
+	name = "%s"
+	zone = "us-central1-a"
+	initial_node_count = 1
+
+	enable_shielded_nodes = %v
 }
 `, clusterName, enabled)
 }
