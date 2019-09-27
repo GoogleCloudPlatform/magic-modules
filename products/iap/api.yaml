@@ -78,7 +78,7 @@ objects:
         description: Service id of the App Engine application
         required: true
       - !ruby/object:Api::Type::String
-        name: 'version'
+        name: 'versionId'
         description: Version id of the App Engine application
         required: true
   - !ruby/object:Api::Resource

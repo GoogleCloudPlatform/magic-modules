@@ -68,7 +68,8 @@ module Api
         check :allowed_iam_role, type: String, default: 'roles/viewer'
         check :parent_resource_attribute, type: String, default: 'id'
         check :test_project_name, type: String
-        check :custom_test_attributes, type: String, default: 'templates/terraform/iam/iam_attributes.go.erb'
+        custom_test_attributes_default = 'templates/terraform/iam/iam_attributes.go.erb'
+        check :custom_test_attributes, type: String, default: custom_test_attributes_default
       end
     end
   end
