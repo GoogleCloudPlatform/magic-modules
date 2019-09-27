@@ -85,6 +85,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_name: "fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"]), \"default\", \"v2\""
         test_env_vars:
           org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
   WebBackendService: !ruby/object:Overrides::Terraform::ResourceOverride
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false

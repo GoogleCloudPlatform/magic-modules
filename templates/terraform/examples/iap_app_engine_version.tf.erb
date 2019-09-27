@@ -1,7 +1,8 @@
 resource "google_project" "my_project" {
-  name       = "%{project_id}"
-  project_id = "%{project_id}"
-  org_id     = "%{org_id}"
+  name            = "%{project_id}"
+  project_id      = "%{project_id}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
 }
 
 resource "google_project_service" "project_service" {

@@ -7,6 +7,8 @@ context := map[string]interface{}{
 <% example.test_env_vars&.each do |var_name, var_type| -%>
 <% if var_type == :ORG_ID  -%>
 	"<%= var_name -%>": getTestOrgFromEnv(t),
+<% elsif var_type == :BILLING_ACCT  -%>
+	"<%= var_name -%>": getTestBillingAccountFromEnv(t),
 <% end -%>
 <% end -%>
 <% unless example.test_custom_context.nil? -%>
