@@ -212,27 +212,10 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 				Optional: true,
 			},
 
-			"trigger_bucket": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Computed:      true,
-				Removed:       "This field is removed. Use `event_trigger` instead.",
-				ConflictsWith: []string{"trigger_http", "trigger_topic"},
-			},
-
 			"trigger_http": {
-				Type:          schema.TypeBool,
-				Optional:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"trigger_bucket", "trigger_topic"},
-			},
-
-			"trigger_topic": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Computed:      true,
-				Removed:       "This field is removed. Use `event_trigger` instead.",
-				ConflictsWith: []string{"trigger_http", "trigger_bucket"},
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
 			},
 
 			"event_trigger": {
