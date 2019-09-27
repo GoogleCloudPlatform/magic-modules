@@ -1,18 +1,15 @@
 {% import "vars.tmpl" as vars %}
 
-# These resource types are here until the PRs get merged in upstream.  :)
 resource_types:
     - name: merged-downstreams
       type: docker-image
       source:
-          # Note: resource types cannot use credhub substitution - "gcr.io/magic-modules" is hardcoded here.
           repository: gcr.io/magic-modules/merged-prs-resource
           tag: '1.1'
 
     - name: git-branch
       type: docker-image
       source:
-          # Note: resource types cannot use credhub substitution - "gcr.io/magic-modules" is hardcoded here.
           repository: gcr.io/magic-modules/concourse-git-resource
           tag: '1.0'
 
@@ -186,6 +183,13 @@ jobs:
                     GITHUB_ORG: {{v.github_org}}
                     OVERRIDE_PROVIDER: {{v.override_provider}}
 
+                - task: test-{{v.short_name}}
+                  file: magic-modules-branched/.ci/unit-tests/tf-3.yml
+                  timeout: 30m
+                  params:
+                      PROVIDER_NAME: {{v.provider_name}}
+                      TEST_DIR: {{v.test_dir}}
+
                 - put: {{v.short_name}}-intermediate
                   params:
                       repository: terraform-diff/new
@@ -203,6 +207,15 @@ jobs:
                       skip_clone: true
 
 {% endfor %}
+
+            on_failure:
+              put: magic-modules-3.0-prs
+              params:
+                status: failure
+                context: code-generation
+                path: magic-modules-3.0-prs
+              get_params:
+                skip_clone: true
 
           - task: create-message
             file: magic-modules-branched/.ci/magic-modules/create-diff-message.yml
