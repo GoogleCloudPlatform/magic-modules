@@ -313,7 +313,7 @@ resource "google_cloudiot_registry" "foobar" {
 
   name = "%s"
 
-  event_notification_config {
+  event_notification_configs {
     pubsub_topic_name = "${google_pubsub_topic.event-topic-1.id}"
 	subfolder_matches = ""
   }
@@ -346,7 +346,7 @@ resource "google_cloudiot_registry" "foobar" {
 	subfolder_matches = "test"
   }
 
-  event_notification_config {
+  event_notification_configs {
     pubsub_topic_name = "${google_pubsub_topic.event-topic-2.id}"
 	subfolder_matches = ""
   }
