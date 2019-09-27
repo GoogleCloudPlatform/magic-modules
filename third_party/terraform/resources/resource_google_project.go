@@ -71,17 +71,6 @@ func resourceGoogleProject() *schema.Resource {
 				Computed:  true,
 				StateFunc: parseFolderId,
 			},
-			"policy_data": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Removed:  "Use the 'google_project_iam_policy' resource to define policies for a Google Project",
-			},
-			"policy_etag": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "Use the the 'google_project_iam_policy' resource to define policies for a Google Project",
-			},
 			"number": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -94,109 +83,6 @@ func resourceGoogleProject() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-			"app_engine": {
-				Type:     schema.TypeList,
-				Elem:     appEngineResource(),
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-		},
-	}
-}
-
-func appEngineResource() *schema.Resource {
-	return &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"auth_domain": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"location_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"serving_status": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"feature_settings": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-				Elem:     appEngineFeatureSettingsResource(),
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"url_dispatch_rule": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-				Elem:     appEngineURLDispatchRuleResource(),
-			},
-			"code_bucket": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"default_hostname": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"default_bucket": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"gcr_domain": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-		},
-	}
-}
-
-func appEngineURLDispatchRuleResource() *schema.Resource {
-	return &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"domain": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"path": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"service": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-		},
-	}
-}
-
-func appEngineFeatureSettingsResource() *schema.Resource {
-	return &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"split_health_checks": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
 			},
 		},
 	}
@@ -304,10 +190,6 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("number", strconv.FormatInt(p.ProjectNumber, 10))
 	d.Set("name", p.Name)
 	d.Set("labels", p.Labels)
-
-	// We get app_engine.#: "" => "<computed>" without this set
-	// Remove when app_engine field is removed from schema completely
-	d.Set("app_engine", nil)
 
 	if p.Parent != nil {
 		switch p.Parent.Type {

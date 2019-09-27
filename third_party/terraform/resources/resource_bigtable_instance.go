@@ -83,34 +83,6 @@ func resourceBigtableInstance() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-
-			"cluster_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Removed:  "Use cluster instead.",
-			},
-
-			"zone": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Removed:  "Use cluster instead.",
-			},
-
-			"num_nodes": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				Removed:  "Use cluster instead.",
-			},
-
-			"storage_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Removed:  "Use cluster instead.",
-			},
 		},
 	}
 }
