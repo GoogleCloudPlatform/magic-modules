@@ -56,27 +56,16 @@ func resourceCloudIoTRegistry() *schema.Resource {
 					[]string{"", "NONE", "ERROR", "INFO", "DEBUG"}, false),
 			},
 			"event_notification_config": {
-				Type:          schema.TypeMap,
-				Optional:      true,
-				Computed:      true,
-				Deprecated:    "eventNotificationConfig has been deprecated in favor of eventNotificationConfigs (plural). Please switch to using the plural field.",
-				ConflictsWith: []string{"event_notification_configs"},
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"pubsub_topic_name": {
-							Type:             schema.TypeString,
-							Required:         true,
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
-						},
-					},
-				},
+				Type:     schema.TypeMap,
+				Optional: true,
+				Computed: true,
+				Removed:  "Please use event_notification_configs instead",
 			},
 			"event_notification_configs": {
 				Type:          schema.TypeList,
 				Optional:      true,
 				Computed:      true,
 				MaxItems:      10,
-				ConflictsWith: []string{"event_notification_config"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"pubsub_topic_name": {
@@ -241,9 +230,6 @@ func createDeviceRegistry(d *schema.ResourceData) *cloudiot.DeviceRegistry {
 	deviceRegistry := &cloudiot.DeviceRegistry{}
 	if v, ok := d.GetOk("event_notification_configs"); ok {
 		deviceRegistry.EventNotificationConfigs = buildEventNotificationConfigs(v.([]interface{}))
-	} else if v, ok := d.GetOk("event_notification_config"); ok {
-		deviceRegistry.EventNotificationConfigs = []*cloudiot.EventNotificationConfig{
-			buildEventNotificationConfig(v.(map[string]interface{}))}
 	}
 
 	if v, ok := d.GetOk("state_notification_config"); ok {
@@ -311,15 +297,6 @@ func resourceCloudIoTRegistryUpdate(d *schema.ResourceData, meta interface{}) er
 		updateMask = append(updateMask, "event_notification_configs")
 		if v, ok := d.GetOk("event_notification_configs"); ok {
 			deviceRegistry.EventNotificationConfigs = buildEventNotificationConfigs(v.([]interface{}))
-		}
-	}
-
-	if d.HasChange("event_notification_config") {
-		hasChanged = true
-		updateMask = append(updateMask, "event_notification_configs")
-		if v, ok := d.GetOk("event_notification_config"); ok {
-			deviceRegistry.EventNotificationConfigs = []*cloudiot.EventNotificationConfig{
-				buildEventNotificationConfig(v.(map[string]interface{}))}
 		}
 	}
 
@@ -402,14 +379,8 @@ func resourceCloudIoTRegistryRead(d *schema.ResourceData, meta interface{}) erro
 		if err := d.Set("event_notification_configs", cfgs); err != nil {
 			return fmt.Errorf("Error reading Registry: %s", err)
 		}
-		if err := d.Set("event_notification_config", map[string]string{
-			"pubsub_topic_name": res.EventNotificationConfigs[0].PubsubTopicName,
-		}); err != nil {
-			return fmt.Errorf("Error reading Registry: %s", err)
-		}
 	} else {
 		d.Set("event_notification_configs", nil)
-		d.Set("event_notification_config", nil)
 	}
 
 	pubsubTopicName := res.StateNotificationConfig.PubsubTopicName
