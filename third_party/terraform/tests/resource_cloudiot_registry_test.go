@@ -118,7 +118,7 @@ func TestAccCloudIoTRegistry_update(t *testing.T) {
 	})
 }
 
-func TestAccCloudIoTRegistry_eventNotificationConfigsSing;e(t *testing.T) {
+func TestAccCloudIoTRegistry_eventNotificationConfigsSingle(t *testing.T) {
 	t.Parallel()
 
 	registryName := fmt.Sprintf("tf-registry-test-%s", acctest.RandString(10))
