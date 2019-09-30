@@ -225,6 +225,7 @@ module Provider
         raise "#{cfg_file}(#{ex.class}) is not a Provider::Ansible::Example" \
           unless ex.is_a?(Provider::Ansible::Example)
 
+        ex.provider = self
         ex.validate
         ex
       end

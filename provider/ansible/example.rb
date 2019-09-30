@@ -66,8 +66,12 @@ module Provider
       attr_reader :facts
       attr_reader :vars
 
+      attr_accessor :provider
+
       def validate
         super
+        @task&.set_variable(self, :__example)
+        @dependencies&.each { |d| d.set_variable(self, :__example) }
 
         check :task, type: Task, required: true
         check :verifier, type: Verifier, default: FactsVerifier.new
@@ -89,13 +93,15 @@ module Provider
       attr_reader :scopes
       attr_reader :register
 
+      attr_reader :__example
+
       def validate
         super
         check :name, type: String, required: true
         check :code, type: Hash, required: true
         check :scopes, type: Array, item_type: ::String
 
-        @name = "google.cloud.#{@name}"
+        @name = "google.cloud.#{@name}" unless @__example&.provider&.is_a?(Provider::Ansible::Devel)
       end
 
       def build_test(state, object, noop = false)
