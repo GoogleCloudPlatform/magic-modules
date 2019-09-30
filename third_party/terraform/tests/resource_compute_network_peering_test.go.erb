@@ -39,6 +39,11 @@ func TestAccComputeNetworkPeering_basic(t *testing.T) {
 					<% end -%>
 				),
 			},
+			{
+				ResourceName:      "google_compute_network_peering.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 
