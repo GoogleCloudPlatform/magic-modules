@@ -22,6 +22,9 @@ get_all_modules() {
   done
 }
 
+# Clone ansible/ansible
+git clone git@github.com:modular-magician/ansible.git
+
 # Install dependencies for Template Generator
 pushd "magic-modules-gcp"
 bundle install
@@ -37,9 +40,8 @@ set -x
 chmod 400 ~/github_private_key
 popd
 
-pushd "magic-modules-gcp/build/ansible"
-
 # Setup Git config and remotes.
+pushd "ansible"
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
 
@@ -48,17 +50,17 @@ git remote add origin git@github.com:modular-magician/ansible.git
 git remote add upstream git@github.com:ansible/ansible.git
 git remote add magician git@github.com:modular-magician/ansible.git
 echo "Remotes setup properly"
-
-# ansible_collections_google currently has the most up-to-date code.
-# Ansible core still requires very specically formatted PRs (< 50 files to a PR, new modules in separate PRs).
-# as well as PRs coming from a branch in a ansible core fork.
-# We need to copy over all the modules/tests from the collection to our ansible core fork, so that we can make PRs
-# against our ansible core fork.
 popd
-git clone git@github.com:ansible/ansible_collections_google.git
-cp ansible_collections_google/plugins/modules/gcp_* magic-modules-gcp/build/ansible/lib/ansible/modules/cloud/google/
-cp -r ansible_collections_google/tests/integration magic-modules-gcp/build/ansible/test/integration/targets
-pushd "magic-modules-gcp/build/ansible"
+
+# Copy code into ansible/ansible + commit to our fork
+# By using the "ansible_devel" provider, we get versions of the resources that work
+# with ansible devel.
+pushd "magic-modules-gcp"
+ruby compiler.rb -a -e ansible -f ansible_devel -o ../ansible/
+popd
+
+# Commit code from magic modules into our fork
+pushd "ansible"
 git add lib/ansible/modules/cloud/google/gcp_* test/integration/targets/gcp_*
 git commit -m "Migrating code from collection"
 ssh-agent bash -c "ssh-add ~/github_private_key; git push origin devel"

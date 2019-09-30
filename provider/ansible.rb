@@ -225,6 +225,7 @@ module Provider
         raise "#{cfg_file}(#{ex.class}) is not a Provider::Ansible::Example" \
           unless ex.is_a?(Provider::Ansible::Example)
 
+        ex.provider = self
         ex.validate
         ex
       end
@@ -364,6 +365,10 @@ module Provider
 
     def copy_common_files(output_folder, provider_name = 'ansible')
       super(output_folder, provider_name)
+    end
+
+    def module_utils_import_path
+      'ansible_collections.google.cloud.plugins.module_utils.gcp_utils'
     end
   end
 end
