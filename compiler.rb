@@ -29,6 +29,7 @@ require 'google/logger'
 require 'optparse'
 require 'pathname'
 require 'provider/ansible'
+require 'provider/ansible_core'
 require 'provider/inspec'
 require 'provider/terraform'
 require 'provider/terraform_oics'
@@ -190,7 +191,8 @@ all_product_files.each do |product_name|
   else
     override_providers = {
       'oics' => Provider::TerraformOiCS,
-      'validator' => Provider::TerraformObjectLibrary
+      'validator' => Provider::TerraformObjectLibrary,
+      'ansible_core' => Provider::AnsibleCore
     }
 
     provider_class = override_providers[force_provider]
