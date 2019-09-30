@@ -367,7 +367,7 @@ module Provider
     end
 
     def module_utils_import_path
-      'ansible.module_utils.gcp_utils'
+      'ansible_collections.google.cloud.plugins.module_utils.gcp_utils'
     end
   end
 end
