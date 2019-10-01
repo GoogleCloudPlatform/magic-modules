@@ -10,10 +10,10 @@ image_resource:
         tag: '1.2'
 
 inputs:
-    - name: magic-modules-new-prs
+    - name: magic-modules-gcp
 
 run:
-    path: "magic-modules-new-prs/.ci/magic-modules/release-ansible.sh"
+    path: "magic-modules-gcp/.ci/magic-modules/release-ansible.sh"
 
 params:
   GITHUB_TOKEN: ""

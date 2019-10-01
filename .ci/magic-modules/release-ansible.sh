@@ -23,7 +23,7 @@ get_all_modules() {
 }
 
 # Install dependencies for Template Generator
-pushd "magic-modules-new-prs"
+pushd "magic-modules-gcp"
 bundle install
 
 # Setup SSH keys.
@@ -55,7 +55,7 @@ popd
 # Copy code into ansible/ansible + commit to our fork
 # By using the "ansible_devel" provider, we get versions of the resources that work
 # with ansible devel.
-pushd "magic-modules-new-prs"
+pushd "magic-modules-gcp"
 ruby compiler.rb -a -e ansible -f ansible_devel -o ../ansible/
 popd
 
