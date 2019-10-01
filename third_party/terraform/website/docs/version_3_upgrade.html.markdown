@@ -34,20 +34,18 @@ have been modified and downgrading your provider is sufficient.
 If you've ran `terraform refresh` or `terraform apply`, Terraform may have made
 state changes in the meantime.
 
-* If you're using a *local* state, `terraform refresh` with a downgraded
-provider is likely sufficient to revert your state. The Google provider
-generally refreshes most state information from the API, and the properties
-necessary to do so have been left unchanged.
+* If you're using a local state, or a remote state backend that does not support
+versioning, `terraform refresh` with a downgraded provider is likely sufficient
+to revert your state. The Google provider generally refreshes most state
+information from the API, and the properties necessary to do so have been left
+unchanged.
 
-* If you're using a *remote* state backend
-
-  * That does not support versioning, see the local state instructions above
-
-  * That supports *versioning* such as [Google Cloud Storage](https://www.terraform.io/docs/backends/types/gcs.html)
-you can revert the Terraform state file to a previous version by hand. If you do
-so and Terraform created resources as part of a `terraform apply`, you'll need
-to either `terraform import` them or delete them by hand.
-  
+* If you're using a remote state backend that supports versioning such as
+[Google Cloud Storage](https://www.terraform.io/docs/backends/types/gcs.html),
+you can revert the Terraform state file to a previous version. If you do
+so and Terraform had created resources as part of a `terraform apply` in the
+meantime, you'll need to either delete them by hand or `terraform import` them
+so Terraform knows to manage them.
 
 ## Upgrade Topics
 
