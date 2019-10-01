@@ -15,7 +15,7 @@ get_all_modules() {
   file_name=$remote_name
   ssh-agent bash -c "ssh-add ~/github_private_key; git fetch $remote_name"
   git checkout $remote_name/devel
-  git ls-files -- plugins/modules/gcp_* | cut -d/ -f 6 | cut -d. -f 1 > $file_name
+  git ls-files -- lib/ansible/modules/cloud/google/gcp_* | cut -d/ -f 6 | cut -d. -f 1 > $file_name
   
   for i in "${ignored_modules[@]}"; do
     sed -i "/$i/d" $file_name
@@ -40,7 +40,6 @@ popd
 # Clone ansible/ansible
 ssh-agent bash -c "ssh-add ~/github_private_key; git clone git@github.com:modular-magician/ansible.git"
 
-
 # Setup Git config and remotes.
 pushd "ansible"
 git config --global user.email "magic-modules@google.com"
@@ -64,7 +63,7 @@ popd
 pushd "ansible"
 git add lib/ansible/modules/cloud/google/gcp_* test/integration/targets/gcp_*
 git commit -m "Migrating code from collection"
-ssh-agent bash -c "ssh-add ~/github_private_key; git push origin devel"
+ssh-agent bash -c "ssh-add ~/github_private_key; git push magician devel"
 
 set -e
 
