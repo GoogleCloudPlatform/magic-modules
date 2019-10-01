@@ -22,9 +22,6 @@ get_all_modules() {
   done
 }
 
-# Clone ansible/ansible
-ssh-agent bash -c "ssh-add ~/github_private_key; git clone git@github.com:modular-magician/ansible.git"
-
 # Install dependencies for Template Generator
 pushd "magic-modules-new-prs"
 bundle install
@@ -39,6 +36,10 @@ echo "$CREDS" > ~/github_private_key
 set -x
 chmod 400 ~/github_private_key
 popd
+
+# Clone ansible/ansible
+ssh-agent bash -c "ssh-add ~/github_private_key; git clone git@github.com:modular-magician/ansible.git"
+
 
 # Setup Git config and remotes.
 pushd "ansible"
