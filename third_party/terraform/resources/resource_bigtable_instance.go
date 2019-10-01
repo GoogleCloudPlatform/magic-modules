@@ -196,8 +196,8 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 
 	clustersNewState := []map[string]interface{}{}
 	for i, cluster := range clusters {
-		// DEVELOPMENT clustersOldState have num_nodes = 0 on their first (and only)
-		// cluster while PRODUCTION clustersOldState will have at least 3.
+		// DEVELOPMENT clusters have num_nodes = 0 on their first (and only)
+		// cluster while PRODUCTION clusters will have at least 3.
 		if i == 0 {
 			var instanceType string
 			if cluster.ServeNodes == 0 {
