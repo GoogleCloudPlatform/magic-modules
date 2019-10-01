@@ -95,7 +95,12 @@ def set_release_notes(release_notes, body):
   Returns:
     Modified text
   """
-  edited = re.sub(r'`{3}[^`]*`{3}', "", body, flags=re.DOTALL)
+  edited = ""
+  md = mistune.markdown(body)
+  soup = BeautifulSoup(md, 'html.parser')
+  for blob in soup.find_all('p'):
+    edited += blob.get_text().strip() + "\n\n"
+
   for heading, note in release_notes:
     edited += "\n```%s\n%s\n```\n" % (heading, note.strip())
   return edited
