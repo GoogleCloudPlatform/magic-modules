@@ -262,3 +262,8 @@ dataproc_cluster:
       prop_value: "true"
     gce_cluster_config:
       tag: foo
+
+folder_exclusion:
+  name: inspec-folder-exclusion
+  description: My folder exclusion description
+  filter: "resource.type = gce_instance AND severity <= DEBUG"
