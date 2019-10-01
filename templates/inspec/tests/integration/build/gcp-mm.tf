@@ -161,6 +161,10 @@ variable "folder_exclusion" {
   type = "map"
 }
 
+variable "filestore_instance" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -677,4 +681,21 @@ resource "google_logging_folder_exclusion" "my-exclusion" {
   description = var.folder_exclusion["description"]
 
   filter      = var.folder_exclusion["filter"]
+}
+
+resource "google_filestore_instance" "instance" {
+  project = var.gcp_project_id
+  name    = var.filestore_instance["name"]
+  zone    = var.filestore_instance["zone"]
+  tier    = var.filestore_instance["tier"]
+
+  file_shares {
+    capacity_gb = var.filestore_instance["fileshare_capacity_gb"]
+    name        = var.filestore_instance["fileshare_name"]
+  }
+
+  networks {
+    network = var.filestore_instance["network_name"]
+    modes   = [var.filestore_instance["network_mode"]]
+  }
 }
