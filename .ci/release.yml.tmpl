@@ -53,7 +53,7 @@ jobs:
           - get: magic-modules-gcp
             trigger: false
           - task: build
-            file: magic-modules-new-prs/.ci/magic-modules/release-ansible.yml
+            file: magic-modules-gcp-prs/.ci/magic-modules/release-ansible.yml
             params:
                 GITHUB_TOKEN: ((github-account.password))
                 CREDS: ((repo-key.private_key))
