@@ -200,5 +200,3 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 	}
 	return nil
 }
-
-

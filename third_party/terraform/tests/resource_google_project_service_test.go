@@ -270,4 +270,3 @@ resource "google_project_service" "test" {
 }
 `, pid, service)
 }
-

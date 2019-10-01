@@ -646,4 +646,3 @@ func waitForServiceUsageEnabledServices(services []string, project string, confi
 	}
 	return nil
 }
-

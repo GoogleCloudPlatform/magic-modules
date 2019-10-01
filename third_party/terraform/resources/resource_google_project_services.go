@@ -13,7 +13,6 @@ import (
 
 const maxServiceUsageBatchSize = 20
 
-
 func resourceGoogleProjectServices() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceGoogleProjectServicesCreateUpdate,
@@ -261,5 +260,3 @@ func listCurrentlyEnabledServices(project string, config *Config, timeout time.D
 	}
 	return apiServices, nil
 }
-
-
