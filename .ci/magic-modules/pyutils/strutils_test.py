@@ -109,19 +109,19 @@ This is a release note
 
   def test_set_release_notes(self):
     downstream_body = """
-      All of the blocks below should be replaced
+All of the blocks below should be replaced
 
-      ```releasenote
-      This should be replaced
-      ```
+```releasenote
+This should be replaced
+```
 
-      More text
+More text
 
-      ```releasenote
-      ```
+```releasenote
+```
 
-      ```test
-      ```
+```test
+```
       """
     release_notes = [
       ("release-note:foo", "new message foo"),
