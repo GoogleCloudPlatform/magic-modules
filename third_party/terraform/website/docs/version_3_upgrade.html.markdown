@@ -20,7 +20,7 @@ such as deprecation notices, can always be found in the CHANGELOG of the
 affected providers. [google](https://github.com/terraform-providers/terraform-provider-google/blob/master/CHANGELOG.md)
 [google-beta](https://github.com/terraform-providers/terraform-provider-google-beta/blob/master/CHANGELOG.md)
 
-## I accidentally upgraded to 3.0.0, how do I downgrade to `1.X`?
+## I accidentally upgraded to 3.0.0, how do I downgrade to `2.X`?
 
 If you've inadvertently upgraded to `3.0.0`, first see the
 [Provider Version Configuration Guide](#provider-version-configuration) to lock
