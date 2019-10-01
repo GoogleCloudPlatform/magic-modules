@@ -179,12 +179,12 @@ resource "google_project_service" "kms" {
 }
 
 resource "google_project_service" "iam" {
-  project = "${google_project_service.kms.project_id}"
+  project = "${google_project_service.kms.project}"
   service = "iam.googleapis.com"
 }
 
 resource "google_project_service" "iamcred" {
-  project = "${google_project_service.iam.project_id}"
+  project = "${google_project_service.iam.project}"
   service = "iamcredentials.googleapis.com"
 }
 
@@ -223,12 +223,12 @@ resource "google_project_service" "kms" {
 }
 
 resource "google_project_service" "iam" {
-  project = "${google_project_service.kms.project_id}"
+  project = "${google_project_service.kms.project}"
   service = "iam.googleapis.com"
 }
 
 resource "google_project_service" "iamcred" {
-  project = "${google_project_service.iam.project_id}"
+  project = "${google_project_service.iam.project}"
   service = "iamcredentials.googleapis.com"
 }
 
@@ -276,12 +276,12 @@ resource "google_project_service" "kms" {
 }
 
 resource "google_project_service" "iam" {
-  project = "${google_project_service.kms.project_id}"
+  project = "${google_project_service.kms.project}"
   service = "iam.googleapis.com"
 }
 
 resource "google_project_service" "iamcred" {
-  project = "${google_project_service.iam.project_id}"
+  project = "${google_project_service.iam.project}"
   service = "iamcredentials.googleapis.com"
 }
 
@@ -320,12 +320,12 @@ resource "google_project_service" "kms" {
 }
 
 resource "google_project_service" "iam" {
-  project = "${google_project_service.kms.project_id}"
+  project = "${google_project_service.kms.project}"
   service = "iam.googleapis.com"
 }
 
 resource "google_project_service" "iamcred" {
-  project = "${google_project_service.iam.project_id}"
+  project = "${google_project_service.iam.project}"
   service = "iamcredentials.googleapis.com"
 }
 

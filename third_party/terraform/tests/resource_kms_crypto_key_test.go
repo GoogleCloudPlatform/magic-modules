@@ -403,7 +403,7 @@ resource "google_project" "acceptance" {
 
 resource "google_project_service" "acceptance" {
 	project = "${google_project.acceptance.project_id}"
-	services = "cloudkms.googleapis.com"
+	service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
@@ -431,7 +431,7 @@ resource "google_project" "acceptance" {
 
 resource "google_project_service" "acceptance" {
 	project = "${google_project.acceptance.project_id}"
-	services = "cloudkms.googleapis.com"
+	service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
@@ -458,7 +458,7 @@ resource "google_project" "acceptance" {
 
 resource "google_project_service" "acceptance" {
 	project = "${google_project.acceptance.project_id}"
-	services = "cloudkms.googleapis.com"
+	service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
@@ -490,7 +490,7 @@ resource "google_project" "acceptance" {
 
 resource "google_project_service" "acceptance" {
 	project = "${google_project.acceptance.project_id}"
-	services = "cloudkms.googleapis.com"
+	service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
