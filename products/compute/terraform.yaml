@@ -1732,6 +1732,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
+      quicOverride: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_value: :NONE
   RegionTargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
