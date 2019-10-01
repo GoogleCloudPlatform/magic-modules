@@ -101,7 +101,7 @@ for filename in mm-bug*; do
   git commit -m "Bug fixes for GCP modules"
 
   # Create a PR message + save to file
-  ruby ../../tools/ansible-pr/generate_template.rb > bug_fixes$filename
+  ruby ../magic-modules-gcp/tools/ansible-pr/generate_template.rb > bug_fixes$filename
 
   # Create PR
   ssh-agent bash -c "ssh-add ~/github_private_key; git push origin bug_fixes$filename --force"
@@ -129,7 +129,7 @@ while read module; do
   # Create a PR message + save to file
   set +e
   git commit -m "New Module: $module"
-  ruby ../../tools/ansible-pr/generate_template.rb --new-module-name $module > $module
+  ruby ../magic-modules-gcp/tools/ansible-pr/generate_template.rb --new-module-name $module > $module
 
   # Create PR
   ssh-agent bash -c "ssh-add ~/github_private_key; git push origin $module --force"
