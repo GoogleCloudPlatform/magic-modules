@@ -56,7 +56,7 @@ module Api
 
       # Some resources (IAP) use fields named differently from the parent resource.
       # This allows us to customize the test/example attributes of the resource by specifying a file
-      attr_reader :custom_test_attributes
+      attr_reader :custom_tf_config
 
       def validate
         super
@@ -68,8 +68,8 @@ module Api
         check :allowed_iam_role, type: String, default: 'roles/viewer'
         check :parent_resource_attribute, type: String, default: 'id'
         check :test_project_name, type: String
-        custom_test_attributes_default = 'templates/terraform/iam/iam_attributes.go.erb'
-        check :custom_test_attributes, type: String, default: custom_test_attributes_default
+        check :custom_tf_config, type: String,\
+          default: 'templates/terraform/iam/iam_attributes.go.erb'
       end
     end
   end
