@@ -183,19 +183,14 @@ resource "google_project_service" "iam" {
   service = "iam.googleapis.com"
 }
 
-resource "google_project_service" "iamcred" {
-  project = "${google_project_service.iam.project}"
-  service = "iamcredentials.googleapis.com"
-}
-
 resource "google_service_account" "test_account" {
-  project      = "${google_project_service.iamcred.project}"
+  project      = "${google_project_service.iam.project}"
   account_id   = "%s"
   display_name = "Kms Key Ring Iam Testing Account"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  project      = "${google_project_service.iamcred.project}"
+  project      = "${google_project_service.iam.project}"
   location = "us-central1"
   name     = "%s"
 }
@@ -227,25 +222,20 @@ resource "google_project_service" "iam" {
   service = "iam.googleapis.com"
 }
 
-resource "google_project_service" "iamcred" {
-  project = "${google_project_service.iam.project}"
-  service = "iamcredentials.googleapis.com"
-}
-
 resource "google_service_account" "test_account" {
-  project      = "${google_project_service.iamcred.project}"
+  project      = "${google_project_service.iam.project}"
   account_id   = "%s"
   display_name = "Kms Key Ring Iam Testing Account"
 }
 
 resource "google_service_account" "test_account_2" {
-  project      = "${google_project_service.iamcred.project}"
+  project      = "${google_project_service.iam.project}"
   account_id   = "%s-2"
   display_name = "Kms Key Ring Iam Testing Account"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  project  = "${google_project_service.iamcred.project}"
+  project  = "${google_project_service.iam.project}"
   location = "%s"
   name     = "%s"
 }
@@ -280,19 +270,14 @@ resource "google_project_service" "iam" {
   service = "iam.googleapis.com"
 }
 
-resource "google_project_service" "iamcred" {
-  project = "${google_project_service.iam.project}"
-  service = "iamcredentials.googleapis.com"
-}
-
 resource "google_service_account" "test_account" {
-  project      = "${google_project_service.iamcred.project}"
+  project      = "${google_project_service.iam.project}"
   account_id   = "%s"
   display_name = "Kms Key Ring Iam Testing Account"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  project  = "${google_project_service.iamcred.project}"
+  project  = "${google_project_service.iam.project}"
   location = "%s"
   name     = "%s"
 }
@@ -324,19 +309,14 @@ resource "google_project_service" "iam" {
   service = "iam.googleapis.com"
 }
 
-resource "google_project_service" "iamcred" {
-  project = "${google_project_service.iam.project}"
-  service = "iamcredentials.googleapis.com"
-}
-
 resource "google_service_account" "test_account" {
-  project      = "${google_project_service.iamcred.project}"
+  project      = "${google_project_service.iam.project}"
   account_id   = "%s"
   display_name = "Kms Key Ring Iam Testing Account"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  project  = "${google_project_service.iamcred.project}"
+  project  = "${google_project_service.iam.project}"
   location = "%s"
   name     = "%s"
 }
