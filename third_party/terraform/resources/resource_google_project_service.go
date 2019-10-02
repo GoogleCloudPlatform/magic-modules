@@ -50,6 +50,8 @@ var renamedServicesByNewServiceNames = reverseStringMap(renamedServices)
 // renamedServices expressed as both old -> new and new -> old
 var renamedServicesByOldAndNewServiceNames = mergeStringMaps(renamedServices, renamedServicesByNewServiceNames)
 
+const maxServiceUsageBatchSize = 20
+
 func resourceGoogleProjectService() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceGoogleProjectServiceCreate,
