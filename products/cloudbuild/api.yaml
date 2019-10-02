@@ -147,10 +147,6 @@ objects:
         min_version: beta
         properties:
           - !ruby/object:Api::Type::String
-            name: 'installationId'
-            description: |
-                The installationID that emits the GitHub event.
-          - !ruby/object:Api::Type::String
             name: 'owner'
             description: |
                 Owner of the repository. For example: The owner for
