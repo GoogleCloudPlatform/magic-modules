@@ -5644,6 +5644,7 @@ objects:
     base_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups'
     input: true
     has_self_link: true
+    collection_url_key: 'items'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'

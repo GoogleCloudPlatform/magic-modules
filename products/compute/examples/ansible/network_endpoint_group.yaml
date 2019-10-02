@@ -37,8 +37,8 @@ dependencies:
     code:
       name: <%= ctx[:name] %>
       ip_cidr_range: '10.0.0.0/16'
-      auto_create_subnetworks: false
       region: us-central1
+      network: "{{ network }}"
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>
