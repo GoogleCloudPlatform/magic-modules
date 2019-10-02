@@ -5750,6 +5750,7 @@ objects:
       guides:
         'Sole-Tenant Nodes': 'https://cloud.google.com/compute/docs/nodes/'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/nodeGroups'
+    collection_url_key: 'items'
     async: !ruby/object:Api::Async
       operation: !ruby/object:Api::Async::Operation
         kind: 'compute#operation'

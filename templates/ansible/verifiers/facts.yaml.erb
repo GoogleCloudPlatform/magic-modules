@@ -2,6 +2,7 @@
   module_name = ["gcp_#{object.__product.api_name}",
                  object.name.underscore,
                  'info'].join('_')
+  module_name = "google.cloud.#{module_name}" unless @__example&.provider&.is_a?(Provider::Ansible::Devel)
 -%>
 - name: verify that <%= object.name.underscore -%> was <%= lines(verbs[_state.to_sym]) -%>
   <%= module_name -%>:
