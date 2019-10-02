@@ -1421,17 +1421,14 @@ resource "google_project" "acceptance" {
 	billing_account = "%{billing_account}"
 }
 
-resource "google_project_services" "acceptance" {
+resource "google_project_service" "acceptance" {
 	project = "${google_project.acceptance.project_id}"
-
-	services = [
-	  "cloudkms.googleapis.com",
-	]
+	service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
 	name     = "tf-test-%{random_suffix}"
-	project  = "${google_project_services.acceptance.project}"
+	project  = "${google_project_service.acceptance.project}"
 	location = "us"
 }
 
