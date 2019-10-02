@@ -23,8 +23,8 @@ popd
 
 # Install collection
 pushd magic-modules-new-prs/build/ansible
-ansible-galaxy build .
-ansible-galaxy install ~/.ansible/collections
+ansible-galaxy collection build .
+ansible-galaxy collection install ~/.ansible/collections
 popd
 
 # Setup Cloud configuration template with variables

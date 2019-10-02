@@ -9,4 +9,4 @@ image_resource:
     repository: gcr.io/magic-modules/ansible
 
 run:
-    path: magic-modules-gcp/.ci/acceptance-tests/ansible-integration.sh
+    path: magic-modules-new-prs/.ci/acceptance-tests/ansible-integration.sh
