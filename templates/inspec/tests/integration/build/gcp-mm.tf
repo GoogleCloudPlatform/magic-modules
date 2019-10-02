@@ -157,6 +157,10 @@ variable "dataproc_cluster" {
   type = any
 }
 
+variable "folder_exclusion" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -663,4 +667,14 @@ resource "google_dataproc_cluster" "mycluster" {
       tags    = [var.dataproc_cluster["config"]["gce_cluster_config"]["tag"]]
     }
   }
+}
+
+resource "google_logging_folder_exclusion" "my-exclusion" {
+  count       = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  name        = var.folder_exclusion["name"]
+  folder      = google_folder.inspec-gcp-folder.0.name
+
+  description = var.folder_exclusion["description"]
+
+  filter      = var.folder_exclusion["filter"]
 }
