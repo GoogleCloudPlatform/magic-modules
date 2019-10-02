@@ -38,6 +38,8 @@
     :version_added: '2.8'
   :Network:
     :version_added: '2.7'
+  :NodeGroup:
+    :version_added: '2.10'
   :NodeTemplate:
     :version_added: '2.10'
   :RegionDisk:
@@ -359,6 +361,16 @@
       :version_added: '2.6'
     :loadBalancingScheme:
       :version_added: '2.6'
+    :metadataFilters:
+      :version_added: '2.10'
+      :filterMatchCriteria:
+        :version_added: '2.10'
+      :filterLabels:
+        :version_added: '2.10'
+        :name:
+          :version_added: '2.10'
+        :value:
+          :version_added: '2.10'
     :name:
       :version_added: '2.6'
     :network:
@@ -847,6 +859,18 @@
       :version_added: '2.8'
       :routingMode:
         :version_added: '2.8'
+  :NodeGroup:
+    :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :nodeTemplate:
+      :version_added: '2.10'
+    :size:
+      :version_added: '2.10'
+    :zone:
+      :version_added: '2.10'
   :NodeTemplate:
     :version_added: '2.10'
     :description:
