@@ -441,7 +441,7 @@ objects:
             description: |
               The format should be a shell command that can be fed to bash -c.
   - !ruby/object:Api::Resource
-    name: 'UrlDispatchRule'
+    name: 'ApplicationUrlDispatchRules'
     description: |
       Rules to match an HTTP request and dispatch that request to a service.
     base_url: ''
