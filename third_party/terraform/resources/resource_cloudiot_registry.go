@@ -62,10 +62,10 @@ func resourceCloudIoTRegistry() *schema.Resource {
 				Removed:  "Please use event_notification_configs instead",
 			},
 			"event_notification_configs": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				Computed:      true,
-				MaxItems:      10,
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 10,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"pubsub_topic_name": {
