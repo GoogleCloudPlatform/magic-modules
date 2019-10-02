@@ -18,11 +18,7 @@ popd
 # Build newest modules
 pushd magic-modules-gcp
 bundle install
-for i in $(find products/ -name 'ansible.yaml' -printf '%h\n');
-do
-  bundle exec compiler -p $i -e ansible -o "build/ansible/"
-done
-popd
+bundle exec compiler -a -e ansible -o build/ansible
 
 # Install collection
 pushd magic-modules-gcp/build/ansible
