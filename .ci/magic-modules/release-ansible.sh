@@ -15,15 +15,12 @@ get_all_modules() {
   file_name=$remote_name
   ssh-agent bash -c "ssh-add ~/github_private_key; git fetch $remote_name"
   git checkout $remote_name/devel
-  git ls-files -- plugins/modules/gcp_* | cut -d/ -f 6 | cut -d. -f 1 > $file_name
+  git ls-files -- lib/ansible/modules/cloud/google/gcp_* | cut -d/ -f 6 | cut -d. -f 1 > $file_name
   
   for i in "${ignored_modules[@]}"; do
     sed -i "/$i/d" $file_name
   done
 }
-
-# Clone ansible/ansible
-git clone git@github.com:modular-magician/ansible.git
 
 # Install dependencies for Template Generator
 pushd "magic-modules-gcp"
@@ -39,6 +36,9 @@ echo "$CREDS" > ~/github_private_key
 set -x
 chmod 400 ~/github_private_key
 popd
+
+# Clone ansible/ansible
+ssh-agent bash -c "ssh-add ~/github_private_key; git clone git@github.com:modular-magician/ansible.git"
 
 # Setup Git config and remotes.
 pushd "ansible"
@@ -63,7 +63,7 @@ popd
 pushd "ansible"
 git add lib/ansible/modules/cloud/google/gcp_* test/integration/targets/gcp_*
 git commit -m "Migrating code from collection"
-ssh-agent bash -c "ssh-add ~/github_private_key; git push origin devel"
+ssh-agent bash -c "ssh-add ~/github_private_key; git push magician devel"
 
 set -e
 
@@ -101,7 +101,7 @@ for filename in mm-bug*; do
   git commit -m "Bug fixes for GCP modules"
 
   # Create a PR message + save to file
-  ruby ../../tools/ansible-pr/generate_template.rb > bug_fixes$filename
+  ruby ../magic-modules-gcp/tools/ansible-pr/generate_template.rb > bug_fixes$filename
 
   # Create PR
   ssh-agent bash -c "ssh-add ~/github_private_key; git push origin bug_fixes$filename --force"
@@ -129,7 +129,7 @@ while read module; do
   # Create a PR message + save to file
   set +e
   git commit -m "New Module: $module"
-  ruby ../../tools/ansible-pr/generate_template.rb --new-module-name $module > $module
+  ruby ../magic-modules-gcp/tools/ansible-pr/generate_template.rb --new-module-name $module > $module
 
   # Create PR
   ssh-agent bash -c "ssh-add ~/github_private_key; git push origin $module --force"
