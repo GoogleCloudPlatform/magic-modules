@@ -16,12 +16,13 @@ source hacking/env-setup
 popd
 
 # Build newest modules
-pushd magic-modules-gcp
+pushd magic-modules-new-prs
 bundle install
 bundle exec compiler -a -e ansible -o build/ansible
+popd
 
 # Install collection
-pushd magic-modules-gcp/build/ansible
+pushd magic-modules-new-prs/build/ansible
 ansible-galaxy build .
 ansible-galaxy install ~/.ansible/collections
 popd

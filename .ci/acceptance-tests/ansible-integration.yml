@@ -1,7 +1,7 @@
 platform: linux
 
 inputs:
-  - name: magic-modules-gcp
+  - name: magic-modules-new-prs
 
 image_resource:
   type: docker-image
