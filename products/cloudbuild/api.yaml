@@ -18,6 +18,14 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://cloudbuild.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    # This is correct even though it's the same base_url as v1.
+    # Some features in this API are beta, even though they're all
+    # released as v1.  This is not ideal, but it's not something
+    # we can fix - we just want to protect our users from APIs that
+    # might change unexpectedly.
+    base_url: https://cloudbuild.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -136,6 +144,7 @@ objects:
         name: 'github'
         description: |
             Describes the configuration of a trigger that creates a build whenever a GitHub event is received.
+        min_version: beta
         properties:
           - !ruby/object:Api::Type::String
             name: 'installationId'
