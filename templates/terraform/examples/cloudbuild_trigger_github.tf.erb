@@ -1,0 +1,22 @@
+resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
+  trigger_template {
+    branch_name = "master"
+    repo_name   = "my-repo"
+  }
+
+  substitutions = {
+    _FOO = "bar"
+    _BAZ = "qux"
+  }
+
+  github {
+    installation_id = "abc123"
+    owner = "terraform-providers"
+    name = "terraform-provider-google-beta"
+    push {
+      branch = "feature-.*"
+    }
+  }
+
+  filename = "cloudbuild.yaml"
+}
