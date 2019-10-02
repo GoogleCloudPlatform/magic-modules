@@ -1,0 +1,16 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% filestore_instance = grab_attributes['filestore_instance'] -%>
+describe google_filestore_instance(project: <%= gcp_project_id -%>, zone: <%= doc_generation ? "'#{filestore_instance['zone']}'" : "filestore_instance['zone']" -%>, name: <%= doc_generation ? "'#{filestore_instance['name']}'" : "filestore_instance['name']" -%>) do
+  it { should exist }
+  its('tier') { should cmp <%= doc_generation ? "'#{filestore_instance['tier']}'" : "filestore_instance['tier']" -%> }
+  its('file_shares.count') { should cmp 1 }
+  its('file_shares.first.capacity_gb') { should cmp <%= doc_generation ? "'#{filestore_instance['fileshare_capacity_gb']}'" : "filestore_instance['fileshare_capacity_gb']" -%> }
+  its('file_shares.first.name') { should cmp <%= doc_generation ? "'#{filestore_instance['fileshare_name']}'" : "filestore_instance['fileshare_name']" -%> }
+  its('networks.count') { should cmp 1 }
+  its('networks.first.network') { should cmp <%= doc_generation ? "'#{filestore_instance['network_name']}'" : "filestore_instance['network_name']" -%> }
+  its('networks.first.modes') { should include <%= doc_generation ? "'#{filestore_instance['network_mode']}'" : "filestore_instance['network_mode']" -%> }
+end
+
+describe google_filestore_instance(project: <%= gcp_project_id -%>, zone: <%= doc_generation ? "'#{filestore_instance['zone']}'" : "filestore_instance['zone']" -%>, name: 'nonexistent') do
+  it { should_not exist }
+end
