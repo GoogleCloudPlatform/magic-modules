@@ -409,7 +409,7 @@ func TestAccContainerCluster_withReleaseChannelDisabled(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerClusterDestroy,
 		Steps: []resource.TestStep{
-      {
+			{
 				Config: testAccContainerCluster_withReleaseChannelDisabled(clusterName),
 			},
 			{
