@@ -201,6 +201,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       timeoutSec: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases:
           - timeout_seconds
+  Image: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      guestOsFeatures.type: !ruby/object:Overrides::Ansible::PropertyOverride
+        # Changing this description because of line length issues.
+        description: The type of supported feature.
   InstanceGroup: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       instances: !ruby/object:Overrides::Ansible::PropertyOverride
