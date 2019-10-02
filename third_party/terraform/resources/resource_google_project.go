@@ -489,6 +489,76 @@ func enableServiceUsageProjectServices(services []string, project string, config
 	return waitForServiceUsageEnabledServices(services, project, config, timeout)
 }
 
+func doEnableServicesRequest(services []string, project string, config *Config, timeout time.Duration) error {
+	var op *serviceusage.Operation
+
+	err := retryTimeDuration(func() error {
+		var rerr error
+		if len(services) == 1 {
+			// BatchEnable returns an error for a single item, so just enable
+			// using service endpoint.
+			name := fmt.Sprintf("projects/%s/services/%s", project, services[0])
+			req := &serviceusage.EnableServiceRequest{}
+			op, rerr = config.clientServiceUsage.Services.Enable(name, req).Do()
+		} else {
+			// Batch enable for multiple services.
+			name := fmt.Sprintf("projects/%s", project)
+			req := &serviceusage.BatchEnableServicesRequest{ServiceIds: services}
+			op, rerr = config.clientServiceUsage.Services.BatchEnable(name, req).Do()
+		}
+		return handleServiceUsageRetryableError(rerr)
+	}, timeout)
+	if err != nil {
+		return errwrap.Wrapf("failed to send enable services request: {{err}}", err)
+	}
+	// Poll for the API to return
+	waitErr := serviceUsageOperationWait(config, op, fmt.Sprintf("Enable Project %q Services: %+v", project, services))
+	if waitErr != nil {
+		return waitErr
+	}
+	return nil
+}
+
+// Retrieve a project's services from the API
+func listCurrentlyEnabledServices(project string, config *Config, timeout time.Duration) (map[string]struct{}, error) {
+	// Verify project for services still exists
+	p, err := config.clientResourceManager.Projects.Get(project).Do()
+	if err != nil {
+		return nil, err
+	}
+	if p.LifecycleState == "DELETE_REQUESTED" {
+		// Construct a 404 error for handleNotFoundError
+		return nil, &googleapi.Error{
+			Code:    404,
+			Message: "Project deletion was requested",
+		}
+	}
+
+	log.Printf("[DEBUG] Listing enabled services for project %s", project)
+	apiServices := make(map[string]struct{})
+	err = retryTimeDuration(func() error {
+		ctx := context.Background()
+		return config.clientServiceUsage.Services.
+			List(fmt.Sprintf("projects/%s", project)).
+			Fields("services/name,nextPageToken").
+			Filter("state:ENABLED").
+			Pages(ctx, func(r *serviceusage.ListServicesResponse) error {
+				for _, v := range r.Services {
+					// services are returned as "projects/PROJECT/services/NAME"
+					name := GetResourceNameFromSelfLink(v.Name)
+					if _, ok := ignoredProjectServicesSet[name]; !ok {
+						apiServices[name] = struct{}{}
+					}
+				}
+				return nil
+			})
+	}, timeout)
+	if err != nil {
+		return nil, errwrap.Wrapf(fmt.Sprintf("Failed to list enabled services for project %s: {{err}}", project), err)
+	}
+	return apiServices, nil
+}
+
 // waitForServiceUsageEnabledServices doesn't resend enable requests - it just
 // waits for service enablement status to propagate. Essentially, it waits until
 // all services show up as enabled when listing services on the project.

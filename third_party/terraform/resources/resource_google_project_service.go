@@ -16,6 +16,7 @@ var ignoredProjectServices = []string{"dataproc-control.googleapis.com", "source
 // These services can only be enabled as a side-effect of enabling other services,
 // so don't bother storing them in the config or using them for diffing.
 var ignoredProjectServicesSet = golangSetFromStringSlice(ignoredProjectServices)
+const maxServiceUsageBatchSize = 20
 
 func resourceGoogleProjectService() *schema.Resource {
 	return &schema.Resource{

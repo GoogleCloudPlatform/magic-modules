@@ -37,3 +37,18 @@ func serviceUsageOperationWaitTime(config *Config, op *serviceusage.Operation, a
 	}
 	return OperationWait(w, activity, timeoutMinutes)
 }
+
+func handleServiceUsageRetryableError(err error) error {
+	if err == nil {
+		return nil
+	}
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if (gerr.Code == 400 || gerr.Code == 412) && gerr.Message == "Precondition check failed." {
+			return &googleapi.Error{
+				Code:    503,
+				Message: "api returned \"precondition failed\" while enabling service",
+			}
+		}
+	}
+	return err
+}
