@@ -165,6 +165,10 @@ variable "filestore_instance" {
   type = "map"
 }
 
+variable "folder_sink" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -698,4 +702,14 @@ resource "google_filestore_instance" "instance" {
     network = var.filestore_instance["network_name"]
     modes   = [var.filestore_instance["network_mode"]]
   }
+}
+
+resource "google_logging_folder_sink" "folder-sink" {
+  count       = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  name        = var.folder_sink.name
+  folder      = google_folder.inspec-gcp-folder.0.name
+
+  destination = "storage.googleapis.com/${google_storage_bucket.generic-storage-bucket.name}"
+
+  filter      = var.folder_sink.filter
 }

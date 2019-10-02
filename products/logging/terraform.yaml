@@ -42,6 +42,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   FolderExclusion: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
+  FolderLogSink: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
 
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
