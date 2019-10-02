@@ -269,10 +269,10 @@ folder_exclusion:
   filter: "resource.type = gce_instance AND severity <= DEBUG"
 
 filestore_instance:
-  name: inspec-gcp-filestore
+  name: inspec_gcp
   zone: us-central1-b
   tier: PREMIUM
   fileshare_capacity_gb: 2660
-  fileshare_name: inspec-gcp-fileshare
+  fileshare_name: inspec_gcp
   network_name: default
   network_mode: MODE_IPV4
