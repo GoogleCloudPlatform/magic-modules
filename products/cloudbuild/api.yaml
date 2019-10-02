@@ -133,6 +133,54 @@ objects:
             description: |
               Explicit commit SHA to build. Exactly one of a branch name, tag, or commit SHA must be provided.
       - !ruby/object:Api::Type::NestedObject
+        name: 'github'
+        description: |
+            Describes the configuration of a trigger that creates a build whenever a GitHub event is received.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'installationId'
+            description: |
+                The installationID that emits the GitHub event.
+          - !ruby/object:Api::Type::String
+            name: 'owner'
+            description: |
+                Owner of the repository. For example: The owner for
+                https://github.com/googlecloudplatform/cloud-builders is "googlecloudplatform".
+          - !ruby/object:Api::Type::String
+            name: 'name'
+            description: |
+                Name of the repository. For example: The name for
+                https://github.com/googlecloudplatform/cloud-builders is "cloud-builders".
+          - !ruby/object:Api::Type::NestedObject
+            name: 'pullRequest'
+            description: |
+                filter to match changes in pull requests.  Specify only one of pullRequest or push.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'branch'
+                description: |
+                    Regex of branches to match.
+              - !ruby/object:Api::Type::Enum
+                name: 'commentControl'
+                description: |
+                    Whether to block builds on a "/gcbrun" comment from a repository owner or collaborator.
+                values:
+                  - :COMMENTS_DISABLED
+                  - :COMMENTS_ENABLED
+          - !ruby/object:Api::Type::NestedObject
+            name: 'push'
+            description: |
+                filter to match changes in refs, like branches or tags.  Specify only one of pullRequest or push.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'branch'
+                description: |
+                    Regex of branches to match.  Specify only one of branch or tag.
+              - !ruby/object:Api::Type::String
+                name: 'tag'
+                description: |
+                    Regex of tags to match.  Specify only one of branch or tag.
+      - !ruby/object:Api::Type::NestedObject
         name: 'build'
         description: |
           Contents of the build template. Either a filename or build template must be provided.
