@@ -723,7 +723,6 @@ func resourceContainerCluster() *schema.Resource {
 							Default:          "UNSPECIFIED",
 							Optional:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"UNSPECIFIED", "RAPID", "REGULAR", "STABLE"}, false),
-							DiffSuppressFunc: emptyOrDefaultStringSuppress("UNSPECIFIED"),
 						},
 					},
 				},
