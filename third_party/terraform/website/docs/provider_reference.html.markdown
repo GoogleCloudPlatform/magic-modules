@@ -318,8 +318,7 @@ as their versioned counterpart but that won't necessarily always be the case.
 
 **So far, batching is implemented for**:
 
-* enabling project services using `google_project_service` or
-  `google_project_services`
+* enabling project services using `google_project_service`.
 
 The `batching` block supports the following fields.
 
