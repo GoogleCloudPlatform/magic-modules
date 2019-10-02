@@ -5,7 +5,7 @@
 describe.one do
   google_resourcemanager_folders(parent: <%= doc_generation ? "'organizations/12345'" : "\"organizations/\#{gcp_organization_id}\"" -%>).names.each do |folder_name|
     # name on a folder is in the form `folders/12345`
-    describe google_logging_folder_log_sink(folder: folder_name.split('/')[1]) do
+    describe google_logging_folder_log_sinks(folder: folder_name.split('/')[1]) do
       its('names') { should include <%= doc_generation ? "'#{folder_sink['name']}'" : "folder_sink['name']" -%> }
       its('filters') { should include <%= doc_generation ? "'#{folder_sink['filter']}'" : "folder_sink['filter']" -%> }
     end
