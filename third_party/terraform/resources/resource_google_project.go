@@ -13,6 +13,7 @@ import (
 	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/googleapi"
+	"google.golang.org/api/serviceusage/v1"
 )
 
 // resourceGoogleProject returns a *schema.Resource that allows a customer
