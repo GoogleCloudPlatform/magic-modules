@@ -13,3 +13,5 @@
 
 --- !ruby/object:Provider::Inspec::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Variable: !ruby/object:Overrides::Inspec::ResourceOverride
+    base_url: projects/{{project}}/configs/{{config}}/variables?returnValues=true

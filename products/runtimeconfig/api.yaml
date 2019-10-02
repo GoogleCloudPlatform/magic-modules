@@ -27,7 +27,7 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'Config'
-    base_url: projects/{{project}}/configs/{{name}}
+    base_url: projects/{{project}}/configs
     self_link: projects/{{project}}/configs/{{name}}
     description: |
       A RuntimeConfig resource is the primary resource in the Cloud RuntimeConfig service.

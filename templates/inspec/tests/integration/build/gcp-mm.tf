@@ -730,7 +730,7 @@ resource "google_runtimeconfig_config" "inspec-runtime-config" {
 
 resource "google_runtimeconfig_variable" "inspec-runtime-variable" {
   project = var.gcp_project_id
-  parent = "${google_runtimeconfig_config.my-runtime-config.name}"
+  parent = "${google_runtimeconfig_config.inspec-runtime-config.name}"
   name = var.runtimeconfig_variable["name"]
   text = var.runtimeconfig_variable["text"]
 }
