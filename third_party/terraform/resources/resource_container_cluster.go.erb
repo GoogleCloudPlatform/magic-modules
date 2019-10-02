@@ -713,6 +713,7 @@ func resourceContainerCluster() *schema.Resource {
 
 			"release_channel": {
 				Type:     schema.TypeList,
+				ForceNew: true,
 				Optional: true,
 				Computed: true,
 				MaxItems: 1,
@@ -722,7 +723,9 @@ func resourceContainerCluster() *schema.Resource {
 							Type:             schema.TypeString,
 							Default:          "UNSPECIFIED",
 							Optional:         true,
+							ForceNew:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"UNSPECIFIED", "RAPID", "REGULAR", "STABLE"}, false),
+							DiffSuppressFunc: emptyOrDefaultStringSuppress("UNSPECIFIED"),
 						},
 					},
 				},
@@ -2381,7 +2384,7 @@ func expandPrivateClusterConfig(configured interface{}) *containerBeta.PrivateCl
 <% unless version == 'ga' -%>
 func expandReleaseChannel(configured interface{}) *containerBeta.ReleaseChannel {
 	l := configured.([]interface{})
-	if len(l) == 0 {
+	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 	config := l[0].(map[string]interface{})
