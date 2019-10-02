@@ -88,7 +88,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "ssl_settings.certificate_id"
           - "ssl_settings.ssl_management_type"
   UrlDispatchRule: !ruby/object:Overrides::Terraform::ResourceOverride
-    self_link: 'dispatch/update?app_id={{project}}'
     id_format: "dispatch/update?app_id={{project}}"
     import_format: ["dispatch/update?app_id={{project}}"]
     examples:
