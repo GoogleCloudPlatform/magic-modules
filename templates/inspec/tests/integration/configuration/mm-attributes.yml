@@ -280,3 +280,11 @@ filestore_instance:
 folder_sink:
   name: inspec-gcp-folder-sink
   filter: resource.type = gce_instance AND severity >= ERROR
+
+runtimeconfig_config:
+  name: inspec-gcp-runtime-config
+  description: My runtime configurations
+
+runtimeconfig_variable:
+  name: prod-variables/hostname
+  text: example.com

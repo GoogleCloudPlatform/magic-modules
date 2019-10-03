@@ -1,0 +1,5 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% runtimeconfig_config = grab_attributes['runtimeconfig_config'] -%>
+describe google_runtime_config_configs(project: <%= gcp_project_id -%>) do
+  its('descriptions') { should include <%= doc_generation ? "'#{runtimeconfig_config['description']}'" : "runtimeconfig_config['description']" -%> }
+end

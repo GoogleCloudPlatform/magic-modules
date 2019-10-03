@@ -27,7 +27,7 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'Config'
-    base_url: projects/{{project}}/configs/{{name}}
+    base_url: projects/{{project}}/configs
     self_link: projects/{{project}}/configs/{{name}}
     description: |
       A RuntimeConfig resource is the primary resource in the Cloud RuntimeConfig service.
@@ -40,7 +40,39 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
-          The name of the RuntimeConfig resource
+          The name of the runtime config.
         required: true
         input: true
-    properties: []
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          The description to associate with the runtime config.
+  - !ruby/object:Api::Resource
+    name: 'Variable'
+    base_url: projects/{{project}}/configs/{{config}}/variables
+    self_link: projects/{{project}}/configs/{{config}}/variables/{{name}}
+    description: |
+      Describes a single variable within a runtime config resource.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The name of the variable resource.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'config'
+        description: |
+          The name of the runtime config that this variable belongs to.
+        required: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'value'
+        description: |
+          The binary value of the variable. Either this or `text` can be set.
+      - !ruby/object:Api::Type::String
+        name: 'text'
+        description: |
+          The string value of the variable. Either this or `value` can be set.
