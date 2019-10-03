@@ -32,4 +32,4 @@ pushd ~/.ansible/collections/ansible_collections/google/cloud
 cp /tmp/ansible-template.ini tests/integration/cloud-config-gcp.ini
 
 # Run ansible
-ansible-test integration -v --allow-unsupported --continue-on-error $(find test/integration/targets -name "gcp*" -type d -printf "%P ")
+ansible-test integration -v --allow-unsupported --continue-on-error $(find tests/integration/targets -name "gcp*" -type d -printf "%P ")
