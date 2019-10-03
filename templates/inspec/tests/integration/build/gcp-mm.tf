@@ -716,7 +716,6 @@ resource "google_filestore_instance" "instance" {
   }
 }
 
-<<<<<<< HEAD
 resource "google_logging_folder_sink" "folder-sink" {
   count       = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
   name        = var.folder_sink.name
