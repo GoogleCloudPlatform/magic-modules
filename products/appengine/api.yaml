@@ -447,11 +447,6 @@ objects:
     base_url: ''
     create_url: 'apps/{{project}}?updateMask=dispatch_rules'
     create_verb: :PATCH
-    delete_url: 'apps/{{project}}?updateMask=dispatch_rules'
-    delete_verb: :PATCH
-    update_url: 'apps/{{project}}?updateMask=dispatch_rules'
-    update_verb: :PATCH
-    update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps#UrlDispatchRule'
     properties:

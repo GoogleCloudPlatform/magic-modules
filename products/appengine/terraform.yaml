@@ -87,9 +87,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         update_mask_fields:
           - "ssl_settings.certificate_id"
           - "ssl_settings.ssl_management_type"
-  UrlDispatchRule: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "dispatch/update?app_id={{project}}"
-    import_format: ["dispatch/update?app_id={{project}}"]
+  ApplicationUrlDispatchRules: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{project}}"
+    import_format: ["{{project}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_application_url_dispatch_rule"
