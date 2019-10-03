@@ -38,6 +38,8 @@
     :version_added: '2.8'
   :Network:
     :version_added: '2.7'
+  :NetworkEndpointGroup:
+    :version_added: '2.10'
   :NodeGroup:
     :version_added: '2.10'
   :NodeTemplate:
@@ -859,6 +861,22 @@
       :version_added: '2.8'
       :routingMode:
         :version_added: '2.8'
+  :NetworkEndpointGroup:
+    :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :networkEndpointType:
+      :version_added: '2.10'
+    :network:
+      :version_added: '2.10'
+    :subnetwork:
+      :version_added: '2.10'
+    :defaultPort:
+      :version_added: '2.10'
+    :zone:
+      :version_added: '2.10'
   :NodeGroup:
     :version_added: '2.10'
     :description:
