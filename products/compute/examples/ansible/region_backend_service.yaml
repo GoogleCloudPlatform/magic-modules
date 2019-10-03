@@ -17,8 +17,9 @@ task: !ruby/object:Provider::Ansible::Task
     name: <%= ctx[:name] %>
     region: us-central1
     health_checks:
-      - "{{ healthcheck }}"
-    connection_draining_timeout_sec: 10
+      - "{{ healthcheck.selfLink }}"
+    connection_draining:
+      draining_timeout_sec: 10
     session_affinity: CLIENT_IP
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
@@ -28,6 +29,7 @@ dependencies:
     name: gcp_compute_health_check
     code:
       name: <%= ctx[:name] %>
+      type: TCP
       tcp_health_check:
         port: 80
       check_interval_sec: 1
