@@ -276,3 +276,7 @@ filestore_instance:
   fileshare_name: inspecgcp
   network_name: default
   network_mode: MODE_IPV4
+
+folder_sink:
+  name: inspec-gcp-folder-sink
+  filter: resource.type = gce_instance AND severity >= ERROR
