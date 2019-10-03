@@ -15,15 +15,20 @@ pip install -r requirements.txt
 source hacking/env-setup
 popd
 
+# Clone ansible_collections_google because submodules
+# break collections
+git clone https://github.com/ansible/ansible_collections_google.git
+
 # Build newest modules
 pushd magic-modules-gcp
 bundle install
-bundle exec compiler -a -e ansible -o build/ansible
+bundle exec compiler -a -e ansible -o ../ansible_collections_google
+popd
 
 # Install collection
-pushd magic-modules-gcp/build/ansible
-ansible-galaxy build .
-ansible-galaxy install ~/.ansible/collections
+pushd ansible_collections_google
+ansible-galaxy collection build .
+ansible-galaxy collection install *.gz
 popd
 
 # Setup Cloud configuration template with variables
@@ -31,4 +36,4 @@ pushd ~/.ansible/collections/ansible_collections/google/cloud
 cp /tmp/ansible-template.ini tests/integration/cloud-config-gcp.ini
 
 # Run ansible
-ansible-test integration -v --allow-unsupported --continue-on-error $(find test/integration/targets -name "gcp*" -type d -printf "%P ")
+ansible-test integration -v --allow-unsupported --continue-on-error $(find tests/integration/targets -name "gcp*" -type d -printf "%P ")
