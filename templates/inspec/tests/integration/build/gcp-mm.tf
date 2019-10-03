@@ -169,6 +169,14 @@ variable "folder_sink" {
   type = "map"
 }
 
+variable "runtimeconfig_config" {
+  type = "map"
+}
+
+variable "runtimeconfig_variable" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -712,4 +720,17 @@ resource "google_logging_folder_sink" "folder-sink" {
   destination = "storage.googleapis.com/${google_storage_bucket.generic-storage-bucket.name}"
 
   filter      = var.folder_sink.filter
+}
+
+resource "google_runtimeconfig_config" "inspec-runtime-config" {
+  project = var.gcp_project_id
+  name = var.runtimeconfig_config["name"]
+  description = var.runtimeconfig_config["description"]
+}
+
+resource "google_runtimeconfig_variable" "inspec-runtime-variable" {
+  project = var.gcp_project_id
+  parent = "${google_runtimeconfig_config.inspec-runtime-config.name}"
+  name = var.runtimeconfig_variable["name"]
+  text = var.runtimeconfig_variable["text"]
 }
