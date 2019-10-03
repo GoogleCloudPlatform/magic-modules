@@ -32,7 +32,6 @@ func TestAccAppEngineServiceSplitTraffic_appEngineServiceSplitTrafficExample(t *
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"service_id", "split"},
-				ExpectError:             regexp.MustCompile("Resource specified by ResourceName couldn't be found: google_app_engine_service_split_traffic."),
 			},
 		},
 	})
