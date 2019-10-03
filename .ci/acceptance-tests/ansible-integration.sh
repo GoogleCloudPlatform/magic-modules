@@ -20,7 +20,7 @@ popd
 git clone https://github.com/ansible/ansible_collections_google.git
 
 # Build newest modules
-pushd magic-modules-new-prs
+pushd magic-modules-gcp
 bundle install
 bundle exec compiler -a -e ansible -o ../ansible_collections_google
 popd

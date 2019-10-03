@@ -1,7 +1,7 @@
 platform: linux
 
 inputs:
-  - name: magic-modules-new-prs
+  - name: magic-modules-gcp
 
 image_resource:
   type: docker-image
@@ -9,4 +9,4 @@ image_resource:
     repository: gcr.io/magic-modules/ansible
 
 run:
-    path: magic-modules-new-prs/.ci/acceptance-tests/ansible-integration.sh
+    path: magic-modules-gcp/.ci/acceptance-tests/ansible-integration.sh

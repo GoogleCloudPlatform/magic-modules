@@ -26,16 +26,6 @@ resources:
           uri: git@github.com:GoogleCloudPlatform/magic-modules.git
           private_key: ((repo-key.private_key))
 
-    - name: magic-modules-new-prs
-      type: github-pull-request
-      source:
-          repo: GoogleCloudPlatform/magic-modules
-          private_key: ((repo-key.private_key))
-          access_token: ((github-account.password))
-          authorship_restriction: true
-          no_label: automerged
-          base: master
-
     - name: gcp-bucket
       type: gcs-resource
       source:
@@ -131,9 +121,9 @@ jobs:
       plan:
         - get: night-trigger
           trigger: true
-        - get: magic-modules-new-prs
+        - get: magic-modules-gcp
         - task: ansible-integration
-          file: magic-modules-new-prs/.ci/acceptance-tests/ansible-integration.yml
+          file: magic-modules-gcp/.ci/acceptance-tests/ansible-integration.yml
           params:
             SERVICE_ACCOUNT_KEY: ((ansible-integration-key))
             ANSIBLE_TEMPLATE: ((ansible-integration-template))
