@@ -15,16 +15,20 @@ pip install -r requirements.txt
 source hacking/env-setup
 popd
 
+# Clone ansible_collections_google because submodules
+# break collections
+git clone https://github.com/ansible/ansible_collections_google.git
+
 # Build newest modules
 pushd magic-modules-new-prs
 bundle install
-bundle exec compiler -a -e ansible -o build/ansible
+bundle exec compiler -a -e ansible -o ../ansible_collections_google
 popd
 
 # Install collection
-pushd magic-modules-new-prs/build/ansible
+pushd ansible_collections_google
 ansible-galaxy collection build .
-ansible-galaxy collection install *.gz -p ~/.ansible/collections
+ansible-galaxy collection install *.gz
 popd
 
 # Setup Cloud configuration template with variables
