@@ -22,4 +22,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   FolderExclusion: !ruby/object:Overrides::Inspec::ResourceOverride
     # Creating a folder requires organization level privileges
     privileged: true
+  FolderLogSink: !ruby/object:Overrides::Inspec::ResourceOverride
+    # Creating a folder requires organization level privileges
+    privileged: true
   
