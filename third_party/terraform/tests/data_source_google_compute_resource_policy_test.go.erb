@@ -1,9 +1,12 @@
+<% autogen_exception -%>
 package google
 
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
@@ -11,9 +14,11 @@ import (
 func TestAccDataSourceComputeResourcePolicy(t *testing.T) {
 	t.Parallel()
 
-	rsName := "foo"
+	randomSuffix := acctest.RandString(10)
+
+	rsName := "foo_" + randomSuffix
 	rsFullName := fmt.Sprintf("google_compute_resource_policy.%s", rsName)
-	dsName := "my_policy"
+	dsName := "my_policy_" + randomSuffix
 	dsFullName := fmt.Sprintf("data.google_compute_resource_policy.%s", dsName)
 
 	resource.Test(t, resource.TestCase{
@@ -22,7 +27,7 @@ func TestAccDataSourceComputeResourcePolicy(t *testing.T) {
 		CheckDestroy: testAccCheckDataSourceComputeResourcePolicyDestroy(rsFullName),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceComputeResourcePolicyConfig(rsName, dsName),
+				Config: testAccDataSourceComputeResourcePolicyConfig(rsName, dsName, randomSuffix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceComputeResourcePolicyCheck(dsFullName, rsFullName),
 				),
@@ -87,10 +92,10 @@ func testAccCheckDataSourceComputeResourcePolicyDestroy(resourceName string) res
 	}
 }
 
-func testAccDataSourceComputeResourcePolicyConfig(rsName, dsName string) string {
+func testAccDataSourceComputeResourcePolicyConfig(rsName, dsName, randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_resource_policy" "%s" {
-  name = "policy"
+  name = "policy-%s"
   region = "us-central1"
   snapshot_schedule_policy {
     schedule {
@@ -106,5 +111,6 @@ data "google_compute_resource_policy" "%s" {
   name     = "${google_compute_resource_policy.%s.name}"
   region   = "${google_compute_resource_policy.%s.region}"
 }
-`, rsName, dsName, rsName, rsName)
+`, rsName, randomSuffix, dsName, rsName, rsName)
 }
+<% end -%>

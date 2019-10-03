@@ -1,5 +1,7 @@
+<% autogen_exception -%>
 package google
 
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 
@@ -60,3 +62,4 @@ func dataSourceGoogleComputeResourcePolicyRead(d *schema.ResourceData, meta inte
 	d.SetId(resourcePolicy.Name)
 	return nil
 }
+<% end -%>
