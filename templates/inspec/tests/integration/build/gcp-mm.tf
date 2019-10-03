@@ -445,7 +445,7 @@ resource "google_container_cluster" "gcp-inspec-regional-cluster" {
   name = "${var.regional_cluster["name"]}"
   region = "${var.gcp_location}"
   initial_node_count = 1
-  remove_default_node_pool = false
+  remove_default_node_pool = true
 
   maintenance_policy {
     daily_maintenance_window {
