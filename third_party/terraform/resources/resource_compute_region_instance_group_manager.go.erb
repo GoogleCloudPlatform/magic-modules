@@ -172,7 +172,7 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 <% if version.nil? || version == 'ga' -%>
 			"update_strategy": &schema.Schema{
 				Type:         schema.TypeString,
-				Deprecated:   "This field is removed.",
+				Removed:      "This field is removed.",
 				Optional:     true,
 				Computed:     true,
 			},

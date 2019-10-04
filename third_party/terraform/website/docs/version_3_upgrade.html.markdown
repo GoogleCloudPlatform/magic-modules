@@ -50,7 +50,17 @@ so Terraform knows to manage them.
 ## Upgrade Topics
 
 <!-- TOC depthFrom:2 depthTo:2 -->
+
+- [Provider Version Configuration](#provider-version-configuration)
+- [Data Source: `google_container_engine_versions`](#data-source-google_container_engine_versions)
+- [Resource: `google_cloudiot_registry`](#resource-google_cloudiot_registry)
+- [Resource: `google_compute_forwarding_rule`](#resource-google_compute_forwarding_rule)
+- [Resource: `google_compute_network`](#resource-google_compute_network)
+- [Resource: `google_compute_network_peering`](#resource-google_compute_network_peering)
+- [Resource: `google_monitoring_alert_policy`](#resource-google_monitoring_alert_policy)
+- [Resource: `google_monitoring_uptime_check_config`](#resource-google_monitoring_uptime_check_config)
 - [Resource: `google_project_services`](#resource-google_project_services)
+- [Resource: `google_storage_bucket`](#resource-google_storage_bucket)
 
 <!-- /TOC -->
 
@@ -89,6 +99,58 @@ provider "google" {
   version = "~> 3.0.0"
 }
 ```
+
+## Data Source: `google_container_engine_versions`
+
+### `region` and `zone` are now a removed
+
+Use `location` instead.
+
+## Resource: `google_cloudiot_registry`
+
+### `event_notification_config` is now a removed
+
+`event_notification_config` has been removed in favor of
+`event_notification_configs` (plural). Please switch to using the plural field.
+
+## Resource: `google_compute_forwarding_rule`
+
+### `ip_version` is now a removed
+
+`ip_version` is not used for regional forwarding rules.
+
+## Resource: `google_compute_network`
+
+### `ipv4_range` is now a removed
+
+Legacy Networks are deprecated and you will no longer be able to create them
+using this field from Feb 1, 2020 onwards.
+
+## Resource: `google_compute_network_peering`
+
+### `auto_create_routes` is now a removed
+
+`auto_create_routes` has been removed because it's redundant and not
+user-configurable.
+
+## Resource: `google_compute_region_instance_group_manager`
+
+### `update_strategy` no longer has any effect and is removed
+
+With `rolling_update_policy` removed, `update_strategy` has no effect anymore.
+Before updating, remove it from your config.
+
+## Resource: `google_monitoring_alert_policy`
+
+### `labels` is now a removed
+
+`labels` is removed as it was never used. See `user_labels` for the correct field.
+
+## Resource: `google_monitoring_uptime_check_config`
+
+### `is_internal` and `internal_checker` are now a removed
+
+`is_internal` and `internal_checker` never worked, and are now removed.
 
 ## Resource: `google_project_services`
 
@@ -157,3 +219,9 @@ resource "google_project_service" "project_cloudresourcemanager" {
   disable_on_destroy = false
 }
 ```
+
+## Resource: `google_storage_bucket`
+
+### `is_live` is now a removed
+
+Please use `with_state` instead, as `is_live` is now removed.

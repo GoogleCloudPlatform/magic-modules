@@ -28,13 +28,13 @@ func dataSourceGoogleContainerEngineVersions() *schema.Resource {
 			"zone": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				Deprecated:    "Use location instead",
+				Removed:       "Use location instead",
 				ConflictsWith: []string{"region", "location"},
 			},
 			"region": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				Deprecated:    "Use location instead",
+				Removed:       "Use location instead",
 				ConflictsWith: []string{"zone", "location"},
 			},
 			"default_cluster_version": {
@@ -76,7 +76,7 @@ func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta in
 		return err
 	}
 	if len(location) == 0 {
-		return fmt.Errorf("Cannot determine location: set location, zone, or region in this data source or at provider-level")
+		return fmt.Errorf("Cannot determine location: set location in this data source or at provider-level")
 	}
 
 	location = fmt.Sprintf("projects/%s/locations/%s", project, location)
