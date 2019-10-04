@@ -177,6 +177,10 @@ variable "runtimeconfig_variable" {
   type = "map"
 }
 
+variable "redis" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -733,4 +737,22 @@ resource "google_runtimeconfig_variable" "inspec-runtime-variable" {
   parent = "${google_runtimeconfig_config.inspec-runtime-config.name}"
   name = var.runtimeconfig_variable["name"]
   text = var.runtimeconfig_variable["text"]
+}
+
+resource "google_redis_instance" "inspec-redis" {
+  project        = var.gcp_project_id
+  name           = var.redis["name"]
+  tier           = var.redis["tier"]
+  memory_size_gb = var.redis["memory_size_gb"]
+
+  location_id             = var.redis["location_id"]
+  alternative_location_id = var.redis["alternative_location_id"]
+
+  redis_version     = var.redis["redis_version"]
+  display_name      = var.redis["display_name"]
+  reserved_ip_range = var.redis["reserved_ip_range"]
+
+  labels = {
+    "${var.redis["label_key"]}" = var.redis["label_value"]
+  }
 }

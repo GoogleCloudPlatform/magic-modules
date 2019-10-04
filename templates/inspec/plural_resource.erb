@@ -16,7 +16,7 @@
 
 <%= lines(autogen_notice :ruby) -%>
 require 'gcp_backend'
-class <%= object.name -%>s < GcpResourceBase
+class <%= object.__product.name.camelize(:upper) -%><%= object.name -%>s < GcpResourceBase
 <%
 name = resource_name(object, product)
 -%>

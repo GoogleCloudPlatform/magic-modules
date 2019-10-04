@@ -288,3 +288,16 @@ runtimeconfig_config:
 runtimeconfig_variable:
   name: prod-variables/hostname
   text: example.com
+
+redis:
+  name: my-redis-cache
+  tier: STANDARD_HA
+  memory_size_gb: 1
+  region: us-central1
+  location_id: us-central1-a
+  alternative_location_id: us-central1-f
+  redis_version: REDIS_3_2
+  display_name: InSpec test instance
+  reserved_ip_range: "192.168.0.0/29"
+  label_key: key
+  label_value: value
