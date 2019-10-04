@@ -185,6 +185,14 @@ variable "network_endpoint_group" {
   type = "map"
 }
 
+variable "node_template" {
+  type = "map"
+}
+
+variable "node_group" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -489,14 +497,22 @@ resource "google_compute_router" "gcp-inspec-router" {
   }
 }
 
+resource "google_compute_disk" "snapshot-disk" {
+  project = "${var.gcp_project_id}"
+  name  = "snapshot-disk"
+  type  = "${var.gcp_compute_disk_type}"
+  zone  = "${var.gcp_zone}"
+  image = "${var.gcp_compute_disk_image}"
+  labels = {
+    environment = "generic_compute_disk_label"
+  }
+}
+
 resource "google_compute_snapshot" "gcp-inspec-snapshot" {
   project = "${var.gcp_project_id}"
   name = "${var.snapshot["name"]}"
-  source_disk = "${google_compute_disk.generic_compute_disk.name}"
+  source_disk = "${google_compute_disk.snapshot-disk.name}"
   zone = "${var.gcp_zone}"
-  # Depends on the instance of the disk we are using. Allow instance to spin up
-  # Before snapshotting the disk to avoid resourceInUse errors
-  depends_on  = ["google_compute_instance.generic_external_vm_instance_data_disk"]
 }
 
 resource "google_compute_ssl_certificate" "gcp-inspec-ssl-certificate" {
@@ -767,4 +783,34 @@ resource "google_compute_network_endpoint_group" "inspec-endpoint-group" {
   subnetwork   = google_compute_subnetwork.inspec-gcp-subnetwork.self_link
   default_port = var.network_endpoint_group["default_port"]
   zone         = var.gcp_zone
+}
+
+data "google_compute_node_types" "zone-node-type" {
+  zone = var.gcp_zone
+}
+
+resource "google_compute_node_template" "inspec-template" {
+  project = var.gcp_project_id
+  region = var.gcp_location
+
+  name = var.node_template["name"]
+  node_type = "${data.google_compute_node_types.zone-node-type.names[0]}"
+
+  node_affinity_labels = {
+    "${var.node_template["label_key"]}" = "${var.node_template["label_value"]}"
+  }
+
+  server_binding {
+    type = var.node_template["binding_type"]
+  }
+}
+
+resource "google_compute_node_group" "inspec-node-group" {
+  project = var.gcp_project_id
+  name = var.node_group["name"]
+  zone = var.gcp_zone
+  description = var.node_group["description"]
+
+  size = var.node_group["size"]
+  node_template = "${google_compute_node_template.inspec-template.self_link}"
 }

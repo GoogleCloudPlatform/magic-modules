@@ -305,3 +305,14 @@ redis:
 network_endpoint_group:
   name: inspec-gcp-endpoint-group
   default_port: 90
+
+node_template:
+  name: inspec-node-template
+  label_key: key
+  label_value: value
+  binding_type: RESTART_NODE_ON_MINIMAL_SERVERS
+
+node_group:
+  name: inspec-node-group
+  description: A description of the node group
+  size: 1

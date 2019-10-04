@@ -50,10 +50,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   NetworkEndpoint: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  NodeGroup: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
-  NodeTemplate: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
   Region: !ruby/object:Overrides::Inspec::ResourceOverride
     additional_functions: |
 <%= lines(indent(compile('templates/inspec/custom_functions/google_compute_region.rb'), 6)) -%>
