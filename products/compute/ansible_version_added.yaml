@@ -8,6 +8,8 @@
     :version_added: '2.7'
   :BackendService:
     :version_added: '2.7'
+  :RegionBackendService:
+    :version_added: '2.10'
   :Disk:
     :version_added: '2.7'
   :Firewall:
@@ -221,6 +223,36 @@
       :version_added: '2.6'
     :timeoutSec:
       :version_added: '2.6'
+  :RegionBackendService:
+    :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :healthChecks:
+      :version_added: '2.10'
+    :backends:
+      :version_added: '2.10'
+      :description:
+        :version_added: '2.10'
+      :group:
+        :version_added: '2.10'
+      :failover:
+        :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :protocol:
+      :version_added: '2.10'
+    :sessionAffinity:
+      :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
+    :timeoutSec:
+      :version_added: '2.10'
+    :connectionDraining:
+      :version_added: '2.10'
+      :drainingTimeoutSec:
+        :version_added: '2.10'
+    :loadBalancingScheme:
+      :version_added: '2.10'
   :Disk:
     :version_added: '2.6'
     :description:
