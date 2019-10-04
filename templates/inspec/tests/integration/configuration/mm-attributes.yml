@@ -301,3 +301,7 @@ redis:
   reserved_ip_range: "192.168.0.0/29"
   label_key: key
   label_value: value
+
+network_endpoint_group:
+  name: inspec-gcp-endpoint-group
+  default_port: 90

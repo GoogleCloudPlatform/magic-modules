@@ -50,8 +50,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   NetworkEndpoint: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  NetworkEndpointGroup: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
   NodeGroup: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   NodeTemplate: !ruby/object:Overrides::Inspec::ResourceOverride

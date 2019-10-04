@@ -181,6 +181,10 @@ variable "redis" {
   type = "map"
 }
 
+variable "network_endpoint_group" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -755,4 +759,12 @@ resource "google_redis_instance" "inspec-redis" {
   labels = {
     "${var.redis["label_key"]}" = var.redis["label_value"]
   }
+
+resource "google_compute_network_endpoint_group" "inspec-endpoint-group" {
+  project      = var.gcp_project_id
+  name         = var.network_endpoint_group["name"]
+  network      = google_compute_subnetwork.inspec-gcp-subnetwork.network
+  subnetwork   = google_compute_subnetwork.inspec-gcp-subnetwork.self_link
+  default_port = var.network_endpoint_group["default_port"]
+  zone         = var.gcp_zone
 }
