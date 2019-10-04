@@ -775,6 +775,7 @@ resource "google_redis_instance" "inspec-redis" {
   labels = {
     "${var.redis["label_key"]}" = var.redis["label_value"]
   }
+}
 
 resource "google_compute_network_endpoint_group" "inspec-endpoint-group" {
   project      = var.gcp_project_id
@@ -798,10 +799,6 @@ resource "google_compute_node_template" "inspec-template" {
 
   node_affinity_labels = {
     "${var.node_template["label_key"]}" = "${var.node_template["label_value"]}"
-  }
-
-  server_binding {
-    type = var.node_template["binding_type"]
   }
 }
 

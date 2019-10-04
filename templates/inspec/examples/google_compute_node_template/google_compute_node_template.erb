@@ -4,7 +4,6 @@
 describe google_compute_node_template(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: <%= doc_generation ? "'#{node_template['name']}'" : "node_template['name']" -%>) do
   it { should exist }
   its('node_affinity_labels') { should include(<%= doc_generation ? "'#{node_template['label_key']}'" : "node_template['label_key']" -%> => <%= doc_generation ? "'#{node_template['label_value']}'" : "node_template['label_value']" -%>) }
-  its('server_binding') { should include('type' => <%= doc_generation ? "'#{node_template['binding_type']}'" : "node_template['binding_type']" -%>) }
 end
 
 describe google_compute_node_template(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: 'nonexistent') do
