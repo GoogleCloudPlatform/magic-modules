@@ -1458,9 +1458,11 @@ resource "google_container_node_pool" "np" {
 	location           = "us-central1-a"
 	cluster            = "${google_container_cluster.cluster.name}"
 	initial_node_count = 2
-	shielded_instance_config {
-		enable_secure_boot          = true
-		enable_integrity_monitoring = true
+	node_config {
+		shielded_instance_config {
+			enable_secure_boot          = true
+			enable_integrity_monitoring = true
+		}
 	}
 }`, cluster, np)
 }
