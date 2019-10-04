@@ -787,7 +787,8 @@ resource "google_compute_network_endpoint_group" "inspec-endpoint-group" {
 }
 
 data "google_compute_node_types" "zone-node-type" {
-  zone = var.gcp_zone
+  project = var.gcp_project_id
+  zone    = var.gcp_zone
 }
 
 resource "google_compute_node_template" "inspec-template" {
