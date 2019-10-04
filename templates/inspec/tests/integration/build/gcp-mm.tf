@@ -499,7 +499,7 @@ resource "google_compute_router" "gcp-inspec-router" {
 
 resource "google_compute_disk" "snapshot-disk" {
   project = "${var.gcp_project_id}"
-  name  = "snapshot-disk"
+  name  = var.snapshot["disk_name"]
   type  = "${var.gcp_compute_disk_type}"
   zone  = "${var.gcp_zone}"
   image = "${var.gcp_compute_disk_image}"

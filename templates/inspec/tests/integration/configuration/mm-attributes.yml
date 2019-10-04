@@ -148,6 +148,7 @@ router:
 
 snapshot:
   name: inspec-gcp-disk-snapshot
+  disk-name: inspec-snapshot-disk
 
 https_proxy:
   name: inspec-gcp-https-proxy

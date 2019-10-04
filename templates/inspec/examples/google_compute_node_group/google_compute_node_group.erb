@@ -7,6 +7,6 @@ describe google_compute_node_group(project: <%= gcp_project_id -%>, zone: <%= gc
   its('size') { should cmp <%= doc_generation ? "'#{node_group['size']}'" : "node_group['size']" -%> }
 end
 
-describe google_compute_node_group(project: <%= gcp_project_id -%>, zone: <%= gcp_zone -%>, 'nonexistent') do
+describe google_compute_node_group(project: <%= gcp_project_id -%>, zone: <%= gcp_zone -%>, name: 'nonexistent') do
   it { should_not exist }
 end
