@@ -2383,7 +2383,6 @@ func expandPodSecurityPolicyConfig(configured interface{}) *containerBeta.PodSec
 <% end -%>
 }
 
-<% unless version == 'ga' -%>
 func expandDefaultMaxPodsConstraint(v interface{}) *containerBeta.MaxPodsConstraint {
 	if v == nil {
 		return nil
@@ -2394,6 +2393,7 @@ func expandDefaultMaxPodsConstraint(v interface{}) *containerBeta.MaxPodsConstra
 	}
 }
 
+<% unless version == 'ga' -%>
 func expandResourceUsageExportConfig(configured interface{}) *containerBeta.ResourceUsageExportConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
