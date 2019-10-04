@@ -100,8 +100,10 @@ func resourceGoogleProjectServicesRead(d *schema.ResourceData, meta interface{})
 		_, ook := sset[ov]
 		_, nok := sset[nv]
 
-		// preserve any values set in prior state. If none were set, only store
-		// the old value.
+		// preserve the values set in prior state if they're identical. If none
+		// were set, we  delete the new value if it exists. By doing that that
+		// we only store the old value if the service is enabled, and no value
+		// if it isn't.
 		if ook && nok {
 			continue
 		} else if ook {
