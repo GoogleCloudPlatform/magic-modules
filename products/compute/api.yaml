@@ -9333,6 +9333,177 @@ objects:
               - :TRANSLATIONS_ONLY
               - :ALL
   - !ruby/object:Api::Resource
+    name: 'RouterBgpPeer'
+    base_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+    self_link: projects/{{project}}/regions/{{region}}/routers/{{router}}
+    create_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+    update_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+    delete_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+    create_verb: :PATCH
+    update_verb: :PATCH
+    delete_verb: :PATCH
+    identity:
+      - name
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      modify_by_patch: true
+      keys:
+        - bgpPeers
+    description: |
+      BGP information that must be configured into the routing stack to
+      establish BGP peering. This information must specify the peer ASN
+      and either the interface name, IP address, or peer IP address.
+      Please refer to RFC4273.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Google Cloud Router': 'https://cloud.google.com/router/docs/'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 10
+          update_minutes: 10
+          delete_minutes: 10
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'router'
+        resource: 'Router'
+        imports: 'name'
+        description: |
+          The name of the Cloud Router in which this BgpPeer will be configured.
+        required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: region
+        resource: Region
+        imports: name
+        description: Region where the router and BgpPeer reside.
+        input: true
+        required: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of this BGP peer. The name must be 1-63 characters long,
+          and comply with RFC1035. Specifically, the name must be 1-63 characters
+          long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])? which
+          means the first character must be a lowercase letter, and all
+          following characters must be a dash, lowercase letter, or digit,
+          except the last character, which cannot be a dash.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'interfaceName'
+        description: |
+          Name of the interface the BGP peer is associated with.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'ipAddress'
+        description: |
+          IP address of the interface inside Google Cloud Platform.
+          Only IPv4 is supported.
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'peerIpAddress'
+        description: |
+          Peer BGP Autonomous System Number (ASN). Each BGP interface may
+          use a different value.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::Integer
+        name: 'peerAsn'
+        description: |
+          Peer BGP Autonomous System Number (ASN).
+          Each BGP interface may use a different value.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::Integer
+        name: 'advertisedRoutePriority'
+        description: |
+          The priority of routes advertised to this BGP peer.
+          Where there is more than one matching route of maximum
+          length, the routes with the lowest priority value win.
+      - !ruby/object:Api::Type::Enum
+        name: advertiseMode
+        description: |
+          User-specified flag to indicate which mode to use for advertisement.
+          Valid values of this enum field are: `DEFAULT`, `CUSTOM`
+        values:
+          - :DEFAULT
+          - :CUSTOM
+        default_value: :DEFAULT
+      - !ruby/object:Api::Type::Array
+        name: advertisedGroups
+        description: |
+          User-specified list of prefix groups to advertise in custom
+          mode, which can take one of the following options:
+
+          * `ALL_SUBNETS`: Advertises all available subnets, including peer VPC subnets.
+          * `ALL_VPC_SUBNETS`: Advertises the router's own VPC subnets.
+          * `ALL_PEER_VPC_SUBNETS`: Advertises peer subnets of the router's VPC network.
+
+
+          Note that this field can only be populated if advertiseMode is `CUSTOM`
+          and overrides the list defined for the router (in the "bgp" message).
+          These groups are advertised in addition to any specified prefixes.
+          Leave this field blank to advertise no custom groups.
+        send_empty_value: true
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: advertisedIpRanges
+        description: |
+          User-specified list of individual IP ranges to advertise in
+          custom mode. This field can only be populated if advertiseMode
+          is `CUSTOM` and is advertised to all peers of the router. These IP
+          ranges will be advertised in addition to any specified groups.
+          Leave this field blank to advertise no custom IP ranges.
+        send_empty_value: true
+        item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: range
+                description: |
+                  The IP range to advertise. The value must be a
+                  CIDR-formatted string.
+                send_empty_value: true
+              - !ruby/object:Api::Type::String
+                name: description
+                description: |
+                  User-specified description for the IP range.
+                send_empty_value: true
+      - !ruby/object:Api::Type::String
+        name: 'managementType'
+        description: |
+          The resource that configures and manages this BGP peer.
+
+          * `MANAGED_BY_USER` is the default value and can be managed by
+          you or other users
+          * `MANAGED_BY_ATTACHMENT` is a BGP peer that is configured and
+          managed by Cloud Interconnect, specifically by an
+          InterconnectAttachment of type PARTNER. Google automatically
+          creates, updates, and deletes this type of BGP peer when the
+          PARTNER InterconnectAttachment is created, updated,
+          or deleted.
+        output: true
+  - !ruby/object:Api::Resource
     name: 'Snapshot'
     kind: 'compute#snapshot'
     input: true

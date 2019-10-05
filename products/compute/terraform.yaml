@@ -1422,6 +1422,35 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/router_nat.go.erb'
       resource_definition: 'templates/terraform/resource_definition/router_nat.go.erb'
+  RouterBgpPeer: !ruby/object:Overrides::Terraform::ResourceOverride
+    legacy_name: 'google_compute_router_peer'
+    exclude_validator: true
+    id_format: "{{project}}/{{region}}/{{router}}/{{name}}"
+    mutex: router/{{region}}/{{router}}
+    examples:
+      # These examples are not used to autogenerate tests, as fine-grained
+      # resources do not fit the normal test flow - we need to test deletion
+      # in a test step while parent resource still exists vs in CheckDestroy
+      # when all resources have been deleted.
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_peer_basic"
+        primary_resource_id: "peer"
+        skip_test: true
+        vars:
+          router_name: "my-router"
+          peer_name: "my-router-peer"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateRFC1035Name(2, 63)'
+      interfaceName: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'interface'
+      ipAddress: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   Snapshot: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 5
