@@ -49,6 +49,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   ResourcePolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  RouterBgpPeer: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
