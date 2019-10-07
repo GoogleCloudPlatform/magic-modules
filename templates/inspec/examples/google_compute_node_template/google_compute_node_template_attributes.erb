@@ -1,0 +1,3 @@
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
+gcp_location = attribute(:gcp_location, default: '<%= external_attribute('gcp_location') -%>', description: 'The GCP project region.')
+node_template = attribute('node_template', default: <%= JSON.pretty_generate(grab_attributes['node_template']) -%>, description: 'Node template description')

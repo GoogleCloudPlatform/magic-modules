@@ -1,7 +1,6 @@
 <% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
 <% snapshot = grab_attributes['snapshot'] -%>
 <% gcp_zone = "#{external_attribute('gcp_zone', doc_generation)}" %>
-<% gcp_compute_disk_name = "#{external_attribute('gcp_compute_disk_name', doc_generation)}" -%>
 describe google_compute_snapshots(project: <%= gcp_project_id -%>) do
   its('count') { should be >= 1 }
 end
@@ -9,7 +8,7 @@ end
 describe.one do
   google_compute_snapshots(project: <%= gcp_project_id -%>).names do |snapshot_name|
     describe google_compute_snapshot(project: <%= gcp_project_id -%>, name: snapshot_name) do
-      its('source_disk') { should match <%= gcp_compute_disk_name -%> }
+      its('source_disk') { should match <%= doc_generation ? "'#{snapshot['disk_name']}'" : "snapshot['disk_name']" -%> }
     end
   end
 end

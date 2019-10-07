@@ -148,6 +148,7 @@ router:
 
 snapshot:
   name: inspec-gcp-disk-snapshot
+  disk_name: inspec-snapshot-disk
 
 https_proxy:
   name: inspec-gcp-https-proxy
@@ -301,3 +302,17 @@ redis:
   reserved_ip_range: "192.168.0.0/29"
   label_key: key
   label_value: value
+
+network_endpoint_group:
+  name: inspec-gcp-endpoint-group
+  default_port: 90
+
+node_template:
+  name: inspec-node-template
+  label_key: key
+  label_value: value
+
+node_group:
+  name: inspec-node-group
+  description: A description of the node group
+  size: 0
