@@ -25,6 +25,8 @@ apis_required:
     name: Cloud Identity-Aware Proxy
     url: https://console.cloud.google.com/apis/library/iap.googleapis.com/
 objects:
+  # This resource is only used to generate IAM resources. They do not correspond to real
+  # GCP resources, and should not be used to generate anything other than IAM suppport.
   - !ruby/object:Api::Resource
     name: 'Web'
     base_url: 'projects/{{project}}/iap_web'
@@ -37,6 +39,8 @@ objects:
         name: 'name'
         description: Dummy property.
         required: true
+  # This resource is only used to generate IAM resources. They do not correspond to real
+  # GCP resources, and should not be used to generate anything other than IAM suppport.
   - !ruby/object:Api::Resource
     name: 'WebTypeCompute'
     base_url: 'projects/{{project}}/iap_web/compute'
@@ -49,6 +53,8 @@ objects:
         name: 'name'
         description: Dummy property.
         required: true
+  # This resource is only used to generate IAM resources. They do not correspond to real
+  # GCP resources, and should not be used to generate anything other than IAM suppport.
   - !ruby/object:Api::Resource
     name: 'WebTypeAppEngine'
     base_url: 'projects/{{project}}/iap_web/appengine-{{appId}}'
@@ -61,6 +67,8 @@ objects:
         name: 'appId'
         description: Id of the App Engine application.
         required: true
+  # This resource is only used to generate IAM resources. They do not correspond to real
+  # GCP resources, and should not be used to generate anything other than IAM suppport.
   - !ruby/object:Api::Resource
     name: 'AppEngineVersion'
     base_url: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
@@ -81,6 +89,8 @@ objects:
         name: 'versionId'
         description: Version id of the App Engine application
         required: true
+  # This resource is only used to generate IAM resources. They do not correspond to real
+  # GCP resources, and should not be used to generate anything other than IAM suppport.
   - !ruby/object:Api::Resource
     name: 'AppEngineService'
     base_url: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}'
@@ -97,6 +107,8 @@ objects:
         name: 'service'
         description: Service id of the App Engine application
         required: true
+  # This resource is only used to generate IAM resources. They do not correspond to real
+  # GCP resources, and should not be used to generate anything other than IAM suppport.
   - !ruby/object:Api::Resource
     name: 'WebBackendService'
     base_url: 'projects/{{project}}/iap_web/compute/services/{{name}}'

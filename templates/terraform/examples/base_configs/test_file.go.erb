@@ -47,7 +47,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
   t.Parallel()
 
 	context := map[string]interface{} {
-<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>
+<%= lines(indent(compile('templates/terraform/env_var_context.go.erb'), 4)) -%>
 	<% unless example.test_custom_context.nil? -%>
 	<% example.test_custom_context.each do |var_name, custom_val| -%>
 			"<%= var_name %>": <%= custom_val %>,
