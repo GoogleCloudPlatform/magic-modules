@@ -125,7 +125,7 @@ func testAcc<%= resource_name -%>IamMember_basicGenerated(context map[string]int
 <%= example.config_test_body -%>
 
 resource "<%= resource_ns_iam -%>_member" "foo" {
-<%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
+<%= lines(compile(object.iam_policy.example_config_body)) -%>
 	role = "%{role}"
 	member = "user:admin@hashicorptest.com"
 }
@@ -144,7 +144,7 @@ data "google_iam_policy" "foo" {
 }
 
 resource "<%= resource_ns_iam -%>_policy" "foo" {
-<%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
+<%= lines(compile(object.iam_policy.example_config_body)) -%>
 	policy_data = "${data.google_iam_policy.foo.policy_data}"
 }
 `, context)
@@ -155,7 +155,7 @@ func testAcc<%= resource_name -%>IamBinding_basicGenerated(context map[string]in
 <%= example.config_test_body -%>
 
 resource "<%= resource_ns_iam -%>_binding" "foo" {
-<%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
+<%= lines(compile(object.iam_policy.example_config_body)) -%>
 	role = "%{role}"
 	members = ["user:admin@hashicorptest.com"]
 }
@@ -167,7 +167,7 @@ func testAcc<%= resource_name -%>IamBinding_updateGenerated(context map[string]i
 <%= example.config_test_body -%>
 
 resource "<%= resource_ns_iam -%>_binding" "foo" {
-<%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
+<%= lines(compile(object.iam_policy.example_config_body)) -%>
 	role = "%{role}"
 	members = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
 }
