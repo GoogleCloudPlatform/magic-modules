@@ -58,7 +58,6 @@ func TestAccContainerNodePool_nodeLocations(t *testing.T) {
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccContainerNodePool_maxPodsPerNode(t *testing.T) {
 	t.Parallel()
 
@@ -81,7 +80,6 @@ func TestAccContainerNodePool_maxPodsPerNode(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerNodePool_namePrefix(t *testing.T) {
 	t.Parallel()
