@@ -4,13 +4,7 @@ context := map[string]interface{}{
 <% unless object.iam_policy.test_project_name.nil? -%>
 	"project_id" : fmt.Sprintf("<%= object.iam_policy.test_project_name -%>%s", acctest.RandString(10)),
 <% end -%>
-<% example.test_env_vars&.each do |var_name, var_type| -%>
-<% if var_type == :ORG_ID  -%>
-	"<%= var_name -%>": getTestOrgFromEnv(t),
-<% elsif var_type == :BILLING_ACCT  -%>
-	"<%= var_name -%>": getTestBillingAccountFromEnv(t),
-<% end -%>
-<% end -%>
+<%= lines(compile('templates/terraform/env_var_context.go.erb')) -%>
 <% unless example.test_custom_context.nil? -%>
 <% example.test_custom_context.each do |var_name, custom_val| -%>
 	"<%= var_name %>": <%= custom_val %>,

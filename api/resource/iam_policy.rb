@@ -55,8 +55,11 @@ module Api
       attr_reader :custom_diff_suppress
 
       # Some resources (IAP) use fields named differently from the parent resource.
-      # This allows us to customize the test/example attributes of the resource by specifying a file
-      attr_reader :custom_tf_config
+      # We need to use the parent's attributes to create an IAM policy, but they may not be named as the IAM
+      # IAM resource expects.
+      # This allows us to specify a file (relative to MM root) containing a partial terraform config with
+      # the test/example attributes of the IAM resource.
+      attr_reader :example_config_body
 
       def validate
         super
@@ -69,7 +72,7 @@ module Api
         check :parent_resource_attribute, type: String, default: 'id'
         check :test_project_name, type: String
         check\
-          :custom_tf_config, type: String, default: 'templates/terraform/iam/iam_attributes.tf.erb'
+          :example_config_body, type: String, default: 'templates/terraform/iam/iam_attributes.tf.erb'
       end
     end
   end

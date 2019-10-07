@@ -1,0 +1,19 @@
+<% example.test_env_vars&.each do |var_name, var_type| -%>
+	<% if var_type == :ORG_ID  -%>
+		"<%= var_name -%>": getTestOrgFromEnv(t),
+	<% elsif var_type == :CREDENTIALS -%>
+		"<%= var_name -%>": getTestCredsFromEnv(t),
+	<% elsif var_type == :REGION -%>
+		"<%= var_name -%>": getTestRegionFromEnv(),
+	<% elsif var_type == :ORG_TARGET -%>
+		"<%= var_name -%>": getTestOrgTargetFromEnv(t),
+	<% elsif var_type == :BILLING_ACCT -%>
+		"<%= var_name -%>": getTestBillingAccountFromEnv(t),
+	<% elsif var_type == :SERVICE_ACCT -%>
+		"<%= var_name -%>": getTestServiceAccountFromEnv(t),
+	<% elsif var_type == :PROJECT_NAME -%>
+		"<%= var_name -%>": getTestProjectFromEnv(),
+	<% elsif var_type == :FIRESTORE_PROJECT_NAME -%>
+		"<%= var_name -%>": getTestFirestoreProjectFromEnv(t),
+	<% end -%>
+<% end -%>
