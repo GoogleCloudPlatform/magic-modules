@@ -1,0 +1,3 @@
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
+network_endpoint_group = attribute('network_endpoint_group', default: <%= JSON.pretty_generate(grab_attributes['network_endpoint_group']) -%>, description: 'Network endpoint group description')
+gcp_zone = attribute(:gcp_zone, default: '<%= external_attribute('gcp_zone') -%>', description: 'GCP zone name')

@@ -1,0 +1,11 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% network_endpoint_group = grab_attributes['network_endpoint_group'] -%>
+<% gcp_zone = "#{external_attribute('gcp_zone', doc_generation)}" %>
+describe google_compute_network_endpoint_group(project: <%= gcp_project_id -%>, zone: <%= gcp_zone -%>, name: <%= doc_generation ? "'#{network_endpoint_group['name']}'" : "network_endpoint_group['name']" -%>) do
+  it { should exist }
+  its('default_port') { should cmp <%= doc_generation ? "'#{network_endpoint_group['default_port']}'" : "network_endpoint_group['default_port']" -%> }
+end
+
+describe google_compute_network_endpoint_group(project: <%= gcp_project_id -%>, zone: <%= gcp_zone -%>, name: 'nonexistent') do
+  it { should_not exist }
+end
