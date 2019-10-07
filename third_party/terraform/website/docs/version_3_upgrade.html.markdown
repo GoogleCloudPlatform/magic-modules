@@ -57,6 +57,8 @@ so Terraform knows to manage them.
 - [Resource: `google_compute_forwarding_rule`](#resource-google_compute_forwarding_rule)
 - [Resource: `google_compute_network`](#resource-google_compute_network)
 - [Resource: `google_compute_network_peering`](#resource-google_compute_network_peering)
+- [Resource: `google_container_cluster`](#resource-google_container_cluster)
+- [Resource: `google_container_node_pool`](#resource-google_container_node_pool)
 - [Resource: `google_monitoring_alert_policy`](#resource-google_monitoring_alert_policy)
 - [Resource: `google_monitoring_uptime_check_config`](#resource-google_monitoring_uptime_check_config)
 - [Resource: `google_project_services`](#resource-google_project_services)
@@ -102,36 +104,49 @@ provider "google" {
 
 ## Data Source: `google_container_engine_versions`
 
-### `region` and `zone` are now a removed
+### `region` and `zone` are now removed
 
 Use `location` instead.
 
 ## Resource: `google_cloudiot_registry`
 
-### `event_notification_config` is now a removed
+### `event_notification_config` is now removed
 
 `event_notification_config` has been removed in favor of
 `event_notification_configs` (plural). Please switch to using the plural field.
 
 ## Resource: `google_compute_forwarding_rule`
 
-### `ip_version` is now a removed
+### `ip_version` is now removed
 
 `ip_version` is not used for regional forwarding rules.
 
 ## Resource: `google_compute_network`
 
-### `ipv4_range` is now a removed
+### `ipv4_range` is now removed
 
 Legacy Networks are deprecated and you will no longer be able to create them
 using this field from Feb 1, 2020 onwards.
 
 ## Resource: `google_compute_network_peering`
 
-### `auto_create_routes` is now a removed
+### `auto_create_routes` is now removed
 
 `auto_create_routes` has been removed because it's redundant and not
 user-configurable.
+
+## Resource: `google_container_cluster`
+
+### `zone`, `region` and `additional_zones` are now removed
+
+`zone` and `region` have been removed in favor of `location` and
+`additional_zones` has been removed in favor of `node_locations`
+
+## Resource: `google_container_node_pool`
+
+### `zone` and `region` are now removed
+
+`zone` and `region` have been removed in favor of `location`
 
 ## Resource: `google_compute_region_instance_group_manager`
 
@@ -142,13 +157,13 @@ Before updating, remove it from your config.
 
 ## Resource: `google_monitoring_alert_policy`
 
-### `labels` is now a removed
+### `labels` is now removed
 
 `labels` is removed as it was never used. See `user_labels` for the correct field.
 
 ## Resource: `google_monitoring_uptime_check_config`
 
-### `is_internal` and `internal_checker` are now a removed
+### `is_internal` and `internal_checker` are now removed
 
 `is_internal` and `internal_checker` never worked, and are now removed.
 
@@ -222,6 +237,6 @@ resource "google_project_service" "project_cloudresourcemanager" {
 
 ## Resource: `google_storage_bucket`
 
-### `is_live` is now a removed
+### `is_live` is now removed
 
 Please use `with_state` instead, as `is_live` is now removed.
