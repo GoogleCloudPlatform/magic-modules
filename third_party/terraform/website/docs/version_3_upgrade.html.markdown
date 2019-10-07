@@ -57,6 +57,7 @@ so Terraform knows to manage them.
 - [Resource: `google_compute_forwarding_rule`](#resource-google_compute_forwarding_rule)
 - [Resource: `google_compute_network`](#resource-google_compute_network)
 - [Resource: `google_compute_network_peering`](#resource-google_compute_network_peering)
+- [Resource: `google_compute_region_instance_group_manager`](#resource-google_compute_region_instance_group_manager)
 - [Resource: `google_container_cluster`](#resource-google_container_cluster)
 - [Resource: `google_container_node_pool`](#resource-google_container_node_pool)
 - [Resource: `google_monitoring_alert_policy`](#resource-google_monitoring_alert_policy)
@@ -135,6 +136,13 @@ using this field from Feb 1, 2020 onwards.
 `auto_create_routes` has been removed because it's redundant and not
 user-configurable.
 
+## Resource: `google_compute_region_instance_group_manager`
+
+### `update_strategy` no longer has any effect and is removed
+
+With `rolling_update_policy` removed, `update_strategy` has no effect anymore.
+Before updating, remove it from your config.
+
 ## Resource: `google_container_cluster`
 
 ### `zone`, `region` and `additional_zones` are now removed
@@ -147,13 +155,6 @@ user-configurable.
 ### `zone` and `region` are now removed
 
 `zone` and `region` have been removed in favor of `location`
-
-## Resource: `google_compute_region_instance_group_manager`
-
-### `update_strategy` no longer has any effect and is removed
-
-With `rolling_update_policy` removed, `update_strategy` has no effect anymore.
-Before updating, remove it from your config.
 
 ## Resource: `google_monitoring_alert_policy`
 
