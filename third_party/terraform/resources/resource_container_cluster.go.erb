@@ -107,25 +107,18 @@ func resourceContainerCluster() *schema.Resource {
 				Optional:      true,
 				Computed:      true,
 				ForceNew:      true,
-				ConflictsWith: []string{"zone", "region"},
 			},
 
 			"region": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				Computed:      true,
-				ForceNew:      true,
 				Removed:       "Use location instead",
-				ConflictsWith: []string{"zone", "location"},
 			},
 
 			"zone": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				Computed:      true,
-				ForceNew:      true,
 				Removed:       "Use location instead",
-				ConflictsWith: []string{"region", "location"},
 			},
 
 			"node_locations": {

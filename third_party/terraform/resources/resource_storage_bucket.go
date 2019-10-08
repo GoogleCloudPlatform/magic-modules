@@ -149,7 +149,6 @@ func resourceStorageBucket() *schema.Resource {
 									"is_live": {
 										Type:     schema.TypeBool,
 										Optional: true,
-										Computed: true,
 										Removed:  "Please use `with_state` instead",
 									},
 									"with_state": {
