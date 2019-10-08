@@ -444,7 +444,7 @@ objects:
     name: 'ApplicationUrlDispatchRules'
     description: |
       Rules to match an HTTP request and dispatch that request to a service.
-    base_url: ''
+    base_url: 'apps/{{project}}'
     create_url: 'apps/{{project}}?updateMask=dispatch_rules'
     create_verb: :PATCH
     delete_verb: :PATCH
