@@ -51,8 +51,10 @@ func dataSourceGoogleComputeZonesRead(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
-	regionUrl := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/regions/%s",
-		project, region)
+	regionUrl, err := replaceVars(d, config, fmt.Sprintf("{{ComputeBasePath}}projects/%s/regions/%s", project, region))
+	if err != nil {
+		return err
+	}
 	filter := fmt.Sprintf("(region eq %s)", regionUrl)
 
 	if s, ok := d.GetOk("status"); ok {
