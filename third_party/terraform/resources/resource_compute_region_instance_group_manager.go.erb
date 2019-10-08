@@ -160,9 +160,8 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 <% if version == 'ga' -%>
 			"update_strategy": &schema.Schema{
 				Type:         schema.TypeString,
-				Deprecated:   "This field will be replaced by `update_policy` in 3.0.0",
+				Removed:      "This field is removed.",
 				Optional:     true,
-				ConflictsWith: []string{"update_policy"},
 			},
 <% end -%>
 
