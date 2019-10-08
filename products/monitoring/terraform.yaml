@@ -101,7 +101,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           group_display_name: "uptime-check-group"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
-      decoder: 'templates/terraform/decoders/monitoring_uptime_check_internal.go.erb'
       extra_schema_entry: 'templates/terraform/extra_schema_entry/monitoring_uptime_check_config_internal.go.erb'
       post_create: templates/terraform/post_create/set_computed_name.erb
     properties:

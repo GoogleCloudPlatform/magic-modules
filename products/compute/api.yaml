@@ -2322,16 +2322,6 @@ objects:
           A BackendService to receive the matched traffic. This is used only
           for INTERNAL load balancing.
       - !ruby/object:Api::Type::Enum
-        name: 'ipVersion'
-        deprecation_message: >-
-          ipVersion is not used for regional forwarding rules. Please remove
-          this field if you are using it.
-        description: |
-          ipVersion is not a valid field for regional forwarding rules.
-        values:
-          - :IPV4
-          - :IPV6
-      - !ruby/object:Api::Type::Enum
         name: 'loadBalancingScheme'
         description: |
           This signifies what the ForwardingRule will be used for and can only
@@ -5534,25 +5524,6 @@ objects:
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
-      - !ruby/object:Api::Type::String
-        name: 'ipv4_range'
-        # We override this in api.yaml so that the name is more aesthetic
-        api_name: 'IPv4Range'
-        deprecation_message: >-
-          Legacy Networks are deprecated and you will no longer be able to
-          create them using this field from Feb 1, 2020 onwards.
-        input: true
-        conflicts:
-          - autoCreateSubnetworks
-        description: |
-          If this field is specified, a deprecated legacy network is created.
-          You will no longer be able to create a legacy network on Feb 1, 2020.
-          See the [legacy network docs](https://cloud.google.com/vpc/docs/legacy)
-          for more details.
-
-          The range of internal addresses that are legal on this legacy network.
-          This range is a CIDR specification, for example: `192.168.0.0/16`.
-          The resource must be recreated to modify this field.
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
