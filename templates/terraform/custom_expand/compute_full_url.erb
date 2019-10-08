@@ -21,9 +21,10 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
     return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: %s", err)
   }
 
-	url, err := replaceVars(d, config, "{{ComputeBasePath}}"+f.RelativeLink())
-	if err != nil {
-		return nil, err
-	}
-	return url, nil
+  url, err := replaceVars(d, config, "{{ComputeBasePath}}"+f.RelativeLink())
+  if err != nil {
+    return nil, err
+  }
+
+  return url, nil
 }
