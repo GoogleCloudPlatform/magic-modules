@@ -251,52 +251,6 @@ resource "google_cloudiot_registry" "foobar" {
 `, acctest.RandString(10), acctest.RandString(10), registryName)
 }
 
-func testAccCloudIoTRegistry_singleEventNotificationConfig(topic, registryName string) string {
-	return fmt.Sprintf(`
-resource "google_project_iam_binding" "cloud-iot-iam-binding" {
-  members = ["serviceAccount:cloud-iot@system.gserviceaccount.com"]
-  role    = "roles/pubsub.publisher"
-}
-
-resource "google_pubsub_topic" "event-topic" {
-  name = "%s"
-}
-
-resource "google_cloudiot_registry" "foobar" {
-  depends_on = ["google_project_iam_binding.cloud-iot-iam-binding"]
-
-  name = "%s"
-
-  event_notification_config = {
-    pubsub_topic_name = "${google_pubsub_topic.event-topic.id}"
-  }
-}
-`, topic, registryName)
-}
-
-func testAccCloudIoTRegistry_pluralEventNotificationConfigs(topic, registryName string) string {
-	return fmt.Sprintf(`
-resource "google_project_iam_binding" "cloud-iot-iam-binding" {
-  members = ["serviceAccount:cloud-iot@system.gserviceaccount.com"]
-  role    = "roles/pubsub.publisher"
-}
-
-resource "google_pubsub_topic" "event-topic" {
-  name = "%s"
-}
-
-resource "google_cloudiot_registry" "foobar" {
-  depends_on = ["google_project_iam_binding.cloud-iot-iam-binding"]
-
-  name = "%s"
-
-  event_notification_config = {
-    pubsub_topic_name = "${google_pubsub_topic.event-topic.id}"
-  }
-}
-`, topic, registryName)
-}
-
 func testAccCloudIoTRegistry_singleEventNotificationConfigs(topic, registryName string) string {
 	return fmt.Sprintf(`
 resource "google_project_iam_binding" "cloud-iot-iam-binding" {

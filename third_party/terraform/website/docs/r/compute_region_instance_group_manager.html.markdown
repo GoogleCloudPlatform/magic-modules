@@ -61,7 +61,6 @@ resource "google_compute_region_instance_group_manager" "appserver" {
   name = "appserver-igm"
 
   base_instance_name = "app"
-  update_strategy    = "NONE"
   region             = "us-central1"
 
   target_size  = 5

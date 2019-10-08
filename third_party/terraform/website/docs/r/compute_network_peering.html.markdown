@@ -53,9 +53,6 @@ The following arguments are supported:
 
 * `peer_network` - (Required) Resource link of the peer network.
 
-* `auto_create_routes` - (Optional) If set to `true`, the routes between the two networks will
-  be created and managed automatically. Defaults to `true`.
-
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
