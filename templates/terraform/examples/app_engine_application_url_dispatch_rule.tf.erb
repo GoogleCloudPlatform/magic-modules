@@ -28,7 +28,7 @@ resource "google_app_engine_standard_app_version" "myapp_v1" {
 
 }
 
-resource "google_app_engine_application_url_dispatch_rule" "service_rules" {
+resource "google_app_engine_application_url_dispatch_rules" "service_rules" {
   # project = "my-project"
   dispatch_rules {
     domain = "*"
