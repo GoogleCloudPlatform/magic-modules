@@ -47,14 +47,6 @@ Must exactly match the location the cluster will be deployed in, or listed
 versions may not be available. If `location`, `region`, and `zone` are not
 specified, the provider-level zone must be set and is used instead.
 
-* `zone` (Optional, Deprecated) - Zone to list available cluster versions for.
-Should match the zone the cluster will be deployed in. `zone` has been
-deprecated in favour of `location`.
-
-* `region` (Optional, Deprecated) - Region to list available cluster versions
-for. Should match the region the cluster will be deployed in. `region` has been
-deprecated in favour of `location`.
-
 * `project` (Optional) - ID of the project to list available cluster versions for. Should match the project the cluster will be deployed to.
   Defaults to the project that the provider is authenticated with.
 
