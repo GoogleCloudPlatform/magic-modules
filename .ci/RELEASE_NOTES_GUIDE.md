@@ -127,6 +127,7 @@ Don’t write notes like:
 ## Headings
 
 Release notes should be formatted with one of the following headings:
+- `release-note:enhancement`
 - `release-note:bug`
 - `release-note:note`
 - `release-note:new-resource`
