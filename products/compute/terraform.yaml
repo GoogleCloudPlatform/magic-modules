@@ -507,6 +507,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_name: "website-net"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/forwarding_rule.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -905,9 +906,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_value: True
         # autoCreateSubnetworks defaults to true, so we need to disable it explicitly
         conflicts: []
-      ipv4_range: !ruby/object:Overrides::Terraform::PropertyOverride
-        # autoCreateSubnetworks defaults to true, so we need to disable it explicitly
-        conflicts: []
       routingConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       routingConfig.routingMode: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -921,6 +919,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/network.erb
       encoder: templates/terraform/encoders/network.erb
   NetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{zone}}/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}"

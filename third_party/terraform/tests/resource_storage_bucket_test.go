@@ -166,30 +166,11 @@ func TestAccStorageBucket_lifecycleRuleStateLive(t *testing.T) {
 		CheckDestroy: testAccStorageBucketDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageBucket_lifecycleRule_IsLiveTrue(bucketName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckStorageBucketExists(
-						"google_storage_bucket.bucket", bucketName, &bucket),
-					testAccCheckStorageBucketLifecycleConditionState(googleapi.Bool(true), &bucket),
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", attrPrefix+"is_live", "true"),
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", attrPrefix+"with_state", "LIVE"),
-				),
-			},
-			{
-				ResourceName:      "google_storage_bucket.bucket",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
 				Config: testAccStorageBucket_lifecycleRule_withStateLive(bucketName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						"google_storage_bucket.bucket", bucketName, &bucket),
 					testAccCheckStorageBucketLifecycleConditionState(googleapi.Bool(true), &bucket),
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", attrPrefix+"is_live", "true"),
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", attrPrefix+"with_state", "LIVE"),
 				),
@@ -226,28 +207,7 @@ func TestAccStorageBucket_lifecycleRuleStateArchived(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						"google_storage_bucket.bucket", bucketName, &bucket),
-					testAccCheckStorageBucketLifecycleConditionState(googleapi.Bool(false), &bucket),
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", attrPrefix+"is_live", "false"),
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", attrPrefix+"with_state", "ARCHIVED"),
-				),
-			},
-			{
-				ResourceName:      "google_storage_bucket.bucket",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccStorageBucket_lifecycleRule_isLiveFalse(bucketName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckStorageBucketExists(
-						"google_storage_bucket.bucket", bucketName, &bucket),
-					testAccCheckStorageBucketLifecycleConditionState(googleapi.Bool(false), &bucket),
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", attrPrefix+"is_live", "false"),
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", attrPrefix+"with_state", "ARCHIVED"),
+					testAccCheckStorageBucketLifecycleConditionState(nil, &bucket),
 				),
 			},
 			{
@@ -261,8 +221,6 @@ func TestAccStorageBucket_lifecycleRuleStateArchived(t *testing.T) {
 					testAccCheckStorageBucketExists(
 						"google_storage_bucket.bucket", bucketName, &bucket),
 					testAccCheckStorageBucketLifecycleConditionState(googleapi.Bool(false), &bucket),
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", attrPrefix+"is_live", "false"),
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", attrPrefix+"with_state", "ARCHIVED"),
 				),
@@ -1302,24 +1260,6 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
-func testAccStorageBucket_lifecycleRule_isLiveFalse(bucketName string) string {
-	return fmt.Sprintf(`
-resource "google_storage_bucket" "bucket" {
-  name          = "%s"
-  lifecycle_rule {
-    action {
-      type = "Delete"
-    }
-
-    condition {
-      age = 10
-      is_live = false
-    }
-  }
-}
-`, bucketName)
-}
-
 func testAccStorageBucket_lifecycleRule_withStateArchived(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
@@ -1332,24 +1272,6 @@ resource "google_storage_bucket" "bucket" {
     condition {
       age = 10
       with_state = "ARCHIVED"
-    }
-  }
-}
-`, bucketName)
-}
-
-func testAccStorageBucket_lifecycleRule_IsLiveTrue(bucketName string) string {
-	return fmt.Sprintf(`
-resource "google_storage_bucket" "bucket" {
-  name          = "%s"
-  lifecycle_rule {
-    action {
-      type = "Delete"
-    }
-
-    condition {
-      age = 10
-      is_live = true
     }
   }
 }
