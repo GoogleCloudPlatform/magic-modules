@@ -13,6 +13,7 @@ this PR, but make sure not to indent notes and to leave newlines between
 code blocks for Markdown's sake.
 
 For Terraform PRs, we use the following "release-note:" headings
+    - release-note:enhancement
     - release-note:bug
     - release-note:note
     - release-note:new-resource
