@@ -95,6 +95,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "app_engine_application_url_dispatch_rules_basic"
         vars:
           project: "my-project"  
+          bucket_name: "appengine-test-bucket"
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
