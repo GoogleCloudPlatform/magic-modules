@@ -28,8 +28,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validation.IntBetween(5, 20)'
       authentication.googleAccount.password: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/scan_config_auth_custom_password.go.erb'
       authentication.customAccount.password: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/scan_config_auth_google_password.go.erb'
       schedule: !ruby/object:Overrides::Terraform::PropertyOverride
         properties:
           scheduleTime: !ruby/object:Overrides::Terraform::PropertyOverride
