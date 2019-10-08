@@ -92,7 +92,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["{{project}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "app_engine_application_url_dispatch_rule"
+        name: "app_engine_application_url_dispatch_rules_basic_example"
         vars:
           project: "my-project"  
 
