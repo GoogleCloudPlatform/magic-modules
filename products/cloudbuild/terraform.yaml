@@ -17,7 +17,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Trigger: !ruby/object:Overrides::Terraform::ResourceOverride
     # import by default only works with old-style self links ending in a name
     import_format: ["projects/{{project}}/triggers/{{trigger_id}}"]
-    id_format: '{{project}}/{{trigger_id}}'
+    id_format: 'projects/{{project}}/triggers/{{trigger_id}}'
     self_link: 'projects/{{project}}/triggers/{{trigger_id}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
