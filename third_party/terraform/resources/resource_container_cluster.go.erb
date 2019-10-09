@@ -24,7 +24,7 @@ var (
 		Schema: map[string]*schema.Schema{
 			"cidr_blocks": {
 				Type:     schema.TypeSet,
-				Optional: true,
+				Required: true,
 				Elem:     cidrBlockConfig,
 			},
 		},
@@ -151,7 +151,7 @@ func resourceContainerCluster() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"disabled": {
 										Type:     schema.TypeBool,
-										Optional: true,
+										Required: true,
 									},
 								},
 							},
@@ -165,7 +165,7 @@ func resourceContainerCluster() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"disabled": {
 										Type:     schema.TypeBool,
-										Optional: true,
+										Required: true,
 									},
 								},
 							},
@@ -179,8 +179,7 @@ func resourceContainerCluster() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"disabled": {
 										Type:     schema.TypeBool,
-										Optional: true,
-										Default:  true,
+										Required: true,
 									},
 								},
 							},
@@ -194,7 +193,7 @@ func resourceContainerCluster() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"disabled": {
 										Type:     schema.TypeBool,
-										Optional: true,
+										Required: true,
 									},
 								},
 							},
@@ -209,8 +208,7 @@ func resourceContainerCluster() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"disabled": {
 										Type:     schema.TypeBool,
-										Default:  false,
-										Optional: true,
+										Required: true,
 									},
 									"auth": {
 										Type:         schema.TypeString,
@@ -232,8 +230,7 @@ func resourceContainerCluster() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"disabled": {
 										Type:     schema.TypeBool,
-										Default:  false,
-										Optional: true,
+										Required: true,
 									},
 								},
 							},

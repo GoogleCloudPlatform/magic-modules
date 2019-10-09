@@ -53,14 +53,19 @@ so Terraform knows to manage them.
 
 - [Provider Version Configuration](#provider-version-configuration)
 - [Data Source: `google_container_engine_versions`](#data-source-google_container_engine_versions)
+- [Resource: `google_app_engine_application`](#resource-google_app_engine_application)
 - [Resource: `google_cloudfunctions_function`](#resource-google_cloudfunctions_function)
 - [Resource: `google_cloudiot_registry`](#resource-google_cloudiot_registry)
 - [Resource: `google_compute_forwarding_rule`](#resource-google_compute_forwarding_rule)
+- [Resource: `google_compute_instance`](#resource-google_compute_instance)
 - [Resource: `google_compute_network`](#resource-google_compute_network)
 - [Resource: `google_compute_network_peering`](#resource-google_compute_network_peering)
 - [Resource: `google_compute_region_instance_group_manager`](#resource-google_compute_region_instance_group_manager)
+- [Resource: `google_compute_snapshot`](#resource-google_compute_snapshot)
 - [Resource: `google_container_cluster`](#resource-google_container_cluster)
 - [Resource: `google_container_node_pool`](#resource-google_container_node_pool)
+- [Resource: `google_dataproc_job`](#resource-google_dataproc_job)
+- [Resource: `google_dns_managed_zone`](#resource-google_dns_managed_zone)
 - [Resource: `google_monitoring_alert_policy`](#resource-google_monitoring_alert_policy)
 - [Resource: `google_monitoring_uptime_check_config`](#resource-google_monitoring_uptime_check_config)
 - [Resource: `google_project_services`](#resource-google_project_services)
@@ -110,6 +115,13 @@ provider "google" {
 
 Use `location` instead.
 
+## Resource: `google_app_engine_application`
+
+### `split_health_checks` is now required on block `google_app_engine_application.feature_settings`
+
+In an attempt to avoid allowing empty blocks in config files, `split_health_checks` is now
+required on the `google_app_engine_application.feature_settings` block.
+
 ## Resource: `google_cloudfunctions_function`
 
 ### The `runtime` option `nodejs6` has been deprecated
@@ -124,11 +136,23 @@ Use `location` instead.
 `event_notification_config` has been removed in favor of
 `event_notification_configs` (plural). Please switch to using the plural field.
 
+### `public_key_certificate` is now required on block `google_cloudiot_registry.credentials`
+
+In an attempt to avoid allowing empty blocks in config files, `public_key_certificate` is now
+required on the `google_cloudiot_registry.credentials` block.
+
 ## Resource: `google_compute_forwarding_rule`
 
 ### `ip_version` is now removed
 
 `ip_version` is not used for regional forwarding rules.
+
+## Resource: `google_compute_instance`
+
+### `interface` is now required on block `google_compute_instance.scratch_disk`
+
+In an attempt to avoid allowing empty blocks in config files, `interface` is now
+required on the `google_compute_instance.scratch_disk` block.
 
 ## Resource: `google_compute_network`
 
@@ -151,7 +175,26 @@ user-configurable.
 With `rolling_update_policy` removed, `update_strategy` has no effect anymore.
 Before updating, remove it from your config.
 
+## Resource: `google_compute_snapshot`
+
+### `raw_key` is now required on block `google_compute_snapshot.source_disk_encryption_key`
+
+In an attempt to avoid allowing empty blocks in config files, `raw_key` is now
+required on the `google_compute_instance.source_disk_encryption_key` block.
+
 ## Resource: `google_container_cluster`
+
+### `cidr_blocks` is now required on block `google_container_cluster.master_authorized_networks_config`
+
+In an attempt to avoid allowing empty blocks in config files, `cidr_blocks` is now
+required on the `google_container_cluster.master_authorized_networks_config` block.
+
+### The `disabled` field is now required on the `addons_config` blocks for
+`http_load_balancing`, `horizontal_pod_autoscaling`, `kubernetes_dashboard`, `istio_config`,
+`cloudrun_config` and `network_policy_config`.
+
+In an attempt to avoid allowing empty blocks in config files, `disabled` is now
+required on the different `google_container_cluster.addons_config` blocks.
 
 ### `zone`, `region` and `additional_zones` are now removed
 
@@ -164,6 +207,38 @@ Before updating, remove it from your config.
 
 `zone` and `region` have been removed in favor of `location`
 
+## Resource: `google_dataproc_job`
+
+### `driver_log_levels` is now required on `logging_config` blocks for
+`google_dataproc_job.pyspark_config`, `google_dataproc_job.hadoop_config`,
+`google_dataproc_job.spark_config`, `google_dataproc_job.pig_config`, and
+`google_dataproc_job.sparksql_config`.
+
+In an attempt to avoid allowing empty blocks in config files, `max_failures_per_hour` is now
+required on the different `google_dataproc_job` config blocks.
+
+### `job_id` is now required on block `google_dataproc_job.reference`
+
+In an attempt to avoid allowing empty blocks in config files, `job_id` is now
+required on the `google_dataproc_job.reference` block.
+
+### `max_failures_per_hour` is now required on block `google_dataproc_job.scheduling`
+
+In an attempt to avoid allowing empty blocks in config files, `max_failures_per_hour` is now
+required on the `google_dataproc_job.scheduling` block.
+
+## Resource: `google_dns_managed_zone`
+
+### `networks` is now required on block `google_dns_managed_zone.private_visibility_config`
+
+In an attempt to avoid allowing empty blocks in config files, `networks` is now
+required on the `google_dns_managed_zone.private_visibility_config` block.
+
+### `network_url` is now required on block `google_dns_managed_zone.private_visibility_config.networks`
+
+In an attempt to avoid allowing empty blocks in config files, `network_url` is now
+required on the `google_dns_managed_zone.private_visibility_config.networks` block.
+
 ## Resource: `google_monitoring_alert_policy`
 
 ### `labels` is now removed
@@ -171,6 +246,11 @@ Before updating, remove it from your config.
 `labels` is removed as it was never used. See `user_labels` for the correct field.
 
 ## Resource: `google_monitoring_uptime_check_config`
+
+### `content` is now required on block `google_monitoring_uptime_check_config.content_matchers`
+
+In an attempt to avoid allowing empty blocks in config files, `content` is now
+required on the `google_monitoring_uptime_check_config.content_matchers` block.
 
 ### `is_internal` and `internal_checker` are now removed
 
@@ -245,6 +325,11 @@ resource "google_project_service" "project_cloudresourcemanager" {
 ```
 
 ## Resource: `google_storage_bucket`
+
+### `enabled` is now required on block `google_storage_bucket.versioning`
+
+In an attempt to avoid allowing empty blocks in config files, `enabled` is now
+required on the `google_storage_bucket.versioning` block.
 
 ### `is_live` is now removed
 
