@@ -756,6 +756,21 @@ func TestAccComputeInstanceTemplate_enableDisplay(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstanceTemplate_invalidDiskType(t *testing.T) {
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeInstanceTemplate_invalidDiskType(),
+				ExpectError: regexp.MustCompile("SCRATCH disks must have a disk_type of local-ssd"),
+			},
+		},
+	})
+}
+
 func testAccCheckComputeInstanceTemplateDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
@@ -1895,22 +1910,51 @@ data "google_compute_image" "my_image" {
 	family  = "centos-7"
 	project = "gce-uefi-images"
 }
-
 resource "google_compute_instance_template" "foobar" {
 	name = "instancet-test-%s"
 	machine_type = "n1-standard-1"
 	can_ip_forward = false
-
 	disk {
 		source_image = "${data.google_compute_image.my_image.self_link}"
 		auto_delete = true
 		boot = true
 	}
-
 	network_interface {
 		network = "default"
 	}
-
 	enable_display = true
+}`, acctest.RandString(10))
+}
+
+func testAccComputeInstanceTemplate_invalidDiskType() string {
+	return fmt.Sprintf(`
+# Use this datasource insead of hardcoded values when https://github.com/hashicorp/terraform/issues/22679
+# is resolved.
+# data "google_compute_image" "my_image" {
+# 	family  = "centos-7"
+# 	project = "gce-uefi-images"
+# }
+resource "google_compute_instance_template" "foobar" {
+	name = "instancet-test-%s"
+	machine_type = "n1-standard-1"
+	can_ip_forward = false
+	disk {
+		source_image = "https://www.googleapis.com/compute/v1/projects/gce-uefi-images/global/images/centos-7-v20190729"
+		auto_delete = true
+		boot = true
+	}
+	disk {
+		auto_delete = true
+		type = "SCRATCH"
+		disk_type = "local-ssd"
+	}
+	disk {
+		source_image = "https://www.googleapis.com/compute/v1/projects/gce-uefi-images/global/images/centos-7-v20190729"
+		auto_delete = true
+		type = "SCRATCH"
+	}
+	network_interface {
+		network = "default"
+	}
 }`, acctest.RandString(10))
 }
