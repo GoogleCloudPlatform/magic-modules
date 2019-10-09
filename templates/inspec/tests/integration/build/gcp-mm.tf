@@ -668,6 +668,29 @@ resource "google_ml_engine_model" "inspec-gcp-model" {
   online_prediction_console_logging = var.ml_model["online_prediction_console_logging"]
 }
 
+resource "google_compute_firewall" "dataproc" {
+  name    = "dataproc-firewall"
+  network = "${google_compute_network.dataproc.name}"
+
+  source_ranges = ["10.128.0.0/9"]
+  allow {
+    protocol = "icmp"
+  }
+
+  allow {
+    protocol = "tcp"
+    ports    = ["0-65535"]
+  }
+  allow {
+    protocol = "udp"
+    ports    = ["0-65535"]
+  }
+}
+
+resource "google_compute_network" "dataproc" {
+  name = "dataproc-network"
+}
+
 resource "google_dataproc_cluster" "mycluster" {
   project = var.gcp_project_id
   region  = var.gcp_location
@@ -704,6 +727,7 @@ resource "google_dataproc_cluster" "mycluster" {
     }
 
     gce_cluster_config {
+      network = google_compute_network.dataproc.self_link
       tags    = [var.dataproc_cluster["config"]["gce_cluster_config"]["tag"]]
     }
   }
