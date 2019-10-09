@@ -851,7 +851,7 @@ func parseBigQueryTableId(id string) (*bigQueryTableId, error) {
 	matchRegex := regexp.MustCompile("^projects/(.+)/datasets/(.+)/tables/(.+)$")
 	subMatches := matchRegex.FindStringSubmatch(id)
 	if subMatches == nil {
-		return nil, fmt.Errorf("Invalid BigQuery table specifier. Expecting "projects/{{project}}/datasets/{{dataset}}/tables/{{table}}", got %s", id)
+		return nil, fmt.Errorf("Invalid BigQuery table specifier. Expecting projects/{{project}}/datasets/{{dataset}}/tables/{{table}}, got %s", id)
 	}
 	return &bigQueryTableId{
 		Project:   subMatches[1],
