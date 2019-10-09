@@ -197,19 +197,36 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	d.Set("instance_type", instanceType)
 
-	clusters := d.Get("cluster").([]interface{})
+	clusters, err := c.Clusters(ctx, instance.Name)
+	if err != nil {
+		return fmt.Errorf("Error retrieving instance clusters. %s", err)
+	}
+
 	clustersNewState := []map[string]interface{}{}
-	for _, cl := range clusters {
-		cluster := cl.(map[string]interface{})
-		clus, err := c.GetCluster(ctx, instance.Name, cluster["cluster_id"].(string))
-		if err != nil {
-			if isGoogleApiErrorWithCode(err, 404) {
+
+	configClusters := d.Get("cluster").([]interface{})
+	if len(configClusters) > 0 {
+		// Instance defined in config; refreshing state
+		for _, cl := range configClusters {
+			cluster := cl.(map[string]interface{})
+			var clus *bigtable.ClusterInfo
+			for _, ci := range clusters {
+				if ci.Name == cluster["cluster_id"].(string) {
+					clus = ci
+					break
+				}
+			}
+			if clus == nil {
 				log.Printf("[WARN] Cluster %q not found, not setting it in state", cluster["cluster_id"].(string))
 				continue
 			}
-			return fmt.Errorf("Error retrieving cluster %q: %s", cluster["cluster_id"].(string), err.Error())
+			clustersNewState = append(clustersNewState, flattenBigtableCluster(clus))
 		}
-		clustersNewState = append(clustersNewState, flattenBigtableCluster(clus))
+	} else {
+		// Instance not defined in config; importing instance
+		for _, cluster := range clusters {
+			clustersNewState = append(clustersNewState, flattenBigtableCluster(cluster))
+		}
 	}
 
 	log.Printf("[DEBUG] Setting clusters in state: %#v", clustersNewState)
