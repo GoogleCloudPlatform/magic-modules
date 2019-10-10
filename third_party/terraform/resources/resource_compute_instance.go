@@ -413,7 +413,6 @@ func resourceComputeInstance() *schema.Resource {
 						"interface": {
 							Type:         schema.TypeString,
 							Required:     true,
-							Default:      "SCSI",
 							ValidateFunc: validation.StringInSlice([]string{"SCSI", "NVME"}, false),
 						},
 					},

@@ -493,8 +493,7 @@ func resourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"enabled": {
 							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
+							Required: true,
 						},
 						"provider": {
 							Type:             schema.TypeString,
@@ -592,8 +591,7 @@ func resourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"use_ip_aliases": {
 							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
+							Required: true,
 							ForceNew: true,
 						},
 
@@ -605,7 +603,7 @@ func resourceContainerCluster() *schema.Resource {
 							ConflictsWith: ipAllocationRangeFields,
 						},
 
-   					"subnetwork_name": {
+   						"subnetwork_name": {
 							Type:          schema.TypeString,
 							Optional:      true,
 							ForceNew:      true,
@@ -672,7 +670,7 @@ func resourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"enable_private_endpoint": {
 							Type:     schema.TypeBool,
-							Optional: true,
+							Required: true,
 							ForceNew: true,
 							DiffSuppressFunc: containerClusterPrivateClusterConfigSuppress,
 						},
