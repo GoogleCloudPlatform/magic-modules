@@ -303,6 +303,13 @@ in config files, `interface` is now required on the `google_compute_instance.scr
 In an attempt to avoid allowing empty blocks in config files, `kms_key_self_link` is now
 required on the `google_compute_instance_template.disk_encryption_key` block.
 
+## Resource: `google_compute_instance_template`
+
+### `kms_key_self_link` is now required on block `google_compute_instance_template.disk_encryption_key`
+
+In an attempt to avoid allowing empty blocks in config files, `kms_key_self_link` is now
+required on the `google_compute_instance_template.disk_encryption_key` block.
+
 ## Resource: `google_compute_network`
 
 ### `ipv4_range` is now removed
@@ -351,6 +358,11 @@ dashboards.
 
 In an attempt to avoid allowing empty blocks in config files, `cidr_blocks` is now
 required on the `google_container_cluster.master_authorized_networks_config` block.
+
+### `enabled` is now required on block `google_container_cluster.vertical_pod_autoscaling`
+
+In an attempt to avoid allowing empty blocks in config files, `enabled` is now
+required on the `google_container_cluster.vertical_pod_autoscaling` block.
 
 ### The `disabled` field is now required on the `addons_config` blocks for
 `http_load_balancing`, `horizontal_pod_autoscaling`, `istio_config`,
