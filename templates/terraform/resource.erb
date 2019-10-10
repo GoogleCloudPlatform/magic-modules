@@ -344,7 +344,28 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  properties_by_custom_update(object.root_properties).each do |key, props| -%>
 if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' || ' -%> {
         obj := make(map[string]interface{})
-<%      custom_update_properties_by_url(properties, key[:update_url]).each do |prop| -%>
+
+<%-      unless key[:fingerprint_name] == nil -%>
+        getUrl, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+        if err != nil {
+            return err
+        }
+
+<%         if has_project -%>
+        project, err := getProject(d, config)
+        if err != nil {
+            return err
+        }
+<%         end -%>
+        getRes, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project %>project<% else %>""<% end %>, getUrl, nil)
+        if err != nil {
+            return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
+        }
+
+        obj["<%= key[:fingerprint_name] %>"] = getRes["<%= key[:fingerprint_name] %>"]
+
+<%       end # unless key[:fingerprint_name] -%>
+<%      custom_update_properties_by_key(properties, key).each do |prop| -%>
         <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
         <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
         if err != nil {
@@ -398,13 +419,13 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         }
 
 <%      if !object.async.nil? && object.async.allow?('update') -%>
-<% if object.autogen_async -%>
+<%        if object.autogen_async -%>
 
         err = <%= client_name_camel -%>OperationWaitTime(
             config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
             int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 
-<% else -%>
+<%        else -%>
         op := &<%= client_name_lower -%>.Operation{}
         err = Convert(res, op)
         if err != nil {
@@ -415,7 +436,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
             int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 
-<% end -%>
+<%        end -%>
         if err != nil {
             return err
         }

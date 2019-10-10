@@ -287,7 +287,7 @@ module Provider
         p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
       end
       update_props.group_by do |p|
-        { update_url: p.update_url, update_verb: p.update_verb }
+        { update_url: p.update_url, update_verb: p.update_verb, update_id: p.update_id, fingerprint_name: p.fingerprint_name }
       end
     end
 
@@ -295,9 +295,9 @@ module Provider
     # that can be updated at that URL. This allows flattened objects
     # to determine which parent property in the API should be updated with
     # the contents of the flattened object
-    def custom_update_properties_by_url(properties, update_url)
+    def custom_update_properties_by_key(properties, key)
       properties_by_custom_update(properties).select do |k, _|
-        k[:update_url] == update_url
+        k[:update_url] == key[:update_url] && k[:update_id] == key[:update_id] && k[:fingerprint_name] == key[:fingerprint_name]
       end.first.last
       # .first is to grab the element from the select which returns a list
       # .last is because properties_by_custom_update returns a list of
