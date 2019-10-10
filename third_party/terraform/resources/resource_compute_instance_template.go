@@ -157,7 +157,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"kms_key_self_link": {
 										Type:             schema.TypeString,
-										Optional:         true,
+										Required:         true,
 										ForceNew:         true,
 										DiffSuppressFunc: compareSelfLinkRelativePaths,
 									},

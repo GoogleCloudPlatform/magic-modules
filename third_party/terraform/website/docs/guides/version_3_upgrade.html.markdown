@@ -58,12 +58,14 @@ so Terraform knows to manage them.
 - [Resource: `google_cloudiot_registry`](#resource-google_cloudiot_registry)
 - [Resource: `google_compute_forwarding_rule`](#resource-google_compute_forwarding_rule)
 - [Resource: `google_compute_instance`](#resource-google_compute_instance)
+- [Resource: `google_compute_instance_template`](#resource-google_compute_instance_template)
 - [Resource: `google_compute_network`](#resource-google_compute_network)
 - [Resource: `google_compute_network_peering`](#resource-google_compute_network_peering)
 - [Resource: `google_compute_region_instance_group_manager`](#resource-google_compute_region_instance_group_manager)
 - [Resource: `google_compute_snapshot`](#resource-google_compute_snapshot)
 - [Resource: `google_container_cluster`](#resource-google_container_cluster)
 - [Resource: `google_container_node_pool`](#resource-google_container_node_pool)
+- [Resource: `google_dataproc_cluster`](#resource-google_dataproc_cluster)
 - [Resource: `google_dataproc_job`](#resource-google_dataproc_job)
 - [Resource: `google_dns_managed_zone`](#resource-google_dns_managed_zone)
 - [Resource: `google_monitoring_alert_policy`](#resource-google_monitoring_alert_policy)
@@ -277,6 +279,13 @@ required on the `google_cloudiot_registry.credentials` block.
 In an attempt to avoid allowing empty blocks in config files, `interface` is now
 required on the `google_compute_instance.scratch_disk` block.
 
+## Resource: `google_compute_instance_template`
+
+### `kms_key_self_link` is now required on block `google_compute_instance_template.disk_encryption_key`
+
+In an attempt to avoid allowing empty blocks in config files, `kms_key_self_link` is now
+required on the `google_compute_instance_template.disk_encryption_key` block.
+
 ## Resource: `google_compute_network`
 
 ### `ipv4_range` is now removed
@@ -318,6 +327,11 @@ dashboards.
 
 In an attempt to avoid allowing empty blocks in config files, `cidr_blocks` is now
 required on the `google_container_cluster.master_authorized_networks_config` block.
+
+### `enabled` is now required on block `google_container_cluster.vertical_pod_autoscaling`
+
+In an attempt to avoid allowing empty blocks in config files, `enabled` is now
+required on the `google_container_cluster.vertical_pod_autoscaling` block.
 
 ### The `disabled` field is now required on the `addons_config` blocks for
 `http_load_balancing`, `horizontal_pod_autoscaling`, `istio_config`,
@@ -367,6 +381,13 @@ monitoring_service = "monitoring.googleapis.com/kubernetes"
 
 `zone` and `region` have been removed in favor of `location`
 
+## Resource: `google_dataproc_cluster`
+
+### `policy_uri` is now required on `google_dataproc_cluster.autoscaling_config` block.
+
+In an attempt to avoid allowing empty blocks in config files, `policy_uri` is now
+required on the `google_dataproc_cluster.autoscaling_config` block.
+
 ## Resource: `google_dataproc_job`
 
 ### `driver_log_levels` is now required on `logging_config` blocks for
@@ -374,7 +395,7 @@ monitoring_service = "monitoring.googleapis.com/kubernetes"
 `google_dataproc_job.spark_config`, `google_dataproc_job.pig_config`, and
 `google_dataproc_job.sparksql_config`.
 
-In an attempt to avoid allowing empty blocks in config files, `max_failures_per_hour` is now
+In an attempt to avoid allowing empty blocks in config files, `driver_log_levels` is now
 required on the different `google_dataproc_job` config blocks.
 
 ### `job_id` is now required on block `google_dataproc_job.reference`
