@@ -24,7 +24,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           namespace: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      encoder: 'templates/terraform/encoders/cloud_run.go.erb'
+      encoder: 'templates/terraform/encoders/cloud_run_domain_mapping.go.erb'
       decoder: 'templates/terraform/decoders/cloud_run.go.erb'
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -53,7 +53,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           namespace: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      encoder: 'templates/terraform/encoders/cloud_run.go.erb'
+      encoder: 'templates/terraform/encoders/cloud_run_service.go.erb'
       decoder: 'templates/terraform/decoders/cloud_run.go.erb'
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
