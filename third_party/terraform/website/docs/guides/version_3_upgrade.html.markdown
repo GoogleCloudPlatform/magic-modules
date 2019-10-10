@@ -359,11 +359,6 @@ dashboards.
 In an attempt to avoid allowing empty blocks in config files, `cidr_blocks` is now
 required on the `google_container_cluster.master_authorized_networks_config` block.
 
-### `enabled` is now required on block `google_container_cluster.vertical_pod_autoscaling`
-
-In an attempt to avoid allowing empty blocks in config files, `enabled` is now
-required on the `google_container_cluster.vertical_pod_autoscaling` block.
-
 ### The `disabled` field is now required on the `addons_config` blocks for
 `http_load_balancing`, `horizontal_pod_autoscaling`, `istio_config`,
 `cloudrun_config` and `network_policy_config`.
@@ -570,15 +565,30 @@ resource "google_project_service" "project_cloudresourcemanager" {
 In an attempt to avoid allowing empty blocks in config files, `dump_file_path`, `username` and `password` are now
 required on the `google_sql_database_instance.replica_configuration` block.
 
+### `enabled` is now required on block `google_sql_database_instance.settings.backup_configuration`
+
+In an attempt to avoid allowing empty blocks in config files, `enabled` is now
+required on the `google_sql_database_instance.settings.backup_configuration` block.
+
 ### `name` and `value` are now required on block `google_sql_database_instance.settings.database_flags`
 
 In an attempt to avoid allowing empty blocks in config files, `name` and `value` are now
 required on the `google_sql_database_instance.settings.database_flags` block.
 
+### `require_ssl` is now required on block `google_sql_database_instance.settings.ip_configuration`
+
+In an attempt to avoid allowing empty blocks in config files, `require_ssl` is now
+required on the `google_sql_database_instance.settings.ip_configuration` block.
+
 ### `value` is now required on block `google_sql_database_instance.settings.ip_configuration.authorized_networks`
 
 In an attempt to avoid allowing empty blocks in config files, `value` is now
 required on the `google_sql_database_instance.settings.ip_configuration.authorized_networks` block.
+
+### `update_track` is now required on block `google_sql_database_instance.settings.maintenance_window`
+
+In an attempt to avoid allowing empty blocks in config files, `update_track` is now
+required on the `google_sql_database_instance.settings.maintenance_window` block.
 
 ### `zone` is now required on block `google_sql_database_instance.settings.location_preference`
 
