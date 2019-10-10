@@ -183,7 +183,6 @@ func resourceStorageBucket() *schema.Resource {
 						"enabled": {
 							Type:     schema.TypeBool,
 							Required: true,
-							Default:  false,
 						},
 					},
 				},

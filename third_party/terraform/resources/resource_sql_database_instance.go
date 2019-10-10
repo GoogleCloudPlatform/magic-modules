@@ -30,7 +30,7 @@ var sqlDatabaseAuthorizedNetWorkSchemaElem *schema.Resource = &schema.Resource{
 		},
 		"value": {
 			Type:     schema.TypeString,
-			Optional: true,
+			Required: true,
 		},
 	},
 }
@@ -110,7 +110,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 									},
 									"enabled": {
 										Type:     schema.TypeBool,
-										Optional: true,
+										Required: true,
 									},
 									"start_time": {
 										Type:     schema.TypeString,
@@ -137,11 +137,11 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"value": {
 										Type:     schema.TypeString,
-										Optional: true,
+										Required: true,
 									},
 									"name": {
 										Type:     schema.TypeString,
-										Optional: true,
+										Required: true,
 									},
 								},
 							},
@@ -185,7 +185,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 									},
 									"require_ssl": {
 										Type:     schema.TypeBool,
-										Optional: true,
+										Required: true,
 									},
 									"private_network": {
 										Type:             schema.TypeString,
@@ -209,7 +209,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 									},
 									"zone": {
 										Type:     schema.TypeString,
-										Optional: true,
+										Required: true,
 									},
 								},
 							},
@@ -232,7 +232,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 									},
 									"update_track": {
 										Type:     schema.TypeString,
-										Optional: true,
+										Required: true,
 									},
 								},
 							},
@@ -355,7 +355,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 						},
 						"dump_file_path": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Required: true,
 							ForceNew: true,
 						},
 						"failover_target": {
@@ -370,7 +370,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 						},
 						"password": {
 							Type:      schema.TypeString,
-							Optional:  true,
+							Required:  true,
 							ForceNew:  true,
 							Sensitive: true,
 						},
@@ -381,7 +381,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 						},
 						"username": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Required: true,
 							ForceNew: true,
 						},
 						"verify_server_certificate": {

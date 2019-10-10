@@ -175,7 +175,7 @@ func transferOptionsSchema() *schema.Schema {
 			Schema: map[string]*schema.Schema{
 				"overwrite_objects_already_existing_in_sink": {
 					Type:     schema.TypeBool,
-					Optional: true,
+					Required: true,
 				},
 				"delete_objects_unique_in_sink": {
 					Type:          schema.TypeBool,
