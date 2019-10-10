@@ -37,8 +37,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'noop_on_destroy'
         description: |
           If set to `true`, the application version will not be deleted.
+      - !ruby/object:Provider::Terraform::VirtualFields
+        name: 'delete_service_on_destroy'
+        description: |
+          If set to `true`, the service will be deleted if it is the last version.    
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_delete: templates/terraform/custom_delete/noop_on_destroy_appengine_version.go.erb
+      custom_delete: templates/terraform/custom_delete/appversion_delete.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/appengine_version.go.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -51,6 +55,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       threadsafe: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+      instanceClass: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true    
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_standard_app_version"
