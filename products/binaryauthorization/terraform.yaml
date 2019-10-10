@@ -15,7 +15,7 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Attestor: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/attestors/{{name}}"]
-    id_format: "{{project}}/{{name}}"
+    id_format: "projects/{{project}}/attestors/{{name}}"
     examples:
      - !ruby/object:Provider::Terraform::Examples
       name: "binary_authorization_attestor_basic"
@@ -54,7 +54,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       attestationAuthorityNote.publicKeys.id: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   Policy: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{project}}"
+    id_format: "projects/{{project}}"
     import_format: ["projects/{{project}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/binaryauthorization_policy.erb'
