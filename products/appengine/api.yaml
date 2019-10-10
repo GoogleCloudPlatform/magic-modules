@@ -440,3 +440,9 @@ objects:
             name: 'shell'
             description: |
               The format should be a shell command that can be fed to bash -c.
+      - !ruby/object:Api::Type::String
+        name: 'instanceClass'
+        description: |
+          Instance class that is used to run this version. Valid values are
+          AutomaticScaling F1, F2, F4, F4_1G
+          (Only AutomaticScaling is supported at the moment)
