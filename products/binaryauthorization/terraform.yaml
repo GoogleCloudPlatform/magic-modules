@@ -14,6 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Attestor: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/attestors/{{name}}"]
     examples:
      - !ruby/object:Provider::Terraform::Examples
       name: "binary_authorization_attestor_basic"

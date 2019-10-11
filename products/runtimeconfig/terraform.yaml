@@ -16,6 +16,7 @@ legacy_name: runtimeconfig
 overrides: !ruby/object:Overrides::ResourceOverrides
   Config: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_resource: true
+    import_format: ["projects/{{project}}/configs/{{config}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "runtimeconfig_config_basic"
