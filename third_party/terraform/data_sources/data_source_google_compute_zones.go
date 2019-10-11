@@ -51,7 +51,13 @@ func dataSourceGoogleComputeZonesRead(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
-	regionUrl, err := replaceVars(d, config, fmt.Sprintf("{{ComputeBasePath}}projects/%s/regions/%s", project, region))
+	// we want to share exactly the same base path as the compute client or the
+	// region string may mismatch, giving us no results
+	// note that the client's BasePath includes a `projects/` suffix, so that'll
+	// need to be added to the URL below if the source changes
+	computeClientBasePath := config.clientCompute.BasePath
+
+	regionUrl, err := replaceVars(d, config, fmt.Sprintf("%s%s/regions/%s", computeClientBasePath, project, region))
 	if err != nil {
 		return err
 	}
