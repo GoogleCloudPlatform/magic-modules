@@ -246,5 +246,12 @@ module Provider
     def extract_identifiers(url)
       url.scan(/\{\{(\w+)\}\}/).flatten
     end
+
+    # Returns the id format of an object, or self_link_uri if none is explicitly defined
+    # We prefer the long name of a resource as the id so that users can reference
+    # resources in a standard way, and most APIs accept short name, long name or self_link
+    def id_format(object)
+      object.id_format || object.self_link_uri
+    end
   end
 end
