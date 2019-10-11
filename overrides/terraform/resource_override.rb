@@ -76,7 +76,7 @@ module Overrides
         @examples ||= []
 
         check :legacy_name, type: String
-        check :id_format, type: String, default: '{{name}}'
+        check :id_format, type: String
         check :examples, item_type: Provider::Terraform::Examples, type: Array, default: []
         check :virtual_fields,
               item_type: Provider::Terraform::VirtualFields,
