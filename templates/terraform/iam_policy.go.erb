@@ -260,9 +260,8 @@ func (u *<%= resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodId
 	return fmt.Sprintf("<%= object.__product.base_url -%>%s<%= object.iam_policy.method_name_separator -%>%s", fmt.Sprintf("<%= import_url -%>", <%= string_qualifiers -%>), methodIdentifier)
 }
 
-<% id_format = object.id_format || object.self_link_uri -%>
 func (u *<%= resource_name -%>IamUpdater) GetResourceId() string {
-	return fmt.Sprintf("<%= id_format.gsub('{{name}}', "{{#{object.name.underscore}}}").gsub(/({{)(\w+)(}})/, '%s') -%>", <%= string_qualifiers -%>)
+	return fmt.Sprintf("<%= id_format(object).gsub('{{name}}', "{{#{object.name.underscore}}}").gsub(/({{)(\w+)(}})/, '%s') -%>", <%= string_qualifiers -%>)
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetMutexKey() string {
