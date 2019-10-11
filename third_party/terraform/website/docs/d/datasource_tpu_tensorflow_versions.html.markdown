@@ -38,8 +38,8 @@ The following arguments are supported:
 * `project` - (Optional) The project to list versions for. If it
     is not provided, the provider project is used.
 
-* `region` - (Optional) The region to list versions for. If it
-    is not provided, the project region is used.
+* `zone` - (Optional) The zone to list versions for. If it
+    is not provided, the project zone is used.
 
 ## Attributes Reference
 
