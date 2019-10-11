@@ -165,11 +165,11 @@ exported:
 <%= product_ns -%> <%= object.name.downcase -%> IAM resources can be imported using the project, resource identifiers, role and member.
 
 ```
-$ terraform import <%= resource_ns_iam -%>_policy.editor <%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") %>
+$ terraform import <%= resource_ns_iam -%>_policy.editor <%= id_format(object).gsub('{{name}}', "{{#{object.name.underscore}}}") %>
 
-$ terraform import <%= resource_ns_iam -%>_binding.editor "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%>"
+$ terraform import <%= resource_ns_iam -%>_binding.editor "<%= id_format(object).gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%>"
 
-$ terraform import <%= resource_ns_iam -%>_member.editor "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%> jane@example.com"
+$ terraform import <%= resource_ns_iam -%>_member.editor "<%= id_format(object).gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%> jane@example.com"
 ```
 
 -> If you're importing a resource with beta features, make sure to include `-provider=google-beta`
