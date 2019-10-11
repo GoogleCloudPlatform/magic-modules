@@ -223,7 +223,7 @@ func (u *<%= resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodId
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetResourceId() string {
-	return fmt.Sprintf("<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}").gsub(/({{)(\w+)(}})/, '%s') -%>", <%= string_qualifiers -%>)
+	return fmt.Sprintf("<%= id_format(object).gsub('{{name}}', "{{#{object.name.underscore}}}").gsub(/({{)(\w+)(}})/, '%s') -%>", <%= string_qualifiers -%>)
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetMutexKey() string {
