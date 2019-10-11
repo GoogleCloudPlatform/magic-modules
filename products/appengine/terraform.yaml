@@ -14,8 +14,6 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   FirewallRule: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "apps/{{project}}/firewall/ingressRules/{{priority}}"
-    import_format: ["apps/{{project}}/firewall/ingressRules/{{priority}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_firewall_rule_basic"
@@ -25,8 +23,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           org_id: :ORG_ID
   StandardAppVersion: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
-    import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
     mutex: "apps/{{project}}/services/{{service}}"
     parameters:
       service: !ruby/object:Overrides::Terraform::PropertyOverride

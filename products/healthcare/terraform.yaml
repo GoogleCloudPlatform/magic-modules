@@ -16,6 +16,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Dataset: !ruby/object:Overrides::Terraform::ResourceOverride
     description: |
       {{description}}
+    id_format: "projects/{{project}}/locations/{{location}}/datasets/{{name}}"
+    import_format: ["projects/{{project}}/locations/{{location}}/datasets/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_dataset_basic"
