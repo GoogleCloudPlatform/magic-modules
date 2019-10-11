@@ -109,7 +109,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 
 	id, err := replaceVars(d, config, "projects/{{project}}/instances/{{instance_id}}/tables/{{name}}")
 	if err != nil {
-		return nil, fmt.Errorf("Error constructing id: %s", err)
+		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
 
