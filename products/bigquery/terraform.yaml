@@ -15,6 +15,7 @@
 legacy_name: 'bigquery'
 overrides: !ruby/object:Overrides::ResourceOverrides
   Dataset: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/datasets/{{dataset_id}}"]
     delete_url: projects/{{project}}/datasets/{{dataset_id}}?deleteContents={{delete_contents_on_destroy}}
     examples:
       - !ruby/object:Provider::Terraform::Examples
