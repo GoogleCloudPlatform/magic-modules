@@ -50,9 +50,9 @@ func GetStorageBucketApiObject(d TerraformResourceData, config *Config) (map[str
 
 	// Create a bucket, setting the labels, location and name.
 	sb := &storage.Bucket{
-		Name:     bucket,
-		Labels:   expandLabels(d),
-		Location: location,
+		Name:             bucket,
+		Labels:           expandLabels(d),
+		Location:         location,
 		IamConfiguration: expandIamConfiguration(d),
 	}
 
@@ -77,14 +77,16 @@ func GetStorageBucketApiObject(d TerraformResourceData, config *Config) (map[str
 
 		sb.Website = &storage.BucketWebsite{}
 
-		website := websites[0].(map[string]interface{})
+		if len(websites) > 0 {
+			website := websites[0].(map[string]interface{})
 
-		if v, ok := website["not_found_page"]; ok {
-			sb.Website.NotFoundPage = v.(string)
-		}
+			if v, ok := website["not_found_page"]; ok {
+				sb.Website.NotFoundPage = v.(string)
+			}
 
-		if v, ok := website["main_page_suffix"]; ok {
-			sb.Website.MainPageSuffix = v.(string)
+			if v, ok := website["main_page_suffix"]; ok {
+				sb.Website.MainPageSuffix = v.(string)
+			}
 		}
 	}
 
