@@ -19,8 +19,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_minutes: 10
       delete_minutes: 10
     autogen_async: true
-    id_format: "{{project}}/{{region}}/{{name}}"
-    import_format: ["projects/{{project}}/locations/{{region}}/instances/{{name}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/redis_location_id_for_fallback_zone.go.erb
     examples:

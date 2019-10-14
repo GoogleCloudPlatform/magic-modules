@@ -14,6 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   ManagedZone: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: 'projects/{{project}}/managedZones/{{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
@@ -97,6 +98,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'caseDiffSuppress'
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
   Policy: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: 'projects/{{project}}/policies/{{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_policy_basic"
