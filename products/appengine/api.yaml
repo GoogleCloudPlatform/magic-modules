@@ -459,6 +459,23 @@ objects:
     update_verb: :PATCH
     references: !ruby/object:Api::Resource::ReferenceLinks
       api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps#UrlDispatchRule'
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'response'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Array   
         name: 'dispatchRules'
