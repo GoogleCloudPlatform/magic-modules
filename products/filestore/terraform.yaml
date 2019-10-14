@@ -19,8 +19,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_minutes: 6
       delete_minutes: 6
     autogen_async: true
-    id_format: "{{project}}/{{zone}}/{{name}}"
-    import_format: ["projects/{{project}}/locations/{{zone}}/instances/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "filestore_instance_basic"
