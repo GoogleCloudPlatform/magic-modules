@@ -16,7 +16,7 @@ legacy_name: 'cloudfunctions'
 overrides: !ruby/object:Overrides::ResourceOverrides
   CloudFunction: !ruby/object:Overrides::Terraform::ResourceOverride
     legacy_name: 'google_cloudfunctions_function'
-    id_format: '{{project}}/{{region}}/{{cloud_function}}'
+    id_format: 'projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}'
     base_url: projects/{{project}}/locations/{{region}}/functions
     import_format: ["projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}"]
     exclude_resource: true

@@ -16,12 +16,9 @@ client_name: 'SqlAdmin'
 overrides: !ruby/object:Overrides::ResourceOverrides
   Database: !ruby/object:Overrides::Terraform::ResourceOverride
     mutex: "google-sql-database-instance-{{project}}-{{instance}}"
-    id_format: "{{instance}}:{{name}}"
     import_format: ["projects/{{project}}/instances/{{instance}}/databases/{{name}}",
                     "{{project}}/{{instance}}/{{name}}",
                     "instances/{{instance}}/databases/{{name}}",
-                    # support for a legacy import format
-                    "{{instance}}:{{name}}",
                     "{{instance}}/{{name}}",
                     "{{name}}"]
     examples:
