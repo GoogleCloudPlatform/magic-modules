@@ -13,7 +13,6 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   ScanConfig: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "scan_config_basic"

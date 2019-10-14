@@ -19,7 +19,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       exclude: false
       method_name_separator: ':'
       parent_resource_attribute: 'repository'
-    id_format: '{{project}}/{{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "sourcerepo_repository_basic"
