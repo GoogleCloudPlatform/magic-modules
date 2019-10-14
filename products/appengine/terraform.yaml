@@ -93,6 +93,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         update_mask_fields:
           - "ssl_settings.certificate_id"
           - "ssl_settings.ssl_management_type"
+  ApplicationUrlDispatchRules: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{project}}"
+    import_format: ["{{project}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "app_engine_application_url_dispatch_rules_basic"
+        vars:
+          project: "my-project"  
+          bucket_name: "appengine-test-bucket"
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

@@ -20,6 +20,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   DomainMapping: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
+  ApplicationUrlDispatchRules: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   FirewallRule: !ruby/object:Overrides::Ansible::ResourceOverride
     # Because of lack of state, Ansible treats identity
     # differently than Terraform.
