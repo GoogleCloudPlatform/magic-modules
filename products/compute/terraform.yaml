@@ -14,7 +14,6 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Address: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{project}}/{{region}}/{{name}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "address_basic"
@@ -71,7 +70,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
   Autoscaler: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{zone}}/{{name}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "autoscaler_single_instance"
@@ -1037,7 +1035,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Region: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   RegionAutoscaler: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{region}}/{{name}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_autoscaler_beta"
@@ -1350,7 +1347,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
             `next_hop_instance`.  Omit if `next_hop_instance` is specified as
             a URL.
   Router: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{region}}/{{name}}"
     mutex: router/{{region}}/{{name}}
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1660,7 +1656,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       insert_minutes: 6
       update_minutes: 6
       delete_minutes: 6
-    id_format: "{{region}}/{{name}}"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
