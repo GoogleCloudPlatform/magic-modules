@@ -18,8 +18,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       insert_minutes: 15
       update_minutes: 15
       delete_minutes: 15
-    id_format: "{{project}}/{{zone}}/{{name}}"
-    import_format: ["projects/{{project}}/locations/{{zone}}/nodes/{{name}}"]
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples

@@ -14,7 +14,6 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Topic: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "projects/{{project}}/topics/{{name}}"
     error_retry_predicates: ["pubsubTopicProjectNotReady"]
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       parent_resource_attribute: 'topic'
@@ -50,7 +49,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/no_send_name.go.erb
       update_encoder: templates/terraform/update_encoder/pubsub_topic.erb
   Subscription: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "projects/{{project}}/subscriptions/{{name}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "pubsub_subscription_push"
