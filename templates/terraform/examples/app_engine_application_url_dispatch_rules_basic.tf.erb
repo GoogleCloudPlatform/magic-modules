@@ -40,4 +40,5 @@ resource "google_app_engine_application_url_dispatch_rules" "service_rules" {
     path = "/myapp/*"
     service = "myapp"
   }
+  depends_on = ["google_app_engine_standard_app_version.myapp_v1"]
 }

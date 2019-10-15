@@ -27,7 +27,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   StandardAppVersion: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
     import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
-    mutex: "apps/{{project}}/services/{{service}}"
+    mutex: "apps/{{project}}"
     parameters:
       service: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -96,7 +96,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   ApplicationUrlDispatchRules: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}"
     import_format: ["{{project}}"]
-    mutex: "apps/{{project}}/services/{{service}}"
+    mutex: "apps/{{project}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_application_url_dispatch_rules_basic"
