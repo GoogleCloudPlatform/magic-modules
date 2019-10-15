@@ -14,8 +14,8 @@
 -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
 	if v == nil {
-    return v
-  }
+		return v
+	}
 
 	kv := v.(map[string]interface{})
 
