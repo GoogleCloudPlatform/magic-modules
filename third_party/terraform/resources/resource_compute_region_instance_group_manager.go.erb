@@ -431,9 +431,9 @@ func waitForInstancesRefreshFunc(f getInstanceManagerFunc, d *schema.ResourceDat
 			return nil, "error", err
 		}
 		if m.Status.IsStable {
-			return nil, "created", nil
+			return true, "created", nil
 		} else {
-			return nil, "creating", nil
+			return false, "creating", nil
 		}
 	}
 }
