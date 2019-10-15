@@ -711,6 +711,13 @@ func resourceContainerCluster() *schema.Resource {
 				},
 			},
 
+			"resource_labels": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+<% unless version == 'ga' -%>
 			"release_channel": {
 				Type:     schema.TypeList,
 				ForceNew: true,
@@ -721,11 +728,9 @@ func resourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"channel": {
 							Type:             schema.TypeString,
-							Default:          "UNSPECIFIED",
 							Optional:         true,
 							ForceNew:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"UNSPECIFIED", "RAPID", "REGULAR", "STABLE"}, false),
-							DiffSuppressFunc: emptyOrDefaultStringSuppress("UNSPECIFIED"),
 						},
 					},
 				},
@@ -2604,11 +2609,6 @@ func flattenReleaseChannel(c *containerBeta.ReleaseChannel) []map[string]interfa
 	if c != nil {
 		result = append(result, map[string]interface{}{
 			"channel": c.Channel,
-		})
-	} else {
-		// Explicitly set the network policy to the default.
-		result = append(result, map[string]interface{}{
-			"channel": "UNSPECIFIED",
 		})
 	}
 	return result
