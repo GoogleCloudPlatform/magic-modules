@@ -213,6 +213,7 @@ an access token using the service account key specified in `credentials`.
     * https://www.googleapis.com/auth/cloud-platform
     * https://www.googleapis.com/auth/ndev.clouddns.readwrite
     * https://www.googleapis.com/auth/devstorage.full_control
+    * https://www.googleapis.com/auth/userinfo.email
 
 ---
 

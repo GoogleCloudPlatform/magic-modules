@@ -11,9 +11,8 @@ description: |-
 Get OpenID userinfo about the credentials used with the Google provider,
 specifically the email.
 
-When the `https://www.googleapis.com/auth/userinfo.email` scope is enabled in
-your provider block, this datasource enables you to export the email of the
-account you've authenticated the provider with; this can be used alongside
+This datasource enables you to export the email of the account you've
+authenticated the provider with; this can be used alongside
 `data.google_client_config`'s `access_token` to perform OpenID Connect
 authentication with GKE and configure an RBAC role for the email used.
 
@@ -24,16 +23,6 @@ receive an error otherwise.
 ## Example Usage - exporting an email
 
 ```hcl
-provider "google" {
-  scopes = [
-    "https://www.googleapis.com/auth/compute",
-    "https://www.googleapis.com/auth/cloud-platform",
-    "https://www.googleapis.com/auth/ndev.clouddns.readwrite",
-    "https://www.googleapis.com/auth/devstorage.full_control",
-    "https://www.googleapis.com/auth/userinfo.email",
-  ]
-}
-
 data "google_client_openid_userinfo" "me" {}
 
 output "my-email" {
@@ -44,16 +33,6 @@ output "my-email" {
 ## Example Usage - OpenID Connect w/ Kubernetes provider + RBAC IAM role
 
 ```hcl
-provider "google" {
-  scopes = [
-    "https://www.googleapis.com/auth/compute",
-    "https://www.googleapis.com/auth/cloud-platform",
-    "https://www.googleapis.com/auth/ndev.clouddns.readwrite",
-    "https://www.googleapis.com/auth/devstorage.full_control",
-    "https://www.googleapis.com/auth/userinfo.email",
-  ]
-}
-
 data "google_client_openid_userinfo" "provider_identity" {}
 
 data "google_client_config" "provider" {}
