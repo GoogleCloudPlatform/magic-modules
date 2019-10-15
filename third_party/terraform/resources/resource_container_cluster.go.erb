@@ -728,9 +728,11 @@ func resourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"channel": {
 							Type:             schema.TypeString,
+							Default:          "UNSPECIFIED",
 							Optional:         true,
 							ForceNew:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"UNSPECIFIED", "RAPID", "REGULAR", "STABLE"}, false),
+							DiffSuppressFunc: emptyOrDefaultStringSuppress("UNSPECIFIED"),
 						},
 					},
 				},
@@ -2609,6 +2611,11 @@ func flattenReleaseChannel(c *containerBeta.ReleaseChannel) []map[string]interfa
 	if c != nil {
 		result = append(result, map[string]interface{}{
 			"channel": c.Channel,
+		})
+	} else {
+		// Explicitly set the release channel to the default.
+		result = append(result, map[string]interface{}{
+			"channel": "UNSPECIFIED",
 		})
 	}
 	return result
