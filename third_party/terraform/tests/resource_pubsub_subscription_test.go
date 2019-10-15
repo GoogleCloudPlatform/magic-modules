@@ -149,18 +149,6 @@ resource "google_pubsub_subscription" "foo" {
 `, topic, subscription)
 }
 
-// TODO: Add acceptance test for push delivery.
-//
-// Testing push endpoints is tricky for the following reason:
-// - You need a publicly accessible HTTPS server to handle POST requests in order to receive push messages.
-// - The server must present a valid SSL certificate signed by a certificate authority
-// - The server must be routable by DNS.
-// - You also need to validate that you own the domain (or have equivalent access to the endpoint).
-// - Finally, you must register the endpoint domain with the GCP project.
-//
-// An easy way to test this would be to create an App Engine Hello World app. With AppEngine, SSL certificate, DNS and domain registry is handled for us.
-// App Engine is not yet supported by Terraform but once it is, it will provide an easy path to testing push configs.
-// Another option would be to use Cloud Functions once Terraform support is added.
 func testAccPubsubSubscription_push(topicFoo string, topicBar string, subscription string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
@@ -198,7 +186,6 @@ resource "google_pubsub_subscription" "foo" {
 }
 `, topicFoo, topicBar, subscription)
 }
-
 
 func testAccPubsubSubscription_fullName(topic, subscription, label string, deadline int) string {
 	return fmt.Sprintf(`
