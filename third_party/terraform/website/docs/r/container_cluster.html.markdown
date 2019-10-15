@@ -186,7 +186,7 @@ set this to a value of at least `1`, alongside setting
 
 * `logging_service` - (Optional) The logging service that the cluster should
     write logs to. Available options include `logging.googleapis.com`,
-    `logging.googleapis.com/kubernetes`, and `none`. Defaults to `logging.googleapis.com`
+    `logging.googleapis.com/kubernetes`, and `none`. Defaults to `logging.googleapis.com/kubernetes`
 
 * `maintenance_policy` - (Optional) The maintenance policy to use for the cluster. Structure is
     documented below.
@@ -223,7 +223,7 @@ region are guaranteed to support the same version.
     VM metrics will be collected by Google Compute Engine regardless of this setting
     Available options include
     `monitoring.googleapis.com`, `monitoring.googleapis.com/kubernetes`, and `none`.
-    Defaults to `monitoring.googleapis.com`
+    Defaults to `monitoring.googleapis.com/kubernetes`
 
 * `network` - (Optional) The name or self_link of the Google Compute Engine
     network to which the cluster is connected. For Shared VPC, set this to the self link of the
@@ -519,9 +519,9 @@ The `node_config` block supports:
     Note this will grant read access to ALL GCS content unless you also
     specify a custom role. See https://cloud.google.com/kubernetes-engine/docs/how-to/access-scopes
   * `logging-write` (`https://www.googleapis.com/auth/logging.write`),
-    if `logging_service` points to Google
+    if `logging_service` is not `none`.
   * `monitoring` (`https://www.googleapis.com/auth/monitoring`),
-    if `monitoring_service` points to Google
+    if `monitoring_service` is not `none`.
 
 * `preemptible` - (Optional) A boolean that represents whether or not the underlying node VMs
     are preemptible. See the [official documentation](https://cloud.google.com/container-engine/docs/preemptible-vm)
