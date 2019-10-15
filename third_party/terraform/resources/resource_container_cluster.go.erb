@@ -717,6 +717,19 @@ func resourceContainerCluster() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
+			"resource_labels": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"default_max_pods_per_node": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
+
 <% unless version == 'ga' -%>
 			"release_channel": {
 				Type:     schema.TypeList,
@@ -738,20 +751,6 @@ func resourceContainerCluster() *schema.Resource {
 				},
 			},
 
-			"resource_labels": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-
-			"default_max_pods_per_node": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
-			},
-
-<% unless version == 'ga' -%>
 			"vertical_pod_autoscaling": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
