@@ -191,8 +191,8 @@ resource "google_pubsub_subscription" "foo" {
   ack_deadline_seconds = 3
   push_config {
     push_endpoint = "${google_pubsub_topic.bar.name}"
-    oidcToken {
-      serviceAccountEmail = "${google_service_account.service_account.email}"
+    oidc_token {
+      service_account_email = "${google_service_account.service_account.email}"
     }
   }
 }
