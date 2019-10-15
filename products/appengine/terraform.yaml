@@ -96,6 +96,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   ApplicationUrlDispatchRules: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}"
     import_format: ["{{project}}"]
+    mutex: "apps/{{project}}/services/{{service}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_application_url_dispatch_rules_basic"
