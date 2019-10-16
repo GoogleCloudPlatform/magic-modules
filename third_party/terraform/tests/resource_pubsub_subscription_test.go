@@ -175,10 +175,10 @@ data "google_iam_policy" "admin" {
 
 resource "google_pubsub_subscription" "foo" {
   name                 = "%s"
-  topic                = "${google_pubsub_topic.foo.id}"
+  topic                = "${google_pubsub_topic.foo.name}"
   ack_deadline_seconds = 3
   push_config {
-    push_endpoint = "${google_pubsub_topic.bar.name}"
+    push_endpoint = "push_endpoint = "https://pubsub.googleapis.com/v1/projects/${data.google_project.pubsub-google-project.id}/topics/${google_pubsub_topic.bar.name}:publish""
     oidc_token {
       service_account_email = "${google_service_account.service_account.email}"
     }
