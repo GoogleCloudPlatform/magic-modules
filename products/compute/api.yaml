@@ -8722,14 +8722,15 @@ objects:
           Whether to enable flow logging for this subnetwork.
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        update_id: 'enableFlowLogs'
+        fingerprint_name: 'fingerprint'
         send_empty_value: true
+      # TODO(rileykarson): Work with rambleraptor to remove this field from downstreams.
       - !ruby/object:Api::Type::Fingerprint
         name: 'fingerprint'
         description: |
           Fingerprint of this resource. This field is used internally during
           updates of this resource.
-        update_verb: :PATCH
-        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
       - !ruby/object:Api::Type::Enum
         name: 'purpose'
         min_version: beta
@@ -8750,6 +8751,8 @@ objects:
         min_version: beta
         update_verb: :PATCH
         update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        update_id: 'role'
+        fingerprint_name: 'fingerprint'
         values:
           - :ACTIVE
           - :BACKUP
@@ -8768,6 +8771,8 @@ objects:
           to either primary or secondary ranges.
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        update_id: 'secondaryIpRanges'
+        fingerprint_name: 'fingerprint'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String

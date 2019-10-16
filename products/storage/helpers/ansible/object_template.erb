@@ -21,7 +21,7 @@ __metaclass__ = type
 -%>
 
 <%
-  update_props = properties_by_custom_update(object.all_user_properties)
+  update_props = properties_by_custom_update(object.all_user_properties, :old)
   import = 'from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest'
   import += ', remove_nones_from_dict' unless properties_with_classes(object.all_user_properties).empty?
   import += ', replace_resource_dict' if nonreadonly_rrefs(object)
