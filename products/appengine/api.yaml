@@ -486,6 +486,7 @@ objects:
           properties:
             - !ruby/object:Api::Type::String
               name: 'domain'
+              default_value: '*'
               description: |
                 Domain name to match against. The wildcard "*" is supported if specified before a period: "*.".
                 Defaults to matching all domains: "*".
