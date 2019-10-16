@@ -1909,8 +1909,8 @@ resource "google_container_cluster" "primary" {
 	enable_kubernetes_alpha = true
 	enable_legacy_abac      = true
 
-	logging_service    = "logging.googleapis.com/kubernetes"
-	monitoring_service = "monitoring.googleapis.com/kubernetes"
+	logging_service    = "logging.googleapis.com"
+	monitoring_service = "monitoring.googleapis.com"
 
 	resource_labels = {
 		created-by = "terraform"
