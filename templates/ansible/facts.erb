@@ -26,9 +26,7 @@ DOCUMENTATION = '''
 ---
 <%= ansible_style_yaml({
   'module' => "#{module_name(object)}_info",
-  'description' => ["Gather info for GCP #{object.name}",
-                    (version_added(object, :facts) < '2.9' ? "This module was called C(#{module_name(object)}_facts) before Ansible 2.9. The usage has not changed." : nil)
-                   ].compact,
+  'description' => ["Gather info for GCP #{object.name}"],
   'short_description' => "Gather info for GCP #{object.name}",
   'version_added' => version_added(object, :facts),
   'author' => "Google Inc. (@googlecloudplatform)",
@@ -91,11 +89,6 @@ def main():
   })), 12)
 -%>
     )
-<% if version_added(object, :facts) < '2.9' -%>
-
-    if module._name == '<%= module_name(object) -%>_facts':
-        module.deprecate("The '<%= module_name(object) -%>_facts' module has been renamed to '<%= module_name(object) -%>_info'", version='2.13')
-<% end -%>
 
     if not module.params['scopes']:
         module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
