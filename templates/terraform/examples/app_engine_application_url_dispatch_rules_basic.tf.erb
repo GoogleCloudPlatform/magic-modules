@@ -38,6 +38,6 @@ resource "google_app_engine_application_url_dispatch_rules" "service_rules" {
   dispatch_rules {
     domain = "*"
     path = "/myapp/*"
-    service = "myapp"
+    service = "${google_app_engine_standard_app_version.myapp_v1.service}"
   }
 }
