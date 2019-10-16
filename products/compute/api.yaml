@@ -3836,6 +3836,31 @@ objects:
                        values:
                          - :ONE_TO_ONE_NAT
                        required: true
+                     - !ruby/object:Api::Type::Boolean
+                       name: 'setPublicPtr'
+                       description: |
+                         Specifies whether a public DNS PTR record should be
+                         created to map the external IP address of the instance
+                         to a DNS domain name.
+                     - !ruby/object:Api::Type::String
+                       name: 'publicPtrDomainName'
+                       description: |
+                         The DNS domain name for the public PTR record. You can
+                         set this field only if the setPublicPtr field is
+                         enabled.
+                     - !ruby/object:Api::Type::Enum
+                       name: 'networkTier'
+                       description: |
+                         This signifies the networking tier used for configuring
+                         this access configuration. If an AccessConfig is
+                         specified without a valid external IP address, an
+                         ephemeral IP will be created with this networkTier. If an
+                         AccessConfig with a valid external IP address is
+                         specified, it must match that of the networkTier
+                         associated with the Address resource owning that IP.
+                       values:
+                         - :PREMIUM
+                         - :STANDARD
                 - !ruby/object:Api::Type::Array
                   name: 'aliasIpRanges'
                   description: |
@@ -4634,6 +4659,31 @@ objects:
                    values:
                      - :ONE_TO_ONE_NAT
                    required: true
+                 - !ruby/object:Api::Type::Boolean
+                   name: 'setPublicPtr'
+                   description: |
+                     Specifies whether a public DNS PTR record should be
+                     created to map the external IP address of the instance
+                     to a DNS domain name.
+                 - !ruby/object:Api::Type::String
+                   name: 'publicPtrDomainName'
+                   description: |
+                     The DNS domain name for the public PTR record. You can
+                     set this field only if the setPublicPtr field is
+                     enabled.
+                 - !ruby/object:Api::Type::Enum
+                   name: 'networkTier'
+                   description: |
+                     This signifies the networking tier used for configuring
+                     this access configuration. If an AccessConfig is
+                     specified without a valid external IP address, an
+                     ephemeral IP will be created with this networkTier. If an
+                     AccessConfig with a valid external IP address is
+                     specified, it must match that of the networkTier
+                     associated with the Address resource owning that IP.
+                   values:
+                     - :PREMIUM
+                     - :STANDARD
             - !ruby/object:Api::Type::Array
               name: 'aliasIpRanges'
               description: |
