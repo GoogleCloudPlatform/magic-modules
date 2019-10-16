@@ -319,9 +319,12 @@ node_group:
 
 spannerinstance:
   config: regional-us-east1
-  name: inspec_inst
+  name: spinstance
   display_name: inspectest
   node_count: 2
   label_key: env
   label_value: test
+
+spannerdatabase:
+  name: spdatabase
   

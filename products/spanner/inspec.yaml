@@ -17,6 +17,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Instance: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: false
+    properties:
+      state: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true  
   Database: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    exclude: false
+    properties:
+      state: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true  
   
