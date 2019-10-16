@@ -11,11 +11,11 @@ variable "subscription" {
 }
 
 variable "managed_zone" {
-	type = "map"
+  type = "map"
 }
 
 variable "record_set" {
-	type = "map"
+  type = "map"
 }
 
 variable "instance_group_manager" {
@@ -115,7 +115,7 @@ variable "folder" {
 }
 
 variable "gcp_organization_id" {
-  type = "string"
+  type    = "string"
   default = "none"
 }
 
@@ -225,23 +225,23 @@ resource "google_dns_managed_zone" "prod" {
 }
 
 resource "google_dns_record_set" "a" {
-  name = "${var.record_set["name"]}"
+  name         = "${var.record_set["name"]}"
   managed_zone = "${google_dns_managed_zone.prod.name}"
-  type = "${var.record_set["type"]}"
-  ttl  = "${var.record_set["ttl"]}"
+  type         = "${var.record_set["type"]}"
+  ttl          = "${var.record_set["ttl"]}"
 
   rrdatas = ["${var.record_set["rrdatas1"]}", "${var.record_set["rrdatas2"]}"]
   project = "${var.gcp_project_id}"
 }
 
 resource "google_compute_instance_group_manager" "gcp-inspec-igm" {
-  project           = "${var.gcp_project_id}"
-  zone              = "${var.gcp_zone}"
-  name              = "${var.instance_group_manager["name"]}"
-  instance_template = "${google_compute_instance_template.default.self_link}"
-  base_instance_name        = "${var.instance_group_manager["base_instance_name"]}"
-  target_pools = []
-  target_size  = 0
+  project            = "${var.gcp_project_id}"
+  zone               = "${var.gcp_zone}"
+  name               = "${var.instance_group_manager["name"]}"
+  instance_template  = "${google_compute_instance_template.default.self_link}"
+  base_instance_name = "${var.instance_group_manager["base_instance_name"]}"
+  target_pools       = []
+  target_size        = 0
   named_port {
     name = "${var.instance_group_manager["named_port_name"]}"
     port = "${var.instance_group_manager["named_port_port"]}"
@@ -266,10 +266,10 @@ resource "google_compute_autoscaler" "gcp-inspec-autoscaler" {
 }
 
 resource "google_compute_target_pool" "gcp-inspec-target-pool" {
-  project = "${var.gcp_project_id}"
-  name = "${var.target_pool["name"]}"
+  project          = "${var.gcp_project_id}"
+  name             = "${var.target_pool["name"]}"
   session_affinity = "${var.target_pool["session_affinity"]}"
-  
+
   instances = [
     "${var.gcp_zone}/${var.gcp_ext_vm_name}",
   ]
@@ -286,15 +286,15 @@ resource "google_cloudbuild_trigger" "gcp-inspec-cloudbuild-trigger" {
 }
 
 resource "google_compute_health_check" "gcp-inspec-health-check" {
- project = "${var.gcp_project_id}"
- name = "${var.health_check["name"]}"
+  project = "${var.gcp_project_id}"
+  name    = "${var.health_check["name"]}"
 
- timeout_sec = "${var.health_check["timeout_sec"]}"
- check_interval_sec = "${var.health_check["check_interval_sec"]}"
+  timeout_sec        = "${var.health_check["timeout_sec"]}"
+  check_interval_sec = "${var.health_check["check_interval_sec"]}"
 
- tcp_health_check {
-   port = "${var.health_check["tcp_health_check_port"]}"
- }
+  tcp_health_check {
+    port = "${var.health_check["tcp_health_check_port"]}"
+  }
 }
 
 resource "google_compute_backend_service" "gcp-inspec-backend-service" {
@@ -314,15 +314,15 @@ resource "google_compute_backend_service" "gcp-inspec-backend-service" {
 }
 
 resource "google_compute_health_check" "gcp-inspec-region-backend-service-hc" {
- project = "${var.gcp_project_id}"
- name = "${var.region_backend_service_health_check["name"]}"
+  project = "${var.gcp_project_id}"
+  name    = "${var.region_backend_service_health_check["name"]}"
 
- timeout_sec = "${var.region_backend_service_health_check["timeout_sec"]}"
- check_interval_sec = "${var.region_backend_service_health_check["check_interval_sec"]}"
+  timeout_sec        = "${var.region_backend_service_health_check["timeout_sec"]}"
+  check_interval_sec = "${var.region_backend_service_health_check["check_interval_sec"]}"
 
- tcp_health_check {
-   port = "${var.region_backend_service_health_check["tcp_health_check_port"]}"
- }
+  tcp_health_check {
+    port = "${var.region_backend_service_health_check["tcp_health_check_port"]}"
+  }
 }
 
 resource "google_compute_region_backend_service" "gcp-inspec-region-backend-service" {
@@ -388,8 +388,8 @@ resource "google_compute_instance_template" "gcp-inspec-instance-template" {
 }
 
 resource "google_compute_global_address" "gcp-inspec-global-address" {
-  project = "${var.gcp_project_id}"
-  name = "${var.global_address["name"]}"
+  project    = "${var.gcp_project_id}"
+  name       = "${var.global_address["name"]}"
   ip_version = "${var.global_address["ip_version"]}"
 }
 
@@ -437,10 +437,10 @@ resource "google_compute_global_forwarding_rule" "gcp-inspec-global-forwarding-r
 }
 
 resource "google_compute_backend_service" "gcp-inspec-tcp-backend-service" {
-  project       = "${var.gcp_project_id}"
-  name          = "${var.target_tcp_proxy["tcp_backend_service_name"]}"
-  protocol      = "TCP"
-  timeout_sec   = 10
+  project     = "${var.gcp_project_id}"
+  name        = "${var.target_tcp_proxy["tcp_backend_service_name"]}"
+  protocol    = "TCP"
+  timeout_sec = 10
 
   health_checks = ["${google_compute_health_check.gcp-inspec-health-check.self_link}"]
 }
@@ -453,10 +453,10 @@ resource "google_compute_target_tcp_proxy" "gcp-inspec-target-tcp-proxy" {
 }
 
 resource "google_container_cluster" "gcp-inspec-regional-cluster" {
-  project = "${var.gcp_project_id}"
-  name = "${var.regional_cluster["name"]}"
-  region = "${var.gcp_location}"
-  initial_node_count = 1
+  project                  = "${var.gcp_project_id}"
+  name                     = "${var.regional_cluster["name"]}"
+  region                   = "${var.gcp_location}"
+  initial_node_count       = 1
   remove_default_node_pool = true
 
   maintenance_policy {
@@ -477,7 +477,7 @@ resource "google_compute_route" "gcp-inspec-route" {
   # of the named network in this block. Since inspec-gcp-network does not
   # automatically create subnetworks, we need to create a dependency so
   # the route is not created before the subnetwork 
-  depends_on  = ["google_compute_subnetwork.inspec-gcp-subnetwork"]
+  depends_on = ["google_compute_subnetwork.inspec-gcp-subnetwork"]
 }
 
 resource "google_compute_router" "gcp-inspec-router" {
@@ -499,20 +499,20 @@ resource "google_compute_router" "gcp-inspec-router" {
 
 resource "google_compute_disk" "snapshot-disk" {
   project = "${var.gcp_project_id}"
-  name  = var.snapshot["disk_name"]
-  type  = "${var.gcp_compute_disk_type}"
-  zone  = "${var.gcp_zone}"
-  image = "${var.gcp_compute_disk_image}"
+  name    = var.snapshot["disk_name"]
+  type    = "${var.gcp_compute_disk_type}"
+  zone    = "${var.gcp_zone}"
+  image   = "${var.gcp_compute_disk_image}"
   labels = {
     environment = "generic_compute_disk_label"
   }
 }
 
 resource "google_compute_snapshot" "gcp-inspec-snapshot" {
-  project = "${var.gcp_project_id}"
-  name = "${var.snapshot["name"]}"
+  project     = "${var.gcp_project_id}"
+  name        = "${var.snapshot["name"]}"
   source_disk = "${google_compute_disk.snapshot-disk.name}"
-  zone = "${var.gcp_zone}"
+  zone        = "${var.gcp_zone}"
 }
 
 resource "google_compute_ssl_certificate" "gcp-inspec-ssl-certificate" {
@@ -524,10 +524,10 @@ resource "google_compute_ssl_certificate" "gcp-inspec-ssl-certificate" {
 }
 
 resource "google_compute_target_https_proxy" "gcp-inspec-https-proxy" {
-  project     = "${var.gcp_project_id}"
-  name        = "${var.https_proxy["name"]}"
-  url_map     = "${google_compute_url_map.gcp-inspec-url-map.self_link}"
-  description = "${var.https_proxy["description"]}"
+  project          = "${var.gcp_project_id}"
+  name             = "${var.https_proxy["name"]}"
+  url_map          = "${google_compute_url_map.gcp-inspec-url-map.self_link}"
+  description      = "${var.https_proxy["description"]}"
   ssl_certificates = ["${google_compute_ssl_certificate.gcp-inspec-ssl-certificate.self_link}"]
 }
 
@@ -559,17 +559,17 @@ resource "google_bigquery_table" "gcp-inspec-bigquery-table" {
     type = "${var.bigquery_table["time_partitioning_type"]}"
   }
 
-  description = "${var.bigquery_table["description"]}"
+  description     = "${var.bigquery_table["description"]}"
   expiration_time = "${var.bigquery_table["expiration_time"]}"
 }
 
 resource "google_sourcerepo_repository" "gcp-inspec-sourcerepo-repository" {
   project = "${var.gcp_project_id}"
-  name = "${var.repository["name"]}"
+  name    = "${var.repository["name"]}"
 }
 
 resource "google_folder" "inspec-gcp-folder" {
-  count = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  count        = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
   display_name = "${var.folder["display_name"]}"
   parent       = "organizations/${var.gcp_organization_id}"
 }
@@ -615,15 +615,15 @@ resource "google_container_node_pool" "inspec-gcp-regional-node-pool" {
 }
 
 resource "google_logging_organization_sink" "my-sink" {
-  count       = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
-  name        = "${var.org_sink.name}"
-  org_id      = "${var.gcp_organization_id}"
+  count  = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  name   = "${var.org_sink.name}"
+  org_id = "${var.gcp_organization_id}"
 
   # Can export to pubsub, cloud storage, or bigquery
   destination = "storage.googleapis.com/${google_storage_bucket.generic-storage-bucket.name}"
 
   # Log all WARN or higher severity messages relating to instances
-  filter      = "${var.org_sink.filter}"
+  filter = "${var.org_sink.filter}"
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -645,7 +645,7 @@ resource "google_app_engine_standard_app_version" "default" {
   runtime         = "${var.standardappversion["runtime"]}"
   noop_on_destroy = true
   entrypoint {
-    shell         = "${var.standardappversion["entrypoint"]}"
+    shell = "${var.standardappversion["entrypoint"]}"
   }
 
   deployment {
@@ -655,7 +655,7 @@ resource "google_app_engine_standard_app_version" "default" {
   }
 
   env_variables = {
-    port          = "${var.standardappversion["port"]}"
+    port = "${var.standardappversion["port"]}"
   }
 }
 
@@ -711,8 +711,8 @@ resource "google_dataproc_cluster" "mycluster" {
     }
 
     worker_config {
-      num_instances    = var.dataproc_cluster["config"]["worker_config"]["num_instances"]
-      machine_type     = var.dataproc_cluster["config"]["worker_config"]["machine_type"]
+      num_instances = var.dataproc_cluster["config"]["worker_config"]["num_instances"]
+      machine_type  = var.dataproc_cluster["config"]["worker_config"]["machine_type"]
       disk_config {
         boot_disk_size_gb = var.dataproc_cluster["config"]["worker_config"]["boot_disk_size_gb"]
         num_local_ssds    = var.dataproc_cluster["config"]["worker_config"]["num_local_ssds"]
@@ -734,13 +734,13 @@ resource "google_dataproc_cluster" "mycluster" {
 }
 
 resource "google_logging_folder_exclusion" "my-exclusion" {
-  count       = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
-  name        = var.folder_exclusion["name"]
-  folder      = google_folder.inspec-gcp-folder.0.name
+  count  = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  name   = var.folder_exclusion["name"]
+  folder = google_folder.inspec-gcp-folder.0.name
 
   description = var.folder_exclusion["description"]
 
-  filter      = var.folder_exclusion["filter"]
+  filter = var.folder_exclusion["filter"]
 }
 
 resource "google_filestore_instance" "instance" {
@@ -761,26 +761,26 @@ resource "google_filestore_instance" "instance" {
 }
 
 resource "google_logging_folder_sink" "folder-sink" {
-  count       = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
-  name        = var.folder_sink.name
-  folder      = google_folder.inspec-gcp-folder.0.name
+  count  = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  name   = var.folder_sink.name
+  folder = google_folder.inspec-gcp-folder.0.name
 
   destination = "storage.googleapis.com/${google_storage_bucket.generic-storage-bucket.name}"
 
-  filter      = var.folder_sink.filter
+  filter = var.folder_sink.filter
 }
 
 resource "google_runtimeconfig_config" "inspec-runtime-config" {
-  project = var.gcp_project_id
-  name = var.runtimeconfig_config["name"]
+  project     = var.gcp_project_id
+  name        = var.runtimeconfig_config["name"]
   description = var.runtimeconfig_config["description"]
 }
 
 resource "google_runtimeconfig_variable" "inspec-runtime-variable" {
   project = var.gcp_project_id
-  parent = "${google_runtimeconfig_config.inspec-runtime-config.name}"
-  name = var.runtimeconfig_variable["name"]
-  text = var.runtimeconfig_variable["text"]
+  parent  = "${google_runtimeconfig_config.inspec-runtime-config.name}"
+  name    = var.runtimeconfig_variable["name"]
+  text    = var.runtimeconfig_variable["text"]
 }
 
 resource "google_redis_instance" "inspec-redis" {
@@ -817,9 +817,9 @@ data "google_compute_node_types" "zone-node-type" {
 
 resource "google_compute_node_template" "inspec-template" {
   project = var.gcp_project_id
-  region = var.gcp_location
+  region  = var.gcp_location
 
-  name = var.node_template["name"]
+  name      = var.node_template["name"]
   node_type = "${data.google_compute_node_types.zone-node-type.names[0]}"
 
   node_affinity_labels = {
@@ -828,11 +828,22 @@ resource "google_compute_node_template" "inspec-template" {
 }
 
 resource "google_compute_node_group" "inspec-node-group" {
-  project = var.gcp_project_id
-  name = var.node_group["name"]
-  zone = var.gcp_zone
+  project     = var.gcp_project_id
+  name        = var.node_group["name"]
+  zone        = var.gcp_zone
   description = var.node_group["description"]
 
-  size = var.node_group["size"]
+  size          = var.node_group["size"]
   node_template = "${google_compute_node_template.inspec-template.self_link}"
+}
+
+resource "google_spanner_instance" "spanner_instance" {
+  project      = "${var.gcp_project_id}"
+  config       = "${var.spannerinstance["config"]}"
+  name         = "${var.spannerinstance["name"]}"
+  display_name = "${var.spannerinstance["display_name"]}"
+  node_count   = "${var.spannerinstance["node_count"]}"
+  labels = {
+    "${var.spannerinstance["label_key"]}" = "${var.spannerinstance["label_value"]}"
+  }
 }
