@@ -479,6 +479,7 @@ objects:
     properties:
       - !ruby/object:Api::Type::Array   
         name: 'dispatchRules'
+        required: true
         description: |
           Rules to match an HTTP request and dispatch that request to a service.
         item_type: !ruby/object:Api::Type::NestedObject
