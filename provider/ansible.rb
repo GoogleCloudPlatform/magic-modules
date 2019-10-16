@@ -290,7 +290,6 @@ module Provider
                       File.join(target_folder,
                                 "plugins/modules/#{name}_info.py"),
                       self)
-
       end
 
       def generate_objects(output_folder, types)
