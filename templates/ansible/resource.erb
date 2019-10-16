@@ -19,7 +19,7 @@ __metaclass__ = type
                                   .map(&:resource_ref)
                                   .uniq
 
-  update_props = properties_by_custom_update(object.all_user_properties)
+  update_props = properties_by_custom_update(object.all_user_properties, :old)
 -%>
 
 <%
