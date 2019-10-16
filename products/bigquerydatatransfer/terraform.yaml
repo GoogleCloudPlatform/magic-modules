@@ -23,6 +23,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       location: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+      params: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/json_to_string_map.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         skip_test: true
