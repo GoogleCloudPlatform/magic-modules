@@ -836,3 +836,14 @@ resource "google_compute_node_group" "inspec-node-group" {
   size = var.node_group["size"]
   node_template = "${google_compute_node_template.inspec-template.self_link}"
 }
+
+resource "google_spanner_instance" "spanner_instance" {
+  project      = "${var.gcp_project_id}"
+  config       = "${var.spannerinstance["config"]}"
+  name         = "${var.spannerinstance["name"]}"
+  display_name = "${var.spannerinstance["display_name"]}"
+  node_count   = "${var.spannerinstance["node_count"]}"
+  labels = {
+    "${var.spannerinstance["label_key"]}" = "${var.spannerinstance["label_value"]}"
+  }
+}
