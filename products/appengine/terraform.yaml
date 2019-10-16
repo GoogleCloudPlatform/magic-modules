@@ -97,6 +97,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{project}}"
     import_format: ["{{project}}"]
     mutex: "apps/{{project}}"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_delete: templates/terraform/custom_delete/appengine.go.erb
+      test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_application_url_dispatch_rules_basic"
