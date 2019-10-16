@@ -8725,7 +8725,7 @@ objects:
         update_id: 'enableFlowLogs'
         fingerprint_name: 'fingerprint'
         send_empty_value: true
-      # TODO(rileykarson): Remove this field from downstreams.
+      # TODO(rileykarson): Work with rambleraptor to remove this field from downstreams.
       - !ruby/object:Api::Type::Fingerprint
         name: 'fingerprint'
         description: |
