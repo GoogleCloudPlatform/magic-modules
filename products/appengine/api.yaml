@@ -490,7 +490,6 @@ objects:
               description: |
                 Domain name to match against. The wildcard "*" is supported if specified before a period: "*.".
                 Defaults to matching all domains: "*".
-              required: true
             - !ruby/object:Api::Type::String
               name: 'path'
               description: |
