@@ -265,7 +265,6 @@ def update_fields(module, request, response):
 
 
 <% update_props.each do |key, props| -%>
-<% req_props = (key[:fingerprint_name] != nil ? props +   -%>
 <% func_name = "#{props.first.name.underscore}_update" -%>
 <% unless object.hidden.include?(func_name) -%>
 def <%= func_name -%>(module, request, response):
