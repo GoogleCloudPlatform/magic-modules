@@ -35,8 +35,20 @@ module Api
       attr_reader :input # If set to true value is used only on creation
       attr_reader :url_param_only # If, true will not be send in request body
       attr_reader :required
+
       attr_reader :update_verb
       attr_reader :update_url
+      # Some updates only allow updating certain fields at once (generally each
+      # top-level field can be updated one-at-a-time). If this is set, we group
+      # fields to update by (verb, url, fingerprint, id) instead of just
+      # (verb, url, fingerprint), to allow multiple fields to reuse the same
+      # endpoints.
+      attr_reader :update_id
+      # THe fingerprint value required to update this field. Downstreams should
+      # GET the resource and parse the fingerprint value while doing each update
+      # call. This ensures we can supply the fingerprint to each distinct
+      # request.
+      attr_reader :fingerprint_name
       # If true, we will include the empty value in requests made including
       # this attribute (both creates and updates).  This rarely needs to be
       # set to true, and corresponds to both the "NullFields" and
@@ -91,6 +103,8 @@ module Api
                           default: @__resource&.update_verb
 
       check :update_url, type: ::String
+      check :update_id, type: ::String
+      check :fingerprint_name, type: ::String
       check :pattern, type: ::String
 
       check_default_value_property

@@ -50,6 +50,7 @@ so Terraform knows to manage them.
 ## Upgrade Topics
 
 <!-- TOC depthFrom:2 depthTo:2 -->
+- [Resource: `google_container_cluster`](#resource-google_container_cluster)
 - [Resource: `google_project_services`](#resource-google_project_services)
 
 <!-- /TOC -->
@@ -90,6 +91,38 @@ provider "google" {
 }
 ```
 
+## Resource: `google_container_cluster`
+
+### `logging_service` and `monitoring_service` defaults changed
+
+GKE Stackdriver Monitoring (the GKE-specific Stackdriver experience) is now
+enabled at cluster creation by default, similar to the default in GKE `1.14`
+through other tools.
+
+Terraform will now detect changes out of band when the field(s) are not defined
+in config, attempting to return them to their new defaults, and will be clear
+about what values will be set when creating a cluster.
+
+`terraform plan` will report changes upon upgrading if the field was previously
+unset. Applying this change will enable the new Stackdriver service without
+recreating clusters. Users who wish to use another value should record their
+intended value in config; the old default values can be added to a
+`google_container_cluster` resource config block to preserve them.
+
+#### Old Defaults
+
+```hcl
+logging_service    = "logging.googleapis.com"
+monitoring_service = "monitoring.googleapis.com"
+```
+
+#### New Defaults
+
+```hcl
+logging_service    = "logging.googleapis.com/kubernetes"
+monitoring_service = "monitoring.googleapis.com/kubernetes"
+```
+
 ## Resource: `google_project_services`
 
 ### `google_project_services` has been removed from the provider
@@ -113,6 +146,11 @@ these services are set on this project".
 Users should migrate to using `google_project_service` resources, or using the
 [`"terraform-google-modules/project-factory/google//modules/project_services"`](https://registry.terraform.io/modules/terraform-google-modules/project-factory/google/3.3.0/submodules/project_services)
 module for a similar interface to `google_project_services`.
+
+-> Prior to `2.13.0`, each `google_project_service` sent separate API enablement
+requests. From `2.13.0` onwards, those requests are batched. It's recommended
+that you upgrade to `2.13.0+` before migrating if you encounter quota issues
+when you migrate off `google_project_services`.
 
 #### Old Config
 

@@ -290,15 +290,6 @@ module Provider
                       File.join(target_folder,
                                 "plugins/modules/#{name}_info.py"),
                       self)
-
-        # Generate symlink for old `facts` modules.
-        return if version_added(data.object, :facts) >= '2.9'
-
-        deprecated_facts_path = File.join(target_folder,
-                                          "plugins/modules/_#{name}_facts.py")
-        return if File.exist?(deprecated_facts_path)
-
-        File.symlink "#{name}_info.py", deprecated_facts_path
       end
 
       def generate_objects(output_folder, types)
