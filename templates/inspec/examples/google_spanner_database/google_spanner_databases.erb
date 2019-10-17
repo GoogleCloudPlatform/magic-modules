@@ -1,6 +1,6 @@
 <% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
 <% spannerdatabase = grab_attributes['spannerdatabase'] -%>
 
-describe google_spanner_databases(project: <%= gcp_project_id -%>, , instance: <%= doc_generation ? "'#{spannerdatabase['instance']}'" : "spannerdatabase['instance']" -%>) do
-  its('instance') { should eq <%= doc_generation ? "'#{spannerdatabase['instance']}'" : "spannerdatabase['instance']" -%> }
+describe google_spanner_databases(project: <%= gcp_project_id -%>, instance: <%= doc_generation ? "'#{spannerdatabase['instance']}'" : "spannerdatabase['instance']" -%>) do
+  its('instances') { should eq <%= doc_generation ? "'#{spannerdatabase['instance']}'" : "spannerdatabase['instance']" -%> }
 end
