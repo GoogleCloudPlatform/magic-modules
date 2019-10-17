@@ -843,17 +843,20 @@ resource "google_compute_node_group" "inspec-node-group" {
   node_template = "${google_compute_node_template.inspec-template.self_link}"
 }
 
-resource "google_compute_router_nat" "inspec-nat" {
-  project                            = var.gcp_project_id
-  name                               = var.router_nat["name"]
-  router                             = google_compute_router.gcp-inspec-router.name
-  region                             = google_compute_router.gcp-inspec-router.region
-  nat_ip_allocate_option             = var.router_nat["nat_ip_allocate_option"]
-  source_subnetwork_ip_ranges_to_nat = var.router_nat["source_subnetwork_ip_ranges_to_nat"]
-  min_ports_per_vm                   = var.router_nat["min_ports_per_vm"]
-
-  log_config {
-    enable = var.router_nat["log_config_enable"]
-    filter = var.router_nat["log_config_filter"]
+resource "google_spanner_instance" "spanner_instance" {
+  project      = "${var.gcp_project_id}"
+  config       = "${var.spannerinstance["config"]}"
+  name         = "${var.spannerinstance["name"]}"
+  display_name = "${var.spannerinstance["display_name"]}"
+  node_count   = "${var.spannerinstance["node_count"]}"
+  labels = {
+    "${var.spannerinstance["label_key"]}" = "${var.spannerinstance["label_value"]}"
   }
+}
+
+resource "google_spanner_instance" "database" {
+  project      = "${var.gcp_project_id}"
+  instance     = "${google_spanner_instance.spanner_instance.name}"
+  name         = "${var.spannerdatabase["name"]}"
+  ddl          = "${split("\n", file("ddl.sql"))}"
 }
