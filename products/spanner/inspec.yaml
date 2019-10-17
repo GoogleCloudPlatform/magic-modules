@@ -12,33 +12,16 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Inspec::Config
-legacy_name: appengine
 overrides: !ruby/object:Overrides::ResourceOverrides
-  ApplicationUrlDispatchRules: !ruby/object:Overrides::Inspec::ResourceOverride
+  InstanceConfig: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  DomainMapping: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
-  FirewallRule: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
-  StandardAppVersion: !ruby/object:Overrides::Inspec::ResourceOverride
+  Instance: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: false
     properties:
-      id: !ruby/object:Overrides::Inspec::PropertyOverride
-        name: "version_id"
-      runtimeApiVersion: !ruby/object:Overrides::Inspec::PropertyOverride
+      state: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true  
-      handlers: !ruby/object:Overrides::Inspec::PropertyOverride
+  Database: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: false
+    properties:
+      state: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true  
-      libraries: !ruby/object:Overrides::Inspec::PropertyOverride
-        exclude: true  
-      envVariables: !ruby/object:Overrides::Inspec::PropertyOverride
-        exclude: true
-      deployment: !ruby/object:Overrides::Inspec::PropertyOverride
-        exclude: true
-      entrypoint: !ruby/object:Overrides::Inspec::PropertyOverride
-        exclude: true
-      service: !ruby/object:Overrides::Inspec::PropertyOverride
-        exclude: true    
-  Service: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true  
-  
