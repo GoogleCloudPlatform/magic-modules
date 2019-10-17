@@ -25,3 +25,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       state: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true  
+      extraStatements: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true  
