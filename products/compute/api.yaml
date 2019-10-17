@@ -3836,6 +3836,31 @@ objects:
                        values:
                          - :ONE_TO_ONE_NAT
                        required: true
+                     - !ruby/object:Api::Type::Boolean
+                       name: 'setPublicPtr'
+                       description: |
+                         Specifies whether a public DNS PTR record should be
+                         created to map the external IP address of the instance
+                         to a DNS domain name.
+                     - !ruby/object:Api::Type::String
+                       name: 'publicPtrDomainName'
+                       description: |
+                         The DNS domain name for the public PTR record. You can
+                         set this field only if the setPublicPtr field is
+                         enabled.
+                     - !ruby/object:Api::Type::Enum
+                       name: 'networkTier'
+                       description: |
+                         This signifies the networking tier used for configuring
+                         this access configuration. If an AccessConfig is
+                         specified without a valid external IP address, an
+                         ephemeral IP will be created with this networkTier. If an
+                         AccessConfig with a valid external IP address is
+                         specified, it must match that of the networkTier
+                         associated with the Address resource owning that IP.
+                       values:
+                         - :PREMIUM
+                         - :STANDARD
                 - !ruby/object:Api::Type::Array
                   name: 'aliasIpRanges'
                   description: |
@@ -4634,6 +4659,31 @@ objects:
                    values:
                      - :ONE_TO_ONE_NAT
                    required: true
+                 - !ruby/object:Api::Type::Boolean
+                   name: 'setPublicPtr'
+                   description: |
+                     Specifies whether a public DNS PTR record should be
+                     created to map the external IP address of the instance
+                     to a DNS domain name.
+                 - !ruby/object:Api::Type::String
+                   name: 'publicPtrDomainName'
+                   description: |
+                     The DNS domain name for the public PTR record. You can
+                     set this field only if the setPublicPtr field is
+                     enabled.
+                 - !ruby/object:Api::Type::Enum
+                   name: 'networkTier'
+                   description: |
+                     This signifies the networking tier used for configuring
+                     this access configuration. If an AccessConfig is
+                     specified without a valid external IP address, an
+                     ephemeral IP will be created with this networkTier. If an
+                     AccessConfig with a valid external IP address is
+                     specified, it must match that of the networkTier
+                     associated with the Address resource owning that IP.
+                   values:
+                     - :PREMIUM
+                     - :STANDARD
             - !ruby/object:Api::Type::Array
               name: 'aliasIpRanges'
               description: |
@@ -8672,14 +8722,15 @@ objects:
           Whether to enable flow logging for this subnetwork.
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        update_id: 'enableFlowLogs'
+        fingerprint_name: 'fingerprint'
         send_empty_value: true
+      # TODO(rileykarson): Work with rambleraptor to remove this field from downstreams.
       - !ruby/object:Api::Type::Fingerprint
         name: 'fingerprint'
         description: |
           Fingerprint of this resource. This field is used internally during
           updates of this resource.
-        update_verb: :PATCH
-        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
       - !ruby/object:Api::Type::Enum
         name: 'purpose'
         min_version: beta
@@ -8700,6 +8751,8 @@ objects:
         min_version: beta
         update_verb: :PATCH
         update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        update_id: 'role'
+        fingerprint_name: 'fingerprint'
         values:
           - :ACTIVE
           - :BACKUP
@@ -8718,6 +8771,8 @@ objects:
           to either primary or secondary ranges.
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        update_id: 'secondaryIpRanges'
+        fingerprint_name: 'fingerprint'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String

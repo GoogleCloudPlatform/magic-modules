@@ -619,6 +619,12 @@
             :version_added: '2.6'
           :type:
             :version_added: '2.6'
+          :setPublicPtr:
+            :version_added: '2.10'
+          :publicPtrDomainName:
+            :version_added: '2.10'
+          :networkTier:
+            :version_added: '2.10'
         :aliasIpRanges:
           :version_added: '2.6'
           :ipCidrRange:
@@ -767,6 +773,12 @@
           :version_added: '2.6'
         :type:
           :version_added: '2.6'
+        :setPublicPtr:
+          :version_added: '2.10'
+        :publicPtrDomainName:
+          :version_added: '2.10'
+        :networkTier:
+          :version_added: '2.10'
       :aliasIpRanges:
         :version_added: '2.6'
         :ipCidrRange:

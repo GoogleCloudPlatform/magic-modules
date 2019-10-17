@@ -272,6 +272,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           * https://www.googleapis.com/compute/v1/projects/project/global/gateways/default-internet-gateway
           * projects/project/global/gateways/default-internet-gateway
           * global/gateways/default-internet-gateway
+  Subnetwork: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      fingerprint: !ruby/object:Overrides::Ansible::PropertyOverride
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
   TargetPool: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
