@@ -327,4 +327,5 @@ spannerinstance:
 
 spannerdatabase:
   name: spdatabase
+  instance: spinstance
   
