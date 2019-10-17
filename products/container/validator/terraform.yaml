@@ -1,0 +1,75 @@
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Cluster: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    properties:
+      binaryAuthorization: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: enable_binary_authorization
+        custom_expand: templates/terraform/custom_expand/empty.erb
+      currentMasterVersion: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: master_version
+      currentNodeVersion: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: node_version
+      defaultMaxPodsConstraint: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: default_max_pods_per_node
+        custom_expand: templates/terraform/custom_expand/empty.erb
+      initialClusterVersion: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: min_master_version
+      legacyAbac: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: enable_legacy_abac
+        custom_expand: templates/terraform/custom_expand/empty.erb
+      masterAuthorizedNetworksConfig.cidrBlocks: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      network: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: templates/terraform/custom_expand/empty.erb
+      locations: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: node_locations
+        is_set: true
+      nodeConfig.accelerators: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: guest_accelerator
+      nodeConfig.accelerators.acceleratorCount: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: count
+      nodeConfig.accelerators.acceleratorType: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: type
+      nodeConfig.oauthScopes: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        custom_expand: templates/terraform/custom_expand/empty.erb
+      nodeConfig.taints: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: taint
+      # TODO
+      # nodePools: !ruby/object:Overrides::Terraform::PropertyOverride
+      #   name: node_pool
+      subnetwork: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: templates/terraform/custom_expand/empty.erb
+
+  NodePool: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    properties:
+      conditions: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      config: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: node_config
+      config.accelerators: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: guest_accelerator
+      config.accelerators.acceleratorCount: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: count
+      config.accelerators.acceleratorType: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: type
+      config.oauthScopes: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        custom_expand: templates/terraform/custom_expand/empty.erb
+      config.taints: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: taint
+      management.upgradeOptions: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      maxPodsConstraint: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: max_pods_per_node
+        custom_expand: templates/terraform/custom_expand/empty.erb
+
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>
+
