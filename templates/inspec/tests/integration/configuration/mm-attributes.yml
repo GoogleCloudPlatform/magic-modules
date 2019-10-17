@@ -328,4 +328,5 @@ spannerinstance:
 spannerdatabase:
   name: spdatabase
   instance: spinstance
+  ddl: "CREATE TABLE test (test STRING(MAX),) PRIMARY KEY (test)"
   

@@ -852,5 +852,5 @@ resource "google_spanner_instance" "database" {
   project      = "${var.gcp_project_id}"
   instance     = "${google_spanner_instance.spanner_instance.name}"
   name         = "${var.spannerdatabase["name"]}"
-  ddl          = "${split("\n", file("ddl.sql"))}"
+  ddl          = "${var.spannerdatabase["ddl"]}"
 }
