@@ -2,5 +2,5 @@
 <% spannerinstance = grab_attributes['spannerinstance'] -%>
 
 describe google_spanner_instances(project: <%= gcp_project_id -%>, config: <%= doc_generation ? "'#{spannerinstance['config']}'" : "spannerinstance['config']" -%>) do
-  its('config') { should eq <%= doc_generation ? "'#{spannerinstance['config']}'" : "spannerinstance['config']" -%> }
+  its('configs') { should eq <%= doc_generation ? "'#{spannerinstance['config']}'" : "spannerinstance['config']" -%> }
 end
