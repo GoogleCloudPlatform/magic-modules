@@ -26,7 +26,7 @@ features/tools:
 * Terraform in Cloud Shell
 
 Importantly, Magic Modules *isn't* full code generation. Every change is made
-manually; more than a code generator, Magic Modules is a force multiplier for 
+manually; more than a code generator, Magic Modules is a force multiplier for
 development. While many Magic Modules resources are defined exactly based on the
 GCP API, we use Magic Modules to preemptively solve issues across each tool by
 encoding our field-tested learnings from other tools in those definitions. In
@@ -61,6 +61,8 @@ To get started, you'll need:
   * You can use `rbenv` to manage your Ruby version(s)
 * [`Bundler`](https://github.com/bundler/bundler)
   * This can be installed with `gem install bundler`
+* If you are getting "Too many open files" ulimit needs to be raised.
+  * Mac OSX: `ulimit -n 1000`
 
 ### Preparing Magic Modules / One-time setup
 
