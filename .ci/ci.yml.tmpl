@@ -192,7 +192,7 @@ jobs:
 
                 - put: {{v.short_name}}-intermediate
                   params:
-                      repository: terraform-diff/new
+                      repository: terraform-diff/{{k}}/new
                       branch_file: magic-modules-branched/branchname
                       force: true
                   get_params:
@@ -200,7 +200,7 @@ jobs:
 
                 - put: {{v.short_name}}-intermediate
                   params:
-                      repository: terraform-diff/old
+                      repository: terraform-diff/{{k}}/old
                       branch_file: magic-modules-previous/branchname
                       force: true
                   get_params:
