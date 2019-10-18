@@ -82,5 +82,7 @@ for mm_dir in magic-modules-branched magic-modules-previous; do
 
 done
 
-git clone "magic-modules-branched/build/$SHORT_NAME" "./terraform-diff/new"
-git clone "magic-modules-previous/build/$SHORT_NAME" "./terraform-diff/old"
+mkdir "./terraform-diff/$VERSION"
+
+git clone "magic-modules-branched/build/$SHORT_NAME" "./terraform-diff/$VERSION/new"
+git clone "magic-modules-previous/build/$SHORT_NAME" "./terraform-diff/$VERSION/old"
