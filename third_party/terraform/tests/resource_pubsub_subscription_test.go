@@ -117,7 +117,7 @@ func TestAccPubsubSubscription_push(t *testing.T) {
 		CheckDestroy: testAccCheckPubsubSubscriptionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPubsubSubscription_push(topicFoo),
+				Config: testAccPubsubSubscription_push(topicFoo, subscription),
 			},
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
@@ -147,9 +147,13 @@ resource "google_pubsub_subscription" "foo" {
 `, topic, subscription)
 }
 
-func testAccPubsubSubscription_push(topicFoo string) string {
+func testAccPubsubSubscription_push(topicFoo string, subscription string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
+
+resource "google_pubsub_topic" "foo" {
+	name = "%s"
+}
 
 resource "google_pubsub_subscription" "foo" {
   name                 = "%s"
@@ -162,7 +166,7 @@ resource "google_pubsub_subscription" "foo" {
     }
   }
 }
-`, topicFoo)
+`, topicFoo, subscription)
 }
 
 func testAccPubsubSubscription_fullName(topic, subscription, label string, deadline int) string {
