@@ -14,6 +14,8 @@
 --- !ruby/object:Provider::Inspec::Config
 legacy_name: appengine
 overrides: !ruby/object:Overrides::ResourceOverrides
+  ApplicationUrlDispatchRules: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   DomainMapping: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   FirewallRule: !ruby/object:Overrides::Inspec::ResourceOverride
