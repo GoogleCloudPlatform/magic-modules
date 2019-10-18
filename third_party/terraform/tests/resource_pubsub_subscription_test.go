@@ -111,15 +111,13 @@ func TestAccPubsubSubscription_push(t *testing.T) {
 	topicFoo := fmt.Sprintf("tf-test-topic-foo-%s", acctest.RandString(10))
 	subscription := fmt.Sprintf("projects/%s/subscriptions/tf-test-topic-foo-%s", getTestProjectFromEnv(), acctest.RandString(10))
 
-	topicBar := fmt.Sprintf("tf-test-topic-bar-%s", acctest.RandString(10))
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckPubsubSubscriptionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPubsubSubscription_push(topicFoo, topicBar, subscription),
+				Config: testAccPubsubSubscription_push(topicFoo),
 			},
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
@@ -149,42 +147,22 @@ resource "google_pubsub_subscription" "foo" {
 `, topic, subscription)
 }
 
-func testAccPubsubSubscription_push(topicFoo string, topicBar string, subscription string) string {
+func testAccPubsubSubscription_push(topicFoo string) string {
 	return fmt.Sprintf(`
-resource "google_pubsub_topic" "foo" {
-  name = "%s"
-}
-
-resource "google_pubsub_topic" "bar" {
-  name = "%s"
-}
-
-resource "google_service_account" "service_account" {
-  account_id = "my-super-service"
-}
-
-data "google_iam_policy" "admin" {
-  binding {
-    role = "roles/projects.topics.publish"
-
-    members = [
-      "serviceAccount:${google_service_account.service_account.email}",
-    ]
-  }
-}
+data "google_project" "project" {}
 
 resource "google_pubsub_subscription" "foo" {
   name                 = "%s"
   topic                = "${google_pubsub_topic.foo.name}"
-  ack_deadline_seconds = 3
+  ack_deadline_seconds = 10
   push_config {
-    push_endpoint = "push_endpoint = "https://pubsub.googleapis.com/v1/projects/${data.google_project.pubsub-google-project.id}/topics/${google_pubsub_topic.bar.name}:publish""
+    push_endpoint = "https://${data.google_project.project.project_id}.appspot.com"
     oidc_token {
       service_account_email = "${google_service_account.service_account.email}"
     }
   }
 }
-`, topicFoo, topicBar, subscription)
+`, topicFoo)
 }
 
 func testAccPubsubSubscription_fullName(topic, subscription, label string, deadline int) string {
