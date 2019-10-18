@@ -786,14 +786,109 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: The type of the health check. One of HTTP, HTTPS, TCP, or SSL.
       httpHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+      httpHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. For port_name to be used
+          port_specification must be `USE_NAMED_PORT`.
+      httpHealthCheck.portSpecification: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
+
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
+
+          If not specified, HTTP health check uses default `port` behavior
       http2HealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+      http2HealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. For port_name to be used
+          port_specification must be `USE_NAMED_PORT`.
+      http2HealthCheck.portSpecification: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
+
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
+
+          If not specified, HTTP2 health check uses default `port` behavior
       httpsHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+      httpsHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. For port_name to be used
+          port_specification must be `USE_NAMED_PORT`.
+      httpsHealthCheck.portSpecification: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
+
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
+
+          If not specified, HTTPS health check uses default `port` behavior
       tcpHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+      tcpHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. For port_name to be used
+          port_specification must be `USE_NAMED_PORT`.
+      tcpHealthCheck.portSpecification: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
+
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
+
+          If not specified, TCP health check uses default `port` behavior
       sslHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+      sslHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. For port_name to be used
+          port_specification must be `USE_NAMED_PORT`.
+      sslHealthCheck.portSpecification: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
+
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
+
+          If not specified, SSL health check uses default `port` behavior
   Image: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1199,14 +1294,109 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: The type of the health check. One of HTTP, HTTP2, HTTPS, TCP, or SSL.
       httpHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+      httpHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. For port_name to be used
+          port_specification must be `USE_NAMED_PORT`.
+      httpHealthCheck.portSpecification: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
+
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
+
+          If not specified, HTTP health check uses default `port` behavior
       http2HealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+      http2HealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. For port_name to be used
+          port_specification must be `USE_NAMED_PORT`.
+      http2HealthCheck.portSpecification: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
+
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
+
+          If not specified, HTTP2 health check uses default `port` behavior
       httpsHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+      httpsHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. For port_name to be used
+          port_specification must be `USE_NAMED_PORT`.
+      httpsHealthCheck.portSpecification: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
+
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
+
+          If not specified, HTTPS health check uses default `port` behavior
       tcpHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+      tcpHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. For port_name to be used
+          port_specification must be `USE_NAMED_PORT`.
+      tcpHealthCheck.portSpecification: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
+
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
+
+          If not specified, TCP health check uses default `port` behavior
       sslHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+      sslHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Port name as defined in InstanceGroup#NamedPort#name. For port_name to be used
+          port_specification must be `USE_NAMED_PORT`.
+      sslHealthCheck.portSpecification: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
+
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+            * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
+
+          If not specified, SSL health check uses default `port` behavior
   RegionUrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
