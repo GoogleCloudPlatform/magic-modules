@@ -522,6 +522,11 @@ func resourceComputeInstanceTemplateSourceImageCustomizeDiff(diff *schema.Resour
 }
 
 func resourceComputeInstanceTemplateScratchDiskCustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
+	// separate func to allow unit testing
+	return resourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(diff)
+}
+
+func resourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(diff TerraformResourceDiff) error {
 	numDisks := diff.Get("disk.#").(int)
 	for i := 0; i < numDisks; i++ {
 		// misspelled on purpose, type is a special symbol
@@ -533,6 +538,11 @@ func resourceComputeInstanceTemplateScratchDiskCustomizeDiff(diff *schema.Resour
 
 		if diskType == "local-ssd" && typee != "SCRATCH" {
 			return fmt.Errorf("disks with a disk_type of local-ssd must be SCRATCH disks. disk %d is a %s disk", i, typee)
+		}
+
+		diskSize := diff.Get(fmt.Sprintf("disk.%d.disk_size_gb", i)).(int)
+		if typee == "SCRATCH" && diskSize != 375 {
+			return fmt.Errorf("SCRATCH disks must be exactly 375GB, disk %d is %d", i, diskSize)
 		}
 	}
 
