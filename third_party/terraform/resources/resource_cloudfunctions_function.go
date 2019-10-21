@@ -189,9 +189,9 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 			},
 
 			"runtime": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "nodejs6",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"nodejs8", "nodejs10", "python37", "go111"}, false),
 			},
 
 			"service_account_email": {
