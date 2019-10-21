@@ -669,6 +669,7 @@ resource "google_ml_engine_model" "inspec-gcp-model" {
 }
 
 resource "google_compute_firewall" "dataproc" {
+  project = var.gcp_project_id
   name    = "dataproc-firewall"
   network = "${google_compute_network.dataproc.name}"
 
@@ -688,7 +689,8 @@ resource "google_compute_firewall" "dataproc" {
 }
 
 resource "google_compute_network" "dataproc" {
-  name = "dataproc-network"
+  project = var.gcp_project_id
+  name    = "dataproc-network"
 }
 
 resource "google_dataproc_cluster" "mycluster" {
