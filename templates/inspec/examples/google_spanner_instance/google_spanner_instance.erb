@@ -3,7 +3,7 @@
 
 describe google_spanner_instance(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{spannerinstance['name']}'" : "spannerinstance['name']" -%>, config: <%= doc_generation ? "'#{spannerinstance['config']}'" : "spannerinstance['config']" -%>) do
   it { should exist }
-  its('config') { should eq <%= doc_generation ? "'projects/#{gcp_project_id}/instanceConfigs/#{spannerinstance['config']}'" : "projects/#{gcp_project_id}/instanceConfigs/spannerinstance['config']" -%> }
+  its('config') { should eq <%= doc_generation ? "'#{spannerinstance['config']}'" : "spannerinstance['config']" -%> }
   its('name') { should eq <%= doc_generation ? "'#{spannerinstance['name']}'" : "spannerinstance['name']" -%> }
   its('display_name') { should eq <%= doc_generation ? "'#{spannerinstance['display_name']}'" : "spannerinstance['display_name']" -%> }
   its('node_count') { should eq <%= doc_generation ? "'#{spannerinstance['node_count']}'" : "spannerinstance['node_count']" -%> }
