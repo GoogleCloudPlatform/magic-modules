@@ -189,6 +189,14 @@ variable "node_template" {
   type = "map"
 }
 
+variable "node_template" {
+  type = "map"
+}
+
+variable "spannerdatabase" {
+  type = "map"
+}
+
 variable "node_group" {
   type = "map"
 }
@@ -854,7 +862,7 @@ resource "google_spanner_instance" "spanner_instance" {
   }
 }
 
-resource "google_spanner_instance" "database" {
+resource "google_spanner_database" "database" {
   project      = "${var.gcp_project_id}"
   instance     = "${google_spanner_instance.spanner_instance.name}"
   name         = "${var.spannerdatabase["name"]}"
