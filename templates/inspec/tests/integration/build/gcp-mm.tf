@@ -189,7 +189,7 @@ variable "node_template" {
   type = "map"
 }
 
-variable "node_template" {
+variable "spannerinstance" {
   type = "map"
 }
 
