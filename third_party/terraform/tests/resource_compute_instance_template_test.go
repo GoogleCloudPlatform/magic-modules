@@ -161,6 +161,54 @@ func TestComputeInstanceTemplate_reorderDisks(t *testing.T) {
 	}
 }
 
+func TestComputeInstanceTemplate_scratchDiskSizeCustomizeDiff(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		Typee       string // misspelled on purpose, type is a special symbol
+		DiskType    string
+		DiskSize    int
+		ExpectError bool
+	}{
+		"scratch disk correct size": {
+			Typee:       "SCRATCH",
+			DiskType:    "local-ssd",
+			DiskSize:    375,
+			ExpectError: false,
+		},
+		"scratch disk incorrect size": {
+			Typee:       "SCRATCH",
+			DiskType:    "local-ssd",
+			DiskSize:    300,
+			ExpectError: true,
+		},
+		"non-scratch disk": {
+			Typee:       "PERSISTENT",
+			DiskType:    "",
+			DiskSize:    300,
+			ExpectError: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		d := &ResourceDiffMock{
+			After: map[string]interface{}{
+				"disk.#":              1,
+				"disk.0.type":         tc.Typee,
+				"disk.0.disk_type":    tc.DiskType,
+				"disk.0.disk_size_gb": tc.DiskSize,
+			},
+		}
+		err := resourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(d)
+		if tc.ExpectError && err == nil {
+			t.Errorf("%s failed, expected error but was none", tn)
+		}
+		if !tc.ExpectError && err != nil {
+			t.Errorf("%s failed, found unexpected error: %s", tn, err)
+		}
+	}
+}
+
 func TestAccComputeInstanceTemplate_basic(t *testing.T) {
 	t.Parallel()
 
