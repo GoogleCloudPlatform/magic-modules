@@ -591,7 +591,7 @@ resource "google_cloudfunctions_function" "function" {
   trigger_http          = "${var.cloudfunction["trigger_http"]}"
   timeout               = "${var.cloudfunction["timeout"]}"
   entry_point           = "${var.cloudfunction["entry_point"]}"
-  runtime               = "nodejs6"
+  runtime               = "nodejs8"
 
   environment_variables = {
     MY_ENV_VAR = "${var.cloudfunction["env_var_value"]}"
