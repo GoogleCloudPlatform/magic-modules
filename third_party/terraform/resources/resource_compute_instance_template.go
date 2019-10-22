@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
@@ -19,7 +20,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 		Read:   resourceComputeInstanceTemplateRead,
 		Delete: resourceComputeInstanceTemplateDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceComputeInstanceTemplateImportState,
 		},
 		SchemaVersion: 1,
 		CustomizeDiff: customdiff.All(
@@ -737,7 +738,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	}
 
 	// Store the ID now
-	d.SetId(instanceTemplate.Name)
+	d.SetId(fmt.Sprintf("projects/%s/global/instanceTemplates/%s", project, instanceTemplate.Name))
 
 	err = computeSharedOperationWait(config.clientCompute, op, project, "Creating Instance Template")
 	if err != nil {
@@ -963,7 +964,8 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	instanceTemplate, err := config.clientComputeBeta.InstanceTemplates.Get(project, d.Id()).Do()
+	splits := strings.Split(d.Id(), "/")
+	instanceTemplate, err := config.clientComputeBeta.InstanceTemplates.Get(project, splits[len(splits)-1]).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Instance Template %q", d.Get("name").(string)))
 	}
@@ -1091,8 +1093,9 @@ func resourceComputeInstanceTemplateDelete(d *schema.ResourceData, meta interfac
 		return err
 	}
 
+	splits := strings.Split(d.Id(), "/")
 	op, err := config.clientCompute.InstanceTemplates.Delete(
-		project, d.Id()).Do()
+		project, splits[len(splits)-1]).Do()
 	if err != nil {
 		return fmt.Errorf("Error deleting instance template: %s", err)
 	}
@@ -1128,4 +1131,20 @@ func expandResourceComputeInstanceTemplateScheduling(d *schema.ResourceData, met
 		expanded.OnHostMaintenance = "TERMINATE"
 	}
 	return expanded, nil
+}
+
+func resourceComputeInstanceTemplateImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*Config)
+	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/global/instanceTemplates/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
+		return nil, err
+	}
+
+	// Replace import id for the resource id
+	id, err := replaceVars(d, config, "projects/{{project}}/global/instanceTemplates/{{name}}")
+	if err != nil {
+		return nil, fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+	return []*schema.ResourceData{d}, nil
 }
