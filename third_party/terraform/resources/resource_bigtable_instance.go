@@ -203,7 +203,7 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	clustersNewState := []map[string]interface{}{}
-	for i, cluster := range clusters {
+	for _, cluster := range clusters {
 		clustersNewState = append(clustersNewState, flattenBigtableCluster(cluster))
 	}
 
