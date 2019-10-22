@@ -81,7 +81,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   ResourcePolicy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   RouterNat: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    collection_url_key: nats
   Subnetwork: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude_resource: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
