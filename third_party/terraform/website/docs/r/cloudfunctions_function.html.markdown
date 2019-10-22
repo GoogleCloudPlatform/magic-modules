@@ -106,10 +106,8 @@ The following arguments are supported:
 
 * `name` - (Required) A user-defined name of the function. Function names must be unique globally.
 
-* `runtime` - (Optional) The runtime in which the function is going to run. One
-of `"nodejs6"`, `"nodejs8"`, `"nodejs10"`, `"python37"`, `"go111"`. If empty,
-defaults to `"nodejs6"`. It's recommended that you override the default, as
-`"nodejs6"` is deprecated.
+* `runtime` - (Required) The runtime in which the function is going to run.
+Eg. `"nodejs8"`, `"nodejs10"`, `"python37"`, `"go111"`.
 
 - - -
 
