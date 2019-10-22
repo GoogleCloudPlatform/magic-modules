@@ -54,6 +54,7 @@ so Terraform knows to manage them.
 - [Provider Version Configuration](#provider-version-configuration)
 - [Data Source: `google_container_engine_versions`](#data-source-google_container_engine_versions)
 - [Resource: `google_container_cluster`](#resource-google_container_cluster)
+- [Resource: `google_cloudfunctions_function`](#resource-google_cloudfunctions_function)
 - [Resource: `google_cloudiot_registry`](#resource-google_cloudiot_registry)
 - [Resource: `google_compute_forwarding_rule`](#resource-google_compute_forwarding_rule)
 - [Resource: `google_compute_network`](#resource-google_compute_network)
@@ -256,6 +257,13 @@ of this change, the JSON/state representation of the field has changed,
 introducing an incompatibility for users who specify config in JSON instead of
 HCL or who use `dynamic` blocks. See more details in the [Attributes as Blocks](https://www.terraform.io/docs/configuration/attr-as-blocks.html)
 documentation.
+
+## Resource: `google_cloudfunctions_function`
+
+### The `runtime` option `nodejs6` has been deprecated
+
+`nodejs6` has been deprecated and is no longer the default value for `runtime`.
+`runtime` is now required.
 
 ## Resource: `google_cloudiot_registry`
 
