@@ -7720,6 +7720,7 @@ objects:
     delete_verb: :PATCH
     identity:
       - name
+    collection_url_key: nats
     nested_query: !ruby/object:Api::Resource::NestedQuery
       modify_by_patch: true
       keys:
