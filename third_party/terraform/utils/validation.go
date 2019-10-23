@@ -108,6 +108,19 @@ func validateRFC1918Network(min, max int) schema.SchemaValidateFunc {
 	}
 }
 
+func validateRFC5545Recurrence(v interface{}, k string) (warnings []string, errors []error) {
+	// These are pretty complicated - I don't want to parse them.
+	return
+}
+
+func validateRFC3339Date(v interface{}, k string) (warnings []string, errors []error) {
+	_, err := time.Parse(time.RFC3339, v.(string))
+	if err != nil {
+		errors = append(errors, err)
+	}
+	return
+}
+
 func validateRFC3339Time(v interface{}, k string) (warnings []string, errors []error) {
 	time := v.(string)
 	if len(time) != 5 || time[2] != ':' {
