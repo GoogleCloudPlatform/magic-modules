@@ -814,7 +814,7 @@ func TestAccContainerCluster_withNodeConfigScopeAlias(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
+// Tests the authoritative taint field
 func TestAccContainerCluster_withNodeConfigTaints(t *testing.T) {
 	t.Parallel()
 
@@ -830,16 +830,14 @@ func TestAccContainerCluster_withNodeConfigTaints(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:			 "google_container_cluster.with_node_config",
-				ImportStateIdPrefix:	 "us-central1-f/",
-				ImportState:			 true,
-				ImportStateVerify:		 true,
+				ResourceName:			   "google_container_cluster.with_node_config",
+				ImportStateIdPrefix: "us-central1-f/",
+				ImportState:			   true,
+				ImportStateVerify:	 true,
 			},
-			// Once taints are in GA, consider merging this test with the _withNodeConfig test.
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_withNodeConfigShieldedInstanceConfig(t *testing.T) {
 	t.Parallel()
@@ -2402,6 +2400,12 @@ resource "google_container_cluster" "with_node_config" {
 		preemptible = true
 		min_cpu_platform = "Intel Broadwell"
 
+		initial_taint {
+			key = "taint_key"
+			value = "taint_value"
+			effect = "PREFER_NO_SCHEDULE"
+		}
+
 		// Updatable fields
 		image_type = "COS"
 	}
@@ -2438,6 +2442,12 @@ resource "google_container_cluster" "with_node_config" {
 		preemptible = true
 		min_cpu_platform = "Intel Broadwell"
 
+		initial_taint {
+			key = "taint_key"
+			value = "taint_value"
+			effect = "PREFER_NO_SCHEDULE"
+		}
+
 		// Updatable fields
 		image_type = "UBUNTU"
 	}
@@ -2467,12 +2477,12 @@ resource "google_container_cluster" "with_node_config" {
 	initial_node_count = 1
 
 	node_config {
-		initial_taint {
+		taint {
 			key = "taint_key"
 			value = "taint_value"
 			effect = "PREFER_NO_SCHEDULE"
 		}
-		initial_taint {
+		taint {
 			key = "taint_key2"
 			value = "taint_value2"
 			effect = "NO_EXECUTE"
