@@ -422,10 +422,12 @@ exported:
 
 ## Import
 
-Instance templates can be imported using the `name`, e.g.
+Instance templates can be imported using any of these accepted formats:
 
 ```
-$ terraform import google_compute_instance_template.default appserver-template
+$ terraform import google_compute_instance_template.default projects/{{project}}/global/instanceTemplates/{{name}}
+$ terraform import google_compute_instance_template.default {{project}}/{{name}}
+$ terraform import google_compute_instance_template.default {{name}}
 ```
 
 [custom-vm-types]: https://cloud.google.com/dataproc/docs/concepts/compute/custom-machine-types

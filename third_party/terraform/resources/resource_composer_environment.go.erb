@@ -575,7 +575,7 @@ func resourceComposerEnvironmentImport(d *schema.ResourceData, meta interface{})
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "{{project}}/{{region}}/{{name}}")
+	id, err := replaceVars(d, config, "projects/{{project}}/locations/{{region}}/environments/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
