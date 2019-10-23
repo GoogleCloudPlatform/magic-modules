@@ -2,10 +2,22 @@
 :facts:
   :Config:
     :version_added: '2.10'
+  :Variable:
+    :version_added: '2.10'
 :regular:
   :Config:
     :version_added: '2.10'
     :description:
       :version_added: '2.10'
     :name:
+      :version_added: '2.10'
+  :Variable:
+    :version_added: '2.10'
+    :value:
+      :version_added: '2.10'
+    :text:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :config:
       :version_added: '2.10'
