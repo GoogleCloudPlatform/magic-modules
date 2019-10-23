@@ -60,9 +60,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_standard_app_version"
-        primary_resource_id: "version_id"
+        primary_resource_id: "myapp_v1"
         ignore_read_extra:
-          - "noop_on_destroy"
+          - "delete_service_on_destroy"
         vars:
           project_id: "test-project"
           bucket_name: "appengine-static-content"
@@ -102,9 +102,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_application_url_dispatch_rules_basic"
-        primary_resource_id: "service_rules"
+        primary_resource_id: "web_service"
         vars:
-          project: "my-project"  
           bucket_name: "appengine-test-bucket"
 
 # This is for copying files over
