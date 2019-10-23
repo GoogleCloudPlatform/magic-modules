@@ -17,8 +17,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
 overrides: !ruby/object:Overrides::ResourceOverrides
-  Variable: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>
