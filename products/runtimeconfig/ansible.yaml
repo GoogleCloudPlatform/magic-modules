@@ -13,6 +13,9 @@
 
 --- !ruby/object:Provider::Ansible::Config
 datasources: !ruby/object:Overrides::ResourceOverrides
+  Config: !ruby/object:Overrides::Ansible::ResourceOverride
+    facts: !ruby/object:Provider::Ansible::FactsOverride
+      has_filters: false
   Variable: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
