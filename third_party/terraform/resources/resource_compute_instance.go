@@ -553,7 +553,7 @@ func getInstance(config *Config, d *schema.ResourceData) (*computeBeta.Instance,
 	if err != nil {
 		return nil, err
 	}
-	instance, err := config.clientComputeBeta.Instances.Get(project, zone, d.Id()).Do()
+	instance, err := config.clientComputeBeta.Instances.Get(project, zone, d.Get("name").(string)).Do()
 	if err != nil {
 		return nil, handleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
 	}
@@ -696,7 +696,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	// Store the ID now
-	d.SetId(instance.Name)
+	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, z, instance.Name))
 
 	// Wait for the operation to complete
 	waitErr := computeSharedOperationWaitTime(config.clientCompute, op, project, createTimeout, "instance to create")
@@ -872,6 +872,8 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
+	zone := GetResourceNameFromSelfLink(instance.Zone)
+
 	d.Set("service_account", flattenServiceAccounts(instance.ServiceAccounts))
 	d.Set("attached_disk", ads)
 	d.Set("scratch_disk", scratchDisks)
@@ -885,11 +887,11 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	d.Set("self_link", ConvertSelfLinkToV1(instance.SelfLink))
 	d.Set("instance_id", fmt.Sprintf("%d", instance.Id))
 	d.Set("project", project)
-	d.Set("zone", GetResourceNameFromSelfLink(instance.Zone))
+	d.Set("zone", zone)
 	d.Set("name", instance.Name)
 	d.Set("description", instance.Description)
 	d.Set("hostname", instance.Hostname)
-	d.SetId(instance.Name)
+	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instance.Name))
 
 	return nil
 }
@@ -909,9 +911,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 	// Use beta api directly in order to read network_interface.fingerprint without having to put it in the schema.
 	// Change back to getInstance(config, d) once updating alias ips is GA.
-	instance, err := config.clientComputeBeta.Instances.Get(project, zone, d.Id()).Do()
+	instance, err := config.clientComputeBeta.Instances.Get(project, zone, d.Get("name").(string)).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
+		return handleNotFoundError(err, d, fmt.Sprintf("Instance %s", instance.Name))
 	}
 
 	// Enable partial mode for the resource since it is possible
@@ -933,14 +935,14 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			func() error {
 				// retrieve up-to-date metadata from the API in case several updates hit simultaneously. instances
 				// sometimes but not always share metadata fingerprints.
-				instance, err := config.clientComputeBeta.Instances.Get(project, zone, d.Id()).Do()
+				instance, err := config.clientComputeBeta.Instances.Get(project, zone, instance.Name).Do()
 				if err != nil {
 					return fmt.Errorf("Error retrieving metadata: %s", err)
 				}
 
 				metadataV1.Fingerprint = instance.Metadata.Fingerprint
 
-				op, err := config.clientCompute.Instances.SetMetadata(project, zone, d.Id(), metadataV1).Do()
+				op, err := config.clientCompute.Instances.SetMetadata(project, zone, instance.Name, metadataV1).Do()
 				if err != nil {
 					return fmt.Errorf("Error updating metadata: %s", err)
 				}
@@ -968,7 +970,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			return err
 		}
 		op, err := config.clientCompute.Instances.SetTags(
-			project, zone, d.Id(), tagsV1).Do()
+			project, zone, d.Get("name").(string), tagsV1).Do()
 		if err != nil {
 			return fmt.Errorf("Error updating tags: %s", err)
 		}
@@ -986,7 +988,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		labelFingerprint := d.Get("label_fingerprint").(string)
 		req := compute.InstancesSetLabelsRequest{Labels: labels, LabelFingerprint: labelFingerprint}
 
-		op, err := config.clientCompute.Instances.SetLabels(project, zone, d.Id(), &req).Do()
+		op, err := config.clientCompute.Instances.SetLabels(project, zone, instance.Name, &req).Do()
 		if err != nil {
 			return fmt.Errorf("Error updating labels: %s", err)
 		}
@@ -1006,7 +1008,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 
 		op, err := config.clientComputeBeta.Instances.SetScheduling(
-			project, zone, d.Id(), scheduling).Do()
+			project, zone, instance.Name, scheduling).Do()
 		if err != nil {
 			return fmt.Errorf("Error updating scheduling policy: %s", err)
 		}
@@ -1047,7 +1049,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			// Delete any accessConfig that currently exists in instNetworkInterface
 			for _, ac := range instNetworkInterface.AccessConfigs {
 				op, err := config.clientCompute.Instances.DeleteAccessConfig(
-					project, zone, d.Id(), ac.Name, networkName).Do()
+					project, zone, instance.Name, ac.Name, networkName).Do()
 				if err != nil {
 					return fmt.Errorf("Error deleting old access_config: %s", err)
 				}
@@ -1072,7 +1074,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				}
 
 				op, err := config.clientComputeBeta.Instances.AddAccessConfig(
-					project, zone, d.Id(), networkName, ac).Do()
+					project, zone, instance.Name, networkName, ac).Do()
 				if err != nil {
 					return fmt.Errorf("Error adding new access_config: %s", err)
 				}
@@ -1092,7 +1094,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					Fingerprint:     instNetworkInterface.Fingerprint,
 					ForceSendFields: []string{"AliasIpRanges"},
 				}
-				op, err := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, d.Id(), networkName, ni).Do()
+				op, err := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, ni).Do()
 				if err != nil {
 					return errwrap.Wrapf("Error removing alias_ip_range: {{err}}", err)
 				}
@@ -1106,7 +1108,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			ranges := d.Get(prefix + ".alias_ip_range").([]interface{})
 			if len(ranges) > 0 {
 				if rereadFingerprint {
-					instance, err = config.clientComputeBeta.Instances.Get(project, zone, d.Id()).Do()
+					instance, err = config.clientComputeBeta.Instances.Get(project, zone, instance.Name).Do()
 					if err != nil {
 						return err
 					}
@@ -1116,7 +1118,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					AliasIpRanges: expandAliasIpRanges(ranges),
 					Fingerprint:   instNetworkInterface.Fingerprint,
 				}
-				op, err := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, d.Id(), networkName, ni).Do()
+				op, err := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, ni).Do()
 				if err != nil {
 					return errwrap.Wrapf("Error adding alias_ip_range: {{err}}", err)
 				}
@@ -1242,7 +1244,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("deletion_protection") {
 		nDeletionProtection := d.Get("deletion_protection").(bool)
 
-		op, err := config.clientCompute.Instances.SetDeletionProtection(project, zone, d.Id()).DeletionProtection(nDeletionProtection).Do()
+		op, err := config.clientCompute.Instances.SetDeletionProtection(project, zone, d.Get("name").(string)).DeletionProtection(nDeletionProtection).Do()
 		if err != nil {
 			return fmt.Errorf("Error updating deletion protection flag: %s", err)
 		}
@@ -1361,7 +1363,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("shielded_instance_config") {
 		shieldedVmConfig := expandShieldedVmConfigs(d)
 
-		op, err := config.clientComputeBeta.Instances.UpdateShieldedVmConfig(project, zone, d.Id(), shieldedVmConfig).Do()
+		op, err := config.clientComputeBeta.Instances.UpdateShieldedVmConfig(project, zone, instance.Name, shieldedVmConfig).Do()
 		if err != nil {
 			return fmt.Errorf("Error updating shielded vm config: %s", err)
 		}
@@ -1515,12 +1517,12 @@ func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) err
 	if err != nil {
 		return err
 	}
-	log.Printf("[INFO] Requesting instance deletion: %s", d.Id())
+	log.Printf("[INFO] Requesting instance deletion: %s", d.Get("name").(string))
 
 	if d.Get("deletion_protection").(bool) {
-		return fmt.Errorf("Cannot delete instance %s: instance Deletion Protection is enabled. Set deletion_protection to false for this resource and run \"terraform apply\" before attempting to delete it.", d.Id())
+		return fmt.Errorf("Cannot delete instance %s: instance Deletion Protection is enabled. Set deletion_protection to false for this resource and run \"terraform apply\" before attempting to delete it.", d.Get("name").(string))
 	} else {
-		op, err := config.clientCompute.Instances.Delete(project, zone, d.Id()).Do()
+		op, err := config.clientCompute.Instances.Delete(project, zone, d.Get("name").(string)).Do()
 		if err != nil {
 			return fmt.Errorf("Error deleting instance: %s", err)
 		}
@@ -1545,7 +1547,8 @@ func resourceComputeInstanceImportState(d *schema.ResourceData, meta interface{}
 
 	d.Set("project", parts[0])
 	d.Set("zone", parts[1])
-	d.SetId(parts[2])
+	d.Set("name", parts[2])
+	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", parts[0], parts[1], parts[2]))
 
 	return []*schema.ResourceData{d}, nil
 }
