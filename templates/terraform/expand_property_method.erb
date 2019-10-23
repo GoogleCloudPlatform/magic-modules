@@ -142,6 +142,9 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
   l := v.([]interface{})
   req := make([]interface{}, 0, len(l))
   for _, raw := range l {
+    if raw == nil {
+      return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: nil")
+    }
     f, err := <%= build_expand_resource_ref('raw.(string)', property.item_type) %>
     if err != nil {
       return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: %s", err)
