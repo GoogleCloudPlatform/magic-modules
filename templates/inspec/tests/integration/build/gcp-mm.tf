@@ -875,7 +875,7 @@ resource "google_spanner_instance" "spanner_instance" {
   config       = "${var.spannerinstance["config"]}"
   name         = "${var.spannerinstance["name"]}"
   display_name = "${var.spannerinstance["display_name"]}"
-  node_count   = "${var.spannerinstance["node_count"]}"
+  num_nodes   = "${var.spannerinstance["num_nodes"]}"
   labels = {
     "${var.spannerinstance["label_key"]}" = "${var.spannerinstance["label_value"]}"
   }
