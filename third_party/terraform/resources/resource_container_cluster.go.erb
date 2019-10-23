@@ -1089,7 +1089,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	d.SetId(clusterName)
+	d.SetId(containerClusterFullName(project, location, clusterName))
 
 	// Wait until it's created
 	timeoutInMinutes := int(d.Timeout(schema.TimeoutCreate).Minutes())
@@ -2725,8 +2725,12 @@ func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interfac
 		project = parts[0]
 		location = parts[1]
 		clusterName = parts[2]
+	case 6:
+		project = parts[1]
+		location = parts[3]
+		clusterName = parts[5]
 	default:
-		return nil, fmt.Errorf("Invalid container cluster specifier. Expecting {location}/{name} or {project}/{location}/{name}")
+		return nil, fmt.Errorf("Invalid container cluster specifier. Expecting {location}/{name}, {project}/{location}/{name} or projects/{project}/locations/{location}/clusters/{name}")
 	}
 
 	if len(project) == 0 {
@@ -2740,7 +2744,7 @@ func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interfac
 
 
 	d.Set("name", clusterName)
-	d.SetId(clusterName)
+	d.SetId(containerClusterFullName(project, location, clusterName))
 	if err := waitForContainerClusterReady(config, project, location, clusterName, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return nil, err
 	}
