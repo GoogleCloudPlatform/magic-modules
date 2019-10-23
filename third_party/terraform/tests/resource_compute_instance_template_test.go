@@ -827,8 +827,9 @@ func testAccCheckComputeInstanceTemplateDestroy(s *terraform.State) error {
 			continue
 		}
 
+		splits := strings.Split(rs.Primary.ID, "/")
 		_, err := config.clientCompute.InstanceTemplates.Get(
-			config.Project, rs.Primary.ID).Do()
+			config.Project, splits[len(splits)-1]).Do()
 		if err == nil {
 			return fmt.Errorf("Instance template still exists")
 		}
@@ -865,13 +866,15 @@ func testAccCheckComputeInstanceTemplateExistsInProject(n, p string, instanceTem
 
 		config := testAccProvider.Meta().(*Config)
 
+		splits := strings.Split(rs.Primary.ID, "/")
+		templateName := splits[len(splits)-1]
 		found, err := config.clientCompute.InstanceTemplates.Get(
-			p, rs.Primary.ID).Do()
+			p, templateName).Do()
 		if err != nil {
 			return err
 		}
 
-		if found.Name != rs.Primary.ID {
+		if found.Name != templateName {
 			return fmt.Errorf("Instance template not found")
 		}
 
@@ -894,13 +897,15 @@ func testAccCheckComputeBetaInstanceTemplateExistsInProject(n, p string, instanc
 
 		config := testAccProvider.Meta().(*Config)
 
+		splits := strings.Split(rs.Primary.ID, "/")
+		templateName := splits[len(splits)-1]
 		found, err := config.clientComputeBeta.InstanceTemplates.Get(
-			p, rs.Primary.ID).Do()
+			p, templateName).Do()
 		if err != nil {
 			return err
 		}
 
-		if found.Name != rs.Primary.ID {
+		if found.Name != templateName {
 			return fmt.Errorf("Instance template not found")
 		}
 
