@@ -197,6 +197,10 @@ variable "router_nat" {
   type = "map"
 }
 
+variable "router_nat" {
+  type = "map"
+}
+
 variable "spannerinstance" {
   type = "map"
 }
