@@ -847,13 +847,14 @@ func testAccCheckComputeInstanceTemplateExistsInProject(n, p string, instanceTem
 		config := testAccProvider.Meta().(*Config)
 
 		splits := strings.Split(rs.Primary.ID, "/")
+		templateName := splits[len(splits)-1]
 		found, err := config.clientCompute.InstanceTemplates.Get(
-			p, splits[len(splits)-1]).Do()
+			p, templateName).Do()
 		if err != nil {
 			return err
 		}
 
-		if found.Name != splits[len(splits)-1] {
+		if found.Name != templateName {
 			return fmt.Errorf("Instance template not found")
 		}
 
@@ -877,13 +878,14 @@ func testAccCheckComputeBetaInstanceTemplateExistsInProject(n, p string, instanc
 		config := testAccProvider.Meta().(*Config)
 
 		splits := strings.Split(rs.Primary.ID, "/")
+		templateName := splits[len(splits)-1]
 		found, err := config.clientComputeBeta.InstanceTemplates.Get(
-			p, splits[len(splits)-1]).Do()
+			p, templateName).Do()
 		if err != nil {
 			return err
 		}
 
-		if found.Name != splits[len(splits)-1] {
+		if found.Name != templateName {
 			return fmt.Errorf("Instance template not found")
 		}
 
