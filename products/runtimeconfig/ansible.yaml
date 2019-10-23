@@ -16,7 +16,17 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   Config: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
+  Variable: !ruby/object:Overrides::Ansible::ResourceOverride
+    facts: !ruby/object:Provider::Ansible::FactsOverride
+      has_filters: false
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Variable: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      config: !ruby/object:Overrides::Ansible::PropertyOverride
+        # Ansible uses input slightly differently than TF.
+        # Config shouldn't be sent to API
+        output: true
+        required: false
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>
