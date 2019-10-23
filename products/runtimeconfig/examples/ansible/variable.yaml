@@ -14,8 +14,8 @@
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_runtimeconfig_variable
   code:
-    name: prod-variables/example
-    config: <%= ctx[:name] %>
+    name: prod-variables/hostname
+    config: 'my-config'
     text: example.com
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
@@ -24,7 +24,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_runtimeconfig_config
     code:
-      name: <%= ctx[:name] %>
+      name: 'my-config'
       description: 'My config'
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>

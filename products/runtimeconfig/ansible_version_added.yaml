@@ -19,3 +19,5 @@
       :version_added: '2.10'
     :name:
       :version_added: '2.10'
+    :config:
+      :version_added: '2.10'
