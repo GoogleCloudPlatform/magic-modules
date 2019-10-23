@@ -201,6 +201,14 @@ variable "service" {
   type = "map"
 }
 
+variable "spannerinstance " {
+  type = "map"
+}
+
+variable "spannerdatabase" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -865,4 +873,22 @@ resource "google_compute_router_nat" "inspec-nat" {
 resource "google_project_service" "project" {
   project = var.gcp_project_id
   service = var.service["name"]
+}
+
+resource "google_spanner_instance" "spanner_instance" {
+  project      = "${var.gcp_project_id}"
+  config       = "${var.spannerinstance["config"]}"
+  name         = "${var.spannerinstance["name"]}"
+  display_name = "${var.spannerinstance["display_name"]}"
+  num_nodes    = "${var.spannerinstance["node_count"]}"
+  labels = {
+    "${var.spannerinstance["label_key"]}" = "${var.spannerinstance["label_value"]}"
+  }
+}
+
+resource "google_spanner_database" "database" {
+  project      = "${var.gcp_project_id}"
+  instance     = "${google_spanner_instance.spanner_instance.name}"
+  name         = "${var.spannerdatabase["name"]}"
+  ddl          = "${var.spannerdatabase["ddl"]}"
 }

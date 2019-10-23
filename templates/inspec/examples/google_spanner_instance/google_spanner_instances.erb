@@ -1,0 +1,6 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% spannerinstance = grab_attributes['spannerinstance'] -%>
+
+describe google_spanner_instances(project: <%= gcp_project_id -%>, config: <%= doc_generation ? "'#{spannerinstance['config']}'" : "spannerinstance['config']" -%>) do
+  its('configs') { should include <%= doc_generation ? "'#{spannerinstance['config']}'" : "spannerinstance['config']" -%> }
+end
