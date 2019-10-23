@@ -906,7 +906,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	// Change back to getInstance(config, d) once updating alias ips is GA.
 	instance, err := config.clientComputeBeta.Instances.Get(project, zone, d.Get("name").(string)).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
+		return handleNotFoundError(err, d, fmt.Sprintf("Instance %s", instance.Name))
 	}
 
 	// Enable partial mode for the resource since it is possible
@@ -928,14 +928,14 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			func() error {
 				// retrieve up-to-date metadata from the API in case several updates hit simultaneously. instances
 				// sometimes but not always share metadata fingerprints.
-				instance, err := config.clientComputeBeta.Instances.Get(project, zone, d.Get("name").(string)).Do()
+				instance, err := config.clientComputeBeta.Instances.Get(project, zone, instance.Name).Do()
 				if err != nil {
 					return fmt.Errorf("Error retrieving metadata: %s", err)
 				}
 
 				metadataV1.Fingerprint = instance.Metadata.Fingerprint
 
-				op, err := config.clientCompute.Instances.SetMetadata(project, zone, d.Get("name").(string), metadataV1).Do()
+				op, err := config.clientCompute.Instances.SetMetadata(project, zone, instance.Name, metadataV1).Do()
 				if err != nil {
 					return fmt.Errorf("Error updating metadata: %s", err)
 				}
@@ -981,7 +981,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		labelFingerprint := d.Get("label_fingerprint").(string)
 		req := compute.InstancesSetLabelsRequest{Labels: labels, LabelFingerprint: labelFingerprint}
 
-		op, err := config.clientCompute.Instances.SetLabels(project, zone, d.Get("name").(string), &req).Do()
+		op, err := config.clientCompute.Instances.SetLabels(project, zone, instance.Name, &req).Do()
 		if err != nil {
 			return fmt.Errorf("Error updating labels: %s", err)
 		}
@@ -1001,7 +1001,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 
 		op, err := config.clientComputeBeta.Instances.SetScheduling(
-			project, zone, d.Get("name").(string), scheduling).Do()
+			project, zone, instance.Name, scheduling).Do()
 		if err != nil {
 			return fmt.Errorf("Error updating scheduling policy: %s", err)
 		}
@@ -1042,7 +1042,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			// Delete any accessConfig that currently exists in instNetworkInterface
 			for _, ac := range instNetworkInterface.AccessConfigs {
 				op, err := config.clientCompute.Instances.DeleteAccessConfig(
-					project, zone, d.Get("name").(string), ac.Name, networkName).Do()
+					project, zone, instance.Name, ac.Name, networkName).Do()
 				if err != nil {
 					return fmt.Errorf("Error deleting old access_config: %s", err)
 				}
@@ -1067,7 +1067,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				}
 
 				op, err := config.clientComputeBeta.Instances.AddAccessConfig(
-					project, zone, d.Get("name").(string), networkName, ac).Do()
+					project, zone, instance.Name, networkName, ac).Do()
 				if err != nil {
 					return fmt.Errorf("Error adding new access_config: %s", err)
 				}
@@ -1087,7 +1087,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					Fingerprint:     instNetworkInterface.Fingerprint,
 					ForceSendFields: []string{"AliasIpRanges"},
 				}
-				op, err := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, d.Get("name").(string), networkName, ni).Do()
+				op, err := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, ni).Do()
 				if err != nil {
 					return errwrap.Wrapf("Error removing alias_ip_range: {{err}}", err)
 				}
@@ -1101,7 +1101,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			ranges := d.Get(prefix + ".alias_ip_range").([]interface{})
 			if len(ranges) > 0 {
 				if rereadFingerprint {
-					instance, err = config.clientComputeBeta.Instances.Get(project, zone, d.Get("name").(string)).Do()
+					instance, err = config.clientComputeBeta.Instances.Get(project, zone, instance.Name).Do()
 					if err != nil {
 						return err
 					}
@@ -1111,7 +1111,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					AliasIpRanges: expandAliasIpRanges(ranges),
 					Fingerprint:   instNetworkInterface.Fingerprint,
 				}
-				op, err := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, d.Get("name").(string), networkName, ni).Do()
+				op, err := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, ni).Do()
 				if err != nil {
 					return errwrap.Wrapf("Error adding alias_ip_range: {{err}}", err)
 				}
@@ -1340,7 +1340,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("shielded_instance_config") {
 		shieldedVmConfig := expandShieldedVmConfigs(d)
 
-		op, err := config.clientComputeBeta.Instances.UpdateShieldedVmConfig(project, zone, d.Get("name").(string), shieldedVmConfig).Do()
+		op, err := config.clientComputeBeta.Instances.UpdateShieldedVmConfig(project, zone, instance.Name, shieldedVmConfig).Do()
 		if err != nil {
 			return fmt.Errorf("Error updating shielded vm config: %s", err)
 		}

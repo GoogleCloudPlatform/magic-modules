@@ -252,6 +252,7 @@ This resource provides the following
 Instance group managers can be imported using any of these accepted formats:
 
 ```
+$ terraform import google_compute_instance_group_manager.appserver projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}
 $ terraform import google_compute_instance_group_manager.appserver {{project}}/{{zone}}/{{name}}
 $ terraform import google_compute_instance_group_manager.appserver {{project}}/{{name}}
 $ terraform import google_compute_instance_group_manager.appserver {{name}}
