@@ -62,6 +62,7 @@ objects:
           The name of the variable resource.
         required: true
         input: true
+        pattern: projects/{{project}}/configs/{{config}}/variables/{{name}}
       - !ruby/object:Api::Type::String
         name: 'config'
         description: |

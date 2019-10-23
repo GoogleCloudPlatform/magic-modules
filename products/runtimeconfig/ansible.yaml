@@ -17,10 +17,14 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
   Variable: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
+    facts: !ruby/object:Provider::Ansible::FactsOverride
+      has_filters: false
 overrides: !ruby/object:Overrides::ResourceOverrides
   Variable: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
+    provider_helpers:
+      - 'products/runtimeconfig/helpers/ansible/variable_delete_config.py'
+    transport: !ruby/object:Overrides::Ansible::Transport
+      encoder: encode_request
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>
