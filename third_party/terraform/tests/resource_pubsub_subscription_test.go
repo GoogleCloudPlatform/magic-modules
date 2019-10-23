@@ -151,6 +151,20 @@ func testAccPubsubSubscription_push(topicFoo string, subscription string) string
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
+resource "google_service_account" "pub_sub_service_account" {
+  account_id = "my-super-service"
+}
+
+data "google_iam_policy" "admin" {
+  binding {
+    role = "roles/projects.topics.publish"
+
+    members = [
+      "serviceAccount:${google_service_account.pub_sub_service_account.email}",
+    ]
+  }
+}
+
 resource "google_pubsub_topic" "foo" {
 	name = "%s"
 }
@@ -162,7 +176,7 @@ resource "google_pubsub_subscription" "foo" {
   push_config {
     push_endpoint = "https://${data.google_project.project.project_id}.appspot.com"
     oidc_token {
-      service_account_email = "${google_service_account.service_account.email}"
+      service_account_email = "${google_service_account.pub_sub_service_account.email}"
     }
   }
 }
