@@ -189,15 +189,11 @@ variable "node_template" {
   type = "map"
 }
 
-variable "spannerinstance" {
-  type = "map"
-}
-
-variable "spannerdatabase" {
-  type = "map"
-}
-
 variable "node_group" {
+  type = "map"
+}
+
+variable "router_nat" {
   type = "map"
 }
 
@@ -849,6 +845,21 @@ resource "google_compute_node_group" "inspec-node-group" {
 
   size = var.node_group["size"]
   node_template = "${google_compute_node_template.inspec-template.self_link}"
+}
+
+resource "google_compute_router_nat" "inspec-nat" {
+  project                            = var.gcp_project_id
+  name                               = var.router_nat["name"]
+  router                             = google_compute_router.gcp-inspec-router.name
+  region                             = google_compute_router.gcp-inspec-router.region
+  nat_ip_allocate_option             = var.router_nat["nat_ip_allocate_option"]
+  source_subnetwork_ip_ranges_to_nat = var.router_nat["source_subnetwork_ip_ranges_to_nat"]
+  min_ports_per_vm                   = var.router_nat["min_ports_per_vm"]
+
+  log_config {
+    enable = var.router_nat["log_config_enable"]
+    filter = var.router_nat["log_config_filter"]
+  }
 }
 
 resource "google_spanner_instance" "spanner_instance" {
