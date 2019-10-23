@@ -2,6 +2,7 @@
 package google
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -176,7 +177,6 @@ var schemaNodeConfig = &schema.Schema{
 				Type:             schema.TypeList,
 				Optional:         true,
 				ForceNew:         true,
-				ConflictsWith:    []string{"taint"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"key": {
@@ -210,7 +210,6 @@ var schemaNodeConfig = &schema.Schema{
 				// Legacy config mode allows setting no taint explicitly.
 				// See https://www.terraform.io/docs/configuration/attr-as-blocks.html
 				// ConfigMode: schema.SchemaConfigModeAttr,
-				ConflictsWith:    []string{"initial_taint"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"key": {
@@ -275,14 +274,14 @@ var schemaNodeConfig = &schema.Schema{
 	},
 }
 
-func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
+func expandNodeConfig(v interface{}) (*containerBeta.NodeConfig, error) {
 	nodeConfigs := v.([]interface{})
 	nc := &containerBeta.NodeConfig{
 		// Defaults can't be set on a list/set in the schema, so set the default on create here.
 		OauthScopes: defaultOauthScopes,
 	}
 	if len(nodeConfigs) == 0 {
-		return nc
+		return nc, nil
 	}
 
 	nodeConfig := nodeConfigs[0].(map[string]interface{})
@@ -377,8 +376,18 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 		nc.MinCpuPlatform = v.(string)
 	}
 
-	if v, ok := nodeConfig["taint"]; ok && len(v.([]interface{})) > 0 {
-		taints := v.([]interface{})
+	// these fields appear in multiple different places in schema, so
+	// ConflictsWith and CustomizeDiff are a pain to use.
+	v1, vOk1 := nodeConfig["taint"]
+	v2, vOk2 := nodeConfig["initial_taint"]
+
+	// this is only called on Create, so checking the computed value is safe
+	if vOk1 && vOk2 {
+		return nil, fmt.Errorf("can't set both taint and initial_taint in node config")
+	}
+
+	if vOk1 && len(v1.([]interface{})) > 0 {
+		taints := v1.([]interface{})
 		nodeTaints := make([]*containerBeta.NodeTaint, 0, len(taints))
 		for _, raw := range taints {
 			data := raw.(map[string]interface{})
@@ -390,8 +399,8 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 			nodeTaints = append(nodeTaints, taint)
 		}
 		nc.Taints = nodeTaints
-	} else if v, ok := nodeConfig["initial_taint"]; ok && len(v.([]interface{})) > 0 {
-		taints := v.([]interface{})
+	} else if vOk2 && len(v2.([]interface{})) > 0 {
+		taints := v2.([]interface{})
 		nodeTaints := make([]*containerBeta.NodeTaint, 0, len(taints))
 		for _, raw := range taints {
 			data := raw.(map[string]interface{})
@@ -421,7 +430,7 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 	}
 <% end -%>
 
-	return nc
+	return nc, nil
 }
 
 func flattenNodeConfig(c *containerBeta.NodeConfig) []map[string]interface{} {
