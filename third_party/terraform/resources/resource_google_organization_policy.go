@@ -46,7 +46,8 @@ var schemaOrganizationPolicy = map[string]*schema.Schema{
 						Schema: map[string]*schema.Schema{
 							"all": {
 								Type:          schema.TypeBool,
-								Required:      true,
+								Optional:      true,
+								Default:       false,
 								ConflictsWith: []string{"list_policy.0.allow.0.values"},
 							},
 							"values": {
@@ -66,7 +67,8 @@ var schemaOrganizationPolicy = map[string]*schema.Schema{
 						Schema: map[string]*schema.Schema{
 							"all": {
 								Type:          schema.TypeBool,
-								Required:      true,
+								Optional:      true,
+								Default:       false,
 								ConflictsWith: []string{"list_policy.0.deny.0.values"},
 							},
 							"values": {
