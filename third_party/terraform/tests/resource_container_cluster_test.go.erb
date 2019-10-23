@@ -2088,7 +2088,7 @@ resource "google_container_cluster" "with_release_channel" {
 	initial_node_count = 1
 
   release_channel {
-    channel = "%s"
+	channel = "%s"
   }
 }`, clusterName, channel)
 }
@@ -2965,10 +2965,10 @@ func testAccContainerCluster_withRecurringMaintenanceWindow(clusterName string, 
 	maintenance_policy {
 		recurring_window {
 			start_time = "%s"
-            end_time = "%s"
-            recurrence = "FREQ=DAILY"
+			end_time = "%s"
+			recurrence = "FREQ=DAILY"
 		}
-    }`, startTime, endTime)
+	}`, startTime, endTime)
 	}
 
 	return fmt.Sprintf(`
@@ -3487,8 +3487,8 @@ resource "google_container_cluster" "cidr_error_overlap" {
   initial_node_count = 1
 
   ip_allocation_policy {
-    cluster_ipv4_cidr_block = "10.0.0.0/16"
-    services_ipv4_cidr_block = "10.1.0.0/16"
+	cluster_ipv4_cidr_block = "10.0.0.0/16"
+	services_ipv4_cidr_block = "10.1.0.0/16"
   }
 }
 `, initConfig, secondCluster)
@@ -3511,11 +3511,11 @@ data "google_project" "project" {}
 
 data "google_iam_policy" "test_kms_binding" {
   binding {
-    role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+	role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
-    members = [
+	members = [
 	  "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
-    ]
+	]
   }
 }
 
