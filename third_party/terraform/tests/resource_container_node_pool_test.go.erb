@@ -163,7 +163,6 @@ func TestAccContainerNodePool_withNodeConfig(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
 func TestAccContainerNodePool_withNodeConfigTaints(t *testing.T) {
 	t.Parallel()
 
@@ -190,7 +189,6 @@ func TestAccContainerNodePool_withNodeConfigTaints(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 <% unless version.nil? || version == 'ga' -%>
 func TestAccContainerNodePool_withWorkloadMetadataConfig(t *testing.T) {
@@ -1070,7 +1068,6 @@ resource "google_container_node_pool" "np_with_node_config" {
 }`, cluster, nodePool)
 }
 
-<% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_withNodeConfigTaints() string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
@@ -1084,12 +1081,12 @@ resource "google_container_node_pool" "np_with_node_config" {
 	cluster = "${google_container_cluster.cluster.name}"
 	initial_node_count = 1
 	node_config {
-		taint {
+		initial_taint {
 			key = "taint_key"
 			value = "taint_value"
 			effect = "PREFER_NO_SCHEDULE"
 		}
-		taint {
+		initial_taint {
 			key = "taint_key2"
 			value = "taint_value2"
 			effect = "NO_EXECUTE"
@@ -1097,7 +1094,6 @@ resource "google_container_node_pool" "np_with_node_config" {
 	}
 }`, acctest.RandString(10), acctest.RandString(10))
 }
-<% end -%>
 
 <% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_withWorkloadMetadataConfig() string {

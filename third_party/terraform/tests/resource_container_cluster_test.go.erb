@@ -2459,7 +2459,6 @@ resource "google_container_cluster" "with_node_config_scope_alias" {
 }`, acctest.RandString(10))
 }
 
-<% unless version.nil? || version == 'ga' -%>
 func testAccContainerCluster_withNodeConfigTaints() string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_node_config" {
@@ -2468,12 +2467,12 @@ resource "google_container_cluster" "with_node_config" {
 	initial_node_count = 1
 
 	node_config {
-		taint {
+		initial_taint {
 			key = "taint_key"
 			value = "taint_value"
 			effect = "PREFER_NO_SCHEDULE"
 		}
-		taint {
+		initial_taint {
 			key = "taint_key2"
 			value = "taint_value2"
 			effect = "NO_EXECUTE"
@@ -2481,8 +2480,6 @@ resource "google_container_cluster" "with_node_config" {
 	}
 }`, acctest.RandString(10))
 }
-<% end -%>
-
 
 func testAccContainerCluster_withNodeConfigShieldedInstanceConfig(clusterName string) string {
 	return fmt.Sprintf(`
