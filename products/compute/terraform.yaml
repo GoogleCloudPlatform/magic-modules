@@ -1240,7 +1240,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "urlmap"
         vars:
           region_url_map_name: "regionurlmap"
-          login_region_backend_service_name: "login"
           home_region_backend_service_name: "home"
           region_health_check_name: "health-check"
       - !ruby/object:Provider::Terraform::Examples
@@ -1248,7 +1247,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "urlmap"
         vars:
           region_url_map_name: "regionurlmap"
-          login_region_backend_service_name: "login"
           home_region_backend_service_name: "home"
           region_health_check_name: "health-check"
     properties:
@@ -1961,9 +1959,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "url_map_traffic_director_route"
         primary_resource_id: "urlmap"
+        min_version: 'beta'
         vars:
           url_map_name: "urlmap"
-          login_backend_service_name: "login"
           home_backend_service_name: "home"
           health_check_name: "health-check"
           backend_bucket_name: "static-asset-backend-bucket"
@@ -1971,9 +1969,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "url_map_traffic_director_path"
         primary_resource_id: "urlmap"
+        min_version: 'beta'
         vars:
           url_map_name: "urlmap"
-          login_backend_service_name: "login"
           home_backend_service_name: "home"
           health_check_name: "health-check"
           backend_bucket_name: "static-asset-backend-bucket"
