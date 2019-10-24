@@ -918,7 +918,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/network.erb
-      encoder: templates/terraform/encoders/network.erb
   NetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{zone}}/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}"
     mutex: networkEndpoint/{{project}}/{{zone}}/{{network_endpoint_group}}

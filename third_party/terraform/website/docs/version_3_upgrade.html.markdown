@@ -170,7 +170,7 @@ monitoring_service = "monitoring.googleapis.com/kubernetes"
 
 ### `ipv4_range` is now removed
 
-Legacy Networks are deprecated and you will no longer be able to create them
+Legacy Networks are removed and you will no longer be able to create them
 using this field from Feb 1, 2020 onwards.
 
 ## Resource: `google_compute_network_peering`
