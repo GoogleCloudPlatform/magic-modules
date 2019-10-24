@@ -177,7 +177,7 @@ type iamBindingKey struct {
 	Condition conditionKey
 }
 
-// Flattens Bindings so each role+condition has a single Binding with combined members
+// Flattens a list of Bindings so each role+condition has a single Binding with combined members
 func removeAllBindingsWithRoleAndCondition(b []*cloudresourcemanager.Binding, role string, condition *cloudresourcemanager.Expr) []*cloudresourcemanager.Binding {
 	bMap := createIamBindingsMap(b)
 	key := iamBindingKey{role, conditionKeyFromCondition(condition)}
