@@ -81,6 +81,7 @@ objects:
         properties:
             - !ruby/object:Api::Type::String
               name: 'clusterId'
+              required: true
               description: |
                 The cluster to which read/write requests should be routed.
             - !ruby/object:Api::Type::Boolean

@@ -473,13 +473,6 @@ required on the `google_monitoring_uptime_check_config.content_matchers` block.
 
 ## Resource: `google_organization_policy`
 
-### `all` is now required on `google_organization_policy.list_policy.allow` and
-`google_organization_policy.list_policy.deny` blocks.
-
-Previously the default value of `all` was `false`. In an attempt to avoid allowing empty blocks
-in config files, `all` is now required on the `google_organization_policy.list_policy.allow` and
-`google_organization_policy.list_policy.deny` blocks
-
 ### `inherit_from_parent` is now required on block `google_organization_policy.list_policy`
 
 In an attempt to avoid allowing empty blocks in config files, `inherit_from_parent` is now

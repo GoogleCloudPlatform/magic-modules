@@ -272,6 +272,7 @@ objects:
     properties:
     - !ruby/object:Api::Type::NestedObject
       name: template
+      required: true
       description: |-
         template holds the latest specification for the Revision to
         be stamped out. The template references the container image, and may also
@@ -341,7 +342,7 @@ objects:
                 - !ruby/object:Api::Type::NestedObject
                   name: configMapRef
                   description: |-
-                    The ConfigMap to select from
+                    The ConfigMap to select from.
                   properties:
                   - !ruby/object:Api::Type::Boolean
                     name: optional
@@ -360,7 +361,7 @@ objects:
                 - !ruby/object:Api::Type::NestedObject
                   name: secretRef
                   description: |-
-                    The Secret to select from
+                    The Secret to select from.
                   properties:
                   - !ruby/object:Api::Type::NestedObject
                     name: localObjectReference
