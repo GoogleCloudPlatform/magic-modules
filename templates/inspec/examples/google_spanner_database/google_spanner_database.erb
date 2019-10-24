@@ -3,5 +3,5 @@
 
 describe google_spanner_database(project: <%= gcp_project_id -%>, instance: <%= doc_generation ? "'#{spannerdatabase['instance']}'" : "spannerdatabase['instance']" -%>, name: <%= doc_generation ? "'#{spannerdatabase['name']}'" : "spannerdatabase['name']" -%>) do
   it { should exist }
-  its('name') { should eq <%= doc_generation ? "'#{spannerdatabase['name']}'" : "spannerdatabase['name']" -%> }
+  its('name') { should match <%= doc_generation ? "'#{spannerdatabase['name']}'" : "spannerdatabase['name']" -%> }
 end
