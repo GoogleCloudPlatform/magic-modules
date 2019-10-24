@@ -78,6 +78,8 @@ module Provider
                         'third_party/validator/sql_database_instance.go'],
                        ['google/storage_bucket.go',
                         'third_party/validator/storage_bucket.go'],
+                       ['google/storage_bucket_iam.go',
+                        'third_party/validator/storage_bucket_iam.go'],
                        ['google/iam_helpers.go',
                         'third_party/validator/iam_helpers.go'],
                        ['google/iam_helpers_test.go',
