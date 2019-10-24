@@ -153,7 +153,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 	return nil
 }
 
-// Flattens Bindings so each role+condition has a single Binding with combined members
+// Flattens a list of Bindings so each role+condition has a single Binding with combined members
 func mergeBindings(bindings []*cloudresourcemanager.Binding) []*cloudresourcemanager.Binding {
 	bm := createIamBindingsMap(bindings)
 	return listFromIamBindingMap(bm)
@@ -185,7 +185,7 @@ type iamBindingKey struct {
 	Condition conditionKey
 }
 
-// Flattens a list of Bindings so each role+condition has a single Binding with combined members
+// Removes a single role+condition binding from a list of Bindings
 func removeAllBindingsWithRoleAndCondition(b []*cloudresourcemanager.Binding, role string, condition *cloudresourcemanager.Expr) []*cloudresourcemanager.Binding {
 	bMap := createIamBindingsMap(b)
 	key := iamBindingKey{role, conditionKeyFromCondition(condition)}
