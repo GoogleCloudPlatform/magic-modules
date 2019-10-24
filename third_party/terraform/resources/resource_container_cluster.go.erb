@@ -48,6 +48,17 @@ var (
 	ipAllocationRangeFields     = []string{"ip_allocation_policy.0.cluster_secondary_range_name", "ip_allocation_policy.0.services_secondary_range_name"}
 )
 
+<% unless version == 'ga' -%>
+<%# This is here because it is unused in ga, which trips up linters - when it starts being used, move it to validation.go. %>
+func validateRFC3339Date(v interface{}, k string) (warnings []string, errors []error) {
+	_, err := time.Parse(time.RFC3339, v.(string))
+	if err != nil {
+		errors = append(errors, err)
+	}
+	return
+}
+<% end %>
+
 func resourceContainerCluster() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceContainerClusterCreate,
@@ -432,7 +443,6 @@ func resourceContainerCluster() *schema.Resource {
 									"recurrence": {
 										Type: schema.TypeString,
 										Required: true,
-										ValidateFunc: validateRFC5545Recurrence,
 									},
 								},
 							},
