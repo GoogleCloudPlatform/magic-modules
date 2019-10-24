@@ -2271,6 +2271,10 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 	name := containerClusterFullName(project, location, clusterName)
 	cluster, _ := config.clientContainerBeta.Projects.Locations.Clusters.Get(name).Do()
 	resourceVersion := ""
+    // If the cluster doesn't exist or if there is a read error of any kind, we will pass in an empty
+    // resourceVersion.  If there happens to be a change to maintenance policy, we will fail at that
+    // point.  This is a compromise between code cleanliness and a slightly worse user experience in
+    // an unlikely error case - we choose code cleanliness.
 	if cluster != nil && cluster.MaintenancePolicy != nil {
 		resourceVersion = cluster.MaintenancePolicy.ResourceVersion
 	}
