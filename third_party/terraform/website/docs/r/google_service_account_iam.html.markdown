@@ -163,11 +163,11 @@ The `condition` block supports:
 
 * `title` - (Required) A title for the expression, i.e. a short string describing its purpose.
 
-~> **Warning:** Terraform assumes that a `role` and condition `title` can uniquely identify a binding
-  within a policy. If that is not the case (i.e. two bindings have the same `role` and condition `title`
-  but different condition `expression`s or `description`s), the behavior is undefined.
-
 * `description` - (Optional) An optional description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
+
+~> **Warning:** Terraform considers the `role` and condition contents (`title`+`description`+`expression`) as the
+  identifier for the binding. This means that if any part of the condition is changed out-of-band, Terraform will
+  consider it to be an entirely different resource and will treat it as such.
 
 ## Attributes Reference
 

@@ -128,7 +128,14 @@ func iamMemberImport(newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser 
 				binding = b
 			}
 		}
+		if binding == nil {
+			return nil, fmt.Errorf("Cannot find binding for %q with role %q, member %q, and condition title %q", updater.DescribeResource(), role, member, conditionTitle)
+		}
+
 		d.Set("condition", flattenIamCondition(binding.Condition))
+		if k := conditionKeyFromCondition(binding.Condition); !k.Empty() {
+			d.SetId(d.Id() + "/" + k.String())
+		}
 <% end -%>
 
 		return []*schema.ResourceData{d}, nil
@@ -188,6 +195,11 @@ func resourceIamMemberCreate(newUpdaterFunc newResourceIamUpdaterFunc, enableBat
 			return err
 		}
 		d.SetId(updater.GetResourceId() + "/" + memberBind.Role + "/" + strings.ToLower(memberBind.Members[0]))
+<% unless version == 'ga' -%>
+		if k := conditionKeyFromCondition(memberBind.Condition); !k.Empty() {
+			d.SetId(d.Id() + "/" + k.String())
+		}
+<% end -%>
 		return resourceIamMemberRead(newUpdaterFunc)(d, meta)
 	}
 }
@@ -218,7 +230,7 @@ func resourceIamMemberRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.Read
 		}
 
 		if binding == nil {
-			log.Printf("[DEBUG]: Binding for role %+v with condition %q does not exist in policy of %s, removing member %q from state.", eMember.Role, eCondition, updater.DescribeResource(), eMember.Members[0])
+			log.Printf("[DEBUG]: Binding for role %q with condition %+v does not exist in policy of %s, removing member %q from state.", eMember.Role, eCondition, updater.DescribeResource(), eMember.Members[0])
 			d.SetId("")
 			return nil
 		}

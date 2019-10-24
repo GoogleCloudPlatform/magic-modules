@@ -108,6 +108,11 @@ func resourceIamBindingCreateUpdate(newUpdaterFunc newResourceIamUpdaterFunc, en
 		}
 
 		d.SetId(updater.GetResourceId() + "/" + binding.Role)
+<% unless version == 'ga' -%>
+		if k := conditionKeyFromCondition(binding.Condition); !k.Empty() {
+			d.SetId(d.Id() + "/" + k.String())
+		}
+<% end -%>
 		return resourceIamBindingRead(newUpdaterFunc)(d, meta)
 	}
 }
@@ -214,7 +219,14 @@ func iamBindingImport(newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser
 				binding = b
 			}
 		}
+		if binding == nil {
+			return nil, fmt.Errorf("Cannot find binding for %q with role %q and condition title %q", updater.DescribeResource(), role, conditionTitle)
+		}
+
 		d.Set("condition", flattenIamCondition(binding.Condition))
+		if k := conditionKeyFromCondition(binding.Condition); !k.Empty() {
+			d.SetId(d.Id() + "/" + k.String())
+		}
 <% end -%>
 
 		// It is possible to return multiple bindings, since we can learn about all the bindings
@@ -286,10 +298,7 @@ func expandIamCondition(v interface{}) *cloudresourcemanager.Expr {
 }
 
 func flattenIamCondition(condition *cloudresourcemanager.Expr) []map[string]interface{} {
-	if condition == nil {
-		return nil
-	}
-	if condition.Expression == "" && condition.Title == "" && condition.Description == "" {
+	if conditionKeyFromCondition(condition).Empty() {
 		return nil
 	}
 	return []map[string]interface{}{
