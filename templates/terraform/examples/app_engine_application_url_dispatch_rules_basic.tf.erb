@@ -1,29 +1,21 @@
-resource "google_app_engine_standard_app_version" "<%= ctx[:primary_resource_id] %>" {
-  version_id = "v1"
-  service    = "myapp"
-  runtime    = "nodejs10"
-
-  entrypoint {
-    shell = "node ./app.js"
+resource "google_app_engine_application_url_dispatch_rules" "<%= ctx[:primary_resource_id] %>" {
+  dispatch_rules {
+    domain = "*"
+    path = "/*"
+    service = "default"
   }
 
-  deployment {
-    zip {
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.object.name}"
-    }
+  dispatch_rules {
+    domain = "*"
+    path = "/admin/*"
+    service = "${google_app_engine_standard_app_version.admin_v3.service}"
   }
-
-  env_variables = {
-    port = "8080"
-  }
-
-  delete_service_on_destroy = true
 }
 
-resource "google_app_engine_standard_app_version" "myapp_v2" {
-  version_id = "v2"
-  service    = "myapp"
-  runtime    = "nodejs10"
+resource "google_app_engine_standard_app_version" "admin_v3" {
+  version_id = "v3"
+  service = "admin"
+  runtime = "nodejs10"
 
   entrypoint {
     shell = "node ./app.js"

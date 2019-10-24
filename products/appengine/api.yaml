@@ -446,3 +446,60 @@ objects:
           Instance class that is used to run this version. Valid values are
           AutomaticScaling F1, F2, F4, F4_1G
           (Only AutomaticScaling is supported at the moment)
+  - !ruby/object:Api::Resource
+    name: 'ApplicationUrlDispatchRules'
+    description: |
+      Rules to match an HTTP request and dispatch that request to a service.
+    base_url: 'apps/{{project}}'
+    create_url: 'apps/{{project}}?updateMask=dispatch_rules'
+    create_verb: :PATCH
+    delete_url: 'apps/{{project}}?updateMask=dispatch_rules'
+    delete_verb: :PATCH
+    update_url: 'apps/{{project}}?updateMask=dispatch_rules'
+    update_verb: :PATCH
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps#UrlDispatchRule'
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'response'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    properties:
+      - !ruby/object:Api::Type::Array   
+        name: 'dispatchRules'
+        required: true
+        description: |
+          Rules to match an HTTP request and dispatch that request to a service.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'domain'
+              default_value: '*'
+              description: |
+                Domain name to match against. The wildcard "*" is supported if specified before a period: "*.".
+                Defaults to matching all domains: "*".
+            - !ruby/object:Api::Type::String
+              name: 'path'
+              description: |
+                Pathname within the host. Must start with a "/". A single "*" can be included at the end of the path.
+                The sum of the lengths of the domain and path may not exceed 100 characters.
+              required: true
+            - !ruby/object:Api::Type::String
+              name: 'service'
+              description: |
+                Pathname within the host. Must start with a "/". A single "*" can be included at the end of the path.
+                The sum of the lengths of the domain and path may not exceed 100 characters.
+              required: true
+              

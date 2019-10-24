@@ -316,3 +316,11 @@ node_group:
   name: inspec-node-group
   description: A description of the node group
   size: 0
+
+router_nat:
+  name: inspec-router-nat
+  nat_ip_allocate_option: AUTO_ONLY
+  source_subnetwork_ip_ranges_to_nat: ALL_SUBNETWORKS_ALL_IP_RANGES
+  min_ports_per_vm: 2
+  log_config_enable: true
+  log_config_filter: ERRORS_ONLY

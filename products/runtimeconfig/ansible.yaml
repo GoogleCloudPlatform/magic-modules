@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2019 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,26 +13,18 @@
 
 --- !ruby/object:Provider::Ansible::Config
 datasources: !ruby/object:Overrides::ResourceOverrides
-  FirewallRule: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: false
+  Config: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-  DomainMapping: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
+  Variable: !ruby/object:Overrides::Ansible::ResourceOverride
+    facts: !ruby/object:Provider::Ansible::FactsOverride
+      has_filters: false
 overrides: !ruby/object:Overrides::ResourceOverrides
-  ApplicationUrlDispatchRules: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  FirewallRule: !ruby/object:Overrides::Ansible::ResourceOverride
-    # Because of lack of state, Ansible treats identity
-    # differently than Terraform.
-    identity:
-      - priority
-  Service: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  StandardAppVersion: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  DomainMapping: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
+  Variable: !ruby/object:Overrides::Ansible::ResourceOverride
+    provider_helpers:
+      - 'products/runtimeconfig/helpers/ansible/variable_delete_config.py'
+    transport: !ruby/object:Overrides::Ansible::Transport
+      encoder: encode_request
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>
