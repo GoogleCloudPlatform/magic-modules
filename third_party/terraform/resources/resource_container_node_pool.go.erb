@@ -265,7 +265,7 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 	}
 	timeout -= time.Since(startTime)
 
-	d.SetId(fmt.Sprintf("%s/%s/%s", nodePoolInfo.location, nodePoolInfo.cluster, nodePool.Name))
+	d.SetId(fmt.Sprintf("projects/%s/locations/%s/clusters/%s/nodePools/%s", nodePoolInfo.project, nodePoolInfo.location, nodePoolInfo.cluster, nodePool.Name))
 
 	waitErr := containerOperationWait(config,
 		operation, nodePoolInfo.project,
@@ -414,29 +414,38 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 }
 
 func resourceContainerNodePoolStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
+	config := meta.(*Config)
+	project, err := getProject(d, config)
+	if err != nil {
+		return nil, err
+	}
 
+	var location, cluster, name string
+	parts := strings.Split(d.Id(), "/")
 	switch len(parts) {
 	case 3:
-		location := parts[0]
-
-		d.Set("location", location)
-		d.Set("cluster", parts[1])
-		d.Set("name", parts[2])
+		location = parts[0]
+		cluster = parts[1]
+		name = parts[2]
 	case 4:
-		d.Set("project", parts[0])
-
-		location := parts[1]
-
-		d.Set("location", location)
-		d.Set("cluster", parts[2])
-		d.Set("name", parts[3])
-
-		// override the inputted ID with the <location>/<cluster>/<name> format
-		d.SetId(strings.Join(parts[1:], "/"))
+		project = parts[0]
+		location = parts[1]
+		cluster = parts[2]
+		name = parts[3]
+	case 8:
+		project = parts[1]
+		location = parts[3]
+		cluster = parts[5]
+		name = parts[7]
 	default:
-		return nil, fmt.Errorf("Invalid container cluster specifier. Expecting {location}/{cluster}/{name} or {project}/{location}/{cluster}/{name}")
+		return nil, fmt.Errorf("Invalid container cluster specifier. Expecting {location}/{cluster}/{name},  {project}/{location}/{cluster}/{name} or projects/{project}/locations/{location}/clusters/{cluster}/nodePools/{name}")
 	}
+
+	d.Set("project", project)
+	d.Set("location", location)
+	d.Set("cluster", cluster)
+	d.Set("name", name)
+	d.SetId(fmt.Sprintf("projects/%s/locations/%s/clusters/%s/nodePools/%s", project, location, cluster, name))
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -795,5 +804,6 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 
 func getNodePoolName(id string) string {
 	// name can be specified with name, name_prefix, or neither, so read it from the id.
-	return strings.Split(id, "/")[2]
+	splits := strings.Split(id, "/")
+	return splits[len(splits)-1]
 }
