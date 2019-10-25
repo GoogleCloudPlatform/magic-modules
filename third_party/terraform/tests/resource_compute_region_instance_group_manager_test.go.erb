@@ -310,18 +310,8 @@ func testAccCheckRegionInstanceGroupManagerDestroy(s *terraform.State) error {
 		if rs.Type != "google_compute_region_instance_group_manager" {
 			continue
 		}
-		id, err := parseRegionInstanceGroupManagerId(rs.Primary.ID)
-		if err != nil {
-			return err
-		}
-		if id.Project == "" {
-			id.Project = config.Project
-		}
-		if id.Region == "" {
-			id.Region = rs.Primary.Attributes["region"]
-		}
-		_, err = config.clientCompute.RegionInstanceGroupManagers.Get(
-			id.Project, id.Region, id.Name).Do()
+		_, err := config.clientCompute.RegionInstanceGroupManagers.Get(
+			rs.Primary.Attributes["project"], rs.Primary.Attributes["region"], rs.Primary.Attributes["name"]).Do()
 		if err == nil {
 			return fmt.Errorf("RegionInstanceGroupManager still exists")
 		}
