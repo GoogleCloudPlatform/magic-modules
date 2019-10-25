@@ -123,6 +123,35 @@ logging_service    = "logging.googleapis.com/kubernetes"
 monitoring_service = "monitoring.googleapis.com/kubernetes"
 ```
 
+### `taint` field is now authoritative when set
+
+The `taint` field inside of `node_config` blocks on `google_container_cluster`
+and `google_container_node_pool` will no longer ignored GPU-related values when
+set.
+
+Previously, the field ignored upstream taints when unset and ignored unset GPU
+taints when other taints were set. Now it will ignore upstream taints when set
+and act authoritatively when set, requiring all taints (including Kubenetes and
+GKE-managed ones) to be defined in config.
+
+Additionally, the empty taint can be specified. As a result of this change, the
+JSON/state representation of the field has changed, introducing an
+incompatibility for users who specify config in JSON instead of HCL.
+
+#### Old Defaults
+
+```hcl
+logging_service    = "logging.googleapis.com"
+monitoring_service = "monitoring.googleapis.com"
+```
+
+#### New Defaults
+
+```hcl
+logging_service    = "logging.googleapis.com/kubernetes"
+monitoring_service = "monitoring.googleapis.com/kubernetes"
+```
+
 ## Resource: `google_project_services`
 
 ### `google_project_services` has been removed from the provider
