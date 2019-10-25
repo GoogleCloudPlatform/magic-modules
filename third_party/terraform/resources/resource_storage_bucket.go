@@ -516,7 +516,7 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 
 			retentionPolicy := retention_policies[0].(map[string]interface{})
 
-			if locked, ok := retentionPolicy["is_locked"]; ok && locked.(bool) {
+			if locked, ok := retentionPolicy["is_locked"]; ok && locked.(bool) && d.HasChange("retention_policy.0.is_locked") {
 				err = lockRetentionPolicy(config.clientStorage.Buckets, d.Get("name").(string), res.Metageneration)
 				if err != nil {
 					return err
