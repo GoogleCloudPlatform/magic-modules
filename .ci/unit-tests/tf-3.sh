@@ -9,7 +9,7 @@ set -x
 
 # Create GOPATH structure
 mkdir -p "${GOPATH}/src/github.com/terraform-providers"
-ln -s "${PWD}/terraform-diff/new" "${GOPATH}/src/github.com/terraform-providers/$PROVIDER_NAME"
+ln -s "${PWD}/terraform-diff/${SUBDIR}/new" "${GOPATH}/src/github.com/terraform-providers/$PROVIDER_NAME"
 
 cd "${GOPATH}/src/github.com/terraform-providers/$PROVIDER_NAME"
 
