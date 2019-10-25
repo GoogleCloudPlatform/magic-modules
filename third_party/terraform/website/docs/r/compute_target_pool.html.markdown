@@ -85,8 +85,11 @@ exported:
 
 ## Import
 
-Target pools can be imported using the `name`, e.g.
+Target pools can be imported using any of the following formats:
 
 ```
-$ terraform import google_compute_target_pool.default instance-pool
+$ terraform import google_compute_target_pool.default projects/{{project}}/regions/{{region}}/targetPools/{{name}}
+$ terraform import google_compute_target_pool.default {{project}}/{{region}}/{{name}}
+$ terraform import google_compute_target_pool.default {{region}}/{{name}}
+$ terraform import google_compute_target_pool.default {{name}}
 ```

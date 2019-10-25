@@ -93,16 +93,21 @@ func TestAccContainerCluster_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:		 "google_container_cluster.primary",
-				ImportStateIdPrefix: "us-central1-a/",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
+				ResourceName:      "google_container_cluster.primary",
+				ImportStateId:     fmt.Sprintf("us-central1-a/%s", clusterName),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
-				ResourceName:		 "google_container_cluster.primary",
-				ImportStateIdPrefix: fmt.Sprintf("%s/us-central1-a/", getTestProjectFromEnv()),
-				ImportState:		 true,
-				ImportStateVerify:	 true,
+				ResourceName:	     "google_container_cluster.primary",
+				ImportStateId:     fmt.Sprintf("%s/us-central1-a/%s", getTestProjectFromEnv(), clusterName),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:	     "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -126,7 +131,6 @@ func TestAccContainerCluster_misc(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
-				ImportStateIdPrefix:     "us-central1-a/",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
@@ -136,7 +140,6 @@ func TestAccContainerCluster_misc(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
-				ImportStateIdPrefix:     "us-central1-a/",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
@@ -160,7 +163,6 @@ func TestAccContainerCluster_withAddons(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.primary",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -169,7 +171,6 @@ func TestAccContainerCluster_withAddons(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.primary",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -192,7 +193,6 @@ func TestAccContainerCluster_withMasterAuthConfig(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_master_auth",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -205,7 +205,6 @@ func TestAccContainerCluster_withMasterAuthConfig(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_master_auth",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -218,7 +217,6 @@ func TestAccContainerCluster_withMasterAuthConfig(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_master_auth",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -231,7 +229,6 @@ func TestAccContainerCluster_withMasterAuthConfig(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_master_auth",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -255,7 +252,6 @@ func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_master_auth_no_cert",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -277,7 +273,6 @@ func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 			},
 			{
 				ResourceName:        "google_container_cluster.with_authenticator_groups",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:         true,
 				ImportStateVerify:   true,
 			},
@@ -305,7 +300,6 @@ func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_container_cluster.with_network_policy_enabled",
-				ImportStateIdPrefix:     "us-central1-a/",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
@@ -319,7 +313,6 @@ func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_container_cluster.with_network_policy_enabled",
-				ImportStateIdPrefix:     "us-central1-a/",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
@@ -333,7 +326,6 @@ func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_container_cluster.with_network_policy_enabled",
-				ImportStateIdPrefix:     "us-central1-a/",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
@@ -347,7 +339,6 @@ func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_container_cluster.with_network_policy_enabled",
-				ImportStateIdPrefix:     "us-central1-a/",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
@@ -478,7 +469,6 @@ func TestAccContainerCluster_withMasterAuthorizedNetworksConfig(t *testing.T) {
 				ResourceName:		 "google_container_cluster.with_master_authorized_networks",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
-				ImportStateIdPrefix: "us-central1-a/",
 			},
 			{
 				Config: testAccContainerCluster_withMasterAuthorizedNetworksConfig(clusterName, []string{"10.0.0.0/8", "8.8.8.8/32"}, ""),
@@ -487,7 +477,6 @@ func TestAccContainerCluster_withMasterAuthorizedNetworksConfig(t *testing.T) {
 				ResourceName:		 "google_container_cluster.with_master_authorized_networks",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
-				ImportStateIdPrefix: "us-central1-a/",
 			},
 			{
 				Config: testAccContainerCluster_withMasterAuthorizedNetworksConfig(clusterName, []string{}, ""),
@@ -498,7 +487,6 @@ func TestAccContainerCluster_withMasterAuthorizedNetworksConfig(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_master_authorized_networks",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -507,7 +495,6 @@ func TestAccContainerCluster_withMasterAuthorizedNetworksConfig(t *testing.T) {
 			},
 			{
 				ResourceName:        "google_container_cluster.with_master_authorized_networks",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:         true,
 				ImportStateVerify:   true,
 			},
@@ -530,7 +517,6 @@ func TestAccContainerCluster_regional(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.regional",
-				ImportStateIdPrefix: "us-central1/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -554,7 +540,6 @@ func TestAccContainerCluster_regionalWithNodePool(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.regional",
-				ImportStateIdPrefix: "us-central1/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -577,7 +562,6 @@ func TestAccContainerCluster_regionalWithNodeLocations(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_locations",
-				ImportStateIdPrefix: "us-central1/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -586,7 +570,6 @@ func TestAccContainerCluster_regionalWithNodeLocations(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_locations",
-				ImportStateIdPrefix: "us-central1/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -613,7 +596,6 @@ func TestAccContainerCluster_withTpu(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_tpu",
-				ImportStateIdPrefix: "us-central1-b/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -637,7 +619,6 @@ func TestAccContainerCluster_withPrivateClusterConfig(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_private_cluster",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -682,7 +663,6 @@ func TestAccContainerCluster_withIntraNodeVisibility(t *testing.T) {
 			},
 			{
 				ResourceName:        "google_container_cluster.with_intranode_visibility",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:         true,
 				ImportStateVerify:   true,
 			},
@@ -694,7 +674,6 @@ func TestAccContainerCluster_withIntraNodeVisibility(t *testing.T) {
 			},
 			{
 				ResourceName:        "google_container_cluster.with_intranode_visibility",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:         true,
 				ImportStateVerify:   true,
 			},
@@ -718,7 +697,6 @@ func TestAccContainerCluster_withVersion(t *testing.T) {
 			},
 			{
 				ResourceName:			 "google_container_cluster.with_version",
-				ImportStateIdPrefix:	 "us-central1-a/",
 				ImportState:			 true,
 				ImportStateVerify:		 true,
 				ImportStateVerifyIgnore: []string{"min_master_version"},
@@ -742,7 +720,6 @@ func TestAccContainerCluster_updateVersion(t *testing.T) {
 			},
 			{
 				ResourceName:			 "google_container_cluster.with_version",
-				ImportStateIdPrefix:	 "us-central1-a/",
 				ImportState:			 true,
 				ImportStateVerify:		 true,
 				ImportStateVerifyIgnore: []string{"min_master_version"},
@@ -752,7 +729,6 @@ func TestAccContainerCluster_updateVersion(t *testing.T) {
 			},
 			{
 				ResourceName:			 "google_container_cluster.with_version",
-				ImportStateIdPrefix:	 "us-central1-a/",
 				ImportState:			 true,
 				ImportStateVerify:		 true,
 				ImportStateVerifyIgnore: []string{"min_master_version"},
@@ -776,7 +752,6 @@ func TestAccContainerCluster_withNodeConfig(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_config",
-				ImportStateIdPrefix: "us-central1-f/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -785,7 +760,6 @@ func TestAccContainerCluster_withNodeConfig(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_config",
-				ImportStateIdPrefix: "us-central1-f/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -806,7 +780,6 @@ func TestAccContainerCluster_withNodeConfigScopeAlias(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_config_scope_alias",
-				ImportStateIdPrefix: "us-central1-f/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -829,7 +802,6 @@ func TestAccContainerCluster_withNodeConfigShieldedInstanceConfig(t *testing.T) 
 			},
 			{
 				ResourceName:        "google_container_cluster.with_node_config",
-				ImportStateIdPrefix: "us-central1-f/",
 				ImportState:         true,
 				ImportStateVerify:   true,
 			},
@@ -855,7 +827,6 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 			},
 			{
 				ResourceName:			 "google_container_cluster.with_workload_metadata_config",
-				ImportStateIdPrefix:	 "us-central1-a/",
 				ImportState:			 true,
 				ImportStateVerify:		 true,
 				ImportStateVerifyIgnore: []string{"min_master_version"},
@@ -883,7 +854,6 @@ func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_container_cluster.with_sandbox_config",
-				ImportStateIdPrefix:     "us-central1-a/",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"min_master_version"},
@@ -906,13 +876,11 @@ func TestAccContainerCluster_network(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_net_ref_by_url",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_net_ref_by_name",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -933,7 +901,6 @@ func TestAccContainerCluster_backend(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.primary",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -957,7 +924,6 @@ func TestAccContainerCluster_withNodePoolBasic(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_pool",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -981,7 +947,6 @@ func TestAccContainerCluster_withNodePoolUpdateVersion(t *testing.T) {
 			},
 			{
 				ResourceName:			 "google_container_cluster.with_node_pool",
-				ImportStateIdPrefix:	 "us-central1-a/",
 				ImportState:			 true,
 				ImportStateVerify:		 true,
 				ImportStateVerifyIgnore: []string{"min_master_version"},
@@ -991,7 +956,6 @@ func TestAccContainerCluster_withNodePoolUpdateVersion(t *testing.T) {
 			},
 			{
 				ResourceName:			 "google_container_cluster.with_node_pool",
-				ImportStateIdPrefix:	 "us-central1-a/",
 				ImportState:			 true,
 				ImportStateVerify:		 true,
 				ImportStateVerifyIgnore: []string{"min_master_version"},
@@ -1018,7 +982,6 @@ func TestAccContainerCluster_withNodePoolResize(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_pool",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1030,7 +993,6 @@ func TestAccContainerCluster_withNodePoolResize(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_pool",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1058,7 +1020,6 @@ func TestAccContainerCluster_withNodePoolAutoscaling(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_pool",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1071,7 +1032,6 @@ func TestAccContainerCluster_withNodePoolAutoscaling(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_pool",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1084,7 +1044,6 @@ func TestAccContainerCluster_withNodePoolAutoscaling(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_pool",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1105,7 +1064,6 @@ func TestAccContainerCluster_withNodePoolNamePrefix(t *testing.T) {
 			},
 			{
 				ResourceName:			 "google_container_cluster.with_node_pool_name_prefix",
-				ImportStateIdPrefix:	 "us-central1-a/",
 				ImportState:			 true,
 				ImportStateVerify:		 true,
 				ImportStateVerifyIgnore: []string{"node_pool.0.name_prefix"},
@@ -1127,7 +1085,6 @@ func TestAccContainerCluster_withNodePoolMultiple(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_pool_multiple",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1164,7 +1121,6 @@ func TestAccContainerCluster_withNodePoolNodeConfig(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_node_pool_node_config",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1187,7 +1143,6 @@ func TestAccContainerCluster_withMaintenanceWindow(t *testing.T) {
 			},
 			{
 				ResourceName:		 resourceName,
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1200,7 +1155,6 @@ func TestAccContainerCluster_withMaintenanceWindow(t *testing.T) {
 			},
 			{
 				ResourceName:		 resourceName,
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 				// maintenance_policy.# = 0 is equivalent to no maintenance policy at all,
@@ -1274,7 +1228,6 @@ func TestAccContainerCluster_withIPAllocationPolicy_existingSecondaryRanges(t *t
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_ip_allocation_policy",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1296,7 +1249,6 @@ func TestAccContainerCluster_withIPAllocationPolicy_specificIPRanges(t *testing.
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_ip_allocation_policy",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1318,7 +1270,6 @@ func TestAccContainerCluster_withIPAllocationPolicy_specificSizes(t *testing.T) 
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_ip_allocation_policy",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1375,7 +1326,6 @@ func TestAccContainerCluster_withIPAllocationPolicy_explicitEmpty(t *testing.T) 
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_ip_allocation_policy",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1384,7 +1334,6 @@ func TestAccContainerCluster_withIPAllocationPolicy_explicitEmpty(t *testing.T) 
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_ip_allocation_policy",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1413,7 +1362,6 @@ func TestAccContainerCluster_nodeAutoprovisioning(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_autoprovisioning",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 				ImportStateVerifyIgnore: []string{"min_master_version"},
@@ -1427,7 +1375,6 @@ func TestAccContainerCluster_nodeAutoprovisioning(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_autoprovisioning",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 				ImportStateVerifyIgnore: []string{"min_master_version"},
@@ -1454,7 +1401,7 @@ func TestAccContainerCluster_sharedVpc(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.shared_vpc_cluster",
-				ImportStateIdPrefix: fmt.Sprintf("%s-service/us-central1-a/", projectName),
+				ImportStateId: fmt.Sprintf("%s-service/us-central1-a/%s", projectName, clusterName),
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1478,7 +1425,6 @@ func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 			},
 			{
 				ResourceName:        "google_container_cluster.with_workload_identity_config",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:         true,
 				ImportStateVerify:   true,
 			},
@@ -1487,7 +1433,6 @@ func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 			},
 			{
 				ResourceName:        "google_container_cluster.with_workload_identity_config",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:         true,
 				ImportStateVerify:   true,
 			},
@@ -1496,7 +1441,6 @@ func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 			},
 			{
 				ResourceName:        "google_container_cluster.with_workload_identity_config",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:         true,
 				ImportStateVerify:   true,
 			},
@@ -1505,7 +1449,6 @@ func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 			},
 			{
 				ResourceName:        "google_container_cluster.with_workload_identity_config",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:         true,
 				ImportStateVerify:   true,
 			},
@@ -1529,7 +1472,6 @@ func TestAccContainerCluster_withBinaryAuthorization(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_binary_authorization",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1538,7 +1480,6 @@ func TestAccContainerCluster_withBinaryAuthorization(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_binary_authorization",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1561,7 +1502,6 @@ func TestAccContainerCluster_withShieldedNodes(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_shielded_nodes",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1570,7 +1510,6 @@ func TestAccContainerCluster_withShieldedNodes(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_shielded_nodes",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1593,7 +1532,6 @@ func TestAccContainerCluster_withFlexiblePodCIDR(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_flexible_cidr",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1622,7 +1560,6 @@ func TestAccContainerCluster_errorCleanDanglingCluster(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.cidr_error_preempt",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
@@ -1679,7 +1616,6 @@ func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 			},
 			{
 				ResourceName:        "google_container_cluster.with_database_encryption",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:         true,
 				ImportStateVerify:   true,
 			},
@@ -1704,7 +1640,6 @@ func TestAccContainerCluster_withResourceUsageExportConfig(t *testing.T) {
 			},
 			{
 				ResourceName:        "google_container_cluster.with_resource_usage_export_config",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:         true,
 				ImportStateVerify:   true,
 			},
@@ -1713,7 +1648,6 @@ func TestAccContainerCluster_withResourceUsageExportConfig(t *testing.T) {
 			},
 			{
 				ResourceName:        "google_container_cluster.with_resource_usage_export_config",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:         true,
 				ImportStateVerify:   true,
 			},
@@ -1741,7 +1675,6 @@ func TestAccContainerCluster_withMasterAuthorizedNetworksDisabled(t *testing.T) 
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_private_cluster",
-				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
