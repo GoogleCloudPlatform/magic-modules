@@ -12,3 +12,4 @@ run:
 params:
   PROVIDER_NAME: ""
   TEST_DIR: ""
+  SUBDIR: ""

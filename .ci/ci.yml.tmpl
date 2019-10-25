@@ -183,13 +183,6 @@ jobs:
                     GITHUB_ORG: {{v.github_org}}
                     OVERRIDE_PROVIDER: {{v.override_provider}}
 
-                - task: test-{{v.short_name}}
-                  file: magic-modules-branched/.ci/unit-tests/tf-3.yml
-                  timeout: 30m
-                  params:
-                      PROVIDER_NAME: {{v.provider_name}}
-                      TEST_DIR: {{v.test_dir}}
-
                 - put: {{v.short_name}}-intermediate
                   params:
                       repository: terraform-diff/{{k}}/new
@@ -205,6 +198,14 @@ jobs:
                       force: true
                   get_params:
                       skip_clone: true
+
+                - task: test-{{v.short_name}}
+                  file: magic-modules-branched/.ci/unit-tests/tf-3.yml
+                  timeout: 30m
+                  params:
+                      PROVIDER_NAME: {{v.provider_name}}
+                      TEST_DIR: {{v.test_dir}}
+                      SUBDIR: {{k}}
 
 {% endfor %}
 
