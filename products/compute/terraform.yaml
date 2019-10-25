@@ -264,6 +264,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           region_backend_service_name: "region-backend-service"
           health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_backend_service_ilb_round_robin"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          region_backend_service_name: "region-backend-service"
+          health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_backend_service_ilb_ring_hash"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          region_backend_service_name: "region-backend-service"
+          health_check_name: "health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/migrate_state_noop.go.erb'
       resource_definition: 'templates/terraform/resource_definition/region_backend_service.go.erb'
@@ -282,6 +296,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       backends.group: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkRelativePaths'
         custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
+      backends.capacityScaler: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       connectionDraining: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       connectionDraining.drainingTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -292,6 +308,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
         set_hash_func: 'selfLinkRelativePathHash'
         custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
       protocol: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       sessionAffinity: !ruby/object:Overrides::Terraform::PropertyOverride
