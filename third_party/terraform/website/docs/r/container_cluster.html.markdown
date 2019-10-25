@@ -712,6 +712,8 @@ GKE clusters can be imported using the `project` , `location`, and `name`. If th
 provider value will be used. Examples:
 
 ```
+$ terraform import google_container_cluster.mycluster projects/my-gcp-project/locations/us-east1-a/clusters/my-cluster
+
 $ terraform import google_container_cluster.mycluster my-gcp-project/us-east1-a/my-cluster
 
 $ terraform import google_container_cluster.mycluster us-east1-a/my-cluster
