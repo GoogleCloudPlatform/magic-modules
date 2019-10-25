@@ -93,21 +93,21 @@ func TestAccContainerCluster_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:		 "google_container_cluster.primary",
-				ImportStateId: fmt.Sprintf("us-central1-a/%s", clusterName),
-				ImportState:		 true,
-				ImportStateVerify:	 true,
+				ResourceName:		   "google_container_cluster.primary",
+				ImportStateId:     fmt.Sprintf("us-central1-a/%s", clusterName),
+				ImportState:		   true,
+				ImportStateVerify: true,
 			},
 			{
-				ResourceName:		 "google_container_cluster.primary",
-				ImportStateId: fmt.Sprintf("%s/us-central1-a/%s", getTestProjectFromEnv(), clusterName),
-				ImportState:		 true,
-				ImportStateVerify:	 true,
+				ResourceName:		   "google_container_cluster.primary",
+				ImportStateId:     fmt.Sprintf("%s/us-central1-a/%s", getTestProjectFromEnv(), clusterName),
+				ImportState:		   true,
+				ImportStateVerify: true,
 			},
 			{
-				ResourceName:		 "google_container_cluster.primary",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
+				ResourceName:		   "google_container_cluster.primary",
+				ImportState:		   true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -786,32 +786,6 @@ func TestAccContainerCluster_withNodeConfigScopeAlias(t *testing.T) {
 		},
 	})
 }
-
-<% unless version.nil? || version == 'ga' -%>
-func TestAccContainerCluster_withNodeConfigTaints(t *testing.T) {
-	t.Parallel()
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:	  func() { testAccPreCheck(t) },
-		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_withNodeConfigTaints(),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_cluster.with_node_config", "node_config.0.taint.#", "2"),
-				),
-			},
-			{
-				ResourceName:			 "google_container_cluster.with_node_config",
-				ImportState:			 true,
-				ImportStateVerify:		 true,
-			},
-			// Once taints are in GA, consider merging this test with the _withNodeConfig test.
-		},
-	})
-}
-<% end -%>
 
 func TestAccContainerCluster_withNodeConfigShieldedInstanceConfig(t *testing.T) {
 	t.Parallel()

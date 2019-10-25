@@ -2715,39 +2715,26 @@ func flattenDatabaseEncryption(c *containerBeta.DatabaseEncryption) []map[string
 func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
 
-	parts := strings.Split(d.Id(), "/")
-	var project, location, clusterName string
-	switch len(parts) {
-	case 2:
-		location = parts[0]
-		clusterName = parts[1]
-	case 3:
-		project = parts[0]
-		location = parts[1]
-		clusterName = parts[2]
-	case 6:
-		project = parts[1]
-		location = parts[3]
-		clusterName = parts[5]
-	default:
-		return nil, fmt.Errorf("Invalid container cluster specifier. Expecting {location}/{name}, {project}/{location}/{name} or projects/{project}/locations/{location}/clusters/{name}")
+	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<name>[^/]+)", "(?P<location>[^/]+)/(?P<name>[^/]+)"}, d, config); err != nil {
+		return nil, err
+	}
+	project, err := getProject(d, config)
+	if err != nil {
+		return nil, err
 	}
 
-	if len(project) == 0 {
-		var err error
-		project, err = getProject(d, config)
-		if err != nil {
-			return nil, err
-		}
+	location, err := getLocation(d, config)
+	if err != nil {
+		return nil, err
 	}
-	d.Set("project", project)
 
+	clusterName := d.Get("name").(string)
 
-	d.Set("name", clusterName)
-	d.SetId(containerClusterFullName(project, location, clusterName))
 	if err := waitForContainerClusterReady(config, project, location, clusterName, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return nil, err
 	}
+
+	d.SetId(containerClusterFullName(project, location, clusterName))
 
 	return []*schema.ResourceData{d}, nil
 }

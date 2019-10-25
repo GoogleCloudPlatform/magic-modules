@@ -415,37 +415,15 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 
 func resourceContainerNodePoolStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	project, err := getProject(d, config)
-	if err != nil {
+	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<cluster>[^/]+)/nodePools/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<cluster>[^/]+)/(?P<name>[^/]+)", "(?P<location>[^/]+)/(?P<cluster>[^/]+)/(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
 
-	var location, cluster, name string
-	parts := strings.Split(d.Id(), "/")
-	switch len(parts) {
-	case 3:
-		location = parts[0]
-		cluster = parts[1]
-		name = parts[2]
-	case 4:
-		project = parts[0]
-		location = parts[1]
-		cluster = parts[2]
-		name = parts[3]
-	case 8:
-		project = parts[1]
-		location = parts[3]
-		cluster = parts[5]
-		name = parts[7]
-	default:
-		return nil, fmt.Errorf("Invalid container cluster specifier. Expecting {location}/{cluster}/{name},  {project}/{location}/{cluster}/{name} or projects/{project}/locations/{location}/clusters/{cluster}/nodePools/{name}")
-	}
-
-	d.Set("project", project)
-	d.Set("location", location)
-	d.Set("cluster", cluster)
-	d.Set("name", name)
-	d.SetId(fmt.Sprintf("projects/%s/locations/%s/clusters/%s/nodePools/%s", project, location, cluster, name))
+	id, err := replaceVars(d, config, "projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}")
+	if err != nil {
+  	return nil, err
+  }
+	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
 }
