@@ -27,7 +27,7 @@ func datasourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error
 		if err != nil {
 			return err
 		}
-		d.SetId(project)
+		d.SetId(fmt.Sprintf("projects/%s", project))
 	}
 
 	return resourceGoogleProjectRead(d, meta)

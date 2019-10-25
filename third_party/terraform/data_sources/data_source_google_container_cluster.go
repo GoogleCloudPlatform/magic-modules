@@ -23,7 +23,17 @@ func dataSourceGoogleContainerCluster() *schema.Resource {
 func datasourceContainerClusterRead(d *schema.ResourceData, meta interface{}) error {
 	clusterName := d.Get("name").(string)
 
-	d.SetId(clusterName)
+	location, err := getLocation(d, config)
+	if err != nil {
+		return err
+	}
+
+	project, err := getProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	d.SetId(containerClusterFullName(project, location, clusterName))
 
 	return resourceContainerClusterRead(d, meta)
 }

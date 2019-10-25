@@ -38,7 +38,7 @@ func dataSourceComputeNetworkEndpointGroupRead(d *schema.ResourceData, meta inte
 		d.Set("name", parsed.Name)
 		d.Set("zone", parsed.Zone)
 		d.Set("project", parsed.Project)
-		d.SetId(fmt.Sprintf("%s/%s", parsed.Zone, parsed.Name))
+		d.SetId(fmt.Sprintf("projects/%s/zones/%s/networkEndpointGroups/%s", parsed.Zone, parsed.Name))
 	} else {
 		return errors.New("Must provide either `self_link` or `zone/name`")
 	}
