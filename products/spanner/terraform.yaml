@@ -57,7 +57,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           {{description}}
-
           If not provided, a random string starting with `tf-` will be selected.
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^[a-z][-a-z0-9]*[a-z0-9]$'
@@ -65,6 +64,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # system, which is done in the encoder.  Consequently we have
         # to interpret "not set" as "use the name in state".
         default_from_api: true
+        required: false
       nodeCount: !ruby/object:Overrides::Terraform::PropertyOverride
         name: num_nodes
       config: !ruby/object:Overrides::Terraform::PropertyOverride
