@@ -86,6 +86,9 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 	}
 
 	d.SetId(sa.Name)
+	// This API is meant to be synchronous, but in practice it shows the old value for
+	// a few milliseconds after the update goes through.  A second is more than enough
+	// time to ensure following reads are correct.
 	time.Sleep(time.Second)
 
 	return resourceGoogleServiceAccountRead(d, meta)
@@ -137,6 +140,9 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 		if err != nil {
 			return fmt.Errorf("Error updating service account %q: %s", d.Id(), err)
 		}
+		// This API is meant to be synchronous, but in practice it shows the old value for
+		// a few milliseconds after the update goes through.  A second is more than enough
+		// time to ensure following reads are correct.
 		time.Sleep(time.Second)
 	}
 
