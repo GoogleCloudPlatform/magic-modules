@@ -40,17 +40,20 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 
 			<% if version == 'ga' -%>
 			"instance_template": &schema.Schema{
-				<%# TODO chrisst - mark as conflicts with verison %>
 				Type:             schema.TypeString,
 				Optional:         true,
-				Deprecated:         "This field will be replaced by `version` in 3.0.0",
+				Computed:         true,
+				Deprecated:       "This field will be replaced by `version` in 3.0.0",
+				ConflictsWith: []string{"version"},
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
 			},
 			<% end -%>
 
 			"version": &schema.Schema{
 				Type:       schema.TypeList,
-				Required: true,
+				Optional: true,
+				Computed: true,
+				<%# TODO 3.0.0 - mark as required %>
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": &schema.Schema{
@@ -148,11 +151,11 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 
 <% if version == 'ga' -%>
 			"update_strategy": &schema.Schema{
-				<%# TODO chrisst - figure out what this conflicts with and mark as such %>
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "REPLACE",
-				Deprecated:   "This field will be removed in 3.0.0",
+				Deprecated:   "This field will be replaced by `update_policy` in 3.0.0",
+				ConflictsWith: []string{"update_policy"},
 				ValidateFunc: validation.StringInSlice([]string{"RESTART", "NONE", "ROLLING_UPDATE", "REPLACE"}, false),
 				DiffSuppressFunc: func(key, old, new string, d *schema.ResourceData) bool {
 					if old == "REPLACE" && new == "RESTART" {
@@ -204,8 +207,56 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 
 <% if version == 'ga' -%>
 			"rolling_update_policy": &schema.Schema{
-				Removed:    "This field replaced by update_policy.",
 				Computed:   true,
+				Type:       schema.TypeList,
+				Removed:    "This field has been replaced by update_policy.",
+				Optional:   true,
+				MaxItems:   1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"minimal_action": &schema.Schema{
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"RESTART", "REPLACE"}, false),
+						},
+
+						"type": &schema.Schema{
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"OPPORTUNISTIC", "PROACTIVE"}, false),
+						},
+
+						"max_surge_fixed": &schema.Schema{
+							Type:          schema.TypeInt,
+							Optional:      true,
+							Computed:      true,
+						},
+
+						"max_surge_percent": &schema.Schema{
+							Type:          schema.TypeInt,
+							Optional:      true,
+							ValidateFunc:  validation.IntBetween(0, 100),
+						},
+
+						"max_unavailable_fixed": &schema.Schema{
+							Type:          schema.TypeInt,
+							Optional:      true,
+							Computed:      true,
+						},
+
+						"max_unavailable_percent": &schema.Schema{
+							Type:          schema.TypeInt,
+							Optional:      true,
+							ValidateFunc:  validation.IntBetween(0, 100),
+						},
+
+						"min_ready_sec": &schema.Schema{
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ValidateFunc: validation.IntBetween(0, 3600),
+						},
+					},
+				},
 			},
 <% end -%>
 			"update_policy": &schema.Schema{

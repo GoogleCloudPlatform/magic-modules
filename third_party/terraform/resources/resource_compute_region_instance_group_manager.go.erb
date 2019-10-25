@@ -46,14 +46,15 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 			<% if version == 'ga' -%>
 			"instance_template": &schema.Schema{
 				Type:             schema.TypeString,
-				<%# TODO chrisst - mark as conflicts with verison %>
 				Optional:         true,
 				Deprecated:         "This field will be replaced by `version.instance_template` in 3.0.0",
+				ConflictsWith: []string{"version"},
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
 			},
 			<% end -%>
 
 			"version": &schema.Schema{
+				<%# TODO 3.0.0 - mark as required %>
 				Type:       schema.TypeList,
 				Optional: true,
 				Computed: true,
@@ -153,11 +154,10 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 
 <% if version == 'ga' -%>
 			"update_strategy": &schema.Schema{
-				<%# TODO chrisst - figure out what this conflicts with and mark as such %>
 				Type:         schema.TypeString,
-				Deprecated: "This field is removed.",
+				Deprecated:   "This field will be replaced by `update_policy` in 3.0.0",
 				Optional:     true,
-				Computed:     true,
+				ConflictsWith: []string{"update_policy"},
 			},
 <% end -%>
 
@@ -219,8 +219,62 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 
 			<% if version == 'ga' -%>
 			"rolling_update_policy": &schema.Schema{
-				Deprecated:    "This is replaced by update_policy",
+				Type:       schema.TypeList,
 				Computed:   true,
+				Removed:    "This field has been replaced by update_policy.",
+				Optional:   true,
+				MaxItems:   1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"minimal_action": &schema.Schema{
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"RESTART", "REPLACE"}, false),
+						},
+
+						"type": &schema.Schema{
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"OPPORTUNISTIC", "PROACTIVE"}, false),
+						},
+
+						"max_surge_fixed": &schema.Schema{
+							Type:          schema.TypeInt,
+							Optional:      true,
+							Computed:      true,
+						},
+
+						"max_surge_percent": &schema.Schema{
+							Type:          schema.TypeInt,
+							Optional:      true,
+							ValidateFunc:  validation.IntBetween(0, 100),
+						},
+
+						"max_unavailable_fixed": &schema.Schema{
+							Type:          schema.TypeInt,
+							Optional:      true,
+							Computed:      true,
+						},
+
+						"max_unavailable_percent": &schema.Schema{
+							Type:          schema.TypeInt,
+							Optional:      true,
+							ValidateFunc:  validation.IntBetween(0, 100),
+						},
+
+						"min_ready_sec": &schema.Schema{
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ValidateFunc: validation.IntBetween(0, 3600),
+						},
+						"instance_redistribution_type": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"PROACTIVE", "NONE", ""}, false),
+							DiffSuppressFunc: emptyOrDefaultStringSuppress("PROACTIVE"),
+						},
+					},
+				},
 			},
 			<% end -%>
 
