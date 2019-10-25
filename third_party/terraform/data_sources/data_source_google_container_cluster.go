@@ -21,6 +21,8 @@ func dataSourceGoogleContainerCluster() *schema.Resource {
 }
 
 func datasourceContainerClusterRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+
 	clusterName := d.Get("name").(string)
 
 	location, err := getLocation(d, config)

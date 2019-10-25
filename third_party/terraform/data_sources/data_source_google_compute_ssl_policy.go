@@ -1,6 +1,8 @@
 package google
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -21,6 +23,8 @@ func dataSourceGoogleComputeSslPolicy() *schema.Resource {
 }
 
 func datasourceComputeSslPolicyRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+
 	project, err := getProject(d, config)
 	if err != nil {
 		return err

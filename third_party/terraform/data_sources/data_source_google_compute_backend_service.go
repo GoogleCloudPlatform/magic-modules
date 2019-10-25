@@ -22,6 +22,8 @@ func dataSourceGoogleComputeBackendService() *schema.Resource {
 }
 
 func dataSourceComputeBackendServiceRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+
 	serviceName := d.Get("name").(string)
 
 	project, err := getProject(d, config)
