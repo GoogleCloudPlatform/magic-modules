@@ -140,9 +140,7 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 		if err != nil {
 			return fmt.Errorf("Error updating service account %q: %s", d.Id(), err)
 		}
-		// This API is meant to be synchronous, but in practice it shows the old value for
-		// a few milliseconds after the update goes through.  A second is more than enough
-		// time to ensure following reads are correct.
+		// See comment in Create.
 		time.Sleep(time.Second)
 	}
 
