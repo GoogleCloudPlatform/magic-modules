@@ -259,7 +259,7 @@ func TestIamMergeBindings(t *testing.T) {
 	}
 }
 
-func TestIamRemoveAllBindingsWithRoleAndCondition(t *testing.T) {
+func TestIamFilterBindingsWithRoleAndCondition(t *testing.T) {
 	testCases := []struct {
 		input          []*cloudresourcemanager.Binding
 		role           string
@@ -365,7 +365,7 @@ func TestIamRemoveAllBindingsWithRoleAndCondition(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		got := removeAllBindingsWithRoleAndCondition(tc.input, tc.role, &cloudresourcemanager.Expr{Title: tc.conditionTitle})
+		got := filterBindingsWithRoleAndCondition(tc.input, tc.role, &cloudresourcemanager.Expr{Title: tc.conditionTitle})
 		if !compareBindings(got, tc.expect) {
 			t.Errorf("Got unexpected value for removeAllBindingsWithRole(%s, %s).\nActual: %s\nExpected: %s",
 				debugPrintBindings(tc.input), tc.role, debugPrintBindings(got), debugPrintBindings(tc.expect))

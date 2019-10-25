@@ -16,6 +16,7 @@ import (
 )
 
 const maxBackoffSeconds = 30
+const iamPolicyVersion = 3
 
 // These types are implemented per GCP resource type and specify how to do per-resource IAM operations.
 // They are used in the generic Terraform IAM resource definitions
@@ -186,7 +187,7 @@ type iamBindingKey struct {
 }
 
 // Removes a single role+condition binding from a list of Bindings
-func removeAllBindingsWithRoleAndCondition(b []*cloudresourcemanager.Binding, role string, condition *cloudresourcemanager.Expr) []*cloudresourcemanager.Binding {
+func filterBindingsWithRoleAndCondition(b []*cloudresourcemanager.Binding, role string, condition *cloudresourcemanager.Expr) []*cloudresourcemanager.Binding {
 	bMap := createIamBindingsMap(b)
 	key := iamBindingKey{role, conditionKeyFromCondition(condition)}
 	delete(bMap, key)

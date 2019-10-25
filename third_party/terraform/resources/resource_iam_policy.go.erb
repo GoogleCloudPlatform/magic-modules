@@ -131,7 +131,7 @@ func setIamPolicyData(d *schema.ResourceData, updater ResourceIamUpdater) error 
 		return fmt.Errorf("'policy_data' is not valid for %s: %s", updater.DescribeResource(), err)
 	}
 <% unless version == 'ga' -%>
-	policy.Version = 3
+	policy.Version = iamPolicyVersion
 <% end -%>
 
 	err = updater.SetResourceIamPolicy(policy)

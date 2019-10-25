@@ -89,10 +89,10 @@ func resourceIamBindingCreateUpdate(newUpdaterFunc newResourceIamUpdaterFunc, en
 
 		binding := getResourceIamBinding(d)
 		modifyF := func(ep *cloudresourcemanager.Policy) error {
-			cleaned := removeAllBindingsWithRoleAndCondition(ep.Bindings, binding.Role, binding.Condition)
+			cleaned := filterBindingsWithRoleAndCondition(ep.Bindings, binding.Role, binding.Condition)
 			ep.Bindings = append(cleaned, binding)
 <% unless version == 'ga' -%>
-			ep.Version = 3
+			ep.Version = iamPolicyVersion
 <% end -%>
 			return nil
 		}
@@ -201,7 +201,11 @@ func iamBindingImport(newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser
 		d.SetId(d.Id() + "/" + role)
 
 <% unless version == 'ga' -%>
-		// Read the upstream policy so we can set the full condition.
+		// Since condition titles can have any character in them, we can't separate them from any other
+		// field the user might set in import (like the condition description and expression). So, we
+		// have the user just specify the title and then read the upstream policy to set the full
+		// condition. We can't rely on the read fn to do this for us because it looks for a match of the
+		// full condition.
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
 			return nil, err
@@ -253,7 +257,7 @@ func resourceIamBindingDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBa
 
 		binding := getResourceIamBinding(d)
 		modifyF := func(p *cloudresourcemanager.Policy) error {
-			p.Bindings = removeAllBindingsWithRoleAndCondition(p.Bindings, binding.Role, binding.Condition)
+			p.Bindings = filterBindingsWithRoleAndCondition(p.Bindings, binding.Role, binding.Condition)
 			return nil
 		}
 
