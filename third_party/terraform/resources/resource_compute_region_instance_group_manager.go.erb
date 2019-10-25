@@ -43,65 +43,47 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 				ForceNew: true,
 			},
 
-<% if version == 'ga' -%>
+			<% if version == 'ga' -%>
 			"instance_template": &schema.Schema{
 				Type:             schema.TypeString,
-				Required:         true,
+				<%# TODO chrisst - mark as conflicts with verison %>
+				Optional:         true,
+				Deprecated:         "This field will be replaced by `version.instance_template` in 3.0.0",
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
 			},
-<% end -%>
+			<% end -%>
 
 			"version": &schema.Schema{
 				Type:       schema.TypeList,
-<% if version == 'ga' -%>
 				Optional: true,
 				Computed: true,
-				Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% else -%>
-				Required: true,
-<% end -%>
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": &schema.Schema{
 							Type:     schema.TypeString,
 							Required: true,
-<% if version == 'ga' -%>
-							Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% end -%>
 						},
 
 						"instance_template": &schema.Schema{
 							Type:             schema.TypeString,
 							Required:         true,
-<% if version == 'ga' -%>
-							Removed:          "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% end -%>
 							DiffSuppressFunc: compareSelfLinkRelativePaths,
 						},
 
 						"target_size": &schema.Schema{
 							Type:     schema.TypeList,
 							Optional: true,
-<% if version == 'ga' -%>
-							Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% end -%>
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"fixed": &schema.Schema{
 										Type:     schema.TypeInt,
 										Optional: true,
-<% if version == 'ga' -%>
-										Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% end -%>
 									},
 
 									"percent": &schema.Schema{
 										Type:         schema.TypeInt,
 										Optional:     true,
-<% if version == 'ga' -%>
-										Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% end -%>
 										ValidateFunc: validation.IntBetween(0, 100),
 									},
 								},
@@ -171,8 +153,9 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 
 <% if version == 'ga' -%>
 			"update_strategy": &schema.Schema{
+				<%# TODO chrisst - figure out what this conflicts with and mark as such %>
 				Type:         schema.TypeString,
-				Deprecated:   "This field is removed.",
+				Deprecated: "This field is removed.",
 				Optional:     true,
 				Computed:     true,
 			},
@@ -205,26 +188,17 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
-<% if version == 'ga' -%>
-				Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% end -%>
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"health_check": &schema.Schema{
 							Type:             schema.TypeString,
 							Required:         true,
-<% if version == 'ga' -%>
-							Removed:          "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% end -%>
 							DiffSuppressFunc: compareSelfLinkRelativePaths,
 						},
 
 						"initial_delay_sec": &schema.Schema{
 							Type:         schema.TypeInt,
 							Required:     true,
-<% if version == 'ga' -%>
-							Removed:      "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% end -%>
 							ValidateFunc: validation.IntBetween(0, 3600),
 						},
 					},
@@ -243,15 +217,16 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 				},
 			},
 
-<% if version == 'ga' -%>
+			<% if version == 'ga' -%>
 			"rolling_update_policy": &schema.Schema{
-				Removed:    "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+				Deprecated:    "This is replaced by update_policy",
 				Computed:   true,
-<% else -%>
+			},
+			<% end -%>
+
 			"update_policy": &schema.Schema{
-				Computed:   true,
-<% end -%>
 				Type:       schema.TypeList,
+				Computed:   true,
 				Optional:   true,
 				MaxItems:   1,
 				Elem: &schema.Resource{
@@ -259,18 +234,12 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 						"minimal_action": &schema.Schema{
 							Type:         schema.TypeString,
 							Required:     true,
-<% if version == 'ga' -%>
-							Removed:      "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% end -%>
 							ValidateFunc: validation.StringInSlice([]string{"RESTART", "REPLACE"}, false),
 						},
 
 						"type": &schema.Schema{
 							Type:         schema.TypeString,
 							Required:     true,
-<% if version == 'ga' -%>
-							Removed:      "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% end -%>
 							ValidateFunc: validation.StringInSlice([]string{"OPPORTUNISTIC", "PROACTIVE"}, false),
 						},
 
@@ -278,62 +247,41 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 							Type:          schema.TypeInt,
 							Optional:      true,
 							Computed:      true,
-<% if version == 'ga' -%>
-							Removed:       "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% else -%>
 							ConflictsWith: []string{"update_policy.0.max_surge_percent"},
-<% end -%>
 						},
 
 						"max_surge_percent": &schema.Schema{
 							Type:          schema.TypeInt,
 							Optional:      true,
-<% if version == 'ga' -%>
-							Removed:       "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% else -%>
 							ConflictsWith: []string{"update_policy.0.max_surge_fixed"},
-<% end -%>
 							ValidateFunc:  validation.IntBetween(0, 100),
 						},
 
 						"max_unavailable_fixed": &schema.Schema{
 							Type:          schema.TypeInt,
 							Optional:      true,
-<% if version == 'ga' -%>
-							Removed:       "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% else -%>
 							Computed:      true,
 							ConflictsWith: []string{"update_policy.0.max_unavailable_percent"},
-<% end -%>
 						},
 
 						"max_unavailable_percent": &schema.Schema{
 							Type:          schema.TypeInt,
 							Optional:      true,
-<% if version == 'ga' -%>
-							Removed:       "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% else -%>
 							ConflictsWith: []string{"update_policy.0.max_unavailable_fixed"},
-<% end -%>
 							ValidateFunc:  validation.IntBetween(0, 100),
 						},
 
 						"min_ready_sec": &schema.Schema{
 							Type:         schema.TypeInt,
-<% if version == 'ga' -%>
-							Removed:      "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% end -%>
 							Optional:     true,
 							ValidateFunc: validation.IntBetween(0, 3600),
 						},
-<% unless version == 'ga' -%>
 						"instance_redistribution_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"PROACTIVE", "NONE", ""}, false),
 							DiffSuppressFunc: emptyOrDefaultStringSuppress("PROACTIVE"),
 						},
-<% end -%>
 					},
 				},
 			},
@@ -358,17 +306,16 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		Name:                d.Get("name").(string),
 		Description:         d.Get("description").(string),
 		BaseInstanceName:    d.Get("base_instance_name").(string),
-<% if version == 'ga' -%>
+		<% if version == 'ga' -%>
+	<% if version == 'ga' -%>
 		InstanceTemplate:    d.Get("instance_template").(string),
-<% end -%>
+	<% end -%>		<% end -%>
 		TargetSize:          int64(d.Get("target_size").(int)),
 		NamedPorts:          getNamedPortsBeta(d.Get("named_port").(*schema.Set).List()),
 		TargetPools:         convertStringSet(d.Get("target_pools").(*schema.Set)),
-<% unless version == 'ga' -%>
 		AutoHealingPolicies: expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		Versions:            expandVersions(d.Get("version").([]interface{})),
 		UpdatePolicy:        expandRegionUpdatePolicy(d.Get("update_policy").([]interface{})),
-<% end -%>
 		DistributionPolicy:  expandDistributionPolicy(d.Get("distribution_policy_zones").(*schema.Set)),
 		// Force send TargetSize to allow size of 0.
 		ForceSendFields: []string{"TargetSize"},
@@ -462,10 +409,9 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	}
 
 	d.Set("base_instance_name", manager.BaseInstanceName)
-<% if version == 'ga' -%>
+	<% if version == 'ga' -%>
 	d.Set("instance_template", ConvertSelfLinkToV1(manager.InstanceTemplate))
-<% end -%>
-
+	<% end -%>
 	d.Set("name", manager.Name)
 	d.Set("region", GetResourceNameFromSelfLink(manager.Region))
 	d.Set("description", manager.Description)
@@ -483,11 +429,12 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 		return err
 	}
 	d.Set("self_link", ConvertSelfLinkToV1(manager.SelfLink))
-<% if version == 'ga' -%>
-	// When we make a list Removed, we see a permadiff from `field_name.#: "" => "<computed>"`. Set to nil in Read so we see no diff.
-	d.Set("version" , nil)
+
+	<% if version == 'ga' -%>
+	// rolling_update_policy
 	d.Set("rolling_update_policy" , nil)
-<% else -%>
+	<% end -%>
+
 	if err := d.Set("auto_healing_policies", flattenAutoHealingPolicies(manager.AutoHealingPolicies)); err != nil {
 		return fmt.Errorf("Error setting auto_healing_policies in state: %s", err.Error())
 	}
@@ -497,7 +444,6 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	if err := d.Set("update_policy", flattenRegionUpdatePolicy(manager.UpdatePolicy)); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
-<% end -%>
 
 	if d.Get("wait_for_instances").(bool) {
 		conf := resource.StateChangeConf{
@@ -515,120 +461,6 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	return nil
 }
 
-<% if version == 'ga' -%>
-func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-
-	region, err := getRegion(d, config)
-	if err != nil {
-		return err
-	}
-
-	d.Partial(true)
-
-	if d.HasChange("target_pools") {
-		targetPools := convertStringSet(d.Get("target_pools").(*schema.Set))
-
-		// Build the parameter
-		setTargetPools := &computeBeta.RegionInstanceGroupManagersSetTargetPoolsRequest{
-			Fingerprint: d.Get("fingerprint").(string),
-			TargetPools: targetPools,
-		}
-
-		op, err := config.clientComputeBeta.RegionInstanceGroupManagers.SetTargetPools(
-			project, region, d.Get("name").(string), setTargetPools).Do()
-
-		if err != nil {
-			return fmt.Errorf("Error updating RegionInstanceGroupManager: %s", err)
-		}
-
-		// Wait for the operation to complete
-		timeoutInMinutes := int(d.Timeout(schema.TimeoutUpdate).Minutes())
-		err = computeSharedOperationWaitTime(config.clientCompute, op, project, timeoutInMinutes, "Updating RegionInstanceGroupManager")
-		if err != nil {
-			return err
-		}
-
-		d.SetPartial("target_pools")
-	}
-
-	if d.HasChange("instance_template") {
-		// Build the parameter
-		setInstanceTemplate := &computeBeta.RegionInstanceGroupManagersSetTemplateRequest{
-			InstanceTemplate: d.Get("instance_template").(string),
-		}
-
-		op, err := config.clientComputeBeta.RegionInstanceGroupManagers.SetInstanceTemplate(
-			project, region, d.Get("name").(string), setInstanceTemplate).Do()
-
-		if err != nil {
-			return fmt.Errorf("Error updating RegionInstanceGroupManager: %s", err)
-		}
-
-		// Wait for the operation to complete
-		timeoutInMinutes := int(d.Timeout(schema.TimeoutUpdate).Minutes())
-		err = computeSharedOperationWaitTime(config.clientCompute, op, project, timeoutInMinutes, "Updating InstanceGroupManager")
-		if err != nil {
-			return err
-		}
-
-		d.SetPartial("instance_template")
-	}
-
-	if d.HasChange("named_port") {
-		// Build the parameters for a "SetNamedPorts" request:
-		namedPorts := getNamedPortsBeta(d.Get("named_port").(*schema.Set).List())
-		setNamedPorts := &computeBeta.RegionInstanceGroupsSetNamedPortsRequest{
-			NamedPorts: namedPorts,
-		}
-
-		// Make the request:
-		op, err := config.clientComputeBeta.RegionInstanceGroups.SetNamedPorts(
-			project, region, d.Get("name").(string), setNamedPorts).Do()
-
-		if err != nil {
-			return fmt.Errorf("Error updating RegionInstanceGroupManager: %s", err)
-		}
-
-		// Wait for the operation to complete:
-		timeoutInMinutes := int(d.Timeout(schema.TimeoutUpdate).Minutes())
-		err = computeSharedOperationWaitTime(config.clientCompute, op, project, timeoutInMinutes, "Updating RegionInstanceGroupManager")
-		if err != nil {
-			return err
-		}
-
-		d.SetPartial("named_port")
-	}
-
-	if d.HasChange("target_size") {
-		targetSize := int64(d.Get("target_size").(int))
-		op, err := config.clientComputeBeta.RegionInstanceGroupManagers.Resize(
-			project, region, d.Get("name").(string), targetSize).Do()
-
-		if err != nil {
-			return fmt.Errorf("Error resizing RegionInstanceGroupManager: %s", err)
-		}
-
-		// Wait for the operation to complete
-		timeoutInMinutes := int(d.Timeout(schema.TimeoutUpdate).Minutes())
-		err = computeSharedOperationWaitTime(config.clientCompute, op, project, timeoutInMinutes, "Resizing RegionInstanceGroupManager")
-		if err != nil {
-			return err
-		}
-
-		d.SetPartial("target_size")
-	}
-
-	d.Partial(false)
-
-	return resourceComputeRegionInstanceGroupManagerRead(d, meta)
-}
-<% else -%>
 func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
@@ -684,6 +516,7 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 	// named ports can't be updated through PATCH
 	// so we call the update method on the region instance group, instead of the rigm
 	if d.HasChange("named_port") {
+		d.Partial(true)
 		namedPorts := getNamedPortsBeta(d.Get("named_port").(*schema.Set).List())
 		setNamedPorts := &computeBeta.RegionInstanceGroupsSetNamedPortsRequest{
 			NamedPorts: namedPorts,
@@ -701,10 +534,12 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		if err != nil {
 			return err
 		}
+		d.SetPartial("named_port")
 	}
 
 	// target size should use resize
 	if d.HasChange("target_size") {
+		d.Partial(true)
 		targetSize := int64(d.Get("target_size").(int))
 		op, err := config.clientComputeBeta.RegionInstanceGroupManagers.Resize(
 			project, region, d.Get("name").(string), targetSize).Do()
@@ -718,11 +553,39 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		if err != nil {
 			return err
 		}
+		d.SetPartial("target_size")
 	}
+
+	<% if version == 'ga' -%>
+	if d.HasChange("instance_template") {
+		d.Partial(true)
+		// Build the parameter
+		setInstanceTemplate := &computeBeta.RegionInstanceGroupManagersSetTemplateRequest{
+			InstanceTemplate: d.Get("instance_template").(string),
+		}
+
+		op, err := config.clientComputeBeta.RegionInstanceGroupManagers.SetInstanceTemplate(
+			project, region, d.Get("name").(string), setInstanceTemplate).Do()
+
+		if err != nil {
+			return fmt.Errorf("Error updating RegionInstanceGroupManager: %s", err)
+		}
+
+		// Wait for the operation to complete
+		timeoutInMinutes := int(d.Timeout(schema.TimeoutUpdate).Minutes())
+		err = computeSharedOperationWaitTime(config.clientCompute, op, project, timeoutInMinutes, "Updating InstanceGroupManager")
+		if err != nil {
+			return err
+		}
+
+		d.SetPartial("instance_template")
+	}
+	<% end -%>
+
+	d.Partial(false)
 
 	return resourceComputeRegionInstanceGroupManagerRead(d, meta)
 }
-<% end -%>
 
 func resourceComputeRegionInstanceGroupManagerDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
@@ -763,7 +626,6 @@ func resourceComputeRegionInstanceGroupManagerDelete(d *schema.ResourceData, met
 	return nil
 }
 
-<% unless version == 'ga' -%>
 func expandRegionUpdatePolicy(configured []interface{}) *computeBeta.InstanceGroupManagerUpdatePolicy {
 	updatePolicy := &computeBeta.InstanceGroupManagerUpdatePolicy{}
 
@@ -838,7 +700,6 @@ func flattenRegionUpdatePolicy(updatePolicy *computeBeta.InstanceGroupManagerUpd
 	}
 	return results
 }
-<% end -%>
 
 func expandDistributionPolicy(configured *schema.Set) *computeBeta.DistributionPolicy {
 	if configured.Len() == 0 {
