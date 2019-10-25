@@ -259,17 +259,20 @@ func listFromIamBindingMap(bm map[iamBindingKey]map[string]struct{}) []*cloudres
 		if len(members) == 0 {
 			continue
 		}
-		rb = append(rb, &cloudresourcemanager.Binding{
+		b := &cloudresourcemanager.Binding{
 			Role:    key.Role,
 			Members: stringSliceFromGolangSet(members),
+		}
 <% unless version == 'ga' -%>
-			Condition: &cloudresourcemanager.Expr{
+		if !key.Condition.Empty() {
+			b.Condition = &cloudresourcemanager.Expr{
 				Description: key.Condition.Description,
 				Expression:  key.Condition.Expression,
 				Title:       key.Condition.Title,
-			},
+			}
+		}
 <% end -%>
-		})
+		rb = append(rb, b)
 	}
 	return rb
 }

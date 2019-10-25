@@ -159,13 +159,16 @@ func ResourceIamMemberWithBatching(parentSpecificSchema map[string]*schema.Schem
 }
 
 func getResourceIamMember(d *schema.ResourceData) *cloudresourcemanager.Binding {
-	return &cloudresourcemanager.Binding{
+	b := &cloudresourcemanager.Binding{
 		Members:   []string{d.Get("member").(string)},
 		Role:      d.Get("role").(string),
-<% unless version == 'ga' -%>
-		Condition: expandIamCondition(d.Get("condition")),
-<% end -%>
 	}
+<% unless version == 'ga' -%>
+	if c := expandIamCondition(d.Get("condition")); c != nil {
+		b.Condition = c
+	}
+<% end -%>
+	return b
 }
 
 func resourceIamMemberCreate(newUpdaterFunc newResourceIamUpdaterFunc, enableBatching bool) schema.CreateFunc {

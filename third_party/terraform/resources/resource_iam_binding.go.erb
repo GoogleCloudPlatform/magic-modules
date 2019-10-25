@@ -277,13 +277,16 @@ func resourceIamBindingDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBa
 
 func getResourceIamBinding(d *schema.ResourceData) *cloudresourcemanager.Binding {
 	members := d.Get("members").(*schema.Set).List()
-	return &cloudresourcemanager.Binding{
+	b := &cloudresourcemanager.Binding{
 		Members:   convertStringArr(members),
 		Role:      d.Get("role").(string),
-<% unless version == 'ga' -%>
-		Condition: expandIamCondition(d.Get("condition")),
-<% end -%>
 	}
+<% unless version == 'ga' -%>
+	if c := expandIamCondition(d.Get("condition")); c != nil {
+		b.Condition = c
+	}
+<% end -%>
+	return b
 }
 
 <% unless version == 'ga' -%>
