@@ -89,7 +89,7 @@ func testAccCheckComputeTargetPoolDestroy(s *terraform.State) error {
 		}
 
 		_, err := config.clientCompute.TargetPools.Get(
-			config.Project, config.Region, rs.Primary.ID).Do()
+			config.Project, config.Region, rs.Primary.Attributes["name"]).Do()
 		if err == nil {
 			return fmt.Errorf("TargetPool still exists")
 		}
@@ -112,12 +112,12 @@ func testAccCheckComputeTargetPoolExists(n string) resource.TestCheckFunc {
 		config := testAccProvider.Meta().(*Config)
 
 		found, err := config.clientCompute.TargetPools.Get(
-			config.Project, config.Region, rs.Primary.ID).Do()
+			config.Project, config.Region, rs.Primary.Attributes["name"]).Do()
 		if err != nil {
 			return err
 		}
 
-		if found.Name != rs.Primary.ID {
+		if found.Name != rs.Primary.Attributes["name"] {
 			return fmt.Errorf("TargetPool not found")
 		}
 
