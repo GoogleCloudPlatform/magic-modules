@@ -47,6 +47,7 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 			"instance_template": &schema.Schema{
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				Deprecated:         "This field will be replaced by `version.instance_template` in 3.0.0",
 				ConflictsWith: []string{"version"},
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
@@ -54,7 +55,7 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 			<% end -%>
 
 			"version": &schema.Schema{
-				<%# TODO 3.0.0 - mark as required %>
+				<%# TODO 3.0.0 - mark as required -%>
 				Type:       schema.TypeList,
 				Optional: true,
 				Computed: true,
@@ -62,7 +63,7 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"name": &schema.Schema{
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 						},
 
 						"instance_template": &schema.Schema{
