@@ -36,6 +36,14 @@ func dataSourceGoogleServiceAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"description": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"oauth2_client_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -60,6 +68,8 @@ func dataSourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}
 	d.Set("account_id", strings.Split(sa.Email, "@")[0])
 	d.Set("name", sa.Name)
 	d.Set("display_name", sa.DisplayName)
+	d.Set("description", sa.Description)
+	d.Set("oauth2_client_id", sa.Oauth2ClientId)
 
 	return nil
 }

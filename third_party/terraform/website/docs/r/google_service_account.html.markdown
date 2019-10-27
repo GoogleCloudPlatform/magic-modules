@@ -41,6 +41,7 @@ The following arguments are supported:
 
 * `description` - (Optional) A text description of the service account.
     Must be less than or equal to 256 UTF-8 bytes.
+    Can be updated without creating a new resource.
 
 * `project` - (Optional) The ID of the project that the service account will be created in.
     Defaults to the provider project configuration.
@@ -59,6 +60,8 @@ exported:
 * `name` - The fully-qualified name of the service account.
 
 * `unique_id` - The unique id of the service account.
+
+* `oauth2_client_id` - The OAuth2 client id for the service account.
 
 ## Timeouts
 

@@ -26,6 +26,8 @@ func TestAccDatasourceGoogleServiceAccount_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "unique_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "name"),
 					resource.TestCheckResourceAttrSet(resourceName, "display_name"),
+					resource.TestCheckResourceAttrSet(resourceName, "description"),
+					resource.TestCheckResourceAttrSet(resourceName, "oauth2_client_id"),
 				),
 			},
 		},
@@ -37,6 +39,7 @@ func testAccCheckGoogleServiceAccount_basic(account string) string {
 resource "google_service_account" "acceptance" {
   account_id   = "%s"
   display_name = "Testing Account"
+  description  = "An account for testing purposes"
 }
 
 data "google_service_account" "acceptance" {
