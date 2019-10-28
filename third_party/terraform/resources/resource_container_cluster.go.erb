@@ -2855,6 +2855,7 @@ func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interfac
 
 	clusterName := d.Get("name").(string)
 
+	d.Set("location", location)
 	if err := waitForContainerClusterReady(config, project, location, clusterName, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return nil, err
 	}
