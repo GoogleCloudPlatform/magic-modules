@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -249,7 +250,7 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
-	d.SetId(job.Reference.JobId)
+	d.SetId(fmt.Sprintf("projects/%s/regions/%s/jobs/%s", project, region, job.Reference.JobId))
 
 	timeoutInMinutes := int(d.Timeout(schema.TimeoutCreate).Minutes())
 	waitErr := dataprocJobOperationWait(config, region, project, job.Reference.JobId,
@@ -271,10 +272,12 @@ func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
+	parts := strings.Split(d.Id(), "/")
+	jobId := parts[len(parts)-1]
 	job, err := config.clientDataproc.Projects.Regions.Jobs.Get(
-		project, region, d.Id()).Do()
+		project, region, jobId).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Dataproc Job %q", d.Id()))
+		return handleNotFoundError(err, d, fmt.Sprintf("Dataproc Job %q", jobId))
 	}
 
 	d.Set("force_delete", d.Get("force_delete"))
@@ -320,15 +323,17 @@ func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
 	forceDelete := d.Get("force_delete").(bool)
 	timeoutInMinutes := int(d.Timeout(schema.TimeoutDelete).Minutes())
 
+	parts := strings.Split(d.Id(), "/")
+	jobId := parts[len(parts)-1]
 	if forceDelete {
 		log.Printf("[DEBUG] Attempting to first cancel Dataproc job %s if it's still running ...", d.Id())
 
 		// ignore error if we get one - job may be finished already and not need to
 		// be cancelled. We do however wait for the state to be one that is
 		// at least not active
-		_, _ = config.clientDataproc.Projects.Regions.Jobs.Cancel(project, region, d.Id(), &dataproc.CancelJobRequest{}).Do()
+		_, _ = config.clientDataproc.Projects.Regions.Jobs.Cancel(project, region, jobId, &dataproc.CancelJobRequest{}).Do()
 
-		waitErr := dataprocJobOperationWait(config, region, project, d.Id(),
+		waitErr := dataprocJobOperationWait(config, region, project, jobId,
 			"Cancelling Dataproc job", timeoutInMinutes, 1)
 		if waitErr != nil {
 			return waitErr
@@ -338,12 +343,12 @@ func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Deleting Dataproc job %s", d.Id())
 	_, err = config.clientDataproc.Projects.Regions.Jobs.Delete(
-		project, region, d.Id()).Do()
+		project, region, jobId).Do()
 	if err != nil {
 		return err
 	}
 
-	waitErr := dataprocDeleteOperationWait(config, region, project, d.Id(),
+	waitErr := dataprocDeleteOperationWait(config, region, project, jobId,
 		"Deleting Dataproc job", timeoutInMinutes, 1)
 	if waitErr != nil {
 		return waitErr
