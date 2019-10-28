@@ -124,7 +124,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 			project.ProjectId, project.Name, err)
 	}
 
-	d.SetId(pid)
+	d.SetId(fmt.Sprintf("projects/%s", pid))
 
 	// Wait for the operation to complete
 	opAsMap, err := ConvertToMap(op)
@@ -175,7 +175,8 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 
 func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	pid := d.Id()
+	parts := strings.Split(d.Id(), "/")
+	pid := parts[len(parts)-1]
 
 	p, err := readGoogleProject(d, config)
 	if err != nil {
@@ -271,7 +272,8 @@ func parseFolderId(v interface{}) string {
 
 func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	pid := d.Id()
+	parts := strings.Split(d.Id(), "/")
+	pid := parts[len(parts)-1]
 	project_name := d.Get("name").(string)
 
 	// Read the project
@@ -348,7 +350,8 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 	config := meta.(*Config)
 	// Only delete projects if skip_delete isn't set
 	if !d.Get("skip_delete").(bool) {
-		pid := d.Id()
+		parts := strings.Split(d.Id(), "/")
+		pid := parts[len(parts)-1]
 		if err := retryTimeDuration(func() error {
 			_, delErr := config.clientResourceManager.Projects.Delete(pid).Do()
 			return delErr
@@ -361,7 +364,8 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceProjectImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	pid := d.Id()
+	parts := strings.Split(d.Id(), "/")
+	pid := parts[len(parts)-1]
 	// Prevent importing via project number, this will cause issues later
 	matched, err := regexp.MatchString("^\\d+$", pid)
 	if err != nil {
@@ -371,6 +375,9 @@ func resourceProjectImportState(d *schema.ResourceData, meta interface{}) ([]*sc
 	if matched {
 		return nil, fmt.Errorf("Error importing project %q, please use project_id", pid)
 	}
+
+	// Ensure the id format includes projects/
+	d.SetId(fmt.Sprintf("projects/%s", pid))
 
 	// Explicitly set to default as a workaround for `ImportStateVerify` tests, and so that users
 	// don't see a diff immediately after import.
@@ -414,7 +421,8 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *Config, projectId
 }
 
 func updateProjectBillingAccount(d *schema.ResourceData, config *Config) error {
-	pid := d.Id()
+	parts := strings.Split(d.Id(), "/")
+	pid := parts[len(parts)-1]
 	name := d.Get("billing_account").(string)
 	ba := &cloudbilling.ProjectBillingInfo{}
 	// If we're unlinking an existing billing account, an empty request does that, not an empty-string billing account.
@@ -461,8 +469,10 @@ func deleteComputeNetwork(project, network string, config *Config) error {
 func readGoogleProject(d *schema.ResourceData, config *Config) (*cloudresourcemanager.Project, error) {
 	var p *cloudresourcemanager.Project
 	// Read the project
+	parts := strings.Split(d.Id(), "/")
+	pid := parts[len(parts)-1]
 	err := retryTimeDuration(func() (reqErr error) {
-		p, reqErr = config.clientResourceManager.Projects.Get(d.Id()).Do()
+		p, reqErr = config.clientResourceManager.Projects.Get(pid).Do()
 		return reqErr
 	}, d.Timeout(schema.TimeoutRead))
 	return p, err

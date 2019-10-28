@@ -503,7 +503,11 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error, failed to create instance %s: %s", instance.Name, err)
 	}
 
-	d.SetId(instance.Name)
+	id, err := replaceVars(d, config, "projects/{{project}}/instances/{{name}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
 
 	err = sqlAdminOperationWaitTime(config.clientSqlAdmin, op, project, "Create Instance", int(d.Timeout(schema.TimeoutCreate).Minutes()))
 	if err != nil {
@@ -708,7 +712,7 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 
 	var instance *sqladmin.DatabaseInstance
 	err = retryTimeDuration(func() (rerr error) {
-		instance, rerr = config.clientSqlAdmin.Instances.Get(project, d.Id()).Do()
+		instance, rerr = config.clientSqlAdmin.Instances.Get(project, d.Get("name").(string)).Do()
 		return rerr
 	}, d.Timeout(schema.TimeoutRead), isSqlOperationInProgressError)
 	if err != nil {
@@ -843,7 +847,7 @@ func resourceSqlDatabaseInstanceImport(d *schema.ResourceData, meta interface{})
 	}
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "{{name}}")
+	id, err := replaceVars(d, config, "projects/{{project}}/instances/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
