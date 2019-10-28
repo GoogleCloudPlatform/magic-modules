@@ -1,0 +1,6 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% service = grab_attributes['service'] -%>
+describe google_project_service(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{service['name']}'" : "service['name']" -%>) do
+  it { should exist }
+  its('state') { should cmp "ENABLED" }
+end
