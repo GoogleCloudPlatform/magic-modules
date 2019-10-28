@@ -2,5 +2,5 @@
 <% spannerdatabase = grab_attributes['spannerdatabase'] -%>
 
 describe google_spanner_databases(project: <%= gcp_project_id -%>, instance: <%= doc_generation ? "'#{spannerdatabase['instance']}'" : "spannerdatabase['instance']" -%>) do
-  its('name') { should include <%= doc_generation ? "'#{spannerdatabase['name']}'" : "spannerdatabase['name']" -%> }
+  its('names') { should include <%= doc_generation ? "'#{spannerdatabase['name']}'" : "spannerdatabase['name']" -%> }
 end
