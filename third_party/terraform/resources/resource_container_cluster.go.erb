@@ -57,6 +57,19 @@ func validateRFC3339Date(v interface{}, k string) (warnings []string, errors []e
 	}
 	return
 }
+
+func rfc5545RecurrenceDiffSuppress(k, o, n string, d *schema.ResourceData) bool {
+	// This diff gets applied in the cloud console if you specify
+	// "FREQ=DAILY" in your config and add a maintenance exclusion.
+	if o == "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU" && n == "FREQ=DAILY" {
+		return true
+	}
+	// Writing a full diff suppress for identical recurrences would be
+	// complex and error-prone - it's not a big problem if a user
+	// changes the recurrence and it's textually difference but semantically
+	// identical.
+	return false
+}
 <% end %>
 
 func resourceContainerCluster() *schema.Resource {
@@ -443,6 +456,7 @@ func resourceContainerCluster() *schema.Resource {
 									"recurrence": {
 										Type: schema.TypeString,
 										Required: true,
+										DiffSuppressFunc: rfc5545RecurrenceDiffSuppress,
 									},
 								},
 							},
@@ -2271,12 +2285,16 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 	name := containerClusterFullName(project, location, clusterName)
 	cluster, _ := config.clientContainerBeta.Projects.Locations.Clusters.Get(name).Do()
 	resourceVersion := ""
-    // If the cluster doesn't exist or if there is a read error of any kind, we will pass in an empty
-    // resourceVersion.  If there happens to be a change to maintenance policy, we will fail at that
-    // point.  This is a compromise between code cleanliness and a slightly worse user experience in
-    // an unlikely error case - we choose code cleanliness.
+	// If the cluster doesn't exist or if there is a read error of any kind, we will pass in an empty
+	// resourceVersion.  If there happens to be a change to maintenance policy, we will fail at that
+	// point.  This is a compromise between code cleanliness and a slightly worse user experience in
+	// an unlikely error case - we choose code cleanliness.
 	if cluster != nil && cluster.MaintenancePolicy != nil {
 		resourceVersion = cluster.MaintenancePolicy.ResourceVersion
+	}
+	exclusions := make(map[string]containerBeta.TimeWindow, 0)
+	if cluster != nil && cluster.MaintenancePolicy != nil && cluster.MaintenancePolicy.Window != nil {
+		exclusions = cluster.MaintenancePolicy.Window.MaintenanceExclusions
 	}
 
 	configured := d.Get("maintenance_policy")
@@ -2284,6 +2302,9 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 	if len(l) == 0 || l[0] == nil {
 		return &containerBeta.MaintenancePolicy{
 			ResourceVersion: resourceVersion,
+			Window: &containerBeta.MaintenanceWindow{
+				MaintenanceExclusions: exclusions,
+			},
 		}
 	}
 	maintenancePolicy := l[0].(map[string]interface{})
@@ -2293,6 +2314,7 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 		startTime := dmw["start_time"].(string)
 		return &containerBeta.MaintenancePolicy{
 			Window: &containerBeta.MaintenanceWindow{
+				MaintenanceExclusions: exclusions,
 				DailyMaintenanceWindow: &containerBeta.DailyMaintenanceWindow{
 					StartTime: startTime,
 				},
@@ -2305,6 +2327,7 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 		rw := recurringWindow.([]interface{})[0].(map[string]interface{})
 		return &containerBeta.MaintenancePolicy{
 			Window: &containerBeta.MaintenanceWindow{
+				MaintenanceExclusions: exclusions,
 				RecurringWindow: &containerBeta.RecurringTimeWindow{
 					Window: &containerBeta.TimeWindow{
 						StartTime: rw["start_time"].(string),
