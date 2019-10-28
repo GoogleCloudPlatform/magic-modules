@@ -1946,7 +1946,7 @@ objects:
     kind: 'compute#firewall'
     base_url: projects/{{project}}/global/firewalls
     collection_url_key: 'items'
-    update_verb: :PUT
+    update_verb: :PATCH
     has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
