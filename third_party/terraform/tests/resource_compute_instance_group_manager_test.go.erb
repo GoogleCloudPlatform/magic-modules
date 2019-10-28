@@ -1186,7 +1186,6 @@ resource "google_compute_instance_group_manager" "igm-instance-template-upgrade"
 	name                       = "%s"
 
 	version {
-		name              = "primary"
 		instance_template = "${google_compute_instance_template.igm-instance-template-upgrade.self_link}"
 	}
 
