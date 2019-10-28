@@ -496,7 +496,7 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error creating Dataproc cluster: %s", err)
 	}
 
-	d.SetId(cluster.ClusterName)
+	d.SetId(fmt.Sprintf("projects/%s/regions/%s/clusters/%s", project, region, cluster.ClusterName))
 
 	// Wait until it's created
 	timeoutInMinutes := int(d.Timeout(schema.TimeoutCreate).Minutes())
