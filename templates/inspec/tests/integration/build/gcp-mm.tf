@@ -197,6 +197,10 @@ variable "router_nat" {
   type = "map"
 }
 
+variable "service" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -504,9 +508,9 @@ resource "google_compute_router" "gcp-inspec-router" {
 resource "google_compute_disk" "snapshot-disk" {
   project = "${var.gcp_project_id}"
   name  = var.snapshot["disk_name"]
-  type  = "${var.gcp_compute_disk_type}"
+  type  = var.snapshot["disk_type"]
   zone  = "${var.gcp_zone}"
-  image = "${var.gcp_compute_disk_image}"
+  image = var.snapshot["disk_image"]
   labels = {
     environment = "generic_compute_disk_label"
   }
@@ -856,4 +860,9 @@ resource "google_compute_router_nat" "inspec-nat" {
     enable = var.router_nat["log_config_enable"]
     filter = var.router_nat["log_config_filter"]
   }
+}
+
+resource "google_project_service" "project" {
+  project = var.gcp_project_id
+  service = var.service["name"]
 }
