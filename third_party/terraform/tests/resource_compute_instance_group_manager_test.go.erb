@@ -1110,7 +1110,7 @@ resource "google_compute_instance_group_manager" "igm-basic" {
 }
 	`, primaryTemplate, canaryTemplate, igm)
 }
-
+<% if version == 'ga' -%>
 func testAccInstanceGroupManager_upgradeInstanceTemplate1(igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1198,3 +1198,4 @@ resource "google_compute_instance_group_manager" "igm-instance-template-upgrade"
 	}
 }`, igm)
 }
+<% end -%>

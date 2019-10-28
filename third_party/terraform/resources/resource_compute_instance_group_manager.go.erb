@@ -545,8 +545,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 
 	return nil
 }
-
-
+<% if version == 'ga' -%>
 // Updates an instance group manager by applying the update strategy (REPLACE, RESTART)
 // and rolling update policy (PROACTIVE, OPPORTUNISTIC). Updates performed by API
 // are OPPORTUNISTIC by default.
@@ -582,6 +581,7 @@ func performZoneUpdate(d *schema.ResourceData, config *Config, id string, update
 
 	return nil
 }
+<% end -%>
 
 func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)

@@ -927,7 +927,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 }
 	`, template, igm, strings.Join(zones, "\",\""))
 }
-
+<% if version == 'ga' -%>
 func testAccRegionInstanceGroupManager_updateStrategy(igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -972,6 +972,7 @@ resource "google_compute_region_instance_group_manager" "igm-update-strategy" {
 	}
 }`, igm)
 }
+<% end -%>
 
 func testAccRegionInstanceGroupManager_rollingUpdatePolicy(igm string) string {
 	return fmt.Sprintf(`
@@ -1142,7 +1143,7 @@ resource "google_compute_region_instance_group_manager" "igm-rolling-update-poli
 	}
 }`, igm)
 }
-
+<% if version == 'ga' -%>
 func testAccRegionInstanceGroupManager_upgradeInstanceTemplate1(igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1234,3 +1235,4 @@ resource "google_compute_region_instance_group_manager" "igm-instance-template-u
 	}
 }`, igm)
 }
+<% end -%>
