@@ -1,19 +1,20 @@
 <% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
 <% gcp_zone = "#{external_attribute('gcp_zone', doc_generation)}" %>
-<% gcp_compute_disk_name = "#{external_attribute('gcp_compute_disk_name', doc_generation)}" -%>
-<% gcp_compute_disk_image = "#{external_attribute('gcp_compute_disk_image', doc_generation).gsub('\'', '')}" -%>
-<% gcp_compute_disk_type = "#{external_attribute('gcp_compute_disk_type', doc_generation)}" -%>
+<% snapshot = grab_attributes['snapshot'] -%>
+<% gcp_compute_disk_name = snapshot["disk_name"] -%>
+<% gcp_compute_disk_image = snapshot["disk_image"] -%>
+<% gcp_compute_disk_type = snapshot["disk_type"] -%>
 most_recent_image = google_compute_image(project: <%= doc_generation ? "'#{gcp_compute_disk_image.split('/').first}'" : "gcp_compute_disk_image.split('/').first" -%>, name: <%= doc_generation ? "'#{gcp_compute_disk_image.split('/').last}'" : "gcp_compute_disk_image.split('/').last" -%>)
 
-describe google_compute_disk(project: <%= gcp_project_id -%>, name: <%= gcp_compute_disk_name -%>, zone: <%= gcp_zone -%>) do
+describe google_compute_disk(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{gcp_compute_disk_name}'" : "gcp_compute_disk_name" -%>, zone: <%= gcp_zone -%>) do
   it { should exist }
   # Test that the image is the most recent image for the family
   its('source_image') { should match most_recent_image.self_link }
-  its('type') { should match <%= gcp_compute_disk_type -%> }
+  its('type') { should match <%= doc_generation ? "'#{gcp_compute_disk_type}'" : "gcp_compute_disk_type" -%> }
 end
 
 describe.one do
-  google_compute_disk(project: <%= gcp_project_id -%>, name: <%= gcp_compute_disk_name -%>, zone: <%= gcp_zone -%>).labels.each_pair do |key, value|
+  google_compute_disk(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{gcp_compute_disk_name}'" : "gcp_compute_disk_name" -%>, zone: <%= gcp_zone -%>).labels.each_pair do |key, value|
     describe key do
       it { should cmp "environment" }
     end
