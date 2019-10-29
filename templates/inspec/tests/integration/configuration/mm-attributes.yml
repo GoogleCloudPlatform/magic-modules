@@ -149,6 +149,8 @@ router:
 snapshot:
   name: inspec-gcp-disk-snapshot
   disk_name: inspec-snapshot-disk
+  disk_type: pd-standard
+  disk_image: debian-cloud/debian-10-buster-v20191014
 
 https_proxy:
   name: inspec-gcp-https-proxy
@@ -324,3 +326,6 @@ router_nat:
   min_ports_per_vm: 2
   log_config_enable: true
   log_config_filter: ERRORS_ONLY
+
+service:
+  name: maps-android-backend.googleapis.com

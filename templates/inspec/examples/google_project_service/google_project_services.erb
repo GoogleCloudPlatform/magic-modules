@@ -1,0 +1,9 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% service = grab_attributes['service'] -%>
+describe.one do
+  google_project_services(project: <%= gcp_project_id -%>).names.each do |name|
+    describe name do
+      it { should match <%= doc_generation ? "'#{service['name']}'" : "service['name']" -%> }
+    end
+  end
+end

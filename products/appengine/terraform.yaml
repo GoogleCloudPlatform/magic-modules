@@ -93,6 +93,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         update_mask_fields:
           - "ssl_settings.certificate_id"
           - "ssl_settings.ssl_management_type"
+      sslSettings.certificateId: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   ApplicationUrlDispatchRules: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}"
     import_format: ["{{project}}"]
