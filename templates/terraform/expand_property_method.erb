@@ -15,7 +15,8 @@
 <% if property.custom_expand -%>
 <%= lines(compile_template(property.custom_expand,
                            prefix: prefix,
-                           property: property)) -%>
+                           property: property,
+                           object: object)) -%>
 <% else -%>
 
 <%# Generate expanders for Maps %>
