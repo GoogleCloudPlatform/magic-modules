@@ -235,4 +235,229 @@ objects:
           implements the Predictor interface described in this reference
           field. The module containing this class should be included in a
           package provided to the packageUris field.
-
+  - !ruby/object:Api::Resource
+    name: 'Job'
+    base_url: projects/{{project}}/jobs
+    self_link: projects/{{project}}/jobs/{{name}}
+    input: true
+    description: |
+      Represents a training or prediction job.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'jobId'
+        description: Required. The user-specified id of the job.
+        required: true
+      - !ruby/object:Api::Type::Time
+        name: 'createTime'
+        description: When the job was created.
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'endTime'
+        description: When the job processing was completed.
+        output: true     
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        description: The detailed state of a job.
+        values:
+          - STATE_UNSPECIFIED
+          - QUEUED
+          - PREPARING
+          - RUNNING
+          - SUCCEEDED
+          - FAILED
+          - CANCELLING
+          - CANCELLED
+        output: true     
+      - !ruby/object:Api::Type::String
+        name: 'errorMessage'
+        description: The details of a failure or a cancellation.
+        output: true                
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+           One or more labels that you can add, to organize your jobs. Each label is a key-value pair, 
+           where both the key and the value are arbitrary Strings that you supply. 
+           An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+      # no etag since it's input: true     
+      - !ruby/object:Api::Type::NestedObject
+        name: 'trainingInput'
+        description: Input parameters to create a training job.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'ScaleTier'
+            description: Specifies the machine types, the number of replicas for workers and parameter servers.
+            values:
+              - BASIC
+              - STANDARD_1
+              - PREMIUM_1
+              - BASIC_GPU
+              - BASIC_TPU
+              - CUSTOM
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'masterType'
+            description: Specifies the type of virtual machine to use for your training job's master worker  
+            required: false  
+          - !ruby/object:Api::Type::Integer
+            name: 'workerCount'
+            description: | 
+              The number of worker replicas to use for the training job. Each replica in the cluster will be of the type 
+              specified in workerType
+            required: false
+          - !ruby/object:Api::Type::Integer
+            name: 'parameterServerCount'
+            description: | 
+              The number of parameter server replicas to use for the training job. Each replica in the cluster will be 
+              of the type specified in parameterServerType.
+            required: false
+          - !ruby/object:Api::Type::Array
+            name: 'packageUris'
+            description: |
+              The Google Cloud Storage location of the packages with the training program and any additional dependencies.
+               The maximum number of package URIs is 100.
+            required: true
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::String
+            name: 'pythonModule'
+            description: The Python module name to run after installing the packages.
+            required: true
+          - !ruby/object:Api::Type::Array
+            name: 'args'
+            description: Command line arguments to pass to the program.
+            required: false
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::String
+            name: 'region'
+            description: The Google Compute Engine region to run the training job in. See the available regions for AI Platform services.
+            required: true 
+          - !ruby/object:Api::Type::String
+            name: 'jobDir'
+            description: |
+               A Google Cloud Storage path in which to store training outputs and other data needed for training. This path is passed 
+               to your TensorFlow program as the '--job-dir' command-line argument. The benefit of specifying this field is that Cloud 
+               ML validates the path for use in training.
+            required: false 
+          - !ruby/object:Api::Type::String
+            name: 'runtimeVersion'
+            description: | 
+              The AI Platform runtime version to use for training. If not set, AI Platform uses the default stable version, 1.0. For more 
+              information, see the runtime version list and how to manage runtime versions.
+            required: false 
+          - !ruby/object:Api::Type::String
+            name: 'pythonVersion'
+            description: |
+              The version of Python used in training. If not set, the default version is '2.7'. Python '3.5' is available when 
+              runtimeVersion is set to '1.4' and above. Python '2.7' works with all supported runtime versions.
+            required: false 
+        name: 'trainingOutput'
+        description: The current training job result.
+        output: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'completedTrialCount'
+            description: The number of hyperparameter tuning trials that completed successfully. Only set for hyperparameter tuning jobs.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'trials'
+            description: Results for individual Hyperparameter trials. Only set for hyperparameter tuning jobs.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'trialId'
+                description: The trial id for these results.
+              - !ruby/object:Api::Type::KeyValuePairs
+                name: 'hyperparameters'
+                description: |
+                  The hyperparameters given to this trial. An object containing a list of "key": value pairs. 
+                  Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }
+              - !ruby/object:Api::Type::Time
+                name: 'startTime'
+                description: Start time for the trial.
+                output: true
+              - !ruby/object:Api::Type::Time
+                name: 'endTime'
+                description:  End time for the trial.
+                output: true              
+              - !ruby/object:Api::Type::Enum
+                name: 'state'
+                description: The detailed state of a job.
+                values:
+                  - STATE_UNSPECIFIED
+                  - QUEUED
+                  - PREPARING
+                  - RUNNING
+                  - SUCCEEDED
+                  - FAILED
+                  - CANCELLING
+                  - CANCELLED
+                output: true
+              - !ruby/object:Api::Type::NestedObject
+                name: 'finalMetric'
+                description:  The final objective metric seen for this trial.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'trainingStep'
+                    description:  The global training step for this metric
+                  - !ruby/object:Api::Type::Integer
+                    name: 'objectiveValue'
+                    description:  The objective value at this training step.
+              - !ruby/object:Api::Type::Boolean
+                name: 'isTrialStoppedEarly'
+                description:  True if the trial is stopped early.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'allMetrics'
+                description:  All recorded object metrics for this trial. This field is not currently populated.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'trainingStep'
+                    description:  The global training step for this metric
+                  - !ruby/object:Api::Type::Integer
+                    name: 'objectiveValue'
+                    description:  The objective value at this training step.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'builtInAlgorithmOutput'
+                description:  Details related to built-in algorithms jobs. Only set for trials of built-in algorithms jobs that have succeeded.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'framework'
+                    description:  Framework on which the built-in algorithm was trained.
+                  - !ruby/object:Api::Type::Integer
+                    name: 'runtimeVersion'
+                    description:  AI Platform runtime version on which the built-in algorithm was trained         
+                  - !ruby/object:Api::Type::Integer
+                    name: 'pythonVersion'
+                    description:  Python version on which the built-in algorithm was trained.          
+                  - !ruby/object:Api::Type::Integer
+                    name: 'modelPath'
+                    description:  |
+                      The Cloud Storage path to the model/ directory where the training job saves the trained model. 
+                      Only set for successful jobs that don't use hyperparameter tuning          
+          - !ruby/object:Api::Type::Integer
+            name: 'consumedMLUnits'
+            description: The amount of ML units consumed by the job.
+          - !ruby/object:Api::Type::Boolean
+            name: 'isHyperparameterTuningJob'
+            description: Whether this job is a hyperparameter tuning job.
+          - !ruby/object:Api::Type::String
+            name: 'isBuiltInAlgorithmJob'
+            description: Whether this job is a built-in Algorithm job.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'builtInAlgorithmOutput'
+            description: Details related to built-in algorithms jobs. Only set for built-in algorithms jobs.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'framework'
+                description:  Framework on which the built-in algorithm was trained.
+              - !ruby/object:Api::Type::Integer
+                name: 'runtimeVersion'
+                description:  AI Platform runtime version on which the built-in algorithm was trained         
+              - !ruby/object:Api::Type::Integer
+                name: 'pythonVersion'
+                description:  Python version on which the built-in algorithm was trained.          
+              - !ruby/object:Api::Type::Integer
+                name: 'modelPath'
+                description:  |
+                  The Cloud Storage path to the model/ directory where the training job saves the trained model. 
+                  Only set for successful jobs that don't use hyperparameter tuning    
+          - !ruby/object:Api::Type::String
+            name: 'hyperparameterMetricTag'
+            description: The TensorFlow summary tag name used for optimizing hyperparameter tuning trials.
+                  

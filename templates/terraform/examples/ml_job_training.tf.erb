@@ -1,0 +1,10 @@
+resource "google_ml_engine_job" "training_job" {
+  job_id          = "ml_job_training1111"
+  job_dir         = "gs://cio-strat-svc-acct-mgmt-238520-mlengine/scikit_learn_job_dir"
+  package_uris    = "gs://cio-strat-svc-acct-mgmt-238520-mlengine/scikit_learn_job_dir/packages/fd65c711be463b2d1e841325d389b6c557db097c2281d40423c8451579238523/census_training-0.0.0.tar.gz"
+  python_module   = "census_training.train"
+  python_version  = "2.7"
+  region          = "us-central1"
+  runtime_version = "1.14"
+  scale_tier      = "BASIC"
+}
