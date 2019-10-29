@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"testing"
 
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"google.golang.org/api/logging/v2"
-	"strconv"
 )
 
 func TestAccLoggingFolderSink_basic(t *testing.T) {
@@ -33,6 +34,39 @@ func TestAccLoggingFolderSink_basic(t *testing.T) {
 					testAccCheckLoggingFolderSink(&sink, "google_logging_folder_sink.basic"),
 				),
 			}, {
+				ResourceName:      "google_logging_folder_sink.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccLoggingFolderSink_removeOptionals(t *testing.T) {
+	t.Parallel()
+
+	org := getTestOrgFromEnv(t)
+	sinkName := "tf-test-sink-" + acctest.RandString(10)
+	bucketName := "tf-test-sink-bucket-" + acctest.RandString(10)
+	folderName := "tf-test-folder-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckLoggingFolderSinkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingFolderSink_basic(sinkName, bucketName, folderName, "organizations/"+org),
+			},
+			{
+				ResourceName:      "google_logging_folder_sink.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccLoggingFolderSink_removeOptionals(sinkName, bucketName, folderName, "organizations/"+org),
+			},
+			{
 				ResourceName:      "google_logging_folder_sink.basic",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -238,6 +272,26 @@ resource "google_folder" "my-folder" {
   parent       = "%s"
 }
 `, sinkName, getTestProjectFromEnv(), bucketName, folderName, folderParent)
+}
+
+func testAccLoggingFolderSink_removeOptionals(sinkName, bucketName, folderName, folderParent string) string {
+	return fmt.Sprintf(`
+resource "google_logging_folder_sink" "basic" {
+	name             = "%s"
+	folder           = "${element(split("/", google_folder.my-folder.name), 1)}"
+	destination      = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
+	filter           = ""
+	include_children = true
+}
+
+resource "google_storage_bucket" "log-bucket" {
+	name = "%s"
+}
+
+resource "google_folder" "my-folder" {
+	display_name = "%s"
+    parent       = "%s"
+}`, sinkName, bucketName, folderName, folderParent)
 }
 
 func testAccLoggingFolderSink_withFullFolderPath(sinkName, bucketName, folderName, folderParent string) string {
