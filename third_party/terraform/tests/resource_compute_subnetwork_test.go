@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
@@ -266,7 +267,10 @@ func testAccCheckComputeSubnetworkExists(n string, subnetwork *compute.Subnetwor
 
 		config := testAccProvider.Meta().(*Config)
 
-		region, subnet_name := splitSubnetID(rs.Primary.ID)
+		splits := strings.Split(rs.Primary.ID, "/")
+		region := splits[len(splits)-3]
+		subnet_name := splits[len(splits)-1]
+
 		found, err := config.clientCompute.Subnetworks.Get(
 			config.Project, region, subnet_name).Do()
 		if err != nil {
@@ -487,7 +491,7 @@ func testAccComputeSubnetwork_flowLogs(cnName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "custom-test" {
 	name = "%s"
-	auto_create_subnetworks = true
+	auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "network-with-flow-logs" {
