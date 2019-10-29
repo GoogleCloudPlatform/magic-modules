@@ -209,6 +209,7 @@ variable "spannerdatabase" {
   type = "map"
 }
 
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"

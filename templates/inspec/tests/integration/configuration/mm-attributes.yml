@@ -330,7 +330,7 @@ router_nat:
 service:
   name: maps-android-backend.googleapis.com
 
-spannerinstance:
+  spannerinstance:
   config: regional-us-east1
   name: spinstance
   display_name: inspectest
