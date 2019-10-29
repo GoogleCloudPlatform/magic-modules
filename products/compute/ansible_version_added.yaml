@@ -64,6 +64,8 @@
     :version_added: '2.7'
   :TargetHttpsProxy:
     :version_added: '2.7'
+  :TargetInstance:
+    :version_added: '2.10'
   :TargetPool:
     :version_added: '2.7'
   :TargetSslProxy:
@@ -1121,6 +1123,18 @@
       :version_added: '2.8'
     :urlMap:
       :version_added: '2.6'
+  :TargetInstance:
+    :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :instance:
+      :version_added: '2.10'
+    :natPolicy:
+      :version_added: '2.10'
+    :zone:
+      :version_added: '2.10'
   :TargetPool:
     :version_added: '2.6'
     :backupPool:
