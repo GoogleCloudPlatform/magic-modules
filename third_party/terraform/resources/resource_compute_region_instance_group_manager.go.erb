@@ -80,11 +80,13 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 									"fixed": &schema.Schema{
 										Type:     schema.TypeInt,
 										Optional: true,
+										AtLeastOneOf: []string{"version.0.target_size.0.fixed", "version.0.target_size.0.percent"},
 									},
 
 									"percent": &schema.Schema{
 										Type:         schema.TypeInt,
 										Optional:     true,
+										AtLeastOneOf: []string{"version.0.target_size.0.fixed", "version.0.target_size.0.percent"},
 										ValidateFunc: validation.IntBetween(0, 100),
 									},
 								},

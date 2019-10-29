@@ -382,11 +382,11 @@ var loggingConfig = &schema.Schema{
 }
 
 var pySparkSchema = &schema.Schema{
-	Type:          schema.TypeList,
-	Optional:      true,
-	ForceNew:      true,
-	MaxItems:      1,
-	ConflictsWith: []string{"spark_config", "hadoop_config", "hive_config", "pig_config", "sparksql_config"},
+	Type:         schema.TypeList,
+	Optional:     true,
+	ForceNew:     true,
+	MaxItems:     1,
+	ExactlyOneOf: []string{"pyspark_config", "spark_config", "hadoop_config", "hive_config", "pig_config", "sparksql_config"},
 	Elem: &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"main_python_file_uri": {
@@ -499,26 +499,26 @@ func expandPySparkJob(config map[string]interface{}) *dataproc.PySparkJob {
 // ---- Spark Job ----
 
 var sparkSchema = &schema.Schema{
-	Type:          schema.TypeList,
-	Optional:      true,
-	ForceNew:      true,
-	MaxItems:      1,
-	ConflictsWith: []string{"pyspark_config", "hadoop_config", "hive_config", "pig_config", "sparksql_config"},
+	Type:         schema.TypeList,
+	Optional:     true,
+	ForceNew:     true,
+	MaxItems:     1,
+	ExactlyOneOf: []string{"pyspark_config", "spark_config", "hadoop_config", "hive_config", "pig_config", "sparksql_config"},
 	Elem: &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			// main driver: can be only one of the class | jar_file
 			"main_class": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"spark_config.0.main_jar_file_uri"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"spark_config.0.main_class", "spark_config.0.main_jar_file_uri"},
 			},
 
 			"main_jar_file_uri": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"spark_config.0.main_class"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"spark_config.0.main_jar_file_uri", "spark_config.0.main_class"},
 			},
 
 			"args": {
@@ -612,26 +612,26 @@ func expandSparkJob(config map[string]interface{}) *dataproc.SparkJob {
 // ---- Hadoop Job ----
 
 var hadoopSchema = &schema.Schema{
-	Type:          schema.TypeList,
-	Optional:      true,
-	ForceNew:      true,
-	MaxItems:      1,
-	ConflictsWith: []string{"spark_config", "pyspark_config", "hive_config", "pig_config", "sparksql_config"},
+	Type:         schema.TypeList,
+	Optional:     true,
+	ForceNew:     true,
+	MaxItems:     1,
+	ExactlyOneOf: []string{"spark_config", "pyspark_config", "hadoop_config", "hive_config", "pig_config", "sparksql_config"},
 	Elem: &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			// main driver: can be only one of the main_class | main_jar_file_uri
 			"main_class": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"hadoop_config.0.main_jar_file_uri"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"hadoop_config.0.main_jar_file_uri", "hadoop_config.0.main_class"},
 			},
 
 			"main_jar_file_uri": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"hadoop_config.0.main_class"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"hadoop_config.0.main_jar_file_uri", "hadoop_config.0.main_class"},
 			},
 
 			"args": {
@@ -725,27 +725,27 @@ func expandHadoopJob(config map[string]interface{}) *dataproc.HadoopJob {
 // ---- Hive Job ----
 
 var hiveSchema = &schema.Schema{
-	Type:          schema.TypeList,
-	Optional:      true,
-	ForceNew:      true,
-	MaxItems:      1,
-	ConflictsWith: []string{"spark_config", "pyspark_config", "hadoop_config", "pig_config", "sparksql_config"},
+	Type:         schema.TypeList,
+	Optional:     true,
+	ForceNew:     true,
+	MaxItems:     1,
+	ExactlyOneOf: []string{"spark_config", "pyspark_config", "hadoop_config", "hive_config", "pig_config", "sparksql_config"},
 	Elem: &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			// main query: can be only one of query_list | query_file_uri
 			"query_list": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				ForceNew:      true,
-				Elem:          &schema.Schema{Type: schema.TypeString},
-				ConflictsWith: []string{"hive_config.0.query_file_uri"},
+				Type:         schema.TypeList,
+				Optional:     true,
+				ForceNew:     true,
+				Elem:         &schema.Schema{Type: schema.TypeString},
+				ExactlyOneOf: []string{"hive_config.0.query_file_uri"},
 			},
 
-			"query_file_uri": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"hive_config.0.query_list"},
+			"query_file_uri": 
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"hive_config.0.query_list"},
 			},
 
 			"continue_on_failure": {
@@ -824,27 +824,27 @@ func expandHiveJob(config map[string]interface{}) *dataproc.HiveJob {
 // ---- Pig Job ----
 
 var pigSchema = &schema.Schema{
-	Type:          schema.TypeList,
-	Optional:      true,
-	ForceNew:      true,
-	MaxItems:      1,
-	ConflictsWith: []string{"spark_config", "pyspark_config", "hadoop_config", "hive_config", "sparksql_config"},
+	Type:         schema.TypeList,
+	Optional:     true,
+	ForceNew:     true,
+	MaxItems:     1,
+	ExactlyOneOf: []string{"spark_config", "pyspark_config", "hadoop_config", "hive_config", "sparksql_config"},
 	Elem: &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			// main query: can be only one of query_list | query_file_uri
 			"query_list": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				ForceNew:      true,
-				Elem:          &schema.Schema{Type: schema.TypeString},
-				ConflictsWith: []string{"pig_config.0.query_file_uri"},
+				Type:         schema.TypeList,
+				Optional:     true,
+				ForceNew:     true,
+				Elem:         &schema.Schema{Type: schema.TypeString},
+				ExactlyOneOf: []string{"pig_config.0.query_file_uri", "pig_config.0.query_list"},
 			},
 
-			"query_file_uri": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"pig_config.0.query_list"},
+			"query_file_uri": 
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"pig_config.0.query_file_uri", "pig_config.0.query_list"},
 			},
 
 			"continue_on_failure": {
@@ -926,27 +926,27 @@ func expandPigJob(config map[string]interface{}) *dataproc.PigJob {
 // ---- Spark SQL Job ----
 
 var sparkSqlSchema = &schema.Schema{
-	Type:          schema.TypeList,
-	Optional:      true,
-	ForceNew:      true,
-	MaxItems:      1,
-	ConflictsWith: []string{"spark_config", "pyspark_config", "hadoop_config", "hive_config", "pig_config"},
+	Type:         schema.TypeList,
+	Optional:     true,
+	ForceNew:     true,
+	MaxItems:     1,
+	ExactlyOneOf: []string{"spark_config", "pyspark_config", "hadoop_config", "hive_config", "pig_config"},
 	Elem: &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			// main query: can be only one of query_list | query_file_uri
 			"query_list": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				ForceNew:      true,
-				Elem:          &schema.Schema{Type: schema.TypeString},
-				ConflictsWith: []string{"pig_config.0.query_file_uri"},
+				Type:         schema.TypeList,
+				Optional:     true,
+				ForceNew:     true,
+				Elem:         &schema.Schema{Type: schema.TypeString},
+				ExactlyOneOf: []string{"pig_config.0.query_file_uri", "pig_config.0.query_list"},
 			},
 
-			"query_file_uri": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"pig_config.0.query_list"},
+			"query_file_uri": 
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"pig_config.0.query_file_uri", "pig_config.0.query_list"},
 			},
 
 			"script_variables": {

@@ -46,6 +46,16 @@ var (
 	ipAllocationSubnetFields    = []string{"ip_allocation_policy.0.create_subnetwork", "ip_allocation_policy.0.subnetwork_name"}
 	ipAllocationCidrBlockFields = []string{"ip_allocation_policy.0.cluster_ipv4_cidr_block", "ip_allocation_policy.0.services_ipv4_cidr_block", "ip_allocation_policy.0.node_ipv4_cidr_block"}
 	ipAllocationRangeFields     = []string{"ip_allocation_policy.0.cluster_secondary_range_name", "ip_allocation_policy.0.services_secondary_range_name"}
+
+	addonsConfigKeys = []string{
+		"addons_config.0.http_load_balancing",
+		"addons_config.0.horizontal_pod_autoscaling",
+		"addons_config.0.network_policy_config",
+	<% unless version == 'ga' -%>
+		"addons_config.0.istio_config",
+		"addons_config.0.cloudrun_config",
+	<% end -%>
+	}
 )
 
 <% unless version == 'ga' -%>
@@ -167,10 +177,11 @@ func resourceContainerCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"http_load_balancing": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Computed: true,
-							MaxItems: 1,
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"disabled": {
@@ -181,10 +192,11 @@ func resourceContainerCluster() *schema.Resource {
 							},
 						},
 						"horizontal_pod_autoscaling": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Computed: true,
-							MaxItems: 1,
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"disabled": {
@@ -209,10 +221,11 @@ func resourceContainerCluster() *schema.Resource {
 							},
 						},
 						"network_policy_config": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Computed: true,
-							MaxItems: 1,
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"disabled": {
@@ -224,10 +237,11 @@ func resourceContainerCluster() *schema.Resource {
 						},
 						<% unless version == 'ga' -%>
 						"istio_config": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Computed: true,
-							MaxItems: 1,
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"disabled": {
@@ -245,11 +259,12 @@ func resourceContainerCluster() *schema.Resource {
 							},
 						},
 						"cloudrun_config": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Computed: true,
-							ForceNew: true,
-							MaxItems: 1,
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							ForceNew:     true,
+							MaxItems:     1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"disabled": {
@@ -464,12 +479,14 @@ func resourceContainerCluster() *schema.Resource {
 						"password": {
 							Type:      schema.TypeString,
 							Optional:  true,
+							AtLeastOneOf: []string{"master_auth.0.password", "master_auth.0.username", "master_auth.0.client_certificate_config"},
 							Sensitive: true,
 						},
 
 						"username": {
 							Type:     schema.TypeString,
 							Optional: true,
+							AtLeastOneOf: []string{"master_auth.0.password", "master_auth.0.username", "master_auth.0.client_certificate_config"},
 						},
 
 						// Ideally, this would be Optional (and not Computed).
@@ -481,6 +498,7 @@ func resourceContainerCluster() *schema.Resource {
 							MaxItems: 1,
 							Optional: true,
 							Computed: true,
+							AtLeastOneOf: []string{"master_auth.0.password", "master_auth.0.username", "master_auth.0.client_certificate_config"},
 							ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -785,7 +803,7 @@ func resourceContainerCluster() *schema.Resource {
 						"channel": {
 							Type:             schema.TypeString,
 							Default:          "UNSPECIFIED",
-							Optional:         true,
+							Required:         true,
 							ForceNew:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"UNSPECIFIED", "RAPID", "REGULAR", "STABLE"}, false),
 							DiffSuppressFunc: emptyOrDefaultStringSuppress("UNSPECIFIED"),

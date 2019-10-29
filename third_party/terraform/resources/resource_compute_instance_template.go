@@ -14,6 +14,19 @@ import (
 	computeBeta "google.golang.org/api/compute/v0.beta"
 )
 
+var schedulingKeys []string{
+	"scheduling.0.on_host_maintenance",
+	"scheduling.0.automatic_restart",
+	"scheduling.0.preemptible",
+	"scheduling.0.node_affinities",
+}
+
+var shieldedInstanceConfigKeys []string{
+	"shielded_instance_config.0.enable_secure_boot",
+	"shielded_instance_config.0.enable_vtpm",
+	"shielded_instance_config.0.enable_integrity_monitoring",
+}
+
 func resourceComputeInstanceTemplate() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeInstanceTemplateCreate,
@@ -116,9 +129,10 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						},
 
 						"source_image": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: []string{"disk.0.source_image", "disk.0.source"},
 						},
 
 						"interface": {
@@ -136,9 +150,10 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						},
 
 						"source": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							AtLeastOneOf: []string{"disk.0.source_image", "disk.0.source"},
+							ForceNew:     true,
 						},
 
 						"type": {
@@ -227,6 +242,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Optional:         true,
 							ForceNew:         true,
 							Computed:         true,
+							AtLeastOneOf:     []string{"network_interface.0.network", "network_interface.0.subnetwork"},
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
 						},
 
@@ -241,6 +257,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Optional:         true,
 							ForceNew:         true,
 							Computed:         true,
+							AtLeastOneOf:     []string{"network_interface.0.network", "network_interface.0.subnetwork"},
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
 						},
 
@@ -262,11 +279,13 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 										Optional: true,
 										ForceNew: true,
 										Computed: true,
+										AtLeastOneOf: []string{"network_interface.0.access_config.0.nat_ip", "network_interface.0.access_config.0.network_tier"},
 									},
 									"network_tier": {
 										Type:         schema.TypeString,
 										Optional:     true,
 										Computed:     true,
+										AtLeastOneOf: []string{"network_interface.0.access_config.0.nat_ip", "network_interface.0.access_config.0.network_tier"},
 										ValidateFunc: validation.StringInSlice([]string{"PREMIUM", "STANDARD"}, false),
 									},
 								},
@@ -322,6 +341,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						"preemptible": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							AtLeastOneOf: schedulingKeys,
 							Default:  false,
 							ForceNew: true,
 						},
@@ -329,6 +349,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						"automatic_restart": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							AtLeastOneOf: schedulingKeys,
 							Default:  true,
 							ForceNew: true,
 						},
@@ -337,12 +358,14 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
+							AtLeastOneOf: schedulingKeys,
 							ForceNew: true,
 						},
 
 						"node_affinities": {
 							Type:             schema.TypeSet,
 							Optional:         true,
+							AtLeastOneOf: schedulingKeys,
 							ForceNew:         true,
 							Elem:             instanceSchedulingNodeAffinitiesElemSchema(),
 							DiffSuppressFunc: emptyOrDefaultStringSuppress(""),
@@ -398,24 +421,27 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enable_secure_boot": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
-							ForceNew: true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							AtLeastOneOf: shieldedInstanceConfigKeys,
+							Default:      false,
+							ForceNew:     true,
 						},
 
 						"enable_vtpm": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
-							ForceNew: true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							AtLeastOneOf: shieldedInstanceConfigKeys,
+							Default:      true,
+							ForceNew:     true,
 						},
 
 						"enable_integrity_monitoring": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
-							ForceNew: true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							AtLeastOneOf: shieldedInstanceConfigKeys,
+							Default:      true,
+							ForceNew:     true,
 						},
 					},
 				},

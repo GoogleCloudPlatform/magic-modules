@@ -195,12 +195,14 @@ func resourceStorageBucket() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"main_page_suffix": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							AtLeastOneOf: []string{"website.0.not_found_page"},
 						},
 						"not_found_page": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							AtLeastOneOf: []string{"website.0.main_page_suffix"},
 						},
 					},
 				},
@@ -234,6 +236,7 @@ func resourceStorageBucket() *schema.Resource {
 						"origin": {
 							Type:     schema.TypeList,
 							Optional: true,
+							AtLeastOneOf: []string{"cors.0.method", "cors.0.response_header", "cors.0.max_age_seconds"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -241,6 +244,7 @@ func resourceStorageBucket() *schema.Resource {
 						"method": {
 							Type:     schema.TypeList,
 							Optional: true,
+							AtLeastOneOf: []string{"cors.0.origin", "cors.0.response_header", "cors.0.max_age_seconds"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -248,6 +252,7 @@ func resourceStorageBucket() *schema.Resource {
 						"response_header": {
 							Type:     schema.TypeList,
 							Optional: true,
+							AtLeastOneOf: []string{"cors.0.origin", "cors.0.method", "cors.0.max_age_seconds"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -255,6 +260,7 @@ func resourceStorageBucket() *schema.Resource {
 						"max_age_seconds": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							AtLeastOneOf: []string{"cors.0.origin", "cors.0.method", "cors.0.response_header"},
 						},
 					},
 				},

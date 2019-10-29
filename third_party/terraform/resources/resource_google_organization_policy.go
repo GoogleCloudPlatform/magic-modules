@@ -17,10 +17,10 @@ var schemaOrganizationPolicy = map[string]*schema.Schema{
 		DiffSuppressFunc: compareSelfLinkOrResourceName,
 	},
 	"boolean_policy": {
-		Type:          schema.TypeList,
-		Optional:      true,
-		MaxItems:      1,
-		ConflictsWith: []string{"list_policy", "restore_policy"},
+		Type:         schema.TypeList,
+		Optional:     true,
+		MaxItems:     1,
+		ExactlyOneOf: []string{"list_policy", "boolean_policy", "restore_policy"},
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"enforced": {
@@ -31,10 +31,10 @@ var schemaOrganizationPolicy = map[string]*schema.Schema{
 		},
 	},
 	"list_policy": {
-		Type:          schema.TypeList,
-		Optional:      true,
-		MaxItems:      1,
-		ConflictsWith: []string{"boolean_policy", "restore_policy"},
+		Type:         schema.TypeList,
+		Optional:     true,
+		MaxItems:     1,
+		ExactlyOneOf: []string{"list_policy", "boolean_policy", "restore_policy"},
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"allow": {
@@ -45,16 +45,17 @@ var schemaOrganizationPolicy = map[string]*schema.Schema{
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"all": {
-								Type:          schema.TypeBool,
-								Optional:      true,
-								Default:       false,
-								ConflictsWith: []string{"list_policy.0.allow.0.values"},
+								Type:         schema.TypeBool,
+								Optional:     true,
+								Default:      false,
+								ExactlyOneOf: []string{"list_policy.0.allow.0.all", "list_policy.0.allow.0.values"},
 							},
 							"values": {
-								Type:     schema.TypeSet,
-								Optional: true,
-								Elem:     &schema.Schema{Type: schema.TypeString},
-								Set:      schema.HashString,
+								Type:         schema.TypeSet,
+								Optional:     true,
+								ExactlyOneOf: []string{"list_policy.0.allow.0.all", "list_policy.0.allow.0.values"},
+								Elem:         &schema.Schema{Type: schema.TypeString},
+								Set:          schema.HashString,
 							},
 						},
 					},
@@ -63,19 +64,21 @@ var schemaOrganizationPolicy = map[string]*schema.Schema{
 					Type:     schema.TypeList,
 					Optional: true,
 					MaxItems: 1,
+					ConflictsWith: []string{"list_policy.0.allow"},
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"all": {
-								Type:          schema.TypeBool,
-								Optional:      true,
-								Default:       false,
-								ConflictsWith: []string{"list_policy.0.deny.0.values"},
+								Type:         schema.TypeBool,
+								Optional:     true,
+								Default:      false,
+								ExactlyOneOf: []string{"list_policy.0.deny.0.all", "list_policy.0.deny.0.values"},
 							},
 							"values": {
-								Type:     schema.TypeSet,
-								Optional: true,
-								Elem:     &schema.Schema{Type: schema.TypeString},
-								Set:      schema.HashString,
+								Type:         schema.TypeSet,
+								Optional:     true,
+								ExactlyOneOf: []string{"list_policy.0.deny.0.all", "list_policy.0.deny.0.values"},
+								Elem:         &schema.Schema{Type: schema.TypeString},
+								Set:          schema.HashString,
 							},
 						},
 					},
@@ -87,7 +90,7 @@ var schemaOrganizationPolicy = map[string]*schema.Schema{
 				},
 				"inherit_from_parent": {
 					Type:     schema.TypeBool,
-					Required: true,
+					Optional: true,
 				},
 			},
 		},
@@ -106,10 +109,10 @@ var schemaOrganizationPolicy = map[string]*schema.Schema{
 		Computed: true,
 	},
 	"restore_policy": {
-		Type:          schema.TypeList,
-		Optional:      true,
-		MaxItems:      1,
-		ConflictsWith: []string{"boolean_policy", "list_policy"},
+		Type:         schema.TypeList,
+		Optional:     true,
+		MaxItems:     1,
+		ExactlyOneOf: []string{"restore_policy", "boolean_policy", "list_policy"},
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"default": {
