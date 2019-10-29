@@ -40,15 +40,15 @@ func resourceRuntimeconfigVariable() *schema.Resource {
 			},
 
 			"value": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ConflictsWith: []string{"text"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				ExactlyOneOf: []string{"text"},
 			},
 
 			"text": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ConflictsWith: []string{"value"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				ExactlyOneOf: []string{"value"},
 			},
 
 			"update_time": {

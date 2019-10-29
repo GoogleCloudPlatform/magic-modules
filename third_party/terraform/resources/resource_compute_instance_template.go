@@ -135,9 +135,10 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						},
 
 						"source_image": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: []string{"disk.0.source_image", "disk.0.source"},
 						},
 
 						"interface": {
@@ -155,9 +156,10 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						},
 
 						"source": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							AtLeastOneOf: []string{"disk.0.source_image", "disk.0.source"},
+							ForceNew:     true,
 						},
 
 						"type": {
@@ -246,6 +248,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Optional:         true,
 							ForceNew:         true,
 							Computed:         true,
+							AtLeastOneOf:     []string{"network_interface.0.network", "network_interface.0.subnetwork"},
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
 						},
 
@@ -260,6 +263,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Optional:         true,
 							ForceNew:         true,
 							Computed:         true,
+							AtLeastOneOf:     []string{"network_interface.0.network", "network_interface.0.subnetwork"},
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
 						},
 
@@ -281,11 +285,13 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 										Optional: true,
 										ForceNew: true,
 										Computed: true,
+										AtLeastOneOf: []string{"network_interface.0.access_config.0.nat_ip", "network_interface.0.access_config.0.network_tier"},
 									},
 									"network_tier": {
 										Type:         schema.TypeString,
 										Optional:     true,
 										Computed:     true,
+										AtLeastOneOf: []string{"network_interface.0.access_config.0.nat_ip", "network_interface.0.access_config.0.network_tier"},
 										ValidateFunc: validation.StringInSlice([]string{"PREMIUM", "STANDARD"}, false),
 									},
 								},

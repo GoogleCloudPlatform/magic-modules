@@ -270,6 +270,7 @@ func resourceStorageBucket() *schema.Resource {
 						"origin": {
 							Type:     schema.TypeList,
 							Optional: true,
+							AtLeastOneOf: []string{"cors.0.method", "cors.0.response_header", "cors.0.max_age_seconds"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -277,6 +278,7 @@ func resourceStorageBucket() *schema.Resource {
 						"method": {
 							Type:     schema.TypeList,
 							Optional: true,
+							AtLeastOneOf: []string{"cors.0.origin", "cors.0.response_header", "cors.0.max_age_seconds"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -284,6 +286,7 @@ func resourceStorageBucket() *schema.Resource {
 						"response_header": {
 							Type:     schema.TypeList,
 							Optional: true,
+							AtLeastOneOf: []string{"cors.0.origin", "cors.0.method", "cors.0.max_age_seconds"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -291,6 +294,7 @@ func resourceStorageBucket() *schema.Resource {
 						"max_age_seconds": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							AtLeastOneOf: []string{"cors.0.origin", "cors.0.method", "cors.0.response_header"},
 						},
 					},
 				},
