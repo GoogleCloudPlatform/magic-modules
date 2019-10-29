@@ -1,6 +1,8 @@
 package google
 
 import (
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"google.golang.org/api/logging/v2"
 )
@@ -56,21 +58,23 @@ func flattenResourceLoggingSink(d *schema.ResourceData, sink *logging.LogSink) {
 	d.Set("writer_identity", sink.WriterIdentity)
 }
 
-func expandResourceLoggingSinkForUpdate(d *schema.ResourceData) *logging.LogSink {
+func expandResourceLoggingSinkForUpdate(d *schema.ResourceData) (*logging.LogSink, string) {
 	// Can only update destination/filter right now. Despite the method below using 'Patch', the API requires both
 	// destination and filter (even if unchanged).
 	sink := logging.LogSink{
-		Destination: d.Get("destination").(string),
-		Filter:      d.Get("filter").(string),
+		Destination:     d.Get("destination").(string),
+		Filter:          d.Get("filter").(string),
+		ForceSendFields: []string{"Destination", "Filter"},
 	}
 
+	updateFields := []string{}
 	if d.HasChange("destination") {
-		sink.ForceSendFields = append(sink.ForceSendFields, "Destination")
+		updateFields = append(updateFields, "destination")
 	}
 	if d.HasChange("filter") {
-		sink.ForceSendFields = append(sink.ForceSendFields, "Filter")
+		updateFields = append(updateFields, "filter")
 	}
-	return &sink
+	return &sink, strings.Join(updateFields, ",")
 }
 
 func resourceLoggingSinkImportState(sinkType string) schema.StateFunc {
