@@ -8694,15 +8694,6 @@ objects:
           Only networks that are in the distributed mode can have subnetworks.
         input: true
         required: true
-      - !ruby/object:Api::Type::Boolean
-        name: 'enableFlowLogs'
-        description: |
-          Whether to enable flow logging for this subnetwork.
-        update_verb: :PATCH
-        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
-        update_id: 'enableFlowLogs'
-        fingerprint_name: 'fingerprint'
-        send_empty_value: true
       # TODO(rileykarson): Work with rambleraptor to remove this field from downstreams.
       - !ruby/object:Api::Type::Fingerprint
         name: 'fingerprint'
@@ -8786,11 +8777,18 @@ objects:
         input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        update_id: 'logConfig'
         description: |
           Denotes the logging options for the subnetwork flow logs. If logging is enabled
           logs will be exported to Stackdriver.
-        min_version: beta
         properties:
+          - !ruby/object:Api::Type::Boolean
+            name: enable
+            description: |
+              Enables flow logging to export logs to Stackdriver
+            default_value: false
           - !ruby/object:Api::Type::Enum
             name: 'aggregationInterval'
             description: |
