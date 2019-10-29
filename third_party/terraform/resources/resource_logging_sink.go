@@ -33,6 +33,20 @@ func resourceLoggingSinkSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Computed: true,
 		},
+
+		"bigquery_options": {
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"use_partitioned_tables": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+				},
+			},
+		},
 	}
 }
 
@@ -44,9 +58,10 @@ func expandResourceLoggingSink(d *schema.ResourceData, resourceType, resourceId 
 	}
 
 	sink := logging.LogSink{
-		Name:        d.Get("name").(string),
-		Destination: d.Get("destination").(string),
-		Filter:      d.Get("filter").(string),
+		Name:            d.Get("name").(string),
+		Destination:     d.Get("destination").(string),
+		Filter:          d.Get("filter").(string),
+		BigqueryOptions: expandLoggingSinkBigqueryOptions(d.Get("bigquery_options")),
 	}
 	return id, &sink
 }
@@ -74,7 +89,23 @@ func expandResourceLoggingSinkForUpdate(d *schema.ResourceData) (*logging.LogSin
 	if d.HasChange("filter") {
 		updateFields = append(updateFields, "filter")
 	}
+	if d.HasChange("bigquery_options") {
+		sink.BigqueryOptions = expandLoggingSinkBigqueryOptions(d.Get("bigquery_options"))
+		updateFields = append(updateFields, "bigqueryOptions")
+	}
 	return &sink, strings.Join(updateFields, ",")
+}
+
+func expandLoggingSinkBigqueryOptions(v interface{}) *logging.BigQueryOptions {
+	if v == nil {
+		return nil
+	}
+	options := v.([]interface{})[0].(map[string]interface{})
+	bo := &logging.BigQueryOptions{}
+	if usePartitionedTables, ok := options["use_partitioned_tables"]; ok {
+		bo.UsePartitionedTables = usePartitionedTables.(bool)
+	}
+	return bo
 }
 
 func resourceLoggingSinkImportState(sinkType string) schema.StateFunc {
