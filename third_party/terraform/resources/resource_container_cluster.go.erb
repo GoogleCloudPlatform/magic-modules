@@ -172,16 +172,14 @@ func resourceContainerCluster() *schema.Resource {
 						},
 						"kubernetes_dashboard": {
 							Type:       schema.TypeList,
-							Optional:   true,
-							Computed:   true,
-							Deprecated: "The Kubernetes Dashboard addon is deprecated for clusters on GKE.",
+							Optional:  true,
+							Removed: "The Kubernetes Dashboard addon is removed for clusters on GKE.",
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"disabled": {
 										Type:     schema.TypeBool,
 										Optional: true,
-										Default:  true,
 									},
 								},
 							},
@@ -2079,14 +2077,6 @@ func expandClusterAddonsConfig(configured interface{}) *containerBeta.AddonsConf
 		}
 	}
 
-	if v, ok := config["kubernetes_dashboard"]; ok && len(v.([]interface{})) > 0 {
-		addon := v.([]interface{})[0].(map[string]interface{})
-		ac.KubernetesDashboard = &containerBeta.KubernetesDashboard{
-			Disabled:        addon["disabled"].(bool),
-			ForceSendFields: []string{"Disabled"},
-		}
-	}
-
 	if v, ok := config["network_policy_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
 		ac.NetworkPolicyConfig = &containerBeta.NetworkPolicyConfig{
@@ -2433,13 +2423,6 @@ func flattenClusterAddonsConfig(c *containerBeta.AddonsConfig) []map[string]inte
 		result["http_load_balancing"] = []map[string]interface{}{
 			{
 				"disabled": c.HttpLoadBalancing.Disabled,
-			},
-		}
-	}
-	if c.KubernetesDashboard != nil {
-		result["kubernetes_dashboard"] = []map[string]interface{}{
-			{
-				"disabled": c.KubernetesDashboard.Disabled,
 			},
 		}
 	}

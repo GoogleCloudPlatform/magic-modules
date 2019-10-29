@@ -1845,7 +1845,6 @@ resource "google_container_cluster" "primary" {
 	addons_config {
 		http_load_balancing { disabled = true }
 		horizontal_pod_autoscaling { disabled = true }
-		kubernetes_dashboard { disabled = true }
 		network_policy_config { disabled = true }
 <% unless version == 'ga' -%>
 		istio_config {
@@ -1867,7 +1866,6 @@ resource "google_container_cluster" "primary" {
 
 	addons_config {
 		http_load_balancing { disabled = false }
-		kubernetes_dashboard { disabled = false }
 		horizontal_pod_autoscaling { disabled = false }
 		network_policy_config { disabled = false }
 <% unless version == 'ga' -%>
