@@ -352,6 +352,12 @@ Before updating, remove it from your config.
 
 ## Resource: `google_container_cluster`
 
+### `addons_config.kubernetes_dashboard` is now removed
+
+The `kubernetes_dashboard` addon is deprecated for clusters on GKE and
+will soon be removed. It is recommended to use alternative GCP Console
+dashboards.
+
 ### `zone`, `region` and `additional_zones` are now removed
 
 `zone` and `region` have been removed in favor of `location` and
