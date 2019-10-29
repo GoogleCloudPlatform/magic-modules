@@ -278,15 +278,7 @@ objects:
            One or more labels that you can add, to organize your jobs. Each label is a key-value pair, 
            where both the key and the value are arbitrary Strings that you supply. 
            An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-      - !ruby/object:Api::Type::String
-        name: 'etag'
-        description: |
-          etag is used for optimistic concurrency control as a way to help prevent simultaneous updates of a job 
-          from overwriting each other. It is strongly suggested that systems make use of the etag in the
-          read-modify-write cycle to perform job updates in order to avoid race conditions: An etag is returned in 
-          the response to jobs.get, and systems are expected to put that etag in the request to jobs.patch to ensure 
-          that their change will be applied to the same version of the job.
-          A base64-encoded String
+      # no etag since it's input: true     
       - !ruby/object:Api::Type::NestedObject
         name: 'trainingInput'
         description: Input parameters to create a training job.
@@ -304,105 +296,9 @@ objects:
             required: true
           - !ruby/object:Api::Type::String
             name: 'masterType'
-            description: Specifies the type of virtual machine to use for your training job's master worker    
-          - !ruby/object:Api::Type::NestedObject
-            name: 'masterConfig'
-            description: The configuration for your master worker.
-            properties:
-              - !ruby/object:Api::Type::NestedObject
-                name: 'acceleratorConfig'
-                description: Represents the type and number of accelerators used by the replica
-                properties:
-                - !ruby/object:Api::Type::Integer
-                  name: 'count'
-                  description: The number of accelerators to attach to each machine running the job.
-                - !ruby/object:Api::Type::Enum
-                  name: 'type'
-                  description: The type of accelerator to use.
-                  values:
-                    - ACCELERATOR_TYPE_UNSPECIFIED
-                    - NVIDIA_TESLA_K80	
-                    - NVIDIA_TESLA_P100
-                    - NVIDIA_TESLA_V100
-                    - NVIDIA_TESLA_P4
-                    - NVIDIA_TESLA_T4
-                    - TPU_V2
-                    - TPU_V3 
-              - !ruby/object:Api::Type::Integer
-                name: 'imageUri'
-                description: The Docker image to run on the replica. This image must be in Container Registry.
-              - !ruby/object:Api::Type::Integer
-                name: 'tpuTfVersion'
-                description: |
-                  The AI Platform runtime version that includes a TensorFlow version matching the one used in the 
-                  custom container. This field is required if the replica is a TPU worker that uses a custom container. 
-                  Otherwise, do not specify this field.
-          - !ruby/object:Api::Type::String
-            name: 'workerType'
-            description: Specifies the type of virtual machine to use for your training job's worker nodes.
-            required: false
-          - !ruby/object:Api::Type::NestedObject
-            name: 'workerConfig'
-            description: The configuration for workers.
-            required: false
-            properties:
-              - !ruby/object:Api::Type::NestedObject
-                name: 'acceleratorConfig'
-                description: Represents the type and number of accelerators used by the replica
-                properties:
-                - !ruby/object:Api::Type::String
-                  name: 'count'
-                  description: The number of accelerators to attach to each machine running the job.
-                - !ruby/object:Api::Type::Enum
-                  name: 'type'
-                  description: The type of accelerator to use.
-                  values:
-                    - ACCELERATOR_TYPE_UNSPECIFIED
-                    - NVIDIA_TESLA_K80	
-                    - NVIDIA_TESLA_P100
-                    - NVIDIA_TESLA_V100
-                    - NVIDIA_TESLA_P4
-                    - NVIDIA_TESLA_T4
-                    - TPU_V2
-                    - TPU_V3 
-              - !ruby/object:Api::Type::Integer
-                name: 'imageUri'
-                description: The Docker image to run on the replica. This image must be in Container Registry.
-              - !ruby/object:Api::Type::Integer
-                name: 'tpuTfVersion'
-                description: |
-                  The AI Platform runtime version that includes a TensorFlow version matching the one used in the 
-                  custom container. This field is required if the replica is a TPU worker that uses a custom container. 
-                  Otherwise, do not specify this field.
-          - !ruby/object:Api::Type::String
-            name: 'parameterServerType'
-            description: The configuration for parameter servers
-            required: false
-          - !ruby/object:Api::Type::String
-            name: 'parameterServerConfig'
-            description:  The configuration for parameter servers.
+            description: Specifies the type of virtual machine to use for your training job's master worker  
             required: false  
-            properties:
-              - !ruby/object:Api::Type::NestedObject
-                name: 'acceleratorConfig'
-                description: Represents the type and number of accelerators used by the replica
-                properties:
-                - !ruby/object:Api::Type::String
-                  name: 'count'
-                  description: The number of accelerators to attach to each machine running the job.
-                - !ruby/object:Api::Type::Enum
-                  name: 'type'
-                  description: The type of accelerator to use.
-                  values:
-                    - ACCELERATOR_TYPE_UNSPECIFIED
-                    - NVIDIA_TESLA_K80	
-                    - NVIDIA_TESLA_P100
-                    - NVIDIA_TESLA_V100
-                    - NVIDIA_TESLA_P4
-                    - NVIDIA_TESLA_T4
-                    - TPU_V2
-                    - TPU_V3 
-          - !ruby/object:Api::Type::String
+          - !ruby/object:Api::Type::Integer
             name: 'workerCount'
             description: | 
               The number of worker replicas to use for the training job. Each replica in the cluster will be of the type 
@@ -430,110 +326,6 @@ objects:
             description: Command line arguments to pass to the program.
             required: false
             item_type: Api::Type::String
-          - !ruby/object:Api::Type::NestedObject
-            name: 'hyperparameters'
-            description: The set of Hyperparameters to tune.
-            required: false 
-            properties:
-              - !ruby/object:Api::Type::Enum  
-                name: goal	
-                description: The type of goal to use for tuning. Available types are MAXIMIZE and MINIMIZE.
-                required: true
-                values:
-                  - GOAL_TYPE_UNSPECIFIED
-                  - MAXIMIZE
-                  - MINIMIZE
-              - !ruby/objetc:Api:Type::Array
-                name: params
-                description: The set of parameters to tune.
-                required: true
-                item_type: Api::Type::NestedObject
-                properties:
-                  - !ruby/object:Api::Type::String
-                    name: parameterName
-                    description: The parameter name must be unique amongst all ParameterConfigs in a HyperparameterSpec message. E.g., "learning_rate".
-                    required: true
-                  - !ruby/object:Api::Type::Enum
-                    name: type  
-                    description:  The type of the parameter.
-                    required: true
-                    values:
-                      - PARAMETER_TYPE_UNSPECIFIED
-                      - DOUBLE
-                      - INTEGER
-                      - CATEGORICAL
-                      - DISCRETE
-                  - !ruby/object:Api::Type::String
-                    name: minValue
-                    description: |
-                      Required if type is DOUBLE or INTEGER. This field should be unset if type is CATEGORICAL. This value should be 
-                      integers if type is INTEGER.
-                  - !ruby/object:Api::Type::String
-                    name: maxValue
-                    description: | 
-                      Required if type is DOUBLE or INTEGER. This field should be unset if type is CATEGORICAL. 
-                      This value should be integers if type is INTEGER.
-                  - !ruby/object:Api::Type::Array
-                    name: categoricalValues
-                    description:  The list of possible categories.
-                    item_type: Api::Type::String
-                  - !ruby/object:Api::Type::Array
-                    name: discreteValues
-                    description: A list of feasible points.
-                    item_type: Api::Type::String
-                  - !ruby/object:Api::Type::String
-                    name: scaleType
-                    description: | 
-                      How the parameter should be scaled to the hypercube. Leave unset for categorical parameters. Some kind of scaling is strongly 
-                      recommended for real or integral parameters 
-                    required: false
-                    values:
-                      - NONE
-                      - UNIT_LINEAR_SCALE
-                      - UNIT_LOG_SCALE
-                      - UNIT_REVERSE_LOG_SCALE
-              - !ruby/object:Api::Type::Integer  
-                name: maxTrials	
-                description: How many training trials should be attempted to optimize the specified hyperparameters.
-                required: false
-              - !ruby/object:Api::Type::Integer  
-                name: maxParallelTrials	
-                description: |
-                  The number of training trials to run concurrently. You can reduce the time it takes to perform 
-                  hyperparameter tuning by adding trials in parallel. However, each trail only benefits from the 
-                  information gained in completed trials. That means that a trial does not get access to the results 
-                  of trials running at the same time, which could reduce the quality of the overall optimization.
-                required: false
-              - !ruby/object:Api::Type::Integer  
-                name: maxFailedTrials	
-                description: |
-                  The TensorFlow summary tag name to use for optimizing trials. For current versions of TensorFlow, 
-                  this tag name should exactly match what is shown in TensorBoard, including all scopes. For versions 
-                  of TensorFlow prior to 0.12, this should be only the tag passed to tf.Summary. By default, 
-                  "training/hptuning/metric" will be used.
-                required: false
-              - !ruby/object:Api::Type::String  
-                name: resumePreviousJobId	
-                description: |
-                  The TensorFlow summary tag name to use for optimizing trials. For current versions of TensorFlow, 
-                  this tag name should exactly match what is shown in TensorBoard, including all scopes. For versions 
-                  of TensorFlow prior to 0.12, this should be only the tag passed to tf.Summary. By default, 
-                  "training/hptuning/metric" will be used.
-                required: false
-              - !ruby/object:Api::Type::Boolean  
-                name: enableTrialEarlyStopping	
-                description: Indicates if the hyperparameter tuning job enables auto trial early stopping.
-                required: false
-              - !ruby/object:Api::Type::Enum  
-                name: algorithm	
-                description: |
-                  The search algorithm specified for the hyperparameter tuning job. Uses the default 
-                  AI Platform hyperparameter tuning algorithm if unspecified.
-                required: false 
-                values:
-                  - ALGORITHM_UNSPECIFIED
-                  - GRID_SEARCH
-                  - RANDOM_SEARCH
           - !ruby/object:Api::Type::String
             name: 'region'
             description: The Google Compute Engine region to run the training job in. See the available regions for AI Platform services.
@@ -557,84 +349,9 @@ objects:
               The version of Python used in training. If not set, the default version is '2.7'. Python '3.5' is available when 
               runtimeVersion is set to '1.4' and above. Python '2.7' works with all supported runtime versions.
             required: false 
-      - !ruby/object:Api::Type::NestedObject
-        name: 'predictionInput'
-        description: Input parameters to create a prediction job.
-        properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'dataFormat'
-            description: Specifies the machine types, the number of replicas for workers and parameter servers.
-            values:
-              - DATA_FORMAT_UNSPECIFIED
-              - JSON
-              - TEXT
-              - TF_RECORD
-              - TF_RECORD_GZIP
-              - CSV
-            required: true
-          - !ruby/object:Api::Type::Enum
-            name: 'outputDataFormat'
-            description: Format of the output data files, defaults to JSON.
-            values:
-              - DATA_FORMAT_UNSPECIFIED
-              - JSON
-              - TEXT
-              - TF_RECORD
-              - TF_RECORD_GZIP
-              - CSV
-            required: false      
-          - !ruby/object:Api::Type::String
-            name: 'inputPaths'
-            description: Format of the output data files, defaults to JSON.
-            required: true  
-          - !ruby/object:Api::Type::String
-            name: 'maxWorkerCount'
-            description: The maximum number of workers to be used for parallel processing. Defaults to 10 if not specified.
-            required: false  
-          - !ruby/object:Api::Type::String
-            name: 'region'
-            description: The Google Compute Engine region to run the prediction job in
-            required: true  
-          - !ruby/object:Api::Type::String
-            name: 'runtimeVersion'
-            description: |
-              The AI Platform runtime version to use for this batch prediction. If not set, AI Platform will pick the runtime 
-              version used during the versions.create request for this model version, or choose the latest stable version when 
-              model version information is not available such as when the model is specified by uri.
-            required: true  
-          - !ruby/object:Api::Type::String
-            name: 'batchSize'
-            description: |
-              Number of records per batch, defaults to 64. The service will buffer batchSize number of records in memory before 
-              invoking one Tensorflow prediction call internally. So take the record size and memory available into consideration 
-              when setting this parameter.
-            required: false
-          - !ruby/object:Api::Type::String
-            name: 'signatureName'
-            description: The name of the signature defined in the SavedModel to use for this job.
-            required: false 
-          - !ruby/object:Api::Type::String
-            name: 'modelName'
-            description: |
-              Use this field if you want to use the default version for the specified model. 
-              The String must use the following format:
-              "projects/YOUR_PROJECT/models/YOUR_MODEL"
-          - !ruby/object:Api::Type::String
-            name: 'versionName'
-            description: | 
-              Use this field if you want to specify a version of the model to use. The String is 
-              formatted the same way as model_version, with the addition of the version information
-              "projects/YOUR_PROJECT/models/YOUR_MODEL/versions/YOUR_VERSION"
-          - !ruby/object:Api::Type::String
-            name: 'uri'
-            description: Use this field if you want to specify a Google Cloud Storage path for the model to use.
-          - !ruby/object:Api::Type::String
-            name: 'outputPath'
-            description: The output Google Cloud Storage location.
-            required: true 
-      - !ruby/object:Api::Type::NestedObject
         name: 'trainingOutput'
         description: The current training job result.
+        output: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'completedTrialCount'
@@ -671,6 +388,7 @@ objects:
                   - FAILED
                   - CANCELLING
                   - CANCELLED
+                output: true
               - !ruby/object:Api::Type::NestedObject
                 name: 'finalMetric'
                 description:  The final objective metric seen for this trial.
@@ -742,19 +460,4 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'hyperparameterMetricTag'
             description: The TensorFlow summary tag name used for optimizing hyperparameter tuning trials.
-      - !ruby/object:Api::Type::String
-        name: 'predictionOutput'
-        description: The current prediction job result
-        properties:
-          - !ruby/object:Api::Type::String
-            name: 'outputPath'
-            description:  The output Google Cloud Storage location provided at the job creation time.
-          - !ruby/object:Api::Type::String
-            name: 'predictionCount'
-            description:  The number of generated predictions.
-          - !ruby/object:Api::Type::String
-            name: 'errorCount'
-            description:  The number of data instances which resulted in errors.
-          - !ruby/object:Api::Type::Integer
-            name: 'nodeHours'
-            description:  Node hours used by the batch prediction job.          
+                  

@@ -37,15 +37,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "census_training"
-        primary_resource_id: "default"
-        vars:
-          model_name: 'default'
-      - !ruby/object:Provider::Terraform::Examples
-        name: "ml_model_full"
-        primary_resource_id: "default"
-        vars:
-          model_name: 'default'
+        name: "ml_job_training"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
