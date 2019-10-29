@@ -920,6 +920,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       autoCreateSubnetworks: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: True
+        send_empty_value: true
         # autoCreateSubnetworks defaults to true, so we need to disable it explicitly
         conflicts: []
       routingConfig: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -935,7 +936,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
-      encoder: templates/terraform/encoders/network.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/network.erb
   NetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{zone}}/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}"
