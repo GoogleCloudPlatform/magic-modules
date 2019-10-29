@@ -188,6 +188,22 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"display_device": {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enable_display": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							ForceNew: true,
+						},
+					},
+				},
+			},
+
 			"instance_description": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -704,6 +720,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		ServiceAccounts:   expandServiceAccounts(d.Get("service_account").([]interface{})),
 		Tags:              resourceInstanceTags(d),
 		ShieldedVmConfig:  expandShieldedVmConfigs(d),
+		DisplayDevice:     expandDisplayDevice(d),
 	}
 
 	if _, ok := d.GetOk("labels"); ok {
@@ -1067,6 +1084,11 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	if instanceTemplate.Properties.ShieldedVmConfig != nil {
 		if err = d.Set("shielded_instance_config", flattenShieldedVmConfig(instanceTemplate.Properties.ShieldedVmConfig)); err != nil {
 			return fmt.Errorf("Error setting shielded_instance_config: %s", err)
+		}
+	}
+	if instanceTemplate.Properties.DisplayDevice != nil {
+		if err = d.Set("display_device", flattenDisplayDevice(instanceTemplate.Properties.DisplayDevice)); err != nil {
+			return fmt.Errorf("Error setting display device: %s", err)
 		}
 	}
 	return nil

@@ -140,6 +140,11 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 
+	err = d.Set("display_device", flattenDisplayDevice(instance.DisplayDevice))
+	if err != nil {
+		return err
+	}
+
 	d.Set("attached_disk", ads)
 	d.Set("cpu_platform", instance.CpuPlatform)
 	d.Set("min_cpu_platform", instance.MinCpuPlatform)

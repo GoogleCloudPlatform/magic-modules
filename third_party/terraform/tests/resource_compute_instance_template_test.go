@@ -736,6 +736,26 @@ func TestAccComputeInstanceTemplate_shieldedVmConfig2(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstanceTemplate_displayDevice(t *testing.T) {
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeInstanceTemplateDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_displayDevice(),
+			},
+			{
+				ResourceName:      "google_compute_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccCheckComputeInstanceTemplateDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
@@ -1867,4 +1887,32 @@ resource "google_compute_instance_template" "foobar" {
 		enable_integrity_monitoring = %t
 	}
 }`, acctest.RandString(10), enableSecureBoot, enableVtpm, enableIntegrityMonitoring)
+}
+
+func testAccComputeInstanceTemplate_displayDevice() string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+	family  = "centos-7"
+	project = "gce-uefi-images"
+}
+
+resource "google_compute_instance_template" "foobar" {
+	name = "instancet-test-%s"
+	machine_type = "n1-standard-1"
+	can_ip_forward = false
+
+	disk {
+		source_image = "${data.google_compute_image.my_image.self_link}"
+		auto_delete = true
+		boot = true
+	}
+
+	network_interface {
+		network = "default"
+	}
+
+	display_device {
+		enable_display = "true"
+	}
+}`, acctest.RandString(10))
 }
