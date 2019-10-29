@@ -56,6 +56,8 @@
     :version_added: '2.9'
   :SslCertificate:
     :version_added: '2.7'
+  :Reservation:
+    :version_added: '2.10'
   :SslPolicy:
     :version_added: '2.7'
   :Subnetwork:
@@ -1067,6 +1069,38 @@
       :version_added: '2.6'
     :privateKey:
       :version_added: '2.6'
+  :Reservation:
+    :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :specificReservationRequired:
+      :version_added: '2.10'
+    :specificReservation:
+      :version_added: '2.10'
+      :count:
+        :version_added: '2.10'
+      :instanceProperties:
+        :version_added: '2.10'
+        :machineType:
+          :version_added: '2.10'
+        :minCpuPlatform:
+          :version_added: '2.10'
+        :guestAccelerators:
+          :version_added: '2.10'
+          :acceleratorType:
+            :version_added: '2.10'
+          :acceleratorCount:
+            :version_added: '2.10'
+        :localSsds:
+          :version_added: '2.10'
+          :interface:
+            :version_added: '2.10'
+          :diskSizeGb:
+            :version_added: '2.10'
+    :zone:
+      :version_added: '2.10'
   :SslPolicy:
     :version_added: '2.7'
     :description:
