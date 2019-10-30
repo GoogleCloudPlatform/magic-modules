@@ -523,7 +523,7 @@ resource "google_compute_subnetwork" "network-with-flow-logs" {
 	network = "${google_compute_network.custom-test.self_link}"
 	log_config {
 		enable               = true
-		aggregation_interval = "INTERVAL_10_SEC"
+		aggregation_interval = "INTERVAL_30_SEC"
 		flow_sampling        = 0.8
 		metadata             = "INCLUDE_ALL_METADATA"
 	}
@@ -543,6 +543,9 @@ resource "google_compute_subnetwork" "network-with-flow-logs" {
 	ip_cidr_range = "10.0.0.0/16"
 	region = "us-central1"
 	network = "${google_compute_network.custom-test.self_link}"
+	log_config {
+		enable               = false
+	}
 }
 `, cnName, subnetworkName)
 }
