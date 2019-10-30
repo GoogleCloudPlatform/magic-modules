@@ -1,4 +1,4 @@
-resource "google_ml_engine_job" "training_job" {
+resource "google_ml_engine_job" "test_job_$(date +'%Y%m%d_%H%M%S') " {
   job_id          = "ml_job_training"
   training_input  {
     job_dir         = "gs://cio-strat-svc-acct-mgmt-238520-mlengine/scikit_learn_job_dir"
