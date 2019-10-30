@@ -544,7 +544,7 @@ resource "google_compute_subnetwork" "network-with-flow-logs" {
 	region = "us-central1"
 	network = "${google_compute_network.custom-test.self_link}"
 	log_config {
-		enable               = false
+		enable = false
 	}
 }
 `, cnName, subnetworkName)
