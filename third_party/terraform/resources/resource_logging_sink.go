@@ -73,7 +73,7 @@ func flattenResourceLoggingSink(d *schema.ResourceData, sink *logging.LogSink) {
 	d.Set("writer_identity", sink.WriterIdentity)
 }
 
-func expandResourceLoggingSinkForUpdate(d *schema.ResourceData) (*logging.LogSink, string) {
+func expandResourceLoggingSinkForUpdate(d *schema.ResourceData) (sink *logging.LogSink, updateMask string) {
 	// Can only update destination/filter right now. Despite the method below using 'Patch', the API requires both
 	// destination and filter (even if unchanged).
 	sink := logging.LogSink{
@@ -100,7 +100,11 @@ func expandLoggingSinkBigqueryOptions(v interface{}) *logging.BigQueryOptions {
 	if v == nil {
 		return nil
 	}
-	options := v.([]interface{})[0].(map[string]interface{})
+	optionsSlice := v.([]interface{})
+	if len(optionsSlice) == 0 || optionsSlice[0] == nil {
+		return nil
+	}
+	options := optionsSlice[0].(map[string]interface{})
 	bo := &logging.BigQueryOptions{}
 	if usePartitionedTables, ok := options["use_partitioned_tables"]; ok {
 		bo.UsePartitionedTables = usePartitionedTables.(bool)
