@@ -1,4 +1,6 @@
 resource_compute_instance.go
+resource_container_cluster.go
+resource_container_node_pool.go
 resource_google_project.go
 resource_sql_database_instance.go.erb
 resource_storage_bucket.go
