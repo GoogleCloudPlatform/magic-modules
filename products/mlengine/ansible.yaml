@@ -42,6 +42,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     provider_helpers:
       - products/mlengine/helpers/ansible/model_decoder.py
       - products/mlengine/helpers/ansible/version_set_default.py
+  Job: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>
