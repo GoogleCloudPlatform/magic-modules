@@ -206,13 +206,13 @@ func transferOptionsSchema() *schema.Schema {
 				"delete_objects_unique_in_sink": {
 					Type:          schema.TypeBool,
 					Optional:      true,
-					AtLeastOneOf: transferOptionsKeys,
+					AtLeastOneOf:  transferOptionsKeys,
 					ConflictsWith: []string{"transfer_spec.transfer_options.delete_objects_from_source_after_transfer"},
 				},
 				"delete_objects_from_source_after_transfer": {
 					Type:          schema.TypeBool,
 					Optional:      true,
-					AtLeastOneOf: transferOptionsKeys,
+					AtLeastOneOf:  transferOptionsKeys,
 					ConflictsWith: []string{"transfer_spec.transfer_options.delete_objects_unique_in_sink"},
 				},
 			},

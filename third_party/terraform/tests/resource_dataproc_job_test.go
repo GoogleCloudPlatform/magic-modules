@@ -22,21 +22,22 @@ type jobTestField struct {
 	gcp_attr interface{}
 }
 
-func TestAccDataprocJob_failForMissingJobConfig(t *testing.T) {
-	t.Parallel()
+// TODO (mbang): Test `ExactlyOneOf` here
+// func TestAccDataprocJob_failForMissingJobConfig(t *testing.T) {
+// 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataprocJobDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config:      testAccDataprocJob_missingJobConf(),
-				ExpectError: regexp.MustCompile("You must define and configure exactly one xxx_config block"),
-			},
-		},
-	})
-}
+// 	resource.Test(t, resource.TestCase{
+// 		PreCheck:     func() { testAccPreCheck(t) },
+// 		Providers:    testAccProviders,
+// 		CheckDestroy: testAccCheckDataprocJobDestroy,
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config:      testAccDataprocJob_missingJobConf(),
+// 				ExpectError: regexp.MustCompile("You must define and configure exactly one xxx_config block"),
+// 			},
+// 		},
+// 	})
+// }
 
 func TestAccDataprocJob_updatable(t *testing.T) {
 	t.Parallel()
@@ -472,16 +473,17 @@ func testAccCheckDataprocJobAttrMatch(n, jobType string, job *dataproc.Job) reso
 	}
 }
 
-func testAccDataprocJob_missingJobConf() string {
-	return `
-resource "google_dataproc_job" "missing_config" {
-	placement {
-		cluster_name = "na"
-	}
+// TODO (mbang): Test `ExactlyOneOf` here
+// func testAccDataprocJob_missingJobConf() string {
+// 	return `
+// resource "google_dataproc_job" "missing_config" {
+// 	placement {
+// 		cluster_name = "na"
+// 	}
 
-	force_delete = true
-}`
-}
+// 	force_delete = true
+// }`
+// }
 
 var singleNodeClusterConfig = `
 resource "google_dataproc_cluster" "basic" {

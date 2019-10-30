@@ -36,7 +36,7 @@ var composerEnvironmentReservedEnvVar = map[string]struct{}{
 	"SQL_USER":         {},
 }
 
-var softwareConfigKeys = []string{
+var composerSoftwareConfigKeys = []string{
 	"config.0.software_config.0.airflow_config_overrides",
 	"config.0.software_config.0.pypi_packages",
 	"config.0.software_config.0.env_variables",
@@ -215,20 +215,20 @@ func resourceComposerEnvironment() *schema.Resource {
 									"airflow_config_overrides": {
 										Type:     schema.TypeMap,
 										Optional: true,
-										AtLeastOneOf: softwareConfigKeys,
+										AtLeastOneOf: composerSoftwareConfigKeys,
 										Elem:     &schema.Schema{Type: schema.TypeString},
 									},
 									"pypi_packages": {
 										Type:         schema.TypeMap,
 										Optional:     true,
-										AtLeastOneOf: softwareConfigKeys,
+										AtLeastOneOf: composerSoftwareConfigKeys,
 										Elem:         &schema.Schema{Type: schema.TypeString},
 										ValidateFunc: validateComposerEnvironmentPypiPackages,
 									},
 									"env_variables": {
 										Type:         schema.TypeMap,
 										Optional:     true,
-										AtLeastOneOf: softwareConfigKeys,
+										AtLeastOneOf: composerSoftwareConfigKeys,
 										Elem:         &schema.Schema{Type: schema.TypeString},
 										ValidateFunc: validateComposerEnvironmentEnvVariables,
 									},
@@ -236,14 +236,14 @@ func resourceComposerEnvironment() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 										Optional: true,
-										AtLeastOneOf: softwareConfigKeys,
+										AtLeastOneOf: composerSoftwareConfigKeys,
 										ValidateFunc: validateRegexp(composerEnvironmentVersionRegexp),
 										DiffSuppressFunc: composerImageVersionDiffSuppress,
 									},
 									"python_version": {
 										Type:     schema.TypeString,
 										Optional: true,
-										AtLeastOneOf: softwareConfigKeys,
+										AtLeastOneOf: composerSoftwareConfigKeys,
 										Computed: true,
 										ForceNew: true,
 									},

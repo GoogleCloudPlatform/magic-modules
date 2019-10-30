@@ -61,9 +61,9 @@ var schemaOrganizationPolicy = map[string]*schema.Schema{
 					},
 				},
 				"deny": {
-					Type:     schema.TypeList,
-					Optional: true,
-					MaxItems: 1,
+					Type:          schema.TypeList,
+					Optional:      true,
+					MaxItems:      1,
 					ConflictsWith: []string{"list_policy.0.allow"},
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{

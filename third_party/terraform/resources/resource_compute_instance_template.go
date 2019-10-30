@@ -14,18 +14,20 @@ import (
 	computeBeta "google.golang.org/api/compute/v0.beta"
 )
 
-var schedulingKeys []string{
-	"scheduling.0.on_host_maintenance",
-	"scheduling.0.automatic_restart",
-	"scheduling.0.preemptible",
-	"scheduling.0.node_affinities",
-}
+var (
+	schedulingInstTemplateKeys = []string{
+		"scheduling.0.on_host_maintenance",
+		"scheduling.0.automatic_restart",
+		"scheduling.0.preemptible",
+		"scheduling.0.node_affinities",
+	}
 
-var shieldedInstanceConfigKeys []string{
-	"shielded_instance_config.0.enable_secure_boot",
-	"shielded_instance_config.0.enable_vtpm",
-	"shielded_instance_config.0.enable_integrity_monitoring",
-}
+	shieldedInstanceTemplateConfigKeys = []string{
+		"shielded_instance_config.0.enable_secure_boot",
+		"shielded_instance_config.0.enable_vtpm",
+		"shielded_instance_config.0.enable_integrity_monitoring",
+	}
+)
 
 func resourceComputeInstanceTemplate() *schema.Resource {
 	return &schema.Resource{
@@ -275,10 +277,10 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"nat_ip": {
-										Type:     schema.TypeString,
-										Optional: true,
-										ForceNew: true,
-										Computed: true,
+										Type:         schema.TypeString,
+										Optional:     true,
+										ForceNew:     true,
+										Computed:     true,
 										AtLeastOneOf: []string{"network_interface.0.access_config.0.nat_ip", "network_interface.0.access_config.0.network_tier"},
 									},
 									"network_tier": {
@@ -339,33 +341,33 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"preemptible": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							AtLeastOneOf: schedulingKeys,
-							Default:  false,
-							ForceNew: true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							AtLeastOneOf: schedulingInstTemplateKeys,
+							Default:      false,
+							ForceNew:     true,
 						},
 
 						"automatic_restart": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							AtLeastOneOf: schedulingKeys,
-							Default:  true,
-							ForceNew: true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							AtLeastOneOf: schedulingInstTemplateKeys,
+							Default:      true,
+							ForceNew:     true,
 						},
 
 						"on_host_maintenance": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-							AtLeastOneOf: schedulingKeys,
-							ForceNew: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: schedulingInstTemplateKeys,
+							ForceNew:     true,
 						},
 
 						"node_affinities": {
 							Type:             schema.TypeSet,
 							Optional:         true,
-							AtLeastOneOf: schedulingKeys,
+							AtLeastOneOf:     schedulingInstTemplateKeys,
 							ForceNew:         true,
 							Elem:             instanceSchedulingNodeAffinitiesElemSchema(),
 							DiffSuppressFunc: emptyOrDefaultStringSuppress(""),
@@ -423,7 +425,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						"enable_secure_boot": {
 							Type:         schema.TypeBool,
 							Optional:     true,
-							AtLeastOneOf: shieldedInstanceConfigKeys,
+							AtLeastOneOf: schedulingInstTemplateKeys,
 							Default:      false,
 							ForceNew:     true,
 						},
@@ -431,7 +433,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						"enable_vtpm": {
 							Type:         schema.TypeBool,
 							Optional:     true,
-							AtLeastOneOf: shieldedInstanceConfigKeys,
+							AtLeastOneOf: schedulingInstTemplateKeys,
 							Default:      true,
 							ForceNew:     true,
 						},
@@ -439,7 +441,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						"enable_integrity_monitoring": {
 							Type:         schema.TypeBool,
 							Optional:     true,
-							AtLeastOneOf: shieldedInstanceConfigKeys,
+							AtLeastOneOf: schedulingInstTemplateKeys,
 							Default:      true,
 							ForceNew:     true,
 						},

@@ -36,7 +36,7 @@ var (
 		"cluster_config.0.preemptible_worker_config.0.disk_config.0.boot_disk_type",
 	}
 
-	softwareConfigKeys = []string{
+	clusterSoftwareConfigKeys = []string{
 		"cluster_config.0.software_config.0.image_version",
 		"cluster_config.0.software_config.0.override_properties",
 		"cluster_config.0.software_config.0.optional_components",
@@ -245,7 +245,7 @@ func resourceDataprocCluster() *schema.Resource {
 										Computed: true,
 										AtLeastOneOf: []string{
 											"cluster_config.0.preemptible_worker_config.0.num_instances",
-											"cluster_config.0.preemptible_worker_config.0.disk_config"
+											"cluster_config.0.preemptible_worker_config.0.disk_config",
 										},
 									},
 
@@ -261,7 +261,7 @@ func resourceDataprocCluster() *schema.Resource {
 										Computed: true,
 										AtLeastOneOf: []string{
 											"cluster_config.0.preemptible_worker_config.0.num_instances",
-											"cluster_config.0.preemptible_worker_config.0.disk_config"
+											"cluster_config.0.preemptible_worker_config.0.disk_config",
 										},
 										MaxItems: 1,
 
@@ -318,7 +318,7 @@ func resourceDataprocCluster() *schema.Resource {
 										Type:             schema.TypeString,
 										Optional:         true,
 										Computed:         true,
-										AtLeastOneOf:     softwareConfigKeys,
+										AtLeastOneOf:     clusterSoftwareConfigKeys,
 										ForceNew:         true,
 										DiffSuppressFunc: dataprocImageVersionDiffSuppress,
 									},
@@ -326,7 +326,7 @@ func resourceDataprocCluster() *schema.Resource {
 									"override_properties": {
 										Type:         schema.TypeMap,
 										Optional:     true,
-										AtLeastOneOf: softwareConfigKeys,
+										AtLeastOneOf: clusterSoftwareConfigKeys,
 										ForceNew:     true,
 										Elem:         &schema.Schema{Type: schema.TypeString},
 									},
@@ -348,7 +348,7 @@ func resourceDataprocCluster() *schema.Resource {
 									"optional_components": {
 										Type:         schema.TypeSet,
 										Optional:     true,
-										AtLeastOneOf: softwareConfigKeys,
+										AtLeastOneOf: clusterSoftwareConfigKeys,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 											ValidateFunc: validation.StringInSlice([]string{"COMPONENT_UNSPECIFIED", "ANACONDA", "DRUID", "HIVE_WEBHCAT",
@@ -419,14 +419,14 @@ func resourceDataprocCluster() *schema.Resource {
 
 func instanceConfigSchema(parent string) *schema.Schema {
 	var instanceConfigKeys = []string{
-		parent+".0.num_instances",
-		parent+".0.image_uri",
-		parent+".0.machine_type",
+		"cluster_config.0."+parent+".0.num_instances",
+		"cluster_config.0."+parent+".0.image_uri",
+		"cluster_config.0."+parent+".0.machine_type",
 <% unless version == 'ga' -%>
-		parent+".0.min_cpu_platform",
+		"cluster_config.0."+parent+".0.min_cpu_platform",
 <% end -%>
-		parent+".0.disk_config",
-		parent+".0.accelerators",
+		"cluster_config.0."+parent+".0.disk_config",
+		"cluster_config.0."+parent+".0.accelerators",
 	}
 
 	return &schema.Schema{
@@ -483,9 +483,9 @@ func instanceConfigSchema(parent string) *schema.Schema {
 								Optional:     true,
 								Computed:     true,
 								AtLeastOneOf: []string{
-									parent+".0.disk_config.0.num_local_ssds",
-									parent+".0.disk_config.0.boot_disk_size_gb",
-									parent+".0.disk_config.0.boot_disk_type",
+									"cluster_config.0."+parent+".0.disk_config.0.num_local_ssds",
+									"cluster_config.0."+parent+".0.disk_config.0.boot_disk_size_gb",
+									"cluster_config.0."+parent+".0.disk_config.0.boot_disk_type",
 								},
 								ForceNew:     true,
 							},
@@ -495,9 +495,9 @@ func instanceConfigSchema(parent string) *schema.Schema {
 								Optional:     true,
 								Computed:     true,
 								AtLeastOneOf: []string{
-									parent+".0.disk_config.0.num_local_ssds",
-									parent+".0.disk_config.0.boot_disk_size_gb",
-									parent+".0.disk_config.0.boot_disk_type",
+									"cluster_config.0."+parent+".0.disk_config.0.num_local_ssds",
+									"cluster_config.0."+parent+".0.disk_config.0.boot_disk_size_gb",
+									"cluster_config.0."+parent+".0.disk_config.0.boot_disk_type",
 								},
 								ForceNew:     true,
 								ValidateFunc: validation.IntAtLeast(10),
@@ -507,9 +507,9 @@ func instanceConfigSchema(parent string) *schema.Schema {
 								Type:         schema.TypeString,
 								Optional:     true,
 								AtLeastOneOf: []string{
-									parent+".0.disk_config.0.num_local_ssds",
-									parent+".0.disk_config.0.boot_disk_size_gb",
-									parent+".0.disk_config.0.boot_disk_type",
+									"cluster_config.0."+parent+".0.disk_config.0.num_local_ssds",
+									"cluster_config.0."+parent+".0.disk_config.0.boot_disk_size_gb",
+									"cluster_config.0."+parent+".0.disk_config.0.boot_disk_type",
 								},
 								ForceNew:     true,
 								ValidateFunc: validation.StringInSlice([]string{"pd-standard", "pd-ssd", ""}, false),

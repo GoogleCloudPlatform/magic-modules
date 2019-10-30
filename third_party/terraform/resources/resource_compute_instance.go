@@ -19,41 +19,43 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
-var bootDiskKeys []string{
-	"boot_disk.0.auto_delete",
-	"boot_disk.0.device_name",
-	"boot_disk.0.disk_encryption_key_raw",
-	"boot_disk.0.kms_key_self_link",
-	"boot_disk.0.initialize_params",
-	"boot_disk.0.mode",
-	"boot_disk.0.source",
-}
+var (
+	bootDiskKeys = []string{
+		"boot_disk.0.auto_delete",
+		"boot_disk.0.device_name",
+		"boot_disk.0.disk_encryption_key_raw",
+		"boot_disk.0.kms_key_self_link",
+		"boot_disk.0.initialize_params",
+		"boot_disk.0.mode",
+		"boot_disk.0.source",
+	}
 
-var initializeParamsKeys []string{
-	"boot_disk.0.initialize_params.0.size",
-	"boot_disk.0.initialize_params.0.type",
-	"boot_disk.0.initialize_params.0.image",
-	"boot_disk.0.initialize_params.0.labels",
-}
+	initializeParamsKeys = []string{
+		"boot_disk.0.initialize_params.0.size",
+		"boot_disk.0.initialize_params.0.type",
+		"boot_disk.0.initialize_params.0.image",
+		"boot_disk.0.initialize_params.0.labels",
+	}
 
-var accessConfigKeys []string{
-	"network_interface.0.access_config.0.nat_ip",
-	"network_interface.0.access_config.0.network_tier",
-	"network_interface.0.access_config.0.public_ptr_domain_name",
-}
+	accessConfigKeys = []string{
+		"network_interface.0.access_config.0.nat_ip",
+		"network_interface.0.access_config.0.network_tier",
+		"network_interface.0.access_config.0.public_ptr_domain_name",
+	}
 
-var schedulingKeys []string{
-	"scheduling.0.on_host_maintenance",
-	"scheduling.0.automatic_restart",
-	"scheduling.0.preemptible",
-	"scheduling.0.node_affinities",
-}
+	schedulingKeys = []string{
+		"scheduling.0.on_host_maintenance",
+		"scheduling.0.automatic_restart",
+		"scheduling.0.preemptible",
+		"scheduling.0.node_affinities",
+	}
 
-var shieldedInstanceConfigKeys []string{
-	"shielded_instance_config.0.enable_secure_boot",
-	"shielded_instance_config.0.enable_vtpm",
-	"shielded_instance_config.0.enable_integrity_monitoring",
-}
+	shieldedInstanceConfigKeys = []string{
+		"shielded_instance_config.0.enable_secure_boot",
+		"shielded_instance_config.0.enable_vtpm",
+		"shielded_instance_config.0.enable_integrity_monitoring",
+	}
+)
 
 func resourceComputeInstance() *schema.Resource {
 	return &schema.Resource{

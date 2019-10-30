@@ -182,7 +182,6 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	jobConfCount := 0
 	clusterName := d.Get("placement.0.cluster_name").(string)
 	region := d.Get("region").(string)
 
@@ -205,43 +204,33 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if v, ok := d.GetOk("pyspark_config"); ok {
-		jobConfCount++
 		config := extractFirstMapConfig(v.([]interface{}))
 		submitReq.Job.PysparkJob = expandPySparkJob(config)
 	}
 
 	if v, ok := d.GetOk("spark_config"); ok {
-		jobConfCount++
 		config := extractFirstMapConfig(v.([]interface{}))
 		submitReq.Job.SparkJob = expandSparkJob(config)
 	}
 
 	if v, ok := d.GetOk("hadoop_config"); ok {
-		jobConfCount++
 		config := extractFirstMapConfig(v.([]interface{}))
 		submitReq.Job.HadoopJob = expandHadoopJob(config)
 	}
 
 	if v, ok := d.GetOk("hive_config"); ok {
-		jobConfCount++
 		config := extractFirstMapConfig(v.([]interface{}))
 		submitReq.Job.HiveJob = expandHiveJob(config)
 	}
 
 	if v, ok := d.GetOk("pig_config"); ok {
-		jobConfCount++
 		config := extractFirstMapConfig(v.([]interface{}))
 		submitReq.Job.PigJob = expandPigJob(config)
 	}
 
 	if v, ok := d.GetOk("sparksql_config"); ok {
-		jobConfCount++
 		config := extractFirstMapConfig(v.([]interface{}))
 		submitReq.Job.SparkSqlJob = expandSparkSqlJob(config)
-	}
-
-	if jobConfCount != 1 {
-		return fmt.Errorf("You must define and configure exactly one xxx_config block")
 	}
 
 	// Submit the job
@@ -738,14 +727,14 @@ var hiveSchema = &schema.Schema{
 				Optional:     true,
 				ForceNew:     true,
 				Elem:         &schema.Schema{Type: schema.TypeString},
-				ExactlyOneOf: []string{"hive_config.0.query_file_uri"},
+				ExactlyOneOf: []string{"hive_config.0.query_file_uri", "hive_config.0.query_list"},
 			},
 
-			"query_file_uri": 
+			"query_file_uri": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ExactlyOneOf: []string{"hive_config.0.query_list"},
+				ExactlyOneOf: []string{"hive_config.0.query_file_uri", "hive_config.0.query_list"},
 			},
 
 			"continue_on_failure": {
@@ -840,7 +829,7 @@ var pigSchema = &schema.Schema{
 				ExactlyOneOf: []string{"pig_config.0.query_file_uri", "pig_config.0.query_list"},
 			},
 
-			"query_file_uri": 
+			"query_file_uri": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
@@ -942,7 +931,7 @@ var sparkSqlSchema = &schema.Schema{
 				ExactlyOneOf: []string{"pig_config.0.query_file_uri", "pig_config.0.query_list"},
 			},
 
-			"query_file_uri": 
+			"query_file_uri": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
