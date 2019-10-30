@@ -104,10 +104,11 @@ leads to confusing patterns that often involve unnecessarily recreating user
 resources. A number of fields in GKE are dedicated to a feature that allows
 users to create a GKE-managed subnetwork.
 
-This is a great fit for an imperative tool like `gcloud`, but with Terraform
-it's relatively easy to specify a subnetwork in config alongside the cluster.
-Not only is it more explicit, it allows the subnetwork to be repurposed or
-persist through cluster deletion.
+This is a great fit for an imperative tool like `gcloud`, but it's not required
+for Terraform. With Terraform, it's relatively easy to specify a subnetwork in
+config alongside the cluster. Not only does that allow configuring subnetwork
+features like flow logging, it's more explicit, allows the subnetwork to be used
+by other resources, and the subnetwork persists through cluster deletion.
 
 Particularly, Shared VPC was incompatible with `create_subnetwork`, and
 `node_ipv4_cidr` was easy to confuse with
@@ -127,10 +128,11 @@ Particularly, Shared VPC was incompatible with `create_subnetwork`, and
 1. Add a `google_compute_subnetwork` to your config, import it using `terraform import`
 1. Reference the subnetwork using the `subnetwork` field on your `google_container_cluster`
 
--> Note that subnetworks originaly created as part of `create_subnetwork` will
-be deleted alongside the cluster if there are no other users of the subnetwork.
-If it's deleted, `terraform apply` will recreate the same subnetwork except that
-it won't be connected to any GKE cluster.
+-> Subnetworks originaly created as part of `create_subnetwork` will be deleted
+alongside the cluster. If there are other users of the subnetwork, deletion will
+fail. If it's deleted, `terraform apply` will recreate the same subnetwork
+except that it won't be connected to any GKE cluster and other resources can use
+it safely.
 
 #### Old Config
 

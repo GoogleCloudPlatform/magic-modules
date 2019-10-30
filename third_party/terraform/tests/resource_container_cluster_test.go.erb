@@ -3096,7 +3096,7 @@ resource "google_compute_network" "container_network" {
 
 resource "google_container_cluster" "with_ip_allocation_policy" {
   name       = "%s"
-  location   = "us-central1"
+  location   = "us-central1-a"
   network    = "${google_compute_network.container_network.name}"
 
   initial_node_count = 1
@@ -3122,7 +3122,7 @@ resource "google_compute_network" "container_network" {
 
 resource "google_container_cluster" "with_ip_allocation_policy" {
   name       = "%s"
-  location   = "us-central1"
+  location   = "us-central1-a"
   network    = "${google_compute_network.container_network.name}"
   subnetwork = "%s-subnet"
 
