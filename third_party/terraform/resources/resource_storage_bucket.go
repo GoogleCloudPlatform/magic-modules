@@ -268,32 +268,32 @@ func resourceStorageBucket() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"origin": {
-							Type:     schema.TypeList,
-							Optional: true,
+							Type:         schema.TypeList,
+							Optional:     true,
 							AtLeastOneOf: []string{"cors.0.method", "cors.0.response_header", "cors.0.max_age_seconds"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
 						"method": {
-							Type:     schema.TypeList,
-							Optional: true,
+							Type:         schema.TypeList,
+							Optional:     true,
 							AtLeastOneOf: []string{"cors.0.origin", "cors.0.response_header", "cors.0.max_age_seconds"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
 						"response_header": {
-							Type:     schema.TypeList,
-							Optional: true,
+							Type:         schema.TypeList,
+							Optional:     true,
 							AtLeastOneOf: []string{"cors.0.origin", "cors.0.method", "cors.0.max_age_seconds"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
 						"max_age_seconds": {
-							Type:     schema.TypeInt,
-							Optional: true,
+							Type:         schema.TypeInt,
+							Optional:     true,
 							AtLeastOneOf: []string{"cors.0.origin", "cors.0.method", "cors.0.response_header"},
 						},
 					},

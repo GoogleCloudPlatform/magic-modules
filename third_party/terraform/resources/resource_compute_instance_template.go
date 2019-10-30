@@ -281,10 +281,10 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"nat_ip": {
-										Type:     schema.TypeString,
-										Optional: true,
-										ForceNew: true,
-										Computed: true,
+										Type:         schema.TypeString,
+										Optional:     true,
+										ForceNew:     true,
+										Computed:     true,
 										AtLeastOneOf: []string{"network_interface.0.access_config.0.nat_ip", "network_interface.0.access_config.0.network_tier"},
 									},
 									"network_tier": {
