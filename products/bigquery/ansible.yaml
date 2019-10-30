@@ -35,6 +35,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # Override self_link due to GoogleCloudPlatform/magic-modules#2219
     self_link: "projects/{project}/datasets/{name}"
     properties:
+      access.iamMember: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
       access.view.tableId: !ruby/object:Overrides::Ansible::PropertyOverride
         # Ansible linter doesn't like the (_) notation.
         description: |
