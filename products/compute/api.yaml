@@ -8807,6 +8807,7 @@ objects:
         name: 'logConfig'
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        fingerprint_name: 'fingerprint'
         update_id: 'logConfig'
         description: |
           Denotes the logging options for the subnetwork flow logs. If logging is enabled
@@ -8817,6 +8818,7 @@ objects:
             description: |
               Enables flow logging to export logs to Stackdriver
             default_value: false
+            send_empty_value: true
           - !ruby/object:Api::Type::Enum
             name: 'aggregationInterval'
             description: |
@@ -8833,7 +8835,7 @@ objects:
               - :INTERVAL_5_MIN
               - :INTERVAL_10_MIN
               - :INTERVAL_15_MIN
-            default_value: :INTERVAL_5_SEC
+            send_empty_value: true
           - !ruby/object:Api::Type::Double
             name: 'flowSampling'
             description: |
@@ -8842,7 +8844,7 @@ objects:
               flow logs within the subnetwork where 1.0 means all collected logs are
               reported and 0.0 means no logs are reported. Default is 0.5 which means
               half of all collected logs are reported.
-            default_value: 0.5
+            send_empty_value: true
           - !ruby/object:Api::Type::Enum
             name: 'metadata'
             description: |
@@ -8852,7 +8854,7 @@ objects:
             values:
               - :EXCLUDE_ALL_METADATA
               - :INCLUDE_ALL_METADATA
-            default_value: :INCLUDE_ALL_METADATA
+            send_empty_value: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Private Google Access':
