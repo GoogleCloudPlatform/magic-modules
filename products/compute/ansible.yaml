@@ -47,13 +47,9 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionUrlMap: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  Reservation: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   ResourcePolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  TargetInstance:  !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -318,11 +314,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionUrlMap: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  Reservation: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  TargetInstance:  !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true

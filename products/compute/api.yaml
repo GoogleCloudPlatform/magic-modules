@@ -9242,6 +9242,7 @@ objects:
     name: 'TargetInstance'
     kind: 'compute#targetInstance'
     base_url: projects/{{project}}/zones/{{zone}}/targetInstances
+    collection_url_key: 'items'
     has_self_link: true
     input: true
     description: |
