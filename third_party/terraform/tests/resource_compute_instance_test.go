@@ -1201,7 +1201,7 @@ func TestAccComputeInstance_shieldedVmConfig2(t *testing.T) {
 	})
 }
 
-func TestAccComputeInstance_displayDevice(t *testing.T) {
+func TestAccComputeInstance_enableDisplay(t *testing.T) {
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("terraform-test-%s", acctest.RandString(10))
@@ -1212,11 +1212,11 @@ func TestAccComputeInstance_displayDevice(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_displayDevice(instanceName),
+				Config: testAccComputeInstance_enableDisplay(instanceName),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 			{
-				Config: testAccComputeInstance_displayDeviceDisabled(instanceName),
+				Config: testAccComputeInstance_enableDisplayUpdated(instanceName),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 		},
@@ -3661,7 +3661,7 @@ resource "google_compute_instance" "foobar" {
 `, instance, enableSecureBoot, enableVtpm, enableIntegrityMonitoring)
 }
 
-func testAccComputeInstance_displayDevice(instance string) string {
+func testAccComputeInstance_enableDisplay(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
 	family  = "centos-7"
@@ -3683,16 +3683,14 @@ resource "google_compute_instance" "foobar" {
 		network = "default"
 	}
 
-	display_device {
-		enable_display = "true"
-	}
+	enable_display = "true"
 
 	allow_stopping_for_update = true
 }
 `, instance)
 }
 
-func testAccComputeInstance_displayDeviceDisabled(instance string) string {
+func testAccComputeInstance_enableDisplayUpdated(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
 	family  = "centos-7"
@@ -3714,9 +3712,7 @@ resource "google_compute_instance" "foobar" {
 		network = "default"
 	}
 
-	display_device {
-		enable_display = "false"
-	}
+	enable_display = "false"
 
 	allow_stopping_for_update = true
 }

@@ -331,21 +331,19 @@ func flattenShieldedVmConfig(shieldedVmConfig *computeBeta.ShieldedVmConfig) []m
 }
 
 func expandDisplayDevice(d *schema.ResourceData) *computeBeta.DisplayDevice {
-	if _, ok := d.GetOk("display_device"); !ok {
+	if _, ok := d.GetOk("enable_display"); !ok {
 		return nil
 	}
 	return &computeBeta.DisplayDevice{
-		EnableDisplay:   d.Get("display_device.0.enable_display").(bool),
+		EnableDisplay:   d.Get("enable_display").(bool),
 		ForceSendFields: []string{"EnableDisplay"},
 	}
 }
 
-func flattenDisplayDevice(displayDevice *computeBeta.DisplayDevice) []map[string]bool {
+func extractEnableDisplay(displayDevice *computeBeta.DisplayDevice) bool {
 	if displayDevice == nil {
-		return nil
+		return false
 	}
 
-	return []map[string]bool{{
-		"enable_display": displayDevice.EnableDisplay,
-	}}
+	return displayDevice.EnableDisplay
 }

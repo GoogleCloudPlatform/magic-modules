@@ -28,7 +28,7 @@ func TestAccDataSourceComputeInstance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("data.google_compute_instance.bar", "boot_disk.0.initialize_params.0.type", "pd-standard"),
 					resource.TestCheckResourceAttr("data.google_compute_instance.bar", "scratch_disk.0.interface", "SCSI"),
 					resource.TestCheckResourceAttr("data.google_compute_instance.bar", "network_interface.0.access_config.0.network_tier", "PREMIUM"),
-					resource.TestCheckResourceAttr("data.google_compute_instance.bar", "display_device.0.enable_display", "true"),
+					resource.TestCheckResourceAttr("data.google_compute_instance.bar", "enable_display", "true"),
 				),
 			},
 		},
@@ -121,9 +121,8 @@ resource "google_compute_instance" "foo" {
 		my_key       = "my_value"
 		my_other_key = "my_other_value"
 	}
-	display_device {
-		enable_display = "true"
-	}
+
+	enable_display = "true"
 }
 
 data "google_compute_instance" "bar" {

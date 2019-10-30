@@ -736,7 +736,7 @@ func TestAccComputeInstanceTemplate_shieldedVmConfig2(t *testing.T) {
 	})
 }
 
-func TestAccComputeInstanceTemplate_displayDevice(t *testing.T) {
+func TestAccComputeInstanceTemplate_enableDisplay(t *testing.T) {
 	t.Parallel()
 
 	resource.Test(t, resource.TestCase{
@@ -745,7 +745,7 @@ func TestAccComputeInstanceTemplate_displayDevice(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_displayDevice(),
+				Config: testAccComputeInstanceTemplate_enableDisplay(),
 			},
 			{
 				ResourceName:      "google_compute_instance_template.foobar",
@@ -1889,7 +1889,7 @@ resource "google_compute_instance_template" "foobar" {
 }`, acctest.RandString(10), enableSecureBoot, enableVtpm, enableIntegrityMonitoring)
 }
 
-func testAccComputeInstanceTemplate_displayDevice() string {
+func testAccComputeInstanceTemplate_enableDisplay() string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
 	family  = "centos-7"
@@ -1911,8 +1911,6 @@ resource "google_compute_instance_template" "foobar" {
 		network = "default"
 	}
 
-	display_device {
-		enable_display = "true"
-	}
+	enable_display = "true"
 }`, acctest.RandString(10))
 }

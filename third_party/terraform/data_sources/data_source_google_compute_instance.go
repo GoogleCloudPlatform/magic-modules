@@ -140,7 +140,7 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	err = d.Set("display_device", flattenDisplayDevice(instance.DisplayDevice))
+	err = d.Set("enable_display", extractEnableDisplay(instance.DisplayDevice))
 	if err != nil {
 		return err
 	}

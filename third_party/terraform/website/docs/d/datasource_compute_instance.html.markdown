@@ -87,7 +87,7 @@ The following arguments are supported:
 
 * `shielded_instance_config` - The shielded vm config being used by the instance. Structure is documented below.
 
-* `display_device` - The display config for the instance. Structure is documented below.
+* `enable_display` -- Whether the instance has virtual displays enabled.
 
 * `network_interface.0.network_ip` - The internal ip address of the instance, either manually or dynamically assigned.
 
@@ -204,7 +204,3 @@ The `shielded_instance_config` block supports:
 * `enable_vtpm` -- Whether the instance uses vTPM.
 
 * `enable_integrity_monitoring` -- Whether integrity monitoring is enabled for the instance.
-
-The `display_device` block supports:
-
-* `enable_display` -- Whether the instance has virtual displays enabled.

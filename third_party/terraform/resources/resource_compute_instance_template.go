@@ -188,20 +188,10 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"display_device": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
+			"enable_display": {
+				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"enable_display": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							ForceNew: true,
-						},
-					},
-				},
 			},
 
 			"instance_description": {
@@ -1087,8 +1077,8 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		}
 	}
 	if instanceTemplate.Properties.DisplayDevice != nil {
-		if err = d.Set("display_device", flattenDisplayDevice(instanceTemplate.Properties.DisplayDevice)); err != nil {
-			return fmt.Errorf("Error setting display device: %s", err)
+		if err = d.Set("enable_display", extractEnableDisplay(instanceTemplate.Properties.DisplayDevice)); err != nil {
+			return fmt.Errorf("Error setting enable_display: %s", err)
 		}
 	}
 	return nil
