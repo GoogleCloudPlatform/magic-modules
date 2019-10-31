@@ -9450,6 +9450,7 @@ objects:
           - :DEFAULT
           - :CUSTOM
         default_value: :DEFAULT
+        input: true
       - !ruby/object:Api::Type::Array
         name: advertisedGroups
         description: |
@@ -9467,6 +9468,7 @@ objects:
           Leave this field blank to advertise no custom groups.
         send_empty_value: true
         item_type: Api::Type::String
+        input: true
       - !ruby/object:Api::Type::Array
         name: advertisedIpRanges
         description: |
