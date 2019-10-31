@@ -340,9 +340,9 @@ func expandDisplayDevice(d *schema.ResourceData) *computeBeta.DisplayDevice {
 	}
 }
 
-func extractEnableDisplay(displayDevice *computeBeta.DisplayDevice) bool {
+func flattenEnableDisplay(displayDevice *computeBeta.DisplayDevice) interface{} {
 	if displayDevice == nil {
-		return false
+		return nil
 	}
 
 	return displayDevice.EnableDisplay

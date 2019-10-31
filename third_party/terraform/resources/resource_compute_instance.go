@@ -958,7 +958,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	d.Set("scheduling", flattenScheduling(instance.Scheduling))
 	d.Set("guest_accelerator", flattenGuestAccelerators(instance.GuestAccelerators))
 	d.Set("shielded_instance_config", flattenShieldedVmConfig(instance.ShieldedVmConfig))
-	d.Set("enable_display", extractEnableDisplay(instance.DisplayDevice))
+	d.Set("enable_display", flattenEnableDisplay(instance.DisplayDevice))
 	d.Set("cpu_platform", instance.CpuPlatform)
 	d.Set("min_cpu_platform", instance.MinCpuPlatform)
 	d.Set("deletion_protection", instance.DeletionProtection)

@@ -122,7 +122,7 @@ resource "google_compute_instance" "foo" {
 		my_other_key = "my_other_value"
 	}
 
-	enable_display = "true"
+	enable_display = true
 }
 
 data "google_compute_instance" "bar" {

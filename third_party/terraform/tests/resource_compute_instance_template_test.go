@@ -1911,6 +1911,6 @@ resource "google_compute_instance_template" "foobar" {
 		network = "default"
 	}
 
-	enable_display = "true"
+	enable_display = true
 }`, acctest.RandString(10))
 }

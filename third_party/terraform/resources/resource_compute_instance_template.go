@@ -1077,7 +1077,7 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		}
 	}
 	if instanceTemplate.Properties.DisplayDevice != nil {
-		if err = d.Set("enable_display", extractEnableDisplay(instanceTemplate.Properties.DisplayDevice)); err != nil {
+		if err = d.Set("enable_display", flattenEnableDisplay(instanceTemplate.Properties.DisplayDevice)); err != nil {
 			return fmt.Errorf("Error setting enable_display: %s", err)
 		}
 	}

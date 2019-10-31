@@ -3683,7 +3683,7 @@ resource "google_compute_instance" "foobar" {
 		network = "default"
 	}
 
-	enable_display = "true"
+	enable_display = true
 
 	allow_stopping_for_update = true
 }
@@ -3712,7 +3712,7 @@ resource "google_compute_instance" "foobar" {
 		network = "default"
 	}
 
-	enable_display = "false"
+	enable_display = false
 
 	allow_stopping_for_update = true
 }
