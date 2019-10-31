@@ -28,7 +28,7 @@ objects:
   - !ruby/object:Api::Resource
     name: "Metric"
     base_url: projects/{{project}}/metrics
-    self_link: "projects/{{project}}/metrics/{{name}}"
+    self_link: "projects/{{project}}/metrics/{{%name}}"
     update_verb: :PUT
     description: |
       Logs-based metric can also be used to extract values from logs and create a a distribution
