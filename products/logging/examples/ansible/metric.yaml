@@ -14,7 +14,7 @@
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_logging_metric
   code:
-    name: "my-(custom)/metric"
+    name: <%= ctx[:name] %>
     filter: "resource.type=gae_app AND severity>=ERROR"
     metric_descriptor:
       metric_kind: "DELTA"
@@ -25,6 +25,8 @@ task: !ruby/object:Provider::Ansible::Task
           value_type: "STRING"
           description: "amount of matter"
     value_extractor: "EXTRACT(jsonPayload.request)"
+    label_extractors:
+      mass: "EXTRACT(jsonPayload.request)"
     bucket_options:
       linear_buckets:
         num_finite_buckets: 3
