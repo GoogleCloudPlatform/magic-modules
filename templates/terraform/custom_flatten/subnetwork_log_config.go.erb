@@ -20,15 +20,13 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	if len(original) == 0 {
 		return nil
 	}
-	transformed := make(map[string]interface{})
-	transformed["enable"] = original["enable"]
-	if v, ok := original["enable"]; ok && !v.(bool) {
-		// enable is false, so the rest of the values should be unset
-		// the other values may be set on the response, but if we send them to the
-		// API on subsequent requests it will fail as enable is false
-		return []interface{}{transformed}
+
+	v, ok := original["enable"]
+	if ok && !v.(bool) {
+		return nil
 	}
 
+	transformed := make(map[string]interface{})
 	transformed["flow_sampling"] = original["flowSampling"]
 	transformed["aggregation_interval"] = original["aggregationInterval"]
 	transformed["metadata"] = original["metadata"]

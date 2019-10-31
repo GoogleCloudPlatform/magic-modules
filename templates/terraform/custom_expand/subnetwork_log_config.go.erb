@@ -20,11 +20,15 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 	raw := l[0]
 	original := raw.(map[string]interface{})
 
-	if !original["enable"].(bool) {
-		transformed := make(map[string]interface{})
-		transformed["enable"] = original["enable"]
-		return transformed, nil
+	v, ok := d.GetOkExists("enable_flow_logs")
+
+	transformed := make(map[string]interface{})
+	if !ok || v.(bool) {
+		transformed["enable"] = true
+		transformed["aggregationInterval"] = original["aggregation_interval"]
+		transformed["flowSampling"] = original["flow_sampling"]
+		transformed["metadata"] = original["metadata"]
 	}
 
-	return original, nil
+	return transformed, nil
 }

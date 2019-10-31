@@ -1667,6 +1667,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validateIpCidrRange'
       fingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: false
+      enableFlowLogs: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.erb'
