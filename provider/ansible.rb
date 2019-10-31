@@ -39,8 +39,7 @@ module Provider
         'Api::Type::Integer' => 'int',
         'Api::Type::KeyValuePairs' => 'dict',
         'Provider::Ansible::FilterProp' => 'list',
-        'Api::Type::Path' => 'path',
-        'Api::Type::KeyValuePairs' => 'dict'
+        'Api::Type::Path' => 'path'
       }.freeze
 
       include Provider::Ansible
