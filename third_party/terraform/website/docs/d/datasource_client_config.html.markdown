@@ -13,10 +13,11 @@ Use this data source to access the configuration of the Google Cloud provider.
 ## Example Usage
 
 ```tf
-data "google_client_config" "current" {}
+data "google_client_config" "current" {
+}
 
 output "project" {
-  value = "${data.google_client_config.current.project}"
+  value = data.google_client_config.current.project
 }
 ```
 

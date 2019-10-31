@@ -23,10 +23,11 @@ receive an error otherwise.
 ## Example Usage - exporting an email
 
 ```hcl
-data "google_client_openid_userinfo" "me" {}
+data "google_client_openid_userinfo" "me" {
+}
 
 output "my-email" {
-  value = "${data.google_client_openid_userinfo.me.email}"
+  value = data.google_client_openid_userinfo.me.email
 }
 ```
 
