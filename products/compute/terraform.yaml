@@ -1425,7 +1425,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RouterBgpPeer: !ruby/object:Overrides::Terraform::ResourceOverride
     legacy_name: 'google_compute_router_peer'
     exclude_validator: true
-    id_format: "{{project}}/{{region}}/{{router}}/{{name}}"
+    id_format: "{{region}}/{{router}}/{{name}}"
     mutex: router/{{region}}/{{router}}
     examples:
       # These examples are not used to autogenerate tests, as fine-grained
