@@ -21,19 +21,18 @@ The most common use of this datasource will be to fetch information about the in
 
 ```hcl
 resource "google_compute_region_instance_group_manager" "foo" {
-	name = "some_name"
+  name               = "some_name"
     ...
-	base_instance_name = "foo"
+  base_instance_name = "foo"
     ...
-	instance_template = "${google_compute_instance_template.foo.self_link}"
-	target_pools = ["${google_compute_target_pool.foo.self_link}"]
+  instance_template  = google_compute_instance_template.foo.self_link
+  target_pools = [google_compute_target_pool.foo.self_link]
     ...
 }
 
 data "google_compute_region_instance_group" "data_source" {
-	self_link = "${google_compute_region_instance_group_manager.foo.instance_group}"
+  self_link = google_compute_region_instance_group_manager.foo.instance_group
 }
-
 ```
 
 ## Argument Reference
