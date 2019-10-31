@@ -2,6 +2,8 @@ package google
 
 import (
 	"fmt"
+	"log"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -42,7 +44,7 @@ func testSweepMonitoringGroups(region string) error {
 		g := gi.(map[string]interface{})
 
 		// Only sweep monitoring groups with the test prefix
-		if g["name"] != nil && strings.HasPrefix(g["name"].string, "test-acc") {
+		if g["name"] != nil && strings.HasPrefix(g["name"].(string), "test-acc") {
 			url := fmt.Sprintf("%s%s", config.MonitoringBasePath, g["name"].(string))
 			log.Printf("Sweeping Monitoring Group: %s", g["name"].(string))
 
