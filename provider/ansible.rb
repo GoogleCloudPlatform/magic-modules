@@ -62,7 +62,7 @@ module Provider
       # Returns a string representation of the corresponding Python type
       # for a MM type.
       def python_type(prop)
-        prop = Module.const_get(prop).new() unless prop.is_a?(Api::Type)
+        prop = Module.const_get(prop).new unless prop.is_a?(Api::Type)
         # All ResourceRefs are dicts with properties.
         if prop.is_a? Api::Type::ResourceRef
           return 'str' if prop.resource_ref.readonly
