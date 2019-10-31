@@ -5,7 +5,6 @@ resource "google_compute_subnetwork" "subnet-with-logging" {
   network       = "${google_compute_network.custom-test.self_link}"
 
   log_config {
-    enable               = true
     aggregation_interval = "INTERVAL_10_MIN"
     flow_sampling        = 0.5
     metadata             = "INCLUDE_ALL_METADATA"
