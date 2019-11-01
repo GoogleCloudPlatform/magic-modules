@@ -20,14 +20,14 @@ support the same version.
 
 ```hcl
 data "google_container_engine_versions" "central1b" {
-  location           = "us-central1-b"
+  location       = "us-central1-b"
   version_prefix = "1.12."
 }
 
 resource "google_container_cluster" "foo" {
   name               = "terraform-test-cluster"
-  location               = "us-central1-b"
-  node_version       = "${data.google_container_engine_versions.central1b.latest_node_version}"
+  location           = "us-central1-b"
+  node_version       = data.google_container_engine_versions.central1b.latest_node_version
   initial_node_count = 1
 
   master_auth {
