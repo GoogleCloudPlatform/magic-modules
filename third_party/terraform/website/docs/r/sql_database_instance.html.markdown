@@ -78,30 +78,6 @@ resource "google_compute_instance" "apps" {
   }
 }
 
-<<<<<<< HEAD
-=======
-data "null_data_source" "auth_netw_postgres_allowed_1" {
-  count = length(google_compute_instance.apps.*.self_link)
-
-  inputs = {
-    name = "apps-${count.index + 1}"
-    value = element(
-      google_compute_instance.apps.*.network_interface.0.access_config.0.nat_ip,
-      count.index,
-    )
-  }
-}
-
-data "null_data_source" "auth_netw_postgres_allowed_2" {
-  count = 2
-
-  inputs = {
-    name  = "onprem-${count.index + 1}"
-    value = element(["192.168.1.2", "192.168.2.3"], count.index)
-  }
-}
-
->>>>>>> changes to terraform/website/docs/r from terrafmt upgrade012
 resource "random_id" "db_name_suffix" {
   byte_length = 4
 }
@@ -118,7 +94,6 @@ resource "google_sql_database_instance" "postgres" {
     tier = "db-f1-micro"
 
     ip_configuration {
-<<<<<<< HEAD
 
       dynamic "authorized_networks" {
         for_each = google_compute_instance.apps
@@ -137,22 +112,6 @@ resource "google_sql_database_instance" "postgres" {
         content {
           name  = "onprem-${onprem.key}"
           value = onprem.value
-=======
-      dynamic "authorized_networks" {
-        for_each = [data.null_data_source.auth_netw_postgres_allowed_1.*.outputs]
-        content {
-          expiration_time = lookup(authorized_networks.value, "expiration_time", null)
-          name            = lookup(authorized_networks.value, "name", null)
-          value           = lookup(authorized_networks.value, "value", null)
-        }
-      }
-      dynamic "authorized_networks" {
-        for_each = [data.null_data_source.auth_netw_postgres_allowed_2.*.outputs]
-        content {
-          expiration_time = lookup(authorized_networks.value, "expiration_time", null)
-          name            = lookup(authorized_networks.value, "name", null)
-          value           = lookup(authorized_networks.value, "value", null)
->>>>>>> changes to terraform/website/docs/r from terrafmt upgrade012
         }
       }
     }
