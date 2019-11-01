@@ -28,7 +28,7 @@ resource "google_container_cluster" "primary" {
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
   remove_default_node_pool = true
-  initial_node_count = 1
+  initial_node_count       = 1
 
   master_auth {
     username = ""
@@ -43,7 +43,7 @@ resource "google_container_cluster" "primary" {
 resource "google_container_node_pool" "primary_preemptible_nodes" {
   name       = "my-node-pool"
   location   = "us-central1"
-  cluster    = "${google_container_cluster.primary.name}"
+  cluster    = google_container_cluster.primary.name
   node_count = 1
 
   node_config {
@@ -329,11 +329,12 @@ The `addons_config` block supports:
 
 This example `addons_config` disables two addons:
 
-```
+```hcl
 addons_config {
   http_load_balancing {
     disabled = true
   }
+
   horizontal_pod_autoscaling {
     disabled = true
   }
@@ -383,7 +384,7 @@ The `maintenance_policy` block supports:
     Specify `start_time` in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) format "HH:MM”,
     where HH : \[00-23\] and MM : \[00-59\] GMT. For example:
 
-```
+```hcl
 maintenance_policy {
   daily_maintenance_window {
     start_time = "03:00"
@@ -464,7 +465,7 @@ The `master_auth` block supports:
 
 * `client_certificate_config` - (Optional) Whether client certificate authorization is enabled for this cluster.  For example:
 
-```
+```hcl
 master_auth {
   client_certificate_config {
     issue_client_certificate = false
@@ -585,7 +586,7 @@ The `guest_accelerator` block supports:
 The `workload_identity_config` block supports:
 
 * `identity_namespace` (Required) - Currently, the only supported identity namespace is the project's default.
-```
+```hcl
 workload_identity_config {
   identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
 }
@@ -651,9 +652,10 @@ The `resource_usage_export_config` block supports:
 
 * `bigquery_destination.dataset_id` (Required) - The ID of a BigQuery Dataset. For Example:
 
-```
+```hcl
 resource_usage_export_config {
   enable_network_egress_metering = false
+
   bigquery_destination {
     dataset_id = "cluster_resource_usage"
   }
