@@ -28,7 +28,7 @@ resource "google_compute_target_pool" "default" {
   ]
 
   health_checks = [
-    "${google_compute_http_health_check.default.name}",
+    google_compute_http_health_check.default.name,
   ]
 }
 
