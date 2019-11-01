@@ -23,7 +23,7 @@ Three different resources help you manage IAM policies on bigtable instances. Ea
 ```hcl
 data "google_iam_policy" "admin" {
   binding {
-    role    = "roles/editor"
+    role = "roles/editor"
     members = [
       "user:jane@example.com",
     ]
@@ -31,9 +31,9 @@ data "google_iam_policy" "admin" {
 }
 
 resource "google_bigtable_instance_iam_policy" "editor" {
-  project      = "your-project"
-  instance      = "your-bigtable-instance"
-  policy_data  = "${data.google_iam_policy.admin.policy_data}"
+  project     = "your-project"
+  instance    = "your-bigtable-instance"
+  policy_data = data.google_iam_policy.admin.policy_data
 }
 ```
 
@@ -41,9 +41,9 @@ resource "google_bigtable_instance_iam_policy" "editor" {
 
 ```hcl
 resource "google_bigtable_instance_iam_binding" "editor" {
-  instance      = "your-bigtable-instance"
-  role         = "roles/editor"
-  members      = [
+  instance = "your-bigtable-instance"
+  role     = "roles/editor"
+  members = [
     "user:jane@example.com",
   ]
 }
@@ -53,9 +53,9 @@ resource "google_bigtable_instance_iam_binding" "editor" {
 
 ```hcl
 resource "google_bigtable_instance_iam_member" "editor" {
-  instance      = "your-bigtable-instance"
-  role         = "roles/editor"
-  member       = "user:jane@example.com"
+  instance = "your-bigtable-instance"
+  role     = "roles/editor"
+  member   = "user:jane@example.com"
 }
 ```
 

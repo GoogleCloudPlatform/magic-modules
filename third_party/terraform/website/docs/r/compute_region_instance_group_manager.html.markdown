@@ -23,7 +23,7 @@ resource "google_compute_health_check" "autohealing" {
   check_interval_sec  = 5
   timeout_sec         = 5
   healthy_threshold   = 2
-  unhealthy_threshold = 10                         # 50 seconds
+  unhealthy_threshold = 10 # 50 seconds
 
   http_health_check {
     request_path = "/healthz"
@@ -34,12 +34,12 @@ resource "google_compute_health_check" "autohealing" {
 resource "google_compute_region_instance_group_manager" "appserver" {
   name = "appserver-igm"
 
-  base_instance_name         = "app"
-  instance_template          = "${google_compute_instance_template.appserver.self_link}"
-  region                     = "us-central1"
-  distribution_policy_zones  = ["us-central1-a", "us-central1-f"]
+  base_instance_name        = "app"
+  instance_template         = google_compute_instance_template.appserver.self_link
+  region                    = "us-central1"
+  distribution_policy_zones = ["us-central1-a", "us-central1-f"]
 
-  target_pools = ["${google_compute_target_pool.appserver.self_link}"]
+  target_pools = [google_compute_target_pool.appserver.self_link]
   target_size  = 2
 
   named_port {
@@ -48,11 +48,10 @@ resource "google_compute_region_instance_group_manager" "appserver" {
   }
 
   auto_healing_policies {
-    health_check      = "${google_compute_health_check.autohealing.self_link}"
+    health_check      = google_compute_health_check.autohealing.self_link
     initial_delay_sec = 300
   }
 }
-
 ```
 
 ## Example Usage with multiple versions (`google-beta` provider)
@@ -63,14 +62,14 @@ resource "google_compute_region_instance_group_manager" "appserver" {
   base_instance_name = "app"
   region             = "us-central1"
 
-  target_size  = 5
+  target_size = 5
 
   version {
-    instance_template  = "${google_compute_instance_template.appserver.self_link}"
+    instance_template = google_compute_instance_template.appserver.self_link
   }
 
   version {
-    instance_template  = "${google_compute_instance_template.appserver-canary.self_link}"
+    instance_template = google_compute_instance_template.appserver-canary.self_link
     target_size {
       fixed = 1
     }
@@ -143,13 +142,13 @@ group. You can specify one or more values. For more information, see the [offici
 The `update_policy` block supports:
 
 ```hcl
-update_policy{
-  type = "PROACTIVE"
+update_policy {
+  type                         = "PROACTIVE"
   instance_redistribution_type = "PROACTIVE"
-  minimal_action = "REPLACE"
-  max_surge_percent = 20
-  max_unavailable_fixed = 2
-  min_ready_sec = 50
+  minimal_action               = "REPLACE"
+  max_surge_percent            = 20
+  max_unavailable_fixed        = 2
+  min_ready_sec                = 50
 }
 ```
 
@@ -188,21 +187,23 @@ The `version` block supports:
 
 ```hcl
 version {
- name = "appserver-canary"
- instance_template = "${google_compute_instance_template.appserver-canary.self_link}"
- target_size {
-   fixed = 1
- }
+  name              = "appserver-canary"
+  instance_template = google_compute_instance_template.appserver-canary.self_link
+
+  target_size {
+    fixed = 1
+  }
 }
 ```
 
 ```hcl
 version {
- name = "appserver-canary"
- instance_template = "${google_compute_instance_template.appserver-canary.self_link}"
- target_size {
-   percent = 20
- }
+  name              = "appserver-canary"
+  instance_template = google_compute_instance_template.appserver-canary.self_link
+
+  target_size {
+    percent = 20
+  }
 }
 ```
 
