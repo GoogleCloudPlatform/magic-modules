@@ -36,7 +36,7 @@ func testSweepMonitoringGroups(region string) error {
 
 	groups, ok := res["group"]
 	if !ok {
-		log.Fatalf("Fatal - no groups found in Montoring Groups response")
+		log.Fatalf("Fatal - no groups found in Monitoring Groups response")
 	}
 	gs := groups.([]interface{})
 
@@ -89,7 +89,7 @@ func TestAccMonitoringGroup_update(t *testing.T) {
 func testAccMonitoringGroup_update(zone string) string {
 	return fmt.Sprintf(`
 resource "google_monitoring_group" "update" {
-  display_name = "tf-acc Integration Test Group"
+  display_name = "tf-test Integration Test Group"
 
   filter = "resource.metadata.region=\"%s\""
 }
