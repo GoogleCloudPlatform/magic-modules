@@ -70,7 +70,6 @@ resource "google_dataproc_cluster" "mycluster" {
     }
 
     gce_cluster_config {
-      #network = "${google_compute_network.dataproc_network.name}"
       tags = ["foo", "bar"]
       service_account_scopes = [
         "https://www.googleapis.com/auth/monitoring",

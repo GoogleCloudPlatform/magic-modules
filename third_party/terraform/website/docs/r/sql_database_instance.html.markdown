@@ -78,29 +78,12 @@ resource "google_compute_instance" "apps" {
   }
 }
 
-data "null_data_source" "auth_netw_postgres_allowed_1" {
-  count = length(google_compute_instance.apps.*.self_link)
-
-  inputs = {
-    name = "apps-${count.index + 1}"
-    value = element(
-      google_compute_instance.apps.*.network_interface.0.access_config.0.nat_ip,
-      count.index,
-    )
-  }
-}
-
-data "null_data_source" "auth_netw_postgres_allowed_2" {
-  count = 2
-
-  inputs = {
-    name  = "onprem-${count.index + 1}"
-    value = element(["192.168.1.2", "192.168.2.3"], count.index)
-  }
-}
-
 resource "random_id" "db_name_suffix" {
   byte_length = 4
+}
+
+locals {
+  onprem = ["192.168.1.2", "192.168.2.3"]
 }
 
 resource "google_sql_database_instance" "postgres" {
@@ -111,20 +94,24 @@ resource "google_sql_database_instance" "postgres" {
     tier = "db-f1-micro"
 
     ip_configuration {
+
       dynamic "authorized_networks" {
-        for_each = [data.null_data_source.auth_netw_postgres_allowed_1.*.outputs]
+        for_each = google_compute_instance.apps
+        iterator = apps
+
         content {
-          expiration_time = lookup(authorized_networks.value, "expiration_time", null)
-          name            = lookup(authorized_networks.value, "name", null)
-          value           = lookup(authorized_networks.value, "value", null)
+          name  = apps.value.name
+          value = apps.value.network_interface.0.access_config.0.nat_ip
         }
       }
+
       dynamic "authorized_networks" {
-        for_each = [data.null_data_source.auth_netw_postgres_allowed_2.*.outputs]
+        for_each = local.onprem
+        iterator = onprem
+
         content {
-          expiration_time = lookup(authorized_networks.value, "expiration_time", null)
-          name            = lookup(authorized_networks.value, "name", null)
-          value           = lookup(authorized_networks.value, "value", null)
+          name  = "onprem-${onprem.key}"
+          value = onprem.value
         }
       }
     }
