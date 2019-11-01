@@ -278,6 +278,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       fingerprint: !ruby/object:Overrides::Ansible::PropertyOverride
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+      logConfig: !ruby/object:Overrides::Ansible::PropertyOverride
+        exclude: true
   TargetPool: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
