@@ -244,6 +244,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         sensitive: true
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       portName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       protocol: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1670,6 +1672,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       enableFlowLogs: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
         custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.erb'
       ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
