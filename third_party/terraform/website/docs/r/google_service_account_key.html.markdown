@@ -15,13 +15,13 @@ Creates and manages service account key-pairs, which allow the user to establish
 
 ```hcl
 resource "google_service_account" "myaccount" {
-  account_id = "myaccount"
+  account_id   = "myaccount"
   display_name = "My Service Account"
 }
 
 resource "google_service_account_key" "mykey" {
-  service_account_id = "${google_service_account.myaccount.name}"
-  public_key_type = "TYPE_X509_PEM_FILE"
+  service_account_id = google_service_account.myaccount.name
+  public_key_type    = "TYPE_X509_PEM_FILE"
 }
 ```
 
@@ -34,7 +34,7 @@ resource "google_service_account" "myaccount" {
 }
 
 resource "google_service_account_key" "mykey" {
-  service_account_id = "${google_service_account.myaccount.name}"
+  service_account_id = google_service_account.myaccount.name
 }
 
 resource "kubernetes_secret" "google-application-credentials" {
@@ -42,7 +42,7 @@ resource "kubernetes_secret" "google-application-credentials" {
     name = "google-application-credentials"
   }
   data = {
-    credentials.json = "${base64decode(google_service_account_key.mykey.private_key)}"
+    credentials.json = base64decode(google_service_account_key.mykey.private_key)
   }
 }
 ```
@@ -51,14 +51,14 @@ resource "kubernetes_secret" "google-application-credentials" {
 
 ```hcl
 resource "google_service_account" "myaccount" {
-  account_id = "myaccount"
+  account_id   = "myaccount"
   display_name = "My Service Account"
 }
 
 resource "google_service_account_key" "mykey" {
-  service_account_id = "${google_service_account.myaccount.name}"
-  pgp_key = "keybase:keybaseusername"
-  public_key_type = "TYPE_X509_PEM_FILE"
+  service_account_id = google_service_account.myaccount.name
+  pgp_key            = "keybase:keybaseusername"
+  public_key_type    = "TYPE_X509_PEM_FILE"
 }
 ```
 

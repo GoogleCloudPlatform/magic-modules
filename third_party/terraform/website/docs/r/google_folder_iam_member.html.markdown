@@ -25,9 +25,9 @@ resource "google_folder" "department1" {
 }
 
 resource "google_folder_iam_member" "admin" {
-  folder  = "${google_folder.department1.name}"
-  role    = "roles/editor"
-  member  = "user:alice@gmail.com"
+  folder = google_folder.department1.name
+  role   = "roles/editor"
+  member = "user:alice@gmail.com"
 }
 ```
 

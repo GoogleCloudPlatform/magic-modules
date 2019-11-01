@@ -35,8 +35,8 @@ data "google_iam_policy" "admin" {
 }
 
 resource "google_healthcare_fhir_store_iam_policy" "fhir_store" {
-	fhir_store_id = "your-fhir-store-id"
-	policy_data = "${data.google_iam_policy.admin.policy_data}"
+  fhir_store_id = "your-fhir-store-id"
+  policy_data   = data.google_iam_policy.admin.policy_data
 }
 ```
 
@@ -45,7 +45,7 @@ resource "google_healthcare_fhir_store_iam_policy" "fhir_store" {
 ```hcl
 resource "google_healthcare_fhir_store_iam_binding" "fhir_store" {
   fhir_store_id = "your-fhir-store-id"
-  role        = "roles/editor"
+  role          = "roles/editor"
 
   members = [
     "user:jane@example.com",
@@ -58,8 +58,8 @@ resource "google_healthcare_fhir_store_iam_binding" "fhir_store" {
 ```hcl
 resource "google_healthcare_fhir_store_iam_member" "fhir_store" {
   fhir_store_id = "your-fhir-store-id"
-  role        = "roles/editor"
-  member      = "user:jane@example.com"
+  role          = "roles/editor"
+  member        = "user:jane@example.com"
 }
 ```
 

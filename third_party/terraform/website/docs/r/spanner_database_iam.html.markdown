@@ -37,7 +37,7 @@ data "google_iam_policy" "admin" {
 resource "google_spanner_database_iam_policy" "database" {
   instance    = "your-instance-name"
   database    = "your-database-name"
-  policy_data = "${data.google_iam_policy.admin.policy_data}"
+  policy_data = data.google_iam_policy.admin.policy_data
 }
 ```
 
@@ -45,9 +45,9 @@ resource "google_spanner_database_iam_policy" "database" {
 
 ```hcl
 resource "google_spanner_database_iam_binding" "database" {
-  instance   = "your-instance-name"
-  database   = "your-database-name"
-  role       = "roles/compute.networkUser"
+  instance = "your-instance-name"
+  database = "your-database-name"
+  role     = "roles/compute.networkUser"
 
   members = [
     "user:jane@example.com",
@@ -59,10 +59,10 @@ resource "google_spanner_database_iam_binding" "database" {
 
 ```hcl
 resource "google_spanner_database_iam_member" "database" {
-  instance   = "your-instance-name"
-  database   = "your-database-name"
-  role       = "roles/compute.networkUser"
-  member     = "user:jane@example.com"
+  instance = "your-instance-name"
+  database = "your-database-name"
+  role     = "roles/compute.networkUser"
+  member   = "user:jane@example.com"
 }
 ```
 

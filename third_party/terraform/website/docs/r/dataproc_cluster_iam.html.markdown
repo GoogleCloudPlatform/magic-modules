@@ -23,7 +23,7 @@ Three different resources help you manage IAM policies on dataproc clusters. Eac
 ```hcl
 data "google_iam_policy" "admin" {
   binding {
-    role    = "roles/editor"
+    role = "roles/editor"
     members = [
       "user:jane@example.com",
     ]
@@ -31,10 +31,10 @@ data "google_iam_policy" "admin" {
 }
 
 resource "google_dataproc_cluster_iam_policy" "editor" {
-  project      = "your-project"
-  region       = "your-region"
-  cluster      = "your-dataproc-cluster"
-  policy_data  = "${data.google_iam_policy.admin.policy_data}"
+  project     = "your-project"
+  region      = "your-region"
+  cluster     = "your-dataproc-cluster"
+  policy_data = data.google_iam_policy.admin.policy_data
 }
 ```
 
@@ -42,9 +42,9 @@ resource "google_dataproc_cluster_iam_policy" "editor" {
 
 ```hcl
 resource "google_dataproc_cluster_iam_binding" "editor" {
-  cluster      = "your-dataproc-cluster"
-  role         = "roles/editor"
-  members      = [
+  cluster = "your-dataproc-cluster"
+  role    = "roles/editor"
+  members = [
     "user:jane@example.com",
   ]
 }
@@ -54,9 +54,9 @@ resource "google_dataproc_cluster_iam_binding" "editor" {
 
 ```hcl
 resource "google_dataproc_cluster_iam_member" "editor" {
-  cluster      = "your-dataproc-cluster"
-  role         = "roles/editor"
-  member       = "user:jane@example.com"
+  cluster = "your-dataproc-cluster"
+  role    = "roles/editor"
+  member  = "user:jane@example.com"
 }
 ```
 
