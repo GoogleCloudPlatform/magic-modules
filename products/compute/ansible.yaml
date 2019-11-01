@@ -96,6 +96,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - 'products/compute/helpers/python/provider_firewall.py'
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
+    tests: !ruby/object:Provider::Ansible::Tests
+      tests:
+        - !ruby/object:Provider::Ansible::Test
+          name: 'update'
+          path: products/compute/tests/ansible/firewall_update.yaml
     properties:
       network: !ruby/object:Overrides::Ansible::PropertyOverride
         default_value:
