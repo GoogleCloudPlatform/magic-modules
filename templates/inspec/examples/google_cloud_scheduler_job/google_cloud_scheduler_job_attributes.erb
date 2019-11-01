@@ -1,0 +1,2 @@
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
+scheduler_job = attribute('scheduler_job', default: <%= JSON.pretty_generate(grab_attributes['scheduler_job']) -%>, description: 'Cloud Scheduler Job configuration')
