@@ -57,8 +57,12 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 			"version": &schema.Schema{
 				<%# TODO 3.0.0 - mark as required -%>
 				Type:       schema.TypeList,
+				<% if version == 'ga' -%>
 				Optional: true,
 				Computed: true,
+				<% else -%>
+				Required: true,
+				<% end -%>
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": &schema.Schema{
@@ -361,10 +365,9 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		Name:                d.Get("name").(string),
 		Description:         d.Get("description").(string),
 		BaseInstanceName:    d.Get("base_instance_name").(string),
-		<% if version == 'ga' -%>
 	<% if version == 'ga' -%>
 		InstanceTemplate:    d.Get("instance_template").(string),
-	<% end -%>		<% end -%>
+	<% end -%>
 		TargetSize:          int64(d.Get("target_size").(int)),
 		NamedPorts:          getNamedPortsBeta(d.Get("named_port").(*schema.Set).List()),
 		TargetPools:         convertStringSet(d.Get("target_pools").(*schema.Set)),
@@ -486,7 +489,6 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	d.Set("self_link", ConvertSelfLinkToV1(manager.SelfLink))
 
 	<% if version == 'ga' -%>
-	// rolling_update_policy
 	d.Set("rolling_update_policy" , nil)
 	<% end -%>
 

@@ -51,9 +51,13 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 
 			"version": &schema.Schema{
 				Type:       schema.TypeList,
+				<%# TODO 3.0.0 - mark as required -%>
+				<% if version == 'ga' -%>
 				Optional: true,
 				Computed: true,
-				<%# TODO 3.0.0 - mark as required -%>
+				<% else -%>
+				Required: true,
+				<% end -%>
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": &schema.Schema{

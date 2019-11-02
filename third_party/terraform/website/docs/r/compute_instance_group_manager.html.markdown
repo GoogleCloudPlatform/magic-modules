@@ -101,6 +101,8 @@ The following arguments are supported:
 * `version` - (Optional) Application versions managed by this instance group. Each
     version deals with a specific instance template, allowing canary release scenarios.
     Structure is documented below.
+    Until `instance_template` is removed this field will be Optional to allow for a
+    graceful upgrade. In the Beta provider and as of 3.0.0 it will be Required.
 
 * `name` - (Required) The name of the instance group manager. Must be 1-63
     characters long and comply with
