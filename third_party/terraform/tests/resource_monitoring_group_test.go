@@ -44,7 +44,7 @@ func testSweepMonitoringGroups(region string) error {
 		g := gi.(map[string]interface{})
 
 		// Only sweep monitoring groups with the test prefix
-		if g["name"] != nil && strings.HasPrefix(g["name"].(string), "test-acc") {
+		if g["name"] != nil && strings.HasPrefix(g["name"].(string), "tf-test") {
 			url := fmt.Sprintf("%s%s", config.MonitoringBasePath, g["name"].(string))
 			log.Printf("Sweeping Monitoring Group: %s", g["name"].(string))
 
