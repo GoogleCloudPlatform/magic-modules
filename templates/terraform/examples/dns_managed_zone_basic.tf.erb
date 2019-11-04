@@ -1,6 +1,6 @@
 resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
-  name = "example-zone"
-  dns_name = "example-${random_id.rnd.hex}.com."
+  name        = "example-zone"
+  dns_name    = "example-${random_id.rnd.hex}.com."
   description = "Example DNS zone"
   labels = {
     foo = "bar"

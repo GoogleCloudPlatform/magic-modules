@@ -1,7 +1,7 @@
 resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
   github {
     owner = "terraform-providers"
-    name = "terraform-provider-google-beta"
+    name  = "terraform-provider-google-beta"
     push {
       branch = "feature-.*"
     }

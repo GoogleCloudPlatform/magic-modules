@@ -1,9 +1,9 @@
 resource "google_compute_autoscaler" "<%= ctx[:primary_resource_id] %>" {
-  provider = "google-beta"
+  provider = google-beta
 
   name   = "<%= ctx[:vars]['autoscaler_name'] %>"
   zone   = "us-central1-f"
-  target = "${google_compute_instance_group_manager.default.self_link}"
+  target = google_compute_instance_group_manager.default.self_link
 
   autoscaling_policy {
     max_replicas    = 5
@@ -19,7 +19,7 @@ resource "google_compute_autoscaler" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_compute_instance_template" "default" {
-  provider = "google-beta"
+  provider = google-beta
 
   name           = "<%= ctx[:vars]['instance_template_name'] %>"
   machine_type   = "n1-standard-1"
@@ -28,7 +28,7 @@ resource "google_compute_instance_template" "default" {
   tags = ["foo", "bar"]
 
   disk {
-    source_image = "${data.google_compute_image.debian_9.self_link}"
+    source_image = data.google_compute_image.debian_9.self_link
   }
 
   network_interface {
@@ -45,34 +45,34 @@ resource "google_compute_instance_template" "default" {
 }
 
 resource "google_compute_target_pool" "default" {
-  provider = "google-beta"
+  provider = google-beta
 
   name = "<%= ctx[:vars]['target_pool_name'] %>"
 }
 
 resource "google_compute_instance_group_manager" "default" {
-  provider = "google-beta"
+  provider = google-beta
 
   name = "<%= ctx[:vars]['igm_name'] %>"
   zone = "us-central1-f"
 
   version {
-    instance_template  = "${google_compute_instance_template.default.self_link}"
-    name               = "primary"
+    instance_template = google_compute_instance_template.default.self_link
+    name              = "primary"
   }
 
-  target_pools       = ["${google_compute_target_pool.default.self_link}"]
+  target_pools       = [google_compute_target_pool.default.self_link]
   base_instance_name = "autoscaler-sample"
 }
 
 data "google_compute_image" "debian_9" {
-  provider = "google-beta"
+  provider = google-beta
 
   family  = "debian-9"
   project = "debian-cloud"
 }
 
-provider "google-beta"{
+provider "google-beta" {
   region = "us-central1"
   zone   = "us-central1-a"
 }

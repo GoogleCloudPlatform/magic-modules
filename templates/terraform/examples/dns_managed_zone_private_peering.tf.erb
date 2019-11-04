@@ -1,36 +1,36 @@
 resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
-  provider = "google-beta"
+  provider = google-beta
 
-  name = "<%= ctx[:vars]['zone_name'] %>"
-  dns_name = "peering.example.com."
+  name        = "<%= ctx[:vars]['zone_name'] %>"
+  dns_name    = "peering.example.com."
   description = "Example private DNS peering zone"
 
   visibility = "private"
 
   private_visibility_config {
     networks {
-      network_url =  "${google_compute_network.network-source.self_link}"
+      network_url = google_compute_network.network-source.self_link
     }
   }
 
   peering_config {
     target_network {
-      network_url = "${google_compute_network.network-target.self_link}"
+      network_url = google_compute_network.network-target.self_link
     }
   }
 }
 
 resource "google_compute_network" "network-source" {
-  provider = "google-beta"
+  provider = google-beta
 
-  name = "<%= ctx[:vars]['network_source_name'] %>"
+  name                    = "<%= ctx[:vars]['network_source_name'] %>"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_network" "network-target" {
-  provider = "google-beta"
+  provider = google-beta
 
-  name = "<%= ctx[:vars]['network_target_name'] %>"
+  name                    = "<%= ctx[:vars]['network_target_name'] %>"
   auto_create_subnetworks = false
 }
 
