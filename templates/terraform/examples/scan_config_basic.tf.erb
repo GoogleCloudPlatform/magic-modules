@@ -1,10 +1,10 @@
 resource "google_compute_address" "scanner_static_ip" {
-  provider = "google-beta"
+  provider = google-beta
   name     = "<%= ctx[:vars]['address_name'] %>"
 }
 
 resource "google_security_scanner_scan_config" "<%= ctx[:primary_resource_id] %>" {
-  provider         = "google-beta"
+  provider         = google-beta
   display_name     = "<%= ctx[:vars]['scan_config_name'] %>"
   starting_urls    = ["http://${google_compute_address.scanner_static_ip.address}"]
   target_platforms = ["COMPUTE"]
