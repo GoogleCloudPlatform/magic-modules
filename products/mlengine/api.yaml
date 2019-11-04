@@ -245,7 +245,7 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'jobId'
-        description: Required. The user-specified id of the job.
+        description: The user-specified id of the job.
         required: true
       - !ruby/object:Api::Type::Time
         name: 'createTime'
