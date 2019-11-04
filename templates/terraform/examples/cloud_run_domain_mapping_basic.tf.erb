@@ -1,7 +1,7 @@
 resource "google_cloud_run_domain_mapping" "<%= ctx[:primary_resource_id] %>" {
   location = "us-central1"
-  provider = "google-beta"
-  name = "<%= ctx[:vars]['cloud_run_domain_name'] %>"
+  provider = google-beta
+  name     = "<%= ctx[:vars]['cloud_run_domain_name'] %>"
 
   metadata {
     namespace = "<%= ctx[:test_env_vars]['namespace'] %>"
