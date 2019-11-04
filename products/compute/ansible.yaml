@@ -261,6 +261,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           a partial or full URL to the resource.
   ResourcePolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  Reservation: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      specificReservation.instanceProperties.minCpuPlatform: !ruby/object:Overrides::Ansible::PropertyOverride
+        # Changing description becaues of line length limitations
+        description: |
+          The minimum CPU platform for the reservation. For example,
+          `"Intel Skylake"`. See
+          https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform#availablezones
+          for information on available CPU platforms.
   Route: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       nextHopGateway: !ruby/object:Overrides::Ansible::PropertyOverride
