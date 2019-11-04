@@ -165,6 +165,7 @@ func Provider() terraform.ResourceProvider {
 			<% unless version == 'ga' -%>
 			"google_compute_resource_policy":                   dataSourceGoogleComputeResourcePolicy(),
 			<% end -%>
+			"google_compute_router":                            dataSourceGoogleComputeRouter(),
 			"google_compute_ssl_certificate":                   dataSourceGoogleComputeSslCertificate(),
 			"google_compute_ssl_policy":                        dataSourceGoogleComputeSslPolicy(),
 			"google_compute_subnetwork":                        dataSourceGoogleComputeSubnetwork(),
