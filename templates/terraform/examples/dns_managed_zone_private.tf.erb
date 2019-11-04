@@ -1,6 +1,6 @@
 resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['zone_name'] %>"
-  dns_name = "private.example.com."
+  name        = "<%= ctx[:vars]['zone_name'] %>"
+  dns_name    = "private.example.com."
   description = "Example private DNS zone"
   labels = {
     foo = "bar"
@@ -10,20 +10,20 @@ resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
 
   private_visibility_config {
     networks {
-      network_url =  "${google_compute_network.network-1.self_link}"
+      network_url = google_compute_network.network-1.self_link
     }
     networks {
-      network_url =  "${google_compute_network.network-2.self_link}"
+      network_url = google_compute_network.network-2.self_link
     }
   }
 }
 
 resource "google_compute_network" "network-1" {
-  name = "<%= ctx[:vars]['network_1_name'] %>"
+  name                    = "<%= ctx[:vars]['network_1_name'] %>"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_network" "network-2" {
-  name = "<%= ctx[:vars]['network_2_name'] %>"
+  name                    = "<%= ctx[:vars]['network_2_name'] %>"
   auto_create_subnetworks = false
 }
