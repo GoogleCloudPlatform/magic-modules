@@ -1,6 +1,6 @@
 resource "google_compute_firewall" "default" {
   name    = "<%= ctx[:vars]['firewall_name'] %>"
-  network = "${google_compute_network.default.name}"
+  network = google_compute_network.default.name
 
   allow {
     protocol = "icmp"

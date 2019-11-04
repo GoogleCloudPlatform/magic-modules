@@ -1,12 +1,11 @@
 resource "google_resource_manager_lien" "<%= ctx[:primary_resource_id] %>" {
-  parent = "projects/${google_project.project.number}"
+  parent       = "projects/${google_project.project.number}"
   restrictions = ["resourcemanager.projects.delete"]
-  origin = "machine-readable-explanation"
-  reason = "This project is an important environment"
+  origin       = "machine-readable-explanation"
+  reason       = "This project is an important environment"
 }
 
 resource "google_project" "project" {
   project_id = "<%= ctx[:vars]["project_id"] %>"
-  name = "A very important project!"
+  name       = "A very important project!"
 }
-
