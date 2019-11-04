@@ -209,6 +209,10 @@ variable "spannerdatabase" {
   type = "map"
 }
 
+variable "scheduler_job" {
+  type = "map"
+}
+
 
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
@@ -892,4 +896,18 @@ resource "google_spanner_database" "database" {
   instance     = "${google_spanner_instance.spanner_instance.name}"
   name         = "${var.spannerdatabase["name"]}"
   ddl          = ["${var.spannerdatabase["ddl"]}"]
+}
+
+resource "google_cloud_scheduler_job" "job" {
+  project  = var.gcp_project_id
+  region   = var.scheduler_job["region"]
+  name     = var.scheduler_job["name"]
+  description = var.scheduler_job["description"]
+  schedule = var.scheduler_job["schedule"]
+  time_zone = var.scheduler_job["time_zone"]
+
+  http_target {
+    http_method = var.scheduler_job["http_method"]
+    uri = var.scheduler_job["http_target_uri"]
+  }
 }

@@ -342,3 +342,13 @@ spannerdatabase:
   name: spdatabase
   instance: spinstance
   ddl: "CREATE TABLE test (test STRING(MAX),) PRIMARY KEY (test)" 
+
+scheduler_job:
+  # region must match where the appengine instance is deployed
+  region: us-central1
+  name: job-name
+  description: A description
+  schedule: "*/8 * * * *"
+  time_zone: America/New_York
+  http_method: POST
+  http_target_uri: https://example.com/ping
