@@ -1339,10 +1339,10 @@ func TestAccContainerCluster_withIPAllocationPolicy_createSubnetwork(t *testing.
 				Config: testAccContainerCluster_withIPAllocationPolicy_createSubnetwork(cluster),
 			},
 			{
-				ResourceName:		     "google_container_cluster.with_ip_allocation_policy",
+				ResourceName:        "google_container_cluster.with_ip_allocation_policy",
 				ImportStateIdPrefix: "us-central1-a/",
-				ImportState:		     true,
-				ImportStateVerify:	 true,
+				ImportState:         true,
+				ImportStateVerify:   true,
 			},
 			{
 				Config: testAccContainerCluster_withIPAllocationPolicy_createSubnetworkUpdated(cluster),
@@ -1350,10 +1350,10 @@ func TestAccContainerCluster_withIPAllocationPolicy_createSubnetwork(t *testing.
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				ResourceName:		     "google_container_cluster.with_ip_allocation_policy",
+				ResourceName:        "google_container_cluster.with_ip_allocation_policy",
 				ImportStateIdPrefix: "us-central1-a/",
-				ImportState:		     true,
-				ImportStateVerify:	 true,
+				ImportState:         true,
+				ImportStateVerify:   true,
 			},
 		},
 	})
