@@ -1,6 +1,6 @@
 resource "google_monitoring_uptime_check_config" "<%= ctx[:primary_resource_id] %>" {
   display_name = "<%= ctx[:vars]["display_name"] %>"
-  timeout = "60s"
+  timeout      = "60s"
 
   tcp_check {
     port = 888
@@ -8,12 +8,11 @@ resource "google_monitoring_uptime_check_config" "<%= ctx[:primary_resource_id] 
 
   resource_group {
     resource_type = "INSTANCE"
-    group_id = "${google_monitoring_group.check.name}"
+    group_id      = google_monitoring_group.check.name
   }
 }
 
-
 resource "google_monitoring_group" "check" {
   display_name = "<%= ctx[:vars]["group_display_name"] %>"
-  filter = "resource.metadata.name=has_substring(\"foo\")"
+  filter       = "resource.metadata.name=has_substring(\"foo\")"
 }

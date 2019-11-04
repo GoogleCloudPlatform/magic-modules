@@ -1,10 +1,10 @@
 resource "google_monitoring_group" "parent" {
   display_name = "<%= ctx[:vars]["display_name"] %>"
-  filter = "resource.metadata.region=\"europe-west2\""
+  filter       = "resource.metadata.region=\"europe-west2\""
 }
 
 resource "google_monitoring_group" "<%= ctx[:primary_resource_id] %>" {
   display_name = "<%= ctx[:vars]["display_name"] %>"
-  filter = "resource.metadata.region=\"europe-west2\""
-  parent_name =  "${google_monitoring_group.parent.name}"
+  filter       = "resource.metadata.region=\"europe-west2\""
+  parent_name  = google_monitoring_group.parent.name
 }
