@@ -371,7 +371,12 @@ objects:
                   Otherwise, do not specify this field.
           - !ruby/object:Api::Type::String
             name: 'parameterServerType'
-            description: The configuration for parameter servers
+            description: |
+              Specifies the type of virtual machine to use for your training job's parameter server.
+              The supported values are the same as those described in the entry for masterType. 
+              This value must be consistent with the category of machine type that masterType uses. 
+              In other words, both must be Compute Engine machine types or both must be legacy machine types. This
+              value must be present when scaleTier is set to CUSTOM and parameterServerCount is greater than zero.        
             required: false
           - !ruby/object:Api::Type::NestedObject
             name: 'parameterServerConfig'
