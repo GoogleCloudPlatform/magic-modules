@@ -47,13 +47,9 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionUrlMap: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  Reservation: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   ResourcePolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  TargetInstance:  !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -100,6 +96,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - 'products/compute/helpers/python/provider_firewall.py'
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
+    tests: !ruby/object:Provider::Ansible::Tests
+      tests:
+        - !ruby/object:Provider::Ansible::Test
+          name: 'update'
+          path: products/compute/tests/ansible/firewall_update.yaml
     properties:
       network: !ruby/object:Overrides::Ansible::PropertyOverride
         default_value:
@@ -277,6 +278,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       fingerprint: !ruby/object:Overrides::Ansible::PropertyOverride
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+      logConfig: !ruby/object:Overrides::Ansible::PropertyOverride
+        exclude: true
   TargetPool: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
@@ -318,11 +321,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionUrlMap: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  Reservation: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  TargetInstance:  !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true

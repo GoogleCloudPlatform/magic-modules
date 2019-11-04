@@ -62,7 +62,7 @@ module Provider
       # Returns a string representation of the corresponding Python type
       # for a MM type.
       def python_type(prop)
-        prop = Module.const_get(prop).new('') unless prop.is_a?(Api::Type)
+        prop = Module.const_get(prop).new unless prop.is_a?(Api::Type)
         # All ResourceRefs are dicts with properties.
         if prop.is_a? Api::Type::ResourceRef
           return 'str' if prop.resource_ref.readonly
@@ -81,7 +81,10 @@ module Provider
       def build_url(url)
         # Return a quoted string, with single pairs of {} brackets and all
         # requested strings are underscored (as they come from the Ansible configs)
-        "\"#{url.gsub(/{{\w+}}/) { |param| "{#{param[2..-3].underscore}}" }}\""
+
+        # The % character indicates that the parameter should be url-encoded. `requests`
+        # does this by default, so the % character should be removed.
+        "\"#{url.gsub(/{{%?\w+}}/) { |param| "{#{param[2..-3].underscore.tr('%', '')}}" }}\""
       end
 
       # Returns the name of the module according to Ansible naming standards.

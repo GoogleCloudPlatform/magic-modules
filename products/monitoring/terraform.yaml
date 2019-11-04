@@ -37,13 +37,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "monitoring_group_basic"
         primary_resource_id: "basic"
         vars:
-          display_name: "New Test Group"
+          display_name: "MonitoringGroup"
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_group_subgroup"
         primary_resource_id: "subgroup"
         vars:
-          display_name: "New Test SubGroup"
-          display_name2: "New Test SubGroup"
+          display_name: "MonitoringSubGroup"
+          display_name2: "MonitoringSubGroup"
     properties:
       parentName: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkRelativePaths'

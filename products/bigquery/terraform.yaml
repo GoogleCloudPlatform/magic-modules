@@ -43,6 +43,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       access: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         is_set: true
+      access.iamMember: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
       defaultTableExpirationMs: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateDefaultTableExpirationMs'

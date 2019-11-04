@@ -8731,6 +8731,9 @@ objects:
         update_id: 'enableFlowLogs'
         fingerprint_name: 'fingerprint'
         send_empty_value: true
+        deprecation_message: >-
+          This field is being removed in favor of log_config. If log_config is present,
+          flow logs are enabled.
       # TODO(rileykarson): Work with rambleraptor to remove this field from downstreams.
       - !ruby/object:Api::Type::Fingerprint
         name: 'fingerprint'
@@ -8814,10 +8817,13 @@ objects:
         input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        fingerprint_name: 'fingerprint'
+        update_id: 'logConfig'
         description: |
           Denotes the logging options for the subnetwork flow logs. If logging is enabled
           logs will be exported to Stackdriver.
-        min_version: beta
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'aggregationInterval'
@@ -9242,6 +9248,7 @@ objects:
     name: 'TargetInstance'
     kind: 'compute#targetInstance'
     base_url: projects/{{project}}/zones/{{zone}}/targetInstances
+    collection_url_key: 'items'
     has_self_link: true
     input: true
     description: |
