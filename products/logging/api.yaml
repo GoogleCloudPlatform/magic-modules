@@ -28,6 +28,7 @@ objects:
   - !ruby/object:Api::Resource
     name: "Metric"
     base_url: projects/{{project}}/metrics
+    # The % in self_link indicates that the name value should be URL-encoded.
     self_link: "projects/{{project}}/metrics/{{%name}}"
     update_verb: :PUT
     description: |
