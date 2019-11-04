@@ -1,13 +1,11 @@
 resource "google_binary_authorization_policy" "<%= ctx[:primary_resource_id] %>" {
-
   default_admission_rule {
-    evaluation_mode = "REQUIRE_ATTESTATION"
-    enforcement_mode = "ENFORCED_BLOCK_AND_AUDIT_LOG"
-    require_attestations_by = ["${google_binary_authorization_attestor.attestor.name}"]
+    evaluation_mode         = "REQUIRE_ATTESTATION"
+    enforcement_mode        = "ENFORCED_BLOCK_AND_AUDIT_LOG"
+    require_attestations_by = [google_binary_authorization_attestor.attestor.name]
   }
 
   global_policy_evaluation_mode = "ENABLE"
-
 }
 
 resource "google_container_analysis_note" "note" {
@@ -22,6 +20,6 @@ resource "google_container_analysis_note" "note" {
 resource "google_binary_authorization_attestor" "attestor" {
   name = "<%= ctx[:vars]["attestor_name"] %>"
   attestation_authority_note {
-    note_reference = "${google_container_analysis_note.note.name}"
+    note_reference = google_container_analysis_note.note.name
   }
 }
