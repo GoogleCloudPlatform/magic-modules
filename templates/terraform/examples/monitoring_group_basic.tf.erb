@@ -1,5 +1,5 @@
 resource "google_monitoring_group" "<%= ctx[:primary_resource_id] %>" {
-  display_name = "<%= ctx[:vars]["display_name"] %>"
+  display_name = "tf-test <%= ctx[:vars]["display_name"] %>"
 
   filter = "resource.metadata.region=\"europe-west2\""
 }
