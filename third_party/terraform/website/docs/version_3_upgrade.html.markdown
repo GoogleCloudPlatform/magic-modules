@@ -128,11 +128,11 @@ Particularly, Shared VPC was incompatible with `create_subnetwork`, and
 1. Add a `google_compute_subnetwork` to your config, import it using `terraform import`
 1. Reference the subnetwork using the `subnetwork` field on your `google_container_cluster`
 
--> Subnetworks originaly created as part of `create_subnetwork` will be deleted
-alongside the cluster. If there are other users of the subnetwork, deletion will
-fail. If it's deleted, `terraform apply` will recreate the same subnetwork
-except that it won't be connected to any GKE cluster and other resources can use
-it safely.
+-> Subnetworks originally created as part of `create_subnetwork` will be deleted
+alongside the cluster. If there are other users of the subnetwork, deletion of
+the cluster will fail. After the original resources are deleted,
+`terraform apply` will recreate the same subnetwork except that it won't be
+managed by a GKE cluster and other resources can use it safely.
 
 #### Old Config
 
@@ -183,11 +183,11 @@ resource "google_container_cluster" "primary" {
 
   initial_node_count = 1
 
-   ip_allocation_policy {
-     use_ip_aliases           = true
-     cluster_ipv4_cidr_block  = "10.0.0.0/16"
-     services_ipv4_cidr_block = "10.1.0.0/16"
-   }
+  ip_allocation_policy {
+    use_ip_aliases           = true
+    cluster_ipv4_cidr_block  = "10.0.0.0/16"
+    services_ipv4_cidr_block = "10.1.0.0/16"
+  }
 }
 ```
 
