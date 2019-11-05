@@ -1,14 +1,14 @@
 ---
 layout: "google"
-page_title: "Google: google_task_queue"
-sidebar_current: "docs-google-task-queue"
+page_title: "Google: google_cloudtasks_queue"
+sidebar_current: "docs-google-cloudtasks-queue"
 description: |-
  Configures task queues for the project
 ---
 
- # google\_task\_queue
+ # google\_cloudtasks\_queue
 
- Configures [Cloud Task Queues](https://cloud.google.com/tasks/docs/creating-queues)
+ Configures [Cloud Cloud Tasks Queues](https://cloud.google.com/tasks/docs/creating-queues)
 for a project.
 
  For more information, see,
@@ -17,7 +17,7 @@ for a project.
  ## Example Usage
 
  ```hcl
-resource "google_task_queue" "foo" {
+resource "google_cloudtasks_queue" "foo" {
   name     = "foo"
   location = "us-central1"
   rate_limits {
@@ -84,4 +84,4 @@ resource "google_task_queue" "foo" {
 
  This resource can be imported using the project ID:
 
- `terraform import google_task_queue.foo project-id/location-name/queue-name`
+ `terraform import google_cloudtasks_queue.foo project-id/location-name/queue-name`

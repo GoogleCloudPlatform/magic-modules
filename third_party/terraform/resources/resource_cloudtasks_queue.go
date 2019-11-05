@@ -10,14 +10,14 @@ import (
 	"google.golang.org/api/cloudtasks/v2"
 )
 
-func resourceTaskQueue() *schema.Resource {
+func resourceCloudTasksQueue() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceTaskQueueCreateUpdate,
-		Read:   resourceTaskQueueRead,
-		Update: resourceTaskQueueCreateUpdate,
-		Delete: resourceTaskQueueDelete,
+		Create: resourceCloudTasksQueueCreateUpdate,
+		Read:   resourceCloudTasksQueueRead,
+		Update: resourceCloudTasksQueueCreateUpdate,
+		Delete: resourceCloudTasksQueueDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceTaskQueueImportState,
+			State: resourceCloudTasksQueueImportState,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -125,7 +125,7 @@ func resourceTaskQueue() *schema.Resource {
 	}
 }
 
-func resourceTaskQueueRead(d *schema.ResourceData, meta interface{}) error {
+func resourceCloudTasksQueueRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	project, err := getProject(d, config)
 	if err != nil {
@@ -150,7 +150,7 @@ func resourceTaskQueueRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceTaskQueueCreateUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceCloudTasksQueueCreateUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	project, err := getProject(d, config)
 	if err != nil {
@@ -181,10 +181,10 @@ func resourceTaskQueueCreateUpdate(d *schema.ResourceData, meta interface{}) err
 
 	log.Printf("[DEBUG] Finished updating new Task Queue: %#v\n%#v\n", name, resp)
 
-	return resourceTaskQueueRead(d, meta)
+	return resourceCloudTasksQueueRead(d, meta)
 }
 
-func resourceTaskQueueDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceCloudTasksQueueDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	project, err := getProject(d, config)
 	if err != nil {
@@ -208,7 +208,7 @@ func resourceTaskQueueDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceTaskQueueImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceCloudTasksQueueImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 3 {
