@@ -77,8 +77,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         * `path`: Path of the subscription in the format `projects/{project}/subscriptions/{name}`
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'comparePubsubSubscriptionBasename'
-        custom_expand: templates/terraform/custom_expand/computed_subscription_name.erb
+        custom_expand: templates/terraform/custom_expand/shortname_to_url.go.erb
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       topic: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
