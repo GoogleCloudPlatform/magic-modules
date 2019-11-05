@@ -33,6 +33,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         max_size: 1
   Version: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
+  Job: !ruby/object:Overrides::Terraform::ResourceOverride
+    properties:
+      jobId: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/mlengine_job_id.erb'  
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "ml_job_training"
+        primary_resource_id: "default"
+        vars:
+          gcs_job_dir: "gs://test-project-ml-engine-job/scikit_learn_job_dir"
+          gcs_pkg_uri: "gs://test-project-ml-engine-job/scikit_learn_job_dir/packages/fd65c711be463b2d1e841325d389b6c557db097c2281d40423c8451579238523/census_training-0.0.0.tar.gz"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
