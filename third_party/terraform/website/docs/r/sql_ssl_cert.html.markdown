@@ -1,5 +1,5 @@
 ---
-subcategory: "SQL"
+subcategory: "Cloud SQL"
 layout: "google"
 page_title: "Google: google_sql_ssl_cert"
 sidebar_current: "docs-google-sql-ssl-cert"

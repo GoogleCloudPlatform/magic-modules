@@ -1,5 +1,5 @@
 ---
-subcategory: "Spanner"
+subcategory: "Cloud Spanner"
 layout: "google"
 page_title: "Google: google_spanner_database_iam"
 sidebar_current: "docs-google-spanner-database-iam"

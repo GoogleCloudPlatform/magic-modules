@@ -1,5 +1,5 @@
 ---
-subcategory: "PubSub"
+subcategory: "Cloud Pub/Sub"
 layout: "google"
 page_title: "Google: google_pubsub_subscription_iam"
 sidebar_current: "docs-google-pubsub-subscription-iam"

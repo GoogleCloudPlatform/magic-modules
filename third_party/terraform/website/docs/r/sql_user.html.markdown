@@ -1,5 +1,5 @@
 ---
-subcategory: "SQL"
+subcategory: "Cloud SQL"
 layout: "google"
 page_title: "Google: google_sql_user"
 sidebar_current: "docs-google-sql-user"
