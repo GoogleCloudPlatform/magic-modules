@@ -469,18 +469,11 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'trainingOutput'
         description: The current training job result.
-<<<<<<< HEAD
-=======
-        output: true
->>>>>>> d838391a0817613cfe7aef14aa7b84d0f34eeb90
         properties:
           - !ruby/object:Api::Type::String
             name: 'completedTrialCount'
             description: The number of hyperparameter tuning trials that completed successfully. Only set for hyperparameter tuning jobs.
-<<<<<<< HEAD
             output: true
-=======
->>>>>>> d838391a0817613cfe7aef14aa7b84d0f34eeb90
           - !ruby/object:Api::Type::NestedObject
             name: 'trials'
             description: Results for individual Hyperparameter trials. Only set for hyperparameter tuning jobs.
@@ -488,19 +481,13 @@ objects:
               - !ruby/object:Api::Type::String
                 name: 'trialId'
                 description: The trial id for these results.
-<<<<<<< HEAD
                 output: true
-=======
->>>>>>> d838391a0817613cfe7aef14aa7b84d0f34eeb90
               - !ruby/object:Api::Type::KeyValuePairs
                 name: 'hyperparameters'
                 description: |
                   The hyperparameters given to this trial. An object containing a list of "key": value pairs. 
                   Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }
-<<<<<<< HEAD
                 output: true
-=======
->>>>>>> d838391a0817613cfe7aef14aa7b84d0f34eeb90
               - !ruby/object:Api::Type::Time
                 name: 'startTime'
                 description: Start time for the trial.
