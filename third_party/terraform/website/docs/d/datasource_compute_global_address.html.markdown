@@ -1,5 +1,5 @@
 ---
-subcategory: "Google Cloud Platform"
+subcategory: "Google Compute Engine"
 layout: "google"
 page_title: "Google: google_compute_global_address"
 sidebar_current: "docs-google-datasource-compute-global-address"

@@ -1,5 +1,5 @@
 ---
-subcategory: "Google Cloud Platform"
+subcategory: "Google Key Management Service"
 layout: "google"
 page_title: "Google: google_kms_secret_ciphertext"
 sidebar_current: "docs-google-kms-secret-ciphertext"
@@ -62,7 +62,7 @@ resource "google_compute_instance" "instance" {
     access_config {
     }
   }
-  
+
   metadata = {
     password = "${data.google_kms_secret_ciphertext.my_password.ciphertext}"
   }

@@ -1,5 +1,5 @@
 ---
-subcategory: "Google Cloud Platform"
+subcategory: "Google Key Management Service"
 layout: "google"
 page_title: "Google: google_kms_crypto_key_version"
 sidebar_current: "docs-google-datasource-kms-crypto-key-version"
