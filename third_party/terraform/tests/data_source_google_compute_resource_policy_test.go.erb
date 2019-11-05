@@ -66,8 +66,8 @@ func testAccDataSourceComputeResourcePolicyCheck(dataSourceName string, resource
 			}
 		}
 
-		if !compareSelfLinkOrResourceName("", ds_attr["self_link"], rs_attr["self_link"], nil) && ds_attr["self_link"] != rs_attr["self_link"] {
-			return fmt.Errorf("self link does not match: %s vs %s", ds_attr["self_link"], rs_attr["self_link"])
+		if !compareSelfLinkOrResourceName("", dsAttr["self_link"], rsAttr["self_link"], nil) && dsAttr["self_link"] != rsAttr["self_link"] {
+			return fmt.Errorf("self link does not match: %s vs %s", dsAttr["self_link"], rsAttr["self_link"])
 		}
 
 		return nil
