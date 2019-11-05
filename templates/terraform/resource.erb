@@ -654,7 +654,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <% end -%>
 
 <% object.settable_properties.each do |prop| -%>
-<%= lines(build_expand_method(resource_name, prop), 1) -%>
+<%= lines(build_expand_method(resource_name, prop, object), 1) -%>
 <% end -%>
 
 <% if object.custom_code.encoder -%>
