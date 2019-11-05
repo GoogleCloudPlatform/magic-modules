@@ -15,7 +15,8 @@
 <% if property.custom_expand -%>
 <%= lines(compile_template(property.custom_expand,
                            prefix: prefix,
-                           property: property)) -%>
+                           property: property,
+                           object: object)) -%>
 <% else -%>
 
 <%# Generate expanders for Maps %>
@@ -176,7 +177,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 <%# Map is a map from {key -> object} in the API, but Terraform can't represent that
 so we treat the key as a property of the object in Terraform schema. %>
 <%     next if property.is_a?(Api::Type::Map) && prop.name == property.key_name -%>
-<%=      lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
+<%=      lines(build_expand_method(prefix + titlelize_property(property), prop, object), 1) -%>
 <%   end -%>
 <% end -%>
 

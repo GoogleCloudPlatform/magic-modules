@@ -28,7 +28,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           repository_name: "my-repository"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_expand: templates/terraform/custom_expand/repository_name_from_short_name.go.erb
+        custom_expand: templates/terraform/custom_expand/shortname_to_url.go.erb
         custom_flatten: templates/terraform/custom_flatten/repository_short_name_from_name.go.erb
         description: |
           Resource name of the repository, of the form `{{repo}}`.
