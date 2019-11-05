@@ -280,7 +280,7 @@ func resourceContainerCluster() *schema.Resource {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 <% if version.nil? || version == 'ga' -%>
-				Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+				Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/guides/provider_versions.html for more details.",
 <% else -%>
 				// This field is Optional + Computed because we automatically set the
 				// enabled value to false if the block is not returned in API responses.
@@ -333,7 +333,7 @@ func resourceContainerCluster() *schema.Resource {
 
 			"enable_binary_authorization": {
 <% if version == 'ga' -%>
-				Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+				Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/guides/provider_versions.html for more details.",
 				Computed:  true,
 <% else -%>
 				Default:  false,
@@ -355,7 +355,7 @@ func resourceContainerCluster() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 <% if version == 'ga' -%>
-				Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+				Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/guides/provider_versions.html for more details.",
 				Computed: true,
 <% else -%>
 				Default:  false,
@@ -595,7 +595,7 @@ func resourceContainerCluster() *schema.Resource {
 			"pod_security_policy_config": {
 <% if version == 'ga' -%>
 				// Remove return nil from expand when this is removed for good.
-				Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+				Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/guides/provider_versions.html for more details.",
 <% else -%>
 				DiffSuppressFunc: podSecurityPolicyCfgSuppress,
 <% end -%>
@@ -896,7 +896,7 @@ func resourceContainerCluster() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 <% if version == 'ga' -%>
-				Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+				Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/guides/provider_versions.html for more details.",
 <% else -%>
 				Default:  false,
 <% end -%>
