@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: TPU
-display_name: Google Cloud TPU
+display_name: Cloud TPU
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
