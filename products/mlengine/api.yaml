@@ -279,10 +279,6 @@ objects:
            where both the key and the value are arbitrary Strings that you supply. 
            An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
       # no etag since it's input: true     
-<<<<<<< HEAD
-=======
-      ## trainingInput starts here     
->>>>>>> d838391a0817613cfe7aef14aa7b84d0f34eeb90
       - !ruby/object:Api::Type::NestedObject
         name: 'trainingInput'
         description: Input parameters to create a training job.
