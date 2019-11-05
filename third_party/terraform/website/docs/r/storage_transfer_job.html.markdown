@@ -1,5 +1,5 @@
 ---
-subcategory: "Google Storage Transfer"
+subcategory: "Cloud Storage Transfer"
 layout: "google"
 page_title: "Google: google_storage_transfer_job"
 sidebar_current: "docs-google-storage-transfer-job-x"

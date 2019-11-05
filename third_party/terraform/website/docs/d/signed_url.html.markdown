@@ -1,5 +1,5 @@
 ---
-subcategory: "Google Storage"
+subcategory: "Cloud Storage"
 layout: "google"
 page_title: "Google: google_storage_object_signed_url"
 sidebar_current: "docs-google-datasource-signed_url"

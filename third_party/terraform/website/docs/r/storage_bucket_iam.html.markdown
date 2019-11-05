@@ -1,5 +1,5 @@
 ---
-subcategory: "Google Storage"
+subcategory: "Cloud Storage"
 layout: "google"
 page_title: "Google: google_storage_bucket_iam"
 sidebar_current: "docs-google-storage-bucket-iam"
