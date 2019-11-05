@@ -1,6 +1,6 @@
 ---
 layout: "google"
-subcategory: "Google Compute Engine"
+subcategory: "Compute Engine"
 page_title: "Google: google_compute_router"
 sidebar_current: "docs-google-datasource-compute-router"
 description: |-

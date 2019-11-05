@@ -1,5 +1,5 @@
 ---
-subcategory: "Google Cloud Platform"
+subcategory: "Cloud Platform"
 layout: "google"
 page_title: "Google: google_client_config"
 sidebar_current: "docs-google-datasource-client-config"

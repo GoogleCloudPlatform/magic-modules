@@ -1,5 +1,5 @@
 ---
-subcategory: "Google Dataproc"
+subcategory: "Dataproc"
 layout: "google"
 page_title: "Google: google_dataproc_job_iam"
 sidebar_current: "docs-google-dataproc-job-iam"

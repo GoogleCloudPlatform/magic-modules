@@ -1,5 +1,5 @@
 ---
-subcategory: "Google Cloud Platform"
+subcategory: "Cloud Platform"
 layout: "google"
 page_title: "Google: google_organization_iam_custom_role"
 sidebar_current: "docs-google-organization-iam-custom-role"

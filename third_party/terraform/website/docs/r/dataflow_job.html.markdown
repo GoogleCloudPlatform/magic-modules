@@ -1,5 +1,5 @@
 ---
-subcategory: "Google Dataflow"
+subcategory: "Dataflow"
 layout: "google"
 page_title: "Google: google_dataflow_job"
 sidebar_current: "docs-google-dataflow-job"

@@ -1,5 +1,5 @@
 ---
-subcategory: "Google Key Management Service"
+subcategory: "Key Management Service"
 layout: "google"
 page_title: "Google: google_kms_crypto_key"
 sidebar_current: "docs-google-datasource-kms-crypto-key"

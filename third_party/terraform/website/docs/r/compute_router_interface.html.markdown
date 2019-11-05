@@ -1,5 +1,5 @@
 ---
-subcategory: "Google Compute Engine"
+subcategory: "Compute Engine"
 layout: "google"
 page_title: "Google: google_compute_router_interface"
 sidebar_current: "docs-google-compute-router-interface"

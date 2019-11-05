@@ -1,5 +1,5 @@
 ---
-subcategory: "Google Cloud IoT Core"
+subcategory: "Cloud IoT Core"
 layout: "google"
 page_title: "Google: google_cloudiot_registry"
 sidebar_current: "docs-google-cloudiot-registry-x"

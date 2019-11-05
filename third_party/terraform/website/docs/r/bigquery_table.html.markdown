@@ -1,5 +1,5 @@
 ---
-subcategory: "Google BigQuery"
+subcategory: "BigQuery"
 layout: "google"
 page_title: "Google: google_bigquery_table"
 sidebar_current: "docs-google-bigquery-table"

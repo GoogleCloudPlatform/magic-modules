@@ -1,5 +1,5 @@
 ---
-subcategory: "Google Cloud Platform"
+subcategory: "Cloud Platform"
 layout: "google"
 page_title: "Google: google_billing_account_iam_member"
 sidebar_current: "docs-google-billing-account-iam-member"

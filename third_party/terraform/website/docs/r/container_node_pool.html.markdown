@@ -1,5 +1,5 @@
 ---
-subcategory: "Google Kubernetes (Container) Engine"
+subcategory: "Kubernetes (Container) Engine"
 layout: "google"
 page_title: "Google: google_container_node_pool"
 sidebar_current: "docs-google-container-node-pool"
