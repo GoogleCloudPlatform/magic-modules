@@ -37,6 +37,7 @@
 -%>
 <%
   tf_product = (@config.legacy_name || product_ns).underscore
+  tf_subcategory = (object.__product.display_name)
   resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   resource_ns_iam = "#{resource_ns}_iam"
   properties = object.all_user_properties
@@ -49,6 +50,7 @@
 -%>
 ---
 <%= lines(autogen_notice :yaml) -%>
+subcategory: "<%= tf_subcategory -%>"
 layout: "google"
 page_title: "Google: <%= resource_ns_iam -%>"
 sidebar_current: "docs-<%= resource_ns_iam.gsub("_", "-") -%>"
