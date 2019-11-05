@@ -1939,7 +1939,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "map_id"
       defaultService: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        # ResourceRef only supports 1 type and UrlMap has references to a BackendBucket or BackendService.
+        # Just read the self_link string instead of extracting the name and making a self_link out of it.
+        custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
         description: The backend service or backend bucket to use when none of the given rules match.
       hostRules: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "host_rule"
@@ -1949,17 +1951,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pathMatchers: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "path_matcher"
       pathMatchers.defaultService: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        # ResourceRef only supports 1 type and UrlMap has references to a BackendBucket or BackendService.
+        # Just read the self_link string instead of extracting the name and making a self_link out of it.
+        custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
         description: The backend service or backend bucket to use when none of the given paths match.
       pathMatchers.pathRules: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "path_rule"
       pathMatchers.pathRules.paths: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       pathMatchers.pathRules.service: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        # ResourceRef only supports 1 type and UrlMap has references to a BackendBucket or BackendService.
+        # Just read the self_link string instead of extracting the name and making a self_link out of it.
+        custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
         description: The backend service or backend bucket to use if any of the given paths match.
       tests.service: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        # ResourceRef only supports 1 type and UrlMap has references to a BackendBucket or BackendService.
+        # Just read the self_link string instead of extracting the name and making a self_link out of it.
+        custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
         description: The backend service or backend bucket link that should be matched by this test.
       tests: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "test"
