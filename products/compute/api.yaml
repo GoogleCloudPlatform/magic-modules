@@ -3093,6 +3093,13 @@ objects:
           If no targetTags are specified, the firewall rule applies to all
           instances on the specified network.
         item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: 'logConfig'
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enable'
+            description: |
+              Whether logging is enabled for this firewall rule
   - !ruby/object:Api::Resource
     name: 'ForwardingRule'
     kind: 'compute#forwardingRule'

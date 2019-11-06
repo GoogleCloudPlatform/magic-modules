@@ -26,7 +26,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   ExternalVpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    additional_functions: |
+<%= lines(indent(compile('templates/inspec/custom_functions/google_compute_firewall.rb'), 6)) -%>
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: firewall_name
+      direction: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: firewall_direction
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: firewall_id
   ForwardingRule: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   GlobalAddress: !ruby/object:Overrides::Inspec::ResourceOverride
