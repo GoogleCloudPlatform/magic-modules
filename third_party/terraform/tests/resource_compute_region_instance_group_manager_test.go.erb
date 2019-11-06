@@ -893,58 +893,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 }
 	`, template, igm, strings.Join(zones, "\",\""))
 }
-<<<<<<< HEAD
-<% if version == 'ga' -%>
-func testAccRegionInstanceGroupManager_updateStrategy(igm string) string {
-	return fmt.Sprintf(`
-data "google_compute_image" "my_image" {
-	family  = "debian-9"
-	project = "debian-cloud"
-}
 
-resource "google_compute_instance_template" "igm-update-strategy" {
-	machine_type   = "n1-standard-1"
-	can_ip_forward = false
-	tags           = ["terraform-testing"]
-
-	disk {
-		source_image = "${data.google_compute_image.my_image.self_link}"
-		auto_delete  = true
-		boot         = true
-	}
-
-	network_interface {
-		network = "default"
-	}
-
-	service_account {
-		scopes = ["userinfo-email", "compute-ro", "storage-ro"]
-	}
-
-	lifecycle {
-		create_before_destroy = true
-	}
-}
-
-resource "google_compute_region_instance_group_manager" "igm-update-strategy" {
-	description                = "Terraform test instance group manager"
-	name                       = "%s"
-	instance_template          = "${google_compute_instance_template.igm-update-strategy.self_link}"
-	base_instance_name         = "rigm-update-strategy"
-	region                     = "us-central1"
-	target_size                = 2
-	named_port {
-		name = "customhttp"
-		port = 8080
-	}
-}`, igm)
-}
-<% end -%>
-
-=======
-
-<% unless version == 'ga' -%>
->>>>>>> Removing deprecated fields (#2436)
 func testAccRegionInstanceGroupManager_rollingUpdatePolicy(igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
