@@ -16,11 +16,6 @@ import (
 	computeBeta "google.golang.org/api/compute/v0.beta"
 )
 
-var (
-	regionInstanceGroupManagerIdRegex     = regexp.MustCompile("^" + ProjectRegex + "/[a-z0-9-]+/[a-z0-9-]+$")
-	regionInstanceGroupManagerIdNameRegex = regexp.MustCompile("^[a-z0-9-]+$")
-)
-
 func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeRegionInstanceGroupManagerCreate,
