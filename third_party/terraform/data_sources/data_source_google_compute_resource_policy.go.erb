@@ -59,7 +59,7 @@ func dataSourceGoogleComputeResourcePolicyRead(d *schema.ResourceData, meta inte
 	}
 	d.Set("self_link", resourcePolicy.SelfLink)
 	d.Set("description", resourcePolicy.Description)
-	d.SetId(fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", project, regions, name)
+	d.SetId(fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", project, regions, name))
 	return nil
 }
 <% end -%>
