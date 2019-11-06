@@ -817,7 +817,7 @@ var pigSchema = &schema.Schema{
 	Optional:     true,
 	ForceNew:     true,
 	MaxItems:     1,
-	ExactlyOneOf: []string{"spark_config", "pyspark_config", "hadoop_config", "hive_config", "sparksql_config"},
+	ExactlyOneOf: []string{"spark_config", "pyspark_config", "hadoop_config", "hive_config", "pig_config", "sparksql_config"},
 	Elem: &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			// main query: can be only one of query_list | query_file_uri
@@ -919,7 +919,7 @@ var sparkSqlSchema = &schema.Schema{
 	Optional:     true,
 	ForceNew:     true,
 	MaxItems:     1,
-	ExactlyOneOf: []string{"spark_config", "pyspark_config", "hadoop_config", "hive_config", "pig_config"},
+	ExactlyOneOf: []string{"spark_config", "pyspark_config", "hadoop_config", "hive_config", "pig_config", "sparksql_config"},
 	Elem: &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			// main query: can be only one of query_list | query_file_uri
@@ -928,14 +928,14 @@ var sparkSqlSchema = &schema.Schema{
 				Optional:     true,
 				ForceNew:     true,
 				Elem:         &schema.Schema{Type: schema.TypeString},
-				ExactlyOneOf: []string{"pig_config.0.query_file_uri", "pig_config.0.query_list"},
+				ExactlyOneOf: []string{"sparksql_config.0.query_file_uri", "sparksql_config.0.query_list"},
 			},
 
 			"query_file_uri": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ExactlyOneOf: []string{"pig_config.0.query_file_uri", "pig_config.0.query_list"},
+				ExactlyOneOf: []string{"sparksql_config.0.query_file_uri", "sparksql_config.0.query_list"},
 			},
 
 			"script_variables": {

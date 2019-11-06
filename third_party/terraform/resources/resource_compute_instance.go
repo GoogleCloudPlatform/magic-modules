@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sort"
 	"strings"
-
 	"time"
 
 	"github.com/hashicorp/errwrap"
@@ -38,9 +38,9 @@ var (
 	}
 
 	accessConfigKeys = []string{
-		"network_interface.0.access_config.0.nat_ip",
-		"network_interface.0.access_config.0.network_tier",
-		"network_interface.0.access_config.0.public_ptr_domain_name",
+		"network_interface.%d.access_config.%d.nat_ip",
+		"network_interface.%d.access_config.%d.network_tier",
+		"network_interface.%d.access_config.%d.public_ptr_domain_name",
 	}
 
 	schedulingKeys = []string{
@@ -56,6 +56,74 @@ var (
 		"shielded_instance_config.0.enable_integrity_monitoring",
 	}
 )
+
+func resourceComputeInstanceAtLeastOneNetworkDiff(diff *schema.ResourceDiff, v interface{}) error {
+	atLeastOneOfList := []string{"network_interface.%d.network", "network_interface.%d.subnetwork"}
+	errorList := make([]string, 0)
+
+	networkInterfaces := diff.Get("network_interface").([]interface{})
+	if len(networkInterfaces) == 0 {
+		return nil
+	}
+
+	for i := range networkInterfaces {
+		found := false
+		for _, atLeastOneOfKey := range atLeastOneOfList {
+			if val := diff.Get(fmt.Sprintf(atLeastOneOfKey, i)); val != "" {
+				found = true
+			}
+		}
+
+		if found == false {
+			sort.Strings(atLeastOneOfList)
+			keyList := formatStringsInList(atLeastOneOfList, i)
+			errorList = append(errorList, fmt.Sprintf("network_interface: one of `%s` must be specified", strings.Join(keyList, ",")))
+		}
+	}
+
+	if len(errorList) > 0 {
+		return fmt.Errorf(strings.Join(errorList, "\n\t* "))
+	}
+
+	return nil
+}
+
+func resourceComputeInstanceAtLeastOneAccessConfigAttrDiff(diff *schema.ResourceDiff, v interface{}) error {
+	errorList := make([]string, 0)
+
+	networkInterfaces := diff.Get("network_interface").([]interface{})
+	if len(networkInterfaces) == 0 {
+		return nil
+	}
+
+	for i := range networkInterfaces {
+		accessConfigs := diff.Get(fmt.Sprintf("network_interface.%d.access_config", i)).([]interface{})
+		if len(accessConfigs) == 0 {
+			continue
+		}
+
+		for j := range accessConfigs {
+			found := false
+			for _, atLeastOneOfKey := range accessConfigKeys {
+				if val := diff.Get(fmt.Sprintf(atLeastOneOfKey, i, j)); val != "" {
+					found = true
+				}
+			}
+
+			if found == false {
+				sort.Strings(accessConfigKeys)
+				keyList := formatStringsInList(accessConfigKeys, i, j)
+				errorList = append(errorList, fmt.Sprintf("network_interface.%d.access_config: one of `%s` must be specified", i, strings.Join(keyList, ",")))
+			}
+		}
+	}
+
+	if len(errorList) > 0 {
+		return fmt.Errorf(strings.Join(errorList, "\n\t* "))
+	}
+
+	return nil
+}
 
 func resourceComputeInstance() *schema.Resource {
 	return &schema.Resource{
@@ -218,7 +286,6 @@ func resourceComputeInstance() *schema.Resource {
 							Optional:         true,
 							Computed:         true,
 							ForceNew:         true,
-							AtLeastOneOf:     []string{"network_interface.0.network", "network_interface.0.subnetwork"},
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
 						},
 
@@ -227,7 +294,6 @@ func resourceComputeInstance() *schema.Resource {
 							Optional:         true,
 							Computed:         true,
 							ForceNew:         true,
-							AtLeastOneOf:     []string{"network_interface.0.network", "network_interface.0.subnetwork"},
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
 						},
 
@@ -256,24 +322,21 @@ func resourceComputeInstance() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"nat_ip": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										Computed:     true,
-										AtLeastOneOf: accessConfigKeys,
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
 									},
 
 									"network_tier": {
 										Type:         schema.TypeString,
 										Optional:     true,
 										Computed:     true,
-										AtLeastOneOf: accessConfigKeys,
 										ValidateFunc: validation.StringInSlice([]string{"PREMIUM", "STANDARD"}, false),
 									},
 
 									"public_ptr_domain_name": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										AtLeastOneOf: accessConfigKeys,
+										Type:     schema.TypeString,
+										Optional: true,
 									},
 								},
 							},
@@ -601,6 +664,8 @@ func resourceComputeInstance() *schema.Resource {
 				},
 				suppressEmptyGuestAcceleratorDiff,
 			),
+			resourceComputeInstanceAtLeastOneNetworkDiff,
+			resourceComputeInstanceAtLeastOneAccessConfigAttrDiff,
 		),
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -22,6 +23,37 @@ import (
 	"google.golang.org/api/storage/v1"
 )
 
+func resourceStorageBucketAtLeastOneCorsAttrDiff(diff *schema.ResourceDiff, v interface{}) error {
+	atLeastOneOfList := []string{"cors.%d.method", "cors.%d.response_header", "cors.%d.max_age_seconds"}
+	errorList := make([]string, 0)
+
+	corsBlocks := diff.Get("cors").([]interface{})
+	if len(corsBlocks) == 0 {
+		return nil
+	}
+
+	for i := range corsBlocks {
+		found := false
+		for _, atLeastOneOfKey := range atLeastOneOfList {
+			if val := diff.Get(fmt.Sprintf(atLeastOneOfKey, i)); val != "" {
+				found = true
+			}
+		}
+
+		if found == false {
+			sort.Strings(atLeastOneOfList)
+			keyList := formatStringsInList(atLeastOneOfList, i)
+			errorList = append(errorList, fmt.Sprintf("cors: one of `%s` must be specified", strings.Join(keyList, ",")))
+		}
+	}
+
+	if len(errorList) > 0 {
+		return fmt.Errorf(strings.Join(errorList, "\n\t* "))
+	}
+
+	return nil
+}
+
 func resourceStorageBucket() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceStorageBucketCreate,
@@ -32,7 +64,9 @@ func resourceStorageBucket() *schema.Resource {
 			State: resourceStorageBucketStateImporter,
 		},
 		CustomizeDiff: customdiff.All(
-			customdiff.ForceNewIfChange("retention_policy.0.is_locked", isPolicyLocked)),
+			customdiff.ForceNewIfChange("retention_policy.0.is_locked", isPolicyLocked),
+			resourceStorageBucketAtLeastOneCorsAttrDiff,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -234,33 +268,29 @@ func resourceStorageBucket() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"origin": {
-							Type:         schema.TypeList,
-							Optional:     true,
-							AtLeastOneOf: []string{"cors.0.method", "cors.0.response_header", "cors.0.max_age_seconds"},
+							Type:     schema.TypeList,
+							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
 						"method": {
-							Type:         schema.TypeList,
-							Optional:     true,
-							AtLeastOneOf: []string{"cors.0.origin", "cors.0.response_header", "cors.0.max_age_seconds"},
+							Type:     schema.TypeList,
+							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
 						"response_header": {
-							Type:         schema.TypeList,
-							Optional:     true,
-							AtLeastOneOf: []string{"cors.0.origin", "cors.0.method", "cors.0.max_age_seconds"},
+							Type:     schema.TypeList,
+							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
 						"max_age_seconds": {
-							Type:         schema.TypeInt,
-							Optional:     true,
-							AtLeastOneOf: []string{"cors.0.origin", "cors.0.method", "cors.0.response_header"},
+							Type:     schema.TypeInt,
+							Optional: true,
 						},
 					},
 				},

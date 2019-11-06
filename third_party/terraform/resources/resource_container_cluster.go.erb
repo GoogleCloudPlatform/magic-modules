@@ -802,7 +802,6 @@ func resourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"channel": {
 							Type:             schema.TypeString,
-							Default:          "UNSPECIFIED",
 							Required:         true,
 							ForceNew:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"UNSPECIFIED", "RAPID", "REGULAR", "STABLE"}, false),

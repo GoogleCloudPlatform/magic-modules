@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"regexp"
+	// "regexp"
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"

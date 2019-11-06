@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/hashicorp/errwrap"
@@ -41,6 +42,9 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			resourceComputeInstanceTemplateSourceImageCustomizeDiff,
 			resourceComputeInstanceTemplateScratchDiskCustomizeDiff,
+			resourceComputeInstanceTemplateAtLeastOneDiskSourceDiff,
+			resourceComputeInstanceTemplateAtLeastOneNetworkDiff,
+			resourceComputeInstanceTemplateAtLeastOneAccessConfigAttrDiff,
 		),
 		MigrateState: resourceComputeInstanceTemplateMigrateState,
 
@@ -131,10 +135,9 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						},
 
 						"source_image": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Computed:     true,
-							AtLeastOneOf: []string{"disk.0.source_image", "disk.0.source"},
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
 						},
 
 						"interface": {
@@ -152,10 +155,9 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						},
 
 						"source": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							AtLeastOneOf: []string{"disk.0.source_image", "disk.0.source"},
-							ForceNew:     true,
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
 						},
 
 						"type": {
@@ -244,7 +246,6 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Optional:         true,
 							ForceNew:         true,
 							Computed:         true,
-							AtLeastOneOf:     []string{"network_interface.0.network", "network_interface.0.subnetwork"},
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
 						},
 
@@ -259,7 +260,6 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Optional:         true,
 							ForceNew:         true,
 							Computed:         true,
-							AtLeastOneOf:     []string{"network_interface.0.network", "network_interface.0.subnetwork"},
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
 						},
 
@@ -277,17 +277,15 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"nat_ip": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										ForceNew:     true,
-										Computed:     true,
-										AtLeastOneOf: []string{"network_interface.0.access_config.0.nat_ip", "network_interface.0.access_config.0.network_tier"},
+										Type:     schema.TypeString,
+										Optional: true,
+										ForceNew: true,
+										Computed: true,
 									},
 									"network_tier": {
 										Type:         schema.TypeString,
 										Optional:     true,
 										Computed:     true,
-										AtLeastOneOf: []string{"network_interface.0.access_config.0.nat_ip", "network_interface.0.access_config.0.network_tier"},
 										ValidateFunc: validation.StringInSlice([]string{"PREMIUM", "STANDARD"}, false),
 									},
 								},
@@ -553,6 +551,106 @@ func resourceComputeInstanceTemplateSourceImageCustomizeDiff(diff *schema.Resour
 			}
 		}
 	}
+	return nil
+}
+
+func resourceComputeInstanceTemplateAtLeastOneDiskSourceDiff(diff *schema.ResourceDiff, v interface{}) error {
+	atLeastOneOfList := []string{"disk.%d.source_image", "disk.%d.source"}
+	errorList := make([]string, 0)
+
+	disks := diff.Get("disk").([]interface{})
+	if len(disks) == 0 {
+		return nil
+	}
+
+	for i := range disks {
+		found := false
+		for _, atLeastOneOfKey := range atLeastOneOfList {
+			if val := diff.Get(fmt.Sprintf(atLeastOneOfKey, i)); val != "" {
+				found = true
+			}
+		}
+
+		if found == false {
+			sort.Strings(atLeastOneOfList)
+			keyList := formatStringsInList(atLeastOneOfList, i)
+			errorList = append(errorList, fmt.Sprintf("disk: one of `%s` must be specified", strings.Join(keyList, ",")))
+		}
+	}
+
+	if len(errorList) > 0 {
+		return fmt.Errorf(strings.Join(errorList, "\n\t* "))
+	}
+
+	return nil
+}
+
+func resourceComputeInstanceTemplateAtLeastOneNetworkDiff(diff *schema.ResourceDiff, v interface{}) error {
+	atLeastOneOfList := []string{"network_interface.%d.network", "network_interface.%d.subnetwork"}
+	errorList := make([]string, 0)
+
+	networkInterfaces := diff.Get("network_interface").([]interface{})
+	if len(networkInterfaces) == 0 {
+		return nil
+	}
+
+	for i := range networkInterfaces {
+		found := false
+		for _, atLeastOneOfKey := range atLeastOneOfList {
+			if val := diff.Get(fmt.Sprintf(atLeastOneOfKey, i)); val != "" {
+				found = true
+			}
+		}
+
+		if found == false {
+			sort.Strings(atLeastOneOfList)
+			keyList := formatStringsInList(atLeastOneOfList, i)
+			errorList = append(errorList, fmt.Sprintf("network_interface: one of `%s` must be specified", strings.Join(keyList, ",")))
+		}
+	}
+
+	if len(errorList) > 0 {
+		return fmt.Errorf(strings.Join(errorList, "\n\t* "))
+	}
+
+	return nil
+}
+
+func resourceComputeInstanceTemplateAtLeastOneAccessConfigAttrDiff(diff *schema.ResourceDiff, v interface{}) error {
+	atLeastOneOfList := []string{"network_interface.%d.access_config.%d.nat_ip", "network_interface.%d.access_config.%d.network_tier"}
+	errorList := make([]string, 0)
+
+	networkInterfaces := diff.Get("network_interface").([]interface{})
+	if len(networkInterfaces) == 0 {
+		return nil
+	}
+
+	for i := range networkInterfaces {
+		accessConfigs := diff.Get(fmt.Sprintf("network_interface.%d.access_config", i)).([]interface{})
+		if len(accessConfigs) == 0 {
+			continue
+		}
+
+		for j := range accessConfigs {
+			found := false
+			for _, atLeastOneOfKey := range atLeastOneOfList {
+				if val := diff.Get(fmt.Sprintf(atLeastOneOfKey, i, j)); val != "" {
+					found = true
+				}
+			}
+
+			if found == false {
+				sort.Strings(atLeastOneOfList)
+				keyList := formatStringsInList(atLeastOneOfList, i, j)
+				errorList = append(errorList, fmt.Sprintf("network_interface.%d.access_config: one of `%s` must be specified", i, strings.Join(keyList, ",")))
+			}
+		}
+	}
+
+	if len(errorList) > 0 {
+		return fmt.Errorf(strings.Join(errorList, "\n\t* "))
+	}
+
 	return nil
 }
 
