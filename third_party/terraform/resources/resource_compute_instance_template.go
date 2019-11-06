@@ -135,10 +135,9 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						},
 
 						"source_image": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Computed:     true,
-							AtLeastOneOf: []string{"disk.0.source_image", "disk.0.source"},
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
 						},
 
 						"interface": {
@@ -156,10 +155,9 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						},
 
 						"source": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							AtLeastOneOf: []string{"disk.0.source_image", "disk.0.source"},
-							ForceNew:     true,
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
 						},
 
 						"type": {
@@ -248,7 +246,6 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Optional:         true,
 							ForceNew:         true,
 							Computed:         true,
-							AtLeastOneOf:     []string{"network_interface.0.network", "network_interface.0.subnetwork"},
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
 						},
 
@@ -263,7 +260,6 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Optional:         true,
 							ForceNew:         true,
 							Computed:         true,
-							AtLeastOneOf:     []string{"network_interface.0.network", "network_interface.0.subnetwork"},
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
 						},
 
@@ -281,17 +277,15 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"nat_ip": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										ForceNew:     true,
-										Computed:     true,
-										AtLeastOneOf: []string{"network_interface.0.access_config.0.nat_ip", "network_interface.0.access_config.0.network_tier"},
+										Type:     schema.TypeString,
+										Optional: true,
+										ForceNew: true,
+										Computed: true,
 									},
 									"network_tier": {
 										Type:         schema.TypeString,
 										Optional:     true,
 										Computed:     true,
-										AtLeastOneOf: []string{"network_interface.0.access_config.0.nat_ip", "network_interface.0.access_config.0.network_tier"},
 										ValidateFunc: validation.StringInSlice([]string{"PREMIUM", "STANDARD"}, false),
 									},
 								},

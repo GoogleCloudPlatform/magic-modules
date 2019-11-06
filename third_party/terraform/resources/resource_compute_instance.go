@@ -286,7 +286,6 @@ func resourceComputeInstance() *schema.Resource {
 							Optional:         true,
 							Computed:         true,
 							ForceNew:         true,
-							AtLeastOneOf:     []string{"network_interface.0.network", "network_interface.0.subnetwork"},
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
 						},
 
@@ -295,7 +294,6 @@ func resourceComputeInstance() *schema.Resource {
 							Optional:         true,
 							Computed:         true,
 							ForceNew:         true,
-							AtLeastOneOf:     []string{"network_interface.0.network", "network_interface.0.subnetwork"},
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
 						},
 
@@ -324,24 +322,21 @@ func resourceComputeInstance() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"nat_ip": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										Computed:     true,
-										AtLeastOneOf: accessConfigKeys,
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
 									},
 
 									"network_tier": {
 										Type:         schema.TypeString,
 										Optional:     true,
 										Computed:     true,
-										AtLeastOneOf: accessConfigKeys,
 										ValidateFunc: validation.StringInSlice([]string{"PREMIUM", "STANDARD"}, false),
 									},
 
 									"public_ptr_domain_name": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										AtLeastOneOf: accessConfigKeys,
+										Type:     schema.TypeString,
+										Optional: true,
 									},
 								},
 							},
