@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -325,6 +326,15 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 				ForceNew: true,
 			},
 
+			<% unless version == 'ga' -%>
+			"root_password": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				ForceNew:  true,
+				Sensitive: true,
+			},
+			<% end -%>
+
 			"ip_address": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -558,6 +568,13 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		MasterInstanceName:   d.Get("master_instance_name").(string),
 		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
 	}
+
+	<% unless version == 'ga' -%>
+	// MSSQL Server require rootPassword to be set
+	if strings.Contains(instance.DatabaseVersion, "SQLSERVER") {
+		instance.RootPassword = d.Get("root_password").(string)
+	}
+	<% end -%>
 
 	// Modifying a replica during Create can cause problems if the master is
 	// modified at the same time. Lock the master until we're done in order

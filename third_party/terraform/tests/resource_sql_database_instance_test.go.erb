@@ -227,6 +227,33 @@ func TestAccSqlDatabaseInstance_basicSecondGen(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+func TestAccSqlDatabaseInstance_basicMSSQL(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + acctest.RandString(10)
+	rootPassword := acctest.RandString(15)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlDatabaseInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_basic_mssql, databaseName, rootPassword),
+			},
+			{
+				ResourceName:      "google_sql_database_instance.instance",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"root_password"},
+			},
+		},
+	})
+}
+<% end -%>
+
 func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 	t.Parallel()
 
@@ -679,6 +706,7 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `
+
 var testGoogleSqlDatabaseInstance_basic3 = `
 resource "google_sql_database_instance" "instance" {
   name   = "%s"
@@ -688,6 +716,19 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `
+
+<% unless version == 'ga' -%>
+var testGoogleSqlDatabaseInstance_basic_mssql = `
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  database_version = "SQLSERVER_2017_STANDARD"
+  root_password    = "%s"
+  settings {
+    tier = "db-custom-1-3840"
+  }
+}
+`
+<% end -%>
 
 func testGoogleSqlDatabaseInstanceConfig_withoutReplica(instanceName string) string {
 	return fmt.Sprintf(`
