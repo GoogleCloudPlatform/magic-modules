@@ -28,6 +28,8 @@ objects:
     name: Service
     base_url: projects/{{project}}/services
     self_link: projects/{{project}}/services/{{name}}
+    create_url: projects/{{project}}/services/{{name}}/enable
+    delete_url: projects/{{project}}/services/{{name}}/disable
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Getting Started': 'https://cloud.google.com/service-usage/docs/getting-started'
