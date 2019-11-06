@@ -50,3 +50,30 @@ objects:
           - STATE_UNSPECIFIED
           - DISABLED
           - ENABLED
+      - !ruby/object:Api::Type::Boolean
+        name: 'disableDependentServices'
+        description: |
+          Indicates if dependent services should also be disabled. Can only be turned on if service
+          is disabled.
+      - !ruby/object:Api::Type::NestedObject
+        name: config
+        description: The service configuration of the available service.
+        output: true
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: name
+            description: The DNS address at which this service is available.
+          - !ruby/object:Api::Type::NestedObject
+            name: title
+            description: The product title for this service
+          - !ruby/object:Api::Type::Array
+            name: apis
+            description: The list of API interfaces exported by this service.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'name'
+                  description: Name of the API
+                - !ruby/object:Api::Type::String
+                  name: 'version'
+                  description: The version of the API
