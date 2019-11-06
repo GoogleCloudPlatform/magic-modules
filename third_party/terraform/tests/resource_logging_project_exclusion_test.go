@@ -118,17 +118,17 @@ func testAccLoggingProjectExclusion_multiple(t *testing.T) {
 				Config: testAccLoggingProjectExclusion_multipleCfg(),
 			},
 			{
-				ResourceName:      "google_logging_project_exclusion.one",
+				ResourceName:      "google_logging_project_exclusion.basic0",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				ResourceName:      "google_logging_project_exclusion.two",
+				ResourceName:      "google_logging_project_exclusion.basic1",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				ResourceName:      "google_logging_project_exclusion.three",
+				ResourceName:      "google_logging_project_exclusion.basic2",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -184,25 +184,15 @@ resource "google_logging_project_exclusion" "basic" {
 }
 
 func testAccLoggingProjectExclusion_multipleCfg() string {
-	return fmt.Sprintf(`
-resource "google_logging_project_exclusion" "one" {
+	s := ""
+	for i := 0; i < 3; i++ {
+		s += fmt.Sprintf(`
+resource "google_logging_project_exclusion" "basic%d" {
 	name = "%s"
 	description = "Basic Project Logging Exclusion"
 	filter = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
-
-resource "google_logging_project_exclusion" "two" {
-	name = "%s"
-	description = "Basic Project Logging Exclusion"
-	filter = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=INFO"
-}
-
-resource "google_logging_project_exclusion" "three" {
-	name = "%s"
-	description = "Basic Project Logging Exclusion"
-	disabled = true
-	filter = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
-}`, "tf-test-exclusion-"+acctest.RandString(10), getTestProjectFromEnv(),
-		"tf-test-exclusion-"+acctest.RandString(10), getTestProjectFromEnv(),
-		"tf-test-exclusion-"+acctest.RandString(10), getTestProjectFromEnv())
+`, i, "tf-test-exclusion-"+acctest.RandString(10), getTestProjectFromEnv())
+	}
+	return s
 }
