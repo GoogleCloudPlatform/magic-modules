@@ -423,7 +423,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						"enable_secure_boot": {
 							Type:         schema.TypeBool,
 							Optional:     true,
-							AtLeastOneOf: schedulingInstTemplateKeys,
+							AtLeastOneOf: shieldedInstanceTemplateConfigKeys,
 							Default:      false,
 							ForceNew:     true,
 						},
@@ -431,7 +431,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						"enable_vtpm": {
 							Type:         schema.TypeBool,
 							Optional:     true,
-							AtLeastOneOf: schedulingInstTemplateKeys,
+							AtLeastOneOf: shieldedInstanceTemplateConfigKeys,
 							Default:      true,
 							ForceNew:     true,
 						},
@@ -439,7 +439,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						"enable_integrity_monitoring": {
 							Type:         schema.TypeBool,
 							Optional:     true,
-							AtLeastOneOf: schedulingInstTemplateKeys,
+							AtLeastOneOf: shieldedInstanceTemplateConfigKeys,
 							Default:      true,
 							ForceNew:     true,
 						},
