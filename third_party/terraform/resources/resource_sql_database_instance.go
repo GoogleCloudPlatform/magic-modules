@@ -467,28 +467,28 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"cert": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:         schema.TypeString,
+							Computed:     true,
 							AtLeastOneOf: serverCertsKeys,
 						},
 						"common_name": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:         schema.TypeString,
+							Computed:     true,
 							AtLeastOneOf: serverCertsKeys,
 						},
 						"create_time": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:         schema.TypeString,
+							Computed:     true,
 							AtLeastOneOf: serverCertsKeys,
 						},
 						"expiration_time": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:         schema.TypeString,
+							Computed:     true,
 							AtLeastOneOf: serverCertsKeys,
 						},
 						"sha1_fingerprint": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:         schema.TypeString,
+							Computed:     true,
 							AtLeastOneOf: serverCertsKeys,
 						},
 					},
