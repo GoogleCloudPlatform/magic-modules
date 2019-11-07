@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -84,58 +83,51 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"base_instance_name": &schema.Schema{
+			"base_instance_name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			<% if version == 'ga' -%>
-			"instance_template": &schema.Schema{
+			"instance_template": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
-				Deprecated:       "This field will be replaced by `version.instance_template` in 3.0.0",
-				ConflictsWith: []string{"version"},
+				Removed:          "This field has been replaced by `version.instance_template`",
+				ConflictsWith:    []string{"version"},
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
 			},
-			<% end -%>
 
-			"version": &schema.Schema{
-				Type:       schema.TypeList,
-				<%# TODO 3.0.0 - mark as required -%>
-				<% if version == 'ga' -%>
-				Optional: true,
-				Computed: true,
-				<% else -%>
+			"version": {
+				Type:     schema.TypeList,
 				Required: true,
-				<% end -%>
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
 
-						"instance_template": &schema.Schema{
+						"instance_template": {
 							Type:             schema.TypeString,
 							Required:         true,
 							DiffSuppressFunc: compareSelfLinkRelativePaths,
 						},
 
-						"target_size": &schema.Schema{
+						"target_size": {
 							Type:     schema.TypeList,
 							Optional: true,
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"fixed": &schema.Schema{
+									"fixed": {
 										Type:     schema.TypeInt,
 										Optional: true,
 									},
-									"percent": &schema.Schema{
-										Type:     schema.TypeInt,
-										Optional: true,
+
+									"percent": {
+										Type:         schema.TypeInt,
+										Optional:     true,
 										ValidateFunc: validation.IntBetween(0, 100),
 									},
 								},
@@ -145,46 +137,46 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				},
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"zone": &schema.Schema{
+			"zone": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"fingerprint": &schema.Schema{
+			"fingerprint": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"instance_group": &schema.Schema{
+			"instance_group": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"named_port": &schema.Schema{
+			"named_port": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
 
-						"port": &schema.Schema{
+						"port": {
 							Type:     schema.TypeInt,
 							Required: true,
 						},
@@ -192,39 +184,26 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				},
 			},
 
-			"project": &schema.Schema{
+			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"self_link": &schema.Schema{
+			"self_link": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-<% if version == 'ga' -%>
-			"update_strategy": &schema.Schema{
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "REPLACE",
-				Deprecated:   "This field will be replaced by `update_policy` in 3.0.0",
-				ConflictsWith: []string{"update_policy"},
-				ValidateFunc: validation.StringInSlice([]string{"RESTART", "NONE", "ROLLING_UPDATE", "REPLACE"}, false),
-				DiffSuppressFunc: func(key, old, new string, d *schema.ResourceData) bool {
-					if old == "REPLACE" && new == "RESTART" {
-						return true
-					}
-					if old == "RESTART" && new == "REPLACE" {
-						return true
-					}
-					return false
-				},
+			"update_strategy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "REPLACE",
+				Removed:  "This field has been replaced by `update_policy`",
 			},
-<% end -%>
 
-			"target_pools": &schema.Schema{
+			"target_pools": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -233,25 +212,25 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				Set: selfLinkRelativePathHash,
 			},
 
-			"target_size": &schema.Schema{
+			"target_size": {
 				Type:     schema.TypeInt,
 				Computed: true,
 				Optional: true,
 			},
 
-			"auto_healing_policies": &schema.Schema{
+			"auto_healing_policies": {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"health_check": &schema.Schema{
+						"health_check": {
 							Type:             schema.TypeString,
 							Required:         true,
 							DiffSuppressFunc: compareSelfLinkRelativePaths,
 						},
 
-						"initial_delay_sec": &schema.Schema{
+						"initial_delay_sec": {
 							Type:         schema.TypeInt,
 							Required:     true,
 							ValidateFunc: validation.IntBetween(0, 3600),
@@ -260,108 +239,54 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				},
 			},
 
-<% if version == 'ga' -%>
-			"rolling_update_policy": &schema.Schema{
-				Computed:   true,
-				Type:       schema.TypeList,
-				Removed:    "This field has been replaced by update_policy.",
-				Optional:   true,
-				MaxItems:   1,
+			"update_policy": {
+				Computed: true,
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"minimal_action": &schema.Schema{
+						"minimal_action": {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"RESTART", "REPLACE"}, false),
 						},
 
-						"type": &schema.Schema{
+						"type": {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"OPPORTUNISTIC", "PROACTIVE"}, false),
 						},
 
-						"max_surge_fixed": &schema.Schema{
-							Type:          schema.TypeInt,
-							Optional:      true,
-							Computed:      true,
-						},
-
-						"max_surge_percent": &schema.Schema{
-							Type:          schema.TypeInt,
-							Optional:      true,
-							ValidateFunc:  validation.IntBetween(0, 100),
-						},
-
-						"max_unavailable_fixed": &schema.Schema{
-							Type:          schema.TypeInt,
-							Optional:      true,
-							Computed:      true,
-						},
-
-						"max_unavailable_percent": &schema.Schema{
-							Type:          schema.TypeInt,
-							Optional:      true,
-							ValidateFunc:  validation.IntBetween(0, 100),
-						},
-
-						"min_ready_sec": &schema.Schema{
-							Type:         schema.TypeInt,
-							Optional:     true,
-							ValidateFunc: validation.IntBetween(0, 3600),
-						},
-					},
-				},
-			},
-<% end -%>
-			"update_policy": &schema.Schema{
-				Computed:   true,
-				Type:       schema.TypeList,
-				Optional:   true,
-				MaxItems:   1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"minimal_action": &schema.Schema{
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"RESTART", "REPLACE"}, false),
-						},
-
-						"type": &schema.Schema{
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"OPPORTUNISTIC", "PROACTIVE"}, false),
-						},
-
-						"max_surge_fixed": &schema.Schema{
+						"max_surge_fixed": {
 							Type:          schema.TypeInt,
 							Optional:      true,
 							Computed:      true,
 							ConflictsWith: []string{"update_policy.0.max_surge_percent"},
 						},
 
-						"max_surge_percent": &schema.Schema{
+						"max_surge_percent": {
 							Type:          schema.TypeInt,
 							Optional:      true,
 							ConflictsWith: []string{"update_policy.0.max_surge_fixed"},
 							ValidateFunc:  validation.IntBetween(0, 100),
 						},
 
-						"max_unavailable_fixed": &schema.Schema{
+						"max_unavailable_fixed": {
 							Type:          schema.TypeInt,
 							Optional:      true,
 							Computed:      true,
 							ConflictsWith: []string{"update_policy.0.max_unavailable_percent"},
 						},
 
-						"max_unavailable_percent": &schema.Schema{
+						"max_unavailable_percent": {
 							Type:          schema.TypeInt,
 							Optional:      true,
 							ConflictsWith: []string{"update_policy.0.max_unavailable_fixed"},
 							ValidateFunc:  validation.IntBetween(0, 100),
 						},
 
-						"min_ready_sec": &schema.Schema{
+						"min_ready_sec": {
 							Type:         schema.TypeInt,
 							Optional:     true,
 							ValidateFunc: validation.IntBetween(0, 3600),
@@ -370,7 +295,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				},
 			},
 
-			"wait_for_instances": &schema.Schema{
+			"wait_for_instances": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
@@ -423,9 +348,6 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		Name:                d.Get("name").(string),
 		Description:         d.Get("description").(string),
 		BaseInstanceName:    d.Get("base_instance_name").(string),
-		<% if version == 'ga' -%>
-		InstanceTemplate:    d.Get("instance_template").(string),
-		<% end -%>
 		TargetSize:          int64(d.Get("target_size").(int)),
 		NamedPorts:          getNamedPortsBeta(d.Get("named_port").(*schema.Set).List()),
 		TargetPools:         convertStringSet(d.Get("target_pools").(*schema.Set)),
@@ -543,9 +465,6 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	}
 
 	d.Set("base_instance_name", manager.BaseInstanceName)
-	<% if version == 'ga' -%>
-	d.Set("instance_template", ConvertSelfLinkToV1(manager.InstanceTemplate))
-	<% end -%>
 	d.Set("name", manager.Name)
 	d.Set("zone", GetResourceNameFromSelfLink(manager.Zone))
 	d.Set("description", manager.Description)
@@ -561,16 +480,6 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	d.Set("instance_group", ConvertSelfLinkToV1(manager.InstanceGroup))
 	d.Set("self_link", ConvertSelfLinkToV1(manager.SelfLink))
 
-	<% if version == 'ga' -%>
-	update_strategy, ok := d.GetOk("update_strategy")
-	if !ok {
-		update_strategy = "REPLACE"
-	}
-	d.Set("update_strategy", update_strategy.(string))
-
-	d.Set("rolling_update_policy" , nil)
-	<% end -%>
-
 	if err = d.Set("auto_healing_policies", flattenAutoHealingPolicies(manager.AutoHealingPolicies)); err != nil {
 		return fmt.Errorf("Error setting auto_healing_policies in state: %s", err.Error())
 	}
@@ -580,7 +489,6 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err = d.Set("update_policy", flattenUpdatePolicy(manager.UpdatePolicy)); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
-
 
 	if d.Get("wait_for_instances").(bool) {
 		conf := resource.StateChangeConf{
@@ -597,43 +505,6 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 
 	return nil
 }
-<% if version == 'ga' -%>
-// Updates an instance group manager by applying the update strategy (REPLACE, RESTART)
-// and rolling update policy (PROACTIVE, OPPORTUNISTIC). Updates performed by API
-// are OPPORTUNISTIC by default.
-func performZoneUpdate(d *schema.ResourceData, config *Config, id string, updateStrategy string, project string, zone string) error {
-	if updateStrategy == "RESTART" || updateStrategy == "REPLACE" {
-		managedInstances, err := config.clientComputeBeta.InstanceGroupManagers.ListManagedInstances(project, zone, id).Do()
-		if err != nil {
-			return fmt.Errorf("Error getting instance group managers instances: %s", err)
-		}
-
-		managedInstanceCount := len(managedInstances.ManagedInstances)
-		instances := make([]string, managedInstanceCount)
-		for i, v := range managedInstances.ManagedInstances {
-			instances[i] = v.Instance
-		}
-
-		recreateInstances := &computeBeta.InstanceGroupManagersRecreateInstancesRequest{
-			Instances: instances,
-		}
-
-		op, err := config.clientComputeBeta.InstanceGroupManagers.RecreateInstances(project, zone, id, recreateInstances).Do()
-		if err != nil {
-			return fmt.Errorf("Error restarting instance group managers instances: %s", err)
-		}
-
-		// Wait for the operation to complete
-		timeoutInMinutes := int(d.Timeout(schema.TimeoutUpdate).Minutes())
-		err = computeSharedOperationWaitTime(config.clientCompute, op, project, timeoutInMinutes, "Restarting InstanceGroupManagers instances")
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-<% end -%>
 
 func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
@@ -735,39 +606,6 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		}
 		d.SetPartial("target_size")
 	}
-
-	<% if version == 'ga' -%>
-	// If instance_template changes then update
-	if d.HasChange("instance_template") {
-		d.Partial(true)
-
-		name := d.Get("name").(string)
-		// Build the parameter
-		setInstanceTemplate := &computeBeta.InstanceGroupManagersSetInstanceTemplateRequest{
-			InstanceTemplate: d.Get("instance_template").(string),
-		}
-
-		op, err := config.clientComputeBeta.InstanceGroupManagers.SetInstanceTemplate(project, zone, name, setInstanceTemplate).Do()
-
-		if err != nil {
-			return fmt.Errorf("Error updating InstanceGroupManager: %s", err)
-		}
-
-		// Wait for the operation to complete
-		timeoutInMinutes := int(d.Timeout(schema.TimeoutUpdate).Minutes())
-		err = computeSharedOperationWaitTime(config.clientCompute, op, project, timeoutInMinutes, "Updating InstanceGroupManager")
-		if err != nil {
-			return err
-		}
-
-		updateStrategy := d.Get("update_strategy").(string)
-		err = performZoneUpdate(d, config, name, updateStrategy, project, zone)
-		if err != nil {
-			return err
-		}
-		d.SetPartial("instance_template")
-	}
-	<% end -%>
 
 	d.Partial(false)
 
@@ -875,7 +713,6 @@ func expandFixedOrPercent(configured []interface{}) *computeBeta.FixedOrPercent 
 	return fixedOrPercent
 }
 
-
 func expandUpdatePolicy(configured []interface{}) *computeBeta.InstanceGroupManagerUpdatePolicy {
 	updatePolicy := &computeBeta.InstanceGroupManagerUpdatePolicy{}
 
@@ -889,7 +726,7 @@ func expandUpdatePolicy(configured []interface{}) *computeBeta.InstanceGroupMana
 		// when the percent values are set, the fixed values will be ignored
 		if v := data["max_surge_percent"]; v.(int) > 0 {
 			updatePolicy.MaxSurge = &computeBeta.FixedOrPercent{
-				Percent: int64(v.(int)),
+				Percent:    int64(v.(int)),
 				NullFields: []string{"Fixed"},
 			}
 		} else {
@@ -903,7 +740,7 @@ func expandUpdatePolicy(configured []interface{}) *computeBeta.InstanceGroupMana
 
 		if v := data["max_unavailable_percent"]; v.(int) > 0 {
 			updatePolicy.MaxUnavailable = &computeBeta.FixedOrPercent{
-				Percent: int64(v.(int)),
+				Percent:    int64(v.(int)),
 				NullFields: []string{"Fixed"},
 			}
 		} else {
