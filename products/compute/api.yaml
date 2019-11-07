@@ -9095,18 +9095,6 @@ objects:
           Only networks that are in the distributed mode can have subnetworks.
         input: true
         required: true
-      - !ruby/object:Api::Type::Boolean
-        name: 'enableFlowLogs'
-        description: |
-          Whether to enable flow logging for this subnetwork.
-        update_verb: :PATCH
-        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
-        update_id: 'enableFlowLogs'
-        fingerprint_name: 'fingerprint'
-        send_empty_value: true
-        deprecation_message: >-
-          This field is being removed in favor of log_config. If log_config is present,
-          flow logs are enabled.
       # TODO(rileykarson): Work with rambleraptor to remove this field from downstreams.
       - !ruby/object:Api::Type::Fingerprint
         name: 'fingerprint'
