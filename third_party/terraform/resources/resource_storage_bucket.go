@@ -24,7 +24,7 @@ import (
 )
 
 func resourceStorageBucketAtLeastOneCorsAttrDiff(diff *schema.ResourceDiff, v interface{}) error {
-	atLeastOneOfList := []string{"cors.%d.method", "cors.%d.response_header", "cors.%d.max_age_seconds"}
+	atLeastOneOfList := []string{"cors.%d.origin", "cors.%d.method", "cors.%d.response_header", "cors.%d.max_age_seconds"}
 	errorList := make([]string, 0)
 
 	corsBlocks := diff.Get("cors").([]interface{})
