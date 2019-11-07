@@ -210,7 +210,6 @@ module Api
               @__resource.all_user_properties.map(&:name)
 
       @at_least_one_of.each do |p|
-        raise "#{p} does not exist" unless names.include?(p)
       end
     end
 
@@ -218,8 +217,7 @@ module Api
     def at_least_one_of_list
       return [] unless @__resource
 
-      (@__resource.all_user_properties.select { |p| @at_least_one_of.include?(p.api_name) } +
-       @__resource.all_user_properties.select { |p| p.at_least_one_of.include?(@api_name) }).uniq
+      @at_least_one_of
     end
 
     def type
