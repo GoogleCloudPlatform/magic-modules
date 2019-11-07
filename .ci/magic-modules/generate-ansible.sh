@@ -18,6 +18,8 @@ COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
 
 # Remove all modules so that old files are removed in process.
 rm build/ansible/plugins/modules/gcp_*
+# This module is handwritten. It's the only one.
+git checkout HEAD -- plugins/modules/gcp_storage_object.py
 
 bundle exec compiler -a -e ansible -o "build/ansible/"
 
