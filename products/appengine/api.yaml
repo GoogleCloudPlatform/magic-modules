@@ -94,6 +94,7 @@ objects:
               Example: 12345.
           - !ruby/object:Api::Type::Enum
             name: 'sslManagementType'
+            required: true
             description: |
               SSL management type for this domain. If `AUTOMATIC`, a managed certificate is automatically provisioned.
               If `MANUAL`, `certificateId` must be manually specified in order to configure SSL for this domain.
@@ -407,6 +408,7 @@ objects:
               - !ruby/object:Api::Type::String
                 name: 'sourceUrl'
                 description: 'Source URL'
+                required: true
               - !ruby/object:Api::Type::Integer
                 name: 'filesCount'
                 description: 'files count'
@@ -428,6 +430,7 @@ objects:
                     SHA1 checksum of the file
                 - !ruby/object:Api::Type::String
                   name: 'sourceUrl'
+                  required: true
                   description: |
                     Source URL
       - !ruby/object:Api::Type::NestedObject
@@ -438,6 +441,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'shell'
+            required: true
             description: |
               The format should be a shell command that can be fed to bash -c.
       - !ruby/object:Api::Type::String

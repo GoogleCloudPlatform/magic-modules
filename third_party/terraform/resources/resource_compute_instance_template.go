@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/hashicorp/errwrap"
@@ -12,6 +13,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	computeBeta "google.golang.org/api/compute/v0.beta"
+)
+
+var (
+	schedulingInstTemplateKeys = []string{
+		"scheduling.0.on_host_maintenance",
+		"scheduling.0.automatic_restart",
+		"scheduling.0.preemptible",
+		"scheduling.0.node_affinities",
+	}
+
+	shieldedInstanceTemplateConfigKeys = []string{
+		"shielded_instance_config.0.enable_secure_boot",
+		"shielded_instance_config.0.enable_vtpm",
+		"shielded_instance_config.0.enable_integrity_monitoring",
+	}
 )
 
 func resourceComputeInstanceTemplate() *schema.Resource {
@@ -26,6 +42,9 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			resourceComputeInstanceTemplateSourceImageCustomizeDiff,
 			resourceComputeInstanceTemplateScratchDiskCustomizeDiff,
+			resourceComputeInstanceTemplateAtLeastOneDiskSourceDiff,
+			resourceComputeInstanceTemplateAtLeastOneNetworkDiff,
+			resourceComputeInstanceTemplateAtLeastOneAccessConfigAttrDiff,
 		),
 		MigrateState: resourceComputeInstanceTemplateMigrateState,
 
@@ -157,7 +176,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"kms_key_self_link": {
 										Type:             schema.TypeString,
-										Optional:         true,
+										Required:         true,
 										ForceNew:         true,
 										DiffSuppressFunc: compareSelfLinkRelativePaths,
 									},
@@ -320,29 +339,33 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"preemptible": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
-							ForceNew: true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							AtLeastOneOf: schedulingInstTemplateKeys,
+							Default:      false,
+							ForceNew:     true,
 						},
 
 						"automatic_restart": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
-							ForceNew: true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							AtLeastOneOf: schedulingInstTemplateKeys,
+							Default:      true,
+							ForceNew:     true,
 						},
 
 						"on_host_maintenance": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-							ForceNew: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: schedulingInstTemplateKeys,
+							ForceNew:     true,
 						},
 
 						"node_affinities": {
 							Type:             schema.TypeSet,
 							Optional:         true,
+							AtLeastOneOf:     schedulingInstTemplateKeys,
 							ForceNew:         true,
 							Elem:             instanceSchedulingNodeAffinitiesElemSchema(),
 							DiffSuppressFunc: emptyOrDefaultStringSuppress(""),
@@ -398,24 +421,27 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enable_secure_boot": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
-							ForceNew: true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							AtLeastOneOf: shieldedInstanceTemplateConfigKeys,
+							Default:      false,
+							ForceNew:     true,
 						},
 
 						"enable_vtpm": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
-							ForceNew: true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							AtLeastOneOf: shieldedInstanceTemplateConfigKeys,
+							Default:      true,
+							ForceNew:     true,
 						},
 
 						"enable_integrity_monitoring": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
-							ForceNew: true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							AtLeastOneOf: shieldedInstanceTemplateConfigKeys,
+							Default:      true,
+							ForceNew:     true,
 						},
 					},
 				},
@@ -525,6 +551,106 @@ func resourceComputeInstanceTemplateSourceImageCustomizeDiff(diff *schema.Resour
 			}
 		}
 	}
+	return nil
+}
+
+func resourceComputeInstanceTemplateAtLeastOneDiskSourceDiff(diff *schema.ResourceDiff, v interface{}) error {
+	atLeastOneOfList := []string{"disk.%d.source_image", "disk.%d.source"}
+	errorList := make([]string, 0)
+
+	disks := diff.Get("disk").([]interface{})
+	if len(disks) == 0 {
+		return nil
+	}
+
+	for i := range disks {
+		found := false
+		for _, atLeastOneOfKey := range atLeastOneOfList {
+			if val := diff.Get(fmt.Sprintf(atLeastOneOfKey, i)); val != "" {
+				found = true
+			}
+		}
+
+		if found == false {
+			sort.Strings(atLeastOneOfList)
+			keyList := formatStringsInList(atLeastOneOfList, i)
+			errorList = append(errorList, fmt.Sprintf("disk: one of `%s` must be specified", strings.Join(keyList, ",")))
+		}
+	}
+
+	if len(errorList) > 0 {
+		return fmt.Errorf(strings.Join(errorList, "\n\t* "))
+	}
+
+	return nil
+}
+
+func resourceComputeInstanceTemplateAtLeastOneNetworkDiff(diff *schema.ResourceDiff, v interface{}) error {
+	atLeastOneOfList := []string{"network_interface.%d.network", "network_interface.%d.subnetwork"}
+	errorList := make([]string, 0)
+
+	networkInterfaces := diff.Get("network_interface").([]interface{})
+	if len(networkInterfaces) == 0 {
+		return nil
+	}
+
+	for i := range networkInterfaces {
+		found := false
+		for _, atLeastOneOfKey := range atLeastOneOfList {
+			if val := diff.Get(fmt.Sprintf(atLeastOneOfKey, i)); val != "" {
+				found = true
+			}
+		}
+
+		if found == false {
+			sort.Strings(atLeastOneOfList)
+			keyList := formatStringsInList(atLeastOneOfList, i)
+			errorList = append(errorList, fmt.Sprintf("network_interface: one of `%s` must be specified", strings.Join(keyList, ",")))
+		}
+	}
+
+	if len(errorList) > 0 {
+		return fmt.Errorf(strings.Join(errorList, "\n\t* "))
+	}
+
+	return nil
+}
+
+func resourceComputeInstanceTemplateAtLeastOneAccessConfigAttrDiff(diff *schema.ResourceDiff, v interface{}) error {
+	atLeastOneOfList := []string{"network_interface.%d.access_config.%d.nat_ip", "network_interface.%d.access_config.%d.network_tier"}
+	errorList := make([]string, 0)
+
+	networkInterfaces := diff.Get("network_interface").([]interface{})
+	if len(networkInterfaces) == 0 {
+		return nil
+	}
+
+	for i := range networkInterfaces {
+		accessConfigs := diff.Get(fmt.Sprintf("network_interface.%d.access_config", i)).([]interface{})
+		if len(accessConfigs) == 0 {
+			continue
+		}
+
+		for j := range accessConfigs {
+			found := false
+			for _, atLeastOneOfKey := range atLeastOneOfList {
+				if val := diff.Get(fmt.Sprintf(atLeastOneOfKey, i, j)); val != "" {
+					found = true
+				}
+			}
+
+			if found == false {
+				sort.Strings(atLeastOneOfList)
+				keyList := formatStringsInList(atLeastOneOfList, i, j)
+				errorList = append(errorList, fmt.Sprintf("network_interface.%d.access_config: one of `%s` must be specified", i, strings.Join(keyList, ",")))
+			}
+		}
+	}
+
+	if len(errorList) > 0 {
+		return fmt.Errorf(strings.Join(errorList, "\n\t* "))
+	}
+
 	return nil
 }
 
