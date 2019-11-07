@@ -6570,6 +6570,7 @@ objects:
             properties:
             - !ruby/object:Api::Type::Double
               name: 'utilizationTarget'
+              required: true
               description: |
                 The target CPU utilization that the autoscaler should maintain.
                 Must be a float value in the range (0, 1]. If not specified, the
@@ -6685,6 +6686,7 @@ objects:
             properties:
             - !ruby/object:Api::Type::Double
               name: 'utilizationTarget'
+              required: true
               description: |
                 Fraction of backend capacity utilization (set in HTTP(s) load
                 balancing configuration) that autoscaler should maintain. Must
