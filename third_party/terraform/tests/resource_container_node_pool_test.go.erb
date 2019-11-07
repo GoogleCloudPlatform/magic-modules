@@ -763,7 +763,7 @@ resource "google_compute_subnetwork" "container_subnetwork" {
 	name                     = "${google_compute_network.container_network.name}"
 	network                  = "${google_compute_network.container_network.name}"
 	ip_cidr_range            = "10.0.36.0/24"
-	location                 = "us-central1"
+	region                   = "us-central1"
 	private_ip_google_access = true
 
 	secondary_ip_range {
