@@ -156,11 +156,13 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 
 	defer c.Close()
 
-	instance, err := c.InstanceInfo(ctx, d.Id())
+	instanceName := d.Get("name").(string)
+
+	instance, err := c.InstanceInfo(ctx, instanceName)
 	if err != nil {
-		log.Printf("[WARN] Removing %s because it's gone", d.Id())
+		log.Printf("[WARN] Removing %s because it's gone", instanceName)
 		d.SetId("")
-		return fmt.Errorf("Error retrieving instance. Could not find %s. %s", d.Id(), err)
+		return fmt.Errorf("Error retrieving instance. Could not find %s. %s", instanceName, err)
 	}
 
 	d.Set("project", project)
@@ -252,7 +254,7 @@ func resourceBigtableInstanceDestroy(d *schema.ResourceData, meta interface{}) e
 
 	defer c.Close()
 
-	name := d.Id()
+	name := d.Get("name").(string)
 	err = c.DeleteInstance(ctx, name)
 	if err != nil {
 		return fmt.Errorf("Error deleting instance. %s", err)
