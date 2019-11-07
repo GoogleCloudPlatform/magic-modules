@@ -1,4 +1,4 @@
-fpackage google
+package google
 
 import (
 	"fmt"
