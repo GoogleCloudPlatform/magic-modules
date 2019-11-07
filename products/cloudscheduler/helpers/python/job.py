@@ -15,3 +15,9 @@
 def encode_request(request, module):
     request['name'] = "projects/%s/locations/%s/jobs/%s" %(module.params['project'], module.params['region'], module.params['name'])
     return request
+
+def decode_request(response, module):
+    if 'name' in response:
+        response['name'] = response['name'].split('/')[-1]
+
+    return response

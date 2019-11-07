@@ -298,7 +298,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     transport: !ruby/object:Overrides::Ansible::Transport
       encoders:
         - encode_request
-      decoders: 
+      decoders:
         - decode_response
     provider_helpers:
       - 'products/compute/helpers/python/provider_target_pool.py'
