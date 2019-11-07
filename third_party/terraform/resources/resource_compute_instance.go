@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sort"
 	"strings"
-
 	"time"
 
 	"github.com/hashicorp/errwrap"
@@ -18,6 +18,112 @@ import (
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/compute/v1"
 )
+
+var (
+	bootDiskKeys = []string{
+		"boot_disk.0.auto_delete",
+		"boot_disk.0.device_name",
+		"boot_disk.0.disk_encryption_key_raw",
+		"boot_disk.0.kms_key_self_link",
+		"boot_disk.0.initialize_params",
+		"boot_disk.0.mode",
+		"boot_disk.0.source",
+	}
+
+	initializeParamsKeys = []string{
+		"boot_disk.0.initialize_params.0.size",
+		"boot_disk.0.initialize_params.0.type",
+		"boot_disk.0.initialize_params.0.image",
+		"boot_disk.0.initialize_params.0.labels",
+	}
+
+	accessConfigKeys = []string{
+		"network_interface.%d.access_config.%d.nat_ip",
+		"network_interface.%d.access_config.%d.network_tier",
+		"network_interface.%d.access_config.%d.public_ptr_domain_name",
+	}
+
+	schedulingKeys = []string{
+		"scheduling.0.on_host_maintenance",
+		"scheduling.0.automatic_restart",
+		"scheduling.0.preemptible",
+		"scheduling.0.node_affinities",
+	}
+
+	shieldedInstanceConfigKeys = []string{
+		"shielded_instance_config.0.enable_secure_boot",
+		"shielded_instance_config.0.enable_vtpm",
+		"shielded_instance_config.0.enable_integrity_monitoring",
+	}
+)
+
+func resourceComputeInstanceAtLeastOneNetworkDiff(diff *schema.ResourceDiff, v interface{}) error {
+	atLeastOneOfList := []string{"network_interface.%d.network", "network_interface.%d.subnetwork"}
+	errorList := make([]string, 0)
+
+	networkInterfaces := diff.Get("network_interface").([]interface{})
+	if len(networkInterfaces) == 0 {
+		return nil
+	}
+
+	for i := range networkInterfaces {
+		found := false
+		for _, atLeastOneOfKey := range atLeastOneOfList {
+			if val := diff.Get(fmt.Sprintf(atLeastOneOfKey, i)); val != "" {
+				found = true
+			}
+		}
+
+		if found == false {
+			sort.Strings(atLeastOneOfList)
+			keyList := formatStringsInList(atLeastOneOfList, i)
+			errorList = append(errorList, fmt.Sprintf("network_interface: one of `%s` must be specified", strings.Join(keyList, ",")))
+		}
+	}
+
+	if len(errorList) > 0 {
+		return fmt.Errorf(strings.Join(errorList, "\n\t* "))
+	}
+
+	return nil
+}
+
+func resourceComputeInstanceAtLeastOneAccessConfigAttrDiff(diff *schema.ResourceDiff, v interface{}) error {
+	errorList := make([]string, 0)
+
+	networkInterfaces := diff.Get("network_interface").([]interface{})
+	if len(networkInterfaces) == 0 {
+		return nil
+	}
+
+	for i := range networkInterfaces {
+		accessConfigs := diff.Get(fmt.Sprintf("network_interface.%d.access_config", i)).([]interface{})
+		if len(accessConfigs) == 0 {
+			continue
+		}
+
+		for j := range accessConfigs {
+			found := false
+			for _, atLeastOneOfKey := range accessConfigKeys {
+				if val := diff.Get(fmt.Sprintf(atLeastOneOfKey, i, j)); val != "" {
+					found = true
+				}
+			}
+
+			if found == false {
+				sort.Strings(accessConfigKeys)
+				keyList := formatStringsInList(accessConfigKeys, i, j)
+				errorList = append(errorList, fmt.Sprintf("network_interface.%d.access_config: one of `%s` must be specified", i, strings.Join(keyList, ",")))
+			}
+		}
+	}
+
+	if len(errorList) > 0 {
+		return fmt.Errorf(strings.Join(errorList, "\n\t* "))
+	}
+
+	return nil
+}
 
 func resourceComputeInstance() *schema.Resource {
 	return &schema.Resource{
@@ -50,24 +156,28 @@ func resourceComputeInstance() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"auto_delete": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
-							ForceNew: true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							AtLeastOneOf: bootDiskKeys,
+							Default:      true,
+							ForceNew:     true,
 						},
 
 						"device_name": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-							ForceNew: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							AtLeastOneOf: bootDiskKeys,
+							Computed:     true,
+							ForceNew:     true,
 						},
 
 						"disk_encryption_key_raw": {
-							Type:      schema.TypeString,
-							Optional:  true,
-							ForceNew:  true,
-							Sensitive: true,
+							Type:          schema.TypeString,
+							Optional:      true,
+							AtLeastOneOf:  bootDiskKeys,
+							ForceNew:      true,
+							ConflictsWith: []string{"boot_disk.0.kms_key_self_link"},
+							Sensitive:     true,
 						},
 
 						"disk_encryption_key_sha256": {
@@ -78,6 +188,7 @@ func resourceComputeInstance() *schema.Resource {
 						"kms_key_self_link": {
 							Type:             schema.TypeString,
 							Optional:         true,
+							AtLeastOneOf:     bootDiskKeys,
 							ForceNew:         true,
 							ConflictsWith:    []string{"boot_disk.0.disk_encryption_key_raw"},
 							DiffSuppressFunc: compareSelfLinkRelativePaths,
@@ -85,16 +196,18 @@ func resourceComputeInstance() *schema.Resource {
 						},
 
 						"initialize_params": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Computed: true,
-							ForceNew: true,
-							MaxItems: 1,
+							Type:         schema.TypeList,
+							Optional:     true,
+							AtLeastOneOf: bootDiskKeys,
+							Computed:     true,
+							ForceNew:     true,
+							MaxItems:     1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"size": {
 										Type:         schema.TypeInt,
 										Optional:     true,
+										AtLeastOneOf: initializeParamsKeys,
 										Computed:     true,
 										ForceNew:     true,
 										ValidateFunc: validation.IntAtLeast(1),
@@ -103,6 +216,7 @@ func resourceComputeInstance() *schema.Resource {
 									"type": {
 										Type:         schema.TypeString,
 										Optional:     true,
+										AtLeastOneOf: initializeParamsKeys,
 										Computed:     true,
 										ForceNew:     true,
 										ValidateFunc: validation.StringInSlice([]string{"pd-standard", "pd-ssd"}, false),
@@ -111,16 +225,18 @@ func resourceComputeInstance() *schema.Resource {
 									"image": {
 										Type:             schema.TypeString,
 										Optional:         true,
+										AtLeastOneOf:     initializeParamsKeys,
 										Computed:         true,
 										ForceNew:         true,
 										DiffSuppressFunc: diskImageDiffSuppress,
 									},
 
 									"labels": {
-										Type:     schema.TypeMap,
-										Optional: true,
-										Computed: true,
-										ForceNew: true,
+										Type:         schema.TypeMap,
+										Optional:     true,
+										AtLeastOneOf: initializeParamsKeys,
+										Computed:     true,
+										ForceNew:     true,
 									},
 								},
 							},
@@ -129,6 +245,7 @@ func resourceComputeInstance() *schema.Resource {
 						"mode": {
 							Type:         schema.TypeString,
 							Optional:     true,
+							AtLeastOneOf: bootDiskKeys,
 							ForceNew:     true,
 							Default:      "READ_WRITE",
 							ValidateFunc: validation.StringInSlice([]string{"READ_WRITE", "READ_ONLY"}, false),
@@ -137,6 +254,7 @@ func resourceComputeInstance() *schema.Resource {
 						"source": {
 							Type:             schema.TypeString,
 							Optional:         true,
+							AtLeastOneOf:     bootDiskKeys,
 							Computed:         true,
 							ForceNew:         true,
 							ConflictsWith:    []string{"boot_disk.initialize_params"},
@@ -380,27 +498,31 @@ func resourceComputeInstance() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"on_host_maintenance": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: schedulingKeys,
 						},
 
 						"automatic_restart": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							AtLeastOneOf: schedulingKeys,
+							Default:      true,
 						},
 
 						"preemptible": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
-							ForceNew: true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							Default:      false,
+							AtLeastOneOf: schedulingKeys,
+							ForceNew:     true,
 						},
 
 						"node_affinities": {
 							Type:             schema.TypeSet,
 							Optional:         true,
+							AtLeastOneOf:     schedulingKeys,
 							ForceNew:         true,
 							Elem:             instanceSchedulingNodeAffinitiesElemSchema(),
 							DiffSuppressFunc: emptyOrDefaultStringSuppress(""),
@@ -417,8 +539,7 @@ func resourceComputeInstance() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"interface": {
 							Type:         schema.TypeString,
-							Optional:     true,
-							Default:      "SCSI",
+							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"SCSI", "NVME"}, false),
 						},
 					},
@@ -463,21 +584,24 @@ func resourceComputeInstance() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enable_secure_boot": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							AtLeastOneOf: shieldedInstanceConfigKeys,
+							Default:      false,
 						},
 
 						"enable_vtpm": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							AtLeastOneOf: shieldedInstanceConfigKeys,
+							Default:      true,
 						},
 
 						"enable_integrity_monitoring": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							AtLeastOneOf: shieldedInstanceConfigKeys,
+							Default:      true,
 						},
 					},
 				},
@@ -540,6 +664,8 @@ func resourceComputeInstance() *schema.Resource {
 				},
 				suppressEmptyGuestAcceleratorDiff,
 			),
+			resourceComputeInstanceAtLeastOneNetworkDiff,
+			resourceComputeInstanceAtLeastOneAccessConfigAttrDiff,
 		),
 	}
 }
