@@ -13,12 +13,23 @@
 
 --- !ruby/object:Provider::Ansible::Config
 datasources: !ruby/object:Overrides::ResourceOverrides
+  Service: !ruby/object:Overrides::Ansible::ResourceOverride
+    facts: !ruby/object:Provider::Ansible::FactsOverride
+      has_filters: false
+      test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
+        exists: |
+          "'{{ (results['resources'] | selectattr('name', 'search', 'spanner.googleapis.com') | list | first).state }}' == 'ENABLED'"
+        does_not_exist: |
+          "'{{ (results['resources'] | selectattr('name', 'search', 'spanner.googleapis.com') | list | first).state }}' == 'DISABLED'"
 overrides: !ruby/object:Overrides::ResourceOverrides
   Service: !ruby/object:Overrides::Ansible::ResourceOverride
     custom_code: !ruby/object:Provider::Ansible::CustomCode
       pre_action: |
         if module.params['state'] == 'present' and module.params['disable_dependent_services']:
           module.fail_json(msg="You cannot enable a service and use the disable_dependent_service option")
+
+        if fetch and fetch.get('state') == 'DISABLED':
+          fetch = {}
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

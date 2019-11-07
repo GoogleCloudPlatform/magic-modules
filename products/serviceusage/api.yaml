@@ -28,23 +28,44 @@ objects:
     name: Service
     base_url: projects/{{project}}/services
     self_link: projects/{{project}}/services/{{name}}
-    create_url: projects/{{project}}/services/{{name}}/enable
-    delete_url: projects/{{project}}/services/{{name}}/disable
+    create_url: projects/{{project}}/services/{{name}}:enable
+    delete_url: projects/{{project}}/services/{{name}}:disable
+    delete_verb: :POST
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Getting Started': 'https://cloud.google.com/service-usage/docs/getting-started'
     description: |
       A service that is available for use
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::Async::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::Async::Error
+        path: 'error'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
-        name: name
+        name: 'name'
         required: true
         description: |
           The resource name of the service
+        pattern: projects/{{project}}/services/{{name}}
+        url_param_only: true
       - !ruby/object:Api::Type::String
         name: parent
         description: |
-          The name of the parent of this service. For example: `projects/123`
+          The name of the parent of this service. For example 'projects/123'
+        output: true
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: Whether or not the service has been enabled for use by the consumer.
@@ -52,6 +73,7 @@ objects:
           - STATE_UNSPECIFIED
           - DISABLED
           - ENABLED
+        output: true
       - !ruby/object:Api::Type::Boolean
         name: 'disableDependentServices'
         description: |
@@ -62,10 +84,10 @@ objects:
         description: The service configuration of the available service.
         output: true
         properties:
-          - !ruby/object:Api::Type::NestedObject
+          - !ruby/object:Api::Type::String
             name: name
             description: The DNS address at which this service is available.
-          - !ruby/object:Api::Type::NestedObject
+          - !ruby/object:Api::Type::String
             name: title
             description: The product title for this service
           - !ruby/object:Api::Type::Array
