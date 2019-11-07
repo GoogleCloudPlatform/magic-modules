@@ -26,32 +26,6 @@ apis_required:
     url: https://console.cloud.google.com/apis/library/storage-component.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
-    name: 'Object'
-    base_url: b/{{bucket}}/o/
-    description: Upload or download a file from a GCS bucket.
-    properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'action'
-        description: 'Upload or download from the bucket'
-        values:
-          - :download
-          - :upload
-      - !ruby/object:Api::Type::Boolean
-        name: 'overwrite'
-        description: |
-          'Overwrite the file on the bucket/local machine. If overwrite is
-          false and a difference exists between GCS + local, module will fail
-          with error'
-      - !ruby/object:Api::Type::Path
-        name: 'src'
-        description: Source location of file (may be local machine or cloud depending on action)
-      - !ruby/object:Api::Type::Path
-        name: 'dest'
-        description: Destination location of file (may be local machine or cloud depending on action)
-      - !ruby/object:Api::Type::String
-        name: 'bucket'
-        description: 'The name of the bucket'
-  - !ruby/object:Api::Resource
     name: 'Bucket'
     kind: 'storage#bucket'
     base_url: b?project={{project}}
