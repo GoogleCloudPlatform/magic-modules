@@ -90,12 +90,12 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 			},
 
 			"instance_template": &schema.Schema{
-				Type:             schema.TypeString,
-				Removed:          "This field has been replaced by `version.instance_template` in 3.0.0",
+				Type:    schema.TypeString,
+				Removed: "This field has been replaced by `version.instance_template` in 3.0.0",
 			},
 
 			"version": &schema.Schema{
-				Type:       schema.TypeList,
+				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -191,9 +191,9 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 			},
 
 			"update_strategy": &schema.Schema{
-				Type:         schema.TypeString,
-				Removed:      "This field is removed.",
-				Optional:     true,
+				Type:     schema.TypeString,
+				Removed:  "This field is removed.",
+				Optional: true,
 			},
 
 			"target_pools": &schema.Schema{
@@ -253,10 +253,10 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 			},
 
 			"update_policy": &schema.Schema{
-				Type:       schema.TypeList,
-				Computed:   true,
-				Optional:   true,
-				MaxItems:   1,
+				Type:     schema.TypeList,
+				Computed: true,
+				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"minimal_action": &schema.Schema{
@@ -305,9 +305,9 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 							ValidateFunc: validation.IntBetween(0, 3600),
 						},
 						"instance_redistribution_type": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"PROACTIVE", "NONE", ""}, false),
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateFunc:     validation.StringInSlice([]string{"PROACTIVE", "NONE", ""}, false),
 							DiffSuppressFunc: emptyOrDefaultStringSuppress("PROACTIVE"),
 						},
 					},
@@ -613,7 +613,7 @@ func expandRegionUpdatePolicy(configured []interface{}) *computeBeta.InstanceGro
 		// when the percent values are set, the fixed values will be ignored
 		if v := data["max_surge_percent"]; v.(int) > 0 {
 			updatePolicy.MaxSurge = &computeBeta.FixedOrPercent{
-				Percent: int64(v.(int)),
+				Percent:    int64(v.(int)),
 				NullFields: []string{"Fixed"},
 			}
 		} else {
@@ -627,7 +627,7 @@ func expandRegionUpdatePolicy(configured []interface{}) *computeBeta.InstanceGro
 
 		if v := data["max_unavailable_percent"]; v.(int) > 0 {
 			updatePolicy.MaxUnavailable = &computeBeta.FixedOrPercent{
-				Percent: int64(v.(int)),
+				Percent:    int64(v.(int)),
 				NullFields: []string{"Fixed"},
 			}
 		} else {

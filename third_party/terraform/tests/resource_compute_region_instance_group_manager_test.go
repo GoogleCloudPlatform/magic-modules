@@ -148,8 +148,8 @@ func TestAccRegionInstanceGroupManager_rollingUpdatePolicy(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccRegionInstanceGroupManager_rollingUpdatePolicySetToDefault(igm),
-				PlanOnly: true,
+				Config:             testAccRegionInstanceGroupManager_rollingUpdatePolicySetToDefault(igm),
+				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
 			},
 			{
@@ -647,7 +647,6 @@ func testAccRegionInstanceGroupManager_separateRegions(igm1, igm2 string) string
 	}
 	`, igm1, igm2)
 }
-
 
 func testAccRegionInstanceGroupManager_autoHealingPolicies(template, target, igm, hck string) string {
 	return fmt.Sprintf(`

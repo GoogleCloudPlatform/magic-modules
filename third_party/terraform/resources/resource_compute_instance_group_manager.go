@@ -94,12 +94,12 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				Removed:          "This field has been replaced by `version.instance_template`",
-				ConflictsWith: []string{"version"},
+				ConflictsWith:    []string{"version"},
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
 			},
 
 			"version": &schema.Schema{
-				Type:       schema.TypeList,
+				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -196,10 +196,10 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 			},
 
 			"update_strategy": &schema.Schema{
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "REPLACE",
-				Removed:      "This field has been replaced by `update_policy`",
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "REPLACE",
+				Removed:  "This field has been replaced by `update_policy`",
 			},
 
 			"target_pools": &schema.Schema{
@@ -239,10 +239,10 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 			},
 
 			"update_policy": &schema.Schema{
-				Computed:   true,
-				Type:       schema.TypeList,
-				Optional:   true,
-				MaxItems:   1,
+				Computed: true,
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"minimal_action": &schema.Schema{
@@ -489,7 +489,6 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
 
-
 	if d.Get("wait_for_instances").(bool) {
 		conf := resource.StateChangeConf{
 			Pending: []string{"creating", "error"},
@@ -713,7 +712,6 @@ func expandFixedOrPercent(configured []interface{}) *computeBeta.FixedOrPercent 
 	return fixedOrPercent
 }
 
-
 func expandUpdatePolicy(configured []interface{}) *computeBeta.InstanceGroupManagerUpdatePolicy {
 	updatePolicy := &computeBeta.InstanceGroupManagerUpdatePolicy{}
 
@@ -727,7 +725,7 @@ func expandUpdatePolicy(configured []interface{}) *computeBeta.InstanceGroupMana
 		// when the percent values are set, the fixed values will be ignored
 		if v := data["max_surge_percent"]; v.(int) > 0 {
 			updatePolicy.MaxSurge = &computeBeta.FixedOrPercent{
-				Percent: int64(v.(int)),
+				Percent:    int64(v.(int)),
 				NullFields: []string{"Fixed"},
 			}
 		} else {
@@ -741,7 +739,7 @@ func expandUpdatePolicy(configured []interface{}) *computeBeta.InstanceGroupMana
 
 		if v := data["max_unavailable_percent"]; v.(int) > 0 {
 			updatePolicy.MaxUnavailable = &computeBeta.FixedOrPercent{
-				Percent: int64(v.(int)),
+				Percent:    int64(v.(int)),
 				NullFields: []string{"Fixed"},
 			}
 		} else {
