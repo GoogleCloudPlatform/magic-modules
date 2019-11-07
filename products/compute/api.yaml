@@ -287,6 +287,7 @@ objects:
             properties:
             - !ruby/object:Api::Type::Double
               name: 'utilizationTarget'
+              required: true
               description: |
                 The target CPU utilization that the autoscaler should maintain.
                 Must be a float value in the range (0, 1]. If not specified, the
@@ -402,6 +403,7 @@ objects:
             properties:
             - !ruby/object:Api::Type::Double
               name: 'utilizationTarget'
+              required: true
               description: |
                 Fraction of backend capacity utilization (set in HTTP(s) load
                 balancing configuration) that autoscaler should maintain. Must
@@ -460,10 +462,10 @@ objects:
         properties:
         - !ruby/object:Api::Type::Integer
           name: 'signedUrlCacheMaxAgeSec'
-          default_value: 3600
+          required: true
           description: |
             Maximum number of seconds the response to a signed URL request will
-            be considered fresh. Defaults to 1hr (3600s). After this time period,
+            be considered fresh. After this time period,
             the response will be revalidated before being served.
             When serving responses to signed URL requests,
             Cloud CDN will internally behave as though
@@ -910,7 +912,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'drainingTimeoutSec'
-            default_value: 300
+            required: true
             description: |
               Time for which instance will be drained (not accept new
               connections, but still work to finish started).
@@ -1516,7 +1518,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'drainingTimeoutSec'
-            default_value: 300
+            required: true
             description: |
               Time for which instance will be drained (not accept new
               connections, but still work to finish started).
@@ -4063,6 +4065,7 @@ objects:
                             Specifies a 256-bit customer-supplied encryption
                             key, encoded in RFC 4648 base64 to either encrypt
                             or decrypt this resource.
+                          required: true
                         - !ruby/object:Api::Type::String
                           name: 'sha256'
                           description: |

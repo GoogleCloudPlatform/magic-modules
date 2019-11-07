@@ -62,6 +62,7 @@ module Api
         check :full_url, type: String
 
         conflicts %i[base_url full_url]
+        at_least_one_of %i[base_url full_url]
       end
     end
 

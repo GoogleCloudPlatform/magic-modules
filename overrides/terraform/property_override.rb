@@ -69,6 +69,9 @@ module Overrides
           # Names of attributes that can't be set alongside this one
           :conflicts_with,
 
+          # Names of attributes that at least one of must be set
+          :at_least_one_of,
+
           # Names of fields that should be included in the updateMask.
           :update_mask_fields,
 
