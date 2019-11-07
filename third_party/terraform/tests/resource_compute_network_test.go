@@ -147,19 +147,19 @@ func testAccCheckComputeNetworkExists(n string, network *compute.Network) resour
 			return fmt.Errorf("Not found: %s", n)
 		}
 
-		if rs.Primary.ID == "" {
+		if rs.Primary.Attributes["name"] == "" {
 			return fmt.Errorf("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
 
 		found, err := config.clientCompute.Networks.Get(
-			config.Project, rs.Primary.ID).Do()
+			config.Project, rs.Primary.Attributes["name"]).Do()
 		if err != nil {
 			return err
 		}
 
-		if found.Name != rs.Primary.ID {
+		if found.Name != rs.Primary.Attributes["name"] {
 			return fmt.Errorf("Network not found")
 		}
 
