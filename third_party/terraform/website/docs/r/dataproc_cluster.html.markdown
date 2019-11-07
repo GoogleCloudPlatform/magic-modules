@@ -1,4 +1,5 @@
 ---
+subcategory: "Cloud Dataproc"
 layout: "google"
 page_title: "Google: google_dataproc_cluster"
 sidebar_current: "docs-google-dataproc-cluster"
@@ -268,7 +269,7 @@ The `cluster_config.master_config` block supports:
    to create for the master. If not specified, GCP will default to a predetermined
    computed value (currently `n1-standard-4`).
 
-* `min_cpu_platform` - (Optional, Computed, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) The name of a minimum generation of CPU family
+* `min_cpu_platform` - (Optional, Computed, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The name of a minimum generation of CPU family
    for the master. If not specified, GCP will default to a predetermined computed value
    for each zone. See [the guide](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform)
    for details about which CPU families are available (and defaulted) for each zone.
@@ -331,7 +332,7 @@ The `cluster_config.worker_config` block supports:
    to create for the worker nodes. If not specified, GCP will default to a predetermined
    computed value (currently `n1-standard-4`).
 
-* `min_cpu_platform` - (Optional, Computed, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) The name of a minimum generation of CPU family
+* `min_cpu_platform` - (Optional, Computed, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The name of a minimum generation of CPU family
    for the master. If not specified, GCP will default to a predetermined computed value
    for each zone. See [the guide](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform)
    for details about which CPU families are available (and defaulted) for each zone.

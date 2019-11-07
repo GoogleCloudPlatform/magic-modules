@@ -1,5 +1,6 @@
 ---
 layout: "google"
+subcategory: "Cloud Healthcare"
 page_title: "Google: google_healthcare_dicom_store_iam"
 sidebar_current: "docs-google-healthcare-dicom-store-iam"
 description: |-
@@ -9,7 +10,7 @@ description: |-
 # IAM policy for Google Cloud Healthcare DICOM store
 
 ~> **Warning:** These resources are in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta resources.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 
 Three different resources help you manage your IAM policy for Healthcare DICOM store. Each of these resources serves a different use case:
 

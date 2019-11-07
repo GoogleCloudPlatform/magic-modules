@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: Bigtable
-display_name: BigTable
+display_name: Bigtable
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
@@ -22,7 +22,7 @@ scopes:
   - https://www.googleapis.com/auth/bigtable
 apis_required:
   - !ruby/object:Api::Product::ApiReference
-    name: BigTable API
+    name: Bigtable API
     url: https://console.cloud.google.com/apis/library/bigtable.googleapis.com/
 objects:
   - !ruby/object:Api::Resource

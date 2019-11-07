@@ -37,6 +37,7 @@
 -%>
 <%
   tf_product = (@config.legacy_name || product_ns).underscore
+  tf_subcategory = (object.__product.display_name)
   resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   resource_ns_iam = "#{resource_ns}_iam"
   properties = object.all_user_properties
@@ -49,6 +50,7 @@
 -%>
 ---
 <%= lines(autogen_notice :yaml) -%>
+subcategory: "<%= tf_subcategory -%>"
 layout: "google"
 page_title: "Google: <%= resource_ns_iam -%>"
 sidebar_current: "docs-<%= resource_ns_iam.gsub("_", "-") -%>"
@@ -69,7 +71,7 @@ Three different resources help you manage your IAM policy for <%= product_ns -%>
 
 <% if object.min_version.name == 'beta' -%>
 ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta resources.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 <% end -%>
 
 <% markdown_escaped_name = resource_ns_iam.gsub("_", "\\_") %>
@@ -178,5 +180,5 @@ as an argument so that Terraform uses the correct provider to import your resour
 <% if object.base_url.include?("{{project}}")-%>
 ## User Project Overrides
 
-This resource supports [User Project Overrides](https://www.terraform.io/docs/providers/google/provider_reference.html#user_project_override).
+This resource supports [User Project Overrides](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#user_project_override).
 <% end -%>

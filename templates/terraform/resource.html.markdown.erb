@@ -35,8 +35,9 @@
     is generated from a ruby function, but skip it on anything that is
     directly inserted from YAML.
 -%>
-<% 
+<%
   tf_product = (@config.legacy_name || product_ns).underscore
+  tf_subcategory = (object.__product.display_name)
   terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   properties = object.all_user_properties
   # In order of preference, use TF override,
@@ -47,6 +48,7 @@
 -%>
 ---
 <%= lines(autogen_notice :yaml) -%>
+subcategory: "<%= tf_subcategory -%>"
 layout: "google"
 page_title: "Google: <%= terraform_name -%>"
 sidebar_current: "docs-<%= terraform_name.gsub("_", "-") -%>"
@@ -60,7 +62,7 @@ description: |-
 
 <% if object.min_version.name == 'beta' -%>
 ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta resources.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 <% end -%>
 
 <% if !object.references.nil? -%>
@@ -184,5 +186,5 @@ as an argument so that Terraform uses the correct provider to import your resour
 <% if object.base_url.include?("{{project}}")-%>
 ## User Project Overrides
 
-This resource supports [User Project Overrides](https://www.terraform.io/docs/providers/google/provider_reference.html#user_project_override).
+This resource supports [User Project Overrides](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#user_project_override).
 <% end -%>
