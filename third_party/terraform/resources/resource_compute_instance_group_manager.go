@@ -83,13 +83,13 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"base_instance_name": &schema.Schema{
+			"base_instance_name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"instance_template": &schema.Schema{
+			"instance_template": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
@@ -98,35 +98,36 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
 			},
 
-			"version": &schema.Schema{
+			"version": {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
 
-						"instance_template": &schema.Schema{
+						"instance_template": {
 							Type:             schema.TypeString,
 							Required:         true,
 							DiffSuppressFunc: compareSelfLinkRelativePaths,
 						},
 
-						"target_size": &schema.Schema{
+						"target_size": {
 							Type:     schema.TypeList,
 							Optional: true,
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"fixed": &schema.Schema{
+									"fixed": {
 										Type:     schema.TypeInt,
 										Optional: true,
 									},
-									"percent": &schema.Schema{
-										Type:     schema.TypeInt,
-										Optional: true,
+
+									"percent": {
+										Type:         schema.TypeInt,
+										Optional:     true,
 										ValidateFunc: validation.IntBetween(0, 100),
 									},
 								},
@@ -136,46 +137,46 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				},
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"zone": &schema.Schema{
+			"zone": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"fingerprint": &schema.Schema{
+			"fingerprint": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"instance_group": &schema.Schema{
+			"instance_group": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"named_port": &schema.Schema{
+			"named_port": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
 
-						"port": &schema.Schema{
+						"port": {
 							Type:     schema.TypeInt,
 							Required: true,
 						},
@@ -183,26 +184,26 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				},
 			},
 
-			"project": &schema.Schema{
+			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"self_link": &schema.Schema{
+			"self_link": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"update_strategy": &schema.Schema{
+			"update_strategy": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "REPLACE",
 				Removed:  "This field has been replaced by `update_policy`",
 			},
 
-			"target_pools": &schema.Schema{
+			"target_pools": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -211,25 +212,25 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				Set: selfLinkRelativePathHash,
 			},
 
-			"target_size": &schema.Schema{
+			"target_size": {
 				Type:     schema.TypeInt,
 				Computed: true,
 				Optional: true,
 			},
 
-			"auto_healing_policies": &schema.Schema{
+			"auto_healing_policies": {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"health_check": &schema.Schema{
+						"health_check": {
 							Type:             schema.TypeString,
 							Required:         true,
 							DiffSuppressFunc: compareSelfLinkRelativePaths,
 						},
 
-						"initial_delay_sec": &schema.Schema{
+						"initial_delay_sec": {
 							Type:         schema.TypeInt,
 							Required:     true,
 							ValidateFunc: validation.IntBetween(0, 3600),
@@ -238,54 +239,54 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				},
 			},
 
-			"update_policy": &schema.Schema{
+			"update_policy": {
 				Computed: true,
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"minimal_action": &schema.Schema{
+						"minimal_action": {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"RESTART", "REPLACE"}, false),
 						},
 
-						"type": &schema.Schema{
+						"type": {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"OPPORTUNISTIC", "PROACTIVE"}, false),
 						},
 
-						"max_surge_fixed": &schema.Schema{
+						"max_surge_fixed": {
 							Type:          schema.TypeInt,
 							Optional:      true,
 							Computed:      true,
 							ConflictsWith: []string{"update_policy.0.max_surge_percent"},
 						},
 
-						"max_surge_percent": &schema.Schema{
+						"max_surge_percent": {
 							Type:          schema.TypeInt,
 							Optional:      true,
 							ConflictsWith: []string{"update_policy.0.max_surge_fixed"},
 							ValidateFunc:  validation.IntBetween(0, 100),
 						},
 
-						"max_unavailable_fixed": &schema.Schema{
+						"max_unavailable_fixed": {
 							Type:          schema.TypeInt,
 							Optional:      true,
 							Computed:      true,
 							ConflictsWith: []string{"update_policy.0.max_unavailable_percent"},
 						},
 
-						"max_unavailable_percent": &schema.Schema{
+						"max_unavailable_percent": {
 							Type:          schema.TypeInt,
 							Optional:      true,
 							ConflictsWith: []string{"update_policy.0.max_unavailable_fixed"},
 							ValidateFunc:  validation.IntBetween(0, 100),
 						},
 
-						"min_ready_sec": &schema.Schema{
+						"min_ready_sec": {
 							Type:         schema.TypeInt,
 							Optional:     true,
 							ValidateFunc: validation.IntBetween(0, 3600),
@@ -294,7 +295,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				},
 			},
 
-			"wait_for_instances": &schema.Schema{
+			"wait_for_instances": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
