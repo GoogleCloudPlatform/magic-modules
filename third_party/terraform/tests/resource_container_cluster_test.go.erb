@@ -2449,7 +2449,7 @@ func testAccContainerCluster_withNodeConfigShieldedInstanceConfig(clusterName st
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_node_config" {
 	name = "%s"
-	zone = "us-central1-f"
+	location = "us-central1-f"
 	initial_node_count = 1
 
 	node_config {
@@ -2915,7 +2915,7 @@ func testAccContainerCluster_withRecurringMaintenanceWindow(clusterName string, 
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_recurring_maintenance_window" {
 	name = "cluster-test-%s"
-	zone = "us-central1-a"
+	location = "us-central1-a"
 	initial_node_count = 1
 
 	%s
@@ -3354,7 +3354,7 @@ func testAccContainerCluster_withBinaryAuthorization(clusterName string, enabled
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_binary_authorization" {
 	name    = "%s"
-	locatin = "us-central1-a"
+	location = "us-central1-a"
 	initial_node_count = 1
 
 	enable_binary_authorization = %v
@@ -3366,7 +3366,7 @@ func testAccContainerCluster_withShieldedNodes(clusterName string, enabled bool)
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_shielded_nodes" {
 	name = "%s"
-	zone = "us-central1-a"
+	location = "us-central1-a"
 	initial_node_count = 1
 
 	enable_shielded_nodes = %v
@@ -3401,7 +3401,7 @@ resource "google_compute_subnetwork" "container_subnetwork" {
 
 resource "google_container_cluster" "with_flexible_cidr" {
 	name    = "%s"
-	locatin = "us-central1-a"
+	location = "us-central1-a"
 	initial_node_count = 3
 
 	network = "${google_compute_network.container_network.name}"
