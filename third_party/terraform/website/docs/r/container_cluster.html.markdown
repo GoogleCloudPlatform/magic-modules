@@ -412,14 +412,14 @@ In beta, one or the other of `recurring_window` and `daily_maintenance_window` i
 
 The `ip_allocation_policy` block supports:
 
-* `cluster_secondary_range_name` - (Optional) The name of the secondary range to
-be used as for the cluster CIDR block. The secondary range will be used for pod
-IP addresses. This must be an existing secondary range in the cluster subnetwork.
+* `cluster_secondary_range_name` - (Optional) The name of the existing secondary
+range in the cluster's subnetwork to use for pod IP addresses. Alternatively,
+`cluster_ipv4_cidr_block` can be used to automatically create a GKE-managed one.
 
-* `services_secondary_range_name` - (Optional) The name of the secondary range
-to be used as for the services CIDR block. The secondary range will be used for
-service ClusterIPs. This must be an existing secondary range in the cluster
-subnetwork.
+* `services_secondary_range_name` - (Optional) The name of the existing
+secondary range in the cluster's subnetwork to use for service `ClusterIP`s.
+Alternatively, `services_ipv4_cidr_block` can be used to automatically create a
+GKE-managed one.
 
 * `cluster_ipv4_cidr_block` - (Optional) The IP address range for the cluster pod IPs.
 Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14)
@@ -428,10 +428,10 @@ from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/
 pick a specific range to use.
 
 * `services_ipv4_cidr_block` - (Optional) The IP address range of the services IPs in this cluster.
-    Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14)
-    to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14)
-    from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to
-    pick a specific range to use.
+Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14)
+to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14)
+from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to
+pick a specific range to use.
 
 The `master_auth` block supports:
 

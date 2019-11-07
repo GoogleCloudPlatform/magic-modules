@@ -699,6 +699,7 @@ func resourceContainerCluster() *schema.Resource {
 						"use_ip_aliases": {
 							Type:     schema.TypeBool,
 							Removed:  "This field is removed as of 3.0.0. If previously set to true, remove it from your config. If false, remove it.",
+							Computed: true,
 							Optional: true,
 						},
 
