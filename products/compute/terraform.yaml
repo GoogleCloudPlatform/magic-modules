@@ -1680,10 +1680,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validateIpCidrRange'
       fingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: false
-      enableFlowLogs: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
+        send_empty_value: true
         custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.erb'
       ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1699,6 +1697,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/subnetwork.erb
       resource_definition: templates/terraform/resource_definition/subnetwork.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/subnetwork.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "subnetwork_basic"
