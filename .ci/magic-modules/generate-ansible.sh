@@ -18,14 +18,15 @@ COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
 
 # Remove all modules so that old files are removed in process.
 rm build/ansible/plugins/modules/gcp_*
-# This module is handwritten. It's the only one.
-git checkout HEAD -- plugins/modules/gcp_storage_object.py
 
 bundle exec compiler -a -e ansible -o "build/ansible/"
 
 ANSIBLE_COMMIT_MSG="$(cat .git/title)"
 
 pushd "build/ansible"
+# This module is handwritten. It's the only one.
+# It was deleted earlier, so it needs to be undeleted.
+git checkout HEAD -- plugins/modules/gcp_storage_object.py
 
 # These config entries will set the "committer".
 git config --global user.email "magic-modules@google.com"
