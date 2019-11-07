@@ -933,6 +933,7 @@ objects:
         - !ruby/object:Api::Type::String
           name: content
           description: String or regex content to match (max 1024 bytes)
+          required: true
     - !ruby/object:Api::Type::Array
       name: selectedRegions
       description: The list of regions from which the check will be run. Some regions

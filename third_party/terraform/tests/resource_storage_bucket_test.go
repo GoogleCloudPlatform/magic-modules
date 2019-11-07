@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -828,11 +830,27 @@ func TestAccStorageBucket_website(t *testing.T) {
 
 	bucketSuffix := acctest.RandomWithPrefix("tf-website-test")
 
+	websiteKeys := []string{"website.0.main_page_suffix", "website.0.not_found_page"}
+	errMsg := fmt.Sprintf("one of `%s` must be specified", strings.Join(websiteKeys, ","))
+	fullErr := fmt.Sprintf("config is invalid: 2 problems:\n\n- \"%s\": %s\n- \"%s\": %s", websiteKeys[0], errMsg, websiteKeys[1], errMsg)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageBucketDestroy,
 		Steps: []resource.TestStep{
+			{
+				Config:      testAccStorageBucket_websiteNoAttributes(bucketSuffix),
+				ExpectError: regexp.MustCompile(fullErr),
+			},
+			{
+				Config: testAccStorageBucket_websiteOneAttribute(bucketSuffix),
+			},
+			{
+				ResourceName:      "google_storage_bucket.website",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 			{
 				Config: testAccStorageBucket_website(bucketSuffix),
 			},
@@ -1418,5 +1436,31 @@ resource "google_storage_bucket" "bucket" {
       retention_period = 10
     }
 }
+`, bucketName)
+}
+
+func testAccStorageBucket_websiteNoAttributes(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "website" {
+	name     = "%s.gcp.tfacc.hashicorptest.com"
+	location = "US"
+	storage_class = "MULTI_REGIONAL"
+
+	website {}
+  }
+`, bucketName)
+}
+
+func testAccStorageBucket_websiteOneAttribute(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "website" {
+	name     = "%s.gcp.tfacc.hashicorptest.com"
+	location = "US"
+	storage_class = "MULTI_REGIONAL"
+
+	website {
+	  main_page_suffix = "index.html"
+	}
+  }
 `, bucketName)
 }

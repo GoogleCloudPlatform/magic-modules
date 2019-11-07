@@ -132,7 +132,7 @@ func resourceCloudIoTRegistry() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"public_key_certificate": {
 							Type:     schema.TypeMap,
-							Optional: true,
+							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"format": {

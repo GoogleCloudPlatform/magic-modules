@@ -267,6 +267,7 @@ objects:
             properties:
               - !ruby/object:Api::Type::String
                 name: serviceAccountEmail
+                required: true
                 description: |
                   Service account email to be used for generating OAuth token.
                   The service account must be within the same project as the job.
@@ -284,6 +285,7 @@ objects:
             properties:
               - !ruby/object:Api::Type::String
                 name: serviceAccountEmail
+                required: true
                 description: |
                   Service account email to be used for generating OAuth token.
                   The service account must be within the same project as the job.

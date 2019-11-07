@@ -170,6 +170,7 @@ objects:
             properties:
               - !ruby/object:Api::Type::String
                 name: 'branch'
+                required: true
                 description: |
                     Regex of branches to match.
               - !ruby/object:Api::Type::Enum
@@ -212,12 +213,14 @@ objects:
               If any of the images fail to be pushed, the build status is marked FAILURE.
           - !ruby/object:Api::Type::Array
             name: 'steps'
+            required: true
             description: |
               The operations to be performed on the workspace.
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'name'
+                  required: true
                   description: |
                     The name of the container image that will run this particular build step.
 
@@ -314,6 +317,7 @@ objects:
                     properties:
                         - !ruby/object:Api::Type::String
                           name: 'name'
+                          required: true
                           description: |
                             Name of the volume to mount.
 
@@ -321,6 +325,7 @@ objects:
                             Docker volumes. Each named volume must be used by at least two build steps.
                         - !ruby/object:Api::Type::String
                           name: 'path'
+                          required: true
                           description: |
                             Path at which to mount the volume.
 
