@@ -1,0 +1,11 @@
+---
+:facts:
+  :Service:
+    :version_added: '2.10'
+:regular:
+  :Service:
+    :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :disableDependentServices:
+      :version_added: '2.10'
