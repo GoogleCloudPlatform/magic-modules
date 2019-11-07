@@ -14,21 +14,20 @@
 -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	l := v.([]interface{})
+	transformed := make(map[string]interface{})
 	if len(l) == 0 || l[0] == nil {
-		return nil, nil
+		// send enable = false to ensure logging is disabled if there is no config
+		transformed["enable"] = false
+		return transformed, nil
 	}
 	raw := l[0]
 	original := raw.(map[string]interface{})
 
-	v, ok := d.GetOkExists("enable_flow_logs")
-
-	transformed := make(map[string]interface{})
-	if !ok || v.(bool) {
-		transformed["enable"] = true
-		transformed["aggregationInterval"] = original["aggregation_interval"]
-		transformed["flowSampling"] = original["flow_sampling"]
-		transformed["metadata"] = original["metadata"]
-	}
+	// The log_config block is specified, so logging should be enabled
+	transformed["enable"] = true
+	transformed["aggregationInterval"] = original["aggregation_interval"]
+	transformed["flowSampling"] = original["flow_sampling"]
+	transformed["metadata"] = original["metadata"]
 
 	return transformed, nil
 }
