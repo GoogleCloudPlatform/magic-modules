@@ -170,6 +170,7 @@ objects:
           - !ruby/object:Api::Type::Array
             name: 'networks'
             description: 'The list of VPC networks that can see this zone.'
+            required: true
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
@@ -180,6 +181,7 @@ objects:
                     The fully qualified URL of the VPC network to bind to.
                     This should be formatted like
                     `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
+                  required: true
       - !ruby/object:Api::Type::NestedObject
         name: 'forwardingConfig'
         description: |
