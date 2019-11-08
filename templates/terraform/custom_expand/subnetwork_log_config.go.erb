@@ -13,16 +13,15 @@
 	# limitations under the License.
 -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	purpose, ok := d.GetOkExists("purpose")
-
-	if ok && purpose.(string) == "INTERNAL_HTTPS_LOAD_BALANCER" {
-		// Subnetworks for L7ILB do not accept any values for logConfig
-		return nil, nil
-	}
-
 	l := v.([]interface{})
 	transformed := make(map[string]interface{})
 	if len(l) == 0 || l[0] == nil {
+		purpose, ok := d.GetOkExists("purpose")
+
+		if ok && purpose.(string) == "INTERNAL_HTTPS_LOAD_BALANCER" {
+			// Subnetworks for L7ILB do not accept any values for logConfig
+			return nil, nil
+		}
 		// send enable = false to ensure logging is disabled if there is no config
 		transformed["enable"] = false
 		return transformed, nil
