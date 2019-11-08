@@ -24,7 +24,7 @@ var (
 		Schema: map[string]*schema.Schema{
 			"cidr_blocks": {
 				Type:     schema.TypeSet,
-				Required: true,
+				Optional: true,
 				Elem:     cidrBlockConfig,
 			},
 		},
