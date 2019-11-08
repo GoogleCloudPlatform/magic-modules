@@ -1,0 +1,6 @@
+resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
+  provider = "google-beta"
+  name = "<%= ctx[:vars]["instance_name"] %>"
+  region = "us-central1"
+  type = "BASIC"
+}
