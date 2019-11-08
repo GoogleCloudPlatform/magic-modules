@@ -14,69 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
-func TestContainerClusterIpAllocationCustomizeDiff(t *testing.T) {
-	t.Parallel()
-
-	cases := map[string]struct {
-		BeforePolicy      []interface{}
-		AfterPolicy       []interface{}
-		ExpectDiffCleared bool
-	}{
-		"empty to false value": {
-			BeforePolicy: []interface{}{},
-			AfterPolicy: []interface{}{
-				map[string]interface{}{
-					"use_ip_aliases": false,
-				},
-			},
-			ExpectDiffCleared: true,
-		},
-		"empty to true value": {
-			BeforePolicy: []interface{}{},
-			AfterPolicy: []interface{}{
-				map[string]interface{}{
-					"use_ip_aliases": true,
-				},
-			},
-			ExpectDiffCleared: false,
-		},
-		"empty to empty": {
-			BeforePolicy:      []interface{}{},
-			AfterPolicy:       []interface{}{},
-			ExpectDiffCleared: false,
-		},
-		"non-empty to non-empty": {
-			BeforePolicy: []interface{}{
-				map[string]interface{}{
-					"use_ip_aliases": false,
-				},
-			},
-			AfterPolicy: []interface{}{
-				map[string]interface{}{
-					"use_ip_aliases": false,
-				},
-			},
-		},
-	}
-
-	for tn, tc := range cases {
-		d := &ResourceDiffMock{
-			Before: map[string]interface{}{
-				"ip_allocation_policy": tc.BeforePolicy,
-			},
-			After: map[string]interface{}{
-				"ip_allocation_policy": tc.AfterPolicy,
-			},
-		}
-		if err := resourceContainerClusterIpAllocationCustomizeDiffFunc(d); err != nil {
-			t.Errorf("%s failed, error calculating diff: %s", tn, err)
-		}
-		if _, ok := d.Cleared["ip_allocation_policy"]; ok != tc.ExpectDiffCleared {
-			t.Errorf("%s failed, expected cleared to be %v, was %v", tn, tc.ExpectDiffCleared, ok)
-		}
-	}
-}
-
 func TestAccContainerCluster_basic(t *testing.T) {
 	t.Parallel()
 
@@ -1267,70 +1204,6 @@ func TestAccContainerCluster_withIPAllocationPolicy_specificSizes(t *testing.T) 
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withIPAllocationPolicy_specificSizes(cluster),
-			},
-			{
-				ResourceName:		 "google_container_cluster.with_ip_allocation_policy",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
-			},
-		},
-	})
-}
-
-func TestAccContainerCluster_withIPAllocationPolicy_createSubnetwork(t *testing.T) {
-	t.Parallel()
-
-	cluster := fmt.Sprintf("cluster-test-%s", acctest.RandString(10))
-	resource.Test(t, resource.TestCase{
-		PreCheck:	  func() { testAccPreCheck(t) },
-		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_withIPAllocationPolicy_createSubnetwork(cluster),
-			},
-			{
-				ResourceName:        "google_container_cluster.with_ip_allocation_policy",
-				ImportStateIdPrefix: "us-central1-a/",
-				ImportState:         true,
-				ImportStateVerify:   true,
-			},
-			{
-				Config: testAccContainerCluster_withIPAllocationPolicy_createSubnetworkUpdated(cluster),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: false,
-			},
-			{
-				ResourceName:        "google_container_cluster.with_ip_allocation_policy",
-				ImportStateIdPrefix: "us-central1-a/",
-				ImportState:         true,
-				ImportStateVerify:   true,
-			},
-		},
-	})
-}
-
-// This test will intentionally perform a recreate. Without attr syntax, there's
-// no way to go from allocation policy set -> unset without one.
-func TestAccContainerCluster_withIPAllocationPolicy_explicitEmpty(t *testing.T) {
-	t.Parallel()
-
-	cluster := fmt.Sprintf("cluster-test-%s", acctest.RandString(10))
-	resource.Test(t, resource.TestCase{
-		PreCheck:	  func() { testAccPreCheck(t) },
-		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_withIPAllocationPolicy_createSubnetwork(cluster),
-			},
-			{
-				ResourceName:		 "google_container_cluster.with_ip_allocation_policy",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
-			},
-			{
-				Config: testAccContainerCluster_withIPAllocationPolicy_explicitEmpty(cluster),
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_ip_allocation_policy",
@@ -2932,17 +2805,18 @@ resource "google_compute_network" "container_network" {
 }
 
 resource "google_compute_subnetwork" "container_subnetwork" {
-	name		  = "${google_compute_network.container_network.name}"
-	network		  = "${google_compute_network.container_network.name}"
+	name    = "${google_compute_network.container_network.name}"
+	network = "${google_compute_network.container_network.name}"
+	region  = "us-central1"
+
 	ip_cidr_range = "10.0.0.0/24"
-	region 	  = "us-central1"
 
 	secondary_ip_range {
-		range_name	  = "pods"
+		range_name    = "pods"
 		ip_cidr_range = "10.1.0.0/16"
 	}
 	secondary_ip_range {
-		range_name	  = "services"
+		range_name    = "services"
 		ip_cidr_range = "10.2.0.0/20"
 	}
 }
@@ -2956,7 +2830,6 @@ resource "google_container_cluster" "with_ip_allocation_policy" {
 
 	initial_node_count = 1
 	ip_allocation_policy {
-		use_ip_aliases                = true
 		cluster_secondary_range_name  = "pods"
 		services_secondary_range_name = "services"
 	}
@@ -2970,18 +2843,24 @@ resource "google_compute_network" "container_network" {
 	auto_create_subnetworks = false
 }
 
+resource "google_compute_subnetwork" "container_subnetwork" {
+	name    = "${google_compute_network.container_network.name}"
+	network = "${google_compute_network.container_network.name}"
+	region  = "us-central1"
+
+	ip_cidr_range = "10.2.0.0/16"
+}
+
 resource "google_container_cluster" "with_ip_allocation_policy" {
-	name	   = "%s"
+	name       = "%s"
 	location   = "us-central1-a"
 	network    = "${google_compute_network.container_network.name}"
+	subnetwork = "${google_compute_subnetwork.container_subnetwork.name}"
 
 	initial_node_count = 1
 	ip_allocation_policy {
-		use_ip_aliases           = true
-		create_subnetwork        = true
 		cluster_ipv4_cidr_block  = "10.0.0.0/16"
 		services_ipv4_cidr_block = "10.1.0.0/16"
-		node_ipv4_cidr_block     = "10.2.0.0/16"
 	}
 }`, cluster, cluster)
 }
@@ -2994,93 +2873,24 @@ resource "google_compute_network" "container_network" {
 }
 
 resource "google_compute_subnetwork" "container_subnetwork" {
-	name		  = "${google_compute_network.container_network.name}"
-	network		  = "${google_compute_network.container_network.name}"
-	ip_cidr_range = "10.0.0.0/24"
-	region	  = "us-central1"
+	name    = "${google_compute_network.container_network.name}"
+	network = "${google_compute_network.container_network.name}"
+	region  = "us-central1"
+
+	ip_cidr_range = "10.2.0.0/16"
 }
 
 resource "google_container_cluster" "with_ip_allocation_policy" {
-	name     = "%s"
-	location = "us-central1-a"
-
-	network = "${google_compute_network.container_network.name}"
+	name       = "%s"
+	location   = "us-central1-a"
+	network    = "${google_compute_network.container_network.name}"
+	subnetwork = "${google_compute_subnetwork.container_subnetwork.name}"
 
 	initial_node_count = 1
 	ip_allocation_policy {
-		use_ip_aliases           = true
-		create_subnetwork        = true
-		subnetwork_name          = "tf-test-%s"
 		cluster_ipv4_cidr_block  = "/16"
 		services_ipv4_cidr_block = "/22"
-		node_ipv4_cidr_block     = "/22"
 	}
-}`, cluster, cluster, cluster)
-}
-
-func testAccContainerCluster_withIPAllocationPolicy_createSubnetwork(cluster string) string {
-	return fmt.Sprintf(`
-resource "google_compute_network" "container_network" {
-  name                    = "%s-network"
-  auto_create_subnetworks = false
-}
-
-resource "google_container_cluster" "with_ip_allocation_policy" {
-  name       = "%s"
-  location   = "us-central1-a"
-  network    = "${google_compute_network.container_network.name}"
-
-  initial_node_count = 1
-
-  ip_allocation_policy {
-    use_ip_aliases           = true
-    create_subnetwork        = true
-    subnetwork_name          = "%s-subnet"
-    cluster_ipv4_cidr_block  = "10.0.0.0/16"
-    services_ipv4_cidr_block = "10.1.0.0/16"
-    node_ipv4_cidr_block     = "10.2.0.0/16"
-  }
-}`, cluster, cluster, cluster)
-}
-
-
-func testAccContainerCluster_withIPAllocationPolicy_createSubnetworkUpdated(cluster string) string {
-	return fmt.Sprintf(`
-resource "google_compute_network" "container_network" {
-  name                    = "%s-network"
-  auto_create_subnetworks = false
-}
-
-resource "google_container_cluster" "with_ip_allocation_policy" {
-  name       = "%s"
-  location   = "us-central1-a"
-  network    = "${google_compute_network.container_network.name}"
-  subnetwork = "%s-subnet"
-
-  initial_node_count = 1
-
-   ip_allocation_policy {
-     use_ip_aliases           = true
-     cluster_ipv4_cidr_block  = "10.0.0.0/16"
-     services_ipv4_cidr_block = "10.1.0.0/16"
-   }
-}`, cluster, cluster, cluster)
-}
-
-func testAccContainerCluster_withIPAllocationPolicy_explicitEmpty(cluster string) string {
-	return fmt.Sprintf(`
-resource "google_compute_network" "container_network" {
-  name                    = "%s-network"
-  auto_create_subnetworks = false
-}
-
-resource "google_container_cluster" "with_ip_allocation_policy" {
-	name     = "%s"
-	location = "us-central1-a"
-
-	initial_node_count = 1
-
-	ip_allocation_policy = []
 }`, cluster, cluster)
 }
 
