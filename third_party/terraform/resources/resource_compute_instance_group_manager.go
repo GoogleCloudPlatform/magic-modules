@@ -17,9 +17,8 @@ import (
 )
 
 func resourceComputeInstanceGroupManagerExactlyOneTargetSizeDiff(diff *schema.ResourceDiff, v interface{}) error {
-	exactlyOneOfList := []string{"version.0.target_size.0.fixed", "version.0.target_size.0.percent"}
+	exactlyOneOfList := []string{"version.%d.target_size.%d.fixed", "version.%d.target_size.%d.percent"}
 	errorList := make([]string, 0)
-
 	versionBlocks := diff.Get("version").([]interface{})
 	if len(versionBlocks) == 0 {
 		return nil
