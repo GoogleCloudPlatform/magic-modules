@@ -101,15 +101,15 @@ removed" are related; see the other entry for more details.
 In `2.X`, `ip_allocation_policy` wouldn't cause a diff if it was undefined in
 config but was set on the cluster itself. Additionally, it could be defined with
 `use_ip_aliases` set to `false`. However, this made it difficult to reason about 
-hether a cluster was routes-based or VPC-native.
+whether a cluster was routes-based or VPC-native.
 
-With `3.0.0`, Terraform will detect drift on the block. Configuration has also
-been simplified. Terraform creates a VPC-native cluster when when
+With `3.0.0`, Terraform will detect drift on the block. The configuration has also
+been simplified. Terraform creates a VPC-native cluster when
 `ip_allocation_policy` is defined (`use_ip_aliases` is implicitly set to true
 and is no longer configurable). When the block is undefined, Terraform creates a
 routes-based cluster.
 
-Other than removing the `use_ip_aliases` field, most users of VPC-native cluster
+Other than removing the `use_ip_aliases` field, most users of VPC-native clusters
 won't be affected. `terraform plan` will show a diff if a config doesn't contain
 `ip_allocation_policy` but the underlying cluster does. Routes-based cluster
 users may need to remove `ip_allocation_policy` if `use_ip_aliases` had been set
