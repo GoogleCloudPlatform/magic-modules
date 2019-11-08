@@ -3,7 +3,6 @@ package google
 import (
 	"fmt"
 	"log"
-	"regexp"
 	"sort"
 	"strings"
 	"time"
