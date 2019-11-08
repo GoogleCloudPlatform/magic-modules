@@ -129,6 +129,12 @@ objects:
                     - :STRING
                   required: false
                   default_value: :STRING
+          - !ruby/object:Api::Type::String
+            name: displayName
+            description: |
+              A concise name for the metric, which can be displayed in user interfaces. Use sentence case 
+              without an ending period, for example "Request count". This field is optional but it is 
+              recommended to be set for any metrics associated with user-visible concepts, such as Quota.
       - !ruby/object:Api::Type::KeyValuePairs
         name: labelExtractors
         description: |

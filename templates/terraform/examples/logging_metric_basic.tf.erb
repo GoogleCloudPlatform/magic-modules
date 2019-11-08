@@ -10,6 +10,7 @@ resource "google_logging_metric" "<%= ctx[:primary_resource_id] %>" {
         value_type = "STRING"
         description = "amount of matter"
     }
+    display_name = "My metric"
   }
   value_extractor = "EXTRACT(jsonPayload.request)"
   label_extractors = { "mass": "EXTRACT(jsonPayload.request)" }
