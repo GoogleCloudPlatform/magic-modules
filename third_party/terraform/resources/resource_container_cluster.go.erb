@@ -43,8 +43,7 @@ var (
 		},
 	}
 
-	ipAllocationSubnetFields    = []string{"ip_allocation_policy.0.create_subnetwork", "ip_allocation_policy.0.subnetwork_name"}
-	ipAllocationCidrBlockFields = []string{"ip_allocation_policy.0.cluster_ipv4_cidr_block", "ip_allocation_policy.0.services_ipv4_cidr_block", "ip_allocation_policy.0.node_ipv4_cidr_block"}
+	ipAllocationCidrBlockFields = []string{"ip_allocation_policy.0.cluster_ipv4_cidr_block", "ip_allocation_policy.0.services_ipv4_cidr_block"}
 	ipAllocationRangeFields     = []string{"ip_allocation_policy.0.cluster_secondary_range_name", "ip_allocation_policy.0.services_secondary_range_name"}
 
 	addonsConfigKeys = []string{
@@ -90,7 +89,6 @@ func resourceContainerCluster() *schema.Resource {
 		Delete: resourceContainerClusterDelete,
 
 		CustomizeDiff: customdiff.All(
-			resourceContainerClusterIpAllocationCustomizeDiff,
 			resourceNodeConfigEmptyGuestAccelerator,
 			containerClusterPrivateClusterConfigCustomDiff,
 		),
@@ -326,6 +324,7 @@ func resourceContainerCluster() *schema.Resource {
 				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: orEmpty(validateRFC1918Network(8, 32)),
+				ConflictsWith: []string{"ip_allocation_policy"},
 			},
 
 			"description": {
@@ -658,37 +657,9 @@ func resourceContainerCluster() *schema.Resource {
 				MaxItems:   1,
 				ForceNew:   true,
 				Optional:   true,
-				Computed:   true,
-				ConfigMode: schema.SchemaConfigModeAttr,
+				ConflictsWith: []string{"cluster_ipv4_cidr"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"use_ip_aliases": {
-							Type:       schema.TypeBool,
-							Deprecated: "This field is being removed in 3.0.0. If set to true, remove it from your config. If false, remove i.",
-							Optional:   true,
-							Default:    true,
-							ForceNew:   true,
-						},
-
-						// GKE creates subnetwork automatically
-						"create_subnetwork": {
-							Type:          schema.TypeBool,
-							Deprecated:    "This field is being removed in 3.0.0. Define an explicit google_compute_subnetwork and use subnetwork instead.",
-							Computed:      true,
-							Optional:      true,
-							ForceNew:      true,
-							ConflictsWith: ipAllocationRangeFields,
-						},
-
-   						"subnetwork_name": {
-							Type:          schema.TypeString,
-							Deprecated:    "This field is being removed in 3.0.0. Define an explicit google_compute_subnetwork and use subnetwork instead.",
-							Computed:      true,
-							Optional:      true,
-							ForceNew:      true,
-							ConflictsWith: ipAllocationRangeFields,
-						},
-
 						// GKE creates/deletes secondary ranges in VPC
 						"cluster_ipv4_cidr_block": {
 							Type:             schema.TypeString,
@@ -698,21 +669,13 @@ func resourceContainerCluster() *schema.Resource {
 							ConflictsWith:    ipAllocationRangeFields,
 							DiffSuppressFunc: cidrOrSizeDiffSuppress,
 						},
+
 						"services_ipv4_cidr_block": {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Computed:         true,
 							ForceNew:         true,
 							ConflictsWith:    ipAllocationRangeFields,
-							DiffSuppressFunc: cidrOrSizeDiffSuppress,
-						},
-						"node_ipv4_cidr_block": {
-							Type:          schema.TypeString,
-							Deprecated:    "This field is being removed in 3.0.0. Define an explicit google_compute_subnetwork and use subnetwork instead.",
-							Computed:      true,
-							Optional:      true,
-							ForceNew:      true,
-							ConflictsWith: ipAllocationRangeFields,
 							DiffSuppressFunc: cidrOrSizeDiffSuppress,
 						},
 
@@ -722,14 +685,44 @@ func resourceContainerCluster() *schema.Resource {
 							Optional:      true,
 							Computed:      true,
 							ForceNew:      true,
-							ConflictsWith: append(ipAllocationSubnetFields, ipAllocationCidrBlockFields...),
+							ConflictsWith: ipAllocationCidrBlockFields,
 						},
+
 						"services_secondary_range_name": {
 							Type:          schema.TypeString,
 							Optional:      true,
 							Computed:      true,
 							ForceNew:      true,
-							ConflictsWith: append(ipAllocationSubnetFields, ipAllocationCidrBlockFields...),
+							ConflictsWith: ipAllocationCidrBlockFields,
+						},
+
+						"use_ip_aliases": {
+							Type:     schema.TypeBool,
+							Removed:  "This field is removed as of 3.0.0. If previously set to true, remove it from your config. If false, remove it.",
+							Computed: true,
+							Optional: true,
+						},
+
+						// GKE creates subnetwork automatically
+						"create_subnetwork": {
+							Type:     schema.TypeBool,
+							Removed:  "This field is removed as of 3.0.0. Define an explicit google_compute_subnetwork and use subnetwork instead.",
+							Computed: true,
+							Optional: true,
+						},
+
+						"subnetwork_name": {
+							Type:     schema.TypeString,
+							Removed:  "This field is removed as of 3.0.0. Define an explicit google_compute_subnetwork and use subnetwork instead.",
+							Computed: true,
+							Optional: true,
+						},
+
+						"node_ipv4_cidr_block": {
+							Type:     schema.TypeString,
+							Removed:  "This field is removed as of 3.0.0. Define an explicit google_compute_subnetwork and use subnetwork instead.",
+							Computed: true,
+							Optional: true,
 						},
 					},
 				},
@@ -964,36 +957,6 @@ func resourceNodeConfigEmptyGuestAccelerator(diff *schema.ResourceDiff, meta int
 	}
 
 	return nil
-}
-
-func resourceContainerClusterIpAllocationCustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
-	// separate func to allow unit testing
-	return resourceContainerClusterIpAllocationCustomizeDiffFunc(diff)
-}
-
-func resourceContainerClusterIpAllocationCustomizeDiffFunc(diff TerraformResourceDiff) error {
-	o, n := diff.GetChange("ip_allocation_policy")
-
-	oList := o.([]interface{})
-	nList := n.([]interface{})
-	if len(oList) > 0 || len(nList) == 0 {
-		// we only care about going from unset to set, so return early if the field was set before
-		// or is unset now
-		return nil
-	}
-
-	// Unset is equivalent to a block where all the values are zero
-	// This might change if use_ip_aliases ends up defaulting to true server-side.
-	// The console says it will eventually, but it's unclear whether that's in the API
-	// too or just client code.
-	polMap := nList[0].(map[string]interface{})
-	for _, v := range polMap {
-		if !isEmptyValue(reflect.ValueOf(v)) {
-			// found a non-empty value, so continue with the diff as it was
-			return nil
-		}
-	}
-	return diff.Clear("ip_allocation_policy")
 }
 
 func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) error {
@@ -2180,20 +2143,17 @@ func expandClusterAddonsConfig(configured interface{}) *containerBeta.AddonsConf
 func expandIPAllocationPolicy(configured interface{}) *containerBeta.IPAllocationPolicy {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
-		return nil
+		return &containerBeta.IPAllocationPolicy{
+			UseIpAliases: false,
+			ForceSendFields: []string{"UseIpAliases"},
+		}
 	}
 
 	config := l[0].(map[string]interface{})
-
 	return &containerBeta.IPAllocationPolicy{
-		UseIpAliases: config["use_ip_aliases"].(bool),
-
-		CreateSubnetwork: config["create_subnetwork"].(bool),
-		SubnetworkName:   config["subnetwork_name"].(string),
-
+		UseIpAliases: true,
 		ClusterIpv4CidrBlock:  config["cluster_ipv4_cidr_block"].(string),
 		ServicesIpv4CidrBlock: config["services_ipv4_cidr_block"].(string),
-		NodeIpv4CidrBlock: config["node_ipv4_cidr_block"].(string),
 
 		ClusterSecondaryRangeName:  config["cluster_secondary_range_name"].(string),
 		ServicesSecondaryRangeName: config["services_secondary_range_name"].(string),
@@ -2657,33 +2617,16 @@ func flattenWorkloadIdentityConfig(c *containerBeta.WorkloadIdentityConfig) []ma
 <% end -%>
 
 func flattenIPAllocationPolicy(c *containerBeta.Cluster, d *schema.ResourceData, config *Config) []map[string]interface{} {
-	if c == nil || c.IpAllocationPolicy == nil {
+	// If IP aliasing isn't enabled, none of the values in this block can be set.
+	if c == nil || c.IpAllocationPolicy == nil || c.IpAllocationPolicy.UseIpAliases == false {
 		return nil
 	}
-	nodeCidrBlock := ""
-	if c.Subnetwork != "" {
-		subnetwork, err := ParseSubnetworkFieldValue(c.Subnetwork, d, config)
-		if err == nil {
-			sn, err := config.clientCompute.Subnetworks.Get(subnetwork.Project, subnetwork.Region, subnetwork.Name).Do()
-			if err == nil {
-				nodeCidrBlock = sn.IpCidrRange
-			}
-		} else {
-			log.Printf("[WARN] Unable to parse subnetwork name, got error while trying to get new subnetwork: %s", err)
-		}
-	}
+
 	p := c.IpAllocationPolicy
 	return []map[string]interface{}{
 		{
-			"use_ip_aliases": p.UseIpAliases,
-
-			"create_subnetwork": p.CreateSubnetwork,
-			"subnetwork_name":   p.SubnetworkName,
-
 			"cluster_ipv4_cidr_block":  p.ClusterIpv4CidrBlock,
 			"services_ipv4_cidr_block": p.ServicesIpv4CidrBlock,
-			"node_ipv4_cidr_block":     nodeCidrBlock,
-
 			"cluster_secondary_range_name":  p.ClusterSecondaryRangeName,
 			"services_secondary_range_name": p.ServicesSecondaryRangeName,
 		},
