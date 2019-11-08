@@ -534,6 +534,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       IPAddress: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateIpAddress'
         description: |
           The IP address that this forwarding rule is serving on behalf of.
 
@@ -554,15 +556,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           internal IP address will be automatically allocated from the IP range
           of the subnet or network configured for this forwarding rule.
 
-          ~> **NOTE** The address should be specified as a literal IP address,
-          e.g. `100.1.2.3` to avoid a permanent diff, as the server returns the
-          IP address regardless of the input value.
-
-          The server accepts a literal IP address or a URL reference to an existing
-          Address resource. The following examples are all valid but only the first
-          will prevent a permadiff. If you are using `google_compute_address` or
-          similar, interpolate using `.address` instead of `.self_link` or similar
-          to prevent a diff on re-apply.
+          An address must be specified by a literal IP address. ~> **NOTE**: While
+          the API allows you to specify various resource paths for an address resource
+          instead, Terraform requires this to specifically be an IP address to
+          avoid needing to fetching the IP address from resource paths on refresh
+          or unnecessary diffs.
       IPProtocol: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'caseDiffSuppress'
         default_from_api: true
@@ -637,6 +635,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       IPAddress: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateIpAddress'
         description: |
           The IP address that this forwarding rule is serving on behalf of.
 
@@ -657,15 +657,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           internal IP address will be automatically allocated from the IP range
           of the subnet or network configured for this forwarding rule.
 
-          ~> **NOTE** The address should be specified as a literal IP address,
-          e.g. `100.1.2.3` to avoid a permanent diff, as the server returns the
-          IP address regardless of the input value.
-
-          The server accepts a literal IP address or a URL reference to an existing
-          Address resource. The following examples are all valid but only the first
-          will prevent a permadiff. If you are using `google_compute_address` or
-          similar, interpolate using `.address` instead of `.self_link` or similar
-          to prevent a diff on re-apply.
+          An address must be specified by a literal IP address. ~> **NOTE**: While
+          the API allows you to specify various resource paths for an address resource
+          instead, Terraform requires this to specifically be an IP address to
+          avoid needing to fetching the IP address from resource paths on refresh
+          or unnecessary diffs.
       IPProtocol: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'caseDiffSuppress'
         default_from_api: true
