@@ -19,6 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_minutes: 6
       delete_minutes: 6
     autogen_async: true
+    id_format: "{{name}}"
     import_format: ["{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
