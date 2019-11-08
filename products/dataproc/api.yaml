@@ -97,11 +97,19 @@ objects:
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'minInstances'
+            at_least_one_of:
+              - secondary_worker_config.0.min_instances
+              - secondary_worker_config.0.max_instances
+              - secondary_worker_config.0.weight
             default_value: 2
             description: |
               Minimum number of instances for this group. Bounds: [0, maxInstances]. Defaults to 0.
           - !ruby/object:Api::Type::Integer
             name: 'maxInstances'
+            at_least_one_of:
+              - secondary_worker_config.0.min_instances
+              - secondary_worker_config.0.max_instances
+              - secondary_worker_config.0.weight
             default_value: 0
             description: |
               Maximum number of instances for this group. Note that by default, clusters will not use
@@ -109,6 +117,10 @@ objects:
               Bounds: [minInstances, ). Defaults to 0.
           - !ruby/object:Api::Type::Integer
             name: 'weight'
+            at_least_one_of:
+              - secondary_worker_config.0.min_instances
+              - secondary_worker_config.0.max_instances
+              - secondary_worker_config.0.weight
             default_value: 1
             description: |
               Weight for the instance group, which is used to determine the fraction of total workers

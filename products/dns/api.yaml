@@ -61,10 +61,20 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'kind'
+            at_least_one_of:
+              - dnssec_config.0.kind
+              - dnssec_config.0.non_existence
+              - dnssec_config.0.state
+              - dnssec_config.0.default_key_specs
             description: Identifies what kind of resource this is
             default_value: 'dns#managedZoneDnsSecConfig'
           - !ruby/object:Api::Type::Enum
             name: 'nonExistence'
+            at_least_one_of:
+              - dnssec_config.0.kind
+              - dnssec_config.0.non_existence
+              - dnssec_config.0.state
+              - dnssec_config.0.default_key_specs
             description: |
               Specifies the mechanism used to provide authenticated denial-of-existence responses.
             values:
@@ -72,6 +82,11 @@ objects:
               - "nsec3"
           - !ruby/object:Api::Type::Enum
             name: 'state'
+            at_least_one_of:
+              - dnssec_config.0.kind
+              - dnssec_config.0.non_existence
+              - dnssec_config.0.state
+              - dnssec_config.0.default_key_specs
             description: Specifies whether DNSSEC is enabled, and what mode it is in
             values:
               - "off"
@@ -79,6 +94,11 @@ objects:
               - "transfer"
           - !ruby/object:Api::Type::Array
             name: 'defaultKeySpecs'
+            at_least_one_of:
+              - dnssec_config.0.kind
+              - dnssec_config.0.non_existence
+              - dnssec_config.0.state
+              - dnssec_config.0.default_key_specs
             description: |
               Specifies parameters that will be used for generating initial DnsKeys
               for this ManagedZone. If you provide a spec for keySigning or zoneSigning,
@@ -193,6 +213,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::Array
             name: 'targetNameServers'
+            required: true
             description: |
               List of target name servers to forward to. Cloud DNS will
               select the best available name server if more than
@@ -201,6 +222,7 @@ objects:
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'ipv4Address'
+                  required: true
                   description: 'IPv4 address of a target name server.'
         min_version: beta
       - !ruby/object:Api::Type::NestedObject
@@ -214,12 +236,14 @@ objects:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'targetNetwork'
+            required: true
             description: 'The network with which to peer.'
             properties:
               # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
               # are possible.
               - !ruby/object:Api::Type::String
                 name: 'networkUrl'
+                required: true
                 description: |
                   The fully qualified URL of the VPC network to forward queries to.
                   This should be formatted like
@@ -249,6 +273,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::Array
             name: 'targetNameServers'
+            required: true
             description: |
               Sets an alternative name server for the associated networks. When specified,
               all DNS queries are forwarded to a name server that you choose. Names such as .internal
@@ -257,6 +282,7 @@ objects:
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'ipv4Address'
+                  required: true
                   description: 'IPv4 address to forward to.'
       - !ruby/object:Api::Type::String
         name: 'description'

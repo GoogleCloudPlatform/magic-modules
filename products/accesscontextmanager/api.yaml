@@ -378,8 +378,8 @@ objects:
               Format: projects/{project_number}
             at_least_one_of:
               - status.0.resources
-              - status.0.accessLevels
-              - status.0.restrictedServices
+              - status.0.access_levels
+              - status.0.restricted_services
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             name: 'accessLevels'
@@ -396,8 +396,8 @@ objects:
               Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
             at_least_one_of:
               - status.0.resources
-              - status.0.accessLevels
-              - status.0.restrictedServices
+              - status.0.access_levels
+              - status.0.restricted_services
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             name: 'restrictedServices'
@@ -409,6 +409,6 @@ objects:
               restrictions.
             at_least_one_of:
               - status.0.resources
-              - status.0.accessLevels
-              - status.0.restrictedServices
+              - status.0.access_levels
+              - status.0.restricted_services
             item_type: Api::Type::String

@@ -238,6 +238,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'ttl'
+            required: true
             description: |
               Specifies the "time-to-live" duration for an associated resource. The
               resource expires if it is not active for a period of ttl.
