@@ -411,9 +411,9 @@ def unwrap_resource(result, module):
 def is_different(module, response):
     request = resource_to_request(module)
     response = response_to_hash(module, response)
-<% object.transport.encoder_functions.each do |d| -%>
+<% object.transport.decoder_functions.each do |d| -%>
     request = <%= d -%>(request, module)
-<% end # encoder_functions.each -%>
+<% end # decoder_functions.each -%>
 
     # Remove all output-only from response.
     response_vals = {}
