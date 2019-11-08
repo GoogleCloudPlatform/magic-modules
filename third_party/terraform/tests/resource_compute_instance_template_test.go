@@ -1998,6 +1998,7 @@ resource "google_compute_instance_template" "foobar" {
 	}
 	disk {
 		auto_delete = true
+		disk_size_gb = 375
 		type = "SCRATCH"
 		disk_type = "local-ssd"
 	}
