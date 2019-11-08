@@ -133,11 +133,9 @@ preferred.
     Structure is documented below.
 
 * `cluster_ipv4_cidr` - (Optional) The IP address range of the Kubernetes pods
-in this cluster in CIDR notation (e.g. 10.96.0.0/14). Leave blank to have one
-automatically chosen or specify a /14 block in 10.0.0.0/8. This field will only
-work if your cluster is not VPC-native- when an `ip_allocation_policy` block is
-not defined, or `ip_allocation_policy.use_ip_aliases` is set to false. If your
-cluster is VPC-native, use `ip_allocation_policy.cluster_ipv4_cidr_block`.
+in this cluster in CIDR notation (e.g. `10.96.0.0/14`). Leave blank to have one
+automatically chosen or specify a `/14` block in `10.0.0.0/8`. This field will
+only work for routes-based clusters, where `ip_allocation_policy` is not defined.
 
 * `cluster_autoscaling` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
 Per-cluster configuration of Node Auto-Provisioning with Cluster Autoscaler to
@@ -180,10 +178,10 @@ number of nodes per zone. Must be set if `node_pool` is not set. If you're using
 set this to a value of at least `1`, alongside setting
 `remove_default_node_pool` to `true`.
 
-* `ip_allocation_policy` - (Optional) Configuration for cluster IP allocation. As of now, only pre-allocated subnetworks (custom type with secondary ranges) are supported.
-    This will activate IP aliases. See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-aliases)
-    Structure is documented below. This field is marked to use [Attribute as Block](/docs/configuration/attr-as-blocks.html)
-    in order to support explicit removal with `ip_allocation_policy = []`.
+* `ip_allocation_policy` - (Optional) Configuration of cluster IP allocation for
+VPC-native clusters. Adding this block enables [IP aliasing](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-aliases),
+making the cluster VPC-native instead of routes-based. Structure is documented
+below.
 
 * `logging_service` - (Optional) The logging service that the cluster should
     write logs to. Available options include `logging.googleapis.com`,
@@ -285,8 +283,8 @@ region are guaranteed to support the same version.
     [ResourceUsageExportConfig](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-usage-metering) feature.
     Structure is documented below.
 
-* `subnetwork` - (Optional) The name or self_link of the Google Compute Engine subnetwork in
-    which the cluster's instances are launched.
+* `subnetwork` - (Optional) The name or self_link of the Google Compute Engine
+subnetwork in which the cluster's instances are launched.
 
 * `vertical_pod_autoscaling` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
     Vertical Pod Autoscaling automatically adjusts the resources of pods controlled by it.
@@ -414,46 +412,26 @@ In beta, one or the other of `recurring_window` and `daily_maintenance_window` i
 
 The `ip_allocation_policy` block supports:
 
-* `use_ip_aliases` - (Optional) Whether alias IPs will be used for pod IPs in
-the cluster. Defaults to `true` if the `ip_allocation_policy` block is defined,
-and to the API default otherwise. Prior to June 17th 2019, the default on the
-API is `false`; afterwards, it's `true`.
+* `cluster_secondary_range_name` - (Optional) The name of the existing secondary
+range in the cluster's subnetwork to use for pod IP addresses. Alternatively,
+`cluster_ipv4_cidr_block` can be used to automatically create a GKE-managed one.
 
-* `cluster_secondary_range_name` - (Optional) The name of the secondary range to be
-    used as for the cluster CIDR block. The secondary range will be used for pod IP
-    addresses. This must be an existing secondary range associated with the cluster
-    subnetwork.
-
-* `services_secondary_range_name` - (Optional) The name of the secondary range to be
-    used as for the services CIDR block.  The secondary range will be used for service
-    ClusterIPs. This must be an existing secondary range associated with the cluster
-    subnetwork.
+* `services_secondary_range_name` - (Optional) The name of the existing
+secondary range in the cluster's subnetwork to use for service `ClusterIP`s.
+Alternatively, `services_ipv4_cidr_block` can be used to automatically create a
+GKE-managed one.
 
 * `cluster_ipv4_cidr_block` - (Optional) The IP address range for the cluster pod IPs.
 Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14)
 to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14)
 from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to
-pick a specific range to use. This field will only work if your cluster is
-VPC-native- when `ip_allocation_policy.use_ip_aliases` is undefined or set to
-true. If your cluster is not VPC-native, use `cluster_ipv4_cidr`.
-
-* `node_ipv4_cidr_block` - (Optional) The IP address range of the node IPs in this cluster.
-    This should be set only if `create_subnetwork` is true.
-    Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14)
-    to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14)
-    from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to
-    pick a specific range to use.
+pick a specific range to use.
 
 * `services_ipv4_cidr_block` - (Optional) The IP address range of the services IPs in this cluster.
-    Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14)
-    to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14)
-    from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to
-    pick a specific range to use.
-
-* `create_subnetwork`- (Optional) Whether a new subnetwork will be created automatically for the cluster.
-
-* `subnetwork_name` - (Optional) A custom subnetwork name to be used if create_subnetwork is true.
-    If this field is empty, then an automatic name will be chosen for the new subnetwork.
+Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14)
+to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14)
+from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to
+pick a specific range to use.
 
 The `master_auth` block supports:
 
