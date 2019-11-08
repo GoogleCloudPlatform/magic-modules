@@ -93,12 +93,10 @@ objects:
         name: 'enableStackdriverLogging'
         description: |
           Option to enable Stackdriver Logging.
-        input: true
       - !ruby/object:Api::Type::Boolean
         name: 'enableStackdriverMonitoring'
         description: |
           Option to enable Stackdriver Monitoring.
-        input: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
