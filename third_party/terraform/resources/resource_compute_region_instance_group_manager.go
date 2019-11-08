@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -89,8 +90,9 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 			},
 
 			"instance_template": {
-				Type:    schema.TypeString,
-				Removed: "This field has been replaced by `version.instance_template` in 3.0.0",
+				Type:     schema.TypeString,
+				Optional: true,
+				Removed:  "This field has been replaced by `version.instance_template` in 3.0.0",
 			},
 
 			"version": {
