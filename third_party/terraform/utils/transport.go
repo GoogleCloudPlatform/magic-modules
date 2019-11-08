@@ -140,7 +140,7 @@ func replaceVars(d TerraformResourceData, config *Config, linkTmpl string) (stri
 // It also replaces {{project}}, {{project_id_or_project}}, {{region}}, and {{zone}} with their appropriate values
 // This function supports URL-encoding the result by prepending '%' to the field name e.g. {{%var}}
 func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *Config, linkTmpl string) (func(string) string, error) {
-	var project, region, zone string
+	var project, projectID, region, zone string
 	var err error
 
 	if strings.Contains(linkTmpl, "{{project}}") {
