@@ -10,4 +10,8 @@ context := map[string]interface{}{
 	"<%= var_name %>": <%= custom_val %>,
 <% end -%>
 <% end -%>
+<% unless version == 'ga' || object.iam_policy.iam_conditions_request_type.nil? -%>
+	"condition_title": "expires_after_2019_12_31",
+	"condition_expr": `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
+<% end -%>
 }
