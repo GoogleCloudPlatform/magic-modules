@@ -94,7 +94,6 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				Removed:          "This field has been replaced by `version.instance_template`",
-				ConflictsWith:    []string{"version"},
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
 			},
 
