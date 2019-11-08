@@ -404,6 +404,8 @@ func resourceCloudIoTRegistryRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	d.Set("credentials", credentials)
 	d.Set("log_level", res.LogLevel)
+	// Removed Computed field must be set to nil to prevent spurious diffs
+	d.Set("event_notification_config", nil)
 
 	return nil
 }
