@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -93,7 +94,6 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				Removed:          "This field has been replaced by `version.instance_template`",
-				ConflictsWith:    []string{"version"},
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
 			},
 
