@@ -16,54 +16,6 @@ import (
 	computeBeta "google.golang.org/api/compute/v0.beta"
 )
 
-func resourceComputeRegionInstanceGroupManagerExactlyOneTargetSizeDiff(diff *schema.ResourceDiff, v interface{}) error {
-	exactlyOneOfList := []string{"version.%d.target_size.%d.fixed", "version.%d.target_size.%d.percent"}
-	errorList := make([]string, 0)
-
-	versionBlocks := diff.Get("version").([]interface{})
-	if len(versionBlocks) == 0 {
-		return nil
-	}
-
-	for i := range versionBlocks {
-		targetBlocks := diff.Get(fmt.Sprintf("version.%d.target_size", i)).([]interface{})
-		if len(targetBlocks) == 0 {
-			continue
-		}
-
-		for j := range targetBlocks {
-			specified := make([]string, 0)
-			for _, exactlyOneOfKey := range exactlyOneOfList {
-				if val := diff.Get(fmt.Sprintf(exactlyOneOfKey, i, j)); val != 0 {
-					specified = append(specified, exactlyOneOfKey)
-				}
-			}
-
-			if len(specified) == 1 {
-				continue
-			}
-
-			sort.Strings(exactlyOneOfList)
-			keyList := formatStringsInList(exactlyOneOfList, i, j)
-			specified = formatStringsInList(specified, i, j)
-
-			if len(specified) == 0 {
-				errorList = append(errorList, fmt.Sprintf("version.%d.target_size: one of `%s` must be specified", i, strings.Join(keyList, ",")))
-			}
-
-			if len(specified) > 1 {
-				errorList = append(errorList, fmt.Sprintf("version.%d.target_size: only one of `%s` can be specified, but `%s` were specified", i, strings.Join(keyList, ","), strings.Join(specified, ",")))
-			}
-		}
-	}
-
-	if len(errorList) > 0 {
-		return fmt.Errorf(strings.Join(errorList, "\n\t* "))
-	}
-
-	return nil
-}
-
 func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeRegionInstanceGroupManagerCreate,
@@ -74,7 +26,7 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 			State: resourceRegionInstanceGroupManagerStateImporter,
 		},
 		CustomizeDiff: customdiff.All(
-			resourceComputeRegionInstanceGroupManagerExactlyOneTargetSizeDiff,
+			resourceComputeInstanceGroupManagerExactlyOneTargetSizeDiff,
 		),
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
