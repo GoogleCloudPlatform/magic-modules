@@ -78,11 +78,11 @@ func (w *ComputeOperationWaiter) TargetStates() []string {
 	return []string{"DONE"}
 }
 
-func computeOperationWait(client *compute.Service, op *compute.Operation, project, activity string) error {
-	return computeOperationWaitTime(client, op, project, activity, 4)
+func computeOperationWait(config *Config, op *compute.Operation, project, activity string) error {
+	return computeOperationWaitTime(config, op, project, activity, 4)
 }
 
-func computeOperationWaitTime(client *compute.Service, res interface{}, project, activity string, timeoutMinutes int) error {
+func computeOperationWaitTime(config *Config, res interface{}, project, activity string, timeoutMinutes int) error {
 	op := &compute.Operation{}
 	err := Convert(res, op)
 	if err != nil {
@@ -90,7 +90,7 @@ func computeOperationWaitTime(client *compute.Service, res interface{}, project,
 	}
 
 	w := &ComputeOperationWaiter{
-		Service: client,
+		Service: config.clientCompute,
 		Op:      op,
 		Project: project,
 	}

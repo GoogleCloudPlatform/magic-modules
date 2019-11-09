@@ -180,7 +180,7 @@ func updateComputeCommonInstanceMetadata(config *Config, projectID string, key s
 
 		log.Printf("[DEBUG] SetCommonInstanceMetadata: %d (%s)", op.Id, op.SelfLink)
 
-		return computeSharedOperationWaitTime(config.clientCompute, op, project.Name, "SetCommonInstanceMetadata", timeout)
+		return computeSharedOperationWaitTime(config, op, project.Name, "SetCommonInstanceMetadata", timeout)
 	}
 
 	return MetadataRetryWrapper(updateMD)

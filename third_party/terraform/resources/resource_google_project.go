@@ -459,7 +459,7 @@ func deleteComputeNetwork(project, network string, config *Config) error {
 		return fmt.Errorf("Error deleting network: %s", err)
 	}
 
-	err = computeSharedOperationWaitTime(config.clientCompute, op, project, "Deleting Network", 10)
+	err = computeSharedOperationWaitTime(config, op, project, "Deleting Network", 10)
 	if err != nil {
 		return err
 	}
