@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 
-	computeBeta "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -83,7 +82,13 @@ func computeOperationWait(client *compute.Service, op *compute.Operation, projec
 	return computeOperationWaitTime(client, op, project, activity, 4)
 }
 
-func computeOperationWaitTime(client *compute.Service, op *compute.Operation, project, activity string, timeoutMinutes int) error {
+func computeOperationWaitTime(client *compute.Service, res interface{}, project, activity string, timeoutMinutes int) error {
+	op := &compute.Operation{}
+	err := Convert(res, op)
+	if err != nil {
+		return err
+	}
+
 	w := &ComputeOperationWaiter{
 		Service: client,
 		Op:      op,
@@ -94,16 +99,6 @@ func computeOperationWaitTime(client *compute.Service, op *compute.Operation, pr
 		return err
 	}
 	return OperationWait(w, activity, timeoutMinutes)
-}
-
-func computeBetaOperationWaitTime(client *compute.Service, op *computeBeta.Operation, project, activity string, timeoutMin int) error {
-	opV1 := &compute.Operation{}
-	err := Convert(op, opV1)
-	if err != nil {
-		return err
-	}
-
-	return computeOperationWaitTime(client, opV1, project, activity, timeoutMin)
 }
 
 // ComputeOperationError wraps compute.OperationError and implements the
