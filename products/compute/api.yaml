@@ -9184,7 +9184,8 @@ objects:
         update_id: 'logConfig'
         description: |
           Denotes the logging options for the subnetwork flow logs. If logging is enabled
-          logs will be exported to Stackdriver.
+          logs will be exported to Stackdriver. This field cannot be set if the `purpose` of this
+          subnetwork is `INTERNAL_HTTPS_LOAD_BALANCER`
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'aggregationInterval'
