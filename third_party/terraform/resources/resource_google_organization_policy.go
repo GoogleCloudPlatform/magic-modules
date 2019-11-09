@@ -224,9 +224,9 @@ func resourceGoogleOrganizationPolicyDelete(d *schema.ResourceData, meta interfa
 }
 
 func resourceGoogleOrganizationPolicyImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), ":")
+	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
-		return nil, fmt.Errorf("Invalid id format. Expecting {org_id}:{constraint}, got '%s' instead.", d.Id())
+		return nil, fmt.Errorf("Invalid id format. Expecting {org_id}/{constraint}, got '%s' instead.", d.Id())
 	}
 
 	d.Set("org_id", parts[0])

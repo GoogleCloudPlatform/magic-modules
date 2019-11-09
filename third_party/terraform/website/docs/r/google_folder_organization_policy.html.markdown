@@ -137,6 +137,6 @@ exported:
 Folder organization policies can be imported using any of the follow formats:
 
 ```
-$ terraform import google_folder_organization_policy.policy folders/folder-1234:constraints/serviceuser.services
-$ terraform import google_folder_organization_policy.policy folder-1234:serviceuser.services
+$ terraform import google_folder_organization_policy.policy folders/folder-1234/constraints/serviceuser.services
+$ terraform import google_folder_organization_policy.policy folder-1234/serviceuser.services
 ```
