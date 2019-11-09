@@ -256,6 +256,7 @@ objects:
               to. This cannot be less than 0. If not provided, autoscaler will
               choose a default value depending on maximum number of instances
               allowed.
+            send_empty_value: true
           - !ruby/object:Api::Type::Integer
             name: 'maxNumReplicas'
             description: |
@@ -6567,6 +6568,7 @@ objects:
               to. This cannot be less than 0. If not provided, autoscaler will
               choose a default value depending on maximum number of instances
               allowed.
+            send_empty_value: true
           - !ruby/object:Api::Type::Integer
             name: 'maxNumReplicas'
             description: |
