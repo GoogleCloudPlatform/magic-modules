@@ -1063,7 +1063,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 
 		opErr := computeSharedOperationWaitTime(
-			config.clientCompute, op, project, "scheduling policy update",
+			config, op, project, "scheduling policy update",
 			int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 		if opErr != nil {
 			return opErr

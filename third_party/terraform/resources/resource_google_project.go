@@ -407,7 +407,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *Config, projectId
 			if err != nil {
 				return fmt.Errorf("Error deleting firewall: %s", err)
 			}
-			err = computeSharedOperationWait(config.clientCompute, op, projectId, "Deleting Firewall")
+			err = computeSharedOperationWait(config, op, projectId, "Deleting Firewall")
 			if err != nil {
 				return err
 			}

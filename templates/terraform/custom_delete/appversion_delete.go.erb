@@ -2,7 +2,7 @@
 if d.Get("noop_on_destroy") == true {
 	log.Printf("[DEBUG] Keeping the StandardAppVersion %q", d.Id())
 	return nil
-} 
+}
 config := meta.(*Config)
 
 project, err := getProject(d, config)
@@ -28,13 +28,8 @@ if d.Get("delete_service_on_destroy") == true {
 	if err != nil {
 		return handleNotFoundError(err, d, "Service")
 	}
-	op := &appengine.Operation{}
-	err = Convert(res, op)
-	if err != nil {
-		return err
-	}
 	err = appEngineOperationWaitTime(
-		config.clientAppEngine, op, project, "Deleting Service",
+		config, res, project, "Deleting Service",
 		int(d.Timeout(schema.TimeoutDelete).Minutes()))
 
 	if err != nil {
@@ -42,7 +37,7 @@ if d.Get("delete_service_on_destroy") == true {
 	}
 	log.Printf("[DEBUG] Finished deleting Service %q: %#v", d.Id(), res)
 	return nil
-} else {	
+} else {
 	url, err := replaceVars(d, config, "{{AppEngineBasePath}}apps/{{project}}/services/{{service}}/versions/{{version_id}}")
 	if err != nil {
 		return err
@@ -53,13 +48,8 @@ if d.Get("delete_service_on_destroy") == true {
 	if err != nil {
 		return handleNotFoundError(err, d, "StandardAppVersion")
 	}
-	op := &appengine.Operation{}
-	err = Convert(res, op)
-	if err != nil {
-		return err
-	}
 	err = appEngineOperationWaitTime(
-		config.clientAppEngine, op, project, "Deleting StandardAppVersion",
+		config, res, project, "Deleting StandardAppVersion",
 		int(d.Timeout(schema.TimeoutDelete).Minutes()))
 
 	if err != nil {

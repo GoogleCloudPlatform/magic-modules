@@ -1,9 +1,5 @@
 package google
 
-import (
-	"google.golang.org/api/compute/v1"
-)
-
 func computeSharedOperationWait(config *Config, op interface{}, project, activity string) error {
 	return computeSharedOperationWaitTime(config, op, project, activity, 4)
 }
