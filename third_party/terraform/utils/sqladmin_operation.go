@@ -9,7 +9,7 @@ import (
 )
 
 type SqlAdminOperationWaiter struct {
-	Service *sqladmin.Service
+	config  *Config
 	Op      *sqladmin.Operation
 	Project string
 }
@@ -99,13 +99,13 @@ func (w *SqlAdminOperationWaiter) TargetStates() []string {
 	return []string{"DONE"}
 }
 
-func sqlAdminOperationWait(service *sqladmin.Service, op *sqladmin.Operation, project, activity string) error {
+func sqlAdminOperationWait(config *Config, op *sqladmin.Operation, project, activity string) error {
 	return sqlAdminOperationWaitTime(service, op, project, activity, 10)
 }
 
-func sqlAdminOperationWaitTime(service *sqladmin.Service, op *sqladmin.Operation, project, activity string, timeoutMinutes int) error {
+func sqlAdminOperationWaitTime(config *Config, op *sqladmin.Operation, project, activity string, timeoutMinutes int) error {
 	w := &SqlAdminOperationWaiter{
-		Service: service,
+		Service: config.clientSqlAdmin,
 		Op:      op,
 		Project: project,
 	}
