@@ -287,7 +287,6 @@ objects:
             properties:
             - !ruby/object:Api::Type::Double
               name: 'utilizationTarget'
-              required: true
               description: |
                 The target CPU utilization that the autoscaler should maintain.
                 Must be a float value in the range (0, 1]. If not specified, the
@@ -403,7 +402,6 @@ objects:
             properties:
             - !ruby/object:Api::Type::Double
               name: 'utilizationTarget'
-              required: true
               description: |
                 Fraction of backend capacity utilization (set in HTTP(s) load
                 balancing configuration) that autoscaler should maintain. Must
@@ -1824,6 +1822,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'drainingTimeoutSec'
+            default_value: 300
             description: |
               Time for which instance will be drained (not accept new
               connections, but still work to finish started).
@@ -4772,7 +4771,6 @@ objects:
                             Specifies a 256-bit customer-supplied encryption
                             key, encoded in RFC 4648 base64 to either encrypt
                             or decrypt this resource.
-                          required: true
                         - !ruby/object:Api::Type::String
                           name: 'sha256'
                           description: |
@@ -5272,9 +5270,6 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'rawKey'
-            at_least_one_of:
-              - image_encryption_key.0.raw_key
-              - image_encryption_key.0.kms_key_name
             description: |
               Specifies a 256-bit customer-supplied encryption key, encoded in
               RFC 4648 base64 to either encrypt or decrypt this resource.
@@ -5287,9 +5282,6 @@ objects:
           - !ruby/object:Api::Type::String
             # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
             name: 'kmsKeyName'
-            at_least_one_of:
-              - image_encryption_key.0.raw_key
-              - image_encryption_key.0.kms_key_name
             min_version: beta
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
@@ -5366,9 +5358,6 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'rawKey'
-            at_least_one_of:
-              - source_disk_encryption_key.0.raw_key
-              - source_disk_encryption_key.0.kms_key_name
             description: |
               Specifies a 256-bit customer-supplied encryption key, encoded in
               RFC 4648 base64 to either encrypt or decrypt this resource.
@@ -5381,9 +5370,6 @@ objects:
           - !ruby/object:Api::Type::String
             # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
             name: 'kmsKeyName'
-            at_least_one_of:
-              - source_disk_encryption_key.0.raw_key
-              - source_disk_encryption_key.0.kms_key_name
             min_version: beta
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
@@ -7299,7 +7285,6 @@ objects:
             properties:
             - !ruby/object:Api::Type::Double
               name: 'utilizationTarget'
-              required: true
               description: |
                 The target CPU utilization that the autoscaler should maintain.
                 Must be a float value in the range (0, 1]. If not specified, the
@@ -7415,7 +7400,6 @@ objects:
             properties:
             - !ruby/object:Api::Type::Double
               name: 'utilizationTarget'
-              required: true
               description: |
                 Fraction of backend capacity utilization (set in HTTP(s) load
                 balancing configuration) that autoscaler should maintain. Must
