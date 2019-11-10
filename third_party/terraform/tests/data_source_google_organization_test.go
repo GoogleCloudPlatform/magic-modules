@@ -66,12 +66,14 @@ func testAccCheckGoogleOrganization_byName(name string) string {
 	return fmt.Sprintf(`
 data "google_organization" "org" {
   organization = "%s"
-}`, name)
+}
+`, name)
 }
 
 func testAccCheckGoogleOrganization_byDomain(name string) string {
 	return fmt.Sprintf(`
 data "google_organization" "org" {
   domain = "%s"
-}`, name)
+}
+`, name)
 }
