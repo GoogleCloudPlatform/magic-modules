@@ -64,7 +64,7 @@
 <% unless property.state_func.nil? -%>
 	StateFunc: <%= property.state_func %>,
 <% end -%>
-	Description: `<%= property.description.strip.gsub("\n\n", "\n").gsub("`", "'") -%>`,
+	Description: `<%= property.description.strip.gsub("`", "'") -%>`,
 <% if property.is_a?(Api::Type::NestedObject) -%>
   MaxItems: 1,
   Elem: &schema.Resource{
