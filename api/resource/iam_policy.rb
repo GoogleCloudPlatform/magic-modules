@@ -61,6 +61,9 @@ module Api
       # config with the test/example attributes of the IAM resource.
       attr_reader :example_config_body
 
+      # How the API supports IAM conditions
+      attr_reader :iam_conditions_request_type
+
       def validate
         super
 
@@ -71,6 +74,7 @@ module Api
         check :allowed_iam_role, type: String, default: 'roles/viewer'
         check :parent_resource_attribute, type: String, default: 'id'
         check :test_project_name, type: String
+        check :iam_conditions_request_type, type: Symbol, allowed: %i[REQUEST_BODY QUERY_PARAM]
         check(
           :example_config_body,
           type: String, default: 'templates/terraform/iam/iam_attributes.tf.erb'
