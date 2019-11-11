@@ -319,10 +319,16 @@ objects:
         properties:
           - !ruby/object:Api::Type::Boolean
             name: allowNullHeader
+            at_least_one_of:
+              - parser_config.0.allow_null_header
+              - parser_config.0.segment_terminator
             description: |
               Determines whether messages with no header are allowed.
           - !ruby/object:Api::Type::String
             name: segmentTerminator
+            at_least_one_of:
+              - parser_config.0.allow_null_header
+              - parser_config.0.segment_terminator
             description: |
               Byte(s) to be used as the segment terminator. If this is unset, '\r' will be used as segment terminator.
 

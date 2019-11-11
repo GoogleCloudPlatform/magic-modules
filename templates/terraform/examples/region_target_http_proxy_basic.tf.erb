@@ -46,5 +46,6 @@ resource "google_compute_region_health_check" "default" {
   region = "us-central1"
   name   = "<%= ctx[:vars]['region_health_check_name'] %>"
   http_health_check {
+    port = 80
   }
 }

@@ -389,6 +389,13 @@ in config files, `interface` is now required on the `google_compute_instance.scr
 In an attempt to avoid allowing empty blocks in config files, `kms_key_self_link` is now
 required on the `google_compute_instance_template.disk_encryption_key` block.
 
+## Resource: `google_compute_instance_template`
+
+### `kms_key_self_link` is now required on block `google_compute_instance_template.disk_encryption_key`
+
+In an attempt to avoid allowing empty blocks in config files, `kms_key_self_link` is now
+required on the `google_compute_instance_template.disk_encryption_key` block.
+
 ## Resource: `google_compute_network`
 
 ### `ipv4_range` is now removed
