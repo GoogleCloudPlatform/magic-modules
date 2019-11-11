@@ -72,6 +72,9 @@ module Overrides
           # Names of attributes that at least one of must be set
           :at_least_one_of,
 
+          # Names of attributes that exactly one of must be set
+          :exactly_one_of,
+
           # Names of fields that should be included in the updateMask.
           :update_mask_fields,
 

@@ -8658,6 +8658,10 @@ objects:
                 name: 'hourlySchedule'
                 description: |
                   The policy will execute every nth hour starting at the specified time.
+                exactly_one_of:
+                  - snapshot_schedule_policy.0.schedule.0.hourly_schedule
+                  - snapshot_schedule_policy.0.schedule.0.daily_schedule
+                  - snapshot_schedule_policy.0.schedule.0.weekly_schedule
                 properties:
                   - !ruby/object:Api::Type::Integer
                     name: 'hoursInCycle'
@@ -8675,6 +8679,10 @@ objects:
                 name: 'dailySchedule'
                 description: |
                   The policy will execute every nth day at the specified time.
+                exactly_one_of:
+                  - snapshot_schedule_policy.0.schedule.0.hourly_schedule
+                  - snapshot_schedule_policy.0.schedule.0.daily_schedule
+                  - snapshot_schedule_policy.0.schedule.0.weekly_schedule
                 properties:
                   - !ruby/object:Api::Type::Integer
                     name: 'daysInCycle'
@@ -8692,6 +8700,10 @@ objects:
                 name: 'weeklySchedule'
                 description: |
                   Allows specifying a snapshot time for each day of the week.
+                exactly_one_of:
+                  - snapshot_schedule_policy.0.schedule.0.hourly_schedule
+                  - snapshot_schedule_policy.0.schedule.0.daily_schedule
+                  - snapshot_schedule_policy.0.schedule.0.weekly_schedule
                 properties:
                   - !ruby/object:Api::Type::Array
                     name: 'dayOfWeeks'
@@ -8800,7 +8812,8 @@ objects:
       sending virtual machine's routing table will be dropped.
 
       A Route resource must have exactly one specification of either
-      nextHopGateway, nextHopInstance, nextHopIp, or nextHopVpnTunnel.
+      nextHopGateway, nextHopInstance, nextHopIp, nextHopVpnTunnel, or
+      nextHopIlb.
 
     references: !ruby/object:Api::Resource::ReferenceLinks
           guides:
@@ -8873,6 +8886,12 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'nextHopGateway'
         input: true
+        exactly_one_of:
+          - next_hop_gateway
+          - next_hop_instance
+          - next_hop_ip
+          - next_hop_vpn_tunnel
+          - next_hop_ilb
         description: |
           URL to a gateway that should handle matching packets.
 
@@ -8888,6 +8907,12 @@ objects:
         resource: 'Instance'
         imports: 'selfLink'
         input: true
+        exactly_one_of:
+          - next_hop_gateway
+          - next_hop_instance
+          - next_hop_ip
+          - next_hop_vpn_tunnel
+          - next_hop_ilb
         description: |
           URL to an instance that should handle matching packets.
           You can specify this as a full or partial URL. For example:
@@ -8901,11 +8926,23 @@ objects:
         description: |
           Network IP address of an instance that should handle matching packets.
         input: true
+        exactly_one_of:
+          - next_hop_gateway
+          - next_hop_instance
+          - next_hop_ip
+          - next_hop_vpn_tunnel
+          - next_hop_ilb
       - !ruby/object:Api::Type::ResourceRef
         name: 'nextHopVpnTunnel'
         resource: 'VpnTunnel'
         imports: 'selfLink'
         input: true
+        exactly_one_of:
+          - next_hop_gateway
+          - next_hop_instance
+          - next_hop_ip
+          - next_hop_vpn_tunnel
+          - next_hop_ilb
         description: |
           URL to a VpnTunnel that should handle matching packets.
       - !ruby/object:Api::Type::String
@@ -8924,6 +8961,12 @@ objects:
           regions/region/forwardingRules/forwardingRule
           Note that this can only be used when the destinationRange is a public (non-RFC 1918) IP CIDR range.
         input: true
+        exactly_one_of:
+          - next_hop_gateway
+          - next_hop_instance
+          - next_hop_ip
+          - next_hop_vpn_tunnel
+          - next_hop_ilb
         min_version: beta
   - !ruby/object:Api::Resource
     name: 'Router'

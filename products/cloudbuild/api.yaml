@@ -138,15 +138,27 @@ objects:
             description: |
               Name of the branch to build. Exactly one a of branch name, tag, or commit SHA must be provided.
               This field is a regular expression.
+            exactly_one_of:
+              - trigger_template.0.branch_name
+              - trigger_template.0.tag_name
+              - trigger_template.0.commit_sha
           - !ruby/object:Api::Type::String
             name: 'tagName'
             description: |
               Name of the tag to build. Exactly one of a branch name, tag, or commit SHA must be provided.
               This field is a regular expression.
+            exactly_one_of:
+              - trigger_template.0.branch_name
+              - trigger_template.0.tag_name
+              - trigger_template.0.commit_sha
           - !ruby/object:Api::Type::String
             name: 'commitSha'
             description: |
               Explicit commit SHA to build. Exactly one of a branch name, tag, or commit SHA must be provided.
+            exactly_one_of:
+              - trigger_template.0.branch_name
+              - trigger_template.0.tag_name
+              - trigger_template.0.commit_sha
       - !ruby/object:Api::Type::NestedObject
         name: 'github'
         description: |
@@ -167,6 +179,9 @@ objects:
             name: 'pullRequest'
             description: |
                 filter to match changes in pull requests.  Specify only one of pullRequest or push.
+            exactly_one_of:
+              - github.0.pull_request
+              - github.0.push
             properties:
               - !ruby/object:Api::Type::String
                 name: 'branch'
@@ -184,15 +199,24 @@ objects:
             name: 'push'
             description: |
                 filter to match changes in refs, like branches or tags.  Specify only one of pullRequest or push.
+            exactly_one_of:
+              - github.0.pull_request
+              - github.0.push
             properties:
               - !ruby/object:Api::Type::String
                 name: 'branch'
                 description: |
                     Regex of branches to match.  Specify only one of branch or tag.
+                exactly_one_of:
+                  - github.0.push.0.branch
+                  - github.0.push.0.tag
               - !ruby/object:Api::Type::String
                 name: 'tag'
                 description: |
                     Regex of tags to match.  Specify only one of branch or tag.
+                exactly_one_of:
+                  - github.0.push.0.branch
+                  - github.0.push.0.tag
       - !ruby/object:Api::Type::NestedObject
         name: 'build'
         description: |
