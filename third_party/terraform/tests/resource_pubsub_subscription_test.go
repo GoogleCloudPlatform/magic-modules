@@ -130,7 +130,9 @@ resource "google_pubsub_subscription" "foo" {
 	message_retention_duration = "1200s"
 	retain_acked_messages = true
 	ack_deadline_seconds = 20
-	expiration_policy {}
+	expiration_policy {
+		ttl = ""
+	}
 }
 `, topic, subscription)
 }

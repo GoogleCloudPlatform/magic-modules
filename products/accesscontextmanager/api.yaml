@@ -376,6 +376,10 @@ objects:
               A list of GCP resources that are inside of the service perimeter.
               Currently only projects are allowed.
               Format: projects/{project_number}
+            at_least_one_of:
+              - status.0.resources
+              - status.0.access_levels
+              - status.0.restricted_services
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             name: 'accessLevels'
@@ -390,6 +394,10 @@ objects:
               be empty.
 
               Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
+            at_least_one_of:
+              - status.0.resources
+              - status.0.access_levels
+              - status.0.restricted_services
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             name: 'restrictedServices'
@@ -399,4 +407,8 @@ objects:
               `storage.googleapis.com` is specified, access to the storage
               buckets inside the perimeter must meet the perimeter's access
               restrictions.
+            at_least_one_of:
+              - status.0.resources
+              - status.0.access_levels
+              - status.0.restricted_services
             item_type: Api::Type::String
