@@ -124,7 +124,7 @@ objects:
             name: 'preemptible'
             description: |
               Defines whether the TPU instance is preemptible.
-            default_value: false
+            required: true
       - !ruby/object:Api::Type::Array
         name: 'networkEndpoints'
         output: true
