@@ -148,6 +148,9 @@
 <% unless property.at_least_one_of_list().empty? -%>
     AtLeastOneOf: <%= go_literal(property.at_least_one_of_list) -%>,
 <% end -%>
+<% unless property.exactly_one_of_list().empty? -%>
+    ExactlyOneOf: <%= go_literal(property.exactly_one_of_list) -%>,
+<% end -%>
 },
 <% else -%>
   // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported
