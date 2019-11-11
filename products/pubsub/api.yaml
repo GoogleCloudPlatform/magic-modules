@@ -232,12 +232,13 @@ objects:
           A subscription is considered active as long as any connected subscriber
           is successfully consuming messages from the subscription or is issuing
           operations on the subscription. If expirationPolicy is not set, a default
-          policy with ttl of 31 days will be used.  If it is set but left empty, the
+          policy with ttl of 31 days will be used.  If it is set but ttl is "", the
           resource never expires.  The minimum allowed value for expirationPolicy.ttl
           is 1 day.
         properties:
           - !ruby/object:Api::Type::String
             name: 'ttl'
+            required: true
             description: |
               Specifies the "time-to-live" duration for an associated resource. The
               resource expires if it is not active for a period of ttl.

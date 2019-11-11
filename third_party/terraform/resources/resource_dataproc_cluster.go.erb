@@ -51,6 +51,9 @@ var (
 		"cluster_config.0.software_config",
 		"cluster_config.0.initialization_action",
 		"cluster_config.0.encryption_config",
+<% unless version == 'ga' -%>
+		"cluster_config.0.autoscaling_config",
+<% end -%>
 	}
 )
 
@@ -397,9 +400,10 @@ func resourceDataprocCluster() *schema.Resource {
 						},
 <% unless version == 'ga' -%>
 						"autoscaling_config": {
-							Type:     schema.TypeList,
-							Optional: true,
-							MaxItems: 1,
+							Type:         schema.TypeList,
+							Optional:     true,
+							AtLeastOneOf: clusterConfigKeys,
+							MaxItems:     1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"policy_uri": {

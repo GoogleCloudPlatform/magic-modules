@@ -404,6 +404,9 @@ objects:
             name: 'zip'
             description: 'Zip File'
             required: false
+            at_least_one_of:
+              - deployment.0.zip
+              - deployment.0.files
             properties:
               - !ruby/object:Api::Type::String
                 name: 'sourceUrl'
@@ -419,6 +422,9 @@ objects:
               Manifest of the files stored in Google Cloud Storage that are included as part of this version.
               All files must be readable using the credentials supplied with this call.
             required: false
+            at_least_one_of:
+              - deployment.0.zip
+              - deployment.0.files
             key_name: 'name'
             key_description: |
               name of file
