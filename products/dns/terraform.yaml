@@ -61,6 +61,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
         set_hash_func: |-
           func(v interface{}) int {
+            if v == nil {
+              return 0
+            }
             raw := v.(map[string]interface{})
             if url, ok := raw["network_url"]; ok {
               return selfLinkNameHash(url)

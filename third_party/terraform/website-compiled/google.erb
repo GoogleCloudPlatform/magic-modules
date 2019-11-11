@@ -811,6 +811,16 @@
     </ul>
     </li>
 
+<% unless version == 'ga' %>
+    <li<%%= sidebar_current("docs-google-data-fusion") %>>
+    <a href="#">Google Data Fusion Resources</a>
+    <ul class="nav nav-visible">
+      <li<%%= sidebar_current("docs-google-data-fusion") %>>
+          <a href="/docs/providers/google/r/data_fusion_instance.html">google_data_fusion_instance</a>
+      </li>
+    </ul>
+    </li>
+<% end -%>
 
     <li<%%= sidebar_current("docs-google-dataflow") %>>
     <a href="#">Google Dataflow Resources</a>
