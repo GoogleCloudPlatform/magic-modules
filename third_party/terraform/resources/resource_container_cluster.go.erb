@@ -24,7 +24,10 @@ var (
 		Schema: map[string]*schema.Schema{
 			"cidr_blocks": {
 				Type:     schema.TypeSet,
-				Required: true,
+				// Despite being the only entry in a nested block, this should be kept
+				// Optional. Expressing the parent with no entries and omitting the
+				// parent entirely are semantically different.
+				Optional: true,
 				Elem:     cidrBlockConfig,
 			},
 		},
