@@ -354,6 +354,7 @@ objects:
                     properties:
                     - !ruby/object:Api::Type::String
                       name: name
+                      required: true
                       description: |-
                         Name of the referent.
                         More info:
@@ -369,6 +370,7 @@ objects:
                     properties:
                     - !ruby/object:Api::Type::String
                       name: name
+                      required: true
                       description: |-
                         Name of the referent.
                         More info:

@@ -160,47 +160,84 @@ objects:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: linearBuckets
+            at_least_one_of:
+              - bucket_options.0.linear_buckets
+              - bucket_options.0.exponential_buckets
+              - bucket_options.0.explicit_buckets
             description: |
               Specifies a linear sequence of buckets that all have the same width (except overflow and underflow).
               Each bucket represents a constant absolute uncertainty on the specific value in the bucket.
             properties:
               - !ruby/object:Api::Type::Integer
                 name: numFiniteBuckets
+                at_least_one_of:
+                  - bucket_options.0.linear_buckets.0.num_finite_buckets
+                  - bucket_options.0.linear_buckets.0.width
+                  - bucket_options.0.linear_buckets.0.offset
                 description: |
                   Must be greater than 0.
               - !ruby/object:Api::Type::Integer
                 name: width
+                at_least_one_of:
+                  - bucket_options.0.linear_buckets.0.num_finite_buckets
+                  - bucket_options.0.linear_buckets.0.width
+                  - bucket_options.0.linear_buckets.0.offset
                 description: |
                   Must be greater than 0.
               - !ruby/object:Api::Type::Double
                 name: offset
+                at_least_one_of:
+                  - bucket_options.0.linear_buckets.0.num_finite_buckets
+                  - bucket_options.0.linear_buckets.0.width
+                  - bucket_options.0.linear_buckets.0.offset
                 description: |
                   Lower bound of the first bucket.
           - !ruby/object:Api::Type::NestedObject
             name: exponentialBuckets
+            at_least_one_of:
+              - bucket_options.0.linear_buckets
+              - bucket_options.0.exponential_buckets
+              - bucket_options.0.explicit_buckets
             description: |
               Specifies an exponential sequence of buckets that have a width that is proportional to the value of
               the lower bound. Each bucket represents a constant relative uncertainty on a specific value in the bucket.
             properties:
               - !ruby/object:Api::Type::Integer
                 name: numFiniteBuckets
+                at_least_one_of:
+                  - bucket_options.0.exponential_buckets.0.num_finite_buckets
+                  - bucket_options.0.exponential_buckets.0.growth_factor
+                  - bucket_options.0.exponential_buckets.0.scale
                 description: |
                   Must be greater than 0.
               - !ruby/object:Api::Type::Integer
                 name: growthFactor
+                at_least_one_of:
+                  - bucket_options.0.exponential_buckets.0.num_finite_buckets
+                  - bucket_options.0.exponential_buckets.0.growth_factor
+                  - bucket_options.0.exponential_buckets.0.scale
                 description: |
                   Must be greater than 1.
               - !ruby/object:Api::Type::Double
                 name: scale
+                at_least_one_of:
+                  - bucket_options.0.exponential_buckets.0.num_finite_buckets
+                  - bucket_options.0.exponential_buckets.0.growth_factor
+                  - bucket_options.0.exponential_buckets.0.scale
                 description: |
                   Must be greater than 0.
           - !ruby/object:Api::Type::NestedObject
             name: explicitBuckets
+            at_least_one_of:
+              - bucket_options.0.linear_buckets
+              - bucket_options.0.exponential_buckets
+              - bucket_options.0.explicit_buckets
             description: |
               Specifies a set of buckets with arbitrary widths.
             properties:
               - !ruby/object:Api::Type::Array
                 name: bounds
+                required: true
                 item_type: Api::Type::Double
                 description: |
                   The values must be monotonically increasing.

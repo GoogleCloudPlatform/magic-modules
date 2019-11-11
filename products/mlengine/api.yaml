@@ -73,6 +73,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'name'
+            required: true
             description: The name specified for the version when it was created.
         # Even though only one region is supported, keeping this as an array
         # to future-proof it.

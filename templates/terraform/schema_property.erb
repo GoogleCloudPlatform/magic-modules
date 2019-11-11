@@ -145,6 +145,9 @@
 <% conflicting_props = property.conflicting().map(&:name).map(&:underscore) -%>
     ConflictsWith: <%= go_literal(conflicting_props) -%>,
 <% end -%>
+<% unless property.at_least_one_of_list().empty? -%>
+    AtLeastOneOf: <%= go_literal(property.at_least_one_of_list) -%>,
+<% end -%>
 },
 <% else -%>
   // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported
