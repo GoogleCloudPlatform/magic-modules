@@ -295,7 +295,8 @@ documentation.
 
 `bigquery-json.googleapis.com` is being renamed to `bigquery.googleapis.com` in
 the upstream API. As a result, `bigquery-json.googleapis.com` has been
-disallowed.
+disallowed. Instead, please use `bigquery.googleapis.com`. The provider will
+automatically convert between them as the upstream API migration continues.
 
 ## Resource: `google_project_services`
 
