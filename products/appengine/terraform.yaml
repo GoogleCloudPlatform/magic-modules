@@ -117,7 +117,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         update_mask_fields:
           - "ssl_settings.certificate_id"
           - "ssl_settings.ssl_management_type"
-<<<<<<< HEAD
       sslSettings.certificateId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   ApplicationUrlDispatchRules: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -156,8 +155,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           split.allocations.v1: "1"
         test_env_vars:
           org_id: :ORG_ID    
-=======
->>>>>>> Updates
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
