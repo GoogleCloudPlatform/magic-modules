@@ -119,8 +119,6 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 <% end -%>
 <% end -%>
 
-	d.SetId(u.GetResourceId())
-
 	return u, nil
 }
 
@@ -161,7 +159,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 <%# Set resource long name in state, this has all the information that we need to identify it -%>
 	d.Set("<%= resource_params.last.underscore -%>", u.GetResourceId())
 <% end -%>
-	d.SetId(u.GetResourceId())
+
 	return nil
 }
 
@@ -174,8 +172,23 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 		return nil, err
 	}
 <% end -%>
-
-	policy, err := sendRequest(u.Config, "<%= object.iam_policy.fetch_iam_policy_verb.to_s.upcase -%>", <% if resource_params.include?('project')  %>project<% else %>""<% end %>, url, nil)
+	var obj map[string]interface{}
+<% unless version == 'ga' -%>
+<%   if object.iam_policy.iam_conditions_request_type == :QUERY_PARAM -%>
+	url, err = addQueryParams(url, map[string]string{"optionsRequestedPolicyVersion": fmt.Sprintf("%d", iamPolicyVersion)})
+	if err != nil {
+		return err
+	}
+<%   elsif object.iam_policy.iam_conditions_request_type == :REQUEST_BODY -%>
+	obj = map[string]interface{}{
+		"options": map[string]interface{}{
+			"requestedPolicyVersion": iamPolicyVersion,
+		},
+	}
+<%    end  -%>
+<%  end -%>
+	
+	policy, err := sendRequest(u.Config, "<%= object.iam_policy.fetch_iam_policy_verb.to_s.upcase -%>", <% if resource_params.include?('project')  %>project<% else %>""<% end %>, url, obj)
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}

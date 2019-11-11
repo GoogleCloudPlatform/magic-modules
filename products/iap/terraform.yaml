@@ -75,6 +75,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       fetch_iam_policy_verb: :POST
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
       example_config_body: 'templates/terraform/iam/example_config_body/app_engine_version.tf.erb'
+      iam_conditions_request_type: :REQUEST_BODY
     id_format: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
     import_format: [
       'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}',
@@ -113,6 +114,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       parent_resource_attribute: 'web_backend_service'
       fetch_iam_policy_verb: :POST
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
+      iam_conditions_request_type: :REQUEST_BODY
     id_format: "projects/{{project}}/iap_web/compute/services/{{name}}"
     import_format: ["projects/{{project}}/iap_web/compute/services/{{name}}"]
     examples:

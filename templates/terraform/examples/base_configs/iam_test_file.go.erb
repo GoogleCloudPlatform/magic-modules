@@ -120,6 +120,130 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' || object.iam_policy.iam_conditions_request_type.nil? -%>
+func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T) {
+	t.Parallel()
+
+<%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc<%= resource_name -%>IamBinding_withConditionGenerated(context),
+			},
+			{
+				ResourceName:      "<%= resource_ns_iam -%>_binding.foo",
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title"]),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *testing.T) {
+	t.Parallel()
+
+<%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc<%= resource_name -%>IamBinding_withAndWithoutConditionGenerated(context),
+			},
+			{
+				ResourceName:      "<%= resource_ns_iam -%>_binding.foo",
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "<%= resource_ns_iam -%>_binding.foo2",
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title"]),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) {
+	t.Parallel()
+
+<%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc<%= resource_name -%>IamMember_withConditionGenerated(context),
+			},
+			{
+				ResourceName:      "<%= resource_ns_iam -%>_member.foo",
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title"]),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *testing.T) {
+	t.Parallel()
+
+<%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc<%= resource_name -%>IamMember_withAndWithoutConditionGenerated(context),
+			},
+			{
+				ResourceName:      "<%= resource_ns_iam -%>_member.foo",
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "<%= resource_ns_iam -%>_member.foo2",
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> <%= object.iam_policy.allowed_iam_role -%> user:admin@hashicorptest.com %s"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>, context["condition_title"]),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) {
+	t.Parallel()
+
+<%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc<%= resource_name -%>IamPolicy_withConditionGenerated(context),
+			},
+			{
+				ResourceName:      "<%= resource_ns_iam -%>_policy.foo",
+				ImportStateId:     fmt.Sprintf("<%= import_url -%>"<% unless import_qualifiers.empty? -%>, <% end -%><%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
+
 func testAcc<%= resource_name -%>IamMember_basicGenerated(context map[string]interface{}) string {
 	return Nprintf(`
 <%= example.config_test_body -%>
@@ -173,3 +297,108 @@ resource "<%= resource_ns_iam -%>_binding" "foo" {
 }
 `, context)
 }
+
+<% unless version == 'ga' || object.iam_policy.iam_conditions_request_type.nil? -%>
+func testAcc<%= resource_name -%>IamBinding_withConditionGenerated(context map[string]interface{}) string {
+	return Nprintf(`
+<%= example.config_test_body -%>
+
+resource "<%= resource_ns_iam -%>_binding" "foo" {
+<%= lines(compile(object.iam_policy.example_config_body)) -%>
+	role = "%{role}"
+	members = ["user:admin@hashicorptest.com"]
+	condition {
+		title       = "%{condition_title}"
+		description = "Expiring at midnight of 2019-12-31"
+		expression  = "%{condition_expr}"
+	}
+}
+`, context)
+}
+
+func testAcc<%= resource_name -%>IamBinding_withAndWithoutConditionGenerated(context map[string]interface{}) string {
+	return Nprintf(`
+<%= example.config_test_body -%>
+
+resource "<%= resource_ns_iam -%>_binding" "foo" {
+<%= lines(compile(object.iam_policy.example_config_body)) -%>
+	role = "%{role}"
+	members = ["user:admin@hashicorptest.com"]
+}
+
+resource "<%= resource_ns_iam -%>_binding" "foo2" {
+<%= lines(compile(object.iam_policy.example_config_body)) -%>
+	role = "%{role}"
+	members = ["user:admin@hashicorptest.com"]
+	condition {
+		title       = "%{condition_title}"
+		description = "Expiring at midnight of 2019-12-31"
+		expression  = "%{condition_expr}"
+	}
+}
+`, context)
+}
+
+func testAcc<%= resource_name -%>IamMember_withConditionGenerated(context map[string]interface{}) string {
+	return Nprintf(`
+<%= example.config_test_body -%>
+
+resource "<%= resource_ns_iam -%>_member" "foo" {
+<%= lines(compile(object.iam_policy.example_config_body)) -%>
+	role = "%{role}"
+	member = "user:admin@hashicorptest.com"
+	condition {
+		title       = "%{condition_title}"
+		description = "Expiring at midnight of 2019-12-31"
+		expression  = "%{condition_expr}"
+	}
+}
+`, context)
+}
+
+func testAcc<%= resource_name -%>IamMember_withAndWithoutConditionGenerated(context map[string]interface{}) string {
+	return Nprintf(`
+<%= example.config_test_body -%>
+
+resource "<%= resource_ns_iam -%>_member" "foo" {
+<%= lines(compile(object.iam_policy.example_config_body)) -%>
+	role = "%{role}"
+	member = "user:admin@hashicorptest.com"
+}
+
+resource "<%= resource_ns_iam -%>_member" "foo2" {
+<%= lines(compile(object.iam_policy.example_config_body)) -%>
+	role = "%{role}"
+	member = "user:admin@hashicorptest.com"
+	condition {
+		title       = "%{condition_title}"
+		description = "Expiring at midnight of 2019-12-31"
+		expression  = "%{condition_expr}"
+	}
+}
+`, context)
+}
+
+func testAcc<%= resource_name -%>IamPolicy_withConditionGenerated(context map[string]interface{}) string {
+	return Nprintf(`
+<%= example.config_test_body -%>
+
+data "google_iam_policy" "foo" {
+	binding {
+		role = "%{role}"
+		members = ["user:admin@hashicorptest.com"]
+		condition {
+			title       = "%{condition_title}"
+			description = "Expiring at midnight of 2019-12-31"
+			expression  = "%{condition_expr}"
+		}
+	}
+}
+
+resource "<%= resource_ns_iam -%>_policy" "foo" {
+<%= lines(compile(object.iam_policy.example_config_body)) -%>
+	policy_data = "${data.google_iam_policy.foo.policy_data}"
+}
+`, context)
+}
+<% end -%>
