@@ -29,7 +29,8 @@ import (
 <% resource_name = product_ns + object.name -%>
 <%
 resource_uri = object.self_link_url
-resource_params = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{object.name.underscore}}}"))
+parent_resource_name = object.iam_policy.parent_resource_attribute || object.name.underscore
+resource_params = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{parent_resource_name}}}"))
 -%>
 
 var <%= resource_name -%>IamSchema = map[string]*schema.Schema{
@@ -88,7 +89,7 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 <% end # resource_params.each -%>
 
 	// We may have gotten either a long or short name, so attempt to parse long name if possible
-	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Get("<%= resource_params.last.underscore -%>").(string))
+	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Get("<%= parent_resource_name -%>").(string))
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +113,7 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 	d.Set("project", u.project)
 <% else -%>
 <%# Set the last parameter as the long name (unless it is project) -%>
-	d.Set("<%= resource_params.last.underscore -%>", u.GetResourceId())
+	d.Set("<%= parent_resource_name -%>", u.GetResourceId())
 <% end -%>
 <% else -%>
 	d.Set("<%= param.underscore -%>", u.<%= param.camelize(:lower) -%>)
@@ -157,7 +158,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 	d.Set("project", u.project)
 <% else -%>
 <%# Set resource long name in state, this has all the information that we need to identify it -%>
-	d.Set("<%= resource_params.last.underscore -%>", u.GetResourceId())
+	d.Set("<%= parent_resource_name -%>", u.GetResourceId())
 <% end -%>
 	d.SetId(u.GetResourceId())
 	return nil
@@ -177,7 +178,7 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 <%   if object.iam_policy.iam_conditions_request_type == :QUERY_PARAM -%>
 	url, err = addQueryParams(url, map[string]string{"optionsRequestedPolicyVersion": fmt.Sprintf("%d", iamPolicyVersion)})
 	if err != nil {
-		return err
+		return nil, err
 	}
 <%   elsif object.iam_policy.iam_conditions_request_type == :REQUEST_BODY -%>
 	obj = map[string]interface{}{
@@ -236,7 +237,7 @@ func (u *<%= resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodId
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetResourceId() string {
-	return fmt.Sprintf("<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}").gsub(/({{)(\w+)(}})/, '%s') -%>", <%= string_qualifiers -%>)
+	return fmt.Sprintf("<%= import_url -%>", <%= string_qualifiers -%>)
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetMutexKey() string {
