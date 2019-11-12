@@ -66,6 +66,7 @@ so Terraform knows to manage them.
 - [Resource: `google_compute_region_instance_group_manager`](#resource-google_compute_region_instance_group_manager)
 - [Resource: `google_compute_router_peer`](#resource-google_compute_router_peer)
 - [Resource: `google_compute_snapshot`](#resource-google_compute_snapshot)
+- [Resource: `google_compute_subnetwork`](#resource-google_compute_subnetwork)
 - [Resource: `google_container_cluster`](#resource-google_container_cluster)
 - [Resource: `google_container_node_pool`](#resource-google_container_node_pool)
 - [Resource: `google_dataproc_cluster`](#resource-google_dataproc_cluster)
@@ -437,6 +438,47 @@ required on the `google_compute_router_peer.advertised_ip_ranges` block.
 
 In an attempt to avoid allowing empty blocks in config files, `raw_key` is now
 required on the `google_compute_snapshot.source_disk_encryption_key` block.
+
+## Resource: `google_compute_subnetwork`
+
+### `enable_flow_logs` is now removed
+
+`enable_flow_logs` has been removed and should be replaced by the `log_config` block with configurations
+for flow logging. Enablement of flow logs is now controlled by whether `log_config` is defined or not instead
+of by the `enable_flow_logs` variable. Users with `enable_flow_logs = false` only need to remove the field.
+
+
+### Old Config
+
+```hcl
+resource "google_compute_subnetwork" "subnet-with-logging" {
+  name          = "log-test-subnetwork"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "us-central1"
+  network       = "${google_compute_network.custom-test.self_link}"
+
+  enable_flow_logs = true
+}
+```
+
+
+### New Config
+
+```hcl
+resource "google_compute_subnetwork" "subnet-with-logging" {
+  name          = "log-test-subnetwork"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "us-central1"
+  network       = "${google_compute_network.custom-test.self_link}"
+
+  log_config {
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+}
+```
+
 
 ## Resource: `google_container_cluster`
 
