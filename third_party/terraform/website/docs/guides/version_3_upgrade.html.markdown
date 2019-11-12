@@ -378,3 +378,14 @@ resource "google_project_service" "project_cloudresourcemanager" {
 
 `name` previously could have been specified by a long name (e.g. `projects/my-project/subscriptions/my-subscription`)
 or a shortname (e.g. `my-subscription`). `name` now must be the shortname.
+
+
+## Resource: `google_cloudiot_registry`
+
+### Replace singular event notification config field with plural `event_notification_configs`
+
+Use the plural field `event_notification_configs` instead of
+`event_notification_config`, which has now been removed.
+Since the Cloud IoT API now accept multiple event notification configs for a
+registry, the singular field no longer exists on the API resource and has been
+removed from Terraform to prevent conflicts.
