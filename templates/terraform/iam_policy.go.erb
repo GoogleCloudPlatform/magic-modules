@@ -29,13 +29,13 @@ import (
 <% resource_name = product_ns + object.name -%>
 <%
 resource_uri = object.self_link_url
-resource_params = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{object.name.underscore}}}"))
-ref_name = object.iam_policy.parent_resource_attribute || resource_params.last.underscore
+parent_resource_name = object.iam_policy.parent_resource_attribute || object.name.underscore
+resource_params = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{parent_resource_name}}}"))
 -%>
 
 var <%= resource_name -%>IamSchema = map[string]*schema.Schema{
 <% resource_params.each_with_index do |param, i| -%>
-	"<%= i == resource_params.size - 1 ? ref_name : param.underscore -%>": {
+	"<%= param.underscore -%>": {
 		Type:             schema.TypeString,
 <% if ['project', 'zone', 'region', 'location'].include?(param) -%>
 		Computed: true,
@@ -72,7 +72,7 @@ type <%= resource_name -%>IamUpdater struct {
 func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Config) (ResourceIamUpdater, error) {
 	values := make(map[string]string)
 
-<% resource_params.each_with_index do |param, i| -%>
+<% resource_params.each do |param| -%>
 <% if provider_default_values.include?(param) -%>
 	<%= param -%>, err := get<%= param.capitalize -%>(d, config)
 	if err != nil {
@@ -81,7 +81,7 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 	values["<%= param -%>"] = <%= param -%>
 
 <% else -%>
-	if v, ok := d.GetOk("<%= i == resource_params.size - 1 ? ref_name : param.underscore -%>"); ok {
+	if v, ok := d.GetOk("<%= param.underscore -%>"); ok {
 		values["<%= param -%>"] = v.(string)
 	}
 
@@ -89,7 +89,7 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 <% end # resource_params.each -%>
 
 	// We may have gotten either a long or short name, so attempt to parse long name if possible
-	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Get("<%= ref_name -%>").(string))
+	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Get("<%= parent_resource_name -%>").(string))
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 	d.Set("project", u.project)
 <% else -%>
 <%# Set the last parameter as the long name (unless it is project) -%>
-	d.Set("<%= ref_name -%>", u.GetResourceId())
+	d.Set("<%= parent_resource_name -%>", u.GetResourceId())
 <% end -%>
 <% else -%>
 	d.Set("<%= param.underscore -%>", u.<%= param.camelize(:lower) -%>)
@@ -158,7 +158,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 	d.Set("project", u.project)
 <% else -%>
 <%# Set resource long name in state, this has all the information that we need to identify it -%>
-	d.Set("<%= ref_name -%>", u.GetResourceId())
+	d.Set("<%= parent_resource_name -%>", u.GetResourceId())
 <% end -%>
 	d.SetId(u.GetResourceId())
 	return nil
