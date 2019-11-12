@@ -403,7 +403,9 @@ required on the `google_compute_snapshot.source_disk_encryption_key` block.
 ### `enable_flow_logs` is now removed
 
 `enable_flow_logs` has been removed and should be replaced by the `log_config` block with configurations
-for flow logging.
+for flow logging. Enablement of flow logs is now controlled by whether `log_config` is defined or not instead
+of by the `enable_flow_logs` variable. Users with `enable_flow_logs = false` only need to remove the field.
+
 
 ### Old Config
 
