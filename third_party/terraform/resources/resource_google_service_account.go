@@ -44,6 +44,7 @@ func resourceGoogleServiceAccount() *schema.Resource {
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 			"project": {
 				Type:     schema.TypeString,
@@ -126,7 +127,7 @@ func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}
 
 func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	if d.HasChange("display_name") || d.HasChange("description") {
+	if d.HasChange("display_name") {
 		sa, err := config.clientIAM.Projects.ServiceAccounts.Get(d.Id()).Do()
 		if err != nil {
 			return fmt.Errorf("Error retrieving service account %q: %s", d.Id(), err)
