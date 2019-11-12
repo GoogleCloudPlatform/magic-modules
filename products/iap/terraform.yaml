@@ -71,7 +71,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       exclude: false
       method_name_separator: ':'
       parent_resource_type: 'google_app_engine_standard_app_version'
-      parent_resource_attribute: 'version'
+      parent_resource_attribute: 'version_id'
       fetch_iam_policy_verb: :POST
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
       example_config_body: 'templates/terraform/iam/example_config_body/app_engine_version.tf.erb'
