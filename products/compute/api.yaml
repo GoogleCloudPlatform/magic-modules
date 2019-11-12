@@ -805,7 +805,7 @@ objects:
               - !ruby/object:Api::Type::NestedObject
                 name: 'ttl'
                 description: |
-                  Liftime of the cookie.
+                  Lifetime of the cookie.
                 properties:
                   - !ruby/object:Api::Type::Integer
                     name: 'seconds'
@@ -1471,7 +1471,7 @@ objects:
               - !ruby/object:Api::Type::NestedObject
                 name: 'ttl'
                 description: |
-                  Liftime of the cookie.
+                  Lifetime of the cookie.
                 properties:
                   - !ruby/object:Api::Type::Integer
                     name: 'seconds'
@@ -9167,11 +9167,11 @@ objects:
           - :ACTIVE
           - :BACKUP
         description: |
-          The role of subnetwork. Currenly, this field is only used
-          when purpose = INTERNAL_HTTPS_LOAD_BALANCER. The value can be set
-          to ACTIVE or BACKUP. An ACTIVE subnetwork is one that is currently
-          being used for Internal HTTP(S) Load Balancing. A BACKUP subnetwork
-          is one that is ready to be promoted to ACTIVE or is currently draining.
+          The role of subnetwork. Currently, this field is only used when
+          purpose = INTERNAL_HTTPS_LOAD_BALANCER. The value can be set to ACTIVE
+          or BACKUP. An ACTIVE subnetwork is one that is currently being used
+          for Internal HTTP(S) Load Balancing. A BACKUP subnetwork is one that
+          is ready to be promoted to ACTIVE or is currently draining.
       - !ruby/object:Api::Type::Array
         name: 'secondaryIpRanges'
         description: |
