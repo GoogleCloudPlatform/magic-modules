@@ -188,7 +188,11 @@ The following arguments are supported:
 
 <% url_properties.each do |param| -%>
 <% if param.name == "name" -%>
-* `<%= object.name.underscore -%>` - (Required) Used to find the parent resource to bind the IAM policy to
+* `<%= object.iam_policy.parent_resource_attribute || object.name.underscore -%>` - (Required) Used to find the parent resource to bind the IAM policy to
+<% elsif ["region", "zone"].include?(param.name.underscore) -%>
+* `<%= param.name.underscore -%>` - (Optional) <%= param.description -%> Used to find the parent resource to bind the IAM policy to. If not specified,
+  the value will be parsed from the identifier of the parent resource. If no <%= param.name.underscore -%> is provided in the parent identifier and no
+  <%= param.name.underscore -%> is specified, it is taken from the provider configuration.
 <% else -%>
 * `<%= param.name.underscore -%>` - (Required) <%= param.description -%> Used to find the parent resource to bind the IAM policy to
 <% end -%>
