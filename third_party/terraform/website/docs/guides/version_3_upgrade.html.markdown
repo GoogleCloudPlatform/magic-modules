@@ -75,6 +75,7 @@ so Terraform knows to manage them.
 - [Resource: `google_monitoring_alert_policy`](#resource-google_monitoring_alert_policy)
 - [Resource: `google_monitoring_uptime_check_config`](#resource-google_monitoring_uptime_check_config)
 - [Resource: `google_organization_policy`](#resource-google_organization_policy)
+- [Resource: `google_project_iam_audit_config`](#resource-google_project_iam_audit_config)
 - [Resource: `google_project_service`](#resource-google_project_service)
 - [Resource: `google_project_services`](#resource-google_project_services)
 - [Resource: `google_pubsub_subscription`](#resource-google_pubsub_subscription)
@@ -585,6 +586,13 @@ required on the `google_monitoring_uptime_check_config.content_matchers` block.
 
 In an attempt to avoid allowing empty blocks in config files, `inherit_from_parent` is now
 required on the `google_organization_policy.list_policy` block.
+
+## Resource: `google_project_iam_audit_config`
+
+### Audit configs are now authoritative on create
+
+Audit configs are now authoritative on create, rather than merging with existing configs on create.
+Writing an audit config resource will now overwrite any existing audit configs on the given project.
 
 ## Resource: `google_project_service`
 
