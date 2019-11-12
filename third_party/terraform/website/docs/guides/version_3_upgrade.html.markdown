@@ -398,7 +398,7 @@ removed from Terraform to prevent conflicts.
 resource "google_cloudiot_registry" "myregistry" {
   name = "%s"
 
-  event_notification_config = {
+  event_notification_config {
     pubsub_topic_name = "${google_pubsub_topic.event-topic.id}"
   }
 }
@@ -411,7 +411,7 @@ resource "google_cloudiot_registry" "myregistry" {
 resource "google_cloudiot_registry" "myregistry" {
   name = "%s"
 
-  event_notification_configs = {
+  event_notification_configs {
     pubsub_topic_name = "${google_pubsub_topic.event-topic.id}"
   }
 }
