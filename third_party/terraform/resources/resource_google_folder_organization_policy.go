@@ -59,7 +59,7 @@ func resourceFolderOrgPolicyImporter(d *schema.ResourceData, meta interface{}) (
 }
 
 func resourceGoogleFolderOrganizationPolicyCreate(d *schema.ResourceData, meta interface{}) error {
-	d.SetId(fmt.Sprintf("%s:%s", d.Get("folder"), d.Get("constraint")))
+	d.SetId(fmt.Sprintf("%s/%s", d.Get("folder"), d.Get("constraint")))
 
 	if isOrganizationPolicyUnset(d) {
 		return resourceGoogleFolderOrganizationPolicyDelete(d, meta)
