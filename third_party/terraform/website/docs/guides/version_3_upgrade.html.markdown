@@ -932,7 +932,7 @@ is now required on `google_dataproc_cluster.cluster_config`
 In an attempt to avoid allowing empty blocks in config files, at least one of `staging_bucket`,
 `gce_cluster_config`, `master_config`, `worker_config`, `preemptible_worker_config`, `software_config`,
 `initialization_action` or `encryption_config` is now required on the
-`google_dataproc_cluster.autoscaling_config` block.
+`google_dataproc_cluster.cluster_config` block.
 
 ### At least one of `image_version`, `override_properties` or `optional_components` is
 now required on `google_dataproc_cluster.cluster_config.software_config`
