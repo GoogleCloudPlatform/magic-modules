@@ -94,6 +94,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project_id: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
+        name: "uptime_check_config_https"
+        primary_resource_id: "https"
+        vars:
+          display_name: "https-uptime-check"
+        test_env_vars:
+          project_id: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
         name: "uptime_check_tcp"
         primary_resource_id: "tcp_group"
         vars:

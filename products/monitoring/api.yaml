@@ -982,6 +982,11 @@ objects:
         name: useSsl
         description: If true, use HTTPS instead of HTTP to run the check.
       - !ruby/object:Api::Type::Boolean
+        name: validateSsl
+        description: Boolean specifying whether to include SSL certificate validation
+          as a part of the Uptime check. Only applies to checks where monitoredResource
+          is set to uptime_url. If useSsl is false, setting validateSsl to true has no effect.
+      - !ruby/object:Api::Type::Boolean
         name: maskHeaders
         description: Boolean specifying whether to encrypt the header information.
           Encryption should be specified for any headers related to authentication that
