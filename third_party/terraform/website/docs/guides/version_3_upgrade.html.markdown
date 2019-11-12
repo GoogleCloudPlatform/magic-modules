@@ -80,7 +80,9 @@ so Terraform knows to manage them.
 - [Resource: `google_project_service`](#resource-google_project_service)
 - [Resource: `google_project_services`](#resource-google_project_services)
 - [Resource: `google_pubsub_subscription`](#resource-google_pubsub_subscription)
+- [Resource: `google_service_account_key`](#resource-google_service_account_key)
 - [Resource: `google_sql_database_instance`](#resource-google_sql_database_instance)
+- [Resource: `google_sql_user`](#resource-google_sql_user)
 - [Resource: `google_storage_bucket`](#resource-google_storage_bucket)
 - [Resource: `google_storage_transfer_job`](#resource-google_storage_transfer_job)
 
@@ -123,6 +125,13 @@ provider "google" {
 ```
 
 ## Provider
+
+### Terraform 0.11 no longer supported
+
+Support for Terraform 0.11 has been deprecated, and Terraform 0.12 or higher is
+required to `terraform init` the provider. See [the blog post](https://www.hashicorp.com/blog/deprecating-terraform-0-11-support-in-terraform-providers/)
+for more information. It is recommended that you upgrade to Terraform 0.12 before
+upgrading to version 3.0.0 of the provider.
 
 ### `userinfo.email` added to default scopes
 
@@ -753,6 +762,18 @@ resource "google_project_service" "project_cloudresourcemanager" {
 `name` previously could have been specified by a long name (e.g. `projects/my-project/subscriptions/my-subscription`)
 or a shortname (e.g. `my-subscription`). `name` now must be the shortname.
 
+## Resource: `google_service_account_key`
+
+### `pgp_key`, `private_key_fingerprint`, and `private_key_encrypted` are now removed
+
+`google_service_account_key` previously supported encrypting the private key with
+a supplied PGP key. This is [no longer supported](https://www.terraform.io/docs/extend/best-practices/sensitive-state.html#don-39-t-encrypt-state)
+and has been removed as functionality. State should instead be treated as sensitive,
+and ideally encrypted using a remote state backend.
+
+This will require re-provisioning your service account key, unfortunately. There
+is no known alternative at this time.
+
 ## Resource: `google_sql_database_instance`
 
 ### `dump_file_path`, `username` and `password` are now required on block `google_sql_database_instance.replica_configuration`
@@ -774,6 +795,13 @@ required on the `google_sql_database_instance.settings.ip_configuration.authoriz
 
 In an attempt to avoid allowing empty blocks in config files, `zone` is now
 required on the `google_sql_database_instance.settings.location_preference` block.
+
+## Resource: `google_sql_user`
+
+### `password` is now required
+
+In previous releases, the `password` field of the `google_sql_user` resource was erroneously marked as optional,
+despite it being required by the API. It is now correctly marked as required.
 
 ## Resource: `google_storage_bucket`
 
