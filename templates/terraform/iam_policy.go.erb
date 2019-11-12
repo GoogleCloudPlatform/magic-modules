@@ -89,7 +89,7 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 <% end # resource_params.each -%>
 
 	// We may have gotten either a long or short name, so attempt to parse long name if possible
-	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Get("<%= parent_resource_name -%>").(string))
+	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Get("<%= parent_resource_name -%>").(string))
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 <% end # if provider_default_values.include? -%>
 <% end # resource_params.each -%>
 
-	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Id())
+	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Id())
 	if err != nil {
 		return err
 	}
