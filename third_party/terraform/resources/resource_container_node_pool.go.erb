@@ -102,12 +102,34 @@ var schemaNodePool = map[string]*schema.Schema{
 	},
 
 <% unless version == 'ga' -%>
-			"node_locations": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+	"node_locations": {
+		Type:     schema.TypeSet,
+		Optional: true,
+		Computed: true,
+		Elem:     &schema.Schema{Type: schema.TypeString},
+	},
+
+	"upgrade_settings": {
+		Type:     schema.TypeList,
+		Optional: true,
+		Computed: true,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"max_surge": {
+					Type:     schema.TypeInt,
+					Optional: true,
+					Default:  1,
+				},
+
+				"max_unavailable": {
+					Type:     schema.TypeInt,
+					Optional: true,
+					Default:  0,
+				},
 			},
+		},
+	},
 <% end -%>
 
 	"initial_node_count": &schema.Schema{
@@ -499,6 +521,19 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*containerBeta.NodeP
 		}
 	}
 
+	if v, ok := d.GetOk(prefix + "upgrade_settings"); ok {
+		upgradeSettings := v.([]interface{})[0].(map[string]interface{})
+		np.UpgradeSettings = &containerBeta.UpgradeSettings{}
+
+		if v, ok := upgradeSettings["max_surge"]; ok {
+			np.UpgradeSettings.MaxSurge = int64(v.(int))
+		}
+
+		if v, ok := upgradeSettings["max_unavailable"]; ok {
+			np.UpgradeSettings.MaxUnavailable = int64(v.(int))
+		}
+	}
+
 	return np, nil
 }
 
@@ -553,6 +588,13 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *containerBeta.N
 		{
 			"auto_repair":  np.Management.AutoRepair,
 			"auto_upgrade": np.Management.AutoUpgrade,
+		},
+	}
+
+	nodePool["upgrade_settings"] = []map[string]interface{}{
+		{
+			"max_surge":  np.UpgradeSettings.MaxSurge,
+			"max_unavailable": np.UpgradeSettings.MaxUnavailable,
 		},
 	}
 
