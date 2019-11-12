@@ -65,6 +65,7 @@ so Terraform knows to manage them.
 - [Resource: `google_compute_region_instance_group_manager`](#resource-google_compute_region_instance_group_manager)
 - [Resource: `google_compute_router_peer`](#resource-google_compute_router_peer)
 - [Resource: `google_compute_snapshot`](#resource-google_compute_snapshot)
+- [Resource: `google_compute_subnetwork`](#resource-google_compute_subnetwork)
 - [Resource: `google_container_cluster`](#resource-google_container_cluster)
 - [Resource: `google_container_node_pool`](#resource-google_container_node_pool)
 - [Resource: `google_dataproc_cluster`](#resource-google_dataproc_cluster)
@@ -396,6 +397,13 @@ required on the `google_compute_router_peer.advertised_ip_ranges` block.
 
 In an attempt to avoid allowing empty blocks in config files, `raw_key` is now
 required on the `google_compute_snapshot.source_disk_encryption_key` block.
+
+## Resource: `google_compute_subnetwork`
+
+### `raw_key` is now required on block `google_compute_snapshot.source_disk_encryption_key`
+
+`enable_flow_logs` has been removed and should be replaced by the `log_config` block with configurations
+for flow logging.
 
 ## Resource: `google_container_cluster`
 
