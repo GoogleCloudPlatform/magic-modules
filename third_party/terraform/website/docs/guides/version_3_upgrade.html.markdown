@@ -945,7 +945,7 @@ In an attempt to avoid allowing empty blocks in config files, at least one of `i
 `google_dataproc_cluster.cluster_config.preemptible_worker_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `num_instances`
-or `disk_config` is now required on the `google_dataproc_cluster.now` block.
+or `disk_config` is now required on the `google_dataproc_cluster.cluster_config.preemptible_worker_config` block.
 
 ### At least one of `zone`, `network`, `subnetwork`, `tags`, `service_account`, `service_account_scopes`,
 `internal_ip_only` or `metadata` is now required on `google_dataproc_cluster.cluster_config.gce_cluster_config`
