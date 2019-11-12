@@ -56,12 +56,20 @@ so Terraform knows to manage them.
 - [ID Format Changes](#id-format-changes)
 - [Data Source: `google_container_engine_versions`](#data-source-google_container_engine_versions)
 - [Resource: `google_app_engine_application`](#resource-google_app_engine_application)
+- [Resource: `google_app_engine_domain_mapping`](#resource-google_app_engine_domain_mapping)
+- [Resource: `google_app_engine_standard_version`](#resource-google_app_engine_standard_version)
+- [Resource: `google_bigtable_app_profile`](#resource-google_bigtable_app_profile)
+- [Resource: `google_bigquery_table`](#resource-google_bigquery_table)
+- [Resource: `google_cloudbuild_trigger`](#resource-google_cloudbuild_trigger)
 - [Resource: `google_cloudfunctions_function`](#resource-google_cloudfunctions_function)
 - [Resource: `google_cloudiot_registry`](#resource-google_cloudiot_registry)
+- [Resource: `google_cloudrun_service`](#resource-google_cloudrun_service)
+- [Resource: `google_cloudscheduler_job`](#resource-google_cloudscheduler_job)
 - [Resource: `google_composer_environment`](#resource-google_composer_environment)
 - [Resource: `google_compute_forwarding_rule`](#resource-google_compute_forwarding_rule)
 - [Resource: `google_compute_global_forwarding_rule`](#resource-google_global_compute_forwarding_rule)
 - [Resource: `google_compute_instance`](#resource-google_compute_instance)
+- [Resource: `google_compute_instance_group_manager`](#resource-google_compute_instance_group_manager)
 - [Resource: `google_compute_instance_template`](#resource-google_compute_instance_template)
 - [Resource: `google_compute_network`](#resource-google_compute_network)
 - [Resource: `google_compute_network_peering`](#resource-google_compute_network_peering)
@@ -236,7 +244,138 @@ resource "google_cloudiot_registry" "myregistry" {
 }
 ```
 
+### `logging_service` and `monitoring_service` defaults changed
+
+GKE Stackdriver Monitoring (the GKE-specific Stackdriver experience) is now
+enabled at cluster creation by default, similar to the default in GKE `1.14`
+through other tools.
+
+## Resource: `google_app_engine_application`
+
+### `split_health_checks` is now required on block `google_app_engine_application.feature_settings`
+
+In an attempt to avoid allowing empty blocks in config files, `split_health_checks` is now
+required on the `google_app_engine_application.feature_settings` block.
+
+## Resource: `google_app_engine_domain_mapping`
+
+### `ssl_management_type` is now required on `google_app_engine_domain_mapping.ssl_settings`
+
+In an attempt to avoid allowing empty blocks in config files, `ssl_management_type` is now
+required on the `google_app_engine_domain_mapping.ssl_settings` block.
+
+## Resource: `google_app_engine_standard_app_version`
+
+### `shell` is now required on `google_app_engine_standard_app_version.entrypoint`
+
+In an attempt to avoid allowing empty blocks in config files, `shell` is now
+required on the `google_app_engine_standard_app_version.entrypoint` block.
+
+### `source_url` is now required on `google_app_engine_standard_app_version.deployment.files`
+and `google_app_engine_standard_app_version.deployment.zip`
+
+In an attempt to avoid allowing empty blocks in config files, `shell` is now
+required on the `google_app_engine_standard_app_version.deployment.files`  and
+`google_app_engine_standard_app_version.deployment.zip` blocks.
+
+## Resource: `google_bigtable_app_profile`
+
+### `cluster_id` is now required on `google_bigtable_app_profile.single_cluster_routing`
+
+In an attempt to avoid allowing empty blocks in config files, `cluster_id` is now
+required on the `google_bigtable_app_profile.single_cluster_routing` block.
+
+## Resource: `google_bigquery_table`
+
+### At least one of `range` or `skip_leading_rows` is now required on
+`google_bigquery_table.external_data_configuration.google_sheets_options`
+
+In an attempt to avoid allowing empty blocks in config files, at least one
+of `range` or `skip_leading_rows` is now required on the
+`google_bigquery_table.external_data_configuration.google_sheets_options` block.
+
+## Resource: `google_cloudbuild_trigger`
+
+### `branch` is now required on `google_cloudbuild_trigger.github`
+
+In an attempt to avoid allowing empty blocks in config files, `branch` is now
+required on the `google_cloudbuild_trigger.github` block.
+
+### `steps` is now required on `google_cloudbuild_trigger.build`.
+
+In an attempt to avoid allowing empty blocks in config files, `steps` is now
+required on the `google_cloudbuild_trigger.build` block.
+
+### `name` is now required on `google_cloudbuild_trigger.build.steps`
+
+In an attempt to avoid allowing empty blocks in config files, `name` is now
+required on the `google_cloudbuild_trigger.build.steps` block.
+
+### `name` and `path` are now required on `google_cloudbuild_trigger.build.steps.volumes`
+
+In an attempt to avoid allowing empty blocks in config files, `name` and `path` are now
+required on the `google_cloudbuild_trigger.build.volumes` block.
+
+### `taint` field is now authoritative when set
+
+The `taint` field inside of `node_config` blocks on `google_container_cluster`
+and `google_container_node_pool` will no longer ignore GPU-related values when
+set.
+
+Previously, the field ignored upstream taints when unset and ignored unset GPU
+taints when other taints were set. Now it will ignore upstream taints when set
+and act authoritatively when set, requiring all taints (including Kubernetes and
+GKE-managed ones) to be defined in config.
+
+Additionally, an empty taint can now be specified with `taint = []`. As a result
+of this change, the JSON/state representation of the field has changed,
+introducing an incompatibility for users who specify config in JSON instead of
+HCL or who use `dynamic` blocks. See more details in the [Attributes as Blocks](https://www.terraform.io/docs/configuration/attr-as-blocks.html)
+documentation.
+
+## Resource: `google_cloudfunctions_function`
+
+### The `runtime` option `nodejs6` has been deprecated
+
+`nodejs6` has been deprecated and is no longer the default value for `runtime`.
+`runtime` is now required.
+
+## Resource: `google_cloudiot_registry`
+
+### `event_notification_config` is now removed
+
+`event_notification_config` has been removed in favor of
+`event_notification_configs` (plural). Please switch to using the plural field.
+
+### `public_key_certificate` is now required on block `google_cloudiot_registry.credentials`
+
+In an attempt to avoid allowing empty blocks in config files, `public_key_certificate` is now
+required on the `google_cloudiot_registry.credentials` block.
+
+## Resource: `google_cloudrun_service`
+
+### `template` is now required on block `google_cloudrun_service.spec`
+
+In an attempt to avoid allowing empty blocks in config files, `template` is now
+required on the `google_cloudrun_service.spec` block.
+
+## Resource: `google_cloudscheduler_job`
+
+### `service_account_email` is now required on `google_cloudscheduler_job.http_target.oauth_token`
+and `google_cloudscheduler_job.http_target.oidc_token`.
+
+In an attempt to avoid allowing empty blocks in config files, `service_account_email` is now
+required on the `google_cloudscheduler_job.http_target.oauth_token` and
+`google_cloudscheduler_job.http_target.oidc_token` blocks.
+
 ## Resource: `google_composer_environment`
+
+### At least one of `airflow_config_overrides`, `pypi_packages`, `env_variables`, `image_version`,
+or `python_version` are now required on `google_composer_environment.config.software_config`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `airflow_config_overrides`,
+`pypi_packages`, `env_variables`, `image_version`, or `python_version` are now required on the
+`google_composer_environment.config.software_config` block.
 
 ### `use_ip_aliases` is now required on block `google_composer_environment.ip_allocation_policy`
 
@@ -310,7 +449,78 @@ See [`google_compute_forwarding_rule`][#resource-google_compute_forwarding_rule]
 Previously the default value of `interface` was `SCSI`. In an attempt to avoid allowing empty blocks
 in config files, `interface` is now required on the `google_compute_instance.scratch_disk` block.
 
+### At least one of `auto_delete`, `device_name`, `disk_encryption_key_raw`, `kms_key_self_link`,
+`initialize_params`, `mode` or `source` is now required on `google_compute_instance.boot_disk`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `auto_delete`, `device_name`,
+`disk_encryption_key_raw`, `kms_key_self_link`, `initialize_params`, `mode` or `source` is now required on the
+`google_compute_instance.boot_disk` block.
+
+### At least one of `size`, `type`, `image`, or `labels` are now required on
+`google_compute_instance.boot_disk.initialize_params`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `size`, `type`, `image`, or `labels`
+is now required on the `google_compute_instance.initialize_params` block.
+
+### At least one of `network` or `subnetwork` are now required on `google_compute_instance.network_interface`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `network` or `subnetwork`
+is now required on the `google_compute_instance.network_interface` block.
+
+### At least one of `nat_ip`, `network_tier`, or `public_ptr_domain_name` is now required on
+`google_compute_instance.network_interface.access_config`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `nat_ip`, `network_tier`, or `public_ptr_domain_name`
+is now required on the `google_compute_instance.network_interface.access_config` block.
+
+### At least one of `enable_secure_boot`, `enable_vtpm`, or `enable_integrity_monitoring` is now required
+on `google_compute_instance.shielded_instance_config`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `enable_secure_boot`, `enable_vtpm`,
+or `enable_integrity_monitoring` is now required on the `google_compute_instance.shielded_instance_config` block.
+
+### At least one of `on_host_maintenance`, `automatic_restart`, `preemptible`, or `node_affinities`
+is now required on `google_compute_instance.scheduling`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `on_host_maintenance`, `automatic_restart`,
+`preemptible`, or `node_affinities` is now required on the `google_compute_instance.scheduling` block.
+
+## Resource: `google_compute_instance_group_manager`
+
+### Exactly one of `fixed` or `percent` is now required on `google_compute_instance_group_manager.version.target_size`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `fixed` or `percent` is now required on the `google_compute_instance_group_manager.version.target_size` block.
+
+
 ## Resource: `google_compute_instance_template`
+
+### At least one of `enable_secure_boot`, `enable_vtpm`, or `enable_integrity_monitoring` is now
+required on `google_compute_instance_template.shielded_instance_config`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `enable_secure_boot`, `enable_vtpm`, or
+`enable_integrity_monitoring` is now required on the `google_compute_instance_template.shielded_instance_config` block.
+
+### At least one of `on_host_maintenance`, `automatic_restart`, `preemptible`, or `node_affinities` is
+now required on `google_compute_instance_template.scheduling`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `on_host_maintenance`, `automatic_restart`,
+`preemptible`, or `node_affinities` is now required on the `google_compute_instance_template.scheduling` block.
+
+### At least one of `network` or `subnetwork` are now required on `google_compute_instance_template.network_interface`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `network` or `subnetwork`
+is now required on the `google_compute_instance_template.network_interface` block.
+
+### At least one of `nat_ip`, `network_tier`, or `public_ptr_domain_name` is now required on
+`google_compute_instance_template.network_interface.access_config`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `nat_ip`, `network_tier`, or `public_ptr_domain_name`
+is now required on the `google_compute_instance_template.network_interface.access_config` block.
+
+### At least one of `source` or `source_image` is now required on `google_compute_instance_template.disk`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `source` or `source_image`
+is now required on the `google_compute_instance_template.network_interface.disk` block.
 
 ### Disks with invalid scratch disk configurations are now rejected
 
@@ -384,6 +594,10 @@ user-configurable.
 
 With `rolling_update_policy` removed, `update_strategy` has no effect anymore.
 Before updating, remove it from your config.
+
+### Exactly one of `fixed` or `percent` is now required on `google_compute_region_instance_group_manager.version.target_size`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `fixed` or `percent` is now required on the `google_compute_region_instance_group_manager.version.target_size` block.
 
 ## Resource: `google_compute_router_peer`
 
@@ -619,6 +833,12 @@ The `kubernetes_dashboard` addon is deprecated for clusters on GKE and
 will soon be removed. It is recommended to use alternative GCP Console
 dashboards.
 
+### `channel` is now required on `google_container_cluster.relase_channel`
+
+In an attempt to avoid allowing empty blocks in config files, `channel` is now
+required on the `google_container_cluster.relase_channel` block.
+dashboards.
+
 ### `cidr_blocks` is now required on block `google_container_cluster.master_authorized_networks_config`
 
 In an attempt to avoid allowing empty blocks in config files, `cidr_blocks` is now
@@ -628,6 +848,20 @@ required on the `google_container_cluster.master_authorized_networks_config` blo
 
 In an attempt to avoid allowing empty blocks in config files, `disabled` is now
 required on the different `google_container_cluster.addons_config` blocks.
+
+### At least one of `http_load_balancing`, `horizontal_pod_autoscaling` , `network_policy_config`,
+`cloudrun_config`, or `istio_config` is now required on `google_container_cluster.addons_config`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `http_load_balancing`,
+`horizontal_pod_autoscaling` , `network_policy_config`, `cloudrun_config`, or `istio_config` is now required on the
+`google_container_cluster.addons_config` block.
+
+
+### At least one of `username`, `password` or `client_certificate_config` is now required on
+`google_container_cluster.master_auth`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `username`, `password`
+or `client_certificate_config` is now required on the `google_container_cluster.master_auth` block.
 
 ### `enabled` is now required on block `google_container_cluster.vertical_pod_autoscaling`
 
@@ -692,12 +926,76 @@ in config files, `use_ip_aliases` is now required on the `google_container_clust
 
 ## Resource: `google_dataproc_cluster`
 
+### At least one of `staging_bucket`, `gce_cluster_config`, `master_config`, `worker_config`,
+`preemptible_worker_config`, `software_config`, `initialization_action` or `encryption_config`
+is now required on `google_dataproc_cluster.cluster_config`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `staging_bucket`,
+`gce_cluster_config`, `master_config`, `worker_config`, `preemptible_worker_config`, `software_config`,
+`initialization_action` or `encryption_config` is now required on the
+`google_dataproc_cluster.autoscaling_config` block.
+
+### At least one of `image_version`, `override_properties` or `optional_components` is
+now required on `google_dataproc_cluster.cluster_config.software_config`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `image_version`,
+`override_properties` or `optional_components` is now required on the
+`google_dataproc_cluster.cluster_config.software_config` block.
+
+### At least one of `num_instances` or `disk_config` is now required on
+`google_dataproc_cluster.cluster_config.preemptible_worker_config`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `num_instances`
+or `disk_config` is now required on the `google_dataproc_cluster.now` block.
+
+### At least one of `zone`, `network`, `subnetwork`, `tags`, `service_account`, `service_account_scopes`,
+`internal_ip_only` or `metadata` is now required on `google_dataproc_cluster.cluster_config.gce_cluster_config`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `zone`, `network`, `subnetwork`,
+`tags`, `service_account`, `service_account_scopes`, `internal_ip_only` or `metadata` is now required on the
+`google_dataproc_cluster.gce_cluster_config` block.
+
+### At least one of `num_instances`, `image_uri`, `machine_type`, `min_cpu_platform`, `disk_config`, or `accelerators`
+is now required on `google_dataproc_cluster.cluster_config.master_config` and
+`google_dataproc_cluster.cluster_config.worker_config`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `num_instances`, `image_uri`,
+`machine_type`, `min_cpu_platform`, `disk_config`, or `accelerators` is now required on the
+`google_dataproc_cluster.cluster_config.master_config` and
+`google_dataproc_cluster.cluster_config.worker_config` blocks.
+
+### At least one of `num_local_ssds`, `boot_disk_size_gb` or `boot_disk_type` is now required on
+`google_dataproc_cluster.cluster_config.preemptible_worker_config.disk_config`,
+`google_dataproc_cluster.cluster_config.master_config.disk_config` and
+`google_dataproc_cluster.cluster_config.worker_config.disk_config`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `num_local_ssds`, `boot_disk_size_gb`
+or `boot_disk_type` is now required on the `google_dataproc_cluster.cluster_config.preemptible_worker_config.disk_config`,
+`google_dataproc_cluster.cluster_config.master_config.disk_config` and
+`google_dataproc_cluster.cluster_config.worker_config.disk_config` blocks.
+
+
 ### `policy_uri` is now required on `google_dataproc_cluster.autoscaling_config` block.
 
 In an attempt to avoid allowing empty blocks in config files, `policy_uri` is now
 required on the `google_dataproc_cluster.autoscaling_config` block.
 
 ## Resource: `google_dataproc_job`
+
+### At least one of `query_file_uri` or `query_list` is now required on
+`google_dataproc_job.hive_config`, `google_dataproc_job.pig_config`, and
+`google_dataproc_job.sparksql_config`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of
+`query_file_uri` or `query_list` is now required on the `google_dataproc_job.hive_config`,
+`google_dataproc_job.pig_config`, and `google_dataproc_job.sparksql_config` blocks.
+
+### At least one of `main_class` or `main_jar_file_uri` is now required on
+`google_dataproc_job.spark_config` and `google_dataproc_job.hadoop_config`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of
+`main_class` or `main_jar_file_uri` is now required on the `google_dataproc_job.spark_config`
+and `google_dataproc_job.hadoop_config` blocks.
 
 ### `driver_log_levels` is now required on `logging_config` blocks for
 `google_dataproc_job.pyspark_config`, `google_dataproc_job.hadoop_config`,
@@ -742,6 +1040,19 @@ required on the `google_monitoring_uptime_check_config.content_matchers` block.
 `is_internal` and `internal_checker` never worked, and are now removed.
 
 ## Resource: `google_organization_policy`
+
+### Exactly one of `list_policy`, `boolean_policy`, or `restore_policy` is now required on
+`google_organization_policy`
+
+In attempt to be more consistent with the API, exactly one of `list_policy`, `boolean_policy`,
+or `restore_policy` is now required on the `google_organization_policy` block.
+
+### Exactly one of `all` or `values` is now required on `google_organization_policy.list_policy.allow`
+and `google_organization_policy.list_policy.deny`
+
+In an attempt to avoid allowing empty blocks in config files, exactly one of `all` or `values` is now
+required on the `google_organization_policy.list_policy.allow`
+and `google_organization_policy.list_policy.deny` blocks.
 
 ### `inherit_from_parent` is now required on block `google_organization_policy.list_policy`
 
@@ -860,10 +1171,41 @@ is no known alternative at this time.
 
 ## Resource: `google_sql_database_instance`
 
-### `dump_file_path`, `username` and `password` are now required on block `google_sql_database_instance.replica_configuration`
+### At least one of `ca_certificate`, `client_certificate`, `client_key`, `connect_retry_interval`,
+`dump_file_path`, `failover_target`, `master_heartbeat_period`, `password`,
+`ssl_cipher`, `username`, or `verify_server_certificate` is now required on
+`google_sql_database_instance.settings.replica_configuration`
 
-In an attempt to avoid allowing empty blocks in config files, `dump_file_path`, `username` and `password` are now
-required on the `google_sql_database_instance.replica_configuration` block.
+In an attempt to avoid allowing empty blocks in config files, at least one of `ca_certificate`, `client_certificate`, `client_key`, `connect_retry_interval`,
+`dump_file_path`, `failover_target`, `master_heartbeat_period`, `password`,
+`ssl_cipher`, `username`, or `verify_server_certificate` is now required on the
+`google_sql_database_instance.settings.replica_configuration` block.
+
+### At least one of `cert`, `common_name`, `create_time`, `expiration_time`, or `sha1_fingerprint`
+is now required on `google_sql_database_instance.settings.server_ca_cert`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `cert`, `common_name`, `create_time`,
+`expiration_time`, or `sha1_fingerprint` is now required on the
+`google_sql_database_instance.settings.server_ca_cert` block.
+
+### At least one of `day`, `hour`, or `update_track` is now required on
+`google_sql_database_instance.settings.maintenance_window`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `day`, `hour`,
+or `update_track` is now required on the `google_sql_database_instance.settings.maintenance_window` block.
+
+### At least one of `binary_log_enabled`, `enabled`, `start_time`, or `location` is now required on
+`google_sql_database_instance.settings.backup_configuration`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `binary_log_enabled`,
+`enabled`, `start_time`, or `location` is now required on the
+`google_sql_database_instance.settings.backup_configuration` block.
+
+### At least one of `authorized_networks`, `ipv4_enabled`, `require_ssl`, or `private_network` is now
+required on `google_sql_database_instance.settings.ip_configuration`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `authorized_networks`, `ipv4_enabled`,
+`require_ssl`, and `private_network` is now required on the `google_sql_database_instance.settings.ip_configuration` block.
 
 ### `name` and `value` are now required on block `google_sql_database_instance.settings.database_flags`
 
@@ -894,6 +1236,25 @@ despite it being required by the API. It is now correctly marked as required.
 Previously the default value of `enabled` was `false`. In an attempt to avoid allowing empty blocks
 in config files, `enabled` is now required on the `google_storage_bucket.versioning` block.
 
+### At least one of `main_page_suffix` or `not_found_page` is now required on `google_storage_bucket.website`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `main_page_suffix` or
+`not_found_page` is now required on the `google_storage_bucket.website` block.
+
+### At least one of `origin`, `method`, `response_header`, or `max_age_seconds` is now required on 
+`google_storage_bucket.cors`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `origin`, `method`,
+`response_header`, or `max_age_seconds` is now required on the `google_storage_bucket.cors` block.
+
+### At least one of `min_time_elapsed_since_last_modification`, `max_time_elapsed_since_last_modification`,
+`include_prefixes`, or `exclude_prefixes` is now required on
+`google_storage_transfer_job.transfer_spec.object_conditions`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `min_time_elapsed_since_last_modification`,
+`max_time_elapsed_since_last_modification`, `include_prefixes`, or `exclude_prefixes` is now required
+on the `google_storage_transfer_job.transfer_spec.object_conditions` block.
+
 ### `is_live` is now removed
 
 Please use `with_state` instead, as `is_live` is now removed.
@@ -904,3 +1265,16 @@ Please use `with_state` instead, as `is_live` is now removed.
 
 In an attempt to avoid allowing empty blocks in config files, `overwrite_objects_already_existing_in_sink` is now
 required on the `google_storage_transfer_job.transfer_options` block.
+
+### At least one of `overwrite_objects_already_existing_in_sink`, `delete_objects_unique_in_sink`, or
+`delete_objects_from_source_after_transfer` is now required on `google_storage_transfer_job.transfer_spec.transfer_options`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `overwrite_objects_already_existing_in_sink`,
+`delete_objects_unique_in_sink`, or `delete_objects_from_source_after_transfer` is now required on the
+`google_storage_transfer_job.transfer_spec.transfer_options` block.
+
+### At least one of `gcs_data_source`, `aws_s3_data_source`, or `http_data_source` is now required
+on `google_storage_transfer_job.transfer_options`
+
+In an attempt to avoid allowing empty blocks in config files, at least one of `gcs_data_source`, `aws_s3_data_source`,
+or `http_data_source` is now required on the `google_storage_transfer_job.transfer_options` block.
