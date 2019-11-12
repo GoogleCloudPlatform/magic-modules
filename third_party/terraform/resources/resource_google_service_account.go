@@ -146,6 +146,9 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 				Etag:        sa.Etag,
 			},
 		}).Do()
+	if err != nil {
+		return err
+	}
 	// See comment in Create.
 	time.Sleep(time.Second)
 
