@@ -837,7 +837,6 @@ dashboards.
 
 In an attempt to avoid allowing empty blocks in config files, `channel` is now
 required on the `google_container_cluster.relase_channel` block.
-dashboards.
 
 ### `cidr_blocks` is now required on block `google_container_cluster.master_authorized_networks_config`
 
