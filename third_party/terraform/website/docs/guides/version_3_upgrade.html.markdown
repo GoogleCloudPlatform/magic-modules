@@ -54,6 +54,7 @@ so Terraform knows to manage them.
 - [Resource: `google_project_service`](#resource-google_project_service)
 - [Resource: `google_project_services`](#resource-google_project_services)
 - [Resource: `google_pubsub_subscription`](#resource-google_pubsub_subscription)
+- [Resource: `google_cloudiot_registry`](#resource-google_cloudiot_registry)
 
 <!-- /TOC -->
 
