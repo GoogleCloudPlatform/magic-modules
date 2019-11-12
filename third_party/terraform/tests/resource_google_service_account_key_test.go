@@ -58,28 +58,6 @@ func TestAccServiceAccountKey_fromEmail(t *testing.T) {
 	})
 }
 
-func TestAccServiceAccountKey_pgp(t *testing.T) {
-	t.Parallel()
-	resourceName := "google_service_account_key.acceptance"
-	accountID := "a" + acctest.RandString(10)
-	displayName := "Terraform Test"
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccServiceAccountKey_pgp(accountID, displayName, testKeyPairPubKey1),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleServiceAccountKeyExists(resourceName),
-					resource.TestCheckResourceAttrSet(resourceName, "public_key"),
-					resource.TestCheckResourceAttrSet(resourceName, "private_key_encrypted"),
-					resource.TestCheckResourceAttrSet(resourceName, "private_key_fingerprint"),
-				),
-			},
-		},
-	})
-}
-
 func testAccCheckGoogleServiceAccountKeyExists(r string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
@@ -128,23 +106,6 @@ resource "google_service_account_key" "acceptance" {
 	public_key_type = "TYPE_X509_PEM_FILE"
 }
 `, account, name)
-}
-
-func testAccServiceAccountKey_pgp(account, name string, key string) string {
-	return fmt.Sprintf(`
-resource "google_service_account" "acceptance" {
-	account_id = "%s"
-	display_name = "%s"
-}
-
-resource "google_service_account_key" "acceptance" {
-	service_account_id = "${google_service_account.acceptance.name}"
-	public_key_type = "TYPE_X509_PEM_FILE"
-	pgp_key = <<EOF
-%s
-EOF
-}
-`, account, name, key)
 }
 
 const testKeyPairPubKey1 = `mQENBFXbjPUBCADjNjCUQwfxKL+RR2GA6pv/1K+zJZ8UWIF9S0lk7cVIEfJiprzzwiMwBS5cD0da
