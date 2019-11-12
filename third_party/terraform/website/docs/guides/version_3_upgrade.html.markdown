@@ -400,10 +400,42 @@ required on the `google_compute_snapshot.source_disk_encryption_key` block.
 
 ## Resource: `google_compute_subnetwork`
 
-### `raw_key` is now required on block `google_compute_snapshot.source_disk_encryption_key`
+### `enable_flow_logs` is now removed
 
 `enable_flow_logs` has been removed and should be replaced by the `log_config` block with configurations
 for flow logging.
+
+### Old Config
+
+```hcl
+resource "google_compute_subnetwork" "subnet-with-logging" {
+  name          = "log-test-subnetwork"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "us-central1"
+  network       = "${google_compute_network.custom-test.self_link}"
+
+  enable_flow_logs = true
+}
+```
+
+
+### New Config
+
+```hcl
+resource "google_compute_subnetwork" "subnet-with-logging" {
+  name          = "log-test-subnetwork"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "us-central1"
+  network       = "${google_compute_network.custom-test.self_link}"
+
+  log_config {
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+}
+```
+
 
 ## Resource: `google_container_cluster`
 
