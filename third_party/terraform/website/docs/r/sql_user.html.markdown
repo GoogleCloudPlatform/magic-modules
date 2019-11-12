@@ -50,7 +50,7 @@ The following arguments are supported:
 * `name` - (Required) The name of the user. Changing this forces a new resource
     to be created.
 
-* `password` - (Optional) The password for the user. Can be updated.
+* `password` - (Required) The password for the user. Can be updated.
 
 - - -
 
