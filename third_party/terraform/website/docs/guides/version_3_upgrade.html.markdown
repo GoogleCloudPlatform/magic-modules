@@ -52,6 +52,7 @@ so Terraform knows to manage them.
 <!-- TOC depthFrom:2 depthTo:2 -->
 
 - [Provider Version Configuration](#provider-version-configuration)
+- [ID Format Changes](#id-format-changes)
 - [Data Source: `google_container_engine_versions`](#data-source-google_container_engine_versions)
 - [Resource: `google_app_engine_application`](#resource-google_app_engine_application)
 - [Resource: `google_cloudfunctions_function`](#resource-google_cloudfunctions_function)
@@ -117,6 +118,12 @@ provider "google" {
   version = "~> 3.0.0"
 }
 ```
+
+
+## ID Format Changes
+
+ID formats on many resources have changed. ID formats have standardized on being similar to the `self_link` of
+a resource. Users who depended on particular ID formats in previous versions may be impacted.
 
 ## Data Source: `google_container_engine_versions`
 
