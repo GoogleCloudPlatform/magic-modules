@@ -1,0 +1,4 @@
+resource "google_cloud_tasks_queue" "default" {
+  name = "<%= ctx[:vars]['name'] %>"
+  location = "us-central1"
+}

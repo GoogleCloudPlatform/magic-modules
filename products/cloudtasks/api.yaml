@@ -28,6 +28,8 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Queue'
     base_url: projects/{{project}}/locations/{{location}}/queues
+    update_verb: :PATCH
+    update_mask: true
     description: |
       A named resource to which messages are sent by publishers.
     parameters:
@@ -45,14 +47,16 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'location'
         required: true
+        input: true
         description: The location of the queue
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
+        input: true
         description: The queue name.
         pattern: projects/{{project}}/locations/{{location}}/queues/{{name}}
       - !ruby/object:Api::Type::NestedObject
-        name: appEngineRoutingOverride
+        name: 'appEngineRoutingOverride'
         description: |
           Overrides for task-level appEngineRouting. These settings apply only
           to App Engine tasks in this queue
@@ -133,7 +137,7 @@ objects:
 
               -1 indicates unlimited attempts.
           - !ruby/object:Api::Type::String
-            name: maxRetryDuration
+            name: 'maxRetryDuration'
             description: |
               If positive, maxRetryDuration specifies the time limit for
               retrying a failed task, measured from when the task was first
