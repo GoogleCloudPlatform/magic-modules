@@ -231,7 +231,7 @@ module Api
       return if @exactly_one_of.empty?
     end
 
-    # Returns list of properties that needs at least one of their fields set.
+    # Returns list of properties that needs exactly one of their fields set.
     def exactly_one_of_list
       return [] unless @__resource
 
