@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"google.golang.org/api/cloudbilling/v1"
 )
 
@@ -32,15 +32,10 @@ func resourceBillingSubaccount() *schema.Resource {
 				Computed: true,
 			},
 			"master_billing_account": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if new == canonicalBillingAccountName(old) {
-						return false
-					}
-					return true
-				},
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: compareSelfLinkOrResourceName,
 			},
 			"billing_account_id": {
 				Type:     schema.TypeString,
@@ -58,21 +53,23 @@ func resourceBillingSubaccount() *schema.Resource {
 func resourceBillingSubaccountCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	billingAccount := new(cloudbilling.BillingAccount)
 	displayName := d.Get("display_name").(string)
 	masterBillingAccount := d.Get("master_billing_account").(string)
-	billingAccount.DisplayName = displayName
-	billingAccount.MasterBillingAccount = canonicalBillingAccountName(masterBillingAccount)
 
-	resp, err := config.clientBilling.BillingAccounts.Create(billingAccount).Do()
+	billingAccount := &cloudbilling.BillingAccount{
+		DisplayName:          displayName,
+		MasterBillingAccount: canonicalBillingAccountName(masterBillingAccount),
+	}
+
+	res, err := config.clientBilling.BillingAccounts.Create(billingAccount).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating billing subaccount '%s' in master account '%s': %s", displayName, masterBillingAccount, err)
 	}
 
-	d.SetId(resp.Name)
-	d.Set("name", resp.Name)
-	d.Set("open", resp.Open)
-	d.Set("billing_account_id", strings.TrimPrefix(d.Get("name").(string), "billingAccounts/"))
+	d.SetId(res.Name)
+	d.Set("name", res.Name)
+	d.Set("open", res.Open)
+	d.Set("billing_account_id", GetResourceNameFromSelfLink(d.Get("name").(string)))
 
 	return nil
 }
@@ -82,13 +79,12 @@ func resourceBillingSubaccountRead(d *schema.ResourceData, meta interface{}) err
 
 	id := d.Id()
 
-	var billingAccount *cloudbilling.BillingAccount
-	resp, err := config.clientBilling.BillingAccounts.Get(d.Id()).Do()
+	res, err := config.clientBilling.BillingAccounts.Get(d.Id()).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Billing Account Not Found : %s", id))
+		return handleNotFoundError(err, d, fmt.Sprintf("Billing Subaccount Not Found : %s", id))
 	}
 
-	billingAccount = resp
+	billingAccount := res
 
 	d.Set("name", billingAccount.Name)
 	d.Set("display_name", billingAccount.DisplayName)
@@ -103,11 +99,12 @@ func resourceBillingSubaccountUpdate(d *schema.ResourceData, meta interface{}) e
 	config := meta.(*Config)
 
 	if ok := d.HasChange("display_name"); ok {
-		billingAccount := new(cloudbilling.BillingAccount)
-		billingAccount.DisplayName = d.Get("display_name").(string)
+		billingAccount := &cloudbilling.BillingAccount{
+			DisplayName: d.Get("display_name").(string),
+		}
 		_, err := config.clientBilling.BillingAccounts.Patch(d.Id(), billingAccount).UpdateMask("display_name").Do()
 		if err != nil {
-			return fmt.Errorf("Could not update billing account display name for: %s", d.Id())
+			return handleNotFoundError(err, d, fmt.Sprintf("Error updating billing account : %s", d.Id()))
 		}
 	}
 	return resourceBillingSubaccountRead(d, meta)
@@ -120,11 +117,12 @@ func resourceBillingSubaccountDelete(d *schema.ResourceData, meta interface{}) e
 
 	if renameOnDestroy {
 		t := time.Now()
-		billingAccount := new(cloudbilling.BillingAccount)
-		billingAccount.DisplayName = "Terraform Destroyed " + t.Format("20060102150405")
+		billingAccount := &cloudbilling.BillingAccount{
+			DisplayName: "Terraform Destroyed " + t.Format("20060102150405"),
+		}
 		_, err := config.clientBilling.BillingAccounts.Patch(d.Id(), billingAccount).UpdateMask("display_name").Do()
 		if err != nil {
-			return fmt.Errorf("Could not update billing account display name for: %s", d.Id())
+			return handleNotFoundError(err, d, fmt.Sprintf("Error updating billing account : %s", d.Id()))
 		}
 	}
 
