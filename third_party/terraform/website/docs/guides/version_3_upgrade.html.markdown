@@ -432,14 +432,15 @@ and an error is only returned when attempting to provision them. Terraform will
 now report that some configs that previously appeared valid at plan time are
 now invalid.
 
-A disk with `type` `"SCRATCH"` must have `disk_type` `"local-ssd"`. For example,
+A disk with `type` `"SCRATCH"` must have `disk_type` `"local-ssd"` and a size of 375GB. For example,
 the following is valid:
 
 ```hcl
 disk {
-    auto_delete = true
-    type        = "SCRATCH"
-    disk_type   = "local-ssd"
+    auto_delete  = true
+    type         = "SCRATCH"
+    disk_type    = "local-ssd"
+    disk_size_gb = 375
 }
 ```
 
@@ -462,12 +463,14 @@ disk {
 }
 ```
 
-### `kms_key_self_link` is now required on block `google_compute_instance_template.disk_encryption_key`
-
-In an attempt to avoid allowing empty blocks in config files, `kms_key_self_link` is now
-required on the `google_compute_instance_template.disk_encryption_key` block.
-
-## Resource: `google_compute_instance_template`
+```hcl
+disk {
+    auto_delete  = true
+    type         = "SCRATCH"
+    disk_type    = "local-ssd"
+    disk_size_gb = 300
+}
+```
 
 ### `kms_key_self_link` is now required on block `google_compute_instance_template.disk_encryption_key`
 
