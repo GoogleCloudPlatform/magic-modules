@@ -390,3 +390,29 @@ Use the plural field `event_notification_configs` instead of
 Since the Cloud IoT API now accept multiple event notification configs for a
 registry, the singular field no longer exists on the API resource and has been
 removed from Terraform to prevent conflicts.
+
+
+#### Old Config
+
+```hcl
+resource "google_cloudiot_registry" "myregistry" {
+  name = "%s"
+
+  event_notification_config = {
+    pubsub_topic_name = "${google_pubsub_topic.event-topic.id}"
+  }
+}
+
+```
+
+#### New Config
+
+```hcl
+resource "google_cloudiot_registry" "myregistry" {
+  name = "%s"
+
+  event_notification_configs = {
+    pubsub_topic_name = "${google_pubsub_topic.event-topic.id}"
+  }
+}
+```
