@@ -44,7 +44,6 @@ func resourceGoogleServiceAccount() *schema.Resource {
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 			"project": {
 				Type:     schema.TypeString,
@@ -143,6 +142,21 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 		}
 		// See comment in Create.
 		time.Sleep(time.Second)
+	}
+	if d.HasChange("description") {
+		sa, err := config.clientIAM.Projects.ServiceAccounts.Get(d.Id()).Do()
+		if err != nil {
+			return fmt.Errorf("Error retrieving service account %q: %s", d.Id(), err)
+		}
+		_, err = config.clientIAM.Projects.ServiceAccounts.Patch(d.Id(),
+			&iam.PatchServiceAccountRequest{
+				UpdateMask: "description",
+				ServiceAccount: &iam.ServiceAccount{
+					DisplayName: d.Get("display_name").(string),
+					Description: d.Get("description").(string),
+					Etag:        sa.Etag,
+				},
+			}).Do()
 	}
 
 	return nil
