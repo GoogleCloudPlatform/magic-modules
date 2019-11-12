@@ -188,7 +188,11 @@ The following arguments are supported:
 
 <% url_properties.each do |param| -%>
 <% if param.name == "name" -%>
-* `<%= object.name.underscore -%>` - (Required) Used to find the parent resource to bind the IAM policy to
+* `<%= object.iam_policy.parent_resource_attribute || object.name.underscore -%>` - (Required) Used to find the parent resource to bind the IAM policy to
+<% elsif ["region", "zone"].include?(param.name.underscore) -%>
+* `<%= param.name.underscore -%>` - (Optional) <%= param.description -%> Used to find the parent resource to bind the IAM policy to. If not specified,
+  the value will be parsed from the identifier of the parent resource. If no <%= param.name.underscore -%> is provided in the parent identifier and no
+  <%= param.name.underscore -%> is specified, it is taken from the provider configuration.
 <% else -%>
 * `<%= param.name.underscore -%>` - (Required) <%= param.description -%> Used to find the parent resource to bind the IAM policy to
 <% end -%>
@@ -243,14 +247,29 @@ exported:
 
 ## Import
 
-<%= product_ns -%> <%= object.name.downcase -%> IAM resources can be imported using the project, resource identifiers, role and member.
+For all import syntaxes, the "resource in question" can take any of the following forms:
 
+<% import_id_formats(object).each do |id_format| -%>
+* <%= id_format %>
+<% end -%>
+
+Any variables not passed in the import command will be taken from the provider configuration.
+
+<%= product_ns -%> <%= object.name.downcase -%> IAM resources can be imported using the resource identifiers, role, and member.
+
+IAM member imports use space-delimited identifiers: the resource in question, the role, and the member identity, e.g.
 ```
-$ terraform import <%= resource_ns_iam -%>_policy.editor <%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") %>
+$ terraform import <% if object.min_version.name == 'beta' %>-provider=google-beta <% end -%><%= resource_ns_iam -%>_member.editor "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%> jane@example.com"
+```
 
+IAM binding imports use space-delimited identifiers: the resource in question and the role, e.g.
+```
 $ terraform import <%= resource_ns_iam -%>_binding.editor "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%>"
+```
 
-$ terraform import <%= resource_ns_iam -%>_member.editor "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%> jane@example.com"
+IAM policy imports use the identifier of the resource in question, e.g.
+```
+$ terraform import <% if object.min_version.name == 'beta' %>-provider=google-beta <% end -%><%= resource_ns_iam -%>_policy.editor <%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") %>
 ```
 
 -> If you're importing a resource with beta features, make sure to include `-provider=google-beta`
