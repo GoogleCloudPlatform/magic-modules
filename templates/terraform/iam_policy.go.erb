@@ -159,7 +159,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 <%# Set resource long name in state, this has all the information that we need to identify it -%>
 	d.Set("<%= resource_params.last.underscore -%>", u.GetResourceId())
 <% end -%>
-
+	d.SetId(u.GetResourceId())
 	return nil
 }
 
