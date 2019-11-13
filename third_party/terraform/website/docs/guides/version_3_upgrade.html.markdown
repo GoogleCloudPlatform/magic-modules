@@ -373,6 +373,40 @@ documentation.
 In an attempt to avoid allowing empty blocks in config files, `public_key_certificate` is now
 required on the `google_cloudiot_registry.credentials` block.
 
+### Replace singular event notification config field with plural `event_notification_configs`
+
+Use the plural field `event_notification_configs` instead of
+`event_notification_config`, which has now been removed.
+Since the Cloud IoT API now accept multiple event notification configs for a
+registry, the singular field no longer exists on the API resource and has been
+removed from Terraform to prevent conflicts.
+
+
+#### Old Config
+
+```hcl
+resource "google_cloudiot_registry" "myregistry" {
+  name = "%s"
+
+  event_notification_config {
+    pubsub_topic_name = "${google_pubsub_topic.event-topic.id}"
+  }
+}
+
+```
+
+#### New Config
+
+```hcl
+resource "google_cloudiot_registry" "myregistry" {
+  name = "%s"
+
+  event_notification_configs {
+    pubsub_topic_name = "${google_pubsub_topic.event-topic.id}"
+  }
+}
+```
+
 ## Resource: `google_composer_environment`
 
 ### `use_ip_aliases` is now required on block `google_composer_environment.ip_allocation_policy`
