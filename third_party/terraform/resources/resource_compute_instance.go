@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"sort"
 	"strings"
 	"time"
 
@@ -56,74 +55,6 @@ var (
 		"shielded_instance_config.0.enable_integrity_monitoring",
 	}
 )
-
-func resourceComputeInstanceAtLeastOneNetworkDiff(diff *schema.ResourceDiff, v interface{}) error {
-	atLeastOneOfList := []string{"network_interface.%d.network", "network_interface.%d.subnetwork"}
-	errorList := make([]string, 0)
-
-	networkInterfaces := diff.Get("network_interface").([]interface{})
-	if len(networkInterfaces) == 0 {
-		return nil
-	}
-
-	for i := range networkInterfaces {
-		found := false
-		for _, atLeastOneOfKey := range atLeastOneOfList {
-			if val := diff.Get(fmt.Sprintf(atLeastOneOfKey, i)); val != "" {
-				found = true
-			}
-		}
-
-		if found == false {
-			sort.Strings(atLeastOneOfList)
-			keyList := formatStringsInList(atLeastOneOfList, i)
-			errorList = append(errorList, fmt.Sprintf("network_interface: one of `%s` must be specified", strings.Join(keyList, ",")))
-		}
-	}
-
-	if len(errorList) > 0 {
-		return fmt.Errorf(strings.Join(errorList, "\n\t* "))
-	}
-
-	return nil
-}
-
-func resourceComputeInstanceAtLeastOneAccessConfigAttrDiff(diff *schema.ResourceDiff, v interface{}) error {
-	errorList := make([]string, 0)
-
-	networkInterfaces := diff.Get("network_interface").([]interface{})
-	if len(networkInterfaces) == 0 {
-		return nil
-	}
-
-	for i := range networkInterfaces {
-		accessConfigs := diff.Get(fmt.Sprintf("network_interface.%d.access_config", i)).([]interface{})
-		if len(accessConfigs) == 0 {
-			continue
-		}
-
-		for j := range accessConfigs {
-			found := false
-			for _, atLeastOneOfKey := range accessConfigKeys {
-				if val := diff.Get(fmt.Sprintf(atLeastOneOfKey, i, j)); val != "" {
-					found = true
-				}
-			}
-
-			if found == false {
-				sort.Strings(accessConfigKeys)
-				keyList := formatStringsInList(accessConfigKeys, i, j)
-				errorList = append(errorList, fmt.Sprintf("network_interface.%d.access_config: one of `%s` must be specified", i, strings.Join(keyList, ",")))
-			}
-		}
-	}
-
-	if len(errorList) > 0 {
-		return fmt.Errorf(strings.Join(errorList, "\n\t* "))
-	}
-
-	return nil
-}
 
 func resourceComputeInstance() *schema.Resource {
 	return &schema.Resource{
@@ -664,8 +595,6 @@ func resourceComputeInstance() *schema.Resource {
 				},
 				suppressEmptyGuestAcceleratorDiff,
 			),
-			resourceComputeInstanceAtLeastOneNetworkDiff,
-			resourceComputeInstanceAtLeastOneAccessConfigAttrDiff,
 		),
 	}
 }

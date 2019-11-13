@@ -95,6 +95,7 @@ objects:
                 Name of the field.
             - !ruby/object:Api::Type::Enum
               name: 'order'
+              # TODO (mbang): Exactly one of order or arrayConfig must be set
               description: |
                 Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=.
                 Only one of `order` and `arrayConfig` can be specified.
@@ -103,6 +104,7 @@ objects:
                 - :DESCENDING
             - !ruby/object:Api::Type::Enum
               name: 'arrayConfig'
+              # TODO (mbang): Exactly one of order or arrayConfig must be set
               description: |
                 Indicates that this field supports operations on arrayValues. Only one of `order` and `arrayConfig` can
                 be specified.

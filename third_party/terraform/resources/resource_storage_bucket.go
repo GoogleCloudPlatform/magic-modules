@@ -7,7 +7,6 @@ import (
 	"log"
 	"math"
 	"runtime"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -23,37 +22,6 @@ import (
 	"google.golang.org/api/storage/v1"
 )
 
-func resourceStorageBucketAtLeastOneCorsAttrDiff(diff *schema.ResourceDiff, v interface{}) error {
-	atLeastOneOfList := []string{"cors.%d.origin", "cors.%d.method", "cors.%d.response_header", "cors.%d.max_age_seconds"}
-	errorList := make([]string, 0)
-
-	corsBlocks := diff.Get("cors").([]interface{})
-	if len(corsBlocks) == 0 {
-		return nil
-	}
-
-	for i := range corsBlocks {
-		found := false
-		for _, atLeastOneOfKey := range atLeastOneOfList {
-			if val := diff.Get(fmt.Sprintf(atLeastOneOfKey, i)); val != "" {
-				found = true
-			}
-		}
-
-		if found == false {
-			sort.Strings(atLeastOneOfList)
-			keyList := formatStringsInList(atLeastOneOfList, i)
-			errorList = append(errorList, fmt.Sprintf("cors: one of `%s` must be specified", strings.Join(keyList, ",")))
-		}
-	}
-
-	if len(errorList) > 0 {
-		return fmt.Errorf(strings.Join(errorList, "\n\t* "))
-	}
-
-	return nil
-}
-
 func resourceStorageBucket() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceStorageBucketCreate,
@@ -65,7 +33,6 @@ func resourceStorageBucket() *schema.Resource {
 		},
 		CustomizeDiff: customdiff.All(
 			customdiff.ForceNewIfChange("retention_policy.0.is_locked", isPolicyLocked),
-			resourceStorageBucketAtLeastOneCorsAttrDiff,
 		),
 
 		Schema: map[string]*schema.Schema{

@@ -158,9 +158,10 @@ objects:
           If the job providers a Pub/Sub target the cron will publish
           a message to the provided topic
         input: true
-        conflicts: 
-          - httpTarget
-          - appEngineHttpTarget
+        exactly_one_of:
+          - pubsub_target
+          - http_target
+          - app_engine_http_target
         properties:
           - !ruby/object:Api::Type::String
             name: topicName
@@ -191,9 +192,10 @@ objects:
           If the job providers a App Engine HTTP target the cron will 
           send a request to the service instance
         input: true
-        conflicts: 
-          - pubsubTarget
-          - httpTarget
+        exactly_one_of:
+          - pubsub_target
+          - http_target
+          - app_engine_http_target
         properties:
           - !ruby/object:Api::Type::String
             name: httpMethod
@@ -273,9 +275,10 @@ objects:
           If the job providers a http_target the cron will 
           send a request to the targeted url
         input: true
-        conflicts: 
-          - pubsubTarget
-          - appEngineHttpTarget
+        exactly_one_of:
+          - pubsub_target
+          - http_target
+          - app_engine_http_target
         properties:
           - !ruby/object:Api::Type::String
             name: uri

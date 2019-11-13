@@ -267,14 +267,15 @@ objects:
                           Format: "major.minor.patch" such as "10.5.301", "9.2.1".
                       - !ruby/object:Api::Type::Enum
                         name: 'osType'
+                        required: true
                         description: |
                           The operating system type of the device.
                         values:
-                        - :OS_UNSPECIFIED
-                        - :DESKTOP_MAC
-                        - :DESKTOP_WINDOWS
-                        - :DESKTOP_LINUX
-                        - :DESKTOP_CHROME_OS
+                          - :OS_UNSPECIFIED
+                          - :DESKTOP_MAC
+                          - :DESKTOP_WINDOWS
+                          - :DESKTOP_LINUX
+                          - :DESKTOP_CHROME_OS
   - !ruby/object:Api::Resource
     name: 'ServicePerimeter'
     # This is an unusual API, so we need to use a few fields to map the methods
