@@ -76,10 +76,12 @@ func resourceGoogleServiceAccountKey() *schema.Resource {
 			"private_key_encrypted": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Removed:  "The private_key_encrypted field has been removed. See https://www.terraform.io/docs/extend/best-practices/sensitive-state.html for more information.",
 			},
 			"private_key_fingerprint": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Removed:  "The private_key_fingerprint field has been removed. See https://www.terraform.io/docs/extend/best-practices/sensitive-state.html for more information.",
 			},
 		},
 	}
