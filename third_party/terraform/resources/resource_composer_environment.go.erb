@@ -275,6 +275,7 @@ func resourceComposerEnvironment() *schema.Resource {
 									"enable_private_endpoint": {
 										Type:         schema.TypeBool,
 										Optional:     true,
+										Default:      true,
 										AtLeastOneOf: []string{
 											"config.0.private_environment_config.0.enable_private_endpoint",
 											"config.0.private_environment_config.0.master_ipv4_cidr_block",
