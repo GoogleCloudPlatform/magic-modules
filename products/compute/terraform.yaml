@@ -1664,7 +1664,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       insert_minutes: 6
       update_minutes: 6
       delete_minutes: 6
-    id_format: "{{region}}/{{name}}"
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/compute.networkUser'
       parent_resource_attribute: 'subnetwork'
