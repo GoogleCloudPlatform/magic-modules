@@ -60,6 +60,7 @@ so Terraform knows to manage them.
 - [Resource: `google_cloudiot_registry`](#resource-google_cloudiot_registry)
 - [Resource: `google_composer_environment`](#resource-google_composer_environment)
 - [Resource: `google_compute_forwarding_rule`](#resource-google_compute_forwarding_rule)
+- [Resource: `google_compute_global_forwarding_rule`](#resource-google_global_compute_forwarding_rule)
 - [Resource: `google_compute_instance`](#resource-google_compute_instance)
 - [Resource: `google_compute_instance_template`](#resource-google_compute_instance_template)
 - [Resource: `google_compute_network`](#resource-google_compute_network)
@@ -390,6 +391,55 @@ in config files, `enable_private_endpoint` is now required on the `google_compos
 ### `ip_version` is now removed
 
 `ip_version` is not used for regional forwarding rules.
+
+### `ip_address` is now strictly validated to enforce literal IP address format
+
+Previously documentation suggested Terraform could use the same range of valid
+IP Address formats for `ip_address` as accepted by the API (e.g. named addresses
+or URLs to GCP Address resources). However, the server returns only literal IP
+addresses and thus caused diffs on re-apply (i.e. a permadiff). We amended
+documenation to say Terraform only accepts literal IP addresses.
+
+This is now strictly validated. While this shouldn't have a large breaking
+impact as users would have already run into permadiff issues on re-apply,
+there might be validation errors for existing configs. The solution is be to
+replace other address formats with the IP address, either manually or by
+interpolating values from a `google_compute_address` resource.
+
+#### Old Config (that would have permadiff)
+
+```hcl
+resource "google_compute_address" "my-addr" {
+  name = "my-addr"
+}
+
+resource "google_compute_forwarding_rule" "frule" {
+  name = "my-forwarding-rule"
+
+  address = google_compute_address.my-addr.self_link
+}
+```
+
+#### New Config
+
+```hcl
+resource "google_compute_address" "my-addr" {
+  name = "my-addr"
+}
+
+resource "google_compute_forwarding_rule" "frule" {
+  name = "my-forwarding-rule"
+
+  address = google_compute_address.my-addr.address
+}
+```
+
+## Resource: `google_compute_global_forwarding_rule`
+
+### `ip_address` is now validated to enforce literal IP address format
+
+See [`google_compute_forwarding_rule`][#resource-google_compute_forwarding_rule].
+
 
 ## Resource: `google_compute_instance`
 
