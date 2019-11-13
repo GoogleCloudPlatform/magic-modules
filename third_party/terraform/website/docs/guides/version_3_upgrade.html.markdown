@@ -373,6 +373,7 @@ resource "google_cloudiot_registry" "myregistry" {
   }
 }
 ```
+
 ### `public_key_certificate` is now required on block `google_cloudiot_registry.credentials`
 
 In an attempt to avoid allowing empty blocks in config files, `public_key_certificate` is now
@@ -1540,6 +1541,7 @@ In an attempt to avoid allowing empty blocks in config files, at least one of `m
 ### `is_live` is now removed
 
 Please use `with_state` instead, as `is_live` is now removed.
+
 ## Resource: `google_storage_transfer_job`
 
 ### At least one of `overwrite_objects_already_existing_in_sink`, `delete_objects_unique_in_sink`, or `delete_objects_from_source_after_transfer` is now required on `google_storage_transfer_job.transfer_spec.transfer_options`
