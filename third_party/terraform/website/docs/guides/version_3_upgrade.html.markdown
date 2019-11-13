@@ -1342,6 +1342,11 @@ is now required on the `documentation` block.
 
 ## Resource: `google_monitoring_uptime_check_config`
 
+### Exactly one of `resource_group` or `monitored_resource` is now required on `google_monitoring_uptime_check_config`
+
+In attempt to be more consistent with the API, exactly one of `resource_group` or `monitored_resource` is now required
+on `google_monitoring_uptime_check_config`.
+
 ### Exactly one of `http_check` or `tcp_check` is now required on `google_monitoring_uptime_check_config`
 
 In attempt to be more consistent with the API, exactly one of `http_check` or `tcp_check` is now required
