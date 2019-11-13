@@ -329,6 +329,7 @@ objects:
             # are possible.
           - !ruby/object:Api::Type::String
               name: 'networkUrl'
+              required: true
               description: |
                 The fully qualified URL of the VPC network to bind to.
                 This should be formatted like

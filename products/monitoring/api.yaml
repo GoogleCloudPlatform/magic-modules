@@ -951,11 +951,19 @@ objects:
     - !ruby/object:Api::Type::NestedObject
       name: httpCheck
       description: Contains information needed to make an HTTP or HTTPS check.
-      conflicts:
-        - tcpCheck
+      exactly_one_of:
+        - http_check
+        - tcp_check
       properties:
       - !ruby/object:Api::Type::NestedObject
         name: authInfo
+        at_least_one_of:
+          - http_check.0.auth_info
+          - http_check.0.port
+          - http_check.0.headers
+          - http_check.0.path
+          - http_check.0.use_ssl
+          - http_check.0.mask_headers
         description: The authentication information. Optional when creating an HTTP
           check; defaults to empty.
         properties:
@@ -969,11 +977,25 @@ objects:
           description: The username to authenticate.
       - !ruby/object:Api::Type::Integer
         name: port
+        at_least_one_of:
+          - http_check.0.auth_info
+          - http_check.0.port
+          - http_check.0.headers
+          - http_check.0.path
+          - http_check.0.use_ssl
+          - http_check.0.mask_headers
         description: The port to the page to run the check against. Will be combined
           with host (specified within the MonitoredResource) and path to construct the
           full URL. Optional (defaults to 80 without SSL, or 443 with SSL).
       - !ruby/object:Api::Type::KeyValuePairs
         name: headers
+        at_least_one_of:
+          - http_check.0.auth_info
+          - http_check.0.port
+          - http_check.0.headers
+          - http_check.0.path
+          - http_check.0.use_ssl
+          - http_check.0.mask_headers
         description: The list of headers to send as part of the uptime check request.
           If two headers have the same key and different values, they should be entered
           as a single header, with the value being a comma-separated list of all the
@@ -983,12 +1005,26 @@ objects:
           headers allowed is 100.
       - !ruby/object:Api::Type::String
         name: path
+        at_least_one_of:
+          - http_check.0.auth_info
+          - http_check.0.port
+          - http_check.0.headers
+          - http_check.0.path
+          - http_check.0.use_ssl
+          - http_check.0.mask_headers
         default_value: "/"
         description: The path to the page to run the check against. Will be combined
           with the host (specified within the MonitoredResource) and port to construct
           the full URL. Optional (defaults to "/").
       - !ruby/object:Api::Type::Boolean
         name: useSsl
+        at_least_one_of:
+          - http_check.0.auth_info
+          - http_check.0.port
+          - http_check.0.headers
+          - http_check.0.path
+          - http_check.0.use_ssl
+          - http_check.0.mask_headers
         description: If true, use HTTPS instead of HTTP to run the check.
       - !ruby/object:Api::Type::Boolean
         name: validateSsl
@@ -997,6 +1033,13 @@ objects:
           is set to uptime_url. If useSsl is false, setting validateSsl to true has no effect.
       - !ruby/object:Api::Type::Boolean
         name: maskHeaders
+        at_least_one_of:
+          - http_check.0.auth_info
+          - http_check.0.port
+          - http_check.0.headers
+          - http_check.0.path
+          - http_check.0.use_ssl
+          - http_check.0.mask_headers
         description: Boolean specifying whether to encrypt the header information.
           Encryption should be specified for any headers related to authentication that
           you do not wish to be seen when retrieving the configuration. The server will
@@ -1005,8 +1048,9 @@ objects:
     - !ruby/object:Api::Type::NestedObject
       name: tcpCheck
       description: Contains information needed to make a TCP check.
-      conflicts:
-        - httpCheck
+      exactly_one_of:
+        - http_check
+        - tcp_check
       properties:
       - !ruby/object:Api::Type::Integer
         name: port
