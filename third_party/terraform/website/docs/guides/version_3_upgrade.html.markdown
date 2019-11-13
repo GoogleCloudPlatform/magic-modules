@@ -495,7 +495,7 @@ is now required on the `log_config` block.
 
 ## Resource: `google_compute_firewall`
 
-### Exactly one of `allowed` or `denied` is required on `google_compute_firewall`
+### Exactly one of `allow` or `deny` is required on `google_compute_firewall`
 
 In attempt to be more consistent with the API, exactly one of `allowed` or `denied`
 is now required on `google_compute_firewall`.

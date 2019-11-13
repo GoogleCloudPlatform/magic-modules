@@ -2849,8 +2849,8 @@ objects:
           specifies a protocol and port-range tuple that describes a permitted
           connection.
         exactly_one_of:
-          - allowed
-          - denied
+          - allow
+          - deny
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             # IPProtocol has to be string, instead of Enum because user can
@@ -2882,8 +2882,8 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'denied'
         exactly_one_of:
-          - allowed
-          - denied
+          - allow
+          - deny
         description: |
           The list of DENY rules specified by this firewall. Each rule specifies
           a protocol and port-range tuple that describes a denied connection.
