@@ -212,8 +212,7 @@ required on the `basic.conditions.device_policy.os_constraints` block.
 
 ## Resource: `google_access_context_manager_service_perimeter`
 
-### At least one of `resources`, `access_levels`, or `restricted_services` is now required on
-`google_accesscontextmanager_service_perimeter.status`
+### At least one of `resources`, `access_levels`, or `restricted_services` is now required on `google_accesscontextmanager_service_perimeter.status`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `resources`, `access_levels`,
 or `restricted_services` is now required on the `status` block.
@@ -249,8 +248,7 @@ required on the `entrypoint` block.
 In an attempt to avoid allowing empty blocks in config files, `script_path` is now
 required on the `handlers.script` block.
 
-### `source_url` is now required on `google_app_engine_standard_app_version.deployment.files`
-and `google_app_engine_standard_app_version.deployment.zip`
+### `source_url` is now required on `google_app_engine_standard_app_version.deployment.files` and `google_app_engine_standard_app_version.deployment.zip`
 
 In an attempt to avoid allowing empty blocks in config files, `shell` is now
 required on the `deployment.files` and `deployment.zip` blocks.
@@ -264,8 +262,7 @@ required on the `access` block.
 
 ## Resource: `google_bigquery_table`
 
-### At least one of `range` or `skip_leading_rows` is now required on
-`external_data_configuration.google_sheets_options`
+### At least one of `range` or `skip_leading_rows` is now required on `external_data_configuration.google_sheets_options`
 
 In an attempt to avoid allowing empty blocks in config files, at least one
 of `range` or `skip_leading_rows` is now required on the
@@ -273,8 +270,7 @@ of `range` or `skip_leading_rows` is now required on the
 
 ## Resource: `google_bigtable_app_profile`
 
-### Exactly one of `single_cluster_routing` or `multi_cluster_routing_use_any` is now required on
-`google_bigtable_app_profile`
+### Exactly one of `single_cluster_routing` or `multi_cluster_routing_use_any` is now required on `google_bigtable_app_profile`
 
 In attempt to be more consistent with the API, exactly one of `single_cluster_routing` or
 `multi_cluster_routing_use_any` is now required on `google_bigtable_app_profile`.
@@ -389,35 +385,30 @@ required on the `credentials` block.
 
 ## Resource: `google_cloudscheduler_job`
 
-### Exactly one of `pubsub_target`, `http_target` or `app_engine_http_target` is required
-on `google_cloudscheduler_job`
+### Exactly one of `pubsub_target`, `http_target` or `app_engine_http_target` is required on `google_cloudscheduler_job`
 
 In attempt to be more consistent with the API, exactly one of `pubsub_target`, `http_target`
 or `app_engine_http_target` is now required on `google_cloudscheduler_job`.
 
-### `service_account_email` is now required on `google_cloudscheduler_job.http_target.oauth_token`
-and `google_cloudscheduler_job.http_target.oidc_token`.
+### `service_account_email` is now required on `google_cloudscheduler_job.http_target.oauth_token` and `google_cloudscheduler_job.http_target.oidc_token`.
 
 In an attempt to avoid allowing empty blocks in config files, `service_account_email` is now
 required on the `http_target.oauth_token` and `http_target.oidc_token` blocks.
 
-### At least one of `retry_count`, `max_retry_duration`, `min_backoff_duration`, `max_backoff_duration`,
-or `max_doublings` is now required on `google_cloud_scheduler_job.retry_config`
+### At least one of `retry_count`, `max_retry_duration`, `min_backoff_duration`, `max_backoff_duration`, or `max_doublings` is now required on `google_cloud_scheduler_job.retry_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `retry_count`,
 `max_retry_duration`, `min_backoff_duration`, `max_backoff_duration`, or `max_doublings` is
 now required on the `retry_config` block.
 
-### At least one of `service`, `version`, or `instance` is now required on
-`google_cloud_scheduler_job.app_engine_http_target.app_engine_routing`
+### At least one of `service`, `version`, or `instance` is now required on `google_cloud_scheduler_job.app_engine_http_target.app_engine_routing`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `service`,
 `version`, or `instance` is now required on the `app_engine_http_target.app_engine_routing` block.
 
 ## Resource: `google_composer_environment`
 
-### At least one of `airflow_config_overrides`, `pypi_packages`, `env_variables`, `image_version`,
-or `python_version` are now required on `google_composer_environment.config.software_config`
+### At least one of `airflow_config_overrides`, `pypi_packages`, `env_variables`, `image_version`, or `python_version` are now required on `google_composer_environment.config.software_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `airflow_config_overrides`,
 `pypi_packages`, `env_variables`, `image_version`, or `python_version` is now required on the
@@ -443,43 +434,34 @@ blocks in config files, `signed_url_cache_max_age_sec` is now required on the
 
 ## Resource: `google_compute_backend_service`
 
-### At least one of `connect_timeout`, `max_requests_per_connection`, `max_connections`,
-`max_pending_requests`, `max_requests`,  or `max_retries` is now required on
-`google_compute_backend_service.circuit_breakers`
+### At least one of `connect_timeout`, `max_requests_per_connection`, `max_connections`, `max_pending_requests`, `max_requests`,  or `max_retries` is now required on `google_compute_backend_service.circuit_breakers`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `connect_timeout`,
 `max_requests_per_connection`, `max_connections`, `max_pending_requests`, `max_requests`,
 or `max_retries` is now required on the `circuit_breakers` block.
 
-###  At least one of `ttl`, `name`, or `path` is now required on
-`google_compute_backend_service.consistent_hash.http_cookie`
+###  At least one of `ttl`, `name`, or `path` is now required on `google_compute_backend_service.consistent_hash.http_cookie`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `ttl`, `name`, or `path`
 is now required on the `consistent_hash.http_cookie` block.
 
-### At least one of `http_cookie`, `http_header_name`, or `minimum_ring_size` is now required on
-`google_compute_backend_service.consistent_hash`
+### At least one of `http_cookie`, `http_header_name`, or `minimum_ring_size` is now required on `google_compute_backend_service.consistent_hash`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `http_cookie`,
 `http_header_name`, or `minimum_ring_size` is now required on the `consistent_hash` block.
 
-### At least one of `cache_key_policy` or `signed_url_cache_max_age_sec` is now required on
-`google_compute_backend_service.cdn_policy`
+### At least one of `cache_key_policy` or `signed_url_cache_max_age_sec` is now required on `google_compute_backend_service.cdn_policy`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `cache_key_policy` or
 `signed_url_cache_max_age_sec` is now required on the `cdn_policy` block.
 
-### At least one of `include_host`, `include_protocol`, `include_query_string`, `query_string_blacklist`,
-or `query_string_whitelist` is now required on `google_compute_backend_service.cdn_policy.cache_key_policy`
+### At least one of `include_host`, `include_protocol`, `include_query_string`, `query_string_blacklist`, or `query_string_whitelist` is now required on `google_compute_backend_service.cdn_policy.cache_key_policy`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `include_host`,
 `include_protocol`, `include_query_string`, `query_string_blacklist`, or `query_string_whitelist`
 is now required on the `cdn_policy.cache_key_policy` block.
 
-### At least one of `base_ejection_time`, `consecutive_errors`, `consecutive_gateway_failure`,
-`enforcing_consecutive_errors`, `enforcing_consecutive_gateway_failure`, `enforcing_success_rate`,
-`interval`, `max_ejection_percent`, `success_rate_minimum_hosts`, `success_rate_request_volume`,
-or `success_rate_stdev_factor` is now required on `google_compute_backend_service.outlier_detection`
+### At least one of `base_ejection_time`, `consecutive_errors`, `consecutive_gateway_failure`, `enforcing_consecutive_errors`, `enforcing_consecutive_gateway_failure`, `enforcing_success_rate`, `interval`, `max_ejection_percent`, `success_rate_minimum_hosts`, `success_rate_request_volume`, or `success_rate_stdev_factor` is now required on `google_compute_backend_service.outlier_detection`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `base_ejection_time`,
 `consecutive_errors`, `consecutive_gateway_failure`, `enforcing_consecutive_errors`,
@@ -555,23 +537,19 @@ See [`google_compute_forwarding_rule`][#resource-google_compute_forwarding_rule]
 
 ## Resource: `google_compute_health_check`
 
-### Exactly one of `http_health_check`, `https_health_check`, `http2_health_check`,
-`tcp_health_check` or `ssl_health_check` is required on `google_compute_health_check`
+### Exactly one of `http_health_check`, `https_health_check`, `http2_health_check`, `tcp_health_check` or `ssl_health_check` is required on `google_compute_health_check`
 
 In attempt to be more consistent with the API, exactly one of `http_health_check`, `https_health_check`,
 `http2_health_check`, `tcp_health_check` or `ssl_health_check` is now required on
 `google_compute_health_check`.
 
-### At least one of `host`, `request_path`, `response`, `port`, `port_name`, `proxy_header`, or `port_specification`
-is now required on `google_compute_health_check.http_health_check`, `google_compute_health_check.https_health_check`
-and `google_compute_health_check.http2_health_check`
+### At least one of `host`, `request_path`, `response`, `port`, `port_name`, `proxy_header`, or `port_specification` is now required on `google_compute_health_check.http_health_check`, `google_compute_health_check.https_health_check` and `google_compute_health_check.http2_health_check`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `host`, `request_path`, `response`,
 `port`, `port_name`, `proxy_header`, or `port_specification` is now required on the
 `http_health_check`, `https_health_check` and `http2_health_check` blocks.
 
-### At least one of `request`, `response`, `port`, `port_name`, `proxy_header`, or `port_specification`
-is now required on `google_compute_health_check.ssl_health_check` and `google_compute_health_check.tcp_health_check`
+### At least one of `request`, `response`, `port`, `port_name`, `proxy_header`, or `port_specification` is now required on `google_compute_health_check.ssl_health_check` and `google_compute_health_check.tcp_health_check`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `request`, `response`, `port`, `port_name`,
 `proxy_header`, or `port_specification` is now required on the `ssl_health_check` and `tcp_health_check` blocks.
@@ -590,41 +568,35 @@ In an attempt to avoid allowing empty blocks in config files, `type` is now requ
 Previously the default value of `interface` was `SCSI`. In an attempt to avoid allowing empty blocks
 in config files, `interface` is now required on the `scratch_disk` block.
 
-### At least one of `auto_delete`, `device_name`, `disk_encryption_key_raw`, `kms_key_self_link`,
-`initialize_params`, `mode` or `source` is now required on `google_compute_instance.boot_disk`
+### At least one of `auto_delete`, `device_name`, `disk_encryption_key_raw`, `kms_key_self_link`, `initialize_params`, `mode` or `source` is now required on `google_compute_instance.boot_disk`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `auto_delete`, `device_name`,
 `disk_encryption_key_raw`, `kms_key_self_link`, `initialize_params`, `mode` or `source` is now required on the
 `boot_disk` block.
 
-### At least one of `size`, `type`, `image`, or `labels` are now required on
-`google_compute_instance.boot_disk.initialize_params`
+### At least one of `size`, `type`, `image`, or `labels` are now required on `google_compute_instance.boot_disk.initialize_params`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `size`, `type`, `image`, or `labels`
 is now required on the `initialize_params` block.
 
-### At least one of `enable_secure_boot`, `enable_vtpm`, or `enable_integrity_monitoring` is now required
-on `google_compute_instance.shielded_instance_config`
+### At least one of `enable_secure_boot`, `enable_vtpm`, or `enable_integrity_monitoring` is now required on `google_compute_instance.shielded_instance_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `enable_secure_boot`, `enable_vtpm`,
 or `enable_integrity_monitoring` is now required on the `shielded_instance_config` block.
 
-### At least one of `on_host_maintenance`, `automatic_restart`, `preemptible`, or `node_affinities`
-is now required on `google_compute_instance.scheduling`
+### At least one of `on_host_maintenance`, `automatic_restart`, `preemptible`, or `node_affinities` is now required on `google_compute_instance.scheduling`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `on_host_maintenance`, `automatic_restart`,
 `preemptible`, or `node_affinities` is now required on the `scheduling` block.
 
 ## Resource: `google_compute_instance_template`
 
-### At least one of `enable_secure_boot`, `enable_vtpm`, or `enable_integrity_monitoring` is now
-required on `google_compute_instance_template.shielded_instance_config`
+### At least one of `enable_secure_boot`, `enable_vtpm`, or `enable_integrity_monitoring` is now required on `google_compute_instance_template.shielded_instance_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `enable_secure_boot`, `enable_vtpm`, or
 `enable_integrity_monitoring` is now required on the `shielded_instance_config` block.
 
-### At least one of `on_host_maintenance`, `automatic_restart`, `preemptible`, or `node_affinities` is
-now required on `google_compute_instance_template.scheduling`
+### At least one of `on_host_maintenance`, `automatic_restart`, `preemptible`, or `node_affinities` is now required on `google_compute_instance_template.scheduling`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `on_host_maintenance`, `automatic_restart`,
 `preemptible`, or `node_affinities` is now required on the `scheduling` block.
@@ -704,36 +676,28 @@ is now required on the `node_type_flexibility` block.
 
 ## Resource: `google_compute_region_backend_service`
 
-### At least one of `connect_timeout`, `max_requests_per_connection`, `max_connections`,
-`max_pending_requests`, `max_requests`,  or `max_retries` is now required on
-`google_compute_region_backend_service.circuit_breakers`
+### At least one of `connect_timeout`, `max_requests_per_connection`, `max_connections`, `max_pending_requests`, `max_requests`,  or `max_retries` is now required on `google_compute_region_backend_service.circuit_breakers`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `connect_timeout`,
 `max_requests_per_connection`, `max_connections`, `max_pending_requests`, `max_requests`,
 or `max_retries` is now required on the `circuit_breakers` block.
 
-###  At least one of `ttl`, `name`, or `path` is now required on
-`google_compute_region_backend_service.consistent_hash.http_cookie`
+###  At least one of `ttl`, `name`, or `path` is now required on `google_compute_region_backend_service.consistent_hash.http_cookie`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `ttl`, `name`, or `path`
 is now required on the `consistent_hash.http_cookie` block.
 
-### At least one of `http_cookie`, `http_header_name`, or `minimum_ring_size` is now required on
-`google_compute_region_backend_service.consistent_hash`
+### At least one of `http_cookie`, `http_header_name`, or `minimum_ring_size` is now required on `google_compute_region_backend_service.consistent_hash`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `http_cookie`,
 `http_header_name`, or `minimum_ring_size` is now required on the `consistent_hash` block.
 
-### At least one of `disable_connection_drain_on_failover`, `drop_traffic_if_unhealthy`, or
-`failover_ratio` is now required on `google_compute_region_backend_service.failover_policy`
+### At least one of `disable_connection_drain_on_failover`, `drop_traffic_if_unhealthy`, or `failover_ratio` is now required on `google_compute_region_backend_service.failover_policy`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `disable_connection_drain_on_failover`,
 `drop_traffic_if_unhealthy`, or `failover_ratio` is now required on the `failover_policy` block.
 
-### At least one of `base_ejection_time`, `consecutive_errors`, `consecutive_gateway_failure`,
-`enforcing_consecutive_errors`, `enforcing_consecutive_gateway_failure`, `enforcing_success_rate`,
-`interval`, `max_ejection_percent`, `success_rate_minimum_hosts`, `success_rate_request_volume`,
-or `success_rate_stdev_factor` is now required on `google_compute_region_backend_service.outlier_detection`
+### At least one of `base_ejection_time`, `consecutive_errors`, `consecutive_gateway_failure`, `enforcing_consecutive_errors`, `enforcing_consecutive_gateway_failure`, `enforcing_success_rate`, `interval`, `max_ejection_percent`, `success_rate_minimum_hosts`, `success_rate_request_volume`, or `success_rate_stdev_factor` is now required on `google_compute_region_backend_service.outlier_detection`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `base_ejection_time`,
 `consecutive_errors`, `consecutive_gateway_failure`, `enforcing_consecutive_errors`,
@@ -748,23 +712,19 @@ is now required on the `log_config` block.
 
 ## Resource: `google_compute_region_health_check`
 
-### Exactly one of `http_health_check`, `https_health_check`, `http2_health_check`,
-`tcp_health_check` or `ssl_health_check` is required on `google_compute_health_check`
+### Exactly one of `http_health_check`, `https_health_check`, `http2_health_check`, `tcp_health_check` or `ssl_health_check` is required on `google_compute_health_check`
 
 In attempt to be more consistent with the API, exactly one of `http_health_check`, `https_health_check`,
 `http2_health_check`, `tcp_health_check` or `ssl_health_check` is now required on the
 `google_compute_region_health_check`.
 
-### At least one of `host`, `request_path`, `response`, `port`, `port_name`, `proxy_header`, or `port_specification`
-is now required on `google_compute_region_health_check.http_health_check`, `google_compute_region_health_check.https_health_check`
-and `google_compute_region_health_check.http2_health_check`
+### At least one of `host`, `request_path`, `response`, `port`, `port_name`, `proxy_header`, or `port_specification` is now required on `google_compute_region_health_check.http_health_check`, `google_compute_region_health_check.https_health_check` and `google_compute_region_health_check.http2_health_check`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `host`, `request_path`, `response`,
 `port`, `port_name`, `proxy_header`, or `port_specification` is now required on the
 `http_health_check`, `https_health_check` and `http2_health_check` blocks.
 
-### At least one of `request`, `response`, `port`, `port_name`, `proxy_header`, or `port_specification`
-is now required on `google_compute_region_health_check.ssl_health_check` and `google_compute_region_health_check.tcp_health_check`
+### At least one of `request`, `response`, `port`, `port_name`, `proxy_header`, or `port_specification` is now required on `google_compute_region_health_check.ssl_health_check` and `google_compute_region_health_check.tcp_health_check`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `request`, `response`, `port`, `port_name`,
 `proxy_header`, or `port_specification` is now required on the `ssl_health_check` and `tcp_health_check` blocks.
@@ -778,15 +738,13 @@ Before updating, remove it from your config.
 
 ## Resource: `google_compute_resource_policy`
 
-### Exactly one of `hourly_schedule`, `daily_schedule` or `weekly_schedule` on
-`google_compute_resource_policy.snapshot_schedule_policy.schedule`
+### Exactly one of `hourly_schedule`, `daily_schedule` or `weekly_schedule` on `google_compute_resource_policy.snapshot_schedule_policy.schedule`
 
 In an attempt to avoid allowing empty blocks in config files, exactly one
 of `hourly_schedule`, `daily_schedule` or `weekly_schedule` is now required
 on the `snapshot_schedule_policy.schedule` block.
 
-### At least one of `labels`, `storage_locations`, or `guest_flush` is now required on
-`google_compute_resource_policy.snapshot_schedule_policy.snapshot_properties`
+### At least one of `labels`, `storage_locations`, or `guest_flush` is now required on `google_compute_resource_policy.snapshot_schedule_policy.snapshot_properties`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of
 `labels`, `storage_locations`, or `guest_flush` is now required on the
@@ -794,8 +752,7 @@ In an attempt to avoid allowing empty blocks in config files, at least one of
 
 ## Resource: `google_compute_route`
 
-### Exactly one of `next_hop_gateway`, `next_hop_instance`, `next_hop_ip`,
-`next_hop_vpn_tunnel` or `next_hop_ilb` is required on `google_compute_route`
+### Exactly one of `next_hop_gateway`, `next_hop_instance`, `next_hop_ip`, `next_hop_vpn_tunnel` or `next_hop_ilb` is required on `google_compute_route`
 
 In attempt to be more consistent with the API, exactly one of `next_hop_gateway`, `next_hop_instance`,
 `next_hop_ip`, `next_hop_vpn_tunnel` or `next_hop_ilb` is now required on the
@@ -830,8 +787,7 @@ required on the `source_disk_encryption_key` block.
 for flow logging. Enablement of flow logs is now controlled by whether `log_config` is defined or not instead
 of by the `enable_flow_logs` variable. Users with `enable_flow_logs = false` only need to remove the field.
 
-### At least one of `aggregation_interval`, `flow_sampling`, or `metadata` is now required on
-`google_compute_subnetwork.log_config`
+### At least one of `aggregation_interval`, `flow_sampling`, or `metadata` is now required on `google_compute_subnetwork.log_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of
 `aggregation_interval`, `flow_sampling`, or `metadata` is now required on the
@@ -1058,16 +1014,14 @@ required on the `master_authorized_networks_config` block.
 In an attempt to avoid allowing empty blocks in config files, `disabled` is now
 required on the different `google_container_cluster.addons_config` blocks.
 
-### At least one of `http_load_balancing`, `horizontal_pod_autoscaling` , `network_policy_config`,
-`cloudrun_config`, or `istio_config` is now required on `google_container_cluster.addons_config`
+### At least one of `http_load_balancing`, `horizontal_pod_autoscaling` , `network_policy_config`, `cloudrun_config`, or `istio_config` is now required on `google_container_cluster.addons_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `http_load_balancing`,
 `horizontal_pod_autoscaling` , `network_policy_config`, `cloudrun_config`, or `istio_config` is now required on the
 `addons_config` block.
 
 
-### At least one of `username`, `password` or `client_certificate_config` is now required on
-`google_container_cluster.master_auth`
+### At least one of `username`, `password` or `client_certificate_config` is now required on `google_container_cluster.master_auth`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `username`, `password`
 or `client_certificate_config` is now required on the `master_auth` block.
@@ -1135,8 +1089,7 @@ in config files, `use_ip_aliases` is now required on the `ip_allocation_policy` 
 
 ## Resource: `google_dataproc_autoscaling_policy`
 
-### At least one of `min_instances`, `max_instances`, or `weight` is now required on
-`google_dataproc_autoscaling_policy.secondary_worker_config`
+### At least one of `min_instances`, `max_instances`, or `weight` is now required on `google_dataproc_autoscaling_policy.secondary_worker_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `min_instances`,
 `max_instances`, or `weight` is now required on the `secondary_worker_config`
@@ -1144,47 +1097,37 @@ block.
 
 ## Resource: `google_dataproc_cluster`
 
-### At least one of `staging_bucket`, `gce_cluster_config`, `master_config`, `worker_config`,
-`preemptible_worker_config`, `software_config`, `initialization_action` or `encryption_config`
-is now required on `google_dataproc_cluster.cluster_config`
+### At least one of `staging_bucket`, `gce_cluster_config`, `master_config`, `worker_config`, `preemptible_worker_config`, `software_config`, `initialization_action` or `encryption_config` is now required on `google_dataproc_cluster.cluster_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `staging_bucket`,
 `gce_cluster_config`, `master_config`, `worker_config`, `preemptible_worker_config`, `software_config`,
 `initialization_action` or `encryption_config` is now required on the
 `cluster_config` block.
 
-### At least one of `image_version`, `override_properties` or `optional_components` is
-now required on `google_dataproc_cluster.cluster_config.software_config`
+### At least one of `image_version`, `override_properties` or `optional_components` is now required on `google_dataproc_cluster.cluster_config.software_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `image_version`,
 `override_properties` or `optional_components` is now required on the
 `cluster_config.software_config` block.
 
-### At least one of `num_instances` or `disk_config` is now required on
-`google_dataproc_cluster.cluster_config.preemptible_worker_config`
+### At least one of `num_instances` or `disk_config` is now required on `google_dataproc_cluster.cluster_config.preemptible_worker_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `num_instances`
 or `disk_config` is now required on the `cluster_config.preemptible_worker_config` block.
 
-### At least one of `zone`, `network`, `subnetwork`, `tags`, `service_account`, `service_account_scopes`,
-`internal_ip_only` or `metadata` is now required on `google_dataproc_cluster.cluster_config.gce_cluster_config`
+### At least one of `zone`, `network`, `subnetwork`, `tags`, `service_account`, `service_account_scopes`, `internal_ip_only` or `metadata` is now required on `google_dataproc_cluster.cluster_config.gce_cluster_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `zone`, `network`, `subnetwork`,
 `tags`, `service_account`, `service_account_scopes`, `internal_ip_only` or `metadata` is now required on the
 `gce_cluster_config` block.
 
-### At least one of `num_instances`, `image_uri`, `machine_type`, `min_cpu_platform`, `disk_config`, or `accelerators`
-is now required on `google_dataproc_cluster.cluster_config.master_config` and
-`google_dataproc_cluster.cluster_config.worker_config`
+### At least one of `num_instances`, `image_uri`, `machine_type`, `min_cpu_platform`, `disk_config`, or `accelerators` is now required on `google_dataproc_cluster.cluster_config.master_config` and `google_dataproc_cluster.cluster_config.worker_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `num_instances`, `image_uri`,
 `machine_type`, `min_cpu_platform`, `disk_config`, or `accelerators` is now required on the
 `cluster_config.master_config` and `cluster_config.worker_config` blocks.
 
-### At least one of `num_local_ssds`, `boot_disk_size_gb` or `boot_disk_type` is now required on
-`google_dataproc_cluster.cluster_config.preemptible_worker_config.disk_config`,
-`google_dataproc_cluster.cluster_config.master_config.disk_config` and
-`google_dataproc_cluster.cluster_config.worker_config.disk_config`
+### At least one of `num_local_ssds`, `boot_disk_size_gb` or `boot_disk_type` is now required on `google_dataproc_cluster.cluster_config.preemptible_worker_config.disk_config`, `google_dataproc_cluster.cluster_config.master_config.disk_config` and `google_dataproc_cluster.cluster_config.worker_config.disk_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `num_local_ssds`, `boot_disk_size_gb`
 or `boot_disk_type` is now required on the `cluster_config.preemptible_worker_config.disk_config`,
@@ -1198,23 +1141,19 @@ required on the `autoscaling_config` block.
 
 ## Resource: `google_dataproc_job`
 
-### At least one of `query_file_uri` or `query_list` is now required on
-`hive_config`, `pig_config`, and `sparksql_config`
+### At least one of `query_file_uri` or `query_list` is now required on `hive_config`, `pig_config`, and `sparksql_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of
 `query_file_uri` or `query_list` is now required on the `hive_config`, `pig_config`, and
 `sparksql_config` blocks.
 
-### At least one of `main_class` or `main_jar_file_uri` is now required on
-`google_dataproc_job.spark_config` and `google_dataproc_job.hadoop_config`
+### At least one of `main_class` or `main_jar_file_uri` is now required on `google_dataproc_job.spark_config` and `google_dataproc_job.hadoop_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of
 `main_class` or `main_jar_file_uri` is now required on the `spark_config`
 and `hadoop_config` blocks.
 
-### `driver_log_levels` is now required on `logging_config` blocks for
-`pyspark_config`, `hadoop_config`, `spark_config`, `pig_config`, and
-`sparksql_config`.
+### `driver_log_levels` is now required on `logging_config` blocks for `pyspark_config`, `hadoop_config`, `spark_config`, `pig_config`, and `sparksql_config`.
 
 In an attempt to avoid allowing empty blocks in config files, `driver_log_levels` is now
 required on `pyspark_config`, `hadoop_config`, `spark_config`, `pig_config`, and
@@ -1227,8 +1166,7 @@ required on the `scheduling` block.
 
 ## Resource: `google_dns_managed_zone`
 
-### At least one of `kind`, `non_existence`, `state`,  or `default_key_specs`
-is now required on `google_dns_managed_zone.dnssec_config`
+### At least one of `kind`, `non_existence`, `state`,  or `default_key_specs` is now required on `google_dns_managed_zone.dnssec_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of
 `kind`, `non_existence`, `state`,  or `default_key_specs` is now required on the
@@ -1288,28 +1226,24 @@ required on the `alternative_name_server_config.target_name_servers` block.
 
 ## Resource: `google_healthcare_hl7_v2_store`
 
-### At least one of `allow_null_header ` or `segment_terminator` is now required on
-`google_healthcare_hl7_v2_store.parser_config`
+### At least one of `allow_null_header ` or `segment_terminator` is now required on `google_healthcare_hl7_v2_store.parser_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `allow_null_header `
 or `segment_terminator` is now required on the `parser_config` block.
 
 ## Resource: `google_logging_metric`
 
-### At least one of `linear_buckets`, `exponential_buckets` or `explicit_buckets` is now required
-on `google_logging_metric.bucket_options`
+### At least one of `linear_buckets`, `exponential_buckets` or `explicit_buckets` is now required on `google_logging_metric.bucket_options`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `linear_buckets`,
 `exponential_buckets` or `explicit_buckets` is now required on the `bucket_options` block.
 
-### At least one of `num_finite_buckets`, `width` or `offset` is now required on
-`google_logging_metric.bucket_options.linear_buckets`
+### At least one of `num_finite_buckets`, `width` or `offset` is now required on `google_logging_metric.bucket_options.linear_buckets`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `num_finite_buckets`,
 `width` or `offset` is now required on the `bucket_options.linear_buckets` block.
 
-### At least one of `num_finite_buckets`, `growth_factor` or `scale` is now required on
-`google_logging_metric.bucket_options.exponential_buckets`
+### At least one of `num_finite_buckets`, `growth_factor` or `scale` is now required on `google_logging_metric.bucket_options.exponential_buckets`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `num_finite_buckets`,
 `growth_factor` or `scale` is now required on the `bucket_options.exponential_buckets` block.
@@ -1349,8 +1283,7 @@ on `google_monitoring_uptime_check_config`.
 In attempt to be more consistent with the API, exactly one of `http_check` or `tcp_check` is now required
 on `google_monitoring_uptime_check_config`.
 
-### At least one of `auth_info`, `port`, `headers`, `path`, `use_ssl`, or `mask_headers` is
-now required on `google_monitoring_uptime_check_config.http_check`
+### At least one of `auth_info`, `port`, `headers`, `path`, `use_ssl`, or `mask_headers` is now required on `google_monitoring_uptime_check_config.http_check`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `auth_info`,
 `port`, `headers`, `path`, `use_ssl`, or `mask_headers` is now required on the `http_check` block.
@@ -1376,14 +1309,12 @@ required on the `http_check.auth_info` block.
 
 ## Resource: `google_organization_policy`
 
-### Exactly one of `list_policy`, `boolean_policy`, or `restore_policy` is now required on
-`google_organization_policy`
+### Exactly one of `list_policy`, `boolean_policy`, or `restore_policy` is now required on `google_organization_policy`
 
 In attempt to be more consistent with the API, exactly one of `list_policy`, `boolean_policy`,
 or `restore_policy` is now required on `google_organization_policy`.
 
-### Exactly one of `all` or `values` is now required on `google_organization_policy.list_policy.allow`
-and `google_organization_policy.list_policy.deny`
+### Exactly one of `all` or `values` is now required on `google_organization_policy.list_policy.allow` and `google_organization_policy.list_policy.deny`
 
 In an attempt to avoid allowing empty blocks in config files, exactly one of `all` or `values` is now
 required on the `list_policy.allow` and `list_policy.deny` blocks.
@@ -1498,8 +1429,7 @@ to `""` for the resource to never expire.
 
 ## Resource: `google_securitiy_scanner_scan_config`
 
-### At least one of `google_account` or `custom_account` is now required on
-`google_securitiy_scanner_scan_config.authentication`
+### At least one of `google_account` or `custom_account` is now required on `google_securitiy_scanner_scan_config.authentication`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `google_account` or
 `custom_account` is now required on the `authentication` block.
@@ -1518,38 +1448,31 @@ is no known alternative at this time.
 
 ## Resource: `google_sql_database_instance`
 
-### At least one of `ca_certificate`, `client_certificate`, `client_key`, `connect_retry_interval`,
-`dump_file_path`, `failover_target`, `master_heartbeat_period`, `password`,
-`ssl_cipher`, `username`, or `verify_server_certificate` is now required on
-`google_sql_database_instance.settings.replica_configuration`
+### At least one of `ca_certificate`, `client_certificate`, `client_key`, `connect_retry_interval`, `dump_file_path`, `failover_target`, `master_heartbeat_period`, `password`, `ssl_cipher`, `username`, or `verify_server_certificate` is now required on `google_sql_database_instance.settings.replica_configuration`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `ca_certificate`, `client_certificate`, `client_key`, `connect_retry_interval`,
 `dump_file_path`, `failover_target`, `master_heartbeat_period`, `password`,
 `ssl_cipher`, `username`, or `verify_server_certificate` is now required on the
 `settings.replica_configuration` block.
 
-### At least one of `cert`, `common_name`, `create_time`, `expiration_time`, or `sha1_fingerprint`
-is now required on `google_sql_database_instance.settings.server_ca_cert`
+### At least one of `cert`, `common_name`, `create_time`, `expiration_time`, or `sha1_fingerprint` is now required on `google_sql_database_instance.settings.server_ca_cert`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `cert`, `common_name`, `create_time`,
 `expiration_time`, or `sha1_fingerprint` is now required on the
 `settings.server_ca_cert` block.
 
-### At least one of `day`, `hour`, or `update_track` is now required on
-`google_sql_database_instance.settings.maintenance_window`
+### At least one of `day`, `hour`, or `update_track` is now required on `google_sql_database_instance.settings.maintenance_window`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `day`, `hour`,
 or `update_track` is now required on the `settings.maintenance_window` block.
 
-### At least one of `binary_log_enabled`, `enabled`, `start_time`, or `location` is now required on
-`google_sql_database_instance.settings.backup_configuration`
+### At least one of `binary_log_enabled`, `enabled`, `start_time`, or `location` is now required on `google_sql_database_instance.settings.backup_configuration`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `binary_log_enabled`,
 `enabled`, `start_time`, or `location` is now required on the
 `settings.backup_configuration` block.
 
-### At least one of `authorized_networks`, `ipv4_enabled`, `require_ssl`, or `private_network` is now
-required on `google_sql_database_instance.settings.ip_configuration`
+### At least one of `authorized_networks`, `ipv4_enabled`, `require_ssl`, or `private_network` is now required on `google_sql_database_instance.settings.ip_configuration`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `authorized_networks`, `ipv4_enabled`,
 `require_ssl`, and `private_network` is now required on the `settings.ip_configuration` block.
@@ -1581,9 +1504,7 @@ in config files, `enabled` is now required on the `versioning` block.
 In an attempt to avoid allowing empty blocks in config files, at least one of `main_page_suffix` or
 `not_found_page` is now required on the `website` block.
 
-### At least one of `min_time_elapsed_since_last_modification`, `max_time_elapsed_since_last_modification`,
-`include_prefixes`, or `exclude_prefixes` is now required on
-`google_storage_transfer_job.transfer_spec.object_conditions`
+### At least one of `min_time_elapsed_since_last_modification`, `max_time_elapsed_since_last_modification`, `include_prefixes`, or `exclude_prefixes` is now required on `google_storage_transfer_job.transfer_spec.object_conditions`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `min_time_elapsed_since_last_modification`,
 `max_time_elapsed_since_last_modification`, `include_prefixes`, or `exclude_prefixes` is now required
@@ -1595,15 +1516,13 @@ Please use `with_state` instead, as `is_live` is now removed.
 
 ## Resource: `google_storage_transfer_job`
 
-### At least one of `overwrite_objects_already_existing_in_sink`, `delete_objects_unique_in_sink`, or
-`delete_objects_from_source_after_transfer` is now required on `google_storage_transfer_job.transfer_spec.transfer_options`
+### At least one of `overwrite_objects_already_existing_in_sink`, `delete_objects_unique_in_sink`, or `delete_objects_from_source_after_transfer` is now required on `google_storage_transfer_job.transfer_spec.transfer_options`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `overwrite_objects_already_existing_in_sink`,
 `delete_objects_unique_in_sink`, or `delete_objects_from_source_after_transfer` is now required on the
 `transfer_spec.transfer_options` block.
 
-### At least one of `gcs_data_source`, `aws_s3_data_source`, or `http_data_source` is now required
-on `google_storage_transfer_job.transfer_spec`
+### At least one of `gcs_data_source`, `aws_s3_data_source`, or `http_data_source` is now required on `google_storage_transfer_job.transfer_spec`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `gcs_data_source`, `aws_s3_data_source`,
 or `http_data_source` is now required on the `transfer_spec` block.
