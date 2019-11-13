@@ -73,7 +73,8 @@ objects:
           Substitutions data for Build resource.
       - !ruby/object:Api::Type::String
         name: 'filename'
-        conflicts:
+        exactly_one_of:
+          - filename
           - build
         description: |
           Path, from the source root, to a file whose contents is used for the template. Either a filename or build template must be provided.
@@ -219,6 +220,9 @@ objects:
                   - github.0.push.0.tag
       - !ruby/object:Api::Type::NestedObject
         name: 'build'
+        exactly_one_of:
+          - filename
+          - build
         description: |
           Contents of the build template. Either a filename or build template must be provided.
         properties:

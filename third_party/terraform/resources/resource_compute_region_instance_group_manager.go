@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -24,9 +23,6 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceRegionInstanceGroupManagerStateImporter,
 		},
-		CustomizeDiff: customdiff.All(
-			resourceComputeInstanceGroupManagerExactlyOneTargetSizeDiff,
-		),
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
 			Update: schema.DefaultTimeout(5 * time.Minute),
