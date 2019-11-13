@@ -71,8 +71,9 @@ so Terraform knows to manage them.
 - [Resource: `google_composer_environment`](#resource-google_composer_environment)
 - [Resource: `google_compute_backend_bucket`](#resource-google_compute_backend_bucket)
 - [Resource: `google_compute_backend_service`](#resource-google_compute_backend_service)
+- [Resource: `google_compute_firewall`](#resource-google_compute_firewall)
 - [Resource: `google_compute_forwarding_rule`](#resource-google_compute_forwarding_rule)
-- [Resource: `google_compute_global_forwarding_rule`](#resource-google_global_compute_forwarding_rule)
+- [Resource: `google_compute_global_forwarding_rule`](#resource-google_compute_global_forwarding_rule)
 - [Resource: `google_compute_health_check`](#resource-google_compute_health_check)
 - [Resource: `google_compute_image`](#resource-google_compute_image)
 - [Resource: `google_compute_instance`](#resource-google_compute_instance)
@@ -341,16 +342,6 @@ required on the `build.volumes` block.
 `nodejs6` has been deprecated and is no longer the default value for `runtime`.
 `runtime` is now required.
 
-### Exactly one of `source_repository`, `source_archive_url` or `source_upload_url` is required
-on `google_cloudfunctions_function`
-
-In attempt to be more consistent with the API, exactly one of `source_repository`, `source_archive_url`
-or `source_upload_url` is now required on `google_cloudfunctions_function`.
-
-### `url` is now required on `google_cloudfunctions_function.source_repository`
-
-In an attempt to avoid allowing empty blocks in config files, `url` is now required on the `source_repository` block.
-
 ## Resource: `google_cloudiot_registry`
 
 ### `event_notification_config` is now removed
@@ -502,6 +493,13 @@ is now required on the `outlier_detection` block.
 In an attempt to avoid allowing empty blocks in config files, at least one of `enable` or `sample_rate`
 is now required on the `log_config` block.
 
+## Resource: `google_compute_firewall`
+
+### Exactly one of `allowed` or `denied` is required on `google_compute_firewall`
+
+In attempt to be more consistent with the API, exactly one of `allowed` or `denied`
+is now required on `google_compute_firewall`.
+
 ## Resource: `google_compute_forwarding_rule`
 
 ### `ip_version` is now removed
@@ -562,7 +560,7 @@ See [`google_compute_forwarding_rule`][#resource-google_compute_forwarding_rule]
 `tcp_health_check` or `ssl_health_check` is required on `google_compute_health_check`
 
 In attempt to be more consistent with the API, exactly one of `http_health_check`, `https_health_check`,
-`http2_health_check`, `tcp_health_check` or `ssl_health_check` is now required on the
+`http2_health_check`, `tcp_health_check` or `ssl_health_check` is now required on
 `google_compute_health_check`.
 
 ### At least one of `host`, `request_path`, `response`, `port`, `port_name`, `proxy_header`, or `port_specification`
@@ -1486,7 +1484,6 @@ resource "google_project_service" "project_cloudresourcemanager" {
 }
 ```
 
-
 ## Resource: `google_pubsub_subscription`
 
 ### `name` must now be a short name
@@ -1496,8 +1493,9 @@ or a shortname (e.g. `my-subscription`). `name` now must be the shortname.
 
 ### `ttl` is now required on `google_pubsub_subscription.expiration_policy`
 
-In an attempt to avoid allowing empty blocks in config files, `ttl` is now
-required on the `expiration_policy` block.
+Previously, an empty `expiration_policy` block would allow the resource to never expire. In an attempt to avoid
+allowing empty blocks in config files, `ttl` is now required on the `expiration_policy` block.  `ttl` should be set
+to `""` for the resource to never expire.
 
 ## Resource: `google_securitiy_scanner_scan_config`
 

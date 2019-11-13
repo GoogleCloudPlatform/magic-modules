@@ -2848,7 +2848,8 @@ objects:
           The list of ALLOW rules specified by this firewall. Each rule
           specifies a protocol and port-range tuple that describes a permitted
           connection.
-        conflicts:
+        exactly_one_of:
+          - allowed
           - denied
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -2880,6 +2881,9 @@ objects:
         output: true
       - !ruby/object:Api::Type::Array
         name: 'denied'
+        exactly_one_of:
+          - allowed
+          - denied
         description: |
           The list of DENY rules specified by this firewall. Each rule specifies
           a protocol and port-range tuple that describes a denied connection.
