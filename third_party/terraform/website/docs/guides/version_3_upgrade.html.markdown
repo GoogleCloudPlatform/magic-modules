@@ -83,6 +83,7 @@ so Terraform knows to manage them.
 - [Resource: `google_compute_region_health_check`](#resource-google_compute_region_health_check)
 - [Resource: `google_compute_region_instance_group_manager`](#resource-google_compute_region_instance_group_manager)
 - [Resource: `google_compute_resource_policy`](#resource-google_compute_resource_policy)
+- [Resource: `google_compute_route`](#resource-google_compute_route)
 - [Resource: `google_compute_router`](#resource-google_compute_router)
 - [Resource: `google_compute_router_peer`](#resource-google_compute_router_peer)
 - [Resource: `google_compute_snapshot`](#resource-google_compute_snapshot)
@@ -326,10 +327,21 @@ of `range` or `skip_leading_rows` is now required on the
 
 ## Resource: `google_cloudbuild_trigger`
 
-### `branch` is now required on `google_cloudbuild_trigger.github`
+### Exactly one of `branch_name`, `tag_name` or `commit_sha` on `google_cloudbuild_trigger.trigger_template`
 
-In an attempt to avoid allowing empty blocks in config files, `branch` is now
-required on the `google_cloudbuild_trigger.github` block.
+In an attempt to avoid allowing empty blocks in config files, exactly one
+of `branch_name`, `tag_name` or `commit_sha` is now required on the
+`google_cloudbuild_trigger.trigger_template` block.
+
+### Exactly one of `pull_request` or `push` on `google_cloudbuild_trigger.github`
+
+In an attempt to avoid allowing empty blocks in config files, exactly one
+of `pull_request` or `push` is now required on the `google_cloudbuild_trigger.github` block.
+
+### Exactly one of `branch` or `tag_name` on `google_cloudbuild_trigger.github.push`
+
+In an attempt to avoid allowing empty blocks in config files, exactly one
+of `branch` or `tag_name` is now required on the `google_cloudbuild_trigger.github.push` block.
 
 ### `steps` is now required on `google_cloudbuild_trigger.build`.
 
@@ -793,12 +805,28 @@ In an attempt to avoid allowing empty blocks in config files, at least one of `f
 
 ## Resource: `google_compute_resource_policy`
 
+### Exactly one of `hourly_schedule`, `daily_schedule` or `weekly_schedule` on
+`google_compute_resource_policy.snapshot_schedule_policy.schedule`
+
+In an attempt to avoid allowing empty blocks in config files, exactly one
+of `hourly_schedule`, `daily_schedule` or `weekly_schedule` is now required
+on the `google_compute_resource_policy.snapshot_schedule_policy.schedule` block.
+
 ### At least one of `labels`, `storage_locations`, or `guest_flush` is now required on
 `google_compute_resource_policy.snapshot_schedule_policy.snapshot_properties`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of
 `labels`, `storage_locations`, or `guest_flush` is now required on the
 `google_compute_resource_policy.snapshot_schedule_policy.snapshot_properties` block.
+
+## Resource: `google_compute_route`
+
+### Exactly one of `next_hop_gateway`, `next_hop_instance`, `next_hop_ip`,
+`next_hop_vpn_tunnel` or `next_hop_ilb` on `google_compute_route`
+
+In attempt to be more consistent with the API, exactly one of `next_hop_gateway`, `next_hop_instance`,
+`next_hop_ip`, `next_hop_vpn_tunnel` or `next_hop_ilb` is now required on the
+`google_compute_resource_policy.snapshot_schedule_policy.schedule` block.
 
 ## Resource: `google_compute_router`
 
