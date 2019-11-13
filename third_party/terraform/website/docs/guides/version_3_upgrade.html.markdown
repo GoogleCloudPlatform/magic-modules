@@ -396,7 +396,7 @@ In an attempt to avoid allowing empty blocks in config files, at least one of `s
 
 ## Resource: `google_composer_environment`
 
-### At least one of `airflow_config_overrides`, `pypi_packages`, `env_variables`, `image_version`, or `python_version` are now required on `google_composer_environment.config.software_config`
+### At least one of `airflow_config_overrides`, `pypi_packages`, `env_variables`, `image_version`, or `python_version` is now required on `google_composer_environment.config.software_config`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `airflow_config_overrides`,
 `pypi_packages`, `env_variables`, `image_version`, or `python_version` is now required on the
@@ -562,7 +562,7 @@ In an attempt to avoid allowing empty blocks in config files, at least one of `a
 `disk_encryption_key_raw`, `kms_key_self_link`, `initialize_params`, `mode` or `source` is now required on the
 `boot_disk` block.
 
-### At least one of `size`, `type`, `image`, or `labels` are now required on `google_compute_instance.boot_disk.initialize_params`
+### At least one of `size`, `type`, `image`, or `labels` is now required on `google_compute_instance.boot_disk.initialize_params`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `size`, `type`, `image`, or `labels`
 is now required on the `initialize_params` block.
