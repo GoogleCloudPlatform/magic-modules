@@ -74,7 +74,6 @@ so Terraform knows to manage them.
 - [Resource: `google_compute_health_check`](#resource-google_compute_health_check)
 - [Resource: `google_compute_image`](#resource-google_compute_image)
 - [Resource: `google_compute_instance`](#resource-google_compute_instance)
-- [Resource: `google_compute_instance_group_manager`](#resource-google_compute_instance_group_manager)
 - [Resource: `google_compute_instance_template`](#resource-google_compute_instance_template)
 - [Resource: `google_compute_network`](#resource-google_compute_network)
 - [Resource: `google_compute_network_peering`](#resource-google_compute_network_peering)
@@ -595,17 +594,6 @@ In an attempt to avoid allowing empty blocks in config files, at least one of `a
 In an attempt to avoid allowing empty blocks in config files, at least one of `size`, `type`, `image`, or `labels`
 is now required on the `google_compute_instance.initialize_params` block.
 
-### At least one of `network` or `subnetwork` are now required on `google_compute_instance.network_interface`
-
-In an attempt to avoid allowing empty blocks in config files, at least one of `network` or `subnetwork`
-is now required on the `google_compute_instance.network_interface` block.
-
-### At least one of `nat_ip`, `network_tier`, or `public_ptr_domain_name` is now required on
-`google_compute_instance.network_interface.access_config`
-
-In an attempt to avoid allowing empty blocks in config files, at least one of `nat_ip`, `network_tier`, or `public_ptr_domain_name`
-is now required on the `google_compute_instance.network_interface.access_config` block.
-
 ### At least one of `enable_secure_boot`, `enable_vtpm`, or `enable_integrity_monitoring` is now required
 on `google_compute_instance.shielded_instance_config`
 
@@ -617,13 +605,6 @@ is now required on `google_compute_instance.scheduling`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `on_host_maintenance`, `automatic_restart`,
 `preemptible`, or `node_affinities` is now required on the `google_compute_instance.scheduling` block.
-
-## Resource: `google_compute_instance_group_manager`
-
-### Exactly one of `fixed` or `percent` is now required on `google_compute_instance_group_manager.version.target_size`
-
-In an attempt to avoid allowing empty blocks in config files, at least one of `fixed` or `percent` is now required on the `google_compute_instance_group_manager.version.target_size` block.
-
 
 ## Resource: `google_compute_instance_template`
 
@@ -639,21 +620,8 @@ now required on `google_compute_instance_template.scheduling`
 In an attempt to avoid allowing empty blocks in config files, at least one of `on_host_maintenance`, `automatic_restart`,
 `preemptible`, or `node_affinities` is now required on the `google_compute_instance_template.scheduling` block.
 
-### At least one of `network` or `subnetwork` are now required on `google_compute_instance_template.network_interface`
-
-In an attempt to avoid allowing empty blocks in config files, at least one of `network` or `subnetwork`
-is now required on the `google_compute_instance_template.network_interface` block.
-
-### At least one of `nat_ip`, `network_tier`, or `public_ptr_domain_name` is now required on
-`google_compute_instance_template.network_interface.access_config`
-
 In an attempt to avoid allowing empty blocks in config files, at least one of `nat_ip`, `network_tier`, or `public_ptr_domain_name`
 is now required on the `google_compute_instance_template.network_interface.access_config` block.
-
-### At least one of `source` or `source_image` is now required on `google_compute_instance_template.disk`
-
-In an attempt to avoid allowing empty blocks in config files, at least one of `source` or `source_image`
-is now required on the `google_compute_instance_template.network_interface.disk` block.
 
 ### Disks with invalid scratch disk configurations are now rejected
 
@@ -798,10 +766,6 @@ and `google_compute_region_health_check.tcp_health_check` blocks.
 
 With `rolling_update_policy` removed, `update_strategy` has no effect anymore.
 Before updating, remove it from your config.
-
-### Exactly one of `fixed` or `percent` is now required on `google_compute_region_instance_group_manager.version.target_size`
-
-In an attempt to avoid allowing empty blocks in config files, at least one of `fixed` or `percent` is now required on the `google_compute_region_instance_group_manager.version.target_size` block.
 
 ## Resource: `google_compute_resource_policy`
 
@@ -1603,12 +1567,6 @@ in config files, `enabled` is now required on the `google_storage_bucket.version
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `main_page_suffix` or
 `not_found_page` is now required on the `google_storage_bucket.website` block.
-
-### At least one of `origin`, `method`, `response_header`, or `max_age_seconds` is now required on 
-`google_storage_bucket.cors`
-
-In an attempt to avoid allowing empty blocks in config files, at least one of `origin`, `method`,
-`response_header`, or `max_age_seconds` is now required on the `google_storage_bucket.cors` block.
 
 ### At least one of `min_time_elapsed_since_last_modification`, `max_time_elapsed_since_last_modification`,
 `include_prefixes`, or `exclude_prefixes` is now required on
