@@ -70,15 +70,17 @@ module Provider
         File.join(target_folder, "#{resource_name(data.object, data.product)}.rb"),
         self
       )
-
-      data.generate(
-        'templates/inspec/plural_resource.erb',
-        File.join(target_folder, resource_name(data.object, data.product).pluralize + '.rb'),
-        self
-      )
-
       generate_documentation(data.clone, name, false)
-      generate_documentation(data.clone, name, true)
+
+      unless data.object.singular_only
+        data.generate(
+          'templates/inspec/plural_resource.erb',
+          File.join(target_folder, resource_name(data.object, data.product).pluralize + '.rb'),
+          self
+        )
+        generate_documentation(data.clone, name, true)
+      end
+
       generate_properties(data.clone, data.object.all_user_properties)
     end
 
@@ -179,8 +181,10 @@ module Provider
 
       generate_inspec_test(data.clone, name, target_folder, name)
 
-      # Build test for plural resource
-      generate_inspec_test(data.clone, name.pluralize, target_folder, name)
+      unless data.object.singular_only
+        # Build test for plural resource
+        generate_inspec_test(data.clone, name.pluralize, target_folder, name)
+      end
     end
 
     def generate_inspec_test(data, name, target_folder, attribute_file_name)

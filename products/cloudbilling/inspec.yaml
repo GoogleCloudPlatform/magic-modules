@@ -13,3 +13,6 @@
 
 --- !ruby/object:Provider::Inspec::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  ProjectBillingInfo: !ruby/object:Overrides::Inspec::ResourceOverride
+    singular_only: true
+    privileged: true

@@ -24,6 +24,7 @@ module Overrides
           additional_functions
           product_url
           privileged
+          singular_only
         ]
       end
 
@@ -37,6 +38,7 @@ module Overrides
         # true if the resources requires organization level privileges
         # resource manager Folder is an example of a privileged resource
         check :privileged, type: :boolean, default: false
+        check :singular_only, type: :boolean, default: false
       end
     end
   end
