@@ -92,8 +92,9 @@ so Terraform knows to manage them.
 ## Provider Version Configuration
 
 -> Before upgrading to version 3.0.0, it is recommended to upgrade to the most
-recent `2.X` series release of the provider and ensure that your environment
-successfully runs [`terraform plan`](https://www.terraform.io/docs/commands/plan.html)
+recent `2.X` series release of the provider, make the changes noted in this guide,
+and ensure that your environment successfully runs
+[`terraform plan`](https://www.terraform.io/docs/commands/plan.html)
 without unexpected changes or deprecation notices.
 
 It is recommended to use [version constraints](https://www.terraform.io/docs/configuration/providers.html#provider-versions)
@@ -175,185 +176,12 @@ a resource. Users who depended on particular ID formats in previous versions may
 
 Use `location` instead.
 
-## Resource: `google_container_cluster`
-
-### `ip_allocation_policy` will catch out-of-band changes, `use_ip_aliases` removed
-
--> This change and "Automatic subnetwork creation for VPC-native clusters
-removed" are related; see the other entry for more details.
-
-In `2.X`, `ip_allocation_policy` wouldn't cause a diff if it was undefined in
-config but was set on the cluster itself. Additionally, it could be defined with
-`use_ip_aliases` set to `false`. However, this made it difficult to reason about 
-whether a cluster was routes-based or VPC-native.
-
-With `3.0.0`, Terraform will detect drift on the block. The configuration has also
-been simplified. Terraform creates a VPC-native cluster when
-`ip_allocation_policy` is defined (`use_ip_aliases` is implicitly set to true
-and is no longer configurable). When the block is undefined, Terraform creates a
-routes-based cluster.
-
-Other than removing the `use_ip_aliases` field, most users of VPC-native clusters
-won't be affected. `terraform plan` will show a diff if a config doesn't contain
-`ip_allocation_policy` but the underlying cluster does. Routes-based cluster
-users may need to remove `ip_allocation_policy` if `use_ip_aliases` had been set
-to `false`.
-
-#### Old Config
-
-```hcl
-resource "google_container_cluster" "primary" {
-  name       = "my-cluster"
-  location   = "us-central1"
-
-  initial_node_count = 1
-
-  ip_allocation_policy {
-    use_ip_aliases = false
-  }
-}
-```
-
-#### New Config
-
-```hcl
-resource "google_container_cluster" "primary" {
-  name       = "my-cluster"
-  location   = "us-central1"
-
-  initial_node_count = 1
-}
-```
-
-
-### Automatic subnetwork creation for VPC-native clusters removed
-
-Automatic creation of subnetworks in GKE has been removed. Now, users of
-VPC-native clusters will always need to provide a `google_compute_subnetwork`
-resource to use `ip_allocation_policy`. Routes-based clusters are unaffected.
-
-Representing resources managed by another source in Terraform is painful, and
-leads to confusing patterns that often involve unnecessarily recreating user
-resources. A number of fields in GKE are dedicated to a feature that allows
-users to create a GKE-managed subnetwork.
-
-This is a great fit for an imperative tool like `gcloud`, but it's not required
-for Terraform. With Terraform, it's relatively easy to specify a subnetwork in
-config alongside the cluster. Not only does that allow configuring subnetwork
-features like flow logging, it's more explicit, allows the subnetwork to be used
-by other resources, and the subnetwork persists through cluster deletion.
-
-Particularly, Shared VPC was incompatible with `create_subnetwork`, and
-`node_ipv4_cidr` was easy to confuse with
-`ip_allocation_policy.node_ipv4_cidr_block`.
-
-#### Detailed changes:
-
-* `ip_allocation_policy.node_ipv4_cidr_block` removed (This controls the primary range of the created subnetwork)
-* `ip_allocation_policy.create_subnetwork`, `ip_allocation_policy.subnetwork_name` removed
-* `ip_allocation_policy` will catch drift when not in config
-* `ip_allocation_policy.use_ip_aliases` removed
-  * Enablement is now based on `ip_allocation_policy` being defined instead
-* Conflict added between `node_ipv4_cidr`, `ip_allocation_policy`
-
-#### Upgrade instructions
-
-1. Remove the removed fields from `google_container_cluster`
-1. Add a `google_compute_subnetwork` to your config, import it using `terraform import`
-1. Reference the subnetwork using the `subnetwork` field on your `google_container_cluster`
-
--> Subnetworks originally created as part of `create_subnetwork` will be deleted
-alongside the cluster. If there are other users of the subnetwork, deletion of
-the cluster will fail. After the original resources are deleted,
-`terraform apply` will recreate the same subnetwork except that it won't be
-managed by a GKE cluster and other resources can use it safely.
-
-#### Old Config
-
-```hcl
-resource "google_compute_network" "container_network" {
-  name                    = "container-network"
-  auto_create_subnetworks = false
-}
-
-resource "google_container_cluster" "primary" {
-  name       = "my-cluster"
-  location   = "us-central1"
-  network    = "${google_compute_network.container_network.name}"
-
-  initial_node_count = 1
-
-  ip_allocation_policy {
-    use_ip_aliases           = true
-    create_subnetwork        = true
-    cluster_ipv4_cidr_block  = "10.0.0.0/16"
-    services_ipv4_cidr_block = "10.1.0.0/16"
-    node_ipv4_cidr_block     = "10.2.0.0/16"
-  }
-}
-```
-
-#### New Config
-
-```hcl
-resource "google_compute_network" "container_network" {
-  name                    = "container-network"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "container_subnetwork" {
-  name          = "container-subnetwork"
-  description   = "auto-created subnetwork for cluster \"my-cluster\""
-  ip_cidr_range = "10.2.0.0/16"
-  region        = "us-central1"
-  network       = "${google_compute_network.container_network.self_link}"
-}
-
-resource "google_container_cluster" "primary" {
-  name       = "my-cluster"
-  location   = "us-central1"
-  network    = "${google_compute_network.container_network.name}"
-  subnetwork = "${google_compute_subnetwork.container_subnetwork.name}"
-
-  initial_node_count = 1
-
-  ip_allocation_policy {
-    use_ip_aliases           = true
-    cluster_ipv4_cidr_block  = "10.0.0.0/16"
-    services_ipv4_cidr_block = "10.1.0.0/16"
-  }
-}
-```
-
-### `logging_service` and `monitoring_service` defaults changed
-
-GKE Stackdriver Monitoring (the GKE-specific Stackdriver experience) is now
-enabled at cluster creation by default, similar to the default in GKE `1.14`
-through other tools.
-
 ## Resource: `google_app_engine_application`
 
 ### `split_health_checks` is now required on block `google_app_engine_application.feature_settings`
 
 In an attempt to avoid allowing empty blocks in config files, `split_health_checks` is now
 required on the `google_app_engine_application.feature_settings` block.
-
-### `taint` field is now authoritative when set
-
-The `taint` field inside of `node_config` blocks on `google_container_cluster`
-and `google_container_node_pool` will no longer ignore GPU-related values when
-set.
-
-Previously, the field ignored upstream taints when unset and ignored unset GPU
-taints when other taints were set. Now it will ignore upstream taints when set
-and act authoritatively when set, requiring all taints (including Kubernetes and
-GKE-managed ones) to be defined in config.
-
-Additionally, an empty taint can now be specified with `taint = []`. As a result
-of this change, the JSON/state representation of the field has changed,
-introducing an incompatibility for users who specify config in JSON instead of
-HCL or who use `dynamic` blocks. See more details in the [Attributes as Blocks](https://www.terraform.io/docs/configuration/attr-as-blocks.html)
-documentation.
 
 ## Resource: `google_cloudfunctions_function`
 
@@ -373,6 +201,40 @@ documentation.
 
 In an attempt to avoid allowing empty blocks in config files, `public_key_certificate` is now
 required on the `google_cloudiot_registry.credentials` block.
+
+### Replace singular event notification config field with plural `event_notification_configs`
+
+Use the plural field `event_notification_configs` instead of
+`event_notification_config`, which has now been removed.
+Since the Cloud IoT API now accept multiple event notification configs for a
+registry, the singular field no longer exists on the API resource and has been
+removed from Terraform to prevent conflicts.
+
+
+#### Old Config
+
+```hcl
+resource "google_cloudiot_registry" "myregistry" {
+  name = "%s"
+
+  event_notification_config {
+    pubsub_topic_name = "${google_pubsub_topic.event-topic.id}"
+  }
+}
+
+```
+
+#### New Config
+
+```hcl
+resource "google_cloudiot_registry" "myregistry" {
+  name = "%s"
+
+  event_notification_configs {
+    pubsub_topic_name = "${google_pubsub_topic.event-topic.id}"
+  }
+}
+```
 
 ## Resource: `google_composer_environment`
 
@@ -580,6 +442,176 @@ resource "google_compute_subnetwork" "subnet-with-logging" {
 
 ## Resource: `google_container_cluster`
 
+### `ip_allocation_policy` will catch out-of-band changes, `use_ip_aliases` removed
+
+-> This change and "Automatic subnetwork creation for VPC-native clusters
+removed" are related; see the other entry for more details.
+
+In `2.X`, `ip_allocation_policy` wouldn't cause a diff if it was undefined in
+config but was set on the cluster itself. Additionally, it could be defined with
+`use_ip_aliases` set to `false`. However, this made it difficult to reason about
+whether a cluster was routes-based or VPC-native.
+
+With `3.0.0`, Terraform will detect drift on the block. The configuration has also
+been simplified. Terraform creates a VPC-native cluster when
+`ip_allocation_policy` is defined (`use_ip_aliases` is implicitly set to true
+and is no longer configurable). When the block is undefined, Terraform creates a
+routes-based cluster.
+
+Other than removing the `use_ip_aliases` field, most users of VPC-native clusters
+won't be affected. `terraform plan` will show a diff if a config doesn't contain
+`ip_allocation_policy` but the underlying cluster does. Routes-based cluster
+users may need to remove `ip_allocation_policy` if `use_ip_aliases` had been set
+to `false`.
+
+#### Old Config
+
+```hcl
+resource "google_container_cluster" "primary" {
+  name       = "my-cluster"
+  location   = "us-central1"
+
+  initial_node_count = 1
+
+  ip_allocation_policy {
+    use_ip_aliases = false
+  }
+}
+```
+
+#### New Config
+
+```hcl
+resource "google_container_cluster" "primary" {
+  name       = "my-cluster"
+  location   = "us-central1"
+
+  initial_node_count = 1
+}
+```
+
+
+### Automatic subnetwork creation for VPC-native clusters removed
+
+Automatic creation of subnetworks in GKE has been removed. Now, users of
+VPC-native clusters will always need to provide a `google_compute_subnetwork`
+resource to use `ip_allocation_policy`. Routes-based clusters are unaffected.
+
+Representing resources managed by another source in Terraform is painful, and
+leads to confusing patterns that often involve unnecessarily recreating user
+resources. A number of fields in GKE are dedicated to a feature that allows
+users to create a GKE-managed subnetwork.
+
+This is a great fit for an imperative tool like `gcloud`, but it's not required
+for Terraform. With Terraform, it's relatively easy to specify a subnetwork in
+config alongside the cluster. Not only does that allow configuring subnetwork
+features like flow logging, it's more explicit, allows the subnetwork to be used
+by other resources, and the subnetwork persists through cluster deletion.
+
+Particularly, Shared VPC was incompatible with `create_subnetwork`, and
+`node_ipv4_cidr` was easy to confuse with
+`ip_allocation_policy.node_ipv4_cidr_block`.
+
+#### Detailed changes:
+
+* `ip_allocation_policy.node_ipv4_cidr_block` removed (This controls the primary range of the created subnetwork)
+* `ip_allocation_policy.create_subnetwork`, `ip_allocation_policy.subnetwork_name` removed
+* `ip_allocation_policy` will catch drift when not in config
+* `ip_allocation_policy.use_ip_aliases` removed
+  * Enablement is now based on `ip_allocation_policy` being defined instead
+* Conflict added between `node_ipv4_cidr`, `ip_allocation_policy`
+
+#### Upgrade instructions
+
+1. Remove the removed fields from `google_container_cluster`
+1. Add a `google_compute_subnetwork` to your config, import it using `terraform import`
+1. Reference the subnetwork using the `subnetwork` field on your `google_container_cluster`
+
+-> Subnetworks originally created as part of `create_subnetwork` will be deleted
+alongside the cluster. If there are other users of the subnetwork, deletion of
+the cluster will fail. After the original resources are deleted,
+`terraform apply` will recreate the same subnetwork except that it won't be
+managed by a GKE cluster and other resources can use it safely.
+
+#### Old Config
+
+```hcl
+resource "google_compute_network" "container_network" {
+  name                    = "container-network"
+  auto_create_subnetworks = false
+}
+
+resource "google_container_cluster" "primary" {
+  name       = "my-cluster"
+  location   = "us-central1"
+  network    = "${google_compute_network.container_network.name}"
+
+  initial_node_count = 1
+
+  ip_allocation_policy {
+    use_ip_aliases           = true
+    create_subnetwork        = true
+    cluster_ipv4_cidr_block  = "10.0.0.0/16"
+    services_ipv4_cidr_block = "10.1.0.0/16"
+    node_ipv4_cidr_block     = "10.2.0.0/16"
+  }
+}
+```
+
+#### New Config
+
+```hcl
+resource "google_compute_network" "container_network" {
+  name                    = "container-network"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "container_subnetwork" {
+  name          = "container-subnetwork"
+  description   = "auto-created subnetwork for cluster \"my-cluster\""
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "us-central1"
+  network       = "${google_compute_network.container_network.self_link}"
+}
+
+resource "google_container_cluster" "primary" {
+  name       = "my-cluster"
+  location   = "us-central1"
+  network    = "${google_compute_network.container_network.name}"
+  subnetwork = "${google_compute_subnetwork.container_subnetwork.name}"
+
+  initial_node_count = 1
+
+  ip_allocation_policy {
+    use_ip_aliases           = true
+    cluster_ipv4_cidr_block  = "10.0.0.0/16"
+    services_ipv4_cidr_block = "10.1.0.0/16"
+  }
+}
+```
+
+### `logging_service` and `monitoring_service` defaults changed
+
+GKE Stackdriver Monitoring (the GKE-specific Stackdriver experience) is now
+enabled at cluster creation by default, similar to the default in GKE `1.14`
+through other tools.
+
+### `taint` field is now authoritative when set
+
+The `taint` field inside of `node_config` blocks on `google_container_cluster`
+and `google_container_node_pool` will no longer ignore GPU-related values when
+set.
+
+Previously, the field ignored upstream taints when unset and ignored unset GPU
+taints when other taints were set. Now it will ignore upstream taints when set
+and act authoritatively when set, requiring all taints (including Kubernetes and
+GKE-managed ones) to be defined in config.
+
+Additionally, an empty taint can now be specified with `taint = []`. As a result
+of this change, the JSON/state representation of the field has changed,
+introducing an incompatibility for users who specify config in JSON instead of
+HCL or who use `dynamic` blocks. See more details in the [Attributes as Blocks](https://www.terraform.io/docs/configuration/attr-as-blocks.html)
+documentation.
 
 ### `addons_config.kubernetes_dashboard` is now removed
 
@@ -592,9 +624,7 @@ dashboards.
 In an attempt to avoid allowing empty blocks in config files, `cidr_blocks` is now
 required on the `google_container_cluster.master_authorized_networks_config` block.
 
-### The `disabled` field is now required on the `addons_config` blocks for
-`http_load_balancing`, `horizontal_pod_autoscaling`, `istio_config`,
-`cloudrun_config` and `network_policy_config`.
+### The `disabled` field is now required on the `addons_config` blocks for `http_load_balancing`, `horizontal_pod_autoscaling`, `istio_config`, `cloudrun_config` and `network_policy_config`.
 
 In an attempt to avoid allowing empty blocks in config files, `disabled` is now
 required on the different `google_container_cluster.addons_config` blocks.
@@ -759,8 +789,9 @@ Users should migrate to using `google_project_service` resources, or using the
 module for a similar interface to `google_project_services`.
 
 -> Prior to `2.13.0`, each `google_project_service` sent separate API enablement
-requests. From `2.13.0` onwards, those requests are batched. It's recommended
-that you upgrade to `2.13.0+` before migrating if you encounter quota issues
+requests. From `2.13.0` onwards, those requests are batched on write, and from `2.20.0` onwards,
+batched on read. It's recommended that you upgrade to `2.13.0+` before migrating if you
+encounter write quota issues or `2.20.0+` before migrating if you encounter read quota issues
 when you migrate off `google_project_services`.
 
 #### Old Config
