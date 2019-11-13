@@ -824,15 +824,15 @@ module "project_services" {
 #### New Config (google_project_service)
 
 ```hcl
-resource "google_project_service" "project_iam" {
-  project = "your-project-id"
-  service = "iam.googleapis.com"
-  disable_on_destroy = false
-}
+resource "google_project_service" "service" {
+  for_each = toset([
+    "iam.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+  ])
 
-resource "google_project_service" "project_cloudresourcemanager" {
+  service = each.key
+
   project = "your-project-id"
-  service = "cloudresourcemanager.googleapis.com"
   disable_on_destroy = false
 }
 ```
