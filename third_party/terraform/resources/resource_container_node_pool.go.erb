@@ -591,11 +591,13 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *containerBeta.N
 		},
 	}
 
-	nodePool["upgrade_settings"] = []map[string]interface{}{
-		{
-			"max_surge":  np.UpgradeSettings.MaxSurge,
-			"max_unavailable": np.UpgradeSettings.MaxUnavailable,
-		},
+	if np.UpgradeSettings != nil {
+		nodePool["upgrade_settings"] = []map[string]interface{}{
+			{
+				"max_surge":  np.UpgradeSettings.MaxSurge,
+				"max_unavailable": np.UpgradeSettings.MaxUnavailable,
+			},
+		}
 	}
 
 	return nodePool, nil

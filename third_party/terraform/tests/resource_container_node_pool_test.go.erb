@@ -246,13 +246,24 @@ func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 	t.Parallel()
 
+	clusterName := acctest.RandString(10)
+	nodePoolName := acctest.RandString(10)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withUpgradeSettings(),
+				Config: testAccContainerNodePool_withUpgradeSettings(clusterName, nodePoolName, 2, 3),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_upgrade_settings",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerNodePool_withUpgradeSettings(clusterName, nodePoolName, 1, 1),
 			},
 			{
 				ResourceName:      "google_container_node_pool.with_upgrade_settings",
@@ -1208,7 +1219,7 @@ resource "google_container_node_pool" "with_sandbox_config" {
 `, acctest.RandString(10), acctest.RandString(10))
 }
 
-func testAccContainerNodePool_withUpgradeSettings() string {
+func testAccContainerNodePool_withUpgradeSettings(clusterName string, nodePoolName string, maxSurge int, maxUnavailable int) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1" {
   location = "us-central1"
@@ -1227,11 +1238,11 @@ resource "google_container_node_pool" "with_upgrade_settings" {
   cluster = "${google_container_cluster.cluster.name}"
   initial_node_count = 1
   upgrade_settings {
-    max_surge = 2
-    max_unavailable = 3
+    max_surge = %d
+    max_unavailable = %d
   }
 }
-`, acctest.RandString(10), acctest.RandString(10))
+`, clusterName, nodePoolName, maxSurge, maxUnavailable)
 }
 <% end -%>
 
