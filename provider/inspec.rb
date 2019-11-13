@@ -181,10 +181,9 @@ module Provider
 
       generate_inspec_test(data.clone, name, target_folder, name)
 
-      unless data.object.singular_only
-        # Build test for plural resource
-        generate_inspec_test(data.clone, name.pluralize, target_folder, name)
-      end
+      # Build test for plural resource
+      generate_inspec_test(data.clone, name.pluralize, target_folder, name)\
+        unless data.object.singular_only
     end
 
     def generate_inspec_test(data, name, target_folder, attribute_file_name)
