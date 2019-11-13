@@ -416,7 +416,7 @@ resource "google_compute_address" "my-addr" {
 resource "google_compute_forwarding_rule" "frule" {
   name = "my-forwarding-rule"
 
-  address = $google_compute_address.my-addr.self_link
+  address = google_compute_address.my-addr.self_link
 }
 ```
 
@@ -430,7 +430,7 @@ resource "google_compute_address" "my-addr" {
 resource "google_compute_forwarding_rule" "frule" {
   name = "my-forwarding-rule"
 
-  address = $google_compute_address.my-addr.address
+  address = google_compute_address.my-addr.address
 }
 ```
 
