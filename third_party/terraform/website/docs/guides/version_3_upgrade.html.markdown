@@ -83,7 +83,6 @@ so Terraform knows to manage them.
 - [Resource: `google_pubsub_subscription`](#resource-google_pubsub_subscription)
 - [Resource: `google_service_account_key`](#resource-google_service_account_key)
 - [Resource: `google_sql_database_instance`](#resource-google_sql_database_instance)
-- [Resource: `google_sql_user`](#resource-google_sql_user)
 - [Resource: `google_storage_bucket`](#resource-google_storage_bucket)
 - [Resource: `google_storage_transfer_job`](#resource-google_storage_transfer_job)
 
@@ -879,13 +878,6 @@ required on the `google_sql_database_instance.settings.ip_configuration.authoriz
 
 In an attempt to avoid allowing empty blocks in config files, `zone` is now
 required on the `google_sql_database_instance.settings.location_preference` block.
-
-## Resource: `google_sql_user`
-
-### `password` is now required
-
-In previous releases, the `password` field of the `google_sql_user` resource was erroneously marked as optional,
-despite it being required by the API. It is now correctly marked as required.
 
 ## Resource: `google_storage_bucket`
 
