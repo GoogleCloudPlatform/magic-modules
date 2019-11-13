@@ -1260,11 +1260,6 @@ Please use `with_state` instead, as `is_live` is now removed.
 
 ## Resource: `google_storage_transfer_job`
 
-### `overwrite_objects_already_existing_in_sink` is now required on block `google_storage_transfer_job.transfer_options`
-
-In an attempt to avoid allowing empty blocks in config files, `overwrite_objects_already_existing_in_sink` is now
-required on the `google_storage_transfer_job.transfer_options` block.
-
 ### At least one of `overwrite_objects_already_existing_in_sink`, `delete_objects_unique_in_sink`, or
 `delete_objects_from_source_after_transfer` is now required on `google_storage_transfer_job.transfer_spec.transfer_options`
 
