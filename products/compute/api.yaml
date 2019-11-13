@@ -2848,8 +2848,9 @@ objects:
           The list of ALLOW rules specified by this firewall. Each rule
           specifies a protocol and port-range tuple that describes a permitted
           connection.
-        conflicts:
-          - denied
+        exactly_one_of:
+          - allow
+          - deny
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             # IPProtocol has to be string, instead of Enum because user can
@@ -2880,6 +2881,9 @@ objects:
         output: true
       - !ruby/object:Api::Type::Array
         name: 'denied'
+        exactly_one_of:
+          - allow
+          - deny
         description: |
           The list of DENY rules specified by this firewall. Each rule specifies
           a protocol and port-range tuple that describes a denied connection.
@@ -4012,11 +4016,12 @@ objects:
           - :HTTP2
       - !ruby/object:Api::Type::NestedObject
         name: 'httpHealthCheck'
-        conflicts:
-          - httpsHealthCheck
-          - http2HealthCheck
-          - tcpHealthCheck
-          - sslHealthCheck
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4134,11 +4139,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'httpsHealthCheck'
-        conflicts:
-          - httpHealthCheck
-          - http2HealthCheck
-          - tcpHealthCheck
-          - sslHealthCheck
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4256,11 +4262,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'tcpHealthCheck'
-        conflicts:
-          - httpHealthCheck
-          - http2HealthCheck
-          - httpsHealthCheck
-          - sslHealthCheck
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -4359,11 +4366,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'sslHealthCheck'
-        conflicts:
-          - httpHealthCheck
-          - http2HealthCheck
-          - httpsHealthCheck
-          - tcpHealthCheck
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -4462,11 +4470,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'http2HealthCheck'
-        conflicts:
-          - httpHealthCheck
-          - sslHealthCheck
-          - httpsHealthCheck
-          - tcpHealthCheck
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -8027,11 +8036,12 @@ objects:
           - :HTTP2
       - !ruby/object:Api::Type::NestedObject
         name: 'httpHealthCheck'
-        conflicts:
-          - httpsHealthCheck
-          - http2HealthCheck
-          - tcpHealthCheck
-          - sslHealthCheck
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -8149,11 +8159,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'httpsHealthCheck'
-        conflicts:
-          - httpHealthCheck
-          - http2HealthCheck
-          - tcpHealthCheck
-          - sslHealthCheck
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -8271,11 +8282,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'tcpHealthCheck'
-        conflicts:
-          - httpHealthCheck
-          - http2HealthCheck
-          - httpsHealthCheck
-          - sslHealthCheck
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -8374,11 +8386,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'sslHealthCheck'
-        conflicts:
-          - httpHealthCheck
-          - http2HealthCheck
-          - httpsHealthCheck
-          - tcpHealthCheck
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -8477,11 +8490,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'http2HealthCheck'
-        conflicts:
-          - httpHealthCheck
-          - sslHealthCheck
-          - httpsHealthCheck
-          - tcpHealthCheck
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
