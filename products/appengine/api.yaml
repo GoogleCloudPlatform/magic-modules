@@ -332,16 +332,19 @@ objects:
               - :REDIRECT_HTTP_RESPONSE_CODE_307
           - !ruby/object:Api::Type::NestedObject
             name: 'script'
+            # TODO (mbang): Exactly one of script, staticFiles, or apiEndpoint must be set
             description: |
               Executes a script to handle the requests that match this URL pattern. 
               Only the auto value is supported for Node.js in the App Engine standard environment, for example "script:" "auto".
             properties:
             - !ruby/object:Api::Type::String
               name: 'scriptPath'
+              required: true
               description: |
                 Path to the script from the application root directory.
           - !ruby/object:Api::Type::NestedObject
             name: 'staticFiles'
+            # TODO (mbang): Exactly one of script, staticFiles, or apiEndpoint must be set
             description: |
               Files served directly to the user for a given URL, such as images, CSS stylesheets, or JavaScript source files. Static file handlers describe which files in the application directory are static files, and which URLs serve them.
             properties:

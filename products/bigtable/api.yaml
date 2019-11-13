@@ -64,8 +64,9 @@ objects:
           Long form description of the use case for this app profile.
       - !ruby/object:Api::Type::Boolean
         name: 'multiClusterRoutingUseAny'
-        conflicts:
-          - singleClusterRouting
+        exactly_one_of:
+          - single_cluster_routing
+          - multi_cluster_routing_use_any
         description: |
           If true, read/write requests are routed to the nearest cluster in the instance, and will fail over to the nearest cluster that is available
           in the event of transient errors or delays. Clusters in a region are considered equidistant. Choosing this option sacrifices read-your-writes
@@ -73,8 +74,9 @@ objects:
         input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'singleClusterRouting'
-        conflicts:
-          - multiClusterRoutingUseAny
+        exactly_one_of:
+          - single_cluster_routing
+          - multi_cluster_routing_use_any
         description: |
           Use a single-cluster routing policy.
         input: true

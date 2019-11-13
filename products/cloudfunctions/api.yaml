@@ -136,17 +136,30 @@ objects:
         description: |
           The Google Cloud Storage URL, starting with gs://, pointing to the zip
           archive which contains the function.
+        exactly_one_of:
+          - source_repository
+          - source_archive_url
+          - source_upload_url
       - !ruby/object:Api::Type::String
         name: 'sourceUploadUrl'
         description: |
           The Google Cloud Storage signed URL used for source uploading.
+        exactly_one_of:
+          - source_repository
+          - source_archive_url
+          - source_upload_url
       - !ruby/object:Api::Type::NestedObject
         name: 'sourceRepository'
         description: |
           The source repository where a function is hosted.
+        exactly_one_of:
+          - source_repository
+          - source_archive_url
+          - source_upload_url
         properties:
           - !ruby/object:Api::Type::String
             name: 'url'
+            required: true
             description: |
               The URL pointing to the hosted repository where the function is defined
           - !ruby/object:Api::Type::String
