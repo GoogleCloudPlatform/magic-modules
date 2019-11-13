@@ -77,13 +77,14 @@ so Terraform knows to manage them.
 - [Resource: `google_compute_health_check`](#resource-google_compute_health_check)
 - [Resource: `google_compute_image`](#resource-google_compute_image)
 - [Resource: `google_compute_instance`](#resource-google_compute_instance)
+- [Resource: `google_compute_instance_group_manager`](#resource-google_compute_instance_group_manager)
 - [Resource: `google_compute_instance_template`](#resource-google_compute_instance_template)
 - [Resource: `google_compute_network`](#resource-google_compute_network)
 - [Resource: `google_compute_network_peering`](#resource-google_compute_network_peering)
 - [Resource: `google_compute_node_template`](#resource-google_compute_node_template)
 - [Resource: `google_compute_region_backend_service`](#resource-google_compute_region_backend_service)
 - [Resource: `google_compute_region_health_check`](#resource-google_compute_region_health_check)
-- [Resource: `google_compute_region_instance_group_manager`](#resource-google_compute_region_instance_group_manager)
+- [Resource: `google_compute_region_instance_group_manager`](#resource-google_compute_instance_group_manager)
 - [Resource: `google_compute_resource_policy`](#resource-google_compute_resource_policy)
 - [Resource: `google_compute_route`](#resource-google_compute_route)
 - [Resource: `google_compute_router`](#resource-google_compute_router)
@@ -583,6 +584,52 @@ or `enable_integrity_monitoring` is now required on the `shielded_instance_confi
 In an attempt to avoid allowing empty blocks in config files, at least one of `on_host_maintenance`, `automatic_restart`,
 `preemptible`, or `node_affinities` is now required on the `scheduling` block.
 
+## Resource: `google_compute_instance_group_manager`
+
+The following changes apply to both `google_compute_instance_group_manager` and `google_compute_region_instance_group_manager`.
+
+### `instance_template` has been replaced by `version.instance_template`
+
+Instance group managers should be using `version` blocks to reference which
+instance template to use for provisioning. To upgrade use a single `version`
+block with `instance_template` in your config and by default all traffic will be
+directed to that version.
+
+### Old Config
+
+```hcl
+resource "google_compute_instance_group_manager" "my_igm" {
+    name               = "my-igm"
+    zone               = "us-central1-c"
+    base_instance_name = "igm"
+
+    instance_template = "${google_compute_instance_template.my_tmpl.self_link}"
+}
+```
+
+### New Config
+
+```hcl
+resource "google_compute_instance_group_manager" "my_igm" {
+    name               = "my-igm"
+    zone               = "us-central1-c"
+    base_instance_name = "igm"
+
+    version {
+        name = "prod"
+        instance_template = "${google_compute_instance_template.my_tmpl.self_link}"
+    }
+}
+```
+
+### `update_strategy` has been replaced by `update_policy`
+
+To allow much greater control over the updates happening to instance groups
+`update_strategy` has been replaced by `update_policy`. The previous
+functionality to determine if instance should be replaced or restarted can be
+achieved using `update_policy.minimal_action`. For more details see the
+[official guide](https://cloud.google.com/compute/docs/instance-groups/rolling-out-updates-to-managed-instance-groups).
+
 ## Resource: `google_compute_instance_template`
 
 ### At least one of `enable_secure_boot`, `enable_vtpm`, or `enable_integrity_monitoring` is now required on `google_compute_instance_template.shielded_instance_config`
@@ -722,13 +769,6 @@ In an attempt to avoid allowing empty blocks in config files, at least one of `h
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `request`, `response`, `port`, `port_name`,
 `proxy_header`, or `port_specification` is now required on the `ssl_health_check` and `tcp_health_check` blocks.
-
-## Resource: `google_compute_region_instance_group_manager`
-
-### `update_strategy` no longer has any effect and is removed
-
-With `rolling_update_policy` removed, `update_strategy` has no effect anymore.
-Before updating, remove it from your config.
 
 ## Resource: `google_compute_resource_policy`
 
