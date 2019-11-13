@@ -94,16 +94,9 @@ The following arguments are supported:
     appending a hyphen and a random four-character string to the base instance
     name.
 
-* `instance_template` - (Deprecated) The
-  full URL to an instance template from which all new instances
-  will be created. This field is replaced by `version.instance_template`. You must
-  specify at least one `version` block with an `instance_template`.
-
-* `version` - (Optional) Application versions managed by this instance group. Each
+* `version` - (Required) Application versions managed by this instance group. Each
     version deals with a specific instance template, allowing canary release scenarios.
     Structure is documented below.
-    Until `instance_template` is removed this field will be Optional to allow for a
-    graceful upgrade. In the Beta provider and as of 3.0.0 it will be Required.
 
 * `name` - (Required) The name of the instance group manager. Must be 1-63
     characters long and comply with
@@ -123,9 +116,6 @@ The following arguments are supported:
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
-
-* `update_strategy` - (Deprecated)  This field has been deprecated, use `update_policy`
-  instead.
 
 * `target_size` - (Optional) The target number of running instances for this managed
     instance group. This value should always be explicitly set unless this resource is attached to
