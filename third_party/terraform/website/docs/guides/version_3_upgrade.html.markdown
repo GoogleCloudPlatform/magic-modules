@@ -1273,7 +1273,7 @@ In an attempt to avoid allowing empty blocks in config files, at least one of `o
 `google_storage_transfer_job.transfer_spec.transfer_options` block.
 
 ### At least one of `gcs_data_source`, `aws_s3_data_source`, or `http_data_source` is now required
-on `google_storage_transfer_job.transfer_options`
+on `google_storage_transfer_job.transfer_spec`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `gcs_data_source`, `aws_s3_data_source`,
-or `http_data_source` is now required on the `google_storage_transfer_job.transfer_options` block.
+or `http_data_source` is now required on the `google_storage_transfer_job.transfer_spec` block.
