@@ -59,7 +59,7 @@ so Terraform knows to manage them.
 - [Resource: `google_access_context_manager_service_perimeter`](#resource-google_access_context_manager_service_perimeter)
 - [Resource: `google_app_engine_application`](#resource-google_app_engine_application)
 - [Resource: `google_app_engine_domain_mapping`](#resource-google_app_engine_domain_mapping)
-- [Resource: `google_app_engine_standard_version`](#resource-google_app_engine_standard_version)
+- [Resource: `google_app_engine_standard_app_version`](#resource-google_app_engine_standard_app_version)
 - [Resource: `google_bigquery_dataset`](#resource-google_bigquery_dataset)
 - [Resource: `google_bigquery_table`](#resource-google_bigquery_table)
 - [Resource: `google_bigtable_app_profile`](#resource-google_bigtable_app_profile)
@@ -234,9 +234,9 @@ required on the `ssl_settings` block.
 
 ## Resource: `google_app_engine_standard_app_version`
 
-### At least one of `zip`, or `files` is now required on `google_app_engine_standard_app_version.deployment`
+### At least one of `zip` or `files` is now required on `google_app_engine_standard_app_version.deployment`
 
-In an attempt to avoid allowing empty blocks in config files, at least one of `zip`, or `files`
+In an attempt to avoid allowing empty blocks in config files, at least one of `zip` or `files`
 is now required on the `deployment` block.
 
 ### `shell` is now required on `google_app_engine_standard_app_version.entrypoint`
@@ -295,7 +295,7 @@ required on the `cluster_admission_rules` block.
 
 ## Resource: `google_cloudbuild_trigger`
 
-### Exactly one of `filename` or `build` on `google_cloudbuild_trigger`
+### Exactly one of `filename` or `build` is now required on `google_cloudbuild_trigger`
 
 In attempt to be more consistent with the API, exactly one of `filename` or `build` is now
 required on `google_cloudbuild_trigger`.
@@ -306,12 +306,12 @@ In an attempt to avoid allowing empty blocks in config files, exactly one
 of `branch_name`, `tag_name` or `commit_sha` is now required on the
 `trigger_template` block.
 
-### Exactly one of `pull_request` or `push` on `google_cloudbuild_trigger.github`
+### Exactly one of `pull_request` or `push` is now required on `google_cloudbuild_trigger.github`
 
 In an attempt to avoid allowing empty blocks in config files, exactly one
 of `pull_request` or `push` is now required on the `github` block.
 
-### Exactly one of `branch` or `tag_name` on `google_cloudbuild_trigger.github.push`
+### Exactly one of `branch` or `tag_name` is now required on `google_cloudbuild_trigger.github.push`
 
 In an attempt to avoid allowing empty blocks in config files, exactly one
 of `branch` or `tag_name` is now required on the `github.push` block.
@@ -534,7 +534,7 @@ resource "google_compute_forwarding_rule" "frule" {
 
 ### `ip_address` is now validated to enforce literal IP address format
 
-See [`google_compute_forwarding_rule`][#resource-google_compute_forwarding_rule].
+See [`google_compute_forwarding_rule`](#resource-google_compute_forwarding_rule).
 
 ## Resource: `google_compute_health_check`
 
@@ -778,7 +778,7 @@ In an attempt to avoid allowing empty blocks in config files, at least one of `r
 
 ## Resource: `google_compute_resource_policy`
 
-### Exactly one of `hourly_schedule`, `daily_schedule` or `weekly_schedule` on `google_compute_resource_policy.snapshot_schedule_policy.schedule`
+### Exactly one of `hourly_schedule`, `daily_schedule` or `weekly_schedule` is now required on `google_compute_resource_policy.snapshot_schedule_policy.schedule`
 
 In an attempt to avoid allowing empty blocks in config files, exactly one
 of `hourly_schedule`, `daily_schedule` or `weekly_schedule` is now required
@@ -1467,9 +1467,9 @@ Previously, an empty `expiration_policy` block would allow the resource to never
 allowing empty blocks in config files, `ttl` is now required on the `expiration_policy` block.  `ttl` should be set
 to `""` for the resource to never expire.
 
-## Resource: `google_securitiy_scanner_scan_config`
+## Resource: `google_security_scanner_scan_config`
 
-### At least one of `google_account` or `custom_account` is now required on `google_securitiy_scanner_scan_config.authentication`
+### At least one of `google_account` or `custom_account` is now required on `google_security_scanner_scan_config.authentication`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `google_account` or
 `custom_account` is now required on the `authentication` block.
@@ -1491,15 +1491,12 @@ is no known alternative at this time.
 ### At least one of `ca_certificate`, `client_certificate`, `client_key`, `connect_retry_interval`, `dump_file_path`, `failover_target`, `master_heartbeat_period`, `password`, `ssl_cipher`, `username`, or `verify_server_certificate` is now required on `google_sql_database_instance.settings.replica_configuration`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `ca_certificate`, `client_certificate`, `client_key`, `connect_retry_interval`,
-`dump_file_path`, `failover_target`, `master_heartbeat_period`, `password`,
-`ssl_cipher`, `username`, or `verify_server_certificate` is now required on the
+`dump_file_path`, `failover_target`, `master_heartbeat_period`, `password`, `ssl_cipher`, `username`, or `verify_server_certificate` is now required on the
 `settings.replica_configuration` block.
 
 ### At least one of `cert`, `common_name`, `create_time`, `expiration_time`, or `sha1_fingerprint` is now required on `google_sql_database_instance.settings.server_ca_cert`
 
-In an attempt to avoid allowing empty blocks in config files, at least one of `cert`, `common_name`, `create_time`,
-`expiration_time`, or `sha1_fingerprint` is now required on the
-`settings.server_ca_cert` block.
+In an attempt to avoid allowing empty blocks in config files, at least one of `cert`, `common_name`, `create_time`, `expiration_time`, or `sha1_fingerprint` is now required on the `settings.server_ca_cert` block.
 
 ### At least one of `day`, `hour`, or `update_track` is now required on `google_sql_database_instance.settings.maintenance_window`
 
@@ -1508,8 +1505,7 @@ or `update_track` is now required on the `settings.maintenance_window` block.
 
 ### At least one of `binary_log_enabled`, `enabled`, `start_time`, or `location` is now required on `google_sql_database_instance.settings.backup_configuration`
 
-In an attempt to avoid allowing empty blocks in config files, at least one of `binary_log_enabled`,
-`enabled`, `start_time`, or `location` is now required on the
+In an attempt to avoid allowing empty blocks in config files, at least one of `binary_log_enabled`, `enabled`, `start_time`, or `location` is now required on the
 `settings.backup_configuration` block.
 
 ### At least one of `authorized_networks`, `ipv4_enabled`, `require_ssl`, or `private_network` is now required on `google_sql_database_instance.settings.ip_configuration`
@@ -1519,13 +1515,11 @@ In an attempt to avoid allowing empty blocks in config files, at least one of `a
 
 ### `name` and `value` are now required on block `google_sql_database_instance.settings.database_flags`
 
-In an attempt to avoid allowing empty blocks in config files, `name` and `value` are now
-required on the `settings.database_flags` block.
+In an attempt to avoid allowing empty blocks in config files, `name` and `value` are now required on the `settings.database_flags` block.
 
 ### `value` is now required on block `google_sql_database_instance.settings.ip_configuration.authorized_networks`
 
-In an attempt to avoid allowing empty blocks in config files, `value` is now
-required on the `settings.ip_configuration.authorized_networks` block.
+In an attempt to avoid allowing empty blocks in config files, `value` is now required on the `settings.ip_configuration.authorized_networks` block.
 
 ### `zone` is now required on block `google_sql_database_instance.settings.location_preference`
 
@@ -1547,8 +1541,7 @@ In an attempt to avoid allowing empty blocks in config files, at least one of `m
 ### At least one of `min_time_elapsed_since_last_modification`, `max_time_elapsed_since_last_modification`, `include_prefixes`, or `exclude_prefixes` is now required on `google_storage_transfer_job.transfer_spec.object_conditions`
 
 In an attempt to avoid allowing empty blocks in config files, at least one of `min_time_elapsed_since_last_modification`,
-`max_time_elapsed_since_last_modification`, `include_prefixes`, or `exclude_prefixes` is now required
-on the `transfer_spec.object_conditions` block.
+`max_time_elapsed_since_last_modification`, `include_prefixes`, or `exclude_prefixes` is now required on the `transfer_spec.object_conditions` block.
 
 ### `is_live` is now removed
 
