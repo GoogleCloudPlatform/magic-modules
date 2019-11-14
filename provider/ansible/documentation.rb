@@ -23,6 +23,8 @@ module Provider
     module Documentation
       # Builds out the DOCUMENTATION for a property.
       # This will eventually be converted to YAML
+      #
+      # TODO(alexstephen): Ansible docs don't like defaults of 0, because 0 == null
       def documentation_for_property(prop)
         required = prop.required && !prop.default_value ? true : false
         {
@@ -39,7 +41,7 @@ module Provider
             'default' => (
               if prop.default_value&.is_a?(::Hash)
                 prop.default_value
-              else
+              elsif prop.default_value.to_s != '0'
                 prop.default_value&.to_s
               end),
             'type' => python_type(prop),
