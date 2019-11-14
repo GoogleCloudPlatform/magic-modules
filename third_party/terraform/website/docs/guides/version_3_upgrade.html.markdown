@@ -1273,11 +1273,6 @@ required on the `list_policy` block.
 In an attempt to avoid allowing empty blocks in config files, exactly one of `all` or `values` is now
 required on the `list_policy.allow` and `list_policy.deny` blocks.
 
-### `inherit_from_parent` is now required on block `google_folder_organization_policy.list_policy`
-
-In an attempt to avoid allowing empty blocks in config files, `inherit_from_parent` is now
-required on the `list_policy` block.
-
 ## Resource: `google_healthcare_hl7_v2_store`
 
 ### At least one of `allow_null_header ` or `segment_terminator` is now required on `google_healthcare_hl7_v2_store.parser_config`
@@ -1378,11 +1373,6 @@ required on the `list_policy` block.
 In an attempt to avoid allowing empty blocks in config files, exactly one of `all` or `values` is now
 required on the `list_policy.allow` and `list_policy.deny` blocks.
 
-### `inherit_from_parent` is now required on block `google_organization_policy.list_policy`
-
-In an attempt to avoid allowing empty blocks in config files, `inherit_from_parent` is now
-required on the `list_policy` block.
-
 ## Resource: `google_project_iam_audit_config`
 
 ### Audit configs are now authoritative on create
@@ -1401,11 +1391,6 @@ required on the `list_policy` block.
 
 In an attempt to avoid allowing empty blocks in config files, exactly one of `all` or `values` is now
 required on the `list_policy.allow` and `list_policy.deny` blocks.
-
-### `inherit_from_parent` is now required on block `google_project_organization_policy.list_policy`
-
-In an attempt to avoid allowing empty blocks in config files, `inherit_from_parent` is now
-required on the `list_policy` block.
 
 ## Resource: `google_project_service`
 
