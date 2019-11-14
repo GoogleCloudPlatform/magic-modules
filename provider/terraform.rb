@@ -108,9 +108,11 @@ module Provider
 
       schema_path.split('.').each_with_index do |pname, i|
         next if i.odd?
+
         pname = pname.camelize(:lower)
         prop = nested_props.find { |p| p.name == pname }
         break if prop.nil?
+
         nested_props = prop.nested_properties || []
       end
       prop
