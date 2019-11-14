@@ -99,6 +99,25 @@ module Provider
                              force_new?(property.parent, resource))))
     end
 
+    # Returns the property for a given Terraform field path (e.g.
+    # 'a_field', 'parent_field.0.child_name'). Returns nil if the property
+    # is not included in the resource's properties.
+    def property_for_schema_path(schema_path, resource)
+      nested_props = resource.properties
+      prop = nil
+
+      schema_path.split('.').each_with_index do |pname, i|
+        next if i.odd?
+
+        pname = pname.camelize(:lower)
+        prop = nested_props.find { |p| p.name == pname }
+        break if prop.nil?
+
+        nested_props = prop.nested_properties || []
+      end
+      prop
+    end
+
     # Transforms a format string with field markers to a regex string with
     # capture groups.
     #
