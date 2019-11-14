@@ -491,14 +491,10 @@ resource "google_compute_region_backend_service" "lipsum" {
 
 resource "google_compute_instance_group_manager" "foobar" {
   name               = "%s"
-<% if version.nil? || version == 'ga' -%>
-  instance_template  = "${google_compute_instance_template.foobar.self_link}"
-<% else -%>
   version {
     instance_template  = "${google_compute_instance_template.foobar.self_link}"
     name               = "primary"
   }
-<% end -%>
   base_instance_name = "foobar"
   zone               = "us-central1-f"
   target_size        = 1
