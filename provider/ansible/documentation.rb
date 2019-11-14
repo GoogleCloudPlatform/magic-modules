@@ -41,7 +41,7 @@ module Provider
             'default' => (
               if prop.default_value&.is_a?(::Hash)
                 prop.default_value
-              elsif !prop.default_value&.zero?
+              elsif prop.default_value.to_s != '0'
                 prop.default_value&.to_s
               end),
             'type' => python_type(prop),
