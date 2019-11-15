@@ -2867,13 +2867,15 @@ resource "google_container_cluster" "with_ip_allocation_policy" {
 }`, cluster, cluster)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withResourceUsageExportConfig(clusterName, datasetId string, resourceUsage bool) string {
 	resourceUsageConfig := ""
 	if resourceUsage {
 		resourceUsageConfig = `
 		resource_usage_export_config {
 			enable_network_egress_metering = true
+			enable_resource_consumption_metering {
+			    enabled = false
+			}
 
 			bigquery_destination {
 				dataset_id = "${google_bigquery_dataset.default.dataset_id}"
@@ -2896,7 +2898,6 @@ func testAccContainerCluster_withResourceUsageExportConfig(clusterName, datasetI
 	}`, datasetId, clusterName, resourceUsageConfig)
 	return config
 }
-<% end -%>
 
 func testAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(clusterName string) string {
 	return fmt.Sprintf(`

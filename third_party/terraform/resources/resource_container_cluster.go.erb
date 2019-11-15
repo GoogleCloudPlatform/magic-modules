@@ -869,7 +869,7 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-
+<% end -%>
 			"resource_usage_export_config": {
 					Type:       schema.TypeList,
 					MaxItems:   1,
@@ -881,6 +881,20 @@ func resourceContainerCluster() *schema.Resource {
 											Optional: true,
 											Default:  false,
 									},
+									"enable_resource_consumption_metering": {
+							                Type:     schema.TypeList,
+							                MaxItems: 1,
+							                Optional: true,
+							                Elem: &schema.Resource{
+								                    Schema: map[string]*schema.Schema{
+									                        "enabled": {
+										                            Type:     schema.TypeBool,
+										                            Optional: true,
+										                            Default:  true,
+									                        },
+								                    },
+							                },
+						            },
 									"bigquery_destination": {
 											Type:       schema.TypeList,
 											MaxItems:   1,
@@ -897,7 +911,6 @@ func resourceContainerCluster() *schema.Resource {
 							},
 					},
 			},
-<% end -%>
 
 			"enable_intranode_visibility": {
 				Type:     schema.TypeBool,
@@ -2454,7 +2467,6 @@ func expandDefaultMaxPodsConstraint(v interface{}) *containerBeta.MaxPodsConstra
 	}
 }
 
-<% unless version == 'ga' -%>
 func expandResourceUsageExportConfig(configured interface{}) *containerBeta.ResourceUsageExportConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -2477,9 +2489,18 @@ func expandResourceUsageExportConfig(configured interface{}) *containerBeta.Reso
 					}
 			}
 	}
+	if _, ok := resourceUsageConfig["enable_resource_consumption_metering"]; ok {
+		    if len(resourceUsageConfig["enable_resource_consumption_metering"].([]interface{})) > 0 {
+			        consumptionMeteringConfig := resourceUsageConfig["enable_resource_consumption_metering"].([]interface{})[0].(map[string]interface{})
+			        if _, ok := consumptionMeteringConfig["enabled"]; ok {
+				            result.ConsumptionMeteringConfig = &containerBeta.ConsumptionMeteringConfig{
+					                Enabled: consumptionMeteringConfig["enabled"].(bool),
+				            }
+			        }
+		    }
+	}
 	return result
 }
-<% end -%>
 
 func flattenNetworkPolicy(c *containerBeta.NetworkPolicy) []map[string]interface{} {
 	result := []map[string]interface{}{}
@@ -2757,6 +2778,7 @@ func flattenPodSecurityPolicyConfig(c *containerBeta.PodSecurityPolicyConfig) []
 		},
 	}
 }
+<% end -%>
 
 func flattenResourceUsageExportConfig(c *containerBeta.ResourceUsageExportConfig) []map[string]interface{} {
 		if c == nil {
@@ -2765,13 +2787,15 @@ func flattenResourceUsageExportConfig(c *containerBeta.ResourceUsageExportConfig
 		return []map[string]interface{}{
 				{
 						"enable_network_egress_metering": c.EnableNetworkEgressMetering,
+						"enable_resource_consumption_metering": []map[string]interface{}{
+				                {"enabled": c.ConsumptionMeteringConfig.Enabled},
+			            },
 						"bigquery_destination": []map[string]interface{}{
 								{"dataset_id": c.BigqueryDestination.DatasetId},
 						},
 				},
 		}
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func flattenDatabaseEncryption(c *containerBeta.DatabaseEncryption) []map[string]interface{} {
