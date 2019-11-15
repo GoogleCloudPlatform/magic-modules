@@ -58,6 +58,7 @@ func GetSQLDatabaseInstanceApiObject(d TerraformResourceData, config *Config) (m
 	}
 
 	instance := &sqladmin.DatabaseInstance{
+		Project:              project,
 		Name:                 name,
 		Region:               region,
 		Settings:             expandSqlDatabaseInstanceSettings(d.Get("settings").([]interface{}), !isFirstGen(d)),
