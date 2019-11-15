@@ -551,6 +551,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	d.Set("name", name)
 
 	instance := &sqladmin.DatabaseInstance{
+		Project:              project,
 		Name:                 name,
 		Region:               region,
 		Settings:             expandSqlDatabaseInstanceSettings(d.Get("settings").([]interface{}), !isFirstGen(d)),
