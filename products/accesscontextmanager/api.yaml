@@ -276,6 +276,14 @@ objects:
                           - :DESKTOP_WINDOWS
                           - :DESKTOP_LINUX
                           - :DESKTOP_CHROME_OS
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'requireAdminApproval'
+                    description: |
+                      Whether the device needs to be approved by the customer admin.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'requireCorpOwned'
+                    description: |
+                      Whether the device needs to be corp owned.
   - !ruby/object:Api::Resource
     name: 'ServicePerimeter'
     # This is an unusual API, so we need to use a few fields to map the methods
