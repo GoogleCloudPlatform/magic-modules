@@ -41,7 +41,7 @@ if v, ok := readRes["users"].([]interface{}); ok {
 			return fmt.Errorf("Error detaching disk %s from instance %s/%s/%s: %s", call.deviceName, call.project,
 				call.zone, call.instance, err.Error())
 		}
-		err = computeOperationWait(config.clientCompute, op, call.project,
+		err = computeOperationWait(config, op, call.project,
 			fmt.Sprintf("Detaching disk from %s/%s/%s", call.project, call.zone, call.instance))
 		if err != nil {
 			if opErr, ok := err.(ComputeOperationError); ok && len(opErr.Errors) == 1 && opErr.Errors[0].Code == "RESOURCE_NOT_FOUND" {

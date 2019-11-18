@@ -198,21 +198,9 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
 <%  if !object.async.nil? && object.async.allow?('create') -%>
-<% if object.autogen_async -%>
     waitErr := <%= client_name_camel -%>OperationWaitTime(
     config, res,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutCreate).Minutes()))
-<% else -%>
-    op := &<%= client_name_lower -%>.Operation{}
-    err = Convert(res, op)
-    if err != nil {
-        return err
-    }
-
-    waitErr := <%= client_name_camel -%>OperationWaitTime(
-    config.client<%= client_name_pascal -%>, op,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
-        int(d.Timeout(schema.TimeoutCreate).Minutes()))
-<% end -%>
 
     if waitErr != nil {
         // The resource didn't actually create
@@ -419,24 +407,10 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         }
 
 <%      if !object.async.nil? && object.async.allow?('update') -%>
-<%        if object.autogen_async -%>
 
         err = <%= client_name_camel -%>OperationWaitTime(
             config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
             int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-
-<%        else -%>
-        op := &<%= client_name_lower -%>.Operation{}
-        err = Convert(res, op)
-        if err != nil {
-            return err
-        }
-
-        err = <%= client_name_camel -%>OperationWaitTime(
-            config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
-            int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-
-<%        end -%>
         if err != nil {
             return err
         }
@@ -515,22 +489,10 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     }
 
 <%  if !object.async.nil? && object.async.allow?('update') -%>
-<% if object.autogen_async && object.async.allow?('update') -%>
 
     err = <%= client_name_camel -%>OperationWaitTime(
     config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
     int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-<% else -%>
-    op := &<%= client_name_lower -%>.Operation{}
-    err = Convert(res, op)
-    if err != nil {
-        return err
-    }
-
-    err = <%= client_name_camel -%>OperationWaitTime(
-    config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
-    int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-<% end -%>
 
     if err != nil {
         return err
@@ -588,22 +550,10 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     }
 
 <%  if !object.async.nil? && object.async.allow?('delete') -%>
-<% if object.autogen_async && object.async.allow?('delete') -%>
 
     err = <%= client_name_camel -%>OperationWaitTime(
         config, res, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
         int(d.Timeout(schema.TimeoutDelete).Minutes()))
-<% else -%>
-    op := &<%= client_name_lower -%>.Operation{}
-    err = Convert(res, op)
-    if err != nil {
-        return err
-    }
-
-    err = <%= client_name_camel -%>OperationWaitTime(
-        config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
-        int(d.Timeout(schema.TimeoutDelete).Minutes()))
-<% end -%>
 
     if err != nil {
         return err

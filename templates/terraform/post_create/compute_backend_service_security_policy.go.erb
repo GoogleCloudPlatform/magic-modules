@@ -11,7 +11,7 @@ if o, n := d.GetChange("security_policy"); o.(string) != n.(string) {
   if err != nil {
     return errwrap.Wrapf("Error setting Backend Service security policy: {{err}}", err)
   }
-  waitErr := computeSharedOperationWait(config.clientCompute, op, project, "Setting Backend Service Security Policy")
+  waitErr := computeOperationWait(config, op, project, "Setting Backend Service Security Policy")
   if waitErr != nil {
     return waitErr
   }
