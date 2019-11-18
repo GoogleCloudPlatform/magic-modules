@@ -769,7 +769,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	// Store the ID now
 	d.SetId(fmt.Sprintf("projects/%s/global/instanceTemplates/%s", project, instanceTemplate.Name))
 
-	err = computeSharedOperationWait(config, op, project, "Creating Instance Template")
+	err = computeOperationWait(config, op, project, "Creating Instance Template")
 	if err != nil {
 		return err
 	}

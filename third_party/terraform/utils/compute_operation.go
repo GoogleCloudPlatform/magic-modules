@@ -78,8 +78,8 @@ func (w *ComputeOperationWaiter) TargetStates() []string {
 	return []string{"DONE"}
 }
 
-func computeOperationWait(config *Config, op *compute.Operation, project, activity string) error {
-	return computeOperationWaitTime(config, op, project, activity, 4)
+func computeOperationWait(config *Config, res interface{}, project, activity string) error {
+	return computeOperationWaitTime(config, res, project, activity, 4)
 }
 
 func computeOperationWaitTime(config *Config, res interface{}, project, activity string, timeoutMinutes int) error {

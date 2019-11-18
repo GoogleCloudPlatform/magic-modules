@@ -102,7 +102,7 @@ func resourceAttachedDiskCreate(d *schema.ResourceData, meta interface{}) error 
 
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s/%s", zv.Project, zv.Zone, zv.Name, diskName))
 
-	waitErr := computeSharedOperationWaitTime(config, op, zv.Project,
+	waitErr := computeOperationWaitTime(config, op, zv.Project,
 		"disk to attach", int(d.Timeout(schema.TimeoutCreate).Minutes()))
 	if waitErr != nil {
 		d.SetId("")
@@ -183,7 +183,7 @@ func resourceAttachedDiskDelete(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	waitErr := computeSharedOperationWaitTime(config, op, zv.Project,
+	waitErr := computeOperationWaitTime(config, op, zv.Project,
 		fmt.Sprintf("Detaching disk from %s", zv.Name), int(d.Timeout(schema.TimeoutDelete).Minutes()))
 	if waitErr != nil {
 		return waitErr

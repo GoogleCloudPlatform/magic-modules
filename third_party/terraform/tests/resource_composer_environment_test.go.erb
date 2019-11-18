@@ -710,7 +710,7 @@ func testAccCheckClearComposerEnvironmentFirewalls(networkName string) resource.
 				continue
 			}
 
-			waitErr := computeSharedOperationWaitTime(config, op, config.Project,
+			waitErr := computeOperationWaitTime(config, op, config.Project,
 				"Sweeping test composer environment firewalls", 10)
 			if waitErr != nil {
 				allErrors = multierror.Append(allErrors,
