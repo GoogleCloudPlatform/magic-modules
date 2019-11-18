@@ -25,13 +25,8 @@ if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(v)) && (ok ||
       return fmt.Errorf("Error adding labels to <%= resource_name -%> %q: %s", d.Id(), err)
     }
 
-    err = Convert(res, op)
-    if err != nil {
-        return err
-    }
-
     err = computeOperationWaitTime(
-        config.clientCompute, op, project, "Updating <%= resource_name -%> Labels",
+        config, res, project, "Updating <%= resource_name -%> Labels",
         int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 
     if err != nil {
