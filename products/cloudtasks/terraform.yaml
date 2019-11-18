@@ -1,0 +1,63 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Queue: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "projects/{{project}}/locations/{{location}}/queues/{{name}}"
+    parameters:
+      status: !ruby/object:Overrides::Terraform::PropertyOverride
+        output: true
+    properties:
+      appEngineRoutingOverride: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/cloudtasks_queue_appenginerouting.go.erb
+      location: !ruby/object:Overrides::Terraform::PropertyOverride
+        url_param_only: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+        custom_expand: templates/terraform/custom_expand/qualify_queue_name.go.erb
+      rateLimits: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      rateLimits.maxConcurrentDispatches: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      rateLimits.maxDispatchesPerSecond: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      retryConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      retryConfig.maxAttempts: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      retryConfig.maxRetryDuration: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      retryConfig.minBackoff: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      retryConfig.maxBackoff: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      retryConfig.maxDoublings: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      retryConfig.purgeTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      status: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+    examples: 
+      - !ruby/object:Provider::Terraform::Examples
+        name: "queue_basic"
+        primary_resource_id: "default"
+        vars:
+          name: "cloud-tasks-queue-test"
+
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>
