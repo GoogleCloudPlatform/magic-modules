@@ -220,6 +220,10 @@ objects:
   name: Service
   kind: Service
   base_url: serving.knative.dev/v1/namespaces/{{project}}/services
+  async: !ruby/object:Api::K8sAsync
+    actions: ['create', 'update']
+    operation: !ruby/object:Api::K8sAsync::Operation
+      base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
   references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':

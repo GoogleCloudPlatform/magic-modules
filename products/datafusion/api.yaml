@@ -20,21 +20,21 @@ versions:
     base_url: https://datafusion.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-async: !ruby/object:Api::Async
-  operation: !ruby/object:Api::Async::Operation
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::Async::Result
+  result: !ruby/object:Api::OpAsync::Result
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::Async::Status
+  status: !ruby/object:Api::OpAsync::Status
     path: 'done'
     complete: true
     allowed:
       - true
       - false
-  error: !ruby/object:Api::Async::Error
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
 apis_required:
@@ -61,14 +61,14 @@ objects:
         url_param_only: true
         input: true
         description: |
-          The region of the Data Fusion instance.      
+          The region of the Data Fusion instance.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
         input: true
         description: |
-          The ID of the instance or a fully qualified identifier for the instance. 
+          The ID of the instance or a fully qualified identifier for the instance.
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
@@ -78,12 +78,12 @@ objects:
         name: 'type'
         required: true
         description: |
-          Represents the type of Data Fusion instance. Each type is configured with 
+          Represents the type of Data Fusion instance. Each type is configured with
           the default settings for processing and memory.
-          - BASIC: Basic Data Fusion instance. In Basic type, the user will be able to create data pipelines 
-          using point and click UI. However, there are certain limitations, such as fewer number 
+          - BASIC: Basic Data Fusion instance. In Basic type, the user will be able to create data pipelines
+          using point and click UI. However, there are certain limitations, such as fewer number
           of concurrent pipelines, no support for streaming pipelines, etc.
-          - ENTERPRISE: Enterprise Data Fusion instance. In Enterprise type, the user will have more features 
+          - ENTERPRISE: Enterprise Data Fusion instance. In Enterprise type, the user will have more features
           available, such as support for streaming pipelines, higher number of concurrent pipelines, etc.
         values:
           - :BASIC
@@ -174,7 +174,7 @@ objects:
             name: 'network'
             description: |
               Name of the network in the project with which the tenant project
-              will be peered for executing pipelines. In case of shared VPC where the network resides in another host 
+              will be peered for executing pipelines. In case of shared VPC where the network resides in another host
               project the network should specified in the form of projects/{host-project-id}/global/networks/{network}
             required: true
             input: true
