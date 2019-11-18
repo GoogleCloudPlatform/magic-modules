@@ -229,5 +229,6 @@ func expandBackupConfiguration(configured []interface{}) *sqladmin.BackupConfigu
 		BinaryLogEnabled: _backupConfiguration["binary_log_enabled"].(bool),
 		Enabled:          _backupConfiguration["enabled"].(bool),
 		StartTime:        _backupConfiguration["start_time"].(string),
+		Location:         _backupConfiguration["location"].(string),
 	}
 }

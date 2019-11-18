@@ -13,7 +13,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
-	"google.golang.org/api/googleapi"
 	"google.golang.org/api/storage/v1"
 )
 
@@ -69,24 +68,18 @@ func GetStorageBucketApiObject(d TerraformResourceData, config *Config) (map[str
 	}
 
 	if v, ok := d.GetOk("website"); ok {
-		websites := v.([]interface{})
+		sb.Website = expandBucketWebsite(v.([]interface{}))
+	}
 
-		if len(websites) > 1 {
-			return nil, fmt.Errorf("At most one website block is allowed")
-		}
+	if v, ok := d.GetOk("retention_policy"); ok {
+		retention_policies := v.([]interface{})
 
-		sb.Website = &storage.BucketWebsite{}
+		sb.RetentionPolicy = &storage.BucketRetentionPolicy{}
 
-		if len(websites) > 0 {
-			website := websites[0].(map[string]interface{})
+		retentionPolicy := retention_policies[0].(map[string]interface{})
 
-			if v, ok := website["not_found_page"]; ok {
-				sb.Website.NotFoundPage = v.(string)
-			}
-
-			if v, ok := website["main_page_suffix"]; ok {
-				sb.Website.MainPageSuffix = v.(string)
-			}
+		if v, ok := retentionPolicy["retention_period"]; ok {
+			sb.RetentionPolicy.RetentionPeriod = int64(v.(int))
 		}
 	}
 
@@ -135,11 +128,7 @@ func expandCors(configured []interface{}) []*storage.BucketCors {
 
 func expandBucketEncryption(configured interface{}) *storage.BucketEncryption {
 	encs := configured.([]interface{})
-	// Added bounds check to prevent panics (not present in provider).
-	if len(encs) == 0 {
-		return nil
-	}
-	if encs == nil || encs[0] == nil {
+	if encs == nil || len(encs) == 0 || encs[0] == nil {
 		return nil
 	}
 	enc := encs[0].(map[string]interface{})
@@ -155,10 +144,10 @@ func expandBucketEncryption(configured interface{}) *storage.BucketEncryption {
 
 func expandBucketLogging(configured interface{}) *storage.BucketLogging {
 	loggings := configured.([]interface{})
-	// Added bounds check to prevent panics (not present in provider).
 	if len(loggings) == 0 {
 		return nil
 	}
+
 	logging := loggings[0].(map[string]interface{})
 
 	bucketLogging := &storage.BucketLogging{
@@ -171,10 +160,10 @@ func expandBucketLogging(configured interface{}) *storage.BucketLogging {
 
 func expandBucketVersioning(configured interface{}) *storage.BucketVersioning {
 	versionings := configured.([]interface{})
-	// Added bounds check to prevent panics (not present in provider).
 	if len(versionings) == 0 {
 		return nil
 	}
+
 	versioning := versionings[0].(map[string]interface{})
 
 	bucketVersioning := &storage.BucketVersioning{}
@@ -183,6 +172,30 @@ func expandBucketVersioning(configured interface{}) *storage.BucketVersioning {
 	bucketVersioning.ForceSendFields = append(bucketVersioning.ForceSendFields, "Enabled")
 
 	return bucketVersioning
+}
+
+func expandBucketWebsite(v interface{}) *storage.BucketWebsite {
+	if v == nil {
+		return nil
+	}
+	vs := v.([]interface{})
+
+	if len(vs) < 1 || vs[0] == nil {
+		return nil
+	}
+
+	website := vs[0].(map[string]interface{})
+	w := &storage.BucketWebsite{}
+
+	if v := website["not_found_page"]; v != "" {
+		w.NotFoundPage = v.(string)
+	}
+
+	if v := website["main_page_suffix"]; v != "" {
+		w.MainPageSuffix = v.(string)
+	}
+
+	return w
 }
 
 func resourceGCSBucketLifecycleCreateOrUpdate(d TerraformResourceData, sb *storage.Bucket) error {
@@ -227,10 +240,6 @@ func resourceGCSBucketLifecycleCreateOrUpdate(d TerraformResourceData, sb *stora
 
 					if v, ok := condition["created_before"]; ok {
 						target_lifecycle_rule.Condition.CreatedBefore = v.(string)
-					}
-
-					if v, ok := condition["is_live"]; ok {
-						target_lifecycle_rule.Condition.IsLive = googleapi.Bool(v.(bool))
 					}
 
 					if v, ok := condition["matches_storage_class"]; ok {
