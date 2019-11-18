@@ -16,8 +16,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/storage/v1"
 )
 
