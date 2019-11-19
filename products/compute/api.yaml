@@ -9336,9 +9336,6 @@ objects:
     name: 'RouterBgpPeer'
     base_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
     self_link: projects/{{project}}/regions/{{region}}/routers/{{router}}
-    create_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
-    update_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
-    delete_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
     create_verb: :PATCH
     update_verb: :PATCH
     delete_verb: :PATCH
