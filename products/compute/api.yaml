@@ -9417,12 +9417,12 @@ objects:
         description: |
           IP address of the interface inside Google Cloud Platform.
           Only IPv4 is supported.
-        input: true
+        output: true
       - !ruby/object:Api::Type::String
         name: 'peerIpAddress'
         description: |
-          Peer BGP Autonomous System Number (ASN). Each BGP interface may
-          use a different value.
+          IP address of the BGP interface outside Google Cloud Platform.
+          Only IPv4 is supported.
         required: true
         input: true
       - !ruby/object:Api::Type::Integer
