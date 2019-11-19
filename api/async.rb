@@ -15,8 +15,12 @@ require 'api/object'
 require 'api/timeout'
 
 module Api
-  # Represents an asynchronous operation definition
+  # Base class from which other Async classes can inherit.
   class Async < Api::Object
+  end
+
+  # Represents an asynchronous operation definition
+  class OpAsync < Async
     attr_reader :operation
     attr_reader :result
     attr_reader :status
@@ -100,6 +104,47 @@ module Api
         super
         check :path, type: String, required: true
         check :message, type: String, required: true
+      end
+    end
+  end
+
+  # Kubernetes shaped resources do not have a dedicated Operation that can be
+  # polled against for the resource's status. Instead the resource contains a
+  # status block which has conditions that represent the state of the resource.
+  # As of now there is a single product with only 2 resources that follow this
+  # convention, so following the 1,2,many rule this is a bare bones
+  # implementation until a larger pattern emerges.
+  class K8sAsync < Async
+    attr_reader :operation
+    # The list of methods where operations are used.
+    attr_reader :actions
+
+    def validate
+      super
+
+      check :operation, type: K8sAsync::Operation, required: true
+      check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
+    end
+
+    def allow?(method)
+      @actions.include?(method.downcase)
+    end
+
+    # Since K8s like objects contain the status within the resource body this
+    # Operation class is just a light wrapper to call the resource itself
+    class Operation < Api::Object
+      attr_reader :base_url
+      attr_reader :full_url
+      attr_reader :timeouts
+
+      def validate
+        super
+
+        check :base_url, type: String
+        check :full_url, type: String
+        check :timeouts, type: Api::Timeouts
+
+        conflicts %i[base_url full_url]
       end
     end
   end

@@ -100,7 +100,8 @@ module Google
       elsif type.is_a? ::Array
         return if type.find_index(:boolean) && [TrueClass, FalseClass].find_index(object.class)
         return unless type.find_index(object.class).nil?
-      elsif object.is_a?(type)
+      # check if class is or inherits from type
+      elsif object.class <= type
         return
       end
       raise "Property '#{name}' is '#{object.class}' instead of '#{type}'"

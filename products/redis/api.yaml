@@ -23,21 +23,21 @@ versions:
     base_url: https://redis.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-async: !ruby/object:Api::Async
-  operation: !ruby/object:Api::Async::Operation
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::Async::Result
+  result: !ruby/object:Api::OpAsync::Result
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::Async::Status
+  status: !ruby/object:Api::OpAsync::Status
     path: 'done'
     complete: true
     allowed:
       - true
       - false
-  error: !ruby/object:Api::Async::Error
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
 objects:
@@ -125,7 +125,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: name
         description: |
-          The ID of the instance or a fully qualified identifier for the instance. 
+          The ID of the instance or a fully qualified identifier for the instance.
         required: true
         input: true
       - !ruby/object:Api::Type::Integer

@@ -31,22 +31,22 @@ objects:
     self_link: projects/{{project}}/models/{{name}}
     # This resources is not updatable (outside of versions, which is a version-level method)
     input: true
-    async: !ruby/object:Api::Async
+    async: !ruby/object:Api::OpAsync
       actions: ['delete']
-      operation: !ruby/object:Api::Async::Operation
+      operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'response'
         resource_inside_response: true
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'done'
         complete: True
         allowed:
           - True
           - False
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
     description: |
@@ -100,21 +100,21 @@ objects:
     description: |
       Each version is a trained model deployed in the cloud, ready to handle
       prediction requests. A model can have multiple versions
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'response'
         resource_inside_response: true
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'done'
         complete: True
         allowed:
           - True
           - False
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
     parameters:
