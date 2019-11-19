@@ -12,6 +12,20 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Budget: !ruby/object:Overrides::Terraform::ResourceOverride
+    description: |
+      {{description}}
+    id_format: '{{name}}'
+    import_format: ['{{name}}']
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: 'billing_budget_basic'
+        # skip_test: true
+        primary_resource_id: 'budget'
+        vars:
+          display_name: 'Example Billing Budget'
+
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
