@@ -284,7 +284,9 @@ objects:
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'scaleTier'
-            description: Specifies the machine types, the number of replicas for workers and parameter servers.
+            description: |
+              Specifies the machine types, the number of replicas for workers and parameter servers. 
+              https://cloud.google.com/ml-engine/reference/rest/v1/projects.jobs#ScaleTier
             values:
               - BASIC
               - STANDARD_1
@@ -297,7 +299,6 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'masterType'
             description: Specifies the type of virtual machine to use for your training job's master worker  
-            required: false  
           - !ruby/object:Api::Type::NestedObject
             name: 'masterConfig'
             description: The configuration for your master worker.
@@ -332,12 +333,16 @@ objects:
                   Otherwise, do not specify this field.
           - !ruby/object:Api::Type::String
             name: 'workerType'
-            description: Specifies the type of virtual machine to use for your training job's worker nodes.
-            required: false
+            description: |
+              Specifies the type of virtual machine to use for your training job's worker nodes.
+              The supported values are the same as those described in the entry for masterType.
+              This value must be consistent with the category of machine type that masterType uses. In other words, 
+              both must be Compute Engine machine types or both must be legacy machine types.
+              If you use cloud_tpu for this value, see special instructions for configuring a custom TPU machine.
+              This value must be present when scaleTier is set to CUSTOM and workerCount is greater than zero.
           - !ruby/object:Api::Type::NestedObject
             name: 'workerConfig'
             description: The configuration for workers.
-            required: false
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'acceleratorConfig'
@@ -375,11 +380,9 @@ objects:
               This value must be consistent with the category of machine type that masterType uses. 
               In other words, both must be Compute Engine machine types or both must be legacy machine types. This
               value must be present when scaleTier is set to CUSTOM and parameterServerCount is greater than zero.        
-            required: false
           - !ruby/object:Api::Type::NestedObject
             name: 'parameterServerConfig'
             description:  The configuration for parameter servers.
-            required: false  
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'acceleratorConfig'
@@ -414,13 +417,11 @@ objects:
             description: | 
               The number of worker replicas to use for the training job. Each replica in the cluster will be of the type 
               specified in workerType
-            required: false
           - !ruby/object:Api::Type::Integer
             name: 'parameterServerCount'
             description: | 
               The number of parameter server replicas to use for the training job. Each replica in the cluster will be 
               of the type specified in parameterServerType.
-            required: false
           - !ruby/object:Api::Type::Array
             name: 'packageUris'
             description: |
@@ -437,7 +438,6 @@ objects:
           - !ruby/object:Api::Type::Array
             name: 'args'
             description: Command line arguments to pass to the program.
-            required: false
             item_type: Api::Type::String
           - !ruby/object:Api::Type::String
             name: 'region'
@@ -449,19 +449,16 @@ objects:
                A Google Cloud Storage path in which to store training outputs and other data needed for training. This path is passed 
                to your TensorFlow program as the '--job-dir' command-line argument. The benefit of specifying this field is that Cloud 
                ML validates the path for use in training.
-            required: false 
           - !ruby/object:Api::Type::String
             name: 'runtimeVersion'
             description: | 
               The AI Platform runtime version to use for training. If not set, AI Platform uses the default stable version, 1.0. For more 
               information, see the runtime version list and how to manage runtime versions.
-            required: false 
           - !ruby/object:Api::Type::String
             name: 'pythonVersion'
             description: |
               The version of Python used in training. If not set, the default version is '2.7'. Python '3.5' is available when 
               runtimeVersion is set to '1.4' and above. Python '2.7' works with all supported runtime versions.
-            required: false 
       ## Training output start here      
       - !ruby/object:Api::Type::NestedObject
         name: 'trainingOutput'
@@ -542,8 +539,8 @@ objects:
                     name: 'framework'
                     description:  Framework on which the built-in algorithm was trained.
                     output: true
-                  - !ruby/object:Api::Type::Integer
-                    name: 'runtimeVersion'
+                  - !ruby/object:Api::Type::String
+                    name: 'runtimeVresion'
                     description:  AI Platform runtime version on which the built-in algorithm was trained
                     output: true       
                   - !ruby/object:Api::Type::String
@@ -575,7 +572,7 @@ objects:
               - !ruby/object:Api::Type::Integer
                 name: 'runtimeVersion'
                 description:  AI Platform runtime version on which the built-in algorithm was trained         
-              - !ruby/object:Api::Type::Integer
+              - !ruby/object:Api::Type::String
                 name: 'pythonVersion'
                 description:  Python version on which the built-in algorithm was trained.          
               - !ruby/object:Api::Type::Integer
