@@ -144,7 +144,6 @@ resource "google_healthcare_dataset" "dataset" {
 resource "google_pubsub_topic" "topic" {
   name         = "%s"
 }
-
 `, dicomStoreName, datasetName, pubsubTopic)
 }
 

@@ -197,7 +197,8 @@ resource "google_logging_organization_sink" "basic" {
 
 resource "google_storage_bucket" "log-bucket" {
 	name = "%s"
-}`, sinkName, orgId, getTestProjectFromEnv(), bucketName)
+}
+`, sinkName, orgId, getTestProjectFromEnv(), bucketName)
 }
 
 func testAccLoggingOrganizationSink_update(sinkName, bucketName, orgId string) string {
@@ -212,7 +213,8 @@ resource "google_logging_organization_sink" "update" {
 
 resource "google_storage_bucket" "log-bucket" {
 	name     = "%s"
-}`, sinkName, orgId, getTestProjectFromEnv(), bucketName)
+}
+`, sinkName, orgId, getTestProjectFromEnv(), bucketName)
 }
 
 func testAccLoggingOrganizationSink_heredoc(sinkName, bucketName, orgId string) string {
@@ -234,5 +236,6 @@ AND severity>=ERROR
 
 resource "google_storage_bucket" "log-bucket" {
 	name = "%s"
-}`, sinkName, orgId, getTestProjectFromEnv(), bucketName)
+}
+`, sinkName, orgId, getTestProjectFromEnv(), bucketName)
 }

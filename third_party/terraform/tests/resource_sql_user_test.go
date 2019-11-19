@@ -153,7 +153,7 @@ func testGoogleSqlUser_mysql(instance, password string) string {
 		host = "gmail.com"
 		password = "hunter2"
 	}
-	`, instance, password)
+`, instance, password)
 }
 
 func testGoogleSqlUser_postgres(instance, password string) string {
@@ -173,5 +173,5 @@ func testGoogleSqlUser_postgres(instance, password string) string {
 		instance = "${google_sql_database_instance.instance.name}"
 		password = "%s"
 	}
-	`, instance, password)
+`, instance, password)
 }

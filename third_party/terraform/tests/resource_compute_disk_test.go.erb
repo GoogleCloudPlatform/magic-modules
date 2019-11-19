@@ -517,7 +517,8 @@ resource "google_compute_disk" "foobar" {
 	labels = {
 		my-label = "my-label-value"
 	}
-}`, diskName)
+}
+`, diskName)
 }
 
 func testAccComputeDisk_timeout(diskName string) string {
@@ -536,7 +537,8 @@ resource "google_compute_disk" "foobar" {
 	timeouts {
 		create = "1s"
 	}
-}`, diskName)
+}
+`, diskName)
 }
 
 func testAccComputeDisk_updated(diskName string) string {
@@ -556,7 +558,8 @@ resource "google_compute_disk" "foobar" {
 		my-label = "my-updated-label-value"
 		a-new-label = "a-new-label-value"
 	}
-}`, diskName)
+}
+`, diskName)
 }
 
 func testAccComputeDisk_fromSnapshot(projectName, firstDiskName, snapshotName, diskName, ref_selector string) string {
@@ -588,7 +591,8 @@ resource "google_compute_disk" "seconddisk" {
 	type = "pd-ssd"
 	zone = "us-central1-a"
 	project = "%s"
-}`, firstDiskName, projectName, snapshotName, projectName, diskName, ref_selector, projectName)
+}
+`, firstDiskName, projectName, snapshotName, projectName, diskName, ref_selector, projectName)
 }
 
 func testAccComputeDisk_encryption(diskName string) string {
@@ -607,7 +611,8 @@ resource "google_compute_disk" "foobar" {
 	disk_encryption_key {
 		raw_key = "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
 	}
-}`, diskName)
+}
+`, diskName)
 }
 
 func testAccComputeDisk_encryptionKMS(pid, diskName, kmsKey string) string {
@@ -676,7 +681,8 @@ resource "google_compute_instance" "bar" {
 	network_interface {
 		network = "default"
 	}
-}`, diskName, instanceName)
+}
+`, diskName, instanceName)
 }
 
 func testAccComputeDisk_deleteDetachIGM(diskName, mgrName string) string {
@@ -730,7 +736,8 @@ resource "google_compute_instance_group_manager" "manager" {
   // block on instances being ready so that when they get deleted, we don't try
   // to continue interacting with them in other resources
   wait_for_instances = true
-}`, diskName, mgrName)
+}
+`, diskName, mgrName)
 }
 
 <% unless version == 'ga' -%>
@@ -761,6 +768,7 @@ resource "google_compute_disk" "foobar" {
   type = "pd-ssd"
   zone = "us-central1-a"
   resource_policies = [google_compute_resource_policy.foo.self_link]
-}`, policyName, diskName)
+}
+`, policyName, diskName)
 }
 <% end -%>

@@ -1674,7 +1674,8 @@ resource "google_container_cluster" "primary" {
 	name               = "%s"
 	location           = "us-central1-a"
 	initial_node_count = 1
-}`, name)
+}
+`, name)
 }
 
 func testAccContainerCluster_misc(name string) string {
@@ -1709,7 +1710,8 @@ resource "google_container_cluster" "primary" {
 		enabled = true
 	}
 <% end -%>
-}`, name)
+}
+`, name)
 }
 
 func testAccContainerCluster_misc_update(name string) string {
@@ -1745,7 +1747,8 @@ resource "google_container_cluster" "primary" {
 		enabled = true
 	}
 <% end -%>
-}`, name)
+}
+`, name)
 }
 
 func testAccContainerCluster_withAddons(clusterName string) string {
@@ -1767,7 +1770,8 @@ resource "google_container_cluster" "primary" {
 		cloudrun_config { disabled = true }
 <% end -%>
 	}
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_updateAddons(clusterName string) string {
@@ -1789,7 +1793,8 @@ resource "google_container_cluster" "primary" {
 		cloudrun_config {disabled = false }
 <% end -%>
 	}
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_withMasterAuth(clusterName string) string {
@@ -1803,7 +1808,8 @@ resource "google_container_cluster" "with_master_auth" {
 		username = "mr.yoda"
 		password = "adoy.rm.123456789"
 	}
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_updateMasterAuth(clusterName string) string {
@@ -1817,7 +1823,8 @@ resource "google_container_cluster" "with_master_auth" {
 		username = "mr.yoda.adoy.mr"
 		password = "adoy.rm.123456789.mr.yoda"
 	}
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_disableMasterAuth(clusterName string) string {
@@ -1831,7 +1838,8 @@ resource "google_container_cluster" "with_master_auth" {
 		username = ""
 		password = ""
 	}
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_withMasterAuthNoCert() string {
@@ -1848,7 +1856,8 @@ resource "google_container_cluster" "with_master_auth_no_cert" {
 			issue_client_certificate = false
 		}
 	}
-}`, acctest.RandString(10))
+}
+`, acctest.RandString(10))
 }
 
 func testAccContainerCluster_withNetworkPolicyEnabled(clusterName string) string {
@@ -1869,7 +1878,8 @@ resource "google_container_cluster" "with_network_policy_enabled" {
 			disabled = false
 		}
 	}
-}`, clusterName)
+}
+`, clusterName)
 }
 
 <% unless version == 'ga' -%>
@@ -1883,7 +1893,8 @@ resource "google_container_cluster" "with_release_channel" {
   release_channel {
 	channel = "%s"
   }
-}`, clusterName, channel)
+}
+`, clusterName, channel)
 }
 <% end -%>
 
@@ -1894,7 +1905,8 @@ resource "google_container_cluster" "with_network_policy_enabled" {
 	location = "us-central1-a"
 	initial_node_count = 1
 	remove_default_node_pool = true
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_withNetworkPolicyDisabled(clusterName string) string {
@@ -1908,7 +1920,8 @@ resource "google_container_cluster" "with_network_policy_enabled" {
 	network_policy {
 		enabled = false
 	}
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_withNetworkPolicyConfigDisabled(clusterName string) string {
@@ -1928,7 +1941,8 @@ resource "google_container_cluster" "with_network_policy_enabled" {
 			disabled = true
 		}
 	}
-}`, clusterName)
+}
+`, clusterName)
 }
 
 <% unless version == 'ga' -%>
@@ -2001,7 +2015,8 @@ resource "google_container_cluster" "with_master_authorized_networks" {
 	master_authorized_networks_config {
 		%s
 	}
-}`, clusterName, cidrBlocks)
+}
+`, clusterName, cidrBlocks)
 }
 
 func testAccContainerCluster_removeMasterAuthorizedNetworksConfig(clusterName string) string {
@@ -2010,7 +2025,8 @@ resource "google_container_cluster" "with_master_authorized_networks" {
 	name = "%s"
 	location = "us-central1-a"
 	initial_node_count = 1
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_regional(clusterName string) string {
@@ -2019,7 +2035,8 @@ resource "google_container_cluster" "regional" {
 	name               = "%s"
 	location           = "us-central1"
 	initial_node_count = 1
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_regionalWithNodePool(cluster, nodePool string) string {
@@ -2031,7 +2048,8 @@ resource "google_container_cluster" "regional" {
 	node_pool {
 		name = "%s"
 	}
-}`, cluster, nodePool)
+}
+`, cluster, nodePool)
 }
 
 func testAccContainerCluster_regionalNodeLocations(clusterName string) string {
@@ -2045,7 +2063,8 @@ resource "google_container_cluster" "with_node_locations" {
 		"us-central1-f",
 		"us-central1-c",
 	]
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_regionalUpdateNodeLocations(clusterName string) string {
@@ -2059,7 +2078,8 @@ resource "google_container_cluster" "with_node_locations" {
 		"us-central1-f",
 		"us-central1-b",
 	]
-}`, clusterName)
+}
+`, clusterName)
 }
 
 <% unless version == 'ga' -%>
@@ -2112,7 +2132,8 @@ resource "google_container_cluster" "with_tpu" {
 		cluster_secondary_range_name  = "${google_compute_subnetwork.container_subnetwork.secondary_ip_range.0.range_name}"
 		services_secondary_range_name = "${google_compute_subnetwork.container_subnetwork.secondary_ip_range.1.range_name}"
 	}
-}`, clusterName, clusterName)
+}
+`, clusterName, clusterName)
 }
 
 func testAccContainerCluster_withIntraNodeVisibility(clusterName string) string {
@@ -2122,7 +2143,8 @@ resource "google_container_cluster" "with_intranode_visibility" {
 	location = "us-central1-a"
 	initial_node_count = 1
 	enable_intranode_visibility = true
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_updateIntraNodeVisibility(clusterName string) string {
@@ -2132,7 +2154,8 @@ resource "google_container_cluster" "with_intranode_visibility" {
 	location = "us-central1-a"
 	initial_node_count = 1
 	enable_intranode_visibility = false
-}`, clusterName)
+}
+`, clusterName)
 }
 
 <% end -%>
@@ -2148,7 +2171,8 @@ resource "google_container_cluster" "with_version" {
 	location = "us-central1-a"
 	min_master_version = "${data.google_container_engine_versions.central1a.latest_master_version}"
 	initial_node_count = 1
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_withLowerVersion(clusterName string) string {
@@ -2162,7 +2186,8 @@ resource "google_container_cluster" "with_version" {
 	location = "us-central1-a"
 	min_master_version = "${data.google_container_engine_versions.central1a.valid_master_versions.2}"
 	initial_node_count = 1
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_updateVersion(clusterName string) string {
@@ -2177,7 +2202,8 @@ resource "google_container_cluster" "with_version" {
 	min_master_version = "${data.google_container_engine_versions.central1a.valid_master_versions.1}"
 	node_version = "${data.google_container_engine_versions.central1a.valid_node_versions.1}"
 	initial_node_count = 1
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_withNodeConfig(clusterName string) string {
@@ -2225,7 +2251,8 @@ resource "google_container_cluster" "with_node_config" {
 		// Updatable fields
 		image_type = "COS"
 	}
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_withNodeConfigUpdate(clusterName string) string {
@@ -2273,7 +2300,8 @@ resource "google_container_cluster" "with_node_config" {
 		// Updatable fields
 		image_type = "UBUNTU"
 	}
-}`, clusterName)
+}
+`, clusterName)
 }
 
 func testAccContainerCluster_withNodeConfigScopeAlias() string {
@@ -2288,7 +2316,8 @@ resource "google_container_cluster" "with_node_config_scope_alias" {
 		disk_size_gb = 15
 		oauth_scopes = [ "compute-rw", "storage-ro", "logging-write", "monitoring" ]
 	}
-}`, acctest.RandString(10))
+}
+`, acctest.RandString(10))
 }
 
 func testAccContainerCluster_withNodeConfigShieldedInstanceConfig(clusterName string) string {
@@ -2329,7 +2358,8 @@ resource "google_container_cluster" "with_node_config" {
 			enable_integrity_monitoring = true
 		}
 	}
-}`, clusterName)
+}
+`, clusterName)
 }
 
 <% unless version.nil? || version == 'ga' -%>
@@ -2380,7 +2410,8 @@ resource "google_container_cluster" "with_workload_identity_config" {
 			node_metadata = "%s"
 		}
   }
-}`, projectID, clusterName, workloadMetadataConfig)
+}
+`, projectID, clusterName, workloadMetadataConfig)
 }
 
 func testAccContainerCluster_withSandboxConfig() string {
@@ -2433,7 +2464,8 @@ resource "google_container_cluster" "with_net_ref_by_name" {
 	initial_node_count = 1
 
 	network = "${google_compute_network.container_network.name}"
-}`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10))
+}
+`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10))
 }
 
 func testAccContainerCluster_backendRef() string {
@@ -2489,7 +2521,8 @@ resource "google_container_cluster" "with_node_pool" {
 		name			   = "%s"
 		initial_node_count = 2
 	}
-}`, cluster, nodePool)
+}
+`, cluster, nodePool)
 }
 
 func testAccContainerCluster_withNodePoolLowerVersion(cluster, nodePool string) string {
@@ -2509,7 +2542,8 @@ resource "google_container_cluster" "with_node_pool" {
 		initial_node_count = 2
 		version			   = "${data.google_container_engine_versions.central1a.valid_node_versions.2}"
 	}
-}`, cluster, nodePool)
+}
+`, cluster, nodePool)
 }
 
 func testAccContainerCluster_withNodePoolUpdateVersion(cluster, nodePool string) string {
@@ -2529,7 +2563,8 @@ resource "google_container_cluster" "with_node_pool" {
 		initial_node_count = 2
 		version			   = "${data.google_container_engine_versions.central1a.valid_node_versions.1}"
 	}
-}`, cluster, nodePool)
+}
+`, cluster, nodePool)
 }
 
 func testAccContainerCluster_withNodePoolNodeLocations(cluster, nodePool string) string {
@@ -2547,7 +2582,8 @@ resource "google_container_cluster" "with_node_pool" {
 		name	   = "%s"
 		node_count = 2
 	}
-}`, cluster, nodePool)
+}
+`, cluster, nodePool)
 }
 
 func testAccContainerCluster_withNodePoolResize(cluster, nodePool string) string {
@@ -2565,7 +2601,8 @@ resource "google_container_cluster" "with_node_pool" {
 		name	   = "%s"
 		node_count = 3
 	}
-}`, cluster, nodePool)
+}
+`, cluster, nodePool)
 }
 
 <% unless version == 'ga' -%>
@@ -2620,7 +2657,8 @@ resource "google_container_cluster" "with_node_pool" {
 			max_node_count = 3
 		}
 	}
-}`, cluster, np)
+}
+`, cluster, np)
 }
 
 func testAccContainerCluster_withNodePoolUpdateAutoscaling(cluster, np string) string {
@@ -2637,7 +2675,8 @@ resource "google_container_cluster" "with_node_pool" {
 			max_node_count = 5
 		}
 	}
-}`, cluster, np)
+}
+`, cluster, np)
 }
 
 func testAccContainerCluster_withNodePoolNamePrefix() string {
@@ -2650,7 +2689,8 @@ resource "google_container_cluster" "with_node_pool_name_prefix" {
 		name_prefix = "tf-np-test"
 		node_count	= 2
 	}
-}`, acctest.RandString(10))
+}
+`, acctest.RandString(10))
 }
 
 func testAccContainerCluster_withNodePoolMultiple() string {
@@ -2668,7 +2708,8 @@ resource "google_container_cluster" "with_node_pool_multiple" {
 		name	   = "tf-cluster-nodepool-test-%s"
 		node_count = 3
 	}
-}`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10))
+}
+`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10))
 }
 
 func testAccContainerCluster_withNodePoolConflictingNameFields() string {
@@ -2683,7 +2724,8 @@ resource "google_container_cluster" "with_node_pool_multiple" {
 		name_prefix = "tf-cluster-nodepool-test-"
 		node_count	= 1
 	}
-}`, acctest.RandString(10), acctest.RandString(10))
+}
+`, acctest.RandString(10), acctest.RandString(10))
 }
 
 func testAccContainerCluster_withNodePoolNodeConfig() string {
@@ -2740,7 +2782,8 @@ resource "google_container_cluster" "with_maintenance_window" {
 	initial_node_count = 1
 
 	%s
-}`, clusterName, maintenancePolicy)
+}
+`, clusterName, maintenancePolicy)
 }
 
 
@@ -2765,7 +2808,8 @@ resource "google_container_cluster" "with_recurring_maintenance_window" {
 	initial_node_count = 1
 
 	%s
-}`, clusterName, maintenancePolicy)
+}
+`, clusterName, maintenancePolicy)
 
 }
 <% end %>
@@ -2806,7 +2850,8 @@ resource "google_container_cluster" "with_ip_allocation_policy" {
 		cluster_secondary_range_name  = "pods"
 		services_secondary_range_name = "services"
 	}
-}`, cluster, cluster)
+}
+`, cluster, cluster)
 }
 
 func testAccContainerCluster_withIPAllocationPolicy_specificIPRanges(cluster string) string {
@@ -2835,7 +2880,8 @@ resource "google_container_cluster" "with_ip_allocation_policy" {
 		cluster_ipv4_cidr_block  = "10.0.0.0/16"
 		services_ipv4_cidr_block = "10.1.0.0/16"
 	}
-}`, cluster, cluster)
+}
+`, cluster, cluster)
 }
 
 func testAccContainerCluster_withIPAllocationPolicy_specificSizes(cluster string) string {
@@ -2864,7 +2910,8 @@ resource "google_container_cluster" "with_ip_allocation_policy" {
 		cluster_ipv4_cidr_block  = "/16"
 		services_ipv4_cidr_block = "/22"
 	}
-}`, cluster, cluster)
+}
+`, cluster, cluster)
 }
 
 <% unless version == 'ga' -%>
@@ -2940,7 +2987,8 @@ resource "google_container_cluster" "with_private_cluster" {
 		cluster_secondary_range_name  = "${google_compute_subnetwork.container_subnetwork.secondary_ip_range.0.range_name}"
 		services_secondary_range_name = "${google_compute_subnetwork.container_subnetwork.secondary_ip_range.1.range_name}"
 	}
-}`, clusterName, clusterName)
+}
+`, clusterName, clusterName)
 }
 
 func testAccContainerCluster_withPrivateClusterConfig(clusterName string) string {
@@ -2986,7 +3034,8 @@ resource "google_container_cluster" "with_private_cluster" {
 		cluster_secondary_range_name  = "${google_compute_subnetwork.container_subnetwork.secondary_ip_range.0.range_name}"
 		services_secondary_range_name = "${google_compute_subnetwork.container_subnetwork.secondary_ip_range.1.range_name}"
 	}
-}`, clusterName, clusterName)
+}
+`, clusterName, clusterName)
 }
 <% unless version.nil? || version == 'ga' -%>
 func testAccContainerCluster_sharedVpc(org, billingId, projectName, name string) string {
@@ -3090,7 +3139,8 @@ resource "google_container_cluster" "shared_vpc_cluster" {
 		"google_compute_subnetwork_iam_member.service_network_cloud_services",
 		"google_compute_subnetwork_iam_member.service_network_gke_user"
 	]
-}`, projectName, org, billingId, projectName, org, billingId, acctest.RandString(10), acctest.RandString(10), name)
+}
+`, projectName, org, billingId, projectName, org, billingId, acctest.RandString(10), acctest.RandString(10), name)
 }
 
 func testAccContainerCluster_withWorkloadIdentityConfigEnabled(projectID string, clusterName string) string {
@@ -3130,7 +3180,8 @@ resource "google_container_cluster" "with_workload_identity_config" {
 	initial_node_count = 1
 
 	%s
-}`, projectID, clusterName, workloadIdentityConfig)
+}
+`, projectID, clusterName, workloadIdentityConfig)
 }
 
 func testAccContainerCluster_withBinaryAuthorization(clusterName string, enabled bool) string {
@@ -3299,7 +3350,8 @@ resource "google_container_cluster" "with_database_encryption" {
 		state = "ENCRYPTED"
 		key_name = "%[2]s"
 	}
-}`, kmsData.KeyRing.Name, kmsData.CryptoKey.Name, clusterName)
+}
+`, kmsData.KeyRing.Name, kmsData.CryptoKey.Name, clusterName)
 }
 <% end -%>
 
@@ -3347,6 +3399,5 @@ resource "google_container_cluster" "with_private_cluster" {
     services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
   }
 }
-
 `, clusterName, clusterName)
 }

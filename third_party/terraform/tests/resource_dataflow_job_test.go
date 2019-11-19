@@ -407,7 +407,8 @@ resource "google_dataflow_job" "big_data" {
 	project = "%s"
 
 	on_delete = "cancel"
-}`, acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
+}
+`, acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
 
 var testAccDataflowJobRegion = fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
@@ -431,7 +432,8 @@ resource "google_dataflow_job" "big_data" {
 	project = "%s"
 
 	on_delete = "cancel"
-}`, acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
+}
+`, acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
 
 var testAccDataflowJobWithNetwork = fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
@@ -460,7 +462,8 @@ resource "google_dataflow_job" "big_data" {
 	project = "%s"
 
 	on_delete = "cancel"
-}`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
+}
+`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
 
 var testAccDataflowJobWithSubnetwork = fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
@@ -495,7 +498,8 @@ resource "google_dataflow_job" "big_data" {
 	project = "%s"
 
 	on_delete = "cancel"
-}`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
+}
+`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
 
 var testAccDataflowJobWithServiceAccount = fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
@@ -535,7 +539,8 @@ resource "google_dataflow_job" "big_data" {
 	service_account_email = "${google_service_account.dataflow-sa.email}"
 
 	on_delete = "cancel"
-}`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
+}
+`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
 
 var testAccDataflowJobWithIpConfig = fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
@@ -562,33 +567,34 @@ resource "google_dataflow_job" "big_data" {
 	project = "%s"
 
 	on_delete = "cancel"
-}`, acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
+}
+`, acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
 
 func testAccDataflowJobWithLabels(key string) string {
 	return fmt.Sprintf(`
-	resource "google_storage_bucket" "temp" {
-		name = "dfjob-test-%s-temp"
+resource "google_storage_bucket" "temp" {
+	name = "dfjob-test-%s-temp"
 
-		force_destroy = true
+	force_destroy = true
+}
+
+resource "google_dataflow_job" "with_labels" {
+	name = "dfjob-test-%s"
+
+	template_gcs_path = "gs://dataflow-templates/wordcount/template_file"
+	temp_gcs_location = "${google_storage_bucket.temp.url}"
+
+	labels = {
+		"my-label" = "test"
 	}
 
-	resource "google_dataflow_job" "with_labels" {
-		name = "dfjob-test-%s"
+	parameters = {
+		inputFile = "gs://dataflow-samples/shakespeare/kinglear.txt"
+		output    = "${google_storage_bucket.temp.url}/output"
+	}
+	zone = "us-central1-f"
+	project = "%s"
 
-		template_gcs_path = "gs://dataflow-templates/wordcount/template_file"
-		temp_gcs_location = "${google_storage_bucket.temp.url}"
-
-		labels = {
-			"my-label" = "test"
-		}
-
-		parameters = {
-			inputFile = "gs://dataflow-samples/shakespeare/kinglear.txt"
-			output    = "${google_storage_bucket.temp.url}/output"
-		}
-		zone = "us-central1-f"
-		project = "%s"
-
-		on_delete = "cancel"
-	}`, acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
+	on_delete = "cancel"
+}`, acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
 }

@@ -139,7 +139,7 @@ resource "google_kms_key_ring" "key_ring" {
 	name     = "%s"
 	location = "us-central1"
 }
-	`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName)
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName)
 }
 
 func testGoogleKmsKeyRing_removed(projectId, projectOrg, projectBillingAccount string) string {
@@ -155,5 +155,5 @@ resource "google_project_service" "acceptance" {
 	project  = "${google_project.acceptance.project_id}"
 	service = "cloudkms.googleapis.com"
 }
-	`, projectId, projectId, projectOrg, projectBillingAccount)
+`, projectId, projectId, projectOrg, projectBillingAccount)
 }

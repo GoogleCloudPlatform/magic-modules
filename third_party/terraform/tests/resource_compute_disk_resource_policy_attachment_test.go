@@ -76,5 +76,6 @@ resource "google_compute_disk_resource_policy_attachment" "foobar" {
 	name = google_compute_resource_policy.foobar.name
   disk = google_compute_disk.foobar.name
 	zone = "us-central1-a"
-}`, diskName, policyName)
+}
+`, diskName, policyName)
 }

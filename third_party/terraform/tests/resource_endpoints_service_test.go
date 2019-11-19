@@ -141,7 +141,8 @@ definitions:
       message:
         type: "string"
 EOF
-}`, random_name, getTestProjectFromEnv(), getTestProjectFromEnv(), random_name, getTestProjectFromEnv())
+}
+`, random_name, getTestProjectFromEnv(), getTestProjectFromEnv(), random_name, getTestProjectFromEnv())
 }
 
 func testAccEndpointsService_grpc(random_name string) string {
@@ -158,7 +159,8 @@ usage:
     allow_unregistered_calls: true
 EOF
   protoc_output_base64 = "${filebase64("test-fixtures/test_api_descriptor.pb")}"
-}`, random_name, getTestProjectFromEnv(), getTestProjectFromEnv(), random_name, getTestProjectFromEnv())
+}
+`, random_name, getTestProjectFromEnv(), getTestProjectFromEnv(), random_name, getTestProjectFromEnv())
 }
 
 func testAccCheckEndpointExistsByName(random_name string) resource.TestCheckFunc {

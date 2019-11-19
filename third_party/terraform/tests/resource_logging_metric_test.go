@@ -73,7 +73,8 @@ resource "google_logging_metric" "logging_metric" {
 		value_type = "INT64"
 		display_name = "My metric"
 	}
-}`, suffix, filter)
+}
+`, suffix, filter)
 }
 
 func testAccLoggingMetric_explicitBucket(suffix string, filter string) string {
@@ -94,5 +95,6 @@ resource "google_logging_metric" "logging_metric" {
       bounds = [0,1,2,3,4.2]
     }
   }
-}`, suffix, filter)
+}
+`, suffix, filter)
 }

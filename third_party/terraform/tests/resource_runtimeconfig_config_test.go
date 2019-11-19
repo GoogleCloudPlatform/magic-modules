@@ -159,12 +159,14 @@ func testAccRuntimeconfigConfig_basicDescription(name, description string) strin
 resource "google_runtimeconfig_config" "foobar" {
  	name = "%s"
  	description = "%s"
-}`, name, description)
+}
+`, name, description)
 }
 
 func testAccRuntimeconfigConfig_emptyDescription(name string) string {
 	return fmt.Sprintf(`
 resource "google_runtimeconfig_config" "foobar" {
  	name = "%s"
-}`, name)
+}
+`, name)
 }

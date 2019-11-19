@@ -234,7 +234,8 @@ resource "google_runtimeconfig_variable" "foobar" {
 	parent = "${google_runtimeconfig_config.foobar.name}"
 	name = "%s"
 	text = "%s"
-}`, acctest.RandString(10), name, text)
+}
+`, acctest.RandString(10), name, text)
 }
 
 func testAccRuntimeconfigVariable_basicTextUpdate(configName, name, text string) string {
@@ -247,7 +248,8 @@ resource "google_runtimeconfig_variable" "foobar" {
 	parent = "${google_runtimeconfig_config.foobar.name}"
 	name = "%s"
 	text = "%s"
-}`, configName, name, text)
+}
+`, configName, name, text)
 }
 
 func testAccRuntimeconfigVariable_basicValue(name, value string) string {
@@ -260,7 +262,8 @@ resource "google_runtimeconfig_variable" "foobar" {
 	parent = "${google_runtimeconfig_config.foobar.name}"
 	name = "%s"
 	value = "%s"
-}`, acctest.RandString(10), name, value)
+}
+`, acctest.RandString(10), name, value)
 }
 
 func testAccRuntimeconfigVariable_invalidBothTextValue() string {
@@ -274,7 +277,8 @@ resource "google_runtimeconfig_variable" "foobar" {
 	name = "%s"
 	text = "here's my value"
 	value = "Zm9vYmFyCg=="
-}`, acctest.RandString(10), acctest.RandString(10))
+}
+`, acctest.RandString(10), acctest.RandString(10))
 }
 
 func testAccRuntimeconfigVariable_invalidMissingTextValue() string {
@@ -286,5 +290,6 @@ resource "google_runtimeconfig_config" "foobar" {
 resource "google_runtimeconfig_variable" "foobar" {
 	parent = "${google_runtimeconfig_config.foobar.name}"
 	name = "my-variable-namespace/%s"
-}`, acctest.RandString(10), acctest.RandString(10))
+}
+`, acctest.RandString(10), acctest.RandString(10))
 }

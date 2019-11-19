@@ -323,7 +323,8 @@ resource "google_project" "acceptance" {
     project_id = "%s"
     name = "%s"
     org_id = "%s"
-}`, pid, name, org)
+}
+`, pid, name, org)
 }
 
 func testAccProjectIamPolicyEmptyMembers(pid, name, org string) string {
@@ -344,7 +345,8 @@ data "google_iam_policy" "expanded" {
         role = "roles/viewer"
 		members = []
     }
-}`, pid, name, org)
+}
+`, pid, name, org)
 }
 
 func testAccProjectAssociatePolicyExpanded(pid, name, org string) string {
@@ -373,7 +375,8 @@ data "google_iam_policy" "expanded" {
             "user:paddy@hashicorp.com",
         ]
     }
-}`, pid, name, org)
+}
+`, pid, name, org)
 }
 
 func testAccProjectAssociatePolicyAuditConfigExpanded(pid, name, org string) string {
@@ -424,7 +427,8 @@ data "google_iam_policy" "expanded" {
       log_type = "DATA_WRITE"
     }
   }
-}`, pid, name, org)
+}
+`, pid, name, org)
 }
 
 <% unless version == 'ga' -%>

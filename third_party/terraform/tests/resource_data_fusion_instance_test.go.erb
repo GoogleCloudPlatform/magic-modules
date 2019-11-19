@@ -43,26 +43,28 @@ func TestAccDataFusionInstance_update(t *testing.T) {
 func testAccDataFusionInstance_basic(instanceName string) string {
 	return fmt.Sprintf(`
 resource "google_data_fusion_instance" "foobar" {
-	name = "%s"
-	region = "us-central1"
-	type = "BASIC"
-}`, instanceName)
+  name   = "%s"
+  region = "us-central1"
+  type   = "BASIC"
+}
+`, instanceName)
 }
 
 func testAccDataFusionInstance_updated(instanceName string) string {
 	return fmt.Sprintf(`
 resource "google_data_fusion_instance" "foobar" {
-	name = "%s"
-	region = "us-central1"
-	type = "BASIC"
-	enable_stackdriver_monitoring=true
-	enable_stackdriver_logging=true
+  name                          = "%s"
+  region                        = "us-central1"
+  type                          = "BASIC"
+  enable_stackdriver_monitoring = true
+  enable_stackdriver_logging    = true
 
-	labels = {
-		label1 = "value1"
-		label2 = "value2"
-	}
-}`, instanceName)
+  labels = {
+    label1 = "value1"
+    label2 = "value2"
+  }
+}
+`, instanceName)
 }
 <% else %>
 // Data Fusion is not GA at the time of writing.

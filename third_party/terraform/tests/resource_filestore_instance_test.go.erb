@@ -79,7 +79,8 @@ resource "google_filestore_instance" "instance" {
   }
   tier = "PREMIUM"
 	description = "A modified instance created during testing."
-}`, name)
+}
+`, name)
 }
 <% else %>
 // Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.

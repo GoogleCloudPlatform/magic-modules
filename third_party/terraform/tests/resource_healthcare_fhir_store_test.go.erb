@@ -152,7 +152,6 @@ resource "google_healthcare_dataset" "dataset" {
 resource "google_pubsub_topic" "topic" {
   name         = "%s"
 }
-
 `, fhirStoreName, datasetName, pubsubTopic)
 }
 

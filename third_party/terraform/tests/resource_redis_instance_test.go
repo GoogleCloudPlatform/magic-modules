@@ -87,7 +87,8 @@ resource "google_redis_instance" "test" {
 		maxmemory-policy       = "allkeys-lru"
 		notify-keyspace-events = "KEA"
 	}
-}`, name)
+}
+`, name)
 }
 
 func testAccRedisInstance_update2(name string) string {
@@ -106,7 +107,8 @@ resource "google_redis_instance" "test" {
 		maxmemory-policy       = "noeviction"
 		notify-keyspace-events = ""
 	}
-}`, name)
+}
+`, name)
 }
 
 func testAccRedisInstance_regionFromLocation(name, zone string) string {
@@ -115,5 +117,6 @@ resource "google_redis_instance" "test" {
 	name           = "%s"
 	memory_size_gb = 1
 	location_id    = "%s"
-}`, name, zone)
+}
+`, name, zone)
 }

@@ -157,7 +157,6 @@ resource "google_dataproc_job_iam_binding" "binding" {
     "serviceAccount:${google_service_account.test-account1.email}",
   ]
 }
-
 `, cluster, job, account, account, role)
 }
 

@@ -389,7 +389,7 @@ resource "google_kms_crypto_key" "crypto_key" {
 		key = "value"
 	}
 }
-	`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
 
 func testGoogleKmsCryptoKey_rotation(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, rotationPeriod string) string {
@@ -417,7 +417,7 @@ resource "google_kms_crypto_key" "crypto_key" {
 	key_ring        = "${google_kms_key_ring.key_ring.self_link}"
 	rotation_period = "%s"
 }
-	`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, rotationPeriod)
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, rotationPeriod)
 }
 
 func testGoogleKmsCryptoKey_rotationRemoved(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
@@ -444,7 +444,7 @@ resource "google_kms_crypto_key" "crypto_key" {
 	name            = "%s"
 	key_ring        = "${google_kms_key_ring.key_ring.self_link}"
 }
-	`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
 
 func testGoogleKmsCryptoKey_template(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, algorithm string) string {
@@ -476,7 +476,7 @@ resource "google_kms_crypto_key" "crypto_key" {
 		algorithm = "%s"
 	}
 }
-	`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, algorithm)
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, algorithm)
 }
 
 func testGoogleKmsCryptoKey_removed(projectId, projectOrg, projectBillingAccount, keyRingName string) string {
@@ -498,5 +498,5 @@ resource "google_kms_key_ring" "key_ring" {
 	name     = "%s"
 	location = "us-central1"
 }
-	`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName)
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName)
 }

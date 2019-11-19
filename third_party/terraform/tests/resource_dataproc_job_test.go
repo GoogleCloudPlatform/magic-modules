@@ -592,7 +592,7 @@ func testAccDataprocJob_spark(rnd string) string {
 			}
 		}
 	}
-	`, rnd)
+`, rnd)
 
 }
 
@@ -618,7 +618,7 @@ func testAccDataprocJob_hadoop(rnd string) string {
 		}
 
 	}
-	`, rnd, rnd)
+`, rnd, rnd)
 
 }
 
@@ -643,7 +643,7 @@ func testAccDataprocJob_hive(rnd string) string {
 		}
 
 	}
-	`, rnd)
+`, rnd)
 
 }
 
@@ -669,7 +669,7 @@ func testAccDataprocJob_pig(rnd string) string {
 			]
 		}
 	}
-	`, rnd)
+`, rnd)
 
 }
 
@@ -693,6 +693,6 @@ func testAccDataprocJob_sparksql(rnd string) string {
 			]
 		}
 	}
-	`, rnd)
+`, rnd)
 
 }

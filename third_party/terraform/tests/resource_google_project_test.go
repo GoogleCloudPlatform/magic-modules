@@ -311,7 +311,8 @@ func testAccProject_createWithoutOrg(pid, name string) string {
 resource "google_project" "acceptance" {
     project_id = "%s"
     name = "%s"
-}`, pid, name)
+}
+`, pid, name)
 }
 
 func testAccProject_createBilling(pid, name, org, billing string) string {
@@ -321,7 +322,8 @@ resource "google_project" "acceptance" {
     name = "%s"
     org_id = "%s"
     billing_account = "%s"
-}`, pid, name, org, billing)
+}
+`, pid, name, org, billing)
 }
 
 func testAccProject_labels(pid, name, org string, labels map[string]string) string {
@@ -349,7 +351,8 @@ resource "google_project" "acceptance" {
   org_id              = "%s"
   billing_account     = "%s"  # requires billing to enable compute API
   auto_create_network = false
-}`, pid, name, org, billing)
+}
+`, pid, name, org, billing)
 }
 
 func testAccProject_parentFolder(pid, projectName, folderName, org string) string {
@@ -366,7 +369,6 @@ resource "google_folder" "folder1" {
   display_name = "%s"
   parent       = "organizations/%s"
 }
-
 `, pid, projectName, folderName, org)
 }
 

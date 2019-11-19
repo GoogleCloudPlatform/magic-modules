@@ -194,7 +194,8 @@ resource "google_logging_folder_exclusion" "basic" {
 resource "google_folder" "my-folder" {
 	display_name = "%s"
 	parent       = "%s"
-}`, exclusionName, description, getTestProjectFromEnv(), folderName, folderParent)
+}
+`, exclusionName, description, getTestProjectFromEnv(), folderName, folderParent)
 }
 
 func testAccLoggingFolderExclusion_withFullFolderPath(exclusionName, description, folderName, folderParent string) string {
@@ -209,7 +210,8 @@ resource "google_logging_folder_exclusion" "full-folder" {
 resource "google_folder" "my-folder" {
 	display_name = "%s"
 	parent       = "%s"
-}`, exclusionName, description, getTestProjectFromEnv(), folderName, folderParent)
+}
+`, exclusionName, description, getTestProjectFromEnv(), folderName, folderParent)
 }
 
 func testAccLoggingFolderExclusion_multipleCfg(folderName, folderParent string) string {

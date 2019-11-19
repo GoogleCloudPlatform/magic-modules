@@ -704,7 +704,8 @@ func testGoogleSqlDatabaseInstanceConfig_withoutReplica(instanceName string) str
         start_time         = "18:00"
     }
   }
-}`, instanceName)
+}
+`, instanceName)
 }
 
 func testGoogleSqlDatabaseInstanceConfig_withReplica(instanceName, failoverName string) string {

@@ -691,7 +691,8 @@ resource "google_container_node_pool" "np" {
 	location           = "us-central1-a"
 	cluster            = "${google_container_cluster.cluster.name}"
 	initial_node_count = 2
-}`, cluster, np)
+}
+`, cluster, np)
 }
 
 <% unless version == 'ga' -%>
@@ -748,7 +749,8 @@ resource "google_container_node_pool" "np" {
 
 	initial_node_count = 1
 	node_locations     = ["us-central1-a", "us-central1-c"]
-}`, cluster, cluster, np)
+}
+`, cluster, cluster, np)
 }
 <% end -%>
 
@@ -805,7 +807,8 @@ resource "google_container_node_pool" "np" {
 	cluster = "${google_container_cluster.cluster.name}"
 	max_pods_per_node = 30
 	initial_node_count = 2
-}`, cluster, cluster, np)
+}
+`, cluster, cluster, np)
 }
 
 func testAccContainerNodePool_regionalClusters(cluster, np string) string {
@@ -821,7 +824,8 @@ resource "google_container_node_pool" "np" {
 	cluster            = "${google_container_cluster.cluster.name}"
 	location           = "us-central1"
 	initial_node_count = 2
-}`, cluster, np)
+}
+`, cluster, np)
 }
 
 func testAccContainerNodePool_namePrefix(cluster, np string) string {
@@ -836,7 +840,8 @@ resource "google_container_node_pool" "np" {
 	location = "us-central1-a"
 	cluster = "${google_container_cluster.cluster.name}"
 	initial_node_count = 2
-}`, cluster, np)
+}
+`, cluster, np)
 }
 
 func testAccContainerNodePool_noName(cluster string) string {
@@ -851,7 +856,8 @@ resource "google_container_node_pool" "np" {
 	location = "us-central1-a"
 	cluster = "${google_container_cluster.cluster.name}"
 	initial_node_count = 2
-}`, cluster)
+}
+`, cluster)
 }
 
 func testAccContainerNodePool_regionalAutoscaling(cluster, np string) string {
@@ -871,7 +877,8 @@ resource "google_container_node_pool" "np" {
 		min_node_count = 1
 		max_node_count = 3
 	}
-}`, cluster, np)
+}
+`, cluster, np)
 }
 
 func testAccContainerNodePool_autoscaling(cluster, np string) string {
@@ -891,7 +898,8 @@ resource "google_container_node_pool" "np" {
 		min_node_count = 1
 		max_node_count = 3
 	}
-}`, cluster, np)
+}
+`, cluster, np)
 }
 
 func testAccContainerNodePool_updateAutoscaling(cluster, np string) string {
@@ -911,7 +919,8 @@ resource "google_container_node_pool" "np" {
 		min_node_count = 0
 		max_node_count = 5
 	}
-}`, cluster, np)
+}
+`, cluster, np)
 }
 
 func testAccContainerNodePool_additionalZones(cluster, nodePool string) string {
@@ -932,7 +941,8 @@ resource "google_container_node_pool" "np" {
 	location = "us-central1-a"
 	cluster = "${google_container_cluster.cluster.name}"
 	node_count = 2
-}`, cluster, nodePool)
+}
+`, cluster, nodePool)
 }
 
 func testAccContainerNodePool_resize(cluster, nodePool string) string {
@@ -953,7 +963,8 @@ resource "google_container_node_pool" "np" {
 	location   = "us-central1-a"
 	cluster    = "${google_container_cluster.cluster.name}"
 	node_count = 3
-}`, cluster, nodePool)
+}
+`, cluster, nodePool)
 }
 
 func testAccContainerNodePool_withManagement(cluster, nodePool, management string) string {
@@ -977,7 +988,8 @@ resource "google_container_node_pool" "np_with_management" {
 		disk_size_gb = 10
 		oauth_scopes = ["compute-rw", "storage-ro", "logging-write", "monitoring"]
 	}
-}`, cluster, nodePool, management)
+}
+`, cluster, nodePool, management)
 }
 
 func testAccContainerNodePool_withNodeConfig(cluster, nodePool string) string {
@@ -1019,7 +1031,8 @@ resource "google_container_node_pool" "np_with_node_config" {
 		// Updatable fields
 		image_type = "COS"
 	}
-}`, cluster, nodePool)
+}
+`, cluster, nodePool)
 }
 
 func testAccContainerNodePool_withNodeConfigUpdate(cluster, nodePool string) string {
@@ -1061,7 +1074,8 @@ resource "google_container_node_pool" "np_with_node_config" {
 		// Updatable fields
 		image_type = "UBUNTU"
 	}
-}`, cluster, nodePool)
+}
+`, cluster, nodePool)
 }
 
 <% unless version.nil? || version == 'ga' -%>
@@ -1214,7 +1228,8 @@ resource "google_container_node_pool" "np_with_gpu" {
 			count = 1
 		}
 	}
-}`, acctest.RandString(10), acctest.RandString(10))
+}
+`, acctest.RandString(10), acctest.RandString(10))
 }
 
 func testAccContainerNodePool_withNodeConfigScopeAlias() string {
@@ -1234,7 +1249,8 @@ resource "google_container_node_pool" "np_with_node_config_scope_alias" {
 		disk_size_gb = 10
 		oauth_scopes = ["compute-rw", "storage-ro", "logging-write", "monitoring"]
 	}
-}`, acctest.RandString(10), acctest.RandString(10))
+}
+`, acctest.RandString(10), acctest.RandString(10))
 }
 
 func testAccContainerNodePool_version(cluster, np string) string {
@@ -1257,7 +1273,8 @@ resource "google_container_node_pool" "np" {
 	initial_node_count = 1
 
 	version = "${data.google_container_engine_versions.central1a.valid_node_versions.1}"
-}`, cluster, np)
+}
+`, cluster, np)
 }
 
 func testAccContainerNodePool_updateVersion(cluster, np string) string {
@@ -1280,7 +1297,8 @@ resource "google_container_node_pool" "np" {
 	initial_node_count = 1
 
 	version = "${data.google_container_engine_versions.central1a.valid_node_versions.0}"
-}`, cluster, np)
+}
+`, cluster, np)
 }
 
 func testAccContainerNodePool_012_ConfigModeAttr1(cluster, np string) string {
@@ -1303,7 +1321,8 @@ resource "google_container_node_pool" "np" {
 			type  = "nvidia-tesla-p100"
 		}
 	}
-}`, cluster, np)
+}
+`, cluster, np)
 }
 
 func testAccContainerNodePool_012_ConfigModeAttr2(cluster, np string) string {
@@ -1323,7 +1342,8 @@ resource "google_container_node_pool" "np" {
 	node_config {
 		guest_accelerator = []
 	}
-}`, cluster, np)
+}
+`, cluster, np)
 }
 
 func testAccContainerNodePool_EmptyGuestAccelerator(cluster, np string) string {
@@ -1346,7 +1366,8 @@ resource "google_container_node_pool" "np" {
 			type  = "nvidia-tesla-p100"
 		}
 	}
-}`, cluster, np)
+}
+`, cluster, np)
 }
 
 func testAccContainerNodePool_PartialEmptyGuestAccelerator(cluster, np string, count int) string {
@@ -1374,7 +1395,8 @@ resource "google_container_node_pool" "np" {
 			type  = "nvidia-tesla-p100"
 		}
 	}
-}`, cluster, np, count)
+}
+`, cluster, np, count)
 }
 
 func testAccContainerNodePool_PartialEmptyGuestAccelerator2(cluster, np string) string {
@@ -1407,7 +1429,8 @@ resource "google_container_node_pool" "np" {
 			type  = "nvidia-tesla-p9000"
 		}
 	}
-}`, cluster, np)
+}
+`, cluster, np)
 }
 
 func testAccContainerNodePool_shieldedInstanceConfig(cluster, np string) string {
@@ -1429,5 +1452,6 @@ resource "google_container_node_pool" "np" {
 			enable_secure_boot          = true
 		}
 	}
-}`, cluster, np)
+}
+`, cluster, np)
 }
