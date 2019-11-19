@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: BillingBudget
+name: Billing
 display_name: Billing Budget
 versions:
   - !ruby/object:Api::Product::Version
@@ -20,9 +20,13 @@ versions:
     base_url: https://billingbudgets.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Billing Budget
+    url: https://console.cloud.google.com/apis/library/billingbudgets.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
-    name: 'Budget'
+    name: Budget
     base_url: billingAccounts/{{billingAccount}}/budgets
     self_link: billingAccounts/{{billingAccount}}/budgets
     update_verb: :PATCH
@@ -55,7 +59,6 @@ objects:
               spend against the budget.
             properties:
               - !ruby/object:Api::Type::Array
-                item_type: Api::Type::String
                 name: projects
                 description: |
                   A set of projects of the form projects/{project_id},
@@ -64,6 +67,7 @@ objects:
                   all usage for the billing account, regardless of which project
                   the usage occurred on. Only zero or one project can be
                   specified currently.
+                item_type: Api::Type::String
               - !ruby/object:Api::Type::Enum
                 name: creditTypesTreatment
                 description: |
@@ -75,7 +79,6 @@ objects:
                   - :INCLUDE_ALL_CREDITS
                   - :EXCLUDE_ALL_CREDITS
               - !ruby/object:Api::Type::Array
-                item_type: Api::Type::String
                 name: services
                 description: |
                   A set of services of the form services/{service_id},
@@ -84,6 +87,7 @@ objects:
                   usage for all the services. The service names are available
                   through the Catalog API:
                   https://cloud.google.com/billing/v1/how-tos/catalog-api.
+                item_type: Api::Type::String
           - !ruby/object:Api::Type::NestedObject
             name: amount
             required: true
@@ -116,36 +120,31 @@ objects:
                       negative. If units is negative, nanos must be negative or
                       zero. For example $-1.75 is represented as units=-1 and
                       nanos=-750,000,000.
-                - !ruby/object:Api::Type::NestedObject
-                  name: lastPeriodAmount
+          - !ruby/object:Api::Type::Array
+            name: thresholdRules
+            required: true
+            description: |
+              Rules that trigger alerts (notifications of thresholds being
+              crossed) when spend exceeds the specified percentages of the
+              budget.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Double
+                  name: thresholdPercent
+                  required: true
                   description: |
-                    Use the last period's actual spend as the budget for the
-                    present period.
-              - !ruby/object:Api::Type::Array
-                name: thresholdRules
-                item_type: !ruby/object:Api::Type::NestedObject
-                required: true
-                description: |
-                  Rules that trigger alerts (notifications of thresholds being
-                  crossed) when spend exceeds the specified percentages of the
-                  budget.
-                properties:
-                  - !ruby/object:Api::Type::Double
-                    name: thresholdPercent
-                    required: true
-                    description: |
-                      Send an alert when this threshold is exceeded. This is a
-                      1.0-based percentage, so 0.5 = 50%. Must be >= 0.
-                  - !ruby/object:Api::Type::Enum
-                    name: spendBasis
-                    description: |
-                      The type of basis used to determine if spend has passed
-                      the threshold.
-                    default_value: :CURRENT_SPEND
-                    values:
-                      - :BASIS_UNSPECIFIED
-                      - :CURRENT_SPEND
-                      - :FORECASTED_SPEND
+                    Send an alert when this threshold is exceeded. This is a
+                    1.0-based percentage, so 0.5 = 50%. Must be >= 0.
+                - !ruby/object:Api::Type::Enum
+                  name: spendBasis
+                  description: |
+                    The type of basis used to determine if spend has passed
+                    the threshold.
+                  default_value: :CURRENT_SPEND
+                  values:
+                    - :BASIS_UNSPECIFIED
+                    - :CURRENT_SPEND
+                    - :FORECASTED_SPEND
           - !ruby/object:Api::Type::NestedObject
             name: allUpdatesRule
             description: |
@@ -164,9 +163,10 @@ objects:
               - !ruby/object:Api::Type::String
                 name: schemaVersion
                 required: true
-                The schema version of the notification. Only "1.0" is
-                accepted. It represents the JSON schema as defined in
-                https://cloud.google.com/billing/docs/how-to/budgets#notification_format.
+                description: |
+                  The schema version of the notification. Only "1.0" is
+                  accepted. It represents the JSON schema as defined in
+                  https://cloud.google.com/billing/docs/how-to/budgets#notification_format.
           - !ruby/object:Api::Type::String
             name: etag
             description: |
