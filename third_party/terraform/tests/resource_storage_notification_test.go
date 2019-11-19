@@ -211,7 +211,6 @@ resource "google_storage_notification" "notification_with_prefix" {
 	object_name_prefix = "foobar"
 	depends_on         = ["google_pubsub_topic_iam_binding.binding"]
 }
-
 `, bucketName, topicName)
 }
 
@@ -247,6 +246,5 @@ resource "google_storage_notification" "notification" {
 	}
 	depends_on        = ["google_pubsub_topic_iam_binding.binding"]
 }
-
 `, bucketName, topicName, eventType1, eventType2)
 }

@@ -66,13 +66,13 @@ func TestAccLoggingMetric_explicitBucket(t *testing.T) {
 func testAccLoggingMetric_update(suffix string, filter string) string {
 	return fmt.Sprintf(`
 resource "google_logging_metric" "logging_metric" {
-	name = "my-custom-metric-%s"
-	filter = "%s"
-	metric_descriptor {
-		metric_kind = "DELTA"
-		value_type = "INT64"
-		display_name = "My metric"
-	}
+  name   = "my-custom-metric-%s"
+  filter = "%s"
+  metric_descriptor {
+    metric_kind  = "DELTA"
+    value_type   = "INT64"
+    display_name = "My metric"
+  }
 }
 `, suffix, filter)
 }
@@ -80,7 +80,7 @@ resource "google_logging_metric" "logging_metric" {
 func testAccLoggingMetric_explicitBucket(suffix string, filter string) string {
 	return fmt.Sprintf(`
 resource "google_logging_metric" "logging_metric" {
-  name = "my-custom-metric-%s"
+  name   = "my-custom-metric-%s"
   filter = "%s"
 
   metric_descriptor {
@@ -92,7 +92,7 @@ resource "google_logging_metric" "logging_metric" {
 
   bucket_options {
     explicit_buckets {
-      bounds = [0,1,2,3,4.2]
+      bounds = [0, 1, 2, 3, 4.2]
     }
   }
 }

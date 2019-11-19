@@ -185,15 +185,15 @@ func testAccCheckLoggingFolderExclusionDestroy(s *terraform.State) error {
 func testAccLoggingFolderExclusion_basicCfg(exclusionName, description, folderName, folderParent string) string {
 	return fmt.Sprintf(`
 resource "google_logging_folder_exclusion" "basic" {
-	name             = "%s"
-	folder           = "${element(split("/", google_folder.my-folder.name), 1)}"
-	description      = "%s"
-	filter           = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+  name        = "%s"
+  folder      = element(split("/", google_folder.my-folder.name), 1)
+  description = "%s"
+  filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
 
 resource "google_folder" "my-folder" {
-	display_name = "%s"
-	parent       = "%s"
+  display_name = "%s"
+  parent       = "%s"
 }
 `, exclusionName, description, getTestProjectFromEnv(), folderName, folderParent)
 }
@@ -201,15 +201,15 @@ resource "google_folder" "my-folder" {
 func testAccLoggingFolderExclusion_withFullFolderPath(exclusionName, description, folderName, folderParent string) string {
 	return fmt.Sprintf(`
 resource "google_logging_folder_exclusion" "full-folder" {
-	name             = "%s"
-	folder           = "${google_folder.my-folder.name}"
-	description      = "%s"
-	filter           = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+  name        = "%s"
+  folder      = google_folder.my-folder.name
+  description = "%s"
+  filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
 
 resource "google_folder" "my-folder" {
-	display_name = "%s"
-	parent       = "%s"
+  display_name = "%s"
+  parent       = "%s"
 }
 `, exclusionName, description, getTestProjectFromEnv(), folderName, folderParent)
 }

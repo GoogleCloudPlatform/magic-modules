@@ -110,13 +110,13 @@ func TestAccHealthcareHl7V2Store_basic(t *testing.T) {
 func testGoogleHealthcareHl7V2Store_basic(hl7_v2StoreName, datasetName string) string {
 	return fmt.Sprintf(`
 resource "google_healthcare_hl7_v2_store" "default" {
-  name                          = "%s"
-  dataset                       = "${google_healthcare_dataset.dataset.id}"
+  name     = "%s"
+  dataset  = google_healthcare_dataset.dataset.id
 }
 
 resource "google_healthcare_dataset" "dataset" {
-  name         = "%s"
-  location     = "us-central1"
+  name     = "%s"
+  location = "us-central1"
 }
 `, hl7_v2StoreName, datasetName)
 }
@@ -124,16 +124,16 @@ resource "google_healthcare_dataset" "dataset" {
 func testGoogleHealthcareHl7V2Store_update(hl7_v2StoreName, datasetName, pubsubTopic string) string {
 	return fmt.Sprintf(`
 resource "google_healthcare_hl7_v2_store" "default" {
-  name                          = "%s"
-  dataset                       = "${google_healthcare_dataset.dataset.id}"
+  name     = "%s"
+  dataset  = google_healthcare_dataset.dataset.id
 
   parser_config {
-    allow_null_header = true
+    allow_null_header  = true
     segment_terminator = "Jw=="
   }
 
   notification_config {
-    pubsub_topic = "${google_pubsub_topic.topic.id}"
+    pubsub_topic = google_pubsub_topic.topic.id
   }
 
   labels = {
@@ -142,12 +142,12 @@ resource "google_healthcare_hl7_v2_store" "default" {
 }
 
 resource "google_healthcare_dataset" "dataset" {
-  name         = "%s"
-  location     = "us-central1"
+  name     = "%s"
+  location = "us-central1"
 }
 
 resource "google_pubsub_topic" "topic" {
-  name         = "%s"
+  name = "%s"
 }
 `, hl7_v2StoreName, datasetName, pubsubTopic)
 }
