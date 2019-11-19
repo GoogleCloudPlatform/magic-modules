@@ -114,7 +114,6 @@ objects:
           Branch and tag names in trigger templates are interpreted as regular
           expressions. Any branch or tag change that matches that regular
           expression will trigger a build.
-        required: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'projectId'
@@ -165,6 +164,9 @@ objects:
         description: |
             Describes the configuration of a trigger that creates a build whenever a GitHub event is received.
         min_version: beta
+        exactly_one_of:
+          - trigger_template
+          - github
         properties:
           - !ruby/object:Api::Type::String
             name: 'owner'
