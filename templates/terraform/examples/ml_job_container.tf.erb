@@ -2,8 +2,6 @@ resource "google_ml_engine_job" "<%= ctx[:primary_resource_id] -%>" {
   job_id = "ml_job_container"
 
   training_input {
-    package_uris = ["<%= ctx[:vars]['gcs_pkg_uri'] -%>"]
-
     master_config {
       image_uri = "<%= ctx[:vars]['gcp_img_uri'] -%>"
     }
@@ -14,7 +12,5 @@ resource "google_ml_engine_job" "<%= ctx[:primary_resource_id] -%>" {
     ]
 
     region        = "us-east1"
-    scale_tier    = "BASIC"
-    python_module = "trainer.task"
   }
 }

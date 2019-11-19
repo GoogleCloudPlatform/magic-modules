@@ -54,7 +54,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "ml_job_container"
         primary_resource_id: "default"
         vars:
-          gcs_pkg_uri: "gs://test-project-ml-engine-job/tensorflow_census_training/packages/aa1821b516689e2b95d2a0dec00302e50314e20e8ee303721ca3f31fd46091e3/preprocessing-1.0.tar.gz"
           gcp_img_uri: "gcr.io/test-proj-234209/mnist_pytorch_custom_container:mnist_pytorch_cpu"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

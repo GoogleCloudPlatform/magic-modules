@@ -238,7 +238,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Job'
     base_url: projects/{{project}}/jobs
-    self_link: projects/{{project}}/jobs/{{name}}
     input: true
     description: |
       Represents a training or prediction job.
@@ -277,7 +276,6 @@ objects:
         description: |
            One or more labels that you can add, to organize your jobs. Each label is a key-value pair, 
            where both the key and the value are arbitrary Strings that you supply. 
-           An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
       # no etag since it's input: true     
       - !ruby/object:Api::Type::NestedObject
         name: 'trainingInput'
@@ -294,7 +292,8 @@ objects:
               - BASIC_GPU
               - BASIC_TPU
               - CUSTOM
-            required: true
+            #need to discuss if it is required or not, it is failing when we are using container/image 
+            #required: true
           - !ruby/object:Api::Type::String
             name: 'masterType'
             description: Specifies the type of virtual machine to use for your training job's master worker  
@@ -427,12 +426,14 @@ objects:
             description: |
               The Google Cloud Storage location of the packages with the training program and any additional dependencies.
                The maximum number of package URIs is 100.
-            required: true
+            #need to discuss if it is required or not, it is failing when we are using container/image 
+            #required: true
             item_type: Api::Type::String
           - !ruby/object:Api::Type::String
             name: 'pythonModule'
             description: The Python module name to run after installing the packages.
-            required: true
+            #need to discuss if it is required or not, it is failing when we are using container/image 
+            #required: true
           - !ruby/object:Api::Type::Array
             name: 'args'
             description: Command line arguments to pass to the program.
@@ -545,7 +546,7 @@ objects:
                     name: 'runtimeVersion'
                     description:  AI Platform runtime version on which the built-in algorithm was trained
                     output: true       
-                  - !ruby/object:Api::Type::Integer
+                  - !ruby/object:Api::Type::String
                     name: 'pythonVersion'
                     description:  Python version on which the built-in algorithm was trained.
                     output: true          
