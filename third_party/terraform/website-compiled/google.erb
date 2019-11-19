@@ -671,6 +671,20 @@
       <a href="/docs/providers/google/r/compute_region_instance_group_manager.html">google_compute_region_instance_group_manager</a>
       </li>
 
+<% unless version == 'ga' -%>
+      <li<%%= sidebar_current("docs-google-compute-region-ssl-certificate") %>>
+      <a href="/docs/providers/google/r/compute_region_ssl_certificate.html">google_compute_region_ssl_certificate</a>
+      </li>
+
+      <li<%%= sidebar_current("docs-google-compute-region-target-http-proxy") %>>
+      <a href="/docs/providers/google/r/compute_region_target_http_proxy.html">google_compute_region_target_http_proxy</a>
+      </li>
+
+      <li<%%= sidebar_current("docs-google-compute-region-target-https-proxy") %>>
+      <a href="/docs/providers/google/r/compute_region_target_https_proxy.html">google_compute_region_target_https_proxy</a>
+      </li>
+<% end -%>
+
       <li<%%= sidebar_current("docs-google-compute-reservation") %>>
       <a href="/docs/providers/google/r/compute_reservation.html">google_compute_reservation</a>
       </li>
