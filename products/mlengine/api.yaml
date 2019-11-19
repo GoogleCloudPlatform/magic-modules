@@ -468,10 +468,11 @@ objects:
             name: 'completedTrialCount'
             description: The number of hyperparameter tuning trials that completed successfully. Only set for hyperparameter tuning jobs.
             output: true
-          - !ruby/object:Api::Type::NestedObject
+          - !ruby/object:Api::Type::Array
             name: 'trials'
             description: Results for individual Hyperparameter trials. Only set for hyperparameter tuning jobs.
-            properties:
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
               - !ruby/object:Api::Type::String
                 name: 'trialId'
                 description: The trial id for these results.
@@ -520,18 +521,6 @@ objects:
                 description:  True if the trial is stopped early.
                 output: true
               - !ruby/object:Api::Type::NestedObject
-                name: 'allMetrics'
-                description:  All recorded object metrics for this trial. This field is not currently populated.
-                properties:
-                  - !ruby/object:Api::Type::String
-                    name: 'trainingStep'
-                    description:  The global training step for this metric
-                    output: true
-                  - !ruby/object:Api::Type::Integer
-                    name: 'objectiveValue'
-                    description:  The objective value at this training step.
-                    output: true
-              - !ruby/object:Api::Type::NestedObject
                 name: 'builtInAlgorithmOutput'
                 description:  Details related to built-in algorithms jobs. Only set for trials of built-in algorithms jobs that have succeeded.
                 properties:
@@ -547,19 +536,19 @@ objects:
                     name: 'pythonVersion'
                     description:  Python version on which the built-in algorithm was trained.
                     output: true          
-                  - !ruby/object:Api::Type::Integer
+                  - !ruby/object:Api::Type::String
                     name: 'modelPath'
                     description:  |
                       The Cloud Storage path to the model/ directory where the training job saves the trained model. 
                       Only set for successful jobs that don't use hyperparameter tuning
                     output: true
-          - !ruby/object:Api::Type::Integer
+          - !ruby/object:Api::Type::Double
             name: 'consumedMLUnits'
             description: The amount of ML units consumed by the job.
           - !ruby/object:Api::Type::Boolean
             name: 'isHyperparameterTuningJob'
             description: Whether this job is a hyperparameter tuning job.
-          - !ruby/object:Api::Type::String
+          - !ruby/object:Api::Type::Boolean
             name: 'isBuiltInAlgorithmJob'
             description: Whether this job is a built-in Algorithm job.
           - !ruby/object:Api::Type::NestedObject
@@ -569,7 +558,7 @@ objects:
               - !ruby/object:Api::Type::String
                 name: 'framework'
                 description:  Framework on which the built-in algorithm was trained.
-              - !ruby/object:Api::Type::Integer
+              - !ruby/object:Api::Type::String
                 name: 'runtimeVersion'
                 description:  AI Platform runtime version on which the built-in algorithm was trained         
               - !ruby/object:Api::Type::String
