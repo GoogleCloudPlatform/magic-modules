@@ -1445,8 +1445,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validateRFC1035Name(2, 63)'
       interfaceName: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'interface'
-      ipAddress: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
