@@ -227,13 +227,13 @@ func testAccCheckRuntimeconfigVariableDestroy(s *terraform.State) error {
 func testAccRuntimeconfigVariable_basicText(name, text string) string {
 	return fmt.Sprintf(`
 resource "google_runtimeconfig_config" "foobar" {
- 	name = "some-config-%s"
+  name = "some-config-%s"
 }
 
 resource "google_runtimeconfig_variable" "foobar" {
-	parent = "${google_runtimeconfig_config.foobar.name}"
-	name = "%s"
-	text = "%s"
+  parent = google_runtimeconfig_config.foobar.name
+  name   = "%s"
+  text   = "%s"
 }
 `, acctest.RandString(10), name, text)
 }
@@ -241,13 +241,13 @@ resource "google_runtimeconfig_variable" "foobar" {
 func testAccRuntimeconfigVariable_basicTextUpdate(configName, name, text string) string {
 	return fmt.Sprintf(`
 resource "google_runtimeconfig_config" "foobar" {
- 	name = "%s"
+  name = "%s"
 }
 
 resource "google_runtimeconfig_variable" "foobar" {
-	parent = "${google_runtimeconfig_config.foobar.name}"
-	name = "%s"
-	text = "%s"
+  parent = google_runtimeconfig_config.foobar.name
+  name   = "%s"
+  text   = "%s"
 }
 `, configName, name, text)
 }
@@ -255,13 +255,13 @@ resource "google_runtimeconfig_variable" "foobar" {
 func testAccRuntimeconfigVariable_basicValue(name, value string) string {
 	return fmt.Sprintf(`
 resource "google_runtimeconfig_config" "foobar" {
- 	name = "some-config-%s"
+  name = "some-config-%s"
 }
 
 resource "google_runtimeconfig_variable" "foobar" {
-	parent = "${google_runtimeconfig_config.foobar.name}"
-	name = "%s"
-	value = "%s"
+  parent = google_runtimeconfig_config.foobar.name
+  name   = "%s"
+  value  = "%s"
 }
 `, acctest.RandString(10), name, value)
 }
@@ -269,14 +269,14 @@ resource "google_runtimeconfig_variable" "foobar" {
 func testAccRuntimeconfigVariable_invalidBothTextValue() string {
 	return fmt.Sprintf(`
 resource "google_runtimeconfig_config" "foobar" {
- 	name = "some-config-%s"
+  name = "some-config-%s"
 }
 
 resource "google_runtimeconfig_variable" "foobar" {
-	parent = "${google_runtimeconfig_config.foobar.name}"
-	name = "%s"
-	text = "here's my value"
-	value = "Zm9vYmFyCg=="
+  parent = google_runtimeconfig_config.foobar.name
+  name   = "%s"
+  text   = "here's my value"
+  value  = "Zm9vYmFyCg=="
 }
 `, acctest.RandString(10), acctest.RandString(10))
 }
@@ -284,12 +284,12 @@ resource "google_runtimeconfig_variable" "foobar" {
 func testAccRuntimeconfigVariable_invalidMissingTextValue() string {
 	return fmt.Sprintf(`
 resource "google_runtimeconfig_config" "foobar" {
- 	name = "some-config-%s"
+  name = "some-config-%s"
 }
 
 resource "google_runtimeconfig_variable" "foobar" {
-	parent = "${google_runtimeconfig_config.foobar.name}"
-	name = "my-variable-namespace/%s"
+  parent = google_runtimeconfig_config.foobar.name
+  name   = "my-variable-namespace/%s"
 }
 `, acctest.RandString(10), acctest.RandString(10))
 }
