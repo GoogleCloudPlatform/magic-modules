@@ -27,12 +27,17 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: Budget
-    base_url: billingAccounts/{{billingAccount}}/budgets
-    self_link: billingAccounts/{{billingAccount}}/budgets
+    base_url: billingAccounts/{{billing_account}}/budgets
+    self_link: billingAccounts/{{billing_account}}/budgets/{{name}}
     update_verb: :PATCH
     update_mask: true
     description: |
       Budget configuration for a billing account.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating a budget':
+          'https://cloud.google.com/billing/docs/how-to/budgets'
+      api: 'https://cloud.google.com/billing/docs/reference/budget/rest/v1beta1/billingAccounts.budgets'
     parameters:
       - !ruby/object:Api::Type::String
         name: billingAccount
