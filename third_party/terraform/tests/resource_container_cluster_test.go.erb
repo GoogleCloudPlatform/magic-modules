@@ -1799,6 +1799,7 @@ resource "google_container_cluster" "primary" {
     network_policy_config {
       disabled = false
     }
+<% unless version == 'ga' -%>
     istio_config {
       disabled = false
       auth     = "AUTH_NONE"
@@ -1806,6 +1807,7 @@ resource "google_container_cluster" "primary" {
     cloudrun_config {
       disabled = false
     }
+<% end -%>
   }
 }
 `, clusterName)
