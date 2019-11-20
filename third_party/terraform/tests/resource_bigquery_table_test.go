@@ -343,7 +343,6 @@ resource "google_storage_bucket_object" "test" {
 %s
 EOF
 
-
   bucket = google_storage_bucket.test.name
 }
 
