@@ -150,7 +150,7 @@ resource "google_binary_authorization_attestor" "attestor" {
     note_reference = google_container_analysis_note.note.name
     public_keys {
       ascii_armored_pgp_public_key = <<EOF
-
+%s
 EOF
 
 
