@@ -21,7 +21,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_basic'
-        # skip_test: true
+        min_version: beta
         primary_resource_id: 'budget'
         vars:
           display_name: 'Example Billing Budget'
