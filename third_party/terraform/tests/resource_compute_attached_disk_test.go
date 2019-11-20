@@ -261,9 +261,7 @@ resource "google_compute_instance" "test" {
   zone         = "us-central1-a"
 
   lifecycle {
-    ignore_changes = [
-      "attached_disk",
-    ]
+    ignore_changes = [attached_disk]
   }
 
   boot_disk {
@@ -279,8 +277,8 @@ resource "google_compute_instance" "test" {
 
 resource "google_compute_attached_disk" "test" {
   count    = length(google_compute_disk.many)
-  disk     = "${google_compute_disk.many.*.self_link[count.index]}"
-  instance = "${google_compute_instance.test.self_link}"
+  disk     = google_compute_disk.many[count.index].self_link
+  instance = google_compute_instance.test.self_link
 }
 `, diskPrefix, count, instanceName)
 }

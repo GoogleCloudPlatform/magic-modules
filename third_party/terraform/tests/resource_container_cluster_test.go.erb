@@ -2625,29 +2625,29 @@ data "google_container_engine_versions" "central1a" {
 }
 
 resource "google_container_cluster" "with_autoprovisioning" {
-	name     = "%s"
-	location = "us-central1-a"
-	min_master_version = "${data.google_container_engine_versions.central1a.latest_master_version}"
-	initial_node_count = 1
+  name               = "%s"
+  location           = "us-central1-a"
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+  initial_node_count = 1
 `, cluster)
 	if autoprovisioning {
 		config += `
-	cluster_autoscaling {
-		enabled = true
-		resource_limits {
-			resource_type = "cpu"
-			maximum = 2
-		}
-		resource_limits {
-			resource_type = "memory"
-			maximum = 2048
-		}
-	}`
+  cluster_autoscaling {
+    enabled = true
+    resource_limits {
+      resource_type = "cpu"
+      maximum       = 2
+    }
+    resource_limits {
+      resource_type = "memory"
+      maximum       = 2048
+    }
+  }`
 	} else {
 		config += `
-		cluster_autoscaling {
-			enabled = false
-		}`
+  cluster_autoscaling {
+    enabled = false
+  }`
 	}
 	config += `
 }`
@@ -2928,28 +2928,29 @@ func testAccContainerCluster_withResourceUsageExportConfig(clusterName, datasetI
 	resourceUsageConfig := ""
 	if resourceUsage {
 		resourceUsageConfig = `
-		resource_usage_export_config {
-			enable_network_egress_metering = true
+  resource_usage_export_config {
+    enable_network_egress_metering = true
 
-			bigquery_destination {
-				dataset_id = "${google_bigquery_dataset.default.dataset_id}"
-			}
-		}`
+    bigquery_destination {
+      dataset_id = google_bigquery_dataset.default.dataset_id
+    }
+  }`
 	}
 
 	config := fmt.Sprintf(`
-	resource "google_bigquery_dataset" "default" {
-		dataset_id                 = "%s"
-		description                = "gke resource usage dataset tests"
-		delete_contents_on_destroy = true
-	}
+resource "google_bigquery_dataset" "default" {
+  dataset_id                 = "%s"
+  description                = "gke resource usage dataset tests"
+  delete_contents_on_destroy = true
+}
 
-	resource "google_container_cluster" "with_resource_usage_export_config" {
-		name               = "cluster-test-%s"
-		location           = "us-central1-a"
-		initial_node_count = 1
-		%s
-	}`, datasetId, clusterName, resourceUsageConfig)
+resource "google_container_cluster" "with_resource_usage_export_config" {
+  name               = "cluster-test-%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  %s
+}
+`, datasetId, clusterName, resourceUsageConfig)
 	return config
 }
 <% end -%>
@@ -3303,7 +3304,7 @@ resource "google_container_cluster" "cidr_error_preempt" {
 
 func testAccContainerCluster_withCIDROverlap(initConfig, secondCluster string) string {
 	return fmt.Sprintf(`
-%s
+  %s
 
 resource "google_container_cluster" "cidr_error_overlap" {
   name     = "%s"

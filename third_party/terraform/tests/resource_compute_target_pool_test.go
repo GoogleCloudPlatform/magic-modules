@@ -61,7 +61,7 @@ func TestAccComputeTargetPool_update(t *testing.T) {
 			{
 				// Add the two instances to the pool
 				Config: testAccComputeTargetPool_update(tpname,
-					`"${google_compute_instance.foo.self_link}", "${google_compute_instance.bar.self_link}"`,
+					`google_compute_instance.foo.self_link, google_compute_instance.bar.self_link`,
 					name1, name2),
 			},
 			{
@@ -72,7 +72,7 @@ func TestAccComputeTargetPool_update(t *testing.T) {
 			{
 				// Reversing the order of instances or changing import format shouldn't matter
 				Config: testAccComputeTargetPool_update(tpname,
-					fmt.Sprintf(`"${google_compute_instance.bar.self_link}", "us-central1-a/%s"`, name1),
+					fmt.Sprintf(`google_compute_instance.bar.self_link, "us-central1-a/%s"`, name1),
 					name1, name2),
 				PlanOnly: true,
 			},

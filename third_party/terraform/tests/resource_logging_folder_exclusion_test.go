@@ -225,10 +225,10 @@ resource "google_folder" "my-folder" {
 	for i := 0; i < 3; i++ {
 		s += fmt.Sprintf(`
 resource "google_logging_folder_exclusion" "basic%d" {
-	name        = "%s"
-	folder      = "${element(split("/", google_folder.my-folder.name), 1)}"
-	description = "Basic Folder Logging Exclusion"
-	filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+  name        = "%s"
+  folder      = element(split("/", google_folder.my-folder.name), 1)
+  description = "Basic Folder Logging Exclusion"
+  filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
 `, i, "tf-test-exclusion-"+acctest.RandString(10), getTestProjectFromEnv())
 	}

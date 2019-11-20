@@ -1325,7 +1325,7 @@ data "google_project" "project" {
 }
 
 resource "google_project_iam_member" "kms-project-binding" {
-  project = "${data.google_project.project.project_id}"
+  project = data.google_project.project.project_id
   role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member  = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
 }

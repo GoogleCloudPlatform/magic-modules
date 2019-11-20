@@ -123,19 +123,18 @@ resource "google_compute_instance_group_manager" "foobar" {
 func testAccComputeAutoscaler_basic(it_name, tp_name, igm_name, autoscaler_name string) string {
 	return testAccComputeAutoscaler_scaffolding(it_name, tp_name, igm_name) + fmt.Sprintf(`
 resource "google_compute_autoscaler" "foobar" {
-	description = "Resource created for Terraform acceptance testing"
-	name = "%s"
-	zone = "us-central1-a"
-	target = "${google_compute_instance_group_manager.foobar.self_link}"
-	autoscaling_policy {
-		max_replicas = 5
-		min_replicas = 1
-		cooldown_period = 60
-		cpu_utilization {
-			target = 0.5
-		}
-	}
-
+  description = "Resource created for Terraform acceptance testing"
+  name        = "%s"
+  zone        = "us-central1-a"
+  target      = google_compute_instance_group_manager.foobar.self_link
+  autoscaling_policy {
+    max_replicas    = 5
+    min_replicas    = 1
+    cooldown_period = 60
+    cpu_utilization {
+      target = 0.5
+    }
+  }
 }
 `, autoscaler_name)
 }
@@ -143,19 +142,18 @@ resource "google_compute_autoscaler" "foobar" {
 func testAccComputeAutoscaler_update(it_name, tp_name, igm_name, autoscaler_name string) string {
 	return testAccComputeAutoscaler_scaffolding(it_name, tp_name, igm_name) + fmt.Sprintf(`
 resource "google_compute_autoscaler" "foobar" {
-	description = "Resource created for Terraform acceptance testing"
-	name = "%s"
-	zone = "us-central1-a"
-	target = "${google_compute_instance_group_manager.foobar.self_link}"
-	autoscaling_policy {
-		max_replicas = 10
-		min_replicas = 0
-		cooldown_period = 60
-		cpu_utilization {
-			target = 0.5
-		}
-	}
-
+  description = "Resource created for Terraform acceptance testing"
+  name        = "%s"
+  zone        = "us-central1-a"
+  target      = google_compute_instance_group_manager.foobar.self_link
+  autoscaling_policy {
+    max_replicas    = 10
+    min_replicas    = 0
+    cooldown_period = 60
+    cpu_utilization {
+      target = 0.5
+    }
+  }
 }
 `, autoscaler_name)
 }
@@ -163,32 +161,31 @@ resource "google_compute_autoscaler" "foobar" {
 func testAccComputeAutoscaler_multicondition(it_name, tp_name, igm_name, autoscaler_name string) string {
 	return testAccComputeAutoscaler_scaffolding(it_name, tp_name, igm_name) + fmt.Sprintf(`
 resource "google_compute_autoscaler" "foobar" {
-	description = "Resource created for Terraform acceptance testing"
-	name = "%s"
-	zone = "us-central1-a"
-	target = "${google_compute_instance_group_manager.foobar.self_link}"
-	autoscaling_policy {
-		max_replicas = 10
-		min_replicas = 1
-		cooldown_period = 60
-		cpu_utilization {
-			target = 0.5
-		}
-		load_balancing_utilization {
-			target = 0.5
-		}
-		metric {
-			name = "compute.googleapis.com/instance/network/received_bytes_count"
-			target = 75
-			type = "GAUGE"
-		}
-		metric {
-			name = "compute.googleapis.com/instance/network/sent_bytes_count"
-			target = 50
-			type = "GAUGE"
-		}
-	}
-
+  description = "Resource created for Terraform acceptance testing"
+  name        = "%s"
+  zone        = "us-central1-a"
+  target      = google_compute_instance_group_manager.foobar.self_link
+  autoscaling_policy {
+    max_replicas    = 10
+    min_replicas    = 1
+    cooldown_period = 60
+    cpu_utilization {
+      target = 0.5
+    }
+    load_balancing_utilization {
+      target = 0.5
+    }
+    metric {
+      name   = "compute.googleapis.com/instance/network/received_bytes_count"
+      target = 75
+      type   = "GAUGE"
+    }
+    metric {
+      name   = "compute.googleapis.com/instance/network/sent_bytes_count"
+      target = 50
+      type   = "GAUGE"
+    }
+  }
 }
 `, autoscaler_name)
 }
