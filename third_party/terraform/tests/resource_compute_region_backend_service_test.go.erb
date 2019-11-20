@@ -466,8 +466,8 @@ resource "google_compute_region_backend_service" "lipsum" {
   timeout_sec = %v
 
   backend {
-<% unless version.nil? || version == 'ga' -%>
     group    = google_compute_instance_group_manager.foobar.instance_group
+<% unless version.nil? || version == 'ga' -%>
     failover = true
   }
 
