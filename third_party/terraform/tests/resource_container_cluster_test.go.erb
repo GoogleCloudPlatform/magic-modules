@@ -1768,6 +1768,7 @@ resource "google_container_cluster" "primary" {
     network_policy_config {
       disabled = true
     }
+<% unless version == 'ga' -%>
     istio_config {
       disabled = true
       auth     = "AUTH_MUTUAL_TLS"
@@ -1775,6 +1776,7 @@ resource "google_container_cluster" "primary" {
     cloudrun_config {
       disabled = true
     }
+<% end -%>
   }
 }
 `, clusterName)
