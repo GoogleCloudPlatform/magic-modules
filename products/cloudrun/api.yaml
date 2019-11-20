@@ -17,7 +17,7 @@ display_name: Cloud Run
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://run.googleapis.com/v1alpha1/
+    base_url: https://{{location}}-run.googleapis.com/v1alpha1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
@@ -223,9 +223,9 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/run/docs/'
-      api: 'https://cloud.google.com/run/docs/reference/rest/v1alpha1/projects.locations.services'
+      api: 'https://cloud.google.com/run/docs/reference/rest/v1/projects.locations.services'
   description: |-
-    **Note:** Cloud Run as a product is in beta, however the REST API is currently still an alpha.
+    TODO chrisst **Note:** Cloud Run as a product is in beta, however the REST API is currently still an alpha.
     Please use this with caution as it may change when the API moves to beta.
 
     Service acts as a top-level container that manages a set of Routes and
@@ -271,6 +271,29 @@ objects:
     description: Spec holds the desired state of the Service (from the client).
     properties:
     - !ruby/object:Api::Type::NestedObject
+      name: traffic
+      description: |-
+        TODO chrisst
+      properties:
+      - !ruby/object:Api::Type::String
+        name: configurationName
+        required: true
+        description: |-
+          ConfigurationName of a configuration to whose latest revision we will send this portion of traffic. When the "status.latestReadyRevisionName" of the referenced configuration changes, we will automatically migrate traffic from the prior "latest ready" revision to the new one. This field is never set in Route's status, only its spec.
+
+          Cloud Run currently supports a single ConfigurationName.
+      - !ruby/object:Api::Type::Integer
+        name: percent
+        required: true
+        description: |-
+          Percent specifies percent of the traffic to this Revision or Configuration. This defaults to zero if unspecified.
+
+          Cloud Run currently requires 100 percent for a single ConfigurationName TrafficTarget entry.
+      - !ruby/object:Api::Type::Boolean
+        name: latestRevision
+        description: |-
+          LatestRevision may be optionally provided to indicate that the latest ready Revision of the Configuration should be used for this traffic target. When provided LatestRevision must be true if RevisionName is empty; it must be false when RevisionName is non-empty.
+    - !ruby/object:Api::Type::NestedObject
       name: template
       description: |-
         template holds the latest specification for the Revision to
@@ -303,6 +326,7 @@ objects:
           item_type: !ruby/object:Api::Type::NestedObject
             properties:
             - !ruby/object:Api::Type::String
+              deprecation_message: "Not supported by Cloud Run fully managed"
               name: workingDir
               input: true
               description: |-
@@ -325,6 +349,7 @@ objects:
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: envFrom
+              deprecation_message: "Not supported by Cloud Run fully managed"
               input: true
               description: |-
                 List of sources to populate environment variables in the container.
@@ -442,7 +467,6 @@ objects:
                   The values of the map is string form of the 'quantity' k8s type:
                   https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
 
-
         - !ruby/object:Api::Type::Integer
           name: containerConcurrency
           description: |-
@@ -453,12 +477,12 @@ objects:
             - `1` not-thread-safe. Single concurrency
             - `2-N` thread-safe, max concurrency of N
         - !ruby/object:Api::Type::String
-          # Will be added by the cloud run team soon
           name: serviceAccountName
-          exclude: true
-          description: Not currently used by Cloud Run.
+          description:  |-
+            Email address of the IAM service account associated with the revision of the service. The service account represents the identity of the running revision, and determines what permissions the revision has. If not provided, the revision will use the project's default service account.
         - !ruby/object:Api::Type::Enum
           name: servingState
+          deprecation_message: "Not supported by Cloud Run fully managed"
           description: |-
             ServingState holds a value describing the state the resources
             are in for this Revision.
