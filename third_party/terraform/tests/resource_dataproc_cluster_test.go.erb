@@ -986,7 +986,9 @@ resource "google_dataproc_cluster" "with_config_overrides" {
         boot_disk_type    = "pd-ssd"
         boot_disk_size_gb = 15
       }
+<% unless version == 'ga' -%>
       min_cpu_platform = "Intel Skylake"
+<% end -%>
     }
 
     worker_config {
@@ -997,7 +999,10 @@ resource "google_dataproc_cluster" "with_config_overrides" {
         boot_disk_size_gb = 16
         num_local_ssds    = 1
       }
+
+<% unless version == 'ga' -%>
       min_cpu_platform = "Intel Broadwell"
+<% end -%>
     }
 
     preemptible_worker_config {
@@ -1216,7 +1221,13 @@ resource "google_dataproc_cluster" "with_service_account" {
     gce_cluster_config {
       service_account = google_service_account.service_account.email
       service_account_scopes = [
+		#	User supplied scopes
         "https://www.googleapis.com/auth/monitoring",
+		#	The following scopes necessary for the cluster to function properly are
+		#	always added, even if not explicitly specified:
+		#		useraccounts-ro: https://www.googleapis.com/auth/cloud.useraccounts.readonly
+		#		storage-rw:      https://www.googleapis.com/auth/devstorage.read_write
+		#		logging-write:   https://www.googleapis.com/auth/logging.write
         "useraccounts-ro",
         "storage-rw",
         "logging-write",

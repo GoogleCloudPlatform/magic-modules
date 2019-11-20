@@ -123,7 +123,6 @@ resource "google_compute_instance" "test_vm" {
 }
 
 resource "google_iap_tunnel_instance_iam_binding" "foo" {
-  provider = google-beta
   project  = google_compute_instance.test_vm.project
   zone     = google_compute_instance.test_vm.zone
   instance = google_compute_instance.test_vm.name
@@ -150,7 +149,6 @@ resource "google_compute_instance" "test_vm" {
 }
 
 resource "google_iap_tunnel_instance_iam_binding" "foo" {
-  provider = google-beta
   project  = google_compute_instance.test_vm.project
   zone     = google_compute_instance.test_vm.zone
   instance = google_compute_instance.test_vm.name
@@ -180,7 +178,6 @@ resource "google_compute_instance" "test_vm" {
 }
 
 resource "google_iap_tunnel_instance_iam_member" "foo" {
-  provider = google-beta
   project  = google_compute_instance.test_vm.project
   zone     = google_compute_instance.test_vm.zone
   instance = google_compute_instance.test_vm.name
@@ -214,7 +211,6 @@ data "google_iam_policy" "foo" {
 }
 
 resource "google_iap_tunnel_instance_iam_policy" "foo" {
-  provider    = google-beta
   project     = google_compute_instance.test_vm.project
   zone        = google_compute_instance.test_vm.zone
   instance    = google_compute_instance.test_vm.name
