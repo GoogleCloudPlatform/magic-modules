@@ -43,7 +43,7 @@ func dataSourceGoogleIamPolicy() *schema.Resource {
 							Required: true,
 							Elem:     &schema.Schema{
 								Type:         schema.TypeString,
-								ValidateFunc: validation.StringDoesNotMatch(regexp.MustCompile("^deleted:"), "Terraform does not support deleted IAM members"),
+								ValidateFunc: validation.StringDoesNotMatch(regexp.MustCompile("^deleted:"), "Terraform does not support IAM policies for deleted principals"),
 							},
 							Set:      schema.HashString,
 						},
