@@ -60,6 +60,7 @@ objects:
           Etag to validate that the object is unchanged for a
           read-modify-write operation. An empty etag will cause an update to
           overwrite other changes.
+        output: true
       - !ruby/object:Api::Type::NestedObject
         name: budget
         required: true
