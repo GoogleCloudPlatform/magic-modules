@@ -163,20 +163,20 @@ func testAccCheckGoogleHealthcareDatasetUpdate(timeZone string) resource.TestChe
 func testGoogleHealthcareDataset_basic(datasetName, location string) string {
 	return fmt.Sprintf(`
 resource "google_healthcare_dataset" "dataset" {
-  name         = "%s"
-  location     = "%s"
+  name     = "%s"
+  location = "%s"
 }
-	`, datasetName, location)
+`, datasetName, location)
 }
 
 func testGoogleHealthcareDataset_update(datasetName, location, timeZone string) string {
 	return fmt.Sprintf(`
 resource "google_healthcare_dataset" "dataset" {
-  name         = "%s"
-  location     = "%s"
-  time_zone    = "%s"
+  name      = "%s"
+  location  = "%s"
+  time_zone = "%s"
 }
-	`, datasetName, location, timeZone)
+`, datasetName, location, timeZone)
 }
 <% else %>
 // Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.

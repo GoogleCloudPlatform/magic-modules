@@ -252,14 +252,14 @@ resource "google_healthcare_dataset" "dataset" {
 }
 
 resource "google_healthcare_hl7_v2_store" "hl7_v2_store" {
-  dataset = "${google_healthcare_dataset.dataset.id}"
+  dataset  = google_healthcare_dataset.dataset.id
   name     = "%s"
 }
 
 resource "google_healthcare_hl7_v2_store_iam_binding" "foo" {
-  hl7_v2_store_id = "${google_healthcare_hl7_v2_store.hl7_v2_store.id}"
-  role          = "%s"
-  members       = ["serviceAccount:${google_service_account.test_account.email}"]
+  hl7_v2_store_id = google_healthcare_hl7_v2_store.hl7_v2_store.id
+  role            = "%s"
+  members         = ["serviceAccount:${google_service_account.test_account.email}"]
 }
 `, account, datasetName, hl7V2StoreName, roleId)
 }
@@ -282,16 +282,16 @@ resource "google_healthcare_dataset" "dataset" {
 }
 
 resource "google_healthcare_hl7_v2_store" "hl7_v2_store" {
-  dataset = "${google_healthcare_dataset.dataset.id}"
+  dataset  = google_healthcare_dataset.dataset.id
   name     = "%s"
 }
 
 resource "google_healthcare_hl7_v2_store_iam_binding" "foo" {
-  hl7_v2_store_id = "${google_healthcare_hl7_v2_store.hl7_v2_store.id}"
-  role          = "%s"
-  members       = [
+  hl7_v2_store_id = google_healthcare_hl7_v2_store.hl7_v2_store.id
+  role            = "%s"
+  members = [
     "serviceAccount:${google_service_account.test_account.email}",
-    "serviceAccount:${google_service_account.test_account_2.email}"
+    "serviceAccount:${google_service_account.test_account_2.email}",
   ]
 }
 `, account, account, datasetName, hl7V2StoreName, roleId)
@@ -308,15 +308,16 @@ resource "google_healthcare_dataset" "dataset" {
   location = "us-central1"
   name     = "%s"
 }
+
 resource "google_healthcare_hl7_v2_store" "hl7_v2_store" {
-  dataset = "${google_healthcare_dataset.dataset.id}"
+  dataset  = google_healthcare_dataset.dataset.id
   name     = "%s"
 }
 
 resource "google_healthcare_hl7_v2_store_iam_member" "foo" {
-  hl7_v2_store_id = "${google_healthcare_hl7_v2_store.hl7_v2_store.id}"
-  role          = "%s"
-  member        = "serviceAccount:${google_service_account.test_account.email}"
+  hl7_v2_store_id = google_healthcare_hl7_v2_store.hl7_v2_store.id
+  role            = "%s"
+  member          = "serviceAccount:${google_service_account.test_account.email}"
 }
 `, account, datasetName, hl7V2StoreName, roleId)
 }
@@ -332,22 +333,23 @@ resource "google_healthcare_dataset" "dataset" {
   location = "us-central1"
   name     = "%s"
 }
+
 resource "google_healthcare_hl7_v2_store" "hl7_v2_store" {
-  dataset = "${google_healthcare_dataset.dataset.id}"
+  dataset  = google_healthcare_dataset.dataset.id
   name     = "%s"
 }
 
 data "google_iam_policy" "foo" {
-	binding {
-		role = "%s"
+  binding {
+    role = "%s"
 
-		members = ["serviceAccount:${google_service_account.test_account.email}"]
-	}
+    members = ["serviceAccount:${google_service_account.test_account.email}"]
+  }
 }
 
 resource "google_healthcare_hl7_v2_store_iam_policy" "foo" {
-  hl7_v2_store_id = "${google_healthcare_hl7_v2_store.hl7_v2_store.id}"
-  policy_data = "${data.google_iam_policy.foo.policy_data}"
+  hl7_v2_store_id = google_healthcare_hl7_v2_store.hl7_v2_store.id
+  policy_data     = data.google_iam_policy.foo.policy_data
 }
 `, account, datasetName, hl7V2StoreName, roleId)
 }
