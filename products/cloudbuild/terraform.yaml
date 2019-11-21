@@ -43,6 +43,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/cloudbuild_trigger_id.go.erb
       pre_update: templates/terraform/pre_update/cloudbuild_trigger.go.erb
+      constants: templates/terraform/constants/cloudbuild_trigger.erb
       resource_definition: templates/terraform/resource_definition/cloudbuild_trigger.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
