@@ -28,7 +28,7 @@ objects:
   - !ruby/object:Api::Resource
     name: Budget
     base_url: billingAccounts/{{billing_account}}/budgets
-    self_link: billingAccounts/{{billing_account}}/budgets/{{name}}
+    self_link: '{{name}}'
     update_verb: :PATCH
     update_mask: true
     description: |
