@@ -32,7 +32,6 @@ objects:
     name: 'AutoscalingPolicy'
     base_url: "projects/{{project}}/locations/{{location}}/autoscalingPolicies"
     self_link: "projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{id}}"
-    min_version: beta
     description: |
       Describes an autoscaling policy for Dataproc cluster autoscaler.
     parameters:
