@@ -1,0 +1,188 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Billing
+display_name: Billing Budget
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://billingbudgets.googleapis.com/v1beta1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Billing Budget
+    url: https://console.cloud.google.com/apis/library/billingbudgets.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: Budget
+    base_url: billingAccounts/{{billing_account}}/budgets
+    self_link: '{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Budget configuration for a billing account.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating a budget':
+          'https://cloud.google.com/billing/docs/how-to/budgets'
+      api: 'https://cloud.google.com/billing/docs/reference/budget/rest/v1beta1/billingAccounts.budgets'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: billingAccount
+        description: |
+          ID the billing account to set budget on.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          Resource name of the budget. The resource name
+          implies the scope of a budget. Values are of the form
+          billingAccounts/{billingAccountId}/budgets/{budgetId}.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: etag
+        description: |
+          Etag to validate that the object is unchanged for a
+          read-modify-write operation. An empty etag will cause an update to
+          overwrite other changes.
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: budget
+        required: true
+        description: |
+          The budget to create.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: displayName
+            description: |
+              User data for display name in UI. Must be <= 60 chars.
+          - !ruby/object:Api::Type::NestedObject
+            name: budgetFilter
+            description: |
+              Filters that define which resources are used to compute the actual
+              spend against the budget.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: projects
+                description: |
+                  A set of projects of the form projects/{project_id},
+                  specifying that usage from only this set of projects should be
+                  included in the budget. If omitted, the report will include
+                  all usage for the billing account, regardless of which project
+                  the usage occurred on. Only zero or one project can be
+                  specified currently.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Enum
+                name: creditTypesTreatment
+                description: |
+                  Specifies how credits should be treated when determining spend
+                  for threshold calculations.
+                default_value: :INCLUDE_ALL_CREDITS
+                values:
+                  - :CREDIT_TYPES_TREATMENT_UNSPECIFIED
+                  - :INCLUDE_ALL_CREDITS
+                  - :EXCLUDE_ALL_CREDITS
+              - !ruby/object:Api::Type::Array
+                name: services
+                description: |
+                  A set of services of the form services/{service_id},
+                  specifying that usage from only this set of services should be
+                  included in the budget. If omitted, the report will include
+                  usage for all the services. The service names are available
+                  through the Catalog API:
+                  https://cloud.google.com/billing/v1/how-tos/catalog-api.
+                item_type: Api::Type::String
+          - !ruby/object:Api::Type::NestedObject
+            name: amount
+            required: true
+            description: |
+              The budgeted amount for each usage period.
+            properties:
+              - !ruby/object:Api::Type::NestedObject
+                name: specifiedAmount
+                description: |
+                  A specified amount to use as the budget. currencyCode is
+                  optional. If specified, it must match the currency of the
+                  billing account. The currencyCode is provided on output.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: currencyCode
+                    description: |
+                      The 3-letter currency code defined in ISO 4217.
+                  - !ruby/object:Api::Type::String
+                    name: units
+                    description: |
+                      The whole units of the amount. For example if currencyCode
+                      is "USD", then 1 unit is one US dollar.
+                  - !ruby/object:Api::Type::Integer
+                    name: nanos
+                    description: |
+                      Number of nano (10^-9) units of the amount.
+                      The value must be between -999,999,999 and +999,999,999
+                      inclusive. If units is positive, nanos must be positive or
+                      zero. If units is zero, nanos can be positive, zero, or
+                      negative. If units is negative, nanos must be negative or
+                      zero. For example $-1.75 is represented as units=-1 and
+                      nanos=-750,000,000.
+          - !ruby/object:Api::Type::Array
+            name: thresholdRules
+            required: true
+            description: |
+              Rules that trigger alerts (notifications of thresholds being
+              crossed) when spend exceeds the specified percentages of the
+              budget.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Double
+                  name: thresholdPercent
+                  required: true
+                  description: |
+                    Send an alert when this threshold is exceeded. This is a
+                    1.0-based percentage, so 0.5 = 50%. Must be >= 0.
+                - !ruby/object:Api::Type::Enum
+                  name: spendBasis
+                  description: |
+                    The type of basis used to determine if spend has passed
+                    the threshold.
+                  default_value: :CURRENT_SPEND
+                  values:
+                    - :BASIS_UNSPECIFIED
+                    - :CURRENT_SPEND
+                    - :FORECASTED_SPEND
+          - !ruby/object:Api::Type::NestedObject
+            name: allUpdatesRule
+            description: |
+              Defines notifications that are sent on every update to the
+              billing account's spend, regardless of the thresholds defined
+              using threshold rules.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: pubsubTopic
+                required: true
+                description: |
+                  The name of the Cloud Pub/Sub topic where budget related
+                  messages will be published, in the form
+                  projects/{project_id}/topics/{topic_id}. Updates are sent
+                  at regular intervals to the topic.
+              - !ruby/object:Api::Type::String
+                name: schemaVersion
+                required: true
+                description: |
+                  The schema version of the notification. Only "1.0" is
+                  accepted. It represents the JSON schema as defined in
+                  https://cloud.google.com/billing/docs/how-to/budgets#notification_format.
