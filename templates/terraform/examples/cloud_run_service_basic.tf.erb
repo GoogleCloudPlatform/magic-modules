@@ -6,9 +6,11 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
     namespace = "<%= ctx[:test_env_vars]['namespace'] %>"
   }
 
-  spec {
-    containers {
-      image = "gcr.io/cloudrun/hello"
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+      }
     }
   }
 

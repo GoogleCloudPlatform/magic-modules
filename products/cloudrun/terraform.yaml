@@ -69,8 +69,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       spec: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
-      spec.template: !ruby/object:Overrides::Terraform::PropertyOverride
-        flatten_object: true
+      spec.template.metadata.name: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      spec.template.metadata.namespace: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        custom_expand: "templates/terraform/custom_expand/default_to_project.go.erb"
       metadata.namespace: !ruby/object:Overrides::Terraform::PropertyOverride
         # makring namepsace as optional so that 1) it can be inferred from the provider
         # project and 2) so customizeDiff can clear the diff when projectNumber == projectName
