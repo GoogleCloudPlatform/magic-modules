@@ -1,6 +1,4 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -25,7 +23,7 @@ func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
-				ImportStateId:           "us-central1/" + name,
+				ImportStateId:           "location/us-central1/namespaces/" + project + "/services/" + name,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
@@ -35,7 +33,7 @@ func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
-				ImportStateId:           "us-central1/" + name,
+				ImportStateId:           "location/us-central1/namespaces/" + project + "/services/" + name,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
@@ -64,7 +62,3 @@ resource "google_cloud_run_service" "default" {
 }
 `, name, project, concurrency)
 }
-<% else %>
-// Because Cloud Run is still in beta, we can't run any of the tests that call that
-// resource without vendoring in the full beta provider.
-<% end -%>
