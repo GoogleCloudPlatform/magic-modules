@@ -76,7 +76,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # project and 2) so customizeDiff can clear the diff when projectNumber == projectName
         required: false
         default_from_api: true
-        custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
+        custom_expand: "templates/terraform/custom_expand/default_to_project.go.erb"
       metadata.labels: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
