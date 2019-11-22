@@ -59,6 +59,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       to the resource to prevent accidental destruction.
     id_format: "{{key_ring}}/cryptoKeys/{{name}}"
     import_format: ["{{key_ring}}/cryptoKeys/{{name}}"]
+    supports_indirect_user_project_override: true
     schema_version: 1
     examples:
       - !ruby/object:Provider::Terraform::Examples
