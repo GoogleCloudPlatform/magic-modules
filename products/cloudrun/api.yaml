@@ -281,19 +281,14 @@ objects:
       item_type: !ruby/object:Api::Type::NestedObject
         properties:
         - !ruby/object:Api::Type::String
-          name: configurationName
-          required: true
+          name: revisionName
           description: |-
-            ConfigurationName of a configuration to whose latest revision we will send this portion of traffic. When the "status.latestReadyRevisionName" of the referenced configuration changes, we will automatically migrate traffic from the prior "latest ready" revision to the new one. This field is never set in Route's status, only its spec.
-
-            Cloud Run currently supports a single ConfigurationName.
+            RevisionName of a specific revision to which to send this portion of traffic.
         - !ruby/object:Api::Type::Integer
           name: percent
           required: true
           description: |-
             Percent specifies percent of the traffic to this Revision or Configuration. This defaults to zero if unspecified.
-
-            Cloud Run currently requires 100 percent for a single ConfigurationName TrafficTarget entry.
         - !ruby/object:Api::Type::Boolean
           name: latestRevision
           description: |-
@@ -340,7 +335,6 @@ objects:
                 might be configured in the container image.
             - !ruby/object:Api::Type::Array
               name: args
-              input: true
               description: |-
                 Arguments to the entrypoint.
                 The docker image's CMD is used if this is not provided.

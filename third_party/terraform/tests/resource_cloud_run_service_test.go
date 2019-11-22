@@ -54,10 +54,15 @@ resource "google_cloud_run_service" "default" {
 
   spec {
     containers {
-      image = "gcr.io/cloudrun/hello"
-      args  = ["arrgs"]
-    }
-    container_concurrency = %s
+    image = "gcr.io/cloudrun/hello"
+    args = ["arrgs"]
+  }
+  container_concurrency = %s
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
   }
 }
 `, name, project, concurrency)
