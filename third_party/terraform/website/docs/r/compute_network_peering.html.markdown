@@ -56,11 +56,11 @@ The following arguments are supported:
 * `peer_network` - (Required) The peer network in the peering. The peer network
 may belong to a different project.
 
-* `export_custom_routes` - (Optional) Whether to export the custom routes to the
-peer network. Defaults to `false`.
+* `export_custom_routes` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+Whether to export the custom routes to the peer network. Defaults to `false`.
 
-* `import_custom_routes` - (Optional) Whether to export the custom routes from
-the peer network. Defaults to `false`.
+* `import_custom_routes` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+Whether to export the custom routes from the peer network. Defaults to `false`.
 
 ## Attributes Reference
 
