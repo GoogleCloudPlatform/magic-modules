@@ -23,7 +23,7 @@ func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
-				ImportStateId:           "location/us-central1/namespaces/" + project + "/services/" + name,
+				ImportStateId:           "locations/us-central1/namespaces/" + project + "/services/" + name,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
@@ -33,7 +33,7 @@ func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
-				ImportStateId:           "location/us-central1/namespaces/" + project + "/services/" + name,
+				ImportStateId:           "locations/us-central1/namespaces/" + project + "/services/" + name,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
