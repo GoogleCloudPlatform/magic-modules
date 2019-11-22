@@ -51,9 +51,7 @@ var (
 		"cluster_config.0.software_config",
 		"cluster_config.0.initialization_action",
 		"cluster_config.0.encryption_config",
-<% unless version == 'ga' -%>
 		"cluster_config.0.autoscaling_config",
-<% end -%>
 	}
 )
 
@@ -398,7 +396,6 @@ func resourceDataprocCluster() *schema.Resource {
 								},
 							},
 						},
-<% unless version == 'ga' -%>
 						"autoscaling_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -413,7 +410,6 @@ func resourceDataprocCluster() *schema.Resource {
 								},
 							},
 						},
-<% end -%>
 					},
 				},
 			},
@@ -651,11 +647,9 @@ func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.Clus
 		conf.EncryptionConfig = expandEncryptionConfig(cfg)
 	}
 
-<% unless version == 'ga' -%>
 	if cfg, ok := configOptions(d, "cluster_config.0.autoscaling_config"); ok {
 		conf.AutoscalingConfig = expandAutoscalingConfig(cfg)
 	}
-<% end -%>
 
 	if cfg, ok := configOptions(d, "cluster_config.0.master_config"); ok {
 		log.Println("[INFO] got master_config")
@@ -759,7 +753,6 @@ func expandEncryptionConfig(cfg map[string]interface{}) *dataproc.EncryptionConf
 	return conf
 }
 
-<% unless version == 'ga' -%>
 func expandAutoscalingConfig(cfg map[string]interface{}) *dataproc.AutoscalingConfig {
 	conf := &dataproc.AutoscalingConfig{}
 	if v, ok := cfg["policy_uri"]; ok {
@@ -767,7 +760,6 @@ func expandAutoscalingConfig(cfg map[string]interface{}) *dataproc.AutoscalingCo
 	}
 	return conf
 }
-<% end -%>
 
 func expandInitializationActions(v interface{}) []*dataproc.NodeInitializationAction {
 	actionList := v.([]interface{})
@@ -983,9 +975,7 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 		"worker_config":             flattenInstanceGroupConfig(d, cfg.WorkerConfig),
 		"preemptible_worker_config": flattenPreemptibleInstanceGroupConfig(d, cfg.SecondaryWorkerConfig),
 		"encryption_config":         flattenEncryptionConfig(d, cfg.EncryptionConfig),
-	<% unless version == 'ga' -%>
 		"autoscaling_config":        flattenAutoscalingConfig(d, cfg.AutoscalingConfig),
-	<% end -%>
 	}
 
 	if len(cfg.InitializationActions) > 0 {
@@ -1021,7 +1011,6 @@ func flattenEncryptionConfig(d *schema.ResourceData, ec *dataproc.EncryptionConf
 	return []map[string]interface{}{data}
 }
 
-<% unless version == 'ga' -%>
 func flattenAutoscalingConfig(d *schema.ResourceData, ec *dataproc.AutoscalingConfig) []map[string]interface{} {
 	if ec == nil {
 		return nil
@@ -1033,7 +1022,6 @@ func flattenAutoscalingConfig(d *schema.ResourceData, ec *dataproc.AutoscalingCo
 
 	return []map[string]interface{}{data}
 }
-<% end -%>
 
 func flattenAccelerators(accelerators []*dataproc.AcceleratorConfig) interface{} {
 	acceleratorsTypeSet := schema.NewSet(schema.HashResource(acceleratorsSchema()), []interface{}{})

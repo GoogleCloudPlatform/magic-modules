@@ -1,8 +1,4 @@
-provider "google-beta" {
-}
-
 resource "google_dataproc_cluster" "basic" {
-  provider = google-beta
   name     = "<%= ctx[:vars]['name'] %>"
   region   = "us-central1"
 
@@ -14,7 +10,6 @@ resource "google_dataproc_cluster" "basic" {
 }
 
 resource "google_dataproc_autoscaling_policy" "<%= ctx[:primary_resource_id] %>" {
-  provider  = google-beta
   policy_id = "<%= ctx[:vars]['name'] %>"
   location  = "us-central1"
 
