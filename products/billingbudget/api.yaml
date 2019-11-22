@@ -111,7 +111,8 @@ objects:
             name: amount
             required: true
             description: |
-              The budgeted amount for each usage period.
+              The budgeted amount for each usage period. Exactly one of
+              :specifiedAmount or :lastPeriodAmount must be set.
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: specifiedAmount
@@ -139,6 +140,14 @@ objects:
                       negative. If units is negative, nanos must be negative or
                       zero. For example $-1.75 is represented as units=-1 and
                       nanos=-750,000,000.
+              - !ruby/object:Api::Type::NestedObject
+                name: lastPeriodAmount
+                description: |
+                   Describes a budget amount targeted to last period's spend.
+                   At this time, the amount is automatically 100% of last
+                   period's spend; that is, there are no other options yet.
+                   Future configuration will be described here (for example,
+                   configuring a percentage of last period's spend).
           - !ruby/object:Api::Type::Array
             name: thresholdRules
             required: true
