@@ -17,8 +17,6 @@ display_name: Cloud Run
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    # base_url: https://{{location}}-run.googleapis.com/v1alpha1/
-    # base_url: https://run.googleapis.com/apis/serving.knative.dev/v1/
     base_url: https://{{location}}-run.googleapis.com/apis/serving.knative.dev/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
@@ -27,8 +25,7 @@ objects:
 - !ruby/object:Api::Resource
   name: DomainMapping
   kind: DomainMapping
-  # base_url: projects/{{project}}/locations/{{location}}/domainmappings
-  base_url: namespaces/{{project}}/services
+  base_url: projects/{{project}}/locations/{{location}}/domainmappings
   references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -36,9 +33,6 @@ objects:
       api: 'https://cloud.google.com/run/docs/reference/rest/v1alpha1/projects.locations.domainmappings'
   description: |-
     Resource to hold the state and status of a user's domain mapping.
-
-    **Note:** Cloud Run as a product is in beta, however the REST API is currently still an alpha.
-    Please use this with caution as it may change when the API moves to beta.
   parameters:
   - !ruby/object:Api::Type::String
     name: location
@@ -229,9 +223,6 @@ objects:
           'https://cloud.google.com/run/docs/'
       api: 'https://cloud.google.com/run/docs/reference/rest/v1/projects.locations.services'
   description: |-
-    TODO chrisst **Note:** Cloud Run as a product is in beta, however the REST API is currently still an alpha.
-    Please use this with caution as it may change when the API moves to beta.
-
     Service acts as a top-level container that manages a set of Routes and
     Configurations which implement a network service. Service exists to provide a
     singular abstraction which can be access controlled, reasoned about, and
