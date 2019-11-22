@@ -42,7 +42,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "monitoring_group_subgroup"
         primary_resource_id: "subgroup"
         vars:
-          display_name: "MonitoringSubGroup"
+          display_name: "MonitoringParentGroup"
           display_name2: "MonitoringSubGroup"
     properties:
       parentName: !ruby/object:Overrides::Terraform::PropertyOverride
