@@ -16,8 +16,10 @@ name: CloudRun
 display_name: Cloud Run
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://{{location}}-run.googleapis.com/v1alpha1/
+    name: ga
+    # base_url: https://{{location}}-run.googleapis.com/v1alpha1/
+    # base_url: https://run.googleapis.com/apis/serving.knative.dev/v1/
+    base_url: https://{{location}}-run.googleapis.com/apis/serving.knative.dev/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
@@ -25,7 +27,8 @@ objects:
 - !ruby/object:Api::Resource
   name: DomainMapping
   kind: DomainMapping
-  base_url: projects/{{project}}/locations/{{location}}/domainmappings
+  # base_url: projects/{{project}}/locations/{{location}}/domainmappings
+  base_url: namespaces/{{project}}/services
   references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -218,7 +221,8 @@ objects:
 - !ruby/object:Api::Resource
   name: Service
   kind: Service
-  base_url: projects/{{project}}/locations/{{location}}/services
+  base_url: namespaces/{{project}}/services
+  # base_url: projects/{{project}}/locations/{{location}}/services
   references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -270,29 +274,30 @@ objects:
     required: true
     description: Spec holds the desired state of the Service (from the client).
     properties:
-    - !ruby/object:Api::Type::NestedObject
+    - !ruby/object:Api::Type::Array
       name: traffic
       description: |-
-        TODO chrisst
-      properties:
-      - !ruby/object:Api::Type::String
-        name: configurationName
-        required: true
-        description: |-
-          ConfigurationName of a configuration to whose latest revision we will send this portion of traffic. When the "status.latestReadyRevisionName" of the referenced configuration changes, we will automatically migrate traffic from the prior "latest ready" revision to the new one. This field is never set in Route's status, only its spec.
+        Traffic specifies how to distribute traffic over a collection of Knative Revisions and Configurations
+      item_type: !ruby/object:Api::Type::NestedObject
+        properties:
+        - !ruby/object:Api::Type::String
+          name: configurationName
+          required: true
+          description: |-
+            ConfigurationName of a configuration to whose latest revision we will send this portion of traffic. When the "status.latestReadyRevisionName" of the referenced configuration changes, we will automatically migrate traffic from the prior "latest ready" revision to the new one. This field is never set in Route's status, only its spec.
 
-          Cloud Run currently supports a single ConfigurationName.
-      - !ruby/object:Api::Type::Integer
-        name: percent
-        required: true
-        description: |-
-          Percent specifies percent of the traffic to this Revision or Configuration. This defaults to zero if unspecified.
+            Cloud Run currently supports a single ConfigurationName.
+        - !ruby/object:Api::Type::Integer
+          name: percent
+          required: true
+          description: |-
+            Percent specifies percent of the traffic to this Revision or Configuration. This defaults to zero if unspecified.
 
-          Cloud Run currently requires 100 percent for a single ConfigurationName TrafficTarget entry.
-      - !ruby/object:Api::Type::Boolean
-        name: latestRevision
-        description: |-
-          LatestRevision may be optionally provided to indicate that the latest ready Revision of the Configuration should be used for this traffic target. When provided LatestRevision must be true if RevisionName is empty; it must be false when RevisionName is non-empty.
+            Cloud Run currently requires 100 percent for a single ConfigurationName TrafficTarget entry.
+        - !ruby/object:Api::Type::Boolean
+          name: latestRevision
+          description: |-
+            LatestRevision may be optionally provided to indicate that the latest ready Revision of the Configuration should be used for this traffic target. When provided LatestRevision must be true if RevisionName is empty; it must be false when RevisionName is non-empty.
     - !ruby/object:Api::Type::NestedObject
       name: template
       description: |-

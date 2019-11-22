@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -177,32 +178,32 @@ func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *Co
 		}
 	}
 
-	f := func(s string) string {
+	f := func(s string) (sub string) {
 		m := re.FindStringSubmatch(s)[1]
 		if m == "project" {
-			return project
+			sub = project
 		}
 		if m == "project_id_or_project" {
 			if projectID != "" {
-				return projectID
+				sub = projectID
 			}
-			return project
+			sub = project
 		}
 		if m == "region" {
-			return region
+			sub = region
 		}
 		if m == "zone" {
-			return zone
+			sub = zone
 		}
 		if string(m[0]) == "%" {
 			v, ok := d.GetOkExists(m[1:])
 			if ok {
-				return url.PathEscape(fmt.Sprintf("%v", v))
+				sub = url.PathEscape(fmt.Sprintf("%v", v))
 			}
 		} else {
 			v, ok := d.GetOkExists(m)
 			if ok {
-				return fmt.Sprintf("%v", v)
+				sub = fmt.Sprintf("%v", v)
 			}
 		}
 
@@ -210,11 +211,31 @@ func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *Co
 		if config != nil {
 			// Attempt to draw values from the provider config if it's present.
 			if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
-				return f.String()
+				sub = f.String()
 			}
 		}
 
-		return ""
+		// Check if the value to be substituted in also contains a replacable string. This must
+		// be done for baseUrl's that contain Region such as CloudRun.
+		if re.Match([]byte(sub)) {
+			// If the substitution string contains the variable to be substituted it would
+			// recursive infintely so this will break out early. This won't catch chains of
+			// substitutions but this is a much smaller edge case.
+			if strings.Contains(sub, s) {
+				log.Printf("[ERROR] Infinite substition detected when [%s] replaces [%s] .\n", sub, s)
+				return "!RECURSIVE_VARIABLE_SUBSTITUTION_DETECTED!"
+			}
+
+			double, err := replaceVars(d, config, sub)
+			if err != nil {
+				log.Printf("[ERROR] Error during nested variable substitution. Exiting early. %s\n", err)
+				return sub
+			}
+
+			return double
+		}
+
+		return sub
 	}
 
 	return f, nil

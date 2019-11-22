@@ -586,3 +586,30 @@ func stringInSlice(arr []string, str string) bool {
 
 	return false
 }
+
+func projectNumberToIDCustomDiff(diff *schema.ResourceDiff, meta interface{}) error {
+	config := meta.(*Config)
+	o, n := diff.GetChange("metadata.0.namespace")
+	projectNumber := o.(string)
+	projectName := n.(string)
+
+	if projectNumber == projectName {
+		return nil
+	}
+
+	// Resource hasn't been created yet - no need to convert
+	if diff.Id() == "" {
+		return nil
+	}
+
+	proj, err := config.clientCompute.Projects.Get(projectNumber).Do()
+	if err != nil {
+		return err
+	}
+	log.Printf("[DEBUG] Project number %v is project ID %s.\n", projectNumber, proj.Name)
+	if proj.Name == projectName {
+		diff.Clear("metadata.0.namespace")
+	}
+
+	return nil
+}

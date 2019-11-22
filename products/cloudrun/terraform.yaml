@@ -53,6 +53,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           namespace: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: 'templates/terraform/custom_import/cloudrun_service.go.erb'
+      resource_definition: 'templates/terraform/resource_definition/cloudrun_service.go'
       encoder: 'templates/terraform/encoders/cloud_run_service.go.erb'
       decoder: 'templates/terraform/decoders/cloud_run.go.erb'
     properties:
@@ -69,9 +71,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         flatten_object: true
       spec.template: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
+      metadata.namespace: !ruby/object:Overrides::Terraform::PropertyOverride
+        # makring namepsace as optional so that 1) it can be inferred from the provider
+        # project and 2) so customizeDiff can clear the diff when projectNumber == projectName
+        required: false
+        default_from_api: true
+        custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
       metadata.labels: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      spec.traffic: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       # name is 'special' in magic modules and lives at the root of properties.
       # We are using encoders to set name at the root here.
