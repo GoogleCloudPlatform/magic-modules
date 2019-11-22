@@ -196,7 +196,6 @@ func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("cluster-test-%s", acctest.RandString(10))
@@ -216,7 +215,6 @@ func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 	t.Parallel()
