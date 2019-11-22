@@ -63,7 +63,11 @@ module Overrides
           # An array of function names that determine whether an error is retryable.
           :error_retry_predicates,
 
-          :schema_version
+          :schema_version,
+
+          # This enables resources that get their project via a reference to a different resource
+          # instead of a project field to use User Project Overrides
+          :supports_indirect_user_project_override
         ]
       end
 
@@ -93,6 +97,7 @@ module Overrides
         check :timeouts, type: Api::Timeouts
         check :error_retry_predicates, type: Array, item_type: String
         check :schema_version, type: Integer
+        check :supports_indirect_user_project_override, type: :boolean, default: false
       end
 
       def apply(resource)
