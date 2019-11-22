@@ -29,8 +29,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         required: true
         exclude: false
-      # excluding kind from Terraform code because it only accepts the same single value
-      # so we hard code it in the encoder instead.
+      # excluding kind from Terraform code because this is a static, hardcoded value
       kind: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       apiVersion: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -54,7 +53,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           namespace: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      resource_definition: 'templates/terraform/resource_definition/cloudrun_service.go'
       encoder: 'templates/terraform/encoders/cloud_run_service.go.erb'
       decoder: 'templates/terraform/decoders/cloud_run.go.erb'
     properties:
@@ -79,6 +77,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # project and 2) so customizeDiff can clear the diff when projectNumber == projectName
         required: false
         default_from_api: true
+        # Namespace takes a projectNumber or projectId but will always return the projectNumber
+        # rather than make a second API query to allow for canonical comparison we are assuming
+        # that this field is "correct" as a Service should never migrate between projects out
+        # of band of Terraform. This assumes namespace will always be a project.
+        ignore_read: true
         custom_expand: "templates/terraform/custom_expand/default_to_project.go.erb"
       metadata.labels: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
