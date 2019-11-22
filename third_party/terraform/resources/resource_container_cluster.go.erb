@@ -2279,7 +2279,6 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *c
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func expandAuthenticatorGroupsConfig(configured interface{}) *containerBeta.AuthenticatorGroupsConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 {
@@ -2293,7 +2292,6 @@ func expandAuthenticatorGroupsConfig(configured interface{}) *containerBeta.Auth
 	}
 	return result
 }
-<% end -%>
 
 func expandMasterAuth(configured interface{}) *containerBeta.MasterAuth {
 	l := configured.([]interface{})
@@ -2558,7 +2556,6 @@ func flattenClusterNodePools(d *schema.ResourceData, config *Config, c []*contai
 	return nodePools, nil
 }
 
-<% unless version == 'ga' -%>
 func flattenAuthenticatorGroupsConfig(c *containerBeta.AuthenticatorGroupsConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -2569,7 +2566,6 @@ func flattenAuthenticatorGroupsConfig(c *containerBeta.AuthenticatorGroupsConfig
 		},
 	}
 }
-<% end -%>
 
 func flattenPrivateClusterConfig(c *containerBeta.PrivateClusterConfig) []map[string]interface{} {
 	if c == nil {
