@@ -379,6 +379,7 @@ func resourceContainerCluster() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+<% end -%>
 
 			"authenticator_groups_config": {
 				Type:     schema.TypeList,
@@ -396,7 +397,6 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 
 			"initial_node_count": {
 				Type:     schema.TypeInt,
@@ -1091,11 +1091,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.NodeConfig = expandNodeConfig(v)
 	}
 
-<% unless version == 'ga' -%>
 	if v, ok := d.GetOk("authenticator_groups_config"); ok {
 		cluster.AuthenticatorGroupsConfig = expandAuthenticatorGroupsConfig(v)
 	}
-<% end -%>
 
 	if v, ok := d.GetOk("private_cluster_config"); ok {
 		cluster.PrivateClusterConfig = expandPrivateClusterConfig(v)
@@ -1252,9 +1250,6 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("cluster_autoscaling", flattenClusterAutoscaling(cluster.Autoscaling)); err != nil {
 		return err
 	}
-	if err := d.Set("authenticator_groups_config", flattenAuthenticatorGroupsConfig(cluster.AuthenticatorGroupsConfig)); err != nil {
-		return err
-	}
 	if err := d.Set("release_channel", flattenReleaseChannel(cluster.ReleaseChannel)); err != nil {
 		return err
 	}
@@ -1264,6 +1259,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 <% end -%>
+	if err := d.Set("authenticator_groups_config", flattenAuthenticatorGroupsConfig(cluster.AuthenticatorGroupsConfig)); err != nil {
+		return err
+	}
 	if cluster.DefaultMaxPodsConstraint != nil {
 		d.Set("default_max_pods_per_node", cluster.DefaultMaxPodsConstraint.MaxPodsPerNode)
 	}

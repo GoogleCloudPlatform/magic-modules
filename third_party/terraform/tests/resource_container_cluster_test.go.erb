@@ -1961,7 +1961,6 @@ resource "google_container_cluster" "with_network_policy_enabled" {
 `, clusterName)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withAuthenticatorGroupsConfig(clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -2005,7 +2004,6 @@ resource "google_container_cluster" "with_authenticator_groups" {
 }
 `, clusterName, clusterName)
 }
-<% end -%>
 
 func testAccContainerCluster_withMasterAuthorizedNetworksConfig(clusterName string, cidrs []string, emptyValue string) string {
 
