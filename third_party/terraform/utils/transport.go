@@ -179,31 +179,52 @@ func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *Co
 	}
 
 	f := func(s string) (sub string) {
+
+		defer func() {
+			// Check if the value returned (the substitute) also contains a replacable string. This must
+			// be done for baseUrl's that contain Region such as CloudRun.
+			if re.Match([]byte(sub)) {
+				// If the substitution string contains the variable to be substituted it would
+				// recursive infintely so this will break out early. This won't catch chains of
+				// substitutions but this is a much smaller edge case.
+				if strings.Contains(sub, s) {
+					log.Printf("[ERROR] Infinite substition detected when [%s] replaces [%s] .\n", sub, s)
+					sub = "!RECURSIVE_VARIABLE_SUBSTITUTION_DETECTED!"
+				}
+
+				double, err := replaceVars(d, config, sub)
+				if err != nil {
+					log.Printf("[ERROR] Error during nested variable substitution. Exiting early. %s\n", err)
+				}
+				sub = double
+			}
+		}()
+
 		m := re.FindStringSubmatch(s)[1]
 		if m == "project" {
-			sub = project
+			return project
 		}
 		if m == "project_id_or_project" {
 			if projectID != "" {
-				sub = projectID
+				return projectID
 			}
-			sub = project
+			return project
 		}
 		if m == "region" {
-			sub = region
+			return region
 		}
 		if m == "zone" {
-			sub = zone
+			return zone
 		}
 		if string(m[0]) == "%" {
 			v, ok := d.GetOkExists(m[1:])
 			if ok {
-				sub = url.PathEscape(fmt.Sprintf("%v", v))
+				return url.PathEscape(fmt.Sprintf("%v", v))
 			}
 		} else {
 			v, ok := d.GetOkExists(m)
 			if ok {
-				sub = fmt.Sprintf("%v", v)
+				return fmt.Sprintf("%v", v)
 			}
 		}
 
@@ -211,31 +232,12 @@ func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *Co
 		if config != nil {
 			// Attempt to draw values from the provider config if it's present.
 			if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
-				sub = f.String()
+				return f.String()
 			}
 		}
 
-		// Check if the value to be substituted in also contains a replacable string. This must
-		// be done for baseUrl's that contain Region such as CloudRun.
-		if re.Match([]byte(sub)) {
-			// If the substitution string contains the variable to be substituted it would
-			// recursive infintely so this will break out early. This won't catch chains of
-			// substitutions but this is a much smaller edge case.
-			if strings.Contains(sub, s) {
-				log.Printf("[ERROR] Infinite substition detected when [%s] replaces [%s] .\n", sub, s)
-				return "!RECURSIVE_VARIABLE_SUBSTITUTION_DETECTED!"
-			}
-
-			double, err := replaceVars(d, config, sub)
-			if err != nil {
-				log.Printf("[ERROR] Error during nested variable substitution. Exiting early. %s\n", err)
-				return sub
-			}
-
-			return double
-		}
-
-		return sub
+		fmt.Printf("returning the replacement %s\n", sub)
+		return
 	}
 
 	return f, nil
