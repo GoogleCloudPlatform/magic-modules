@@ -17,7 +17,7 @@ display_name: Cloud Run
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://{{location}}-run.googleapis.com/apis/serving.knative.dev/v1/
+    base_url: https://{{location}}-run.googleapis.com/apis/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
@@ -25,7 +25,7 @@ objects:
 - !ruby/object:Api::Resource
   name: DomainMapping
   kind: DomainMapping
-  base_url: projects/{{project}}/locations/{{location}}/domainmappings
+  base_url: domains.cloudrun.com/v1/namespaces/{{project}}/domainmappings
   references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -105,6 +105,7 @@ objects:
           - :CNAME
         - !ruby/object:Api::Type::String
           name: rrdata
+          output: true
           description: |-
             Data for this record. Values vary by record type, as defined in RFC 1035
             (section 5) and RFC 1034 (section 3.6.1).
@@ -133,8 +134,10 @@ objects:
         It is recommended that the user leaves this empty to receive an error
         warning about a potential conflict and only set it once the respective UI
         has given such a warning.
-    - !ruby/object:Api::Type::String
+    - !ruby/object:Api::Type::ResourceRef
       name: routeName
+      resource: Service
+      imports: name
       required: true
       description: |-
         The name of the Cloud Run Service that this DomainMapping applies to.
@@ -145,6 +148,7 @@ objects:
       values:
       - :NONE
       - :AUTOMATIC
+      default_value: :AUTOMATIC
   - !ruby/object:Api::Type::NestedObject
     name: metadata
     required: true
@@ -215,8 +219,7 @@ objects:
 - !ruby/object:Api::Resource
   name: Service
   kind: Service
-  base_url: namespaces/{{project}}/services
-  # base_url: projects/{{project}}/locations/{{location}}/services
+  base_url: serving.knative.dev/v1/namespaces/{{project}}/services
   references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -245,10 +248,9 @@ objects:
   properties:
   - !ruby/object:Api::Type::String
     name: name
+    # This is a convenience field as terraform expects `name` to be a top level property
     url_param_only: true
     input: true
-    # This is a convenience field handled by terraform
-    exclude: true
     description: |-
       Name must be unique within a namespace, within a Cloud Run region.
       Is required when creating resources. Name is primarily intended
