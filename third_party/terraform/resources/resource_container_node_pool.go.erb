@@ -112,20 +112,17 @@ var schemaNodePool = map[string]*schema.Schema{
 	"upgrade_settings": {
 		Type:     schema.TypeList,
 		Optional: true,
-		Computed: true,
 		MaxItems: 1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"max_surge": {
 					Type:     schema.TypeInt,
-					Optional: true,
-					Default:  1,
+					Required: true,
 				},
 
 				"max_unavailable": {
 					Type:     schema.TypeInt,
-					Optional: true,
-					Default:  0,
+					Required: true,
 				},
 			},
 		},
