@@ -3,8 +3,8 @@ package google
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -128,13 +128,33 @@ func addQueryParams(rawurl string, params map[string]string) (string, error) {
 }
 
 func replaceVars(d TerraformResourceData, config *Config, linkTmpl string) (string, error) {
+	return replaceVarsRecursive(d, config, linkTmpl, 0)
+}
+
+// replaceVars must be done recursively because there are baseUrls that can contain references to regions
+// (eg cloudrun service) there aren't any cases known for 2+ recursion but we will track a run away
+// substitution as 10+ calls to allow for future use cases.
+func replaceVarsRecursive(d TerraformResourceData, config *Config, linkTmpl string, depth int) (string, error) {
+	if depth > 10 {
+		return "", errors.New("Recursive substitution detcted")
+	}
+
 	// https://github.com/google/re2/wiki/Syntax
 	re := regexp.MustCompile("{{([%[:word:]]+)}}")
 	f, err := buildReplacementFunc(re, d, config, linkTmpl)
 	if err != nil {
 		return "", err
 	}
-	return re.ReplaceAllStringFunc(linkTmpl, f), nil
+	final, err := re.ReplaceAllStringFunc(linkTmpl, f), nil
+	if err != nil {
+		return "", err
+	}
+
+	if re.Match([]byte(final)) {
+		return replaceVarsRecursive(d, config, final, depth+1)
+	}
+
+	return final, nil
 }
 
 // This function replaces references to Terraform properties (in the form of {{var}}) with their value in Terraform
@@ -178,27 +198,7 @@ func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *Co
 		}
 	}
 
-	f := func(s string) (sub string) {
-
-		defer func() {
-			// Check if the value returned (the substitute) also contains a replaceable string. This must
-			// be done for baseUrls that contain Region such as CloudRun.
-			if re.Match([]byte(sub)) {
-				// If the substitution string contains the variable to be substituted it would
-				// recursive infintely so this will break out early. This won't catch chains of
-				// substitutions but this is a much smaller edge case.
-				if strings.Contains(sub, s) {
-					log.Printf("[ERROR] Infinite substition detected when [%s] replaces [%s] .\n", sub, s)
-					sub = "!RECURSIVE_VARIABLE_SUBSTITUTION_DETECTED!"
-				}
-
-				double, err := replaceVars(d, config, sub)
-				if err != nil {
-					log.Printf("[ERROR] Error during nested variable substitution. Exiting early. %s\n", err)
-				}
-				sub = double
-			}
-		}()
+	f := func(s string) string {
 
 		m := re.FindStringSubmatch(s)[1]
 		if m == "project" {
@@ -235,9 +235,7 @@ func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *Co
 				return f.String()
 			}
 		}
-
-		fmt.Printf("returning the replacement %s\n", sub)
-		return
+		return ""
 	}
 
 	return f, nil

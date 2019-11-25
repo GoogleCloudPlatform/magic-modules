@@ -283,7 +283,6 @@ objects:
           required: true
           description: |-
             Percent specifies percent of the traffic to this Revision or Configuration.
-            This defaults to zero if unspecified.
         - !ruby/object:Api::Type::Boolean
           name: latestRevision
           description: |-
