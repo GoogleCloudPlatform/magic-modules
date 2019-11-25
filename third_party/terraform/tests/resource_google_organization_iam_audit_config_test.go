@@ -2,11 +2,14 @@ package google
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
+
+var runOrgIamAuditConfigTestEnvVar = "TF_RUN_ORG_IAM_AUDIT_CONFIG"
 
 func organizationIamAuditConfigImportStep(resourceName, org, service string) resource.TestStep {
 	return resource.TestStep{
@@ -19,6 +22,9 @@ func organizationIamAuditConfigImportStep(resourceName, org, service string) res
 
 // Test that an IAM audit config can be applied to an organization
 func TestAccOrganizationIamAuditConfig_basic(t *testing.T) {
+	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
+		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
+	}
 	org := getTestOrgFromEnv(t)
 	service := "cloudkms.googleapis.com"
 	resource.Test(t, resource.TestCase{
@@ -36,6 +42,9 @@ func TestAccOrganizationIamAuditConfig_basic(t *testing.T) {
 
 // Test that multiple IAM audit configs can be applied to an organization, one at a time
 func TestAccOrganizationIamAuditConfig_multiple(t *testing.T) {
+	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
+		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
+	}
 	org := getTestOrgFromEnv(t)
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
@@ -60,6 +69,9 @@ func TestAccOrganizationIamAuditConfig_multiple(t *testing.T) {
 
 // Test that multiple IAM audit configs can be applied to an organization all at once
 func TestAccOrganizationIamAuditConfig_multipleAtOnce(t *testing.T) {
+	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
+		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
+	}
 	org := getTestOrgFromEnv(t)
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
@@ -80,6 +92,9 @@ func TestAccOrganizationIamAuditConfig_multipleAtOnce(t *testing.T) {
 
 // Test that an IAM audit config can be updated once applied to an organization
 func TestAccOrganizationIamAuditConfig_update(t *testing.T) {
+	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
+		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
+	}
 	org := getTestOrgFromEnv(t)
 	service := "cloudkms.googleapis.com"
 
@@ -110,6 +125,9 @@ func TestAccOrganizationIamAuditConfig_update(t *testing.T) {
 
 // Test that an IAM audit config can be removed from an organization
 func TestAccOrganizationIamAuditConfig_remove(t *testing.T) {
+	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
+		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
+	}
 	org := getTestOrgFromEnv(t)
 	service := "cloudkms.googleapis.com"
 	service2 := "cloudsql.googleapis.com"
@@ -136,6 +154,9 @@ func TestAccOrganizationIamAuditConfig_remove(t *testing.T) {
 
 // Test adding exempt first exempt member
 func TestAccOrganizationIamAuditConfig_addFirstExemptMember(t *testing.T) {
+	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
+		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
+	}
 	org := getTestOrgFromEnv(t)
 	service := "cloudkms.googleapis.com"
 	members := []string{}
@@ -162,6 +183,9 @@ func TestAccOrganizationIamAuditConfig_addFirstExemptMember(t *testing.T) {
 
 // test removing last exempt member
 func TestAccOrganizationIamAuditConfig_removeLastExemptMember(t *testing.T) {
+	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
+		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
+	}
 	org := getTestOrgFromEnv(t)
 	service := "cloudkms.googleapis.com"
 	members := []string{"user:paddy@hashicorp.com"}
@@ -188,6 +212,9 @@ func TestAccOrganizationIamAuditConfig_removeLastExemptMember(t *testing.T) {
 
 // test changing service with no exempt members
 func TestAccOrganizationIamAuditConfig_updateNoExemptMembers(t *testing.T) {
+	if os.Getenv(runOrgIamAuditConfigTestEnvVar) != "true" {
+		t.Skipf("Environment variable %s is not set, skipping.", runOrgIamAuditConfigTestEnvVar)
+	}
 	org := getTestOrgFromEnv(t)
 	logType := "DATA_READ"
 	logType2 := "DATA_WRITE"
