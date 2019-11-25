@@ -145,10 +145,7 @@ func replaceVarsRecursive(d TerraformResourceData, config *Config, linkTmpl stri
 	if err != nil {
 		return "", err
 	}
-	final, err := re.ReplaceAllStringFunc(linkTmpl, f), nil
-	if err != nil {
-		return "", err
-	}
+	final := re.ReplaceAllStringFunc(linkTmpl, f)
 
 	if re.Match([]byte(final)) {
 		return replaceVarsRecursive(d, config, final, depth+1)
