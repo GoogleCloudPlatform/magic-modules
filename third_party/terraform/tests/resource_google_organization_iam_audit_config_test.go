@@ -243,7 +243,7 @@ resource "google_organization_iam_audit_config" "acceptance" {
 }
 
 resource "google_organization_iam_audit_config" "multiple" {
-	org_id = "%s"
+  org_id = "%s"
   service = "%s"
   audit_log_config {
     log_type = "DATA_WRITE"
@@ -255,7 +255,7 @@ resource "google_organization_iam_audit_config" "multiple" {
 func testAccOrganizationAssociateAuditConfigUpdated(org, service string) string {
 	return fmt.Sprintf(`
 resource "google_organization_iam_audit_config" "acceptance" {
-	org_id = "%s"
+  org_id = "%s"
   service = "%s"
   audit_log_config {
     log_type = "DATA_WRITE"
@@ -271,7 +271,7 @@ resource "google_organization_iam_audit_config" "acceptance" {
 func testAccOrganizationAssociateAuditConfigDropMemberFromBasic(org, service string) string {
 	return fmt.Sprintf(`
 resource "google_organization_iam_audit_config" "acceptance" {
-	org_id = "%s"
+  org_id = "%s"
   service = "%s"
   audit_log_config {
     log_type = "DATA_READ"
@@ -293,7 +293,7 @@ func testAccOrganizationAssociateAuditConfigMembers(org, service string, members
 	}
 	return fmt.Sprintf(`
 resource "google_organization_iam_audit_config" "acceptance" {
-	org_id = "%s"
+  org_id = "%s"
   service = "%s"
   audit_log_config {
     log_type = "DATA_READ"%s
@@ -305,7 +305,7 @@ resource "google_organization_iam_audit_config" "acceptance" {
 func testAccOrganizationAssociateAuditConfigLogType(org, service, logType string) string {
 	return fmt.Sprintf(`
 resource "google_organization_iam_audit_config" "acceptance" {
-	org_id = "%s"
+  org_id = "%s"
   service = "%s"
   audit_log_config {
     log_type = "%s"
