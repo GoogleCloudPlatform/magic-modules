@@ -1191,8 +1191,6 @@ func TestAccContainerCluster_withIPAllocationPolicy_specificSizes(t *testing.T) 
 	})
 }
 
-
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_nodeAutoprovisioning(t *testing.T) {
 	t.Parallel()
 
@@ -1233,6 +1231,7 @@ func TestAccContainerCluster_nodeAutoprovisioning(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccContainerCluster_sharedVpc(t *testing.T) {
 	t.Parallel()
 
@@ -2617,7 +2616,6 @@ resource "google_container_cluster" "with_node_pool" {
 `, cluster, nodePool)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerCluster_autoprovisioning(cluster string, autoprovisioning bool) string {
 	config := fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -2642,6 +2640,11 @@ resource "google_container_cluster" "with_autoprovisioning" {
       resource_type = "memory"
       maximum       = 2048
     }
+    auto_provisioning_defaults {
+      oauth_scopes = [
+        "https://www.googleapis.com/auth/logging.write",
+      ]
+    }
   }`
 	} else {
 		config += `
@@ -2653,7 +2656,6 @@ resource "google_container_cluster" "with_autoprovisioning" {
 }`
 	return config
 }
-<% end -%>
 
 func testAccContainerCluster_withNodePoolAutoscaling(cluster, np string) string {
 	return fmt.Sprintf(`
