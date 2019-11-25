@@ -2642,7 +2642,8 @@ resource "google_container_cluster" "with_autoprovisioning" {
     }
     auto_provisioning_defaults {
       oauth_scopes = [
-        "https://www.googleapis.com/auth/logging.write",
+        "https://www.googleapis.com/auth/pubsub",
+        "https://www.googleapis.com/auth/devstorage.read_only"
       ]
     }
   }`

@@ -323,6 +323,7 @@ func resourceContainerCluster() *schema.Resource {
 										Type:     schema.TypeList,
 										Optional: true,
 										Elem:     &schema.Schema{Type: schema.TypeString},
+										DiffSuppressFunc: containerClusterAutoProvisioningDefaultSuppress,
 										ExactlyOneOf: []string{
 											"cluster_autoscaling.0.auto_provisioning_defaults.0.oauth_scopes",
 											"cluster_autoscaling.0.auto_provisioning_defaults.0.service_account",
@@ -331,6 +332,7 @@ func resourceContainerCluster() *schema.Resource {
 									"service_account": {
 										Type:     schema.TypeString,
 										Optional: true,
+										Default:  "default",
 										ExactlyOneOf: []string{
 											"cluster_autoscaling.0.auto_provisioning_defaults.0.oauth_scopes",
 											"cluster_autoscaling.0.auto_provisioning_defaults.0.service_account",
@@ -2294,7 +2296,7 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *c
 	return &containerBeta.ClusterAutoscaling{
 		EnableNodeAutoprovisioning: config["enabled"].(bool),
 		ResourceLimits:             resourceLimits,
-		AutoprovisioningNodePoolDefaults:   expandAutoProvisioningDefaults(config, d),
+		AutoprovisioningNodePoolDefaults:   expandAutoProvisioningDefaults(config["auto_provisioning_defaults"], d),
 	}
 }
 
@@ -2306,7 +2308,7 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 	config := l[0].(map[string]interface{})
 
 	return &containerBeta.AutoprovisioningNodePoolDefaults{
-		OauthScopes:    config["oauth_scopes"].([]string),
+		OauthScopes:    convertStringArr(config["oauth_scopes"].([]interface{})),
 		ServiceAccount: config["service_account"].(string),
 	}
 }
@@ -2875,6 +2877,35 @@ func extractNodePoolInformationFromCluster(d *schema.ResourceData, config *Confi
 func cidrOrSizeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// If the user specified a size and the API returned a full cidr block, suppress.
 	return strings.HasPrefix(new, "/") && strings.HasSuffix(old, new)
+}
+
+// We want to suppress diffs for the default auto provisioning defaults
+func containerClusterAutoProvisioningDefaultSuppress(k, old, new string, d *schema.ResourceData) bool {
+	o, n := d.GetChange("cluster_autoscaling.0.auto_provisioning_defaults.0.oauth_scopes")
+
+	defaultScopes := []string{
+		"https://www.googleapis.com/auth/logging.write",
+		"https://www.googleapis.com/auth/monitoring",
+	}
+
+	// combine what the default scopes are with what was passed
+	m := golangSetFromStringSlice(append(defaultScopes, convertStringArr(n.([]interface{}))... ))
+	combined := stringSliceFromGolangSet(m)
+
+	// compare if the combined new scopes and default scopes differ from the old scopes
+	if len(combined) != len(convertStringArr(o.([]interface{}))) {
+		return false
+	}
+
+	for _, i := range combined {
+		if stringInSlice(convertStringArr(o.([]interface{})), i) {
+			continue
+		}
+
+		return false
+	}
+
+	return true
 }
 
 // We want to suppress diffs for empty/disabled private cluster config.
