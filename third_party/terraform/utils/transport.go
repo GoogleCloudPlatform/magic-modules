@@ -181,8 +181,8 @@ func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *Co
 	f := func(s string) (sub string) {
 
 		defer func() {
-			// Check if the value returned (the substitute) also contains a replacable string. This must
-			// be done for baseUrl's that contain Region such as CloudRun.
+			// Check if the value returned (the substitute) also contains a replaceable string. This must
+			// be done for baseUrls that contain Region such as CloudRun.
 			if re.Match([]byte(sub)) {
 				// If the substitution string contains the variable to be substituted it would
 				// recursive infintely so this will break out early. This won't catch chains of

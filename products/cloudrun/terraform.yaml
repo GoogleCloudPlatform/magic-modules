@@ -73,7 +73,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         custom_expand: "templates/terraform/custom_expand/default_to_project.go.erb"
       metadata.namespace: !ruby/object:Overrides::Terraform::PropertyOverride
-        # makring namepsace as optional so that 1) it can be inferred from the provider
+        # marking namepsace as optional so that 1) it can be inferred from the provider
         # project and 2) so customizeDiff can clear the diff when projectNumber == projectName
         required: false
         default_from_api: true
