@@ -9479,10 +9479,10 @@ objects:
             properties:
               - !ruby/object:Api::Type::String
                 name: range
+                required: true
                 description: |
                   The IP range to advertise. The value must be a
                   CIDR-formatted string.
-                send_empty_value: true
               - !ruby/object:Api::Type::String
                 name: description
                 description: |
