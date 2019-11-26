@@ -2961,11 +2961,11 @@ objects:
         properties:
           - !ruby/object:Api::Type::Boolean
             name: 'enableLogging'
+            send_empty_value: true
             description: |
               This field denotes whether to enable logging for a particular
               firewall rule. If logging is enabled, logs will be exported to
               Stackdriver.
-            send_empty_value: true
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
