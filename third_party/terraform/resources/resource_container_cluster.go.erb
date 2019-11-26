@@ -2617,7 +2617,9 @@ func flattenPrivateClusterConfig(c *containerBeta.PrivateClusterConfig) []map[st
 			"enable_private_endpoint": c.EnablePrivateEndpoint,
 			"enable_private_nodes":    c.EnablePrivateNodes,
 			"master_ipv4_cidr_block":  c.MasterIpv4CidrBlock,
+<% unless version == 'ga' -%>
 			"peering_name":            c.PeeringName,
+<% end -%>
 			"private_endpoint":        c.PrivateEndpoint,
 			"public_endpoint":         c.PublicEndpoint,
 		},
