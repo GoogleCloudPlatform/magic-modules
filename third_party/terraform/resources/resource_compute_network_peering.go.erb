@@ -222,7 +222,7 @@ func resourceComputeNetworkPeeringImport(d *schema.ResourceData, meta interface{
 	if err != nil {
 		return nil, err
 	}
-	d.Set("network", fmt.Sprintf(urlTemplate, splits[0], splits[1]))
+	d.Set("network", ConvertSelfLinkToV1(fmt.Sprintf(urlTemplate, splits[0], splits[1])))
 	d.Set("name", splits[2])
 
 	// Replace import id for the resource id
