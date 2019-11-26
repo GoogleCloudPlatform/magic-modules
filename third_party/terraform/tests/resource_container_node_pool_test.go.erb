@@ -273,6 +273,25 @@ func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 		},
 	})
 }
+
+func TestAccContainerNodePool_withInvalidUpgradeSettings(t *testing.T) {
+	t.Parallel()
+
+	clusterName := acctest.RandString(10)
+	nodePoolName := acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withUpgradeSettings(clusterName, nodePoolName, 0, 0),
+				ExpectError: regexp.MustCompile("max_surge and max_unavailable must not be negative and at least one of them must be greater than zero."),
+			},
+		},
+	})
+}
 <% end -%>
 
 func TestAccContainerNodePool_withGPU(t *testing.T) {

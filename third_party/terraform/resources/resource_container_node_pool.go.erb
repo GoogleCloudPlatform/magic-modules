@@ -116,13 +116,15 @@ var schemaNodePool = map[string]*schema.Schema{
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"max_surge": {
-					Type:     schema.TypeInt,
-					Required: true,
+					Type:         schema.TypeInt,
+					Required:     true,
+					ValidateFunc: validation.IntAtLeast(0),
 				},
 
 				"max_unavailable": {
-					Type:     schema.TypeInt,
-					Required: true,
+					Type:         schema.TypeInt,
+					Required:     true,
+					ValidateFunc: validation.IntAtLeast(0),
 				},
 			},
 		},
@@ -447,6 +449,15 @@ func resourceContainerNodePoolStateImporter(d *schema.ResourceData, meta interfa
 	return []*schema.ResourceData{d}, nil
 }
 
+<% unless version == 'ga' -%>
+func checkUpgradeSettingsConstraints(max_surge, max_unavailable int64) error {
+	if max_surge == 0 && max_unavailable == 0 {
+		return fmt.Errorf("max_surge and max_unavailable must not be negative and at least one of them must be greater than zero.")
+	}
+	return nil
+}
+<% end -%>
+
 func expandNodePool(d *schema.ResourceData, prefix string) (*containerBeta.NodePool, error) {
 	var name string
 	if v, ok := d.GetOk(prefix + "name"); ok {
@@ -529,6 +540,11 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*containerBeta.NodeP
 
 		if v, ok := upgradeSettingsConfig["max_unavailable"]; ok {
 			np.UpgradeSettings.MaxUnavailable = int64(v.(int))
+		}
+
+		err := checkUpgradeSettingsConstraints(np.UpgradeSettings.MaxSurge, np.UpgradeSettings.MaxUnavailable)
+		if err != nil {
+			return np, err
 		}
 	}
 <% end -%>
@@ -827,6 +843,10 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			upgradeSettingsConfig := v.([]interface{})[0].(map[string]interface{})
 			upgradeSettings.MaxSurge = int64(upgradeSettingsConfig["max_surge"].(int))
 			upgradeSettings.MaxUnavailable = int64(upgradeSettingsConfig["max_unavailable"].(int))
+			err := checkUpgradeSettingsConstraints(upgradeSettings.MaxSurge, upgradeSettings.MaxUnavailable)
+			if err != nil {
+				return err
+			}
 		}
 		req := &containerBeta.UpdateNodePoolRequest{
 			UpgradeSettings: upgradeSettings,

@@ -170,11 +170,11 @@ The `management` block supports:
 
 The `upgrade_settings` block supports:
 
-* `max_surge` - (Optional) The number of additional nodes that can be added to the node pool during
+* `max_surge` - (Required) The number of additional nodes that can be added to the node pool during
     an upgrade. Increasing `max_surge` raises the number of nodes that can be upgraded simultaneously.
     Can be set to 0 or greater.
 
-* `max_unavailable` - (Optional) The number of nodes that can be simultaneously unavailable during
+* `max_unavailable` - (Required) The number of nodes that can be simultaneously unavailable during
     an upgrade. Increasing `max_unavailable` raises the number of nodes that can be upgraded in
     parallel. Can be set to 0 or greater.
 
