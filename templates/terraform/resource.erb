@@ -204,14 +204,14 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
 <%  if !object.async.nil? && object.async.allow?('create') -%>
-<%  if object.async.is_a? Api::K8sAsync -%>
-    waitURL, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, object.update_url)}" -%>")
+<%  if object.async.is_a? Api::PollAsync -%>
+    waitURL, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
     if err != nil {
         return err
     }
 
-    waitErr := k8sOperationWaitTime(
-    config, res, project, waitURL, "Creating <%= object.name -%>",
+    waitErr := <%= client_name_camel -%>PollingWaitTime(
+    config, res,<% if has_project -%> project, <% end -%> waitURL, "Creating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutCreate).Minutes()))
 <%  else -%>
     waitErr := <%= client_name_camel -%>OperationWaitTime(
@@ -221,7 +221,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
     if waitErr != nil {
         // The resource didn't actually create
-        <%  if !object.async.is_a? Api::K8sAsync -%>
+        <%  if !object.async.is_a? Api::PollAsync -%>
         d.SetId("")
         <%  end -%>
         return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", waitErr)
@@ -444,14 +444,14 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         }
 
 <%      if !object.async.nil? && object.async.allow?('update') -%>
-<%        if object.async.is_a? Api::K8sAsync -%>
-        waitURL, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, key[:update_url])}" -%>")
+<%        if object.async.is_a? Api::PollAsync -%>
+        waitURL, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
         if err != nil {
             return err
         }
 
-        err := k8sOperationWaitTime(
-        config, res, project, waitURL, "Updating <%= object.name -%>",
+        err = <%= client_name_camel -%>PollingWaitTime(
+            config, res, <% if has_project -%> project, <% end -%> waitURL, "Updating <%= object.name -%>",
             int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 <%        else -%>
 
@@ -542,24 +542,23 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     }
 
 <%  if !object.async.nil? && object.async.allow?('update') -%>
-<%    if object.async.is_a? Api::K8sAsync -%>
-    waitURL, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, object.update_url)}" -%>")
+<%    if object.async.is_a? Api::PollAsync -%>
+    waitURL, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
     if err != nil {
         return err
     }
 
-    err = k8sOperationWaitTime(
-    config, res, project, waitURL, "Updating <%= object.name -%>",
+    err = <%= client_name_camel -%>PollingWaitTime(
+        config, res, <% if has_project -%> project, <% end -%> waitURL, "Updating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 <%    else -%>
     err = <%= client_name_camel -%>OperationWaitTime(
-    config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
-    int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-
+        config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
+        int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+<%    end -%>
     if err != nil {
         return err
     }
-<%    end -%>
 <%  end -%>
 <%  end # if object.input -%>
 

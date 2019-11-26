@@ -108,13 +108,10 @@ module Api
     end
   end
 
-  # Kubernetes shaped resources do not have a dedicated Operation that can be
-  # polled against for the resource's status. Instead the resource contains a
-  # status block which has conditions that represent the state of the resource.
-  # As of now there is a single product with only 2 resources that follow this
-  # convention, so following the 1,2,many rule this is a bare bones
-  # implementation until a larger pattern emerges.
-  class K8sAsync < Async
+  # Many resources are async but do not provide a long running Operation that can be
+  # polled against. This class is meant to poll the resource itself until it can be
+  # determined that the resource is in a ready state.
+  class PollAsync < Async
     attr_reader :operation
     # The list of methods where operations are used.
     attr_reader :actions
@@ -122,7 +119,7 @@ module Api
     def validate
       super
 
-      check :operation, type: K8sAsync::Operation, required: true
+      check :operation, type: PollAsync::Operation, required: true
       check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
     end
 
@@ -130,17 +127,15 @@ module Api
       @actions.include?(method.downcase)
     end
 
-    # Since K8s like objects contain the status within the resource body this
-    # Operation class is just a light wrapper to call the resource itself
+    # Operation class is just a light wrapper to call the resource itself in order to
+    # share a similar structure with AsycOp
     class Operation < Api::Object
-      attr_reader :base_url
       attr_reader :full_url
       attr_reader :timeouts
 
       def validate
         super
 
-        check :base_url, type: String
         check :full_url, type: String
         check :timeouts, type: Api::Timeouts
 
