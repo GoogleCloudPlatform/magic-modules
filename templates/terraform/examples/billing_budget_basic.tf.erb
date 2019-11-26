@@ -1,6 +1,5 @@
 data "google_billing_account" "account" {
-  display_name = "My Billing Account"
-  open         = true
+  billing_account = "<%= ctx[:test_env_vars]['billing_acct'] -%>"
 }
 
 resource "google_billing_budget" "<%= ctx[:primary_resource_id] %>" {
