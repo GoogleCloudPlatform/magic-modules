@@ -317,6 +317,7 @@ func resourceContainerCluster() *schema.Resource {
 							Type:     schema.TypeList,
 							MaxItems: 1,
 							Optional: true,
+							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"oauth_scopes": {
@@ -2879,7 +2880,14 @@ func cidrOrSizeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	return strings.HasPrefix(new, "/") && strings.HasSuffix(old, new)
 }
 
-// We want to suppress diffs for the scopes automatically added by GKE
+// Suppress unremovable default scope values from GCP.
+// If the default service account would not otherwise have it, the `monitoring.write` scope
+// is added to a GKE cluster's scopes regardless of what the user provided.
+// monitoring.write is inherited from monitoring (rw) and cloud-platform, so it won't always
+// be present.
+// Enabling Stackdriver features through logging_service and monitoring_service may enable
+// monitoring or logging.write. We've chosen not to suppress in those cases because they're
+// removable by disabling those features.
 func containerClusterAddedScopesSuppress(k, old, new string, d *schema.ResourceData) bool {
 	o, n := d.GetChange("cluster_autoscaling.0.auto_provisioning_defaults.0.oauth_scopes")
 
