@@ -214,7 +214,7 @@ The following arguments are supported:
 * `replica_configuration` - (Optional) The configuration for replication. The
     configuration is detailed below.
     
-* `root_password` - (Optional, Beta) Initial root password. Required for MS SQL Server, ignored by MySQL and PostgreSQL.
+* `root_password` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Initial root password. Required for MS SQL Server, ignored by MySQL and PostgreSQL.
 
 The required `settings` block supports:
 
