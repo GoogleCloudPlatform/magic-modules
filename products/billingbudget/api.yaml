@@ -30,7 +30,9 @@ objects:
     base_url: billingAccounts/{{billing_account}}/budgets
     self_link: '{{name}}'
     update_verb: :PATCH
-    update_mask: true
+    # TODO: re-enable this. When this is enabled, changes are not being made
+    # by the API.
+    # update_mask: true
     description: |
       Budget configuration for a billing account.
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -42,7 +44,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: billingAccount
         description: |
-          ID the billing account to set budget on.
+          ID of the billing account to set a budget on.
         required: true
         input: true
         url_param_only: true
@@ -53,13 +55,6 @@ objects:
           Resource name of the budget. The resource name
           implies the scope of a budget. Values are of the form
           billingAccounts/{billingAccountId}/budgets/{budgetId}.
-        output: true
-      - !ruby/object:Api::Type::String
-        name: etag
-        description: |
-          Etag to validate that the object is unchanged for a
-          read-modify-write operation. An empty etag will cause an update to
-          overwrite other changes.
         output: true
       - !ruby/object:Api::Type::NestedObject
         name: budget
@@ -94,7 +89,6 @@ objects:
                   for threshold calculations.
                 default_value: :INCLUDE_ALL_CREDITS
                 values:
-                  - :CREDIT_TYPES_TREATMENT_UNSPECIFIED
                   - :INCLUDE_ALL_CREDITS
                   - :EXCLUDE_ALL_CREDITS
               - !ruby/object:Api::Type::Array
@@ -111,8 +105,7 @@ objects:
             name: amount
             required: true
             description: |
-              The budgeted amount for each usage period. Exactly one of
-              :specifiedAmount or :lastPeriodAmount must be set.
+              The budgeted amount for each usage period.
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: specifiedAmount
@@ -120,6 +113,7 @@ objects:
                   A specified amount to use as the budget. currencyCode is
                   optional. If specified, it must match the currency of the
                   billing account. The currencyCode is provided on output.
+                required: true
                 properties:
                   - !ruby/object:Api::Type::String
                     name: currencyCode
@@ -140,14 +134,6 @@ objects:
                       negative. If units is negative, nanos must be negative or
                       zero. For example $-1.75 is represented as units=-1 and
                       nanos=-750,000,000.
-              - !ruby/object:Api::Type::NestedObject
-                name: lastPeriodAmount
-                description: |
-                   Describes a budget amount targeted to last period's spend.
-                   At this time, the amount is automatically 100% of last
-                   period's spend; that is, there are no other options yet.
-                   Future configuration will be described here (for example,
-                   configuring a percentage of last period's spend).
           - !ruby/object:Api::Type::Array
             name: thresholdRules
             required: true
@@ -163,6 +149,7 @@ objects:
                   description: |
                     Send an alert when this threshold is exceeded. This is a
                     1.0-based percentage, so 0.5 = 50%. Must be >= 0.
+                  send_empty_value: true
                 - !ruby/object:Api::Type::Enum
                   name: spendBasis
                   description: |
@@ -170,7 +157,6 @@ objects:
                     the threshold.
                   default_value: :CURRENT_SPEND
                   values:
-                    - :BASIS_UNSPECIFIED
                     - :CURRENT_SPEND
                     - :FORECASTED_SPEND
           - !ruby/object:Api::Type::NestedObject
@@ -190,7 +176,7 @@ objects:
                   at regular intervals to the topic.
               - !ruby/object:Api::Type::String
                 name: schemaVersion
-                required: true
+                default_value: "1.0"
                 description: |
                   The schema version of the notification. Only "1.0" is
                   accepted. It represents the JSON schema as defined in

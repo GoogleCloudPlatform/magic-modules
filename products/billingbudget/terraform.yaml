@@ -14,8 +14,6 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Budget: !ruby/object:Overrides::Terraform::ResourceOverride
-    description: |
-      {{description}}
     id_format: '{{name}}'
     import_format: ['{{name}}']
     examples:
