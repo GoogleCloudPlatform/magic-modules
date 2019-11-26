@@ -80,6 +80,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   ResourcePolicy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  RouterBgpPeer: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   Subnetwork: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude_resource: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
