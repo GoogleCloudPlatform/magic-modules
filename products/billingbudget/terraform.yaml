@@ -25,6 +25,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           display_name: 'Example Billing Budget'
         test_env_vars:
           billing_acct: :BILLING_ACCT
+      - !ruby/object:Provider::Terraform::Examples
+        name: 'billing_budget_filter'
+        min_version: beta
+        primary_resource_id: 'budget'
+        vars:
+          display_name: 'Example Billing Budget'
+        test_env_vars:
+          billing_acct: :BILLING_ACCT
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
