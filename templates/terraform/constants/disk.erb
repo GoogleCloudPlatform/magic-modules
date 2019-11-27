@@ -1,10 +1,10 @@
 // Is the new disk size smaller than the old one?
 func isDiskShrinkage(old, new, _ interface{}) bool {
-  // It's okay to remove size entirely.
-  if old == nil || new == nil {
-    return false
-  }
-  return new.(int) < old.(int)
+	// It's okay to remove size entirely.
+	if old == nil || new == nil {
+		return false
+	}
+	return new.(int) < old.(int)
 }
 
 // We cannot suppress the diff for the case when family name is not part of the image name since we can't
@@ -186,9 +186,5 @@ func suppressWindowsFamilyDiff(imageName, familyName string) bool {
 	updatedFamilyString := strings.Replace(familyName, "windows-", "windows-server-", 1)
 	updatedImageName := strings.Replace(imageName, "-dc-", "-", 1)
 
-	if strings.Contains(updatedImageName, updatedFamilyString) {
-		return true
-	}
-
-	return false
+	return strings.Contains(updatedImageName, updatedFamilyString)
 }
