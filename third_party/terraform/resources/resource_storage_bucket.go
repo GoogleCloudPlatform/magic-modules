@@ -595,6 +595,29 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 	// Get the bucket
 	bucket := d.Get("name").(string)
 
+	// Try to delete the bucket without clearing it first
+	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+		err := config.clientStorage.Buckets.Delete(bucket).Do()
+		if err == nil {
+			return nil
+		}
+		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 429 {
+			return resource.RetryableError(gerr)
+		}
+		return resource.NonRetryableError(err)
+	})
+
+	if err == nil {
+		log.Printf("[DEBUG] Deleted bucket %v\n\n", bucket)
+		return nil
+	}
+
+	// We get a 409 when we try to delete a bucket with items in it
+	if gerr, ok := err.(*googleapi.Error); !ok || gerr.Code != 409 {
+		fmt.Printf("Error deleting bucket %s: %v\n\n", bucket, err)
+		return err
+	}
+
 	for {
 		res, err := config.clientStorage.Objects.List(bucket).Versions(true).Do()
 		if err != nil {
@@ -665,7 +688,7 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 	}
 
 	// remove empty bucket
-	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 		err := config.clientStorage.Buckets.Delete(bucket).Do()
 		if err == nil {
 			return nil
