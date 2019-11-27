@@ -187,6 +187,7 @@ module Provider
         config.gsub!('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
         config.gsub!('path/to/certificate.crt', 'test-fixtures/ssl_cert/test.crt')
         config.gsub!('path/to/index.zip', '%{zip_path}')
+        config.gsub!('verified-domain.com', '%{verified_domain}')
         config
       end
 

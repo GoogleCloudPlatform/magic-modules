@@ -1,28 +1,21 @@
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
   location = "us-central1"
-  provider = "google-beta"
 
   metadata {
     namespace = "<%= ctx[:test_env_vars]['namespace'] %>"
   }
 
-  spec {
-    containers {
-      image = "gcr.io/cloudrun/hello"
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+      }
     }
   }
-}
 
-# The Service is ready to be used when the "Ready" condition is True
-# Due to Terraform and API limitations this is best accessed through a local variable
-locals {
-  cloud_run_status = {
-    for cond in google_cloud_run_service.default.status[0].conditions :
-    cond.type => cond.status
+  traffic {
+    percent         = 100
+    latest_revision = true
   }
-}
-
-output "isReady" {
-  value = local.cloud_run_status["Ready"] == "True"
 }

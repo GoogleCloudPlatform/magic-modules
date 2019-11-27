@@ -1,13 +1,30 @@
+
+resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
+  location = "us-central1"
+
+  metadata {
+    namespace = "<%= ctx[:test_env_vars]['namespace'] %>"
+  }
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+      }
+    }
+  }
+}
+
 resource "google_cloud_run_domain_mapping" "<%= ctx[:primary_resource_id] %>" {
   location = "us-central1"
-  provider = google-beta
-  name     = "<%= ctx[:vars]['cloud_run_domain_name'] %>"
+  name     = "verified-domain.com"
 
   metadata {
     namespace = "<%= ctx[:test_env_vars]['namespace'] %>"
   }
 
   spec {
-    route_name = "should-be-a-service"
+    route_name = google_cloud_run_service.<%= ctx[:primary_resource_id] %>.name
   }
 }
