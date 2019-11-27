@@ -16,8 +16,8 @@ name: CloudRun
 display_name: Cloud Run
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://run.googleapis.com/v1alpha1/
+    name: ga
+    base_url: https://{{location}}-run.googleapis.com/apis/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
@@ -25,7 +25,7 @@ objects:
 - !ruby/object:Api::Resource
   name: DomainMapping
   kind: DomainMapping
-  base_url: projects/{{project}}/locations/{{location}}/domainmappings
+  base_url: domains.cloudrun.com/v1/namespaces/{{project}}/domainmappings
   references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -33,9 +33,6 @@ objects:
       api: 'https://cloud.google.com/run/docs/reference/rest/v1alpha1/projects.locations.domainmappings'
   description: |-
     Resource to hold the state and status of a user's domain mapping.
-
-    **Note:** Cloud Run as a product is in beta, however the REST API is currently still an alpha.
-    Please use this with caution as it may change when the API moves to beta.
   parameters:
   - !ruby/object:Api::Type::String
     name: location
@@ -108,6 +105,7 @@ objects:
           - :CNAME
         - !ruby/object:Api::Type::String
           name: rrdata
+          output: true
           description: |-
             Data for this record. Values vary by record type, as defined in RFC 1035
             (section 5) and RFC 1034 (section 3.6.1).
@@ -136,8 +134,10 @@ objects:
         It is recommended that the user leaves this empty to receive an error
         warning about a potential conflict and only set it once the respective UI
         has given such a warning.
-    - !ruby/object:Api::Type::String
+    - !ruby/object:Api::Type::ResourceRef
       name: routeName
+      resource: Service
+      imports: name
       required: true
       description: |-
         The name of the Cloud Run Service that this DomainMapping applies to.
@@ -148,6 +148,7 @@ objects:
       values:
       - :NONE
       - :AUTOMATIC
+      default_value: :AUTOMATIC
   - !ruby/object:Api::Type::NestedObject
     name: metadata
     required: true
@@ -218,16 +219,13 @@ objects:
 - !ruby/object:Api::Resource
   name: Service
   kind: Service
-  base_url: projects/{{project}}/locations/{{location}}/services
+  base_url: serving.knative.dev/v1/namespaces/{{project}}/services
   references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
           'https://cloud.google.com/run/docs/'
-      api: 'https://cloud.google.com/run/docs/reference/rest/v1alpha1/projects.locations.services'
+      api: 'https://cloud.google.com/run/docs/reference/rest/v1/projects.locations.services'
   description: |-
-    **Note:** Cloud Run as a product is in beta, however the REST API is currently still an alpha.
-    Please use this with caution as it may change when the API moves to beta.
-
     Service acts as a top-level container that manages a set of Routes and
     Configurations which implement a network service. Service exists to provide a
     singular abstraction which can be access controlled, reasoned about, and
@@ -250,10 +248,9 @@ objects:
   properties:
   - !ruby/object:Api::Type::String
     name: name
+    # This is a convenience field as terraform expects `name` to be a top level property
     url_param_only: true
     input: true
-    # This is a convenience field handled by terraform
-    exclude: true
     description: |-
       Name must be unique within a namespace, within a Cloud Run region.
       Is required when creating resources. Name is primarily intended
@@ -270,6 +267,29 @@ objects:
     required: true
     description: Spec holds the desired state of the Service (from the client).
     properties:
+    - !ruby/object:Api::Type::Array
+      name: traffic
+      description: |-
+        Traffic specifies how to distribute traffic over a collection of Knative Revisions
+        and Configurations
+      item_type: !ruby/object:Api::Type::NestedObject
+        properties:
+        - !ruby/object:Api::Type::String
+          name: revisionName
+          description: |-
+            RevisionName of a specific revision to which to send this portion of traffic.
+        - !ruby/object:Api::Type::Integer
+          name: percent
+          required: true
+          description: |-
+            Percent specifies percent of the traffic to this Revision or Configuration.
+        - !ruby/object:Api::Type::Boolean
+          name: latestRevision
+          description: |-
+            LatestRevision may be optionally provided to indicate that the latest ready
+            Revision of the Configuration should be used for this traffic target. When
+            provided LatestRevision must be true if RevisionName is empty; it must be
+            false when RevisionName is non-empty.
     - !ruby/object:Api::Type::NestedObject
       name: template
       description: |-
@@ -284,6 +304,72 @@ objects:
         Cloud Run does not currently support referencing a build that is
         responsible for materializing the container image from source.
       properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: metadata
+        description: |-
+          Optional metadata for this Revision, including labels and annotations.
+          Name will be generated by the Configuration. To set minimum instances
+          for this revision, use the "autoscaling.knative.dev/minScale" annotation
+          key. To set maximum instances for this revision, use the
+          "autoscaling.knative.dev/maxScale" annotation key. To set Cloud SQL
+          connections for the revision, use the "run.googleapis.com/cloudsql-instances"
+          annotation key.
+        properties:
+        - !ruby/object:Api::Type::KeyValuePairs
+          name: labels
+          description: |-
+            Map of string keys and values that can be used to organize and categorize
+            (scope and select) objects. May match selectors of replication controllers
+            and routes.
+            More info: http://kubernetes.io/docs/user-guide/labels
+        - !ruby/object:Api::Type::Integer
+          name: generation
+          description: |-
+            A sequence number representing a specific generation of the desired state.
+          output: true
+        - !ruby/object:Api::Type::String
+          name: resourceVersion
+          description: |-
+            An opaque value that represents the internal version of this object that
+            can be used by clients to determine when objects have changed. May be used
+            for optimistic concurrency, change detection, and the watch operation on a
+            resource or set of resources. They may only be valid for a
+            particular resource or set of resources.
+
+            More info:
+            https://git.k8s.io/community/contributors/devel/api-conventions.md#concurrency-control-and-consistency
+          output: true
+        - !ruby/object:Api::Type::String
+          name: selfLink
+          description: |-
+            SelfLink is a URL representing this object.
+          output: true
+        - !ruby/object:Api::Type::String
+          name: uid
+          description: |-
+            UID is a unique id generated by the server on successful creation of a resource and is not
+            allowed to change on PUT operations.
+
+            More info: http://kubernetes.io/docs/user-guide/identifiers#uids
+          output: true
+        - !ruby/object:Api::Type::String
+          name: namespace
+          description: |-
+            In Cloud Run the namespace must be equal to either the
+            project ID or project number.
+        - !ruby/object:Api::Type::KeyValuePairs
+          name: annotations
+          description: |-
+            Annotations is a key value map stored with a resource that
+            may be set by external tools to store and retrieve arbitrary metadata. More
+            info: http://kubernetes.io/docs/user-guide/annotations
+        - !ruby/object:Api::Type::String
+          name: name
+          description: |-
+            Name must be unique within a namespace, within a Cloud Run region.
+            Is required when creating resources. Name is primarily intended
+            for creation idempotence and configuration definition. Cannot be updated.
+            More info: http://kubernetes.io/docs/user-guide/identifiers#names
       - !ruby/object:Api::Type::NestedObject
         name: spec
         required: true
@@ -303,6 +389,7 @@ objects:
           item_type: !ruby/object:Api::Type::NestedObject
             properties:
             - !ruby/object:Api::Type::String
+              deprecation_message: "Not supported by Cloud Run fully managed"
               name: workingDir
               input: true
               description: |-
@@ -311,7 +398,6 @@ objects:
                 might be configured in the container image.
             - !ruby/object:Api::Type::Array
               name: args
-              input: true
               description: |-
                 Arguments to the entrypoint.
                 The docker image's CMD is used if this is not provided.
@@ -325,6 +411,7 @@ objects:
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: envFrom
+              deprecation_message: "Not supported by Cloud Run fully managed"
               input: true
               description: |-
                 List of sources to populate environment variables in the container.
@@ -442,7 +529,6 @@ objects:
                   The values of the map is string form of the 'quantity' k8s type:
                   https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
 
-
         - !ruby/object:Api::Type::Integer
           name: containerConcurrency
           description: |-
@@ -453,12 +539,15 @@ objects:
             - `1` not-thread-safe. Single concurrency
             - `2-N` thread-safe, max concurrency of N
         - !ruby/object:Api::Type::String
-          # Will be added by the cloud run team soon
           name: serviceAccountName
-          exclude: true
-          description: Not currently used by Cloud Run.
+          description:  |-
+            Email address of the IAM service account associated with the revision of the
+            service. The service account represents the identity of the running revision,
+            and determines what permissions the revision has. If not provided, the revision
+            will use the project's default service account.
         - !ruby/object:Api::Type::Enum
           name: servingState
+          deprecation_message: "Not supported by Cloud Run fully managed"
           description: |-
             ServingState holds a value describing the state the resources
             are in for this Revision.

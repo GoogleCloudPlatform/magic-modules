@@ -14,13 +14,16 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"
+    import_format: ["locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_domain_mapping_basic"
-        min_version: 'beta'
         primary_resource_id: "default"
         vars:
-          cloud_run_domain_name: "tftest-domainmapping.com"
+          cloud_run_service_name: "tftest-cloudrun"
+        test_custom_context:
+          verified_domain: "\"tftest-domainmapping.com\""
         test_env_vars:
           namespace: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -30,8 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         required: true
         exclude: false
-      # excluding kind from Terraform code because it only accepts the same single value
-      # so we hard code it in the encoder instead.
+      # excluding kind from Terraform code because this is a static, hardcoded value
       kind: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       apiVersion: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -40,14 +42,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      metadata.namespace: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/set_to_project.go.erb
       metadata.name: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "locations/{{location}}/namespaces/{{project}}/services/{{name}}"
+    import_format: ["locations/{{location}}/namespaces/{{project}}/services/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_basic"
-        min_version: 'beta'
         primary_resource_id: "default"
+        # skipping test until custom import ids are supported
+        skip_test: true
         vars:
           cloud_run_service_name: "tftest-cloudrun"
         test_env_vars:
@@ -67,11 +74,27 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       spec: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
-      spec.template: !ruby/object:Overrides::Terraform::PropertyOverride
-        flatten_object: true
+      spec.template.metadata.name: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      spec.template.metadata.namespace: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        custom_expand: "templates/terraform/custom_expand/default_to_project.go.erb"
+      metadata.namespace: !ruby/object:Overrides::Terraform::PropertyOverride
+        # marking namepsace as optional so that 1) it can be inferred from the provider
+        # project and 2) so customizeDiff can clear the diff when projectNumber == projectName
+        required: false
+        default_from_api: true
+        # Namespace takes a projectNumber or projectId but will always return the projectNumber
+        # rather than make a second API query to allow for canonical comparison we are assuming
+        # that this field is "correct" as a Service should never migrate between projects out
+        # of band of Terraform. This assumes namespace will always be a project.
+        custom_flatten: templates/terraform/custom_flatten/set_to_project.go.erb
+        custom_expand: "templates/terraform/custom_expand/default_to_project.go.erb"
       metadata.labels: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      spec.traffic: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       # name is 'special' in magic modules and lives at the root of properties.
       # We are using encoders to set name at the root here.
