@@ -53,8 +53,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_basic"
         primary_resource_id: "default"
-        # skipping test until custom import ids are supported
-        skip_test: true
         vars:
           cloud_run_service_name: "tftest-cloudrun"
         test_env_vars:

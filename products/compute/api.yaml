@@ -9360,8 +9360,8 @@ objects:
       guides:
         'Google Cloud Router': 'https://cloud.google.com/router/docs/'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
@@ -9370,16 +9370,16 @@ objects:
           insert_minutes: 10
           update_minutes: 10
           delete_minutes: 10
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
