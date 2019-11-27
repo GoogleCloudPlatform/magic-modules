@@ -103,6 +103,11 @@ func Provider() terraform.ResourceProvider {
 				Optional: true,
 			},
 
+            "synchronous_timeout": {
+                Type:     schema.TypeString,
+                Optional: true,
+            },
+
 			// Generated Products
 			<% products.each do |product| -%>
 			"<%= product[:definitions].name.underscore -%>_custom_endpoint": &schema.Schema{
@@ -408,6 +413,13 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		terraformVersion:    terraformVersion,
 	}
 
+    if v, ok := d.GetOk("synchronous_timeout"); ok {
+        var err error
+        config.SynchronousTimeout, err = time.ParseDuration(v.(string))
+        if err != nil {
+            return nil, err
+        }
+    }
 	// Add credential source
 	if v, ok := d.GetOk("access_token"); ok {
 		config.AccessToken = v.(string)
