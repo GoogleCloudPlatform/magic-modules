@@ -397,6 +397,7 @@ Google Cloud Run Service is being released at v1 and there are breaking schema c
 
 To support partial rollouts of different revisions, the `spec` block is now nested under `template` and a second `metadata` block has been added alongside `spec`. Now users can make a change and, using a named revision, they can control the rollout of that revision with a higher granularity.
 
+#### Old Config
 
 ```hcl
 resource "google_cloud_run_service" "default" {
