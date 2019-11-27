@@ -287,7 +287,7 @@ func TestAccContainerNodePool_withInvalidUpgradeSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerNodePool_withUpgradeSettings(clusterName, nodePoolName, 0, 0),
-				ExpectError: regexp.MustCompile("max_surge and max_unavailable must not be negative and at least one of them must be greater than zero."),
+				ExpectError: regexp.MustCompile(`.?Max_surge and max_unavailable must not be negative and at least one of them must be greater than zero.*`),
 			},
 		},
 	})
