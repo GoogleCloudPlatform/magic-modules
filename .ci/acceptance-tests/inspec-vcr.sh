@@ -26,7 +26,7 @@ export VCR_MODE=all
 # Running other controls may cause caching issues due to underlying clients caching responses
 rm build/inspec/test/integration/verify/controls/*
 bundle install
-bundle exec compiler -a -e inspec -o "build/inspec/"
+bundle exec compiler -a -e inspec -o "build/inspec/" -v beta
 cp templates/inspec/vcr_config.rb build/inspec
 
 pushd build/inspec

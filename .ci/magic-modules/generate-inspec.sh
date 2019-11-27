@@ -16,7 +16,7 @@ pushd magic-modules-branched
 # use their GH noreply email which isn't compatible with CLAs.
 COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
 
-bundle exec compiler -a -e inspec -o "build/inspec/"
+bundle exec compiler -a -e inspec -o "build/inspec/" -v beta
 
 INSPEC_COMMIT_MSG="$(cat .git/title)"
 

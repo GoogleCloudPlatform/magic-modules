@@ -46,6 +46,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   MachineType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  ManagedSslCertificate: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   Network: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   NetworkEndpoint: !ruby/object:Overrides::Inspec::ResourceOverride
@@ -94,6 +96,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   TargetVpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   TargetSslProxy: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  VpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   VpnTunnel: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
