@@ -30,8 +30,8 @@ objects:
     base_url: billingAccounts/{{billing_account}}/budgets
     self_link: '{{name}}'
     update_verb: :PATCH
-    # TODO: re-enable this. When this is enabled, changes are not being made
-    # by the API.
+    # TODO: investigate why updates are not being handled by the API when this
+    # is enabled.
     # update_mask: true
     description: |
       Budget configuration for a billing account.
