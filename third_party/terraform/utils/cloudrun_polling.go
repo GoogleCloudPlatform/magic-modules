@@ -35,7 +35,7 @@ type KnativeStatus struct {
 func (s KnativeStatus) ConditionByType(typ string) *Condition {
 	for _, condition := range s.Status.Conditions {
 		if condition.Type == typ {
-			c := Condition(condition)
+			c := condition
 			return &c
 		}
 	}

@@ -223,8 +223,10 @@ objects:
   async: !ruby/object:Api::PollAsync
     actions: ['create', 'update']
     operation: !ruby/object:Api::PollAsync::Operation
-      # TODO chrisst - update to cloudrun v1 url structure once v1 PR is merged.
-      full_url: 'projects/{{project}}/locations/{{location}}/services/{{name}}'
+      timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 6
+          update_minutes: 6
+          delete_minutes: 4
   references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':

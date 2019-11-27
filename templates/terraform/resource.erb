@@ -204,28 +204,31 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
 <%  if !object.async.nil? && object.async.allow?('create') -%>
-<%  if object.async.is_a? Api::PollAsync -%>
+<%    if object.async.is_a? Api::PollAsync -%>
     waitURL, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
     if err != nil {
         return err
     }
 
-    waitErr := <%= client_name_camel -%>PollingWaitTime(
+    err = <%= client_name_camel -%>PollingWaitTime(
     config, res,<% if has_project -%> project, <% end -%> waitURL, "Creating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutCreate).Minutes()))
-<%  else -%>
-    waitErr := <%= client_name_camel -%>OperationWaitTime(
+
+    if err != nil {
+        return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
+    }
+<%    end -%>
+<%    if object.async.is_a? Api::OpAsync -%>
+    err = <%= client_name_camel -%>OperationWaitTime(
     config, res,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutCreate).Minutes()))
-<%  end -%>
 
-    if waitErr != nil {
+    if err != nil {
         // The resource didn't actually create
-        <%  if !object.async.is_a? Api::PollAsync -%>
         d.SetId("")
-        <%  end -%>
-        return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", waitErr)
+        return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
     }
+<%    end -%>
 <%  end -%>
 
     log.Printf("[DEBUG] Finished creating <%= object.name -%> %q: %#v", d.Id(), res)
@@ -453,8 +456,11 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         err = <%= client_name_camel -%>PollingWaitTime(
             config, res, <% if has_project -%> project, <% end -%> waitURL, "Updating <%= object.name -%>",
             int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-<%        else -%>
-
+        if err != nil {
+            return err
+        }
+<%        end -%>
+<%        if object.async.is_a? Api::OpAsync -%>
         err = <%= client_name_camel -%>OperationWaitTime(
             config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
             int(d.Timeout(schema.TimeoutUpdate).Minutes()))
@@ -551,14 +557,20 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     err = <%= client_name_camel -%>PollingWaitTime(
         config, res, <% if has_project -%> project, <% end -%> waitURL, "Updating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-<%    else -%>
-    err = <%= client_name_camel -%>OperationWaitTime(
-        config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
-        int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-<%    end -%>
+
     if err != nil {
         return err
     }
+<%    end -%>
+<%    if object.async.is_a? Api::OpAsync -%>
+    err = <%= client_name_camel -%>OperationWaitTime(
+        config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
+        int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+
+    if err != nil {
+        return err
+    }
+<%    end -%>
 <%  end -%>
 <%  end # if object.input -%>
 
