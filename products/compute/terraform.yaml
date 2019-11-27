@@ -486,6 +486,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # being ingress to egress without examining the diff carefully.
         # See terraform issue #2713 for more context.
         input: true
+      logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        flatten_object: true
+      logConfig.enableLogging: !ruby/object:Overrides::Terraform::PropertyOverride
+        api_name: enable
+        send_empty_value: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
