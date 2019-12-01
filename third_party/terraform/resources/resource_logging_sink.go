@@ -71,6 +71,7 @@ func flattenResourceLoggingSink(d *schema.ResourceData, sink *logging.LogSink) {
 	d.Set("destination", sink.Destination)
 	d.Set("filter", sink.Filter)
 	d.Set("writer_identity", sink.WriterIdentity)
+	d.Set("bigquery_options", flattenLoggingSinkBigqueryOptions(sink.BigqueryOptions))
 }
 
 func expandResourceLoggingSinkForUpdate(d *schema.ResourceData) (sink *logging.LogSink, updateMask string) {
@@ -111,6 +112,16 @@ func expandLoggingSinkBigqueryOptions(v interface{}) *logging.BigQueryOptions {
 		bo.UsePartitionedTables = usePartitionedTables.(bool)
 	}
 	return bo
+}
+
+func flattenLoggingSinkBigqueryOptions(o *logging.BigQueryOptions) []map[string]interface{} {
+	if o == nil {
+		return nil
+	}
+	oMap := map[string]interface{}{
+		"use_partitioned_tables": o.UsePartitionedTables,
+	}
+	return []map[string]interface{}{oMap}
 }
 
 func resourceLoggingSinkImportState(sinkType string) schema.StateFunc {
