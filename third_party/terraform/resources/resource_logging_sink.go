@@ -76,7 +76,7 @@ func flattenResourceLoggingSink(d *schema.ResourceData, sink *logging.LogSink) {
 func expandResourceLoggingSinkForUpdate(d *schema.ResourceData) (sink *logging.LogSink, updateMask string) {
 	// Can only update destination/filter right now. Despite the method below using 'Patch', the API requires both
 	// destination and filter (even if unchanged).
-	sink := logging.LogSink{
+	sink = &logging.LogSink{
 		Destination:     d.Get("destination").(string),
 		Filter:          d.Get("filter").(string),
 		ForceSendFields: []string{"Destination", "Filter"},
@@ -93,7 +93,8 @@ func expandResourceLoggingSinkForUpdate(d *schema.ResourceData) (sink *logging.L
 		sink.BigqueryOptions = expandLoggingSinkBigqueryOptions(d.Get("bigquery_options"))
 		updateFields = append(updateFields, "bigqueryOptions")
 	}
-	return &sink, strings.Join(updateFields, ",")
+	updateMask = strings.Join(updateFields, ",")
+	return
 }
 
 func expandLoggingSinkBigqueryOptions(v interface{}) *logging.BigQueryOptions {
