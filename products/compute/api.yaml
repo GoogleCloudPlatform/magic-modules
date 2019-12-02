@@ -9423,7 +9423,7 @@ objects:
         description: |
           IP address of the interface inside Google Cloud Platform.
           Only IPv4 is supported.
-        output: true
+        input: true
       - !ruby/object:Api::Type::String
         name: 'peerIpAddress'
         description: |
