@@ -1,0 +1,93 @@
+---
+name: push-downstream
+on:
+    #    schedule:
+    #    - cron: '* * * * *'
+    push:
+        branches:
+            - master
+jobs:
+    tpg:
+        runs-on: ubuntu-latest
+        name: "Build Terraform and push downstream"
+        env:
+            GOPATH: /home/runner/work/magic-modules/go
+            GO111MODULE: auto
+        steps:
+            - uses: actions/checkout@v1
+            - uses: actions/setup-go@v1
+              with:
+                  go-version: 1.11.x
+            - uses: actions/setup-ruby@v1
+              with:
+                  ruby-version: 2.x
+                  architecture: 'x64'
+
+            - run: go get golang.org/x/tools/cmd/goimports
+            - run: bundle install
+            - uses: actions/checkout@v1
+              with:
+                  path: go/src/github.com/terraform-providers/terraform-provider-google
+                  repository: terraform-providers/terraform-provider-google
+                  ref: master
+            - uses: actions/checkout@v1
+              with:
+                  path: go/src/github.com/terraform-providers/terraform-provider-google-beta
+                  repository: terraform-providers/terraform-provider-google-beta
+                  ref: master
+
+            - name: Configure git.
+              run: git config --global user.email "magic-modules@google.com" && git config --global user.name "Modular Magician"
+
+            - name: Generate downstreams
+              run: |
+                  set -e
+                  set -x
+                  export PATH=$PATH:$GOPATH/bin
+                  git fetch --all
+                  for sha in $(git log --pretty=%H $(git merge-base HEAD origin/downstream-master)..HEAD); do
+                      pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google-beta
+                      find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \; > /dev/null
+                      popd
+
+                      pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google
+                      find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \; > /dev/null
+                      popd
+
+                      bundle exec compiler -a -e terraform -o $GOPATH/src/github.com/terraform-providers/terraform-provider-google/ > /dev/null
+                      bundle exec compiler -a -e terraform -o $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta/ > /dev/null
+                      COMMIT_MSG=$(git log -1 --pretty=%B $sha)
+
+                      pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google-beta
+                      git add . && git commit -m "$COMMIT_MSG" || true
+                      popd
+
+                      pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google
+                      git add . && git commit -m "$COMMIT_MSG" || true
+                      popd
+                  done
+                  git branch -f downstream-master
+
+            - name: Update downstream-master
+              uses: ad-m/github-push-action@master
+              with:
+                  github_token: ${{ secrets.NATHAN_TOKEN }}
+                  branch: downstream-master
+                  force: true
+
+            - name: Push changes to TPGB
+              uses: ad-m/github-push-action@master
+              with:
+                  github_token: ${{ secrets.NATHAN_TOKEN }}
+                  repository: ndmckinley/terraform-provider-google-beta
+                  branch: master
+                  directory: /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google-beta
+                  force: true
+            - name: Push changes to TPG
+              uses: ad-m/github-push-action@master
+              with:
+                  github_token: ${{ secrets.NATHAN_TOKEN }}
+                  repository: ndmckinley/terraform-provider-google
+                  branch: master
+                  directory: /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google
+                  force: true
