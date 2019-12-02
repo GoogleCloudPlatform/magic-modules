@@ -1731,13 +1731,13 @@ resource "google_container_cluster" "primary" {
     created-by = "terraform"
   }
 
-<% unless version == 'ga' -%>
-  enable_intranode_visibility = true
-  enable_binary_authorization = true
-
   vertical_pod_autoscaling {
     enabled = true
   }
+
+<% unless version == 'ga' -%>
+  enable_intranode_visibility = true
+  enable_binary_authorization = true
 <% end -%>
 }
 `, name)
@@ -1768,13 +1768,13 @@ resource "google_container_cluster" "primary" {
     new-label  = "update"
   }
 
-<% unless version == 'ga' -%>
-  enable_intranode_visibility = true
-  enable_binary_authorization = true
-
   vertical_pod_autoscaling {
     enabled = true
   }
+
+<% unless version == 'ga' -%>
+  enable_intranode_visibility = true
+  enable_binary_authorization = true
 <% end -%>
 }
 `, name)
