@@ -24,22 +24,22 @@ apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Cloud SQL Admin API
     url: https://console.cloud.google.com/apis/library/sqladmin.googleapis.com/
-async: !ruby/object:Api::Async
-  operation: !ruby/object:Api::Async::Operation
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     kind: 'sql#operation'
     path: 'name'
     base_url: 'projects/{{project}}/operations/{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::Async::Result
+  result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
-  status: !ruby/object:Api::Async::Status
+  status: !ruby/object:Api::OpAsync::Status
     path: 'status'
     complete: 'DONE'
     allowed:
       - 'PENDING'
       - 'RUNNING'
       - 'DONE'
-  error: !ruby/object:Api::Async::Error
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
 objects:
