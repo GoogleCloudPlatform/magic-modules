@@ -401,6 +401,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           [google_compute_image data source](/docs/providers/google/d/datasource_compute_image.html).
           For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
           These images can be referred by family name here.
+      diskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
       diskEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkRelativePaths'
         name: "kmsKeySelfLink"
