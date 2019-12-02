@@ -112,7 +112,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   ServiceSplitTraffic: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{service_id}}"
     import_format: ["apps/{{project}}/services/{{service_id}}"]
-    mutex: "apps/{{project}}/services/{{service_id}}"
+    mutex: "apps/{{project}}"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
@@ -133,7 +133,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           bucket_name: "appengine-static-content"
         test_env_vars:
           org_id: :ORG_ID    
-        skip_test: true  
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

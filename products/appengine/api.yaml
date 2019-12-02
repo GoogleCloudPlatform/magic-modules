@@ -518,9 +518,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'ServiceSplitTraffic'
     description: |
-      A Service resource is a logical component of an application that can share state and communicate in a secure fashion with other services. 
-      For example, an application that handles customer requests might include separate services to handle tasks such as backend data analysis or API requests from mobile devices. 
-      Each service has a collection of versions that define a specific set of code used to implement the functionality of that service.
+      Traffic routing configuration for versions within a single service. Traffic splits define how traffic directed to the service is assigned to versions.
     base_url: 'apps/{{project}}/services'
     create_url: 'apps/{{project}}/services/{{service_id}}?migrateTraffic={{migrate_traffic}}&updateMask=split'
     create_verb: :PATCH
@@ -555,10 +553,9 @@ objects:
           If set to true traffic will be migrated to this version.
     properties:
       - !ruby/object:Api::Type::String
-        name: 'name'
+        name: 'service'
         description: |
-          Full path to the Service resource in the API. Example apps/myapp/services/default.
-          This field is used in responses only. Any value specified here in a request is ignored.
+          The name of the service these settings apply to.
       - !ruby/object:Api::Type::String
         name: 'id'
         description: |
@@ -571,7 +568,6 @@ objects:
         properties:      
           - !ruby/object:Api::Type::Enum
             name: 'shardBy'
-            required: false
             description: |
               Mechanism used to determine which version a request is sent to. The traffic selection algorithm will be stable for either type until allocations are changed.
             values:
