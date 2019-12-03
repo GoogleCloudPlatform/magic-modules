@@ -62,10 +62,7 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'specialGroup'
               description: |
-                A special group to grant access to.
-                
-                
-                Possible values include:
+                A special group to grant access to. Possible values include:
                 
                 
                 * `projectOwners`: Owners of the enclosing project.
