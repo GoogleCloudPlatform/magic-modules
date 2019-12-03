@@ -35,7 +35,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Job: !ruby/object:Overrides::Terraform::ResourceOverride
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-    custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
+      custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
     properties:
       jobId: !ruby/object:Overrides::Terraform::PropertyOverride
 #        custom_expand: 'templates/terraform/custom_expand/mlengine_job_id.erb'  
