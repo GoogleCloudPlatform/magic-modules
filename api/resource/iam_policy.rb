@@ -64,8 +64,12 @@ module Api
       # How the API supports IAM conditions
       attr_reader :iam_conditions_request_type
 
-      # Just cloud run things
+      # Allows us to override the base_url of the resource. This is required for Cloud Run as the
+      # IAM resources use an entirely different base URL from the actual resource
       attr_reader :base_url_override
+
+      # Allows us to override the import format of the resource. Useful for Cloud Run where we need
+      # variables that are outside of the base_url qualifiers.
       attr_reader :import_format_override
 
       def validate
