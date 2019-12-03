@@ -22,10 +22,9 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 					"data.google_dns_managed_zone.qa",
 					"google_dns_managed_zone.foo",
 					map[string]struct{}{
-						// Virtual fields
 						"dnssec_config":             {},
 						"private_visibility_config": {},
-					}),
+					},
 				),
 			},
 		},
