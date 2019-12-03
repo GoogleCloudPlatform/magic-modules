@@ -45,9 +45,7 @@ module Provider
           if identity.nil? || identity.empty?
             id_formats = [underscored_base_url + '/{{name}}']
           else
-            identity_path = identity
-                                    .map { |v| "{{#{v.name.underscore}}}" }
-                                    .join('/')
+            identity_path = identity.map { |v| "{{#{v.name.underscore}}}" }.join('/')
             id_formats = [underscored_base_url + '/' + identity_path]
           end
         else
