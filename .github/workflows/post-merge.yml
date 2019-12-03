@@ -29,8 +29,8 @@ jobs:
                   ref: master
             - uses: actions/checkout@v1
               with:
-                  path: go/src/github.com/terraform-providers/terraform-provider-google
-                  repository: terraform-providers/terraform-provider-google
+                  path: go/src/github.com/terraform-providers/terraform-provider-google-beta
+                  repository: terraform-providers/terraform-provider-google-beta
                   ref: master
             - uses: actions/checkout@v1
               with:

@@ -6,7 +6,7 @@ on:
 jobs:
     tpgb:
         runs-on: ubuntu-latest
-        name: "Build TPGB, before and after commit"
+        name: "Build TPGB"
         env:
             GOPATH: /home/runner/work/magic-modules/go
             GO111MODULE: auto
@@ -74,7 +74,7 @@ jobs:
 
     tpg:
         runs-on: ubuntu-latest
-        name: "Build TPG, before and after commit"
+        name: "Build TPG"
         env:
             GOPATH: /home/runner/work/magic-modules/go
             GO111MODULE: auto
@@ -102,7 +102,7 @@ jobs:
                   find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \;
                   popd
                   export PATH=$PATH:$GOPATH/bin
-                  bundle exec compiler -a -e terraform -o $GOPATH/src/github.com/terraform-providers/terraform-provider-google.
+                  bundle exec compiler -a -e terraform -o $GOPATH/src/github.com/terraform-providers/terraform-provider-google
 
                   pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google
                   git add . && git commit -m "${{ github.event.pull_request.title }}" || true
@@ -142,7 +142,7 @@ jobs:
 
     tf-conversion:
         runs-on: ubuntu-latest
-        name: "Build conversion lib, before and after commit"
+        name: "Build conversion lib"
         env:
             GOPATH: /home/runner/work/magic-modules/go
             GO111MODULE: auto
@@ -196,7 +196,7 @@ jobs:
 
     inspec:
         runs-on: ubuntu-latest
-        name: "Build Inspec, before and after commit"
+        name: "Build Inspec"
         steps:
             - uses: actions/checkout@v1
             - uses: actions/setup-ruby@v1
@@ -242,7 +242,7 @@ jobs:
 
     ansible:
         runs-on: ubuntu-latest
-        name: "Build Ansible, before and after commit"
+        name: "Build Ansible"
         steps:
             - uses: actions/checkout@v1
             - uses: actions/setup-ruby@v1
@@ -291,7 +291,7 @@ jobs:
 
     post-comment:
         runs-on: ubuntu-latest
-        name: "Build Ansible, before and after commit"
+        name: "Generate comment"
         needs:
             - ansible
             - inspec
@@ -309,5 +309,5 @@ jobs:
                       [Terraform GA](https://github.com/ndmckinley/terraform-provider-google/compare/pr-${{ github.event.pull_request.number }}-old..pr-${{ github.event.pull_request.number }}-new).
                       [Terraform Beta](https://github.com/ndmckinley/terraform-provider-google-beta/compare/pr-${{ github.event.pull_request.number }}-old..pr-${{ github.event.pull_request.number }}-new).
                       [Terraform Conversion](https://github.com/ndmckinley/terraform-google-conversion/compare/pr-${{ github.event.pull_request.number }}-old..pr-${{ github.event.pull_request.number }}-new).
-                      [Terraform GA](https://github.com/ndmckinley/inspec-gcp/compare/pr-${{ github.event.pull_request.number }}-old..pr-${{ github.event.pull_request.number }}-new).
-                      [Terraform GA](https://github.com/ndmckinley/ansible_collections_google/compare/pr-${{ github.event.pull_request.number }}-old..pr-${{ github.event.pull_request.number }}-new).
+                      [Inspec](https://github.com/ndmckinley/inspec-gcp/compare/pr-${{ github.event.pull_request.number }}-old..pr-${{ github.event.pull_request.number }}-new).
+                      [Ansible](https://github.com/ndmckinley/ansible_collections_google/compare/pr-${{ github.event.pull_request.number }}-old..pr-${{ github.event.pull_request.number }}-new).
