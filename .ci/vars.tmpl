@@ -22,14 +22,18 @@
     }
   }
 %}
+{% set downstreams_with_changelogs = [
+  'terraform-providers/terraform-provider-google-beta',
+  'terraform-providers/terraform-provider-google'
+  ]
+%}
 {% macro build_folder(names) -%}
 {% for name in names %}
 build/{{name}}
 {%- endfor %}
 {% endmacro -%}
 {% set terraform_submodules = build_folder(terraform_v.values()|map(attribute='short_name')).split() %}
-{%
-  set all_submodules = 
+{% set all_submodules =
      (terraform_submodules + ['build/ansible'] + ['build/inspec'])
 %}
 {% set all_submodules_yaml_format = '[' + ','.join(all_submodules) + ']' %}

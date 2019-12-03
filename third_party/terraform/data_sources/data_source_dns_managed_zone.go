@@ -1,6 +1,10 @@
 package google
 
-import "github.com/hashicorp/terraform/helper/schema"
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+)
 
 func dataSourceDnsManagedZone() *schema.Resource {
 	return &schema.Resource{
@@ -43,15 +47,16 @@ func dataSourceDnsManagedZone() *schema.Resource {
 func dataSourceDnsManagedZoneRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	d.SetId(d.Get("name").(string))
-
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
 
+	name := d.Get("name").(string)
+	d.SetId(fmt.Sprintf("projects/%s/managedZones/%s", project, name))
+
 	zone, err := config.clientDns.ManagedZones.Get(
-		project, d.Id()).Do()
+		project, name).Do()
 	if err != nil {
 		return err
 	}

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceGoogleContainerEngineVersions() *schema.Resource {
@@ -23,19 +23,16 @@ func dataSourceGoogleContainerEngineVersions() *schema.Resource {
 			"location": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ConflictsWith: []string{"zone", "region"},
 			},
 			"zone": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				Deprecated:    "Use location instead",
-				ConflictsWith: []string{"region", "location"},
+				Removed:       "Use location instead",
 			},
 			"region": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				Deprecated:    "Use location instead",
-				ConflictsWith: []string{"zone", "location"},
+				Removed:       "Use location instead",
 			},
 			"default_cluster_version": {
 				Type:     schema.TypeString,
@@ -76,7 +73,7 @@ func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta in
 		return err
 	}
 	if len(location) == 0 {
-		return fmt.Errorf("Cannot determine location: set location, zone, or region in this data source or at provider-level")
+		return fmt.Errorf("Cannot determine location: set location in this data source or at provider-level")
 	}
 
 	location = fmt.Sprintf("projects/%s/locations/%s", project, location)

@@ -21,17 +21,17 @@ datasources: !ruby/object:Overrides::ResourceOverrides
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
         exists: |
-          "\"{{resource_name}}\" in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "\"{{resource_name}}\" in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
-          "\"{{resource_name}}\" not in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "\"{{resource_name}}\" not in \"{{ results['resources'] | map(attribute='name') | list }}\""
   User: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
         exists: |
-          "'test-user' in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'test-user' in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
-          "'test-user' not in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'test-user' not in \"{{ results['resources'] | map(attribute='name') | list }}\""
   Tier: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   SslCert: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -41,16 +41,23 @@ datasources: !ruby/object:Overrides::ResourceOverrides
 overrides: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Ansible::ResourceOverride
     access_api_results: true
-    return_if_object: |
-<%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 6)) -%>
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      return_if_object: |
+<%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 8)) -%>
+      update: |
+        module.fail_json(msg="SQL objects can't be updated to ensure data safety")
   Database: !ruby/object:Overrides::Ansible::ResourceOverride
-    return_if_object: |
-<%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 6)) -%>
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      return_if_object: |
+<%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 8)) -%>
+      update: |
+        module.fail_json(msg="SQL objects can't be updated to ensure data safety")
   User: !ruby/object:Overrides::Ansible::ResourceOverride
     unwrap_resource: true
-    return_if_object: |
-<%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 6)) -%>
-  # Objects not implmented yet.
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      return_if_object: |
+<%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 8)) -%>
+  # Objects not implemented yet.
   Tier: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   SslCert: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -58,6 +65,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Flag: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
-  copy:
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

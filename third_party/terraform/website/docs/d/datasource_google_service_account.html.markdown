@@ -1,4 +1,5 @@
 ---
+subcategory: "Cloud Platform"
 layout: "google"
 page_title: "Google: google_service_account"
 sidebar_current: "docs-google-datasource-service-account"
@@ -26,15 +27,15 @@ data "google_service_account" "myaccount" {
 }
 
 resource "google_service_account_key" "mykey" {
-  service_account_id = "${data.google_service_account.myaccount.name}"
+  service_account_id = data.google_service_account.myaccount.name
 }
 
 resource "kubernetes_secret" "google-application-credentials" {
-  metadata = {
+  metadata {
     name = "google-application-credentials"
   }
-  data {
-    credentials.json = "${base64decode(google_service_account_key.mykey.private_key)}"
+  data = {
+    credentials.json = base64decode(google_service_account_key.mykey.private_key)
   }
 }
 ```
@@ -45,7 +46,7 @@ The following arguments are supported:
 
 * `account_id` - (Required) The Service account id.  (This is the part of the service account's email field that comes before the @ symbol.)
 
-* `project` - (Optional) The ID of the project that the service account will be created in.
+* `project` - (Optional) The ID of the project that the service account is present in.
     Defaults to the provider project configuration.
 
 ## Attributes Reference

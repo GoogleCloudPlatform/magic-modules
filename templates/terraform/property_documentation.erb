@@ -2,9 +2,9 @@
 * `<%= property.name.underscore -%>` -
 <% if property.min_version.name == 'beta' && property.__resource.min_version.name != 'beta'-%>
 <%   if property.required -%>
-  (Required, [Beta](https://terraform.io/docs/providers/google/provider_versions.html))
+  (Required, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
 <%   elsif !property.output -%>
-  (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html))
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
 <%   end -%>
 <% else -%>
 <%   if property.required -%>

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccDataprocClusterIamBinding(t *testing.T) {
@@ -118,22 +118,21 @@ func TestAccDataprocClusterIamPolicy(t *testing.T) {
 
 func testAccDataprocClusterIamBinding_basic(cluster, account, role string) string {
 	return fmt.Sprintf(testDataprocIamSingleNodeCluster+`
-
 resource "google_service_account" "test-account1" {
   account_id   = "%s-1"
-  display_name = "Dataproc IAM Testing Account"
+  display_name = "Dataproc Cluster IAM Testing Account"
 }
 
 resource "google_service_account" "test-account2" {
   account_id   = "%s-2"
-  display_name = "Iam Testing Account"
+  display_name = "Dataproc Cluster Iam Testing Account"
 }
 
 resource "google_dataproc_cluster_iam_binding" "binding" {
-  cluster      = "${google_dataproc_cluster.cluster.name}"
-  region 	   = "us-central1"
-  role         = "%s"
-  members      = [
+  cluster = google_dataproc_cluster.cluster.name
+  region  = "us-central1"
+  role    = "%s"
+  members = [
     "serviceAccount:${google_service_account.test-account1.email}",
   ]
 }
@@ -144,19 +143,19 @@ func testAccDataprocClusterIamBinding_update(cluster, account, role string) stri
 	return fmt.Sprintf(testDataprocIamSingleNodeCluster+`
 resource "google_service_account" "test-account1" {
   account_id   = "%s-1"
-  display_name = "Dataproc IAM Testing Account"
+  display_name = "Dataproc Cluster IAM Testing Account"
 }
 
 resource "google_service_account" "test-account2" {
   account_id   = "%s-2"
-  display_name = "Iam Testing Account"
+  display_name = "Dataproc Cluster Iam Testing Account"
 }
 
 resource "google_dataproc_cluster_iam_binding" "binding" {
-  cluster      = "${google_dataproc_cluster.cluster.name}"
-  region 	   = "us-central1"
-  role         = "%s"
-  members      = [
+  cluster = google_dataproc_cluster.cluster.name
+  region  = "us-central1"
+  role    = "%s"
+  members = [
     "serviceAccount:${google_service_account.test-account1.email}",
     "serviceAccount:${google_service_account.test-account2.email}",
   ]
@@ -168,13 +167,13 @@ func testAccDataprocClusterIamMember(cluster, account, role string) string {
 	return fmt.Sprintf(testDataprocIamSingleNodeCluster+`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
-  display_name = "Dataproc IAM Testing Account"
+  display_name = "Dataproc Cluster IAM Testing Account"
 }
 
 resource "google_dataproc_cluster_iam_member" "member" {
-  cluster      = "${google_dataproc_cluster.cluster.name}"
-  role         = "%s"
-  member       = "serviceAccount:${google_service_account.test-account.email}"
+  cluster = google_dataproc_cluster.cluster.name
+  role    = "%s"
+  member  = "serviceAccount:${google_service_account.test-account.email}"
 }
 `, cluster, account, role)
 }
@@ -183,20 +182,20 @@ func testAccDataprocClusterIamPolicy(cluster, account, role string) string {
 	return fmt.Sprintf(testDataprocIamSingleNodeCluster+`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
-  display_name = "Dataproc IAM Testing Account"
+  display_name = "Dataproc Cluster IAM Testing Account"
 }
 
 data "google_iam_policy" "policy" {
-	binding {
-		role    = "%s"
-		members = ["serviceAccount:${google_service_account.test-account.email}"]
-	}
+  binding {
+    role    = "%s"
+    members = ["serviceAccount:${google_service_account.test-account.email}"]
+  }
 }
 
 resource "google_dataproc_cluster_iam_policy" "policy" {
-  cluster      = "${google_dataproc_cluster.cluster.name}"
-  region 	   = "us-central1"
-  policy_data  = "${data.google_iam_policy.policy.policy_data}"
+  cluster     = google_dataproc_cluster.cluster.name
+  region      = "us-central1"
+  policy_data = data.google_iam_policy.policy.policy_data
 }
 `, cluster, account, role)
 }
@@ -204,23 +203,23 @@ resource "google_dataproc_cluster_iam_policy" "policy" {
 // Smallest cluster possible for testing
 var testDataprocIamSingleNodeCluster = `
 resource "google_dataproc_cluster" "cluster" {
-	name                  = "%s"
-	region                = "us-central1"
+  name   = "%s"
+  region = "us-central1"
 
-	cluster_config {
-		# Keep the costs down with smallest config we can get away with
-		software_config {
-			override_properties = {
-				"dataproc:dataproc.allow.zero.workers" = "true"
-			}
-		}
+  cluster_config {
+    # Keep the costs down with smallest config we can get away with
+    software_config {
+      override_properties = {
+        "dataproc:dataproc.allow.zero.workers" = "true"
+      }
+    }
 
-		master_config {
-			num_instances     = 1
-			machine_type      = "n1-standard-1"
-			disk_config {
-				boot_disk_size_gb = 15
-			}
-		}
-	}
+    master_config {
+      num_instances = 1
+      machine_type  = "n1-standard-1"
+      disk_config {
+        boot_disk_size_gb = 15
+      }
+    }
+  }
 }`

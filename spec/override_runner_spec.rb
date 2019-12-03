@@ -29,7 +29,7 @@ describe Overrides::Runner do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         new_api = Overrides::Runner.build(api, overrides)
@@ -45,7 +45,7 @@ describe Overrides::Runner do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         new_api = Overrides::Runner.build(api, overrides)
@@ -60,13 +60,13 @@ describe Overrides::Runner do
           'ReferencedResource' => Overrides::ResourceOverride.new(
             'properties' => {
               'name' => Overrides::PropertyOverride.new(
-                'description' => 'My overriden description'
+                'description' => 'My overridden description'
               )
             }
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         new_api = Overrides::Runner.build(api, overrides)
@@ -90,7 +90,7 @@ describe Overrides::Runner do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         new_api = Overrides::Runner.build(api, overrides)
@@ -113,7 +113,7 @@ describe Overrides::Runner do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         new_api = Overrides::Runner.build(api, overrides)
@@ -135,7 +135,7 @@ describe Overrides::Runner do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         new_api = Overrides::Runner.build(api, overrides)
@@ -151,13 +151,13 @@ describe Overrides::Runner do
           'AnotherResource' => TestResourceOverride.new(
             'properties' => {
               'namevalue-property.nv-prop1' => Overrides::PropertyOverride.new(
-                'description' => 'overriden'
+                'description' => 'overridden'
               )
             }
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         new_api = Overrides::Runner.build(api, overrides, TestResourceOverride)
@@ -166,7 +166,7 @@ describe Overrides::Runner do
                        .first
                        .value_type
                        .properties.first
-        expect(prop.description).to eq('overriden')
+        expect(prop.description).to eq('overridden')
       }
     end
   end

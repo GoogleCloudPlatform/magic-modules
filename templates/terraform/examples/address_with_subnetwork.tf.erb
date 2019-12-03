@@ -6,12 +6,12 @@ resource "google_compute_subnetwork" "default" {
   name          = "<%= ctx[:vars]['subnetwork_name'] %>"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
-  network       = "${google_compute_network.default.self_link}"
+  network       = google_compute_network.default.self_link
 }
 
 resource "google_compute_address" "<%= ctx[:primary_resource_id] %>" {
   name         = "<%= ctx[:vars]['address_name'] %>"
-  subnetwork   = "${google_compute_subnetwork.default.self_link}"
+  subnetwork   = google_compute_subnetwork.default.self_link
   address_type = "INTERNAL"
   address      = "10.0.42.42"
   region       = "us-central1"

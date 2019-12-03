@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccSourceRepoRepository_basic(t *testing.T) {
@@ -34,5 +34,5 @@ func testAccSourceRepoRepository_basic(repositoryName string) string {
 resource "google_sourcerepo_repository" "acceptance" {
   name = "%s"
 }
-	`, repositoryName)
+`, repositoryName)
 }

@@ -7,37 +7,32 @@ set -x
 set -e
 source "$(dirname "$0")/helpers.sh"
 PATCH_DIR="$(pwd)/patches"
+
 pushd magic-modules-branched
-LAST_COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
-bundle install
-for i in $(find products/ -name 'inspec.yaml' -printf '%h\n');
-do
-  bundle exec compiler -p $i -e inspec -o "build/inspec/"
-done
 
-pushd build/inspec
-rubocop -c .rubocop.yml
-popd
+# Choose the author of the most recent commit as the downstream author
+# Note that we don't use the last submitted commit, we use the primary GH email
+# of the GH PR submitted. If they've enabled a private email, we'll actually
+# use their GH noreply email which isn't compatible with CLAs.
+COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
 
-# This command can crash - if that happens, the script should not fail.
-set +e
-INSPEC_COMMIT_MSG="$(python .ci/magic-modules/extract_from_pr_description.py --tag inspec < .git/body)"
-set -e
-if [ -z "$INSPEC_COMMIT_MSG" ]; then
-  INSPEC_COMMIT_MSG="$(cat .git/title)"
-fi
+bundle exec compiler -a -e inspec -o "build/inspec/"
+
+INSPEC_COMMIT_MSG="$(cat .git/title)"
 
 pushd "build/inspec"
+
 # These config entries will set the "committer".
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
 
 git add -A
-# Set the "author" to the commit's real author.
-git commit -m "$INSPEC_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
+
+git commit -m "$INSPEC_COMMIT_MSG" --author="$COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
 
-apply_patches "$PATCH_DIR/modular-magician/inspec-gcp" "$INSPEC_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "master"
+apply_patches "$PATCH_DIR/modular-magician/inspec-gcp" "$INSPEC_COMMIT_MSG" "$COMMIT_AUTHOR" "master"
+
 popd
 popd
 

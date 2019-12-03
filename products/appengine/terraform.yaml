@@ -14,8 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   FirewallRule: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{project}}/{{priority}}"
-    import_format: ["{{project}}/{{priority}}"]
+    import_format: ["apps/{{project}}/firewall/ingressRules/{{priority}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_firewall_rule_basic"
@@ -24,6 +23,88 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project_id: "test-project"
         test_env_vars:
           org_id: :ORG_ID
+  StandardAppVersion: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
+    mutex: "apps/{{project}}"
+    parameters:
+      service: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        required: false
+    virtual_fields:
+      - !ruby/object:Provider::Terraform::VirtualFields
+        name: 'noop_on_destroy'
+        description: |
+          If set to `true`, the application version will not be deleted.
+      - !ruby/object:Provider::Terraform::VirtualFields
+        name: 'delete_service_on_destroy'
+        description: |
+          If set to `true`, the service will be deleted if it is the last version.    
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_delete: templates/terraform/custom_delete/appversion_delete.go.erb
+      test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.erb
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'version_id'
+      deployment: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      entrypoint: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      envVariables: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      threadsafe: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      instanceClass: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true    
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "app_engine_standard_app_version"
+        primary_resource_id: "myapp_v1"
+        ignore_read_extra:
+          - "delete_service_on_destroy"
+        vars:
+          project_id: "test-project"
+          bucket_name: "appengine-static-content"
+          service_name: "tf-test-service"
+        test_env_vars:
+          org_id: :ORG_ID
+  Service: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
+  DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
+    self_link: 'apps/{{project}}/domainMappings/{{domain_name}}'
+    id_format: 'apps/{{project}}/domainMappings/{{domain_name}}'
+    import_format: ['apps/{{project}}/domainMappings/{{domain_name}}']
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "app_engine_domain_mapping_basic"
+        primary_resource_id: "domain_mapping"
+        vars:
+          domain: "dm-test-"
+    custom_code:  !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/domain_mapping.erb
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'domainName'
+      overrideStrategy: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      sslSettings: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'sslSettingsDiffSuppress'
+        update_mask_fields:
+          - "ssl_settings.certificate_id"
+          - "ssl_settings.ssl_management_type"
+      sslSettings.certificateId: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+  ApplicationUrlDispatchRules: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{project}}"
+    import_format: ["{{project}}"]
+    mutex: "apps/{{project}}"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.erb
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "app_engine_application_url_dispatch_rules_basic"
+        primary_resource_id: "web_service"
+        vars:
+          bucket_name: "appengine-test-bucket"
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

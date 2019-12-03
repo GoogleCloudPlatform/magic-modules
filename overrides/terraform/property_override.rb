@@ -69,6 +69,15 @@ module Overrides
           # Names of attributes that can't be set alongside this one
           :conflicts_with,
 
+          # Names of attributes that at least one of must be set
+          :at_least_one_of,
+
+          # Names of attributes that exactly one of must be set
+          :exactly_one_of,
+
+          # Names of fields that should be included in the updateMask.
+          :update_mask_fields,
+
           # ====================
           # Schema Modifications
           # ====================
@@ -79,13 +88,22 @@ module Overrides
           #
           # With great power comes great responsibility.
 
-          # Flatten the child field of a NestedObject into "convenience fields"
-          # that are addressed as if they were top level fields.
+          # Flattens a NestedObject by removing that field from the Terraform
+          # schema but will preserve it in the JSON sent/retrieved from the API
+          #
+          # EX: a API schema where fields are nested (eg: `one.two.three`) and we
+          # desire the properties of the deepest nested object (eg: `three`) to
+          # become top level properties in the Terraform schema. By overriding
+          # the properties `one` and `one.two` and setting flatten_object then
+          # all the properties in `three` will be at the root of the TF schema.
           #
           # We need this for cases where a field inside a nested object has a
           # default, if we can't spend a breaking change to fix a misshapen
-          # field, or if the UX is _much_ better otherwise. Nesting flattened
-          # NestedObjects is inadvisable.
+          # field, or if the UX is _much_ better otherwise.
+          #
+          # WARN: only fully flattened properties are currently supported. In the
+          # example above you could not flatten `one.two` without also flattening
+          # all of it's parents such as `one`
           :flatten_object,
 
           # ===========

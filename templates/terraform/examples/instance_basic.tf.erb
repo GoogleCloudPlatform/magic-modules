@@ -1,0 +1,15 @@
+resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
+  name         = "<%= ctx[:vars]['instance_name'] %>"
+  zone         = "<%= ctx[:vars]['zone_name'] %>"
+  machine_type = "n1-standard-1"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-9"
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}

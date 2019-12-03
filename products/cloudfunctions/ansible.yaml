@@ -1,0 +1,36 @@
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Ansible::Config
+# This is where custom code would be defined eventually.
+datasources: !ruby/object:Overrides::ResourceOverrides
+  CloudFunction: !ruby/object:Overrides::Ansible::ResourceOverride
+    facts: !ruby/object:Provider::Ansible::FactsOverride
+      has_filters: false
+overrides: !ruby/object:Overrides::ResourceOverrides
+  CloudFunction: !ruby/object:Overrides::Ansible::ResourceOverride
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      pre_action: |
+        # Need to set triggerHttps to {} if boolean true.
+        if fetch and fetch.get('httpsTrigger') and module.params['trigger_http']:
+          module.params['https_trigger'] = fetch.get('httpsTrigger')
+        elif module.params['trigger_http']:
+          module.params['https_trigger'] = {}
+    transport: !ruby/object:Overrides::Ansible::Transport
+      encoder: encode_request
+      remove_nones_post_encoder: false
+    provider_helpers:
+      - 'products/cloudfunctions/helpers/ansible/function_transport.py'
+files: !ruby/object:Provider::Config::Files
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

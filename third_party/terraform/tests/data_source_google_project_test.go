@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccDataSourceGoogleProject_basic(t *testing.T) {
@@ -37,12 +37,13 @@ func TestAccDataSourceGoogleProject_basic(t *testing.T) {
 func testAccCheckGoogleProjectConfig(project, org string) string {
 	return fmt.Sprintf(`
 resource "google_project" "project" {
-	project_id = "%s"
-	name = "%s"
-	org_id = "%s"
+  project_id = "%s"
+  name       = "%s"
+  org_id     = "%s"
 }
-	
+
 data "google_project" "project" {
-	project_id = "${google_project.project.project_id}"
-}`, project, project, org)
+  project_id = google_project.project.project_id
+}
+`, project, project, org)
 }

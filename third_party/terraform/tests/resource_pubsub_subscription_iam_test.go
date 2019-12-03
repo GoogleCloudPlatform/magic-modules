@@ -6,9 +6,9 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccPubsubSubscriptionIamBinding(t *testing.T) {
@@ -142,18 +142,18 @@ resource "google_pubsub_topic" "topic" {
 
 resource "google_pubsub_subscription" "subscription" {
   name  = "%s"
-  topic = "${google_pubsub_topic.topic.id}"
+  topic = google_pubsub_topic.topic.id
 }
 
 resource "google_service_account" "test-account-1" {
   account_id   = "%s-1"
-  display_name = "Iam Testing Account"
+  display_name = "Pubsub Subscription Iam Testing Account"
 }
 
 resource "google_pubsub_subscription_iam_binding" "foo" {
-  subscription = "${google_pubsub_subscription.subscription.id}"
+  subscription = google_pubsub_subscription.subscription.id
   role         = "roles/pubsub.subscriber"
-  members      = [
+  members = [
     "serviceAccount:${google_service_account.test-account-1.email}",
   ]
 }
@@ -168,24 +168,23 @@ resource "google_pubsub_topic" "topic" {
 
 resource "google_pubsub_subscription" "subscription" {
   name  = "%s"
-  topic = "${google_pubsub_topic.topic.id}"
+  topic = google_pubsub_topic.topic.id
 }
-
 
 resource "google_service_account" "test-account-1" {
   account_id   = "%s-1"
-  display_name = "Iam Testing Account"
+  display_name = "Pubsub Subscription Iam Testing Account"
 }
 
 resource "google_service_account" "test-account-2" {
   account_id   = "%s-2"
-  display_name = "Iam Testing Account"
+  display_name = "Pubsub Subscription Iam Testing Account"
 }
 
 resource "google_pubsub_subscription_iam_binding" "foo" {
-  subscription = "${google_pubsub_subscription.subscription.id}"
+  subscription = google_pubsub_subscription.subscription.id
   role         = "roles/pubsub.subscriber"
-  members      = [
+  members = [
     "serviceAccount:${google_service_account.test-account-1.email}",
     "serviceAccount:${google_service_account.test-account-2.email}",
   ]
@@ -201,17 +200,16 @@ resource "google_pubsub_topic" "topic" {
 
 resource "google_pubsub_subscription" "subscription" {
   name  = "%s"
-  topic = "${google_pubsub_topic.topic.id}"
+  topic = google_pubsub_topic.topic.id
 }
-
 
 resource "google_service_account" "test-account" {
   account_id   = "%s"
-  display_name = "Iam Testing Account"
+  display_name = "Pubsub Subscription Iam Testing Account"
 }
 
 resource "google_pubsub_subscription_iam_member" "foo" {
-  subscription = "${google_pubsub_subscription.subscription.id}"
+  subscription = google_pubsub_subscription.subscription.id
   role         = "roles/pubsub.subscriber"
   member       = "serviceAccount:${google_service_account.test-account.email}"
 }
@@ -226,25 +224,24 @@ resource "google_pubsub_topic" "topic" {
 
 resource "google_pubsub_subscription" "subscription" {
   name  = "%s"
-  topic = "${google_pubsub_topic.topic.id}"
+  topic = google_pubsub_topic.topic.id
 }
-
 
 resource "google_service_account" "test-account" {
   account_id   = "%s"
-  display_name = "Iam Testing Account"
+  display_name = "Pubsub Subscription Iam Testing Account"
 }
 
 data "google_iam_policy" "foo" {
-	binding {
-		role    = "%s"
-		members = ["serviceAccount:${google_service_account.test-account.email}"]
-	}
+  binding {
+    role    = "%s"
+    members = ["serviceAccount:${google_service_account.test-account.email}"]
+  }
 }
 
 resource "google_pubsub_subscription_iam_policy" "foo" {
-  subscription = "${google_pubsub_subscription.subscription.id}"
-  policy_data  = "${data.google_iam_policy.foo.policy_data}"
+  subscription = google_pubsub_subscription.subscription.id
+  policy_data  = data.google_iam_policy.foo.policy_data
 }
 `, topic, subscription, account, role)
 }

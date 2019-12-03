@@ -1,0 +1,123 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Iap
+display_name: Identity-Aware Proxy
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://iap.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Cloud Identity-Aware Proxy
+    url: https://console.cloud.google.com/apis/library/iap.googleapis.com/
+objects:
+  # This resource is only used to generate IAM resources. They do not correspond to real
+  # GCP resources, and should not be used to generate anything other than IAM suppport.
+  - !ruby/object:Api::Resource
+    name: 'Web'
+    base_url: 'projects/{{project}}/iap_web'
+    self_link: 'projects/{{project}}/iap_web'
+    exclude_resource: true
+    description: |
+      Only used to generate IAM resources
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: Dummy property.
+        required: true
+  # This resource is only used to generate IAM resources. They do not correspond to real
+  # GCP resources, and should not be used to generate anything other than IAM suppport.
+  - !ruby/object:Api::Resource
+    name: 'WebTypeCompute'
+    base_url: 'projects/{{project}}/iap_web/compute'
+    self_link: 'projects/{{project}}/iap_web/compute'
+    exclude_resource: true
+    description: |
+      Only used to generate IAM resources
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: Dummy property.
+        required: true
+  # This resource is only used to generate IAM resources. They do not correspond to real
+  # GCP resources, and should not be used to generate anything other than IAM suppport.
+  - !ruby/object:Api::Resource
+    name: 'WebTypeAppEngine'
+    base_url: 'projects/{{project}}/iap_web/appengine-{{appId}}'
+    self_link: 'projects/{{project}}/iap_web/appengine-{{appId}}'
+    exclude_resource: true
+    description: |
+      Only used to generate IAM resources
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'appId'
+        description: Id of the App Engine application.
+        required: true
+  # This resource is only used to generate IAM resources. They do not correspond to real
+  # GCP resources, and should not be used to generate anything other than IAM suppport.
+  - !ruby/object:Api::Resource
+    name: 'AppEngineVersion'
+    base_url: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
+    self_link: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
+    exclude_resource: true
+    description: |
+      Only used to generate IAM resources
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'appId'
+        description: Id of the App Engine application.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'service'
+        description: Service id of the App Engine application
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'versionId'
+        description: Version id of the App Engine application
+        required: true
+  # This resource is only used to generate IAM resources. They do not correspond to real
+  # GCP resources, and should not be used to generate anything other than IAM suppport.
+  - !ruby/object:Api::Resource
+    name: 'AppEngineService'
+    base_url: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}'
+    self_link: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}'
+    exclude_resource: true
+    description: |
+      Only used to generate IAM resources
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'appId'
+        description: Id of the App Engine application.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'service'
+        description: Service id of the App Engine application
+        required: true
+  # This resource is only used to generate IAM resources. They do not correspond to real
+  # GCP resources, and should not be used to generate anything other than IAM suppport.
+  - !ruby/object:Api::Resource
+    name: 'WebBackendService'
+    base_url: 'projects/{{project}}/iap_web/compute/services/{{name}}'
+    self_link: 'projects/{{project}}/iap_web/compute/services/{{name}}'
+    exclude_resource: true
+    description: |
+      Only used to generate IAM resources
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: Name or self link of a backend service.
+        required: true

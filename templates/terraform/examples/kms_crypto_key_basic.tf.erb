@@ -1,0 +1,14 @@
+resource "google_kms_key_ring" "keyring" {
+  name     = "keyring-example"
+  location = "global"
+}
+
+resource "google_kms_crypto_key" "<%= ctx[:primary_resource_id] %>" {
+  name            = "crypto-key-example"
+  key_ring        = google_kms_key_ring.keyring.self_link
+  rotation_period = "100000s"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}

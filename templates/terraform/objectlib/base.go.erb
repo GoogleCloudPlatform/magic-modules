@@ -5,7 +5,7 @@ package google
 <%
     resource_name = product_ns + object.name
     properties = object.all_user_properties
-    api_version = version.base_url.split("/")[-1]
+    api_version = @base_url.split("/")[-1]
     # See discussion on asset name here: https://github.com/GoogleCloudPlatform/magic-modules/pull/1520
     asset_name_template = '//' + product_ns.downcase + '.googleapis.com/' + (!object.self_link.nil? && !object.self_link.empty? ? object.self_link : object.base_url + '/{{name}}')
 %>
@@ -38,18 +38,10 @@ func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *Config) 
     obj := make(map[string]interface{})
 <%  object.settable_properties.each do |prop| -%>
 <%    if prop.flatten_object -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d, config)
-    if err != nil {
-        return nil, err
-<%      unless prop.send_empty_value -%>
-    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
-<%      else -%>
-    } else {
-<%      end -%>
-        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-    }
-<%    else -%>
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(nil, d, config)
+<%    else # if flatten -%>
     <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+<%    end -%>
     if err != nil {
         return nil, err
 <%      unless prop.send_empty_value -%>
@@ -59,7 +51,6 @@ func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *Config) 
 <%      end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
-<%    end -%>
 <%  end -%>
 
 <%  if object.custom_code.encoder -%>
@@ -76,6 +67,6 @@ func resource<%= resource_name -%>Encoder(d TerraformResourceData, meta interfac
 <% end -%>
 
 <% object.settable_properties.each do |prop| -%>
-<%= lines(build_expand_method(resource_name, prop), 1) -%>
+<%= lines(build_expand_method(resource_name, prop, object), 1) -%>
 <% end -%>
 

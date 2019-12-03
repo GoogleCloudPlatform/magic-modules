@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestCryptoKeyIdParsing(t *testing.T) {
@@ -109,6 +109,62 @@ func TestCryptoKeyNextRotationCalculation_validation(t *testing.T) {
 	}
 }
 
+func TestCryptoKeyStateUpgradeV0(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		Attributes map[string]interface{}
+		Expected   map[string]string
+		Meta       interface{}
+	}{
+		"change key_ring from terraform id fmt to link fmt": {
+			Attributes: map[string]interface{}{
+				"key_ring": "my-project/my-location/my-key-ring",
+			},
+			Expected: map[string]string{
+				"key_ring": "projects/my-project/locations/my-location/keyRings/my-key-ring",
+			},
+			Meta: &Config{},
+		},
+		"key_ring link fmt stays as link fmt": {
+			Attributes: map[string]interface{}{
+				"key_ring": "projects/my-project/locations/my-location/keyRings/my-key-ring",
+			},
+			Expected: map[string]string{
+				"key_ring": "projects/my-project/locations/my-location/keyRings/my-key-ring",
+			},
+			Meta: &Config{},
+		},
+		"key_ring without project to link fmt": {
+			Attributes: map[string]interface{}{
+				"key_ring": "my-location/my-key-ring",
+			},
+			Expected: map[string]string{
+				"key_ring": "projects/my-project/locations/my-location/keyRings/my-key-ring",
+			},
+			Meta: &Config{
+				Project: "my-project",
+			},
+		},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			actual, err := resourceKMSCryptoKeyUpgradeV0(tc.Attributes, tc.Meta)
+
+			if err != nil {
+				t.Error(err)
+			}
+
+			for k, v := range tc.Expected {
+				if actual[k] != v {
+					t.Errorf("expected: %#v -> %#v\n got: %#v -> %#v\n in: %#v",
+						k, v, k, actual[k], actual)
+				}
+			}
+		})
+	}
+}
+
 func TestAccKmsCryptoKey_basic(t *testing.T) {
 	t.Parallel()
 
@@ -197,6 +253,51 @@ func TestAccKmsCryptoKey_rotation(t *testing.T) {
 	})
 }
 
+func TestAccKmsCryptoKey_template(t *testing.T) {
+	t.Parallel()
+
+	projectId := "terraform-" + acctest.RandString(10)
+	projectOrg := getTestOrgFromEnv(t)
+	location := getTestRegionFromEnv()
+	projectBillingAccount := getTestBillingAccountFromEnv(t)
+	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	algorithm := "EC_SIGN_P256_SHA256"
+	updatedAlgorithm := "EC_SIGN_P384_SHA384"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleKmsCryptoKey_template(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, algorithm),
+			},
+			{
+				ResourceName:      "google_kms_crypto_key.crypto_key",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testGoogleKmsCryptoKey_template(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, updatedAlgorithm),
+			},
+			{
+				ResourceName:      "google_kms_crypto_key.crypto_key",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Use a separate TestStep rather than a CheckDestroy because we need the project to still exist.
+			{
+				Config: testGoogleKmsCryptoKey_removed(projectId, projectOrg, projectBillingAccount, keyRingName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleKmsCryptoKeyWasRemovedFromState("google_kms_crypto_key.crypto_key"),
+					testAccCheckGoogleKmsCryptoKeyVersionsDestroyed(projectId, location, keyRingName, cryptoKeyName),
+					testAccCheckGoogleKmsCryptoKeyRotationDisabled(projectId, location, keyRingName, cryptoKeyName),
+				),
+			},
+		},
+	})
+}
+
 // KMS KeyRings cannot be deleted. This ensures that the CryptoKey resource was removed from state,
 // even though the server-side resource was not removed.
 func testAccCheckGoogleKmsCryptoKeyWasRemovedFromState(resourceName string) resource.TestCheckFunc {
@@ -264,120 +365,138 @@ func testAccCheckGoogleKmsCryptoKeyRotationDisabled(projectId, location, keyRing
 func testGoogleKmsCryptoKey_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
-	name            = "%s"
-	project_id      = "%s"
-	org_id          = "%s"
-	billing_account = "%s"
+  name            = "%s"
+  project_id      = "%s"
+  org_id          = "%s"
+  billing_account = "%s"
 }
 
-resource "google_project_services" "acceptance" {
-	project = "${google_project.acceptance.project_id}"
-
-	services = [
-	  "cloudkms.googleapis.com",
-	]
+resource "google_project_service" "acceptance" {
+  project = google_project.acceptance.project_id
+  service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-	project  = "${google_project_services.acceptance.project}"
-	name     = "%s"
-	location = "us-central1"
+  project  = google_project_service.acceptance.project
+  name     = "%s"
+  location = "us-central1"
 }
 
 resource "google_kms_crypto_key" "crypto_key" {
-	name            = "%s"
-	key_ring        = "${google_kms_key_ring.key_ring.self_link}"
-	rotation_period = "1000000s"
-	version_template {
-		algorithm =        "GOOGLE_SYMMETRIC_ENCRYPTION"
-		protection_level = "SOFTWARE"
-	}
+  name     = "%s"
+  key_ring = google_kms_key_ring.key_ring.self_link
+  labels = {
+    key = "value"
+  }
 }
-	`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
 
 func testGoogleKmsCryptoKey_rotation(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, rotationPeriod string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
-	name            = "%s"
-	project_id      = "%s"
-	org_id          = "%s"
-	billing_account = "%s"
+  name            = "%s"
+  project_id      = "%s"
+  org_id          = "%s"
+  billing_account = "%s"
 }
 
-resource "google_project_services" "acceptance" {
-	project = "${google_project.acceptance.project_id}"
-
-	services = [
-	  "cloudkms.googleapis.com",
-	]
+resource "google_project_service" "acceptance" {
+  project = google_project.acceptance.project_id
+  service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-	project  = "${google_project_services.acceptance.project}"
-	name     = "%s"
-	location = "us-central1"
+  project  = google_project_service.acceptance.project
+  name     = "%s"
+  location = "us-central1"
 }
 
 resource "google_kms_crypto_key" "crypto_key" {
-	name            = "%s"
-	key_ring        = "${google_kms_key_ring.key_ring.self_link}"
-	rotation_period = "%s"
+  name            = "%s"
+  key_ring        = google_kms_key_ring.key_ring.self_link
+  rotation_period = "%s"
 }
-	`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, rotationPeriod)
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, rotationPeriod)
 }
 
 func testGoogleKmsCryptoKey_rotationRemoved(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
-	name            = "%s"
-	project_id      = "%s"
-	org_id          = "%s"
-	billing_account = "%s"
+  name            = "%s"
+  project_id      = "%s"
+  org_id          = "%s"
+  billing_account = "%s"
 }
 
-resource "google_project_services" "acceptance" {
-	project = "${google_project.acceptance.project_id}"
-
-	services = [
-	  "cloudkms.googleapis.com",
-	]
+resource "google_project_service" "acceptance" {
+  project = google_project.acceptance.project_id
+  service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-	project  = "${google_project_services.acceptance.project}"
-	name     = "%s"
-	location = "us-central1"
+  project  = google_project_service.acceptance.project
+  name     = "%s"
+  location = "us-central1"
 }
 
 resource "google_kms_crypto_key" "crypto_key" {
-	name            = "%s"
-	key_ring        = "${google_kms_key_ring.key_ring.self_link}"
+  name     = "%s"
+  key_ring = google_kms_key_ring.key_ring.self_link
 }
-	`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
+}
+
+func testGoogleKmsCryptoKey_template(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, algorithm string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+  name            = "%s"
+  project_id      = "%s"
+  org_id          = "%s"
+  billing_account = "%s"
+}
+
+resource "google_project_service" "acceptance" {
+  project = google_project.acceptance.project_id
+  service = "cloudkms.googleapis.com"
+}
+
+resource "google_kms_key_ring" "key_ring" {
+  project  = google_project_service.acceptance.project
+  name     = "%s"
+  location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "crypto_key" {
+  name     = "%s"
+  key_ring = google_kms_key_ring.key_ring.self_link
+  purpose  = "ASYMMETRIC_SIGN"
+
+  version_template {
+    algorithm = "%s"
+  }
+}
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, algorithm)
 }
 
 func testGoogleKmsCryptoKey_removed(projectId, projectOrg, projectBillingAccount, keyRingName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
-	name            = "%s"
-	project_id      = "%s"
-	org_id          = "%s"
-	billing_account = "%s"
+  name            = "%s"
+  project_id      = "%s"
+  org_id          = "%s"
+  billing_account = "%s"
 }
 
-resource "google_project_services" "acceptance" {
-	project = "${google_project.acceptance.project_id}"
-
-	services = [
-	  "cloudkms.googleapis.com",
-	]
+resource "google_project_service" "acceptance" {
+  project = google_project.acceptance.project_id
+  service = "cloudkms.googleapis.com"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-	project  = "${google_project_services.acceptance.project}"
-	name     = "%s"
-	location = "us-central1"
+  project  = google_project_service.acceptance.project
+  name     = "%s"
+  location = "us-central1"
 }
-	`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName)
+`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName)
 }

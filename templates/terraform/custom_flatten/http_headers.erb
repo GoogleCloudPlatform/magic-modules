@@ -28,9 +28,9 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
       delete(headers, "Content-Type")
     }
   }
-  for key, _ := range headers {
-    match, _ := regexp.MatchString("(X-Google-|X-AppEngine-|Content-Length).*", key)
-    if match {
+  r := regexp.MustCompile(`(X-Google-|X-AppEngine-|Content-Length).*`)
+  for key, _ := range headers { 
+    if r.MatchString(key) {
       delete(headers, key)
     }
   }

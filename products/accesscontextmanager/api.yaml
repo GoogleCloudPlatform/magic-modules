@@ -20,21 +20,21 @@ versions:
     base_url: https://accesscontextmanager.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-async: !ruby/object:Api::Async
-  operation: !ruby/object:Api::Async::Operation
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::Async::Result
+  result: !ruby/object:Api::OpAsync::Result
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::Async::Status
+  status: !ruby/object:Api::OpAsync::Status
     path: 'done'
     complete: true
     allowed:
       - true
       - false
-  error: !ruby/object:Api::Async::Error
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
 objects:
@@ -197,12 +197,14 @@ objects:
               - !ruby/object:Api::Type::Array
                 name: 'members'
                 description: |
-                  An allowed list of members (users, groups, service accounts).
+                  An allowed list of members (users, service accounts).
+                  Using groups is not supported yet.
+
                   The signed-in user originating the request must be a part of one
                   of the provided members. If not specified, a request may come
                   from any user (logged in/not logged in, not present in any
                   groups, etc.).
-                  Formats: `user:{emailid}`, `group:{emailid}`, `serviceAccount:{emailid}`
+                  Formats: `user:{emailid}`, `serviceAccount:{emailid}`
                 item_type: Api::Type::String
               - !ruby/object:Api::Type::Boolean
                 name: 'negate'
@@ -267,14 +269,23 @@ objects:
                           Format: "major.minor.patch" such as "10.5.301", "9.2.1".
                       - !ruby/object:Api::Type::Enum
                         name: 'osType'
+                        required: true
                         description: |
                           The operating system type of the device.
                         values:
-                        - :OS_UNSPECIFIED
-                        - :DESKTOP_MAC
-                        - :DESKTOP_WINDOWS
-                        - :DESKTOP_LINUX
-                        - :DESKTOP_CHROME_OS
+                          - :OS_UNSPECIFIED
+                          - :DESKTOP_MAC
+                          - :DESKTOP_WINDOWS
+                          - :DESKTOP_LINUX
+                          - :DESKTOP_CHROME_OS
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'requireAdminApproval'
+                    description: |
+                      Whether the device needs to be approved by the customer admin.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'requireCorpOwned'
+                    description: |
+                      Whether the device needs to be corp owned.
   - !ruby/object:Api::Resource
     name: 'ServicePerimeter'
     # This is an unusual API, so we need to use a few fields to map the methods
@@ -356,7 +367,7 @@ objects:
           entirely by the regular perimeter that resource is in.
 
           Perimeter Bridges are typically useful when building more complex
-          toplogies with many independent perimeters that need to share some data
+          topologies with many independent perimeters that need to share some data
           with a common perimeter, but should not be able to share data among
           themselves.
         values:
@@ -376,6 +387,10 @@ objects:
               A list of GCP resources that are inside of the service perimeter.
               Currently only projects are allowed.
               Format: projects/{project_number}
+            at_least_one_of:
+              - status.0.resources
+              - status.0.access_levels
+              - status.0.restricted_services
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             name: 'accessLevels'
@@ -390,6 +405,10 @@ objects:
               be empty.
 
               Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
+            at_least_one_of:
+              - status.0.resources
+              - status.0.access_levels
+              - status.0.restricted_services
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             name: 'restrictedServices'
@@ -399,4 +418,8 @@ objects:
               `storage.googleapis.com` is specified, access to the storage
               buckets inside the perimeter must meet the perimeter's access
               restrictions.
+            at_least_one_of:
+              - status.0.resources
+              - status.0.access_levels
+              - status.0.restricted_services
             item_type: Api::Type::String

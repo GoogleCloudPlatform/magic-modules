@@ -1,0 +1,133 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Web: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "projects/{{project}}/iap_web"
+    import_format: ["projects/{{project}}/iap_web"]
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      parent_resource_type: 'google_project_service'
+      fetch_iam_policy_verb: :POST
+      allowed_iam_role: 'roles/iap.httpsResourceAccessor'
+      parent_resource_attribute: 'project'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iap_project"
+        primary_resource_id: "project_service"
+        primary_resource_name: "fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+        test_env_vars:
+          org_id: :ORG_ID
+  WebTypeCompute: !ruby/object:Overrides::Terraform::ResourceOverride
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      parent_resource_type: 'google_project_service'
+      parent_resource_attribute: 'project'
+      fetch_iam_policy_verb: :POST
+      allowed_iam_role: 'roles/iap.httpsResourceAccessor'
+    id_format: "projects/{{project}}/iap_web/compute"
+    import_format: ["projects/{{project}}/iap_web/compute"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iap_project"
+        primary_resource_id: "project_service"
+        primary_resource_name: "fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+        test_env_vars:
+          org_id: :ORG_ID
+  WebTypeAppEngine: !ruby/object:Overrides::Terraform::ResourceOverride
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      parent_resource_type: 'google_app_engine_application'
+      parent_resource_attribute: 'app_id'
+      fetch_iam_policy_verb: :POST
+      allowed_iam_role: 'roles/iap.httpsResourceAccessor'
+      test_project_name: "tf-test"
+      custom_diff_suppress: 'templates/terraform/iam/iap_web_appengine_diff_suppress.go.erb'
+    id_format: "projects/{{project}}/iap_web/appengine-{{appId}}"
+    import_format: ["projects/{{project}}/iap_web/appengine-{{appId}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iap_appengine"
+        primary_resource_id: "app"
+        primary_resource_name: "context[\"project_id\"]"
+        test_env_vars:
+          org_id: :ORG_ID
+  AppEngineVersion: !ruby/object:Overrides::Terraform::ResourceOverride
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      parent_resource_type: 'google_app_engine_standard_app_version'
+      parent_resource_attribute: 'version_id'
+      fetch_iam_policy_verb: :POST
+      allowed_iam_role: 'roles/iap.httpsResourceAccessor'
+      example_config_body: 'templates/terraform/iam/example_config_body/app_engine_version.tf.erb'
+      iam_conditions_request_type: :REQUEST_BODY
+    id_format: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
+    import_format: [
+      'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}',
+      '{{version}}'
+    ]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iap_app_engine_version"
+        primary_resource_id: "version"
+        primary_resource_name: "getTestProjectFromEnv(), \"default\", context[\"random_suffix\"]"
+  AppEngineService: !ruby/object:Overrides::Terraform::ResourceOverride
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      parent_resource_type: 'google_app_engine_standard_app_version'
+      parent_resource_attribute: 'service'
+      fetch_iam_policy_verb: :POST
+      allowed_iam_role: 'roles/iap.httpsResourceAccessor'
+      test_project_name: "tf-test"
+      example_config_body: 'templates/terraform/iam/example_config_body/app_engine_service.tf.erb'
+    id_format: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}'
+    import_format: ['projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}', '{{service}}']
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iap_app_engine_service"
+        primary_resource_id: "version"
+        primary_resource_name: "context[\"project_id\"], \"default\""
+        test_env_vars:
+          org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
+  WebBackendService: !ruby/object:Overrides::Terraform::ResourceOverride
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      parent_resource_type: 'google_compute_backend_service'
+      parent_resource_attribute: 'web_backend_service'
+      fetch_iam_policy_verb: :POST
+      allowed_iam_role: 'roles/iap.httpsResourceAccessor'
+      iam_conditions_request_type: :REQUEST_BODY
+    id_format: "projects/{{project}}/iap_web/compute/services/{{name}}"
+    import_format: ["projects/{{project}}/iap_web/compute/services/{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_basic"
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+          http_health_check_name: "health-check"
+        primary_resource_name: "fmt.Sprintf(\"backend-service%s\", context[\"random_suffix\"])"
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

@@ -1,0 +1,25 @@
+const datasetIdRegexp = `[0-9A-Za-z_]+`
+
+func validateDatasetId(v interface{}, k string) (ws []string, errors []error) {
+    value := v.(string)
+    if !regexp.MustCompile(datasetIdRegexp).MatchString(value) {
+       errors = append(errors, fmt.Errorf(
+            "%q must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_)", k))
+    }
+
+    if len(value) > 1024 {
+        errors = append(errors, fmt.Errorf(
+            "%q cannot be greater than 1,024 characters", k))
+    }
+
+    return
+}
+
+func validateDefaultTableExpirationMs(v interface{}, k string) (ws []string, errors []error) {
+    value := v.(int)
+    if value < 3600000 {
+        errors = append(errors, fmt.Errorf("%q cannot be shorter than 3600000 milliseconds (one hour)", k))
+    }
+
+    return
+}

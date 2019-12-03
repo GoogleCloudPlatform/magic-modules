@@ -14,6 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   ManagedZone: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: 'projects/{{project}}/managedZones/{{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
@@ -49,6 +50,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           A textual description field. Defaults to 'Managed by Terraform'.
         default_value: 'Managed by Terraform'
         required: false
+      dnssecConfig.defaultKeySpecs: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      dnssecConfig.nonExistence: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       nameServerSet: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -57,6 +62,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
         set_hash_func: |-
           func(v interface{}) int {
+            if v == nil {
+              return 0
+            }
             raw := v.(map[string]interface{})
             if url, ok := raw["network_url"]; ok {
               return selfLinkNameHash(url)
@@ -90,6 +98,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'caseDiffSuppress'
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
   Policy: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: 'projects/{{project}}/policies/{{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_policy_basic"

@@ -6,9 +6,9 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccBillingAccountIam(t *testing.T) {
@@ -128,13 +128,13 @@ func testAccBillingAccountIamBinding_basic(account, billingAccountId, role strin
 	return fmt.Sprintf(`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
-  display_name = "Iam Testing Account"
+  display_name = "Billing Account Iam Testing Account"
 }
 
 resource "google_billing_account_iam_binding" "foo" {
-  billing_account_id  = "%s"
-  role                = "%s"
-  members             = ["serviceAccount:${google_service_account.test-account.email}"]
+  billing_account_id = "%s"
+  role               = "%s"
+  members            = ["serviceAccount:${google_service_account.test-account.email}"]
 }
 `, account, billingAccountId, role)
 }
@@ -143,20 +143,20 @@ func testAccBillingAccountIamBinding_update(account, billingAccountId, role stri
 	return fmt.Sprintf(`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
-  display_name = "Iam Testing Account"
+  display_name = "Billing Account Iam Testing Account"
 }
 
 resource "google_service_account" "test-account-2" {
   account_id   = "%s-2"
-  display_name = "Iam Testing Account"
+  display_name = "Billing Account Iam Testing Account"
 }
 
 resource "google_billing_account_iam_binding" "foo" {
-  billing_account_id  = "%s"
-  role                = "%s"
-  members             = [
+  billing_account_id = "%s"
+  role               = "%s"
+  members = [
     "serviceAccount:${google_service_account.test-account.email}",
-    "serviceAccount:${google_service_account.test-account-2.email}"
+    "serviceAccount:${google_service_account.test-account-2.email}",
   ]
 }
 `, account, account, billingAccountId, role)
@@ -166,7 +166,7 @@ func testAccBillingAccountIamMember_basic(account, billingAccountId, role string
 	return fmt.Sprintf(`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
-  display_name = "Iam Testing Account"
+  display_name = "Billing Account Iam Testing Account"
 }
 
 resource "google_billing_account_iam_member" "foo" {

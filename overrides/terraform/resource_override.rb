@@ -13,6 +13,9 @@
 
 require 'overrides/resources'
 require 'provider/terraform/custom_code'
+require 'provider/terraform/docs'
+require 'provider/terraform/examples'
+require 'provider/terraform/virtual_fields'
 
 module Overrides
   module Terraform
@@ -21,6 +24,12 @@ module Overrides
     class ResourceOverride < Overrides::ResourceOverride
       def self.attributes
         [
+          # If non-empty, overrides the full given resource name.
+          # i.e. 'google_project' for resourcemanager.Project
+          # Use Provider::Terraform::Config.legacy_name to override just
+          # product name.
+          :legacy_name,
+
           # The Terraform resource id format used when calling #setId(...).
           # For instance, `{{name}}` means the id will be the resource name.
           :id_format,
@@ -36,6 +45,9 @@ module Overrides
           # corresponding OiCS walkthroughs.
           :examples,
 
+          # Virtual fields on the Terraform resource.
+          :virtual_fields,
+
           # TODO(alexstephen): Deprecate once all resources using autogen async.
           :autogen_async,
 
@@ -46,7 +58,16 @@ module Overrides
           # (i.e. terraform-provider-conversion)
           :exclude_validator,
 
-          :timeouts
+          :timeouts,
+
+          # An array of function names that determine whether an error is retryable.
+          :error_retry_predicates,
+
+          :schema_version,
+
+          # This enables resources that get their project via a reference to a different resource
+          # instead of a project field to use User Project Overrides
+          :supports_indirect_user_project_override
         ]
       end
 
@@ -58,8 +79,13 @@ module Overrides
 
         @examples ||= []
 
-        check :id_format, type: String, default: '{{name}}'
+        check :legacy_name, type: String
+        check :id_format, type: String
         check :examples, item_type: Provider::Terraform::Examples, type: Array, default: []
+        check :virtual_fields,
+              item_type: Provider::Terraform::VirtualFields,
+              type: Array,
+              default: []
 
         check :custom_code, type: Provider::Terraform::CustomCode,
                             default: Provider::Terraform::CustomCode.new
@@ -68,7 +94,10 @@ module Overrides
         check :autogen_async, type: :boolean, default: false
         check :exclude_import, type: :boolean, default: false
 
-        check :timeouts, type: Api::Timeouts, default: Api::Timeouts.new
+        check :timeouts, type: Api::Timeouts
+        check :error_retry_predicates, type: Array, item_type: String
+        check :schema_version, type: Integer
+        check :supports_indirect_user_project_override, type: :boolean, default: false
       end
 
       def apply(resource)

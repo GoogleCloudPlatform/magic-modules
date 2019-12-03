@@ -13,7 +13,7 @@
 # limitations under the License.
 -%>
 <% autogen_exception -%>
-<% resource_underscored_name = plural ? resource_name(object, product_ns).pluralize : resource_name(object, product_ns) -%>
+<% resource_underscored_name = plural ? resource_name(object, product).pluralize : resource_name(object, product) -%>
 ---
 title: About the <%= resource_underscored_name -%> resource
 platform: gcp
@@ -24,7 +24,7 @@ A `<%= resource_underscored_name -%>` is used to test a Google <%= object.name -
 
 ## Examples
 ```
-<%= compile("templates/inspec/examples/#{resource_name(object, product_ns)}/#{resource_underscored_name}.erb") -%>
+<%= compile("templates/inspec/examples/#{resource_name(object, product)}/#{resource_underscored_name}.erb") -%>
 
 ```
 
@@ -32,9 +32,9 @@ A `<%= resource_underscored_name -%>` is used to test a Google <%= object.name -
 Properties that can be accessed from the `<%= resource_underscored_name -%>` resource:
 
 <% if plural -%>
-See <%= "[#{resource_name(object, product_ns)}.md](#{resource_name(object, product_ns)}.md)" -%> for more detailed information
+See <%= "[#{resource_name(object, product)}.md](#{resource_name(object, product)}.md)" -%> for more detailed information
 <% object.all_user_properties.reject(&:exclude_plural).each do |prop| -%>
-  * `<%= "#{(prop.override_name || prop.out_name).pluralize}" -%>`: an array of `<%= resource_name(object, product_ns) -%>` <%= "#{prop.out_name}" -%>
+  * `<%= "#{(prop.override_name || prop.out_name).pluralize}" -%>`: an array of `<%= resource_name(object, product) -%>` <%= "#{prop.out_name}" -%>
 
 <% end -%>
 
@@ -43,18 +43,17 @@ This resource supports all of the above properties as filter criteria, which can
 with `where` as a block or a method.
 <% else # if plural -%>
 <% object.all_user_properties.each do |prop| -%>
-  * `<%= "#{prop.out_name}" -%>`: <%= "#{prop.description.split("\n").join(' ')}" -%>
 
+<%= markdown_format(prop) -%>
 
-<%= sub_property_descriptions(prop) -%>
 <% end -%>
 
 <% end # if plural -%>
-<% unless @api.apis_required.empty? -%>
+<% unless @api.apis_required&.empty? -%>
 
 ## GCP Permissions
 
-<% @api.apis_required.each do |api| -%>
+<% @api.apis_required&.each do |api| -%>
 Ensure the [<%= api.name -%>](<%= api.url -%>) is enabled for the current project.
 <% end # @api.apis_required.each -%>
 <% end # unless @api.apis_required.empty? -%>

@@ -5,3 +5,12 @@ describe google_bigquery_datasets(project: <%= doc_generation ? "#{gcp_project_i
   its('friendly_names') { should include <%= doc_generation ? "'#{dataset['friendly_name']}'" : "dataset['friendly_name']" -%> }
   its('locations') { should include <%= doc_generation ? "'#{dataset['location']}'" : "dataset['location']" -%> }
 end
+
+google_bigquery_datasets(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>).ids.each do |name|
+  google_bigquery_dataset(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: name.split(':').last).access.each do |access|
+    describe access do
+      # No bigquery dataset should allow access to allUsers
+      its('iam_member') { should_not cmp 'allUsers' }
+    end
+  end
+end

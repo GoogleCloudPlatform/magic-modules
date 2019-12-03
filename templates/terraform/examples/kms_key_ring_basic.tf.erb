@@ -1,0 +1,4 @@
+resource "google_kms_key_ring" "<%= ctx[:primary_resource_id] %>" {
+  name     = "keyring-example"
+  location = "global"
+}

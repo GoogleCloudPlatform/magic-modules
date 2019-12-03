@@ -148,6 +148,9 @@ router:
 
 snapshot:
   name: inspec-gcp-disk-snapshot
+  disk_name: inspec-snapshot-disk
+  disk_type: pd-standard
+  disk_image: debian-cloud/debian-10-buster-v20191014
 
 https_proxy:
   name: inspec-gcp-https-proxy
@@ -221,3 +224,131 @@ regional_node_pool:
   cluster_name: inspec-gcp-regional-node-pool-cluster
   node_count: 1
   initial_node_count: 1
+
+org_sink:
+  name: inspec-gcp-org-sink
+  filter: resource.type = gce_instance
+
+standardappversion:
+  version_id: v2
+  service: default
+  runtime: nodejs10
+  entrypoint: "node ./app.js"
+  port: "8080"
+  
+ml_model:
+  name: ml_model
+  region: us-central1
+  description: My awesome ML model
+  online_prediction_logging: true
+  online_prediction_console_logging: true
+
+dataproc_cluster:
+  name: inspec-dataproc-cluster
+  label_key: label
+  label_value: value
+  config:
+    master_config:
+      num_instances: 1
+      machine_type: n1-standard-1
+      boot_disk_type: pd-ssd
+      boot_disk_size_gb: 15
+    worker_config:
+      num_instances: 2
+      machine_type: n1-standard-1
+      boot_disk_size_gb: 20
+      num_local_ssds: 1
+    preemptible_worker_config:
+      num_instances: 0
+    software_config:
+      prop_key: "dataproc:dataproc.allow.zero.workers"
+      prop_value: "true"
+    gce_cluster_config:
+      tag: foo
+
+folder_exclusion:
+  name: inspec-folder-exclusion
+  description: My folder exclusion description
+  filter: "resource.type = gce_instance AND severity <= DEBUG"
+
+filestore_instance:
+  name: inspecgcp
+  zone: us-central1-b
+  tier: PREMIUM
+  fileshare_capacity_gb: 2660
+  fileshare_name: inspecgcp
+  network_name: default
+  network_mode: MODE_IPV4
+
+folder_sink:
+  name: inspec-gcp-folder-sink
+  filter: resource.type = gce_instance AND severity >= ERROR
+
+runtimeconfig_config:
+  name: inspec-gcp-runtime-config
+  description: My runtime configurations
+
+runtimeconfig_variable:
+  name: prod-variables/hostname
+  text: example.com
+
+redis:
+  name: my-redis-cache
+  tier: STANDARD_HA
+  memory_size_gb: 1
+  region: us-central1
+  location_id: us-central1-a
+  alternative_location_id: us-central1-f
+  redis_version: REDIS_3_2
+  display_name: InSpec test instance
+  reserved_ip_range: "192.168.0.0/29"
+  label_key: key
+  label_value: value
+
+network_endpoint_group:
+  name: inspec-gcp-endpoint-group
+  default_port: 90
+
+node_template:
+  name: inspec-node-template
+  label_key: key
+  label_value: value
+
+node_group:
+  name: inspec-node-group
+  description: A description of the node group
+  size: 0
+
+router_nat:
+  name: inspec-router-nat
+  nat_ip_allocate_option: AUTO_ONLY
+  source_subnetwork_ip_ranges_to_nat: ALL_SUBNETWORKS_ALL_IP_RANGES
+  min_ports_per_vm: 2
+  log_config_enable: true
+  log_config_filter: ERRORS_ONLY
+
+service:
+  name: maps-android-backend.googleapis.com
+
+spannerinstance:
+  config: regional-us-east1
+  name: spinstance
+  display_name: inspectest
+  num_nodes: 1
+  label_key: env
+  label_value: test
+
+spannerdatabase:
+  name: spdatabase
+  instance: spinstance
+  ddl: "CREATE TABLE test (test STRING(MAX),) PRIMARY KEY (test)" 
+
+scheduler_job:
+  # region must match where the appengine instance is deployed
+  region: us-central1
+  name: job-name
+  description: A description
+  schedule: "*/8 * * * *"
+  time_zone: America/New_York
+  http_method: POST
+  http_target_uri: https://example.com/ping

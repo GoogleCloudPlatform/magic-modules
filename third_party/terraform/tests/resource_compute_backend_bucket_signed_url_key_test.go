@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccComputeBackendBucketSignedUrlKey_basic(t *testing.T) {
@@ -35,13 +36,13 @@ func testAccComputeBackendBucketSignedUrlKey_basic(context map[string]interface{
 resource "google_compute_backend_bucket_signed_url_key" "backend_key" {
   name           = "test-key-%{random_suffix}"
   key_value      = "iAmAFakeKeyRandomBytes=="
-  backend_bucket = "${google_compute_backend_bucket.test_backend.name}"
+  backend_bucket = google_compute_backend_bucket.test_backend.name
 }
 
 resource "google_compute_backend_bucket" "test_backend" {
   name        = "test-signed-backend-bucket-%{random_suffix}"
   description = "Contains beautiful images"
-  bucket_name = "${google_storage_bucket.bucket.name}"
+  bucket_name = google_storage_bucket.bucket.name
   enable_cdn  = true
 }
 
@@ -84,33 +85,34 @@ func checkComputeBackendBucketSignedUrlKeyExists(s *terraform.State) (bool, erro
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		keyName := rs.Primary.ID
+		keyName := rs.Primary.Attributes["name"]
 
-		url, err := replaceVarsForTest(rs, "https://www.googleapis.com/compute/v1/projects/{{project}}/global/backendBuckets/{{backend_bucket}}")
+		url, err := replaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/global/backendBuckets/{{backend_bucket}}")
 		if err != nil {
 			return false, err
 		}
 
-		res, err := sendRequest(config, "GET", url, nil)
-		if err == nil {
-			policyRaw, ok := res["cdnPolicy"]
-			if !ok {
-				return false, nil
-			}
+		res, err := sendRequest(config, "GET", "", url, nil)
+		if err != nil {
+			return false, err
+		}
+		policyRaw, ok := res["cdnPolicy"]
+		if !ok {
+			return false, nil
+		}
 
-			policy := policyRaw.(map[string]interface{})
-			keyNames, ok := policy["signedUrlKeyNames"]
-			if !ok {
-				return false, nil
-			}
+		policy := policyRaw.(map[string]interface{})
+		keyNames, ok := policy["signedUrlKeyNames"]
+		if !ok {
+			return false, nil
+		}
 
-			// Because the sensitive key value is not returned, all we can do is verify a
-			// key with this name exists and assume the key value hasn't been changed.
-			for _, k := range keyNames.([]interface{}) {
-				if k.(string) == keyName {
-					// Just return empty map to indicate key was found
-					return true, nil
-				}
+		// Because the sensitive key value is not returned, all we can do is verify a
+		// key with this name exists and assume the key value hasn't been changed.
+		for _, k := range keyNames.([]interface{}) {
+			if k.(string) == keyName {
+				// Just return empty map to indicate key was found
+				return true, nil
 			}
 		}
 	}

@@ -13,11 +13,11 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   ScanConfig: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "scan_config_basic"
         primary_resource_id: "scan-config"
+        min_version: beta
         vars:
           address_name: "scan-basic-static-ip"
           scan_config_name: "terraform-scan-config"
@@ -27,8 +27,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validation.IntBetween(5, 20)'
       authentication.googleAccount.password: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/scan_config_auth_custom_password.go.erb'
       authentication.customAccount.password: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/scan_config_auth_google_password.go.erb'
       schedule: !ruby/object:Overrides::Terraform::PropertyOverride
         properties:
           scheduleTime: !ruby/object:Overrides::Terraform::PropertyOverride

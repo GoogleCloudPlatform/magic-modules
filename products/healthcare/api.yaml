@@ -1,0 +1,386 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Healthcare
+display_name: Cloud Healthcare
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://healthcare.googleapis.com/v1beta1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Cloud Healthcare API
+    url: https://console.cloud.google.com/apis/library/healthcare.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Dataset'
+    kind: "healthcare#dataset"
+    base_url: 'projects/{{project}}/locations/{{location}}/datasets?datasetId={{name}}'
+    self_link: 'projects/{{project}}/locations/{{location}}/datasets/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A Healthcare `Dataset` is a toplevel logical grouping of `dicomStores`, `fhirStores` and `hl7V2Stores`.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        description: |
+          The location for the Dataset.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource name for the Dataset.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: "timeZone"
+        update_url: 'projects/{{project}}/locations/{{location}}/datasets/{{name}}'
+        description: |
+          The default timezone used by this dataset. Must be a either a valid IANA time zone name such as
+          "America/New_York" or empty, which defaults to UTC. This is used for parsing times in resources
+          (e.g., HL7 messages) where no explicit timezone is specified.
+        required: false
+      - !ruby/object:Api::Type::Time
+        name: 'creationTime'
+        description: |
+          The time that this resource was created on the server.
+          This is in RFC3339 text format.
+        required: false
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        description: |
+          The fully qualified name of this dataset
+        output: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating a dataset':
+          'https://cloud.google.com/healthcare/docs/how-tos/datasets'
+      api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1beta1/projects.locations.datasets'
+  - !ruby/object:Api::Resource
+    name: 'DicomStore'
+    kind: "healthcare#dicomStore"
+    base_url: '{{dataset}}/dicomStores?dicomStoreId={{name}}'
+    self_link: '{{dataset}}/dicomStores/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A DicomStore is a datastore inside a Healthcare dataset that conforms to the DICOM
+      (https://www.dicomstandard.org/about/) standard for Healthcare information exchange
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'dataset'
+        description: |
+          Identifies the dataset addressed by this request. Must be in the format
+          'projects/{project}/locations/{location}/datasets/{dataset}'
+        required: true
+        input: true
+        resource: 'Dataset'
+        imports: 'selfLink'
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource name for the DicomStore.
+
+          ** Changing this property may recreate the Dicom store (removing all data) **
+        required: true
+        input: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: labels
+        required: false
+        update_url: '{{dataset}}/dicomStores/{{name}}'
+        description: |
+          User-supplied key-value pairs used to organize DICOM stores.
+
+          Label keys must be between 1 and 63 characters long, have a UTF-8 encoding of maximum 128 bytes, and must
+          conform to the following PCRE regular expression: [\p{Ll}\p{Lo}][\p{Ll}\p{Lo}\p{N}_-]{0,62}
+
+          Label values are optional, must be between 1 and 63 characters long, have a UTF-8 encoding of maximum 128
+          bytes, and must conform to the following PCRE regular expression: [\p{Ll}\p{Lo}\p{N}_-]{0,63}
+
+          No more than 64 labels can be associated with a given store.
+
+          An object containing a list of "key": value pairs.
+          Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+
+      - !ruby/object:Api::Type::NestedObject
+        name: notificationConfig
+        required: false
+        update_url: '{{dataset}}/dicomStores/{{name}}'
+        properties:
+          - !ruby/object:Api::Type::String
+            name: pubsubTopic
+            description: |
+              The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
+              PubsubMessage.Data will contain the resource name. PubsubMessage.MessageId is the ID of this message.
+              It is guaranteed to be unique within the topic. PubsubMessage.PublishTime is the time at which the message
+              was published. Notifications are only sent if the topic is non-empty. Topic names must be scoped to a
+              project. cloud-healthcare@system.gserviceaccount.com must have publisher permissions on the given
+              Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
+            required: true
+
+      - !ruby/object:Api::Type::Time
+        name: 'creationTime'
+        description: |
+          The time that this resource was created on the server.
+          This is in RFC3339 text format.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        description: |
+          The fully qualified name of this dataset
+        output: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating a DICOM store':
+          'https://cloud.google.com/healthcare/docs/how-tos/dicom'
+      api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1beta1/projects.locations.datasets.dicomStores'
+  - !ruby/object:Api::Resource
+    name: 'FhirStore'
+    kind: "healthcare#fhirStore"
+    base_url: '{{dataset}}/fhirStores?fhirStoreId={{name}}'
+    self_link: '{{dataset}}/fhirStores/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A FhirStore is a datastore inside a Healthcare dataset that conforms to the FHIR (https://www.hl7.org/fhir/STU3/)
+      standard for Healthcare information exchange
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'dataset'
+        description: |
+          Identifies the dataset addressed by this request. Must be in the format
+          'projects/{project}/locations/{location}/datasets/{dataset}'
+        required: true
+        input: true
+        resource: 'Dataset'
+        imports: 'selfLink'
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource name for the FhirStore.
+
+          ** Changing this property may recreate the FHIR store (removing all data) **
+        required: true
+        input: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableUpdateCreate'
+        description: |
+          Whether this FHIR store has the updateCreate capability. This determines if the client can use an Update
+          operation to create a new resource with a client-specified ID. If false, all IDs are server-assigned through
+          the Create operation and attempts to Update a non-existent resource will return errors. Please treat the audit
+          logs with appropriate levels of care if client-specified resource IDs contain sensitive data such as patient
+          identifiers, those IDs will be part of the FHIR resource path recorded in Cloud audit logs and Cloud Pub/Sub
+          notifications.
+        required: false
+        update_url: '{{dataset}}/fhirStores/{{name}}'
+      - !ruby/object:Api::Type::Boolean
+        name: 'disableReferentialIntegrity'
+        description: |
+          Whether to disable referential integrity in this FHIR store. This field is immutable after FHIR store
+          creation. The default value is false, meaning that the API will enforce referential integrity and fail the
+          requests that will result in inconsistent state in the FHIR store. When this field is set to true, the API
+          will skip referential integrity check. Consequently, operations that rely on references, such as
+          Patient.get$everything, will not return all the results if broken references exist.
+
+          ** Changing this property may recreate the FHIR store (removing all data) **
+        required: false
+        input: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'disableResourceVersioning'
+        description: |
+          Whether to disable resource versioning for this FHIR store. This field can not be changed after the creation
+          of FHIR store. If set to false, which is the default behavior, all write operations will cause historical
+          versions to be recorded automatically. The historical versions can be fetched through the history APIs, but
+          cannot be updated. If set to true, no historical versions will be kept. The server will send back errors for
+          attempts to read the historical versions.
+
+          ** Changing this property may recreate the FHIR store (removing all data) **
+        required: false
+        input: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableHistoryImport'
+        description: |
+          Whether to allow the bulk import API to accept history bundles and directly insert historical resource
+          versions into the FHIR store. Importing resource histories creates resource interactions that appear to have
+          occurred in the past, which clients may not want to allow. If set to false, history bundles within an import
+          will fail with an error.
+
+          ** Changing this property may recreate the FHIR store (removing all data) **
+
+          ** This property can be changed manually in the Google Cloud Healthcare admin console without recreating the FHIR store **
+        required: false
+        input: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: labels
+        required: false
+        update_url: '{{dataset}}/fhirStores/{{name}}'
+        description: |
+          User-supplied key-value pairs used to organize FHIR stores.
+
+          Label keys must be between 1 and 63 characters long, have a UTF-8 encoding of maximum 128 bytes, and must
+          conform to the following PCRE regular expression: [\p{Ll}\p{Lo}][\p{Ll}\p{Lo}\p{N}_-]{0,62}
+
+          Label values are optional, must be between 1 and 63 characters long, have a UTF-8 encoding of maximum 128
+          bytes, and must conform to the following PCRE regular expression: [\p{Ll}\p{Lo}\p{N}_-]{0,63}
+
+          No more than 64 labels can be associated with a given store.
+
+          An object containing a list of "key": value pairs.
+          Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+
+      - !ruby/object:Api::Type::NestedObject
+        name: notificationConfig
+        required: false
+        update_url: '{{dataset}}/fhirStores/{{name}}'
+        properties:
+          - !ruby/object:Api::Type::String
+            name: pubsubTopic
+            description: |
+              The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
+              PubsubMessage.Data will contain the resource name. PubsubMessage.MessageId is the ID of this message.
+              It is guaranteed to be unique within the topic. PubsubMessage.PublishTime is the time at which the message
+              was published. Notifications are only sent if the topic is non-empty. Topic names must be scoped to a
+              project. cloud-healthcare@system.gserviceaccount.com must have publisher permissions on the given
+              Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
+            required: true
+
+      - !ruby/object:Api::Type::Time
+        name: 'creationTime'
+        description: |
+          The time that this resource was created on the server.
+          This is in RFC3339 text format.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        description: |
+          The fully qualified name of this dataset
+        output: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating a FHIR store':
+          'https://cloud.google.com/healthcare/docs/how-tos/fhir'
+      api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1beta1/projects.locations.datasets.fhirStores'
+  - !ruby/object:Api::Resource
+    name: 'Hl7V2Store'
+    kind: "healthcare#hl7V2Store"
+    base_url: '{{dataset}}/hl7V2Stores?hl7V2StoreId={{name}}'
+    self_link: '{{dataset}}/hl7V2Stores/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A Hl7V2Store is a datastore inside a Healthcare dataset that conforms to the FHIR (https://www.hl7.org/hl7V2/STU3/)
+      standard for Healthcare information exchange
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'dataset'
+        description: |
+          Identifies the dataset addressed by this request. Must be in the format
+          'projects/{project}/locations/{location}/datasets/{dataset}'
+        required: true
+        input: true
+        resource: 'Dataset'
+        imports: 'selfLink'
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource name for the Hl7V2Store.
+
+          ** Changing this property may recreate the Hl7v2 store (removing all data) **
+        required: true
+        input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: parserConfig
+        required: false
+        update_url: '{{dataset}}/hl7V2Stores/{{name}}'
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: allowNullHeader
+            at_least_one_of:
+              - parser_config.0.allow_null_header
+              - parser_config.0.segment_terminator
+            description: |
+              Determines whether messages with no header are allowed.
+          - !ruby/object:Api::Type::String
+            name: segmentTerminator
+            at_least_one_of:
+              - parser_config.0.allow_null_header
+              - parser_config.0.segment_terminator
+            description: |
+              Byte(s) to be used as the segment terminator. If this is unset, '\r' will be used as segment terminator.
+
+              A base64-encoded string.
+
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: labels
+        required: false
+        update_url: '{{dataset}}/hl7V2Stores/{{name}}'
+        description: |
+          User-supplied key-value pairs used to organize HL7v2 stores.
+
+          Label keys must be between 1 and 63 characters long, have a UTF-8 encoding of maximum 128 bytes, and must
+          conform to the following PCRE regular expression: [\p{Ll}\p{Lo}][\p{Ll}\p{Lo}\p{N}_-]{0,62}
+
+          Label values are optional, must be between 1 and 63 characters long, have a UTF-8 encoding of maximum 128
+          bytes, and must conform to the following PCRE regular expression: [\p{Ll}\p{Lo}\p{N}_-]{0,63}
+
+          No more than 64 labels can be associated with a given store.
+
+          An object containing a list of "key": value pairs.
+          Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+
+      - !ruby/object:Api::Type::NestedObject
+        name: notificationConfig
+        required: false
+        update_url: '{{dataset}}/hl7V2Stores/{{name}}'
+        properties:
+          - !ruby/object:Api::Type::String
+            name: pubsubTopic
+            description: |
+              The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
+              PubsubMessage.Data will contain the resource name. PubsubMessage.MessageId is the ID of this message.
+              It is guaranteed to be unique within the topic. PubsubMessage.PublishTime is the time at which the message
+              was published. Notifications are only sent if the topic is non-empty. Topic names must be scoped to a
+              project. cloud-healthcare@system.gserviceaccount.com must have publisher permissions on the given
+              Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
+            required: true
+
+      - !ruby/object:Api::Type::Time
+        name: 'creationTime'
+        description: |
+          The time that this resource was created on the server.
+          This is in RFC3339 text format.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        description: |
+          The fully qualified name of this dataset
+        output: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating a HL7v2 Store':
+          'https://cloud.google.com/healthcare/docs/how-tos/hl7v2'
+      api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1beta1/projects.locations.datasets.hl7V2Stores'

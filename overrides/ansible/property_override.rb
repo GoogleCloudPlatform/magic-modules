@@ -23,6 +23,7 @@ module Overrides
       def self.attributes
         %i[
           aliases
+          contain_extra_docs
         ]
       end
 
@@ -32,6 +33,7 @@ module Overrides
         super
 
         check :aliases, type: ::Array, item_type: ::String
+        check :contain_extra_docs, type: :boolean, default: true
       end
     end
   end

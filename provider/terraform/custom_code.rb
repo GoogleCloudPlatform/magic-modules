@@ -19,205 +19,6 @@ require 'provider/abstract_core'
 
 module Provider
   class Terraform < Provider::AbstractCore
-    # Inserts custom strings into terraform resource docs.
-    class Docs < Api::Object
-      # All these values should be strings, which will be inserted
-      # directly into the terraform resource documentation.  The
-      # strings should _not_ be the names of template files
-      # (This should be reconsidered if we find ourselves repeating
-      # any string more than ones), but rather the actual text
-      # (including markdown) which needs to be injected into the
-      # template.
-      # The text will be injected at the bottom of the specified
-      # section.
-      attr_reader :warning
-      attr_reader :required_properties
-      attr_reader :optional_properties
-      attr_reader :attributes
-
-      def validate
-        super
-        check :warning, type: String
-        check :required_properties, type: String
-        check :optional_properties, type: String
-        check :attributes, type: String
-      end
-    end
-
-    # Generates configs to be shown as examples in docs and outputted as tests
-    # from a shared template
-    class Examples < Api::Object
-      include Compile::Core
-      include Google::GolangUtils
-
-      # The name of the example in lower snake_case.
-      # Generally takes the form of the resource name followed by some detail
-      # about the specific test. For example, "address_with_subnetwork".
-      # The template for the example is expected at the path
-      # "templates/terraform/examples/{{name}}.tf.erb"
-      attr_reader :name
-
-      # The id of the "primary" resource in an example. Used in import tests.
-      # This is the value that will appear in the Terraform config url. For
-      # example:
-      # resource "google_compute_address" {{primary_resource_id}} {
-      #   ...
-      # }
-      attr_reader :primary_resource_id
-
-      # vars is a Hash from template variable names to output variable names.
-      # It will use the provided value as a prefix for generated tests, and
-      # insert it into the docs verbatim.
-      attr_reader :vars
-      # Some variables need to hold special values during tests, and cannot
-      # be inferred by Open in Cloud Shell.  For instance, org_id
-      # needs to be the correct value during integration tests, or else
-      # org tests cannot pass. Other examples include an existing project_id,
-      # a zone, a service account name, etc.
-      #
-      # test_env_vars is a Hash from template variable names to one of the
-      # following symbols:
-      #  - :PROJECT_NAME
-      #  - :FIRESTORE_PROJECT_NAME
-      #  - :CREDENTIALS
-      #  - :REGION
-      #  - :ORG_ID
-      #  - :ORG_TARGET
-      #  - :BILLING_ACCT
-      #  - :SERVICE_ACCT
-      # This list corresponds to the `get*FromEnv` methods in provider_test.go.
-      attr_reader :test_env_vars
-
-      # The version name of of the example's version if it's different than the
-      # resource version, eg. `beta`
-      #
-      # This should be the highest version of all the features used in the
-      # example; if there's a single beta field in an example, the example's
-      # min_version is beta. This is only needed if an example uses features
-      # with a different version than the resource; a beta resource's examples
-      # are all automatically versioned at beta.
-      #
-      # When an example has a version of beta, each resource must use the
-      # `google-beta` provider in the config. If the `google` provider is
-      # implicitly used, the test will fail.
-      #
-      # NOTE: Until Terraform 0.12 is released and is used in the OiCS tests, an
-      # explicit provider block should be defined. While the tests @ 0.12 will
-      # use `google-beta` automatically, past Terraform versions required an
-      # explicit block.
-      attr_reader :min_version
-
-      # Extra properties to ignore read on during import.
-      # These properties will likely be custom code.
-      attr_reader :ignore_read_extra
-
-      # Whether to skip generating tests for this resource
-      attr_reader :skip_test
-
-      def config_documentation
-        docs_defaults = {
-          PROJECT_NAME: 'my-project-name',
-          FIRESTORE_PROJECT_NAME: 'my-project-name',
-          CREDENTIALS: 'my/credentials/filename.json',
-          REGION: 'us-west1',
-          ORG_ID: '123456789',
-          ORG_TARGET: '123456789',
-          BILLING_ACCT: '000000-0000000-0000000-000000',
-          SERVICE_ACCT: 'emailAddress:my@service-account.com'
-        }
-        @vars ||= {}
-        @test_env_vars ||= {}
-        body = lines(compile_file(
-                       {
-                         vars: vars,
-                         test_env_vars: test_env_vars.map { |k, v| [k, docs_defaults[v]] }.to_h,
-                         primary_resource_id: primary_resource_id
-                       },
-                       "templates/terraform/examples/#{name}.tf.erb"
-                     ))
-        lines(compile_file(
-                { content: body },
-                'templates/terraform/examples/base_configs/documentation.tf.erb'
-              ))
-      end
-
-      def config_test
-        @vars ||= {}
-        @test_env_vars ||= {}
-        body = lines(compile_file(
-                       {
-                         vars: vars.map { |k, str| [k, "#{str}-%{random_suffix}"] }.to_h,
-                         test_env_vars: test_env_vars.map { |k, _| [k, "%{#{k}}"] }.to_h,
-                         primary_resource_id: primary_resource_id
-                       },
-                       "templates/terraform/examples/#{name}.tf.erb"
-                     ))
-
-        body = substitute_test_paths body
-
-        lines(compile_file(
-                {
-                  content: body,
-                  count: vars.length
-                },
-                'templates/terraform/examples/base_configs/test_body.go.erb'
-              ))
-      end
-
-      def config_example
-        @vars ||= []
-        # Examples with test_env_vars are skipped elsewhere
-        body = lines(compile_file(
-                       {
-                         vars: vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h,
-                         primary_resource_id: primary_resource_id
-                       },
-                       "templates/terraform/examples/#{name}.tf.erb"
-                     ))
-
-        substitute_example_paths body
-      end
-
-      def oics_link
-        hash = {
-          cloudshell_git_repo: 'https://github.com/terraform-google-modules/docs-examples.git',
-          cloudshell_working_dir: @name,
-          cloudshell_image: 'gcr.io/graphite-cloud-shell-images/terraform:latest',
-          open_in_editor: 'main.tf',
-          cloudshell_print: './motd',
-          cloudshell_tutorial: './tutorial.md'
-        }
-        URI::HTTPS.build(
-          host: 'console.cloud.google.com',
-          path: '/cloudshell/open',
-          query: URI.encode_www_form(hash)
-        )
-      end
-
-      def substitute_test_paths(config)
-        config = config.gsub('../static/img/header-logo.png', 'test-fixtures/header-logo.png')
-        config = config.gsub('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
-        config.gsub('path/to/certificate.crt', 'test-fixtures/ssl_cert/test.crt')
-      end
-
-      def substitute_example_paths(config)
-        config = config.gsub('../static/img/header-logo.png', '../static/header-logo.png')
-        config = config.gsub('path/to/private.key', '../static/ssl_cert/test.key')
-        config.gsub('path/to/certificate.crt', '../static/ssl_cert/test.crt')
-      end
-
-      def validate
-        super
-        check :name, type: String, required: true
-        check :primary_resource_id, type: String
-        check :min_version, type: String
-        check :vars, type: Hash
-        check :test_env_vars, type: Hash
-        check :ignore_read_extra, type: Array, item_type: String, default: []
-        check :skip_test, type: TrueClass
-      end
-    end
-
     # Inserts custom code into terraform resources.
     class CustomCode < Api::Object
       # Collection of fields allowed in the CustomCode section for
@@ -291,6 +92,10 @@ module Provider
       # useful to prepare an object for deletion, e.g. by detaching
       # a disk before deleting it.
       attr_reader :pre_delete
+      # This code replaces the entire delete method.  Since the delete
+      # method's function header can't be changed, the template
+      # inserts that for you - do not include it in your custom code.
+      attr_reader :custom_delete
       # This code replaces the entire import method.  Since the import
       # method's function header can't be changed, the template
       # inserts that for you - do not include it in your custom code.
@@ -299,6 +104,10 @@ module Provider
       # is useful for parsing attributes that are necessary for
       # the Read() method to succeed.
       attr_reader :post_import
+      # This code is run in the generated test file to check that the
+      # resource was successfully deleted. Use this if the API responds
+      # with a success HTTP code for deleted resources
+      attr_reader :test_check_destroy
 
       def validate
         super
@@ -315,6 +124,7 @@ module Provider
         check :pre_delete, type: String
         check :custom_import, type: String
         check :post_import, type: String
+        check :test_check_destroy, type: String
       end
     end
   end

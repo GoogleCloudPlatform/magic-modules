@@ -1,16 +1,17 @@
 package google
 
 import (
+	"reflect"
 	"regexp"
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 // This function isn't a test of transport.go; instead, it is used as an alternative
 // to replaceVars inside tests.
-func replaceVarsForTest(rs *terraform.ResourceState, linkTmpl string) (string, error) {
+func replaceVarsForTest(config *Config, rs *terraform.ResourceState, linkTmpl string) (string, error) {
 	re := regexp.MustCompile("{{([[:word:]]+)}}")
 	var project, region, zone string
 
@@ -40,6 +41,11 @@ func replaceVarsForTest(rs *terraform.ResourceState, linkTmpl string) (string, e
 
 		if v, ok := rs.Primary.Attributes[m]; ok {
 			return v
+		}
+
+		// Attempt to draw values from the provider config
+		if f := reflect.Indirect(reflect.ValueOf(config)).FieldByName(m); f.IsValid() {
+			return f.String()
 		}
 
 		return ""
@@ -125,6 +131,25 @@ func TestReplaceVars(t *testing.T) {
 				"name":    "instance1",
 			},
 			Expected: "projects/project1/zones/zone1/instances/instance1",
+		},
+		"zonal schema recursive replacement": {
+			Template: "projects/{{project}}/zones/{{zone}}/instances/{{name}}",
+			SchemaValues: map[string]interface{}{
+				"project":   "project1",
+				"zone":      "wrapper{{innerzone}}wrapper",
+				"name":      "instance1",
+				"innerzone": "inner",
+			},
+			Expected: "projects/project1/zones/wrapperinnerwrapper/instances/instance1",
+		},
+		"base path recursive replacement": {
+			Template: "{{CloudRunBasePath}}namespaces/{{project}}/services",
+			Config: &Config{
+				Project:          "default-project",
+				Region:           "default-region",
+				CloudRunBasePath: "https://{{region}}-run.googleapis.com/",
+			},
+			Expected: "https://default-region-run.googleapis.com/namespaces/default-project/services",
 		},
 	}
 

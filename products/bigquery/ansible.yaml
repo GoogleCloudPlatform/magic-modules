@@ -17,26 +17,38 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   Table: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
+      test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
+        exists: |
+          results['resources'] | map(attribute='tableReference') | map(attribute='tableId') | select("match", ".*example_table.*") | list | length == 1
+        does_not_exist: |
+          results['resources'] | map(attribute='tableReference') | map(attribute='tableId') | select("match", ".*example_table.*") | list | length == 0
   Dataset: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
+      test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
+        exists: |
+          results['resources'] | map(attribute='datasetReference') | map(attribute='datasetId') | select("match", ".*my_example_dataset.*") | list | length == 1
+        does_not_exist: |
+          results['resources'] | map(attribute='datasetReference') | map(attribute='datasetId') | select("match", ".*my_example_dataset.*") | list | length == 0
 overrides: !ruby/object:Overrides::ResourceOverrides
   Dataset: !ruby/object:Overrides::Ansible::ResourceOverride
+    # Override self_link due to GoogleCloudPlatform/magic-modules#2219
+    self_link: "projects/{project}/datasets/{name}"
     properties:
+      access.iamMember: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
       access.view.tableId: !ruby/object:Overrides::Ansible::PropertyOverride
         # Ansible linter doesn't like the (_) notation.
-        description: >
+        description: |
           The ID of the table. The ID must contain only letters (a-z,
           A-Z), numbers (0-9), or underscores. The maximum length
           is 1,024 characters.
       datasetReference.datasetId: !ruby/object:Overrides::Ansible::PropertyOverride
         # Ansible linter doesn't like the (_) notation.
-        description: >
+        description: |
           A unique ID for this dataset, without the project name. The ID
           must contain only letters (a-z, A-Z), numbers (0-9), or
           underscores. The maximum length is 1,024 characters.
 files: !ruby/object:Provider::Config::Files
-  copy:
-<%= lines(indent(compile('provider/ansible/common~copy.yaml'), 4)) -%>
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

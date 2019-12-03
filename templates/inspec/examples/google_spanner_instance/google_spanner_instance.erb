@@ -1,0 +1,11 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% spannerinstance = grab_attributes['spannerinstance'] -%>
+
+describe google_spanner_instance(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{spannerinstance['name']}'" : "spannerinstance['name']" -%>, config: <%= doc_generation ? "'#{spannerinstance['config']}'" : "spannerinstance['config']" -%>) do
+  it { should exist }
+  its('config') { should match <%= doc_generation ? "'#{spannerinstance['config']}'" : "spannerinstance['config']" -%> }
+  its('name') { should match <%= doc_generation ? "'#{spannerinstance['name']}'" : "spannerinstance['name']" -%> }
+  its('display_name') { should eq <%= doc_generation ? "'#{spannerinstance['display_name']}'" : "spannerinstance['display_name']" -%> }
+  its('node_count') { should eq <%= doc_generation ? "'#{spannerinstance['num_nodes']}'" : "spannerinstance['num_nodes']" -%> }
+  its('labels') { should include(<%= doc_generation ? "'#{spannerinstance['label_key']}'" : "spannerinstance['label_key']" -%> => <%= doc_generation ? "'#{spannerinstance['label_value']}'" : "spannerinstance['label_value']" -%>) }
+end

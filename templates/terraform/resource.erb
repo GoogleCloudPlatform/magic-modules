@@ -24,14 +24,17 @@ package google
     update_body_properties = object.settable_properties
     update_body_properties = object.settable_properties.reject(&:input) if object.update_verb == :PATCH
     # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
-    client_name_camel = String.new(if @config.client_name then @config.client_name else product_ns end)
-    client_name_camel[0] = client_name_camel[0].downcase
-    client_name_pascal = String.new(client_name_camel)
-    client_name_pascal[0] = client_name_pascal[0].upcase
-    client_name_lower = client_name_camel.downcase
+    client_name = @config.client_name || product_ns
+    client_name_camel = client_name.camelize(:lower)
+    client_name_pascal = client_name.camelize(:upper)
+    client_name_lower = client_name.downcase
     has_project = object.base_url.include?('{{project}}')
     has_region = object.base_url.include?('{{region}}') && object.parameters.any?{ |p| p.name == 'region' && p.ignore_read }
-    timeouts = object.async.nil? ? Api::Timeouts.new : object.timeouts
+    # In order of preference, use TF override,
+    # general defined timeouts, or default Timeouts
+    timeouts = object.timeouts
+    timeouts ||= object&.async&.operation&.timeouts
+    timeouts ||= Api::Timeouts.new
 -%>
 
 func resource<%= resource_name -%>() *schema.Resource {
@@ -59,34 +62,56 @@ func resource<%= resource_name -%>() *schema.Resource {
 <%      end -%>
 
         Timeouts: &schema.ResourceTimeout {
-            Create: schema.DefaultTimeout(<%= timeouts.insert_sec  -%> * time.Second),
-<%          if updatable?(object, properties) -%>
-            Update: schema.DefaultTimeout(<%= timeouts.update_sec -%> * time.Second),
-<%          end -%>
-            Delete: schema.DefaultTimeout(<%= timeouts.delete_sec -%> * time.Second),
+            Create: schema.DefaultTimeout(<%= timeouts.insert_minutes -%> * time.Minute),
+<%      if updatable?(object, properties) -%>
+            Update: schema.DefaultTimeout(<%= timeouts.update_minutes -%> * time.Minute),
+<%      end -%>
+            Delete: schema.DefaultTimeout(<%= timeouts.delete_minutes -%> * time.Minute),
         },
+
+<%      if object.schema_version -%>
+        SchemaVersion: <%= object.schema_version -%>,
+        StateUpgraders: []schema.StateUpgrader{
+<%        for v in 0..object.schema_version-1 -%>
+            {
+                Type: resource<%= "#{resource_name}ResourceV#{v}" -%>().CoreConfigSchema().ImpliedType(),
+                Upgrade: resource<%= "#{resource_name}UpgradeV#{v}" -%>,
+                Version: <%= v -%>,
+            },
+        },
+<%        end -%>
+<%      end -%>
 
 <%=     lines(compile(object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
 
         Schema: map[string]*schema.Schema{
-<%          order_properties(properties).each do |prop| -%>
-<%=             lines(build_schema_property(prop, object)) -%>
-<%          end -%>
-<%=         lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
-<%          if has_project -%>
+<%      order_properties(properties).each do |prop| -%>
+<%=       lines(build_schema_property(prop, object)) -%>
+<%      end -%>
+<%-     unless object.virtual_fields.empty? -%>
+<%-       object.virtual_fields.each do |field| -%>
+            "<%= field.name -%>": {
+              Type:     schema.TypeBool,
+              Optional: true,
+              Default:  false,
+            },
+<%        end -%>
+<%      end -%>
+<%=     lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
+<%      if has_project -%>
             "project": {
                 Type:     schema.TypeString,
                 Optional: true,
                 Computed: true,
                 ForceNew: true,
             },
-<%          end -%>
-<%          if object.has_self_link -%>
+<%      end -%>
+<%      if object.has_self_link -%>
             "self_link": {
                 Type:     schema.TypeString,
                 Computed: true,
             },
-<%          end -%>
+<%      end -%>
         },
     }
 }
@@ -110,29 +135,19 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
     obj := make(map[string]interface{})
 <%  object.settable_properties.each do |prop| -%>
-<%    if prop.flatten_object -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d, config)
+    <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
     if err != nil {
         return err
-<%      unless prop.send_empty_value -%>
-    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
-<%      else -%>
-    } else {
-<%      end -%>
-        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-    }
-<%    else -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
-    if err != nil {
-        return err
-<%      unless prop.send_empty_value -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
-<%      else -%>
+<%    if prop.send_empty_value -%>
     } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
-<%      end -%>
+<%    elsif prop.flatten_object -%>
+    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+<%    else -%>
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+<%    end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
-<%    end -%>
 <%  end -%>
 
 <%  if object.custom_code.encoder -%>
@@ -151,52 +166,69 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    url, err := replaceVars(d, config, "<%= object.full_create_url -%>")
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.create_uri}" -%>")
     if err != nil {
         return err
     }
 
     log.Printf("[DEBUG] Creating new <%= object.name -%>: %#v", obj)
-    res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", url, obj, d.Timeout(schema.TimeoutCreate))
+<%  if object.nested_query&.modify_by_patch -%>
+<%# Keep this after mutex - patch request data relies on current resource state %>
+    obj, err = resource<%= resource_name -%>PatchCreateEncoder(d, meta, obj)
     if err != nil {
-        return fmt.Errorf("Error creating <%= object.name -%>: %s", err)
+        return err
     }
-
-    // Store the ID now
-    id, err := replaceVars(d, config, "<%= object.id_format -%>")
-    if err != nil {
-        return fmt.Errorf("Error constructing id: %s", err)
-    }
-    d.SetId(id)
-
-<%  unless object.async.nil? -%>
+<%  end -%>
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
         return err
     }
 <%  end -%>
-<% if object.autogen_async -%>
-    waitErr := <%= client_name_camel -%>OperationWaitTime(
-    config, res,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
-        int(d.Timeout(schema.TimeoutCreate).Minutes()))
-<% else -%>
-    op := &<%= client_name_lower -%>.Operation{}
-    err = Convert(res, op)
+<%  if object.supports_indirect_user_project_override -%>
+    var project string
+    if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+        project = parts[1]
+    }
+<%  end -%>
+    res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutCreate) <%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    if err != nil {
+        return fmt.Errorf("Error creating <%= object.name -%>: %s", err)
+    }
+
+    // Store the ID now
+    id, err := replaceVars(d, config, "<%= id_format(object) -%>")
+    if err != nil {
+        return fmt.Errorf("Error constructing id: %s", err)
+    }
+    d.SetId(id)
+
+<%  if !object.async.nil? && object.async.allow?('create') -%>
+<%    if object.async.is_a? Api::PollAsync -%>
+    waitURL, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
     if err != nil {
         return err
     }
 
-    waitErr := <%= client_name_camel -%>OperationWaitTime(
-    config.client<%= client_name_pascal -%>, op,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
+    err = <%= client_name_camel -%>PollingWaitTime(
+    config, res,<% if has_project -%> project, <% end -%> waitURL, "Creating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutCreate).Minutes()))
-<% end -%>
 
-    if waitErr != nil {
+    if err != nil {
+        return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
+    }
+<%    end -%>
+<%    if object.async.is_a? Api::OpAsync -%>
+    err = <%= client_name_camel -%>OperationWaitTime(
+    config, res,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
+        int(d.Timeout(schema.TimeoutCreate).Minutes()))
+
+    if err != nil {
         // The resource didn't actually create
         d.SetId("")
-        return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", waitErr)
+        return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
     }
+<%    end -%>
 <%  end -%>
 
     log.Printf("[DEBUG] Finished creating <%= object.name -%> %q: %#v", d.Id(), res)
@@ -209,12 +241,24 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
 
-    url, err := replaceVars(d, config, "<%= object.self_link_url -%>")
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
     if err != nil {
         return err
     }
 
-    res, err := sendRequest(config, "GET", url, nil)
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return err
+    }
+<%  end -%>
+<%  if object.supports_indirect_user_project_override -%>
+    var project string
+    if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+        project = parts[1]
+    }
+<%  end -%>
+    res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, nil)
     if err != nil {
         return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
     }
@@ -233,18 +277,30 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 <%  end -%>
 
+<%- unless object.virtual_fields.empty? -%>
+  // Explicitly set virtual fields to default values if unset
+<%-   object.virtual_fields.each do |field| -%>
+    if _, ok := d.GetOk("<%= field.name -%>"); !ok {
+      d.Set("<%= field.name -%>", false)
+    }
+<%    end -%>
+<%  end -%>
+
 <%  if object.custom_code.decoder -%>
     res, err = resource<%= resource_name -%>Decoder(d, meta, res)
     if err != nil {
         return err
     }
+
+    if res == nil {
+        // Decoding the object has resulted in it being gone. It may be marked deleted
+        log.Printf("[DEBUG] Removing <%= resource_name -%> because it no longer exists.")
+        d.SetId("")
+        return nil
+    }
 <%  end -%>
 
 <%  if has_project -%>
-    project, err := getProject(d, config)
-    if err != nil {
-        return err
-    }
     if err := d.Set("project", project); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
@@ -262,16 +318,15 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
 <%  object.gettable_properties.reject{|p| p.ignore_read }.each do |prop| -%>
 <%    if prop.flatten_object -%>
-    if v, ok := res["<%= prop.api_name -%>"].(map[string]interface{}); res["<%= prop.api_name -%>"] != nil && ok {
-<%      prop.properties.each do |p| -%>
-      if err := d.Set("<%= p.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%><%= titlelize_property(p) -%>(v["<%= p.api_name -%>"], d)); err != nil {
-        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
-    }
-<%      end -%>
-    } else {
-<%      prop.properties.each do |p| -%>
-      d.Set("<%= p.name.underscore -%>", nil)
-<%      end -%>
+// Terraform must set the top level schema field, but since this object contains collapsed properties
+// it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
+    if flattenedProp := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d); flattenedProp != nil {
+        casted := flattenedProp.([]interface{})[0]
+        if casted != nil {
+            for k, v := range casted.(map[string]interface{}) {
+                d.Set(k, v)
+            }
+        }
     }
 <%    else -%>
     if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d)); err != nil {
@@ -288,32 +343,53 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     return nil
 }
 
-<% if updatable?(object, properties) -%>
+<% if updatable?(object, object.root_properties) -%>
 func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
+
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return err
+    }
+<%  end -%>
 
 <%  if object.input -%>
     d.Partial(true)
 
-<%  properties_by_custom_update(properties).each do |key, props| -%>
-<%  top_level_props = props.reject(&:flatten_object) + props.select(&:flatten_object).flat_map(&:properties) -%>
-    if <%= top_level_props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' || ' -%> {
+<%  properties_by_custom_update(object.root_properties).each do |key, props| -%>
+if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' || ' -%> {
         obj := make(map[string]interface{})
-<%    props.each do |prop| -%>
-<%      if prop.flatten_object -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d, config)
-    if err != nil {
-        return err
-<%        unless prop.send_empty_value -%>
-    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
-<%        else -%>
-    } else {
-<%        end -%>
-        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-    }
-<%      else -%>
-<%        if update_body_properties.include? prop -%>
-        <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+
+<%-      unless key[:fingerprint_name] == nil -%>
+        getUrl, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+        if err != nil {
+            return err
+        }
+
+<%         if has_project -%>
+        project, err := getProject(d, config)
+        if err != nil {
+            return err
+        }
+<%         end -%>
+<%         if object.supports_indirect_user_project_override -%>
+        var project string
+        if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+            project = parts[1]
+        }
+<%         end -%>
+        getRes, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, getUrl, nil)
+        if err != nil {
+            return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
+        }
+
+        obj["<%= key[:fingerprint_name] %>"] = getRes["<%= key[:fingerprint_name] %>"]
+
+<%       end # unless key[:fingerprint_name] -%>
+<%      custom_update_properties_by_key(properties, key).each do |prop| -%>
+        <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
+        <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
         if err != nil {
             return err
 <%#         There is some nuance in when we choose to send a value to an update function.
@@ -340,11 +416,6 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%          end -%>
             obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
         }
-<%        else # if update_body_properties.include? prop -%>
-        <%= prop.api_name -%>Prop := d.Get("<%= prop.name.underscore -%>")
-        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-<%        end # if update_body_properties.include? prop -%>
-<%      end # prop.flatten_object -%>
 <%    end # props.each -%>
 
 <%      if object.mutex -%>
@@ -356,48 +427,47 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
         defer mutexKV.Unlock(lockName)
 <%      end -%>
 
-        url, err := replaceVars(d, config, "<%= update_url(object, key[:update_url]) -%>")
+        url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, key[:update_url])}" -%>")
         if err != nil {
             return err
         }
+<%      if object.supports_indirect_user_project_override -%>
+        var project string
+        if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+            project = parts[1]
+        }
+<%      end -%>
 <%      if object.async.nil? -%>
-        _, err = sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
+        _, err = sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate))
 <%      else -%>
-        res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
+        res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate))
 <%      end -%>
         if err != nil {
             return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
         }
 
-<%      unless object.async.nil? -%>
-<%      if has_project -%>
-        project, err := getProject(d, config)
+<%      if !object.async.nil? && object.async.allow?('update') -%>
+<%        if object.async.is_a? Api::PollAsync -%>
+        waitURL, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
         if err != nil {
             return err
         }
-<%      end -%>
-<% if object.autogen_async -%>
 
+        err = <%= client_name_camel -%>PollingWaitTime(
+            config, res, <% if has_project -%> project, <% end -%> waitURL, "Updating <%= object.name -%>",
+            int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+        if err != nil {
+            return err
+        }
+<%        end -%>
+<%        if object.async.is_a? Api::OpAsync -%>
         err = <%= client_name_camel -%>OperationWaitTime(
             config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
             int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-
-<% else -%>
-        op := &<%= client_name_lower -%>.Operation{}
-        err = Convert(res, op)
         if err != nil {
             return err
         }
-
-        err = <%= client_name_camel -%>OperationWaitTime(
-            config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
-            int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-
-<% end -%>
-        if err != nil {
-            return err
-        }
-
+<%        end -%>
 <%      end -%>
 
 <%      props.each do |prop|    -%>
@@ -410,19 +480,9 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  else # if object.input -%>
     obj := make(map[string]interface{})
 <%  update_body_properties.each do |prop| -%>
-<%    if prop.flatten_object -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d, config)
-    if err != nil {
-        return err
-<%      unless prop.send_empty_value -%>
-    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
-<%      else -%>
-    } else {
-<%      end -%>
-        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-    }
-<%    else -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+    <%# flattened objects won't have something stored in state so instead nil is passed to the next expander. -%>
+    <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
     if err != nil {
         return err
 <%      unless prop.send_empty_value -%>
@@ -432,7 +492,6 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%      end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
-<%    end -%>
 <%  end -%>
 
 <%# We need to decide what encoder to use here - if there's an update encoder, use that! -%>
@@ -457,7 +516,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    url, err := replaceVars(d, config, "<%= update_url(object, object.update_url) -%>")
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, object.update_url)}" -%>")
     if err != nil {
         return err
     }
@@ -465,43 +524,53 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
 <%= lines(compile('templates/terraform/update_mask.erb')) if object.update_mask -%>
 <%= lines(compile(object.custom_code.pre_update)) if object.custom_code.pre_update -%>
+<%  if object.nested_query&.modify_by_patch -%>
+<%# Keep this after mutex - patch request data relies on current resource state %>
+    obj, err = resource<%= resource_name -%>PatchUpdateEncoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+<%  end -%>
+<%  if object.supports_indirect_user_project_override -%>
+    var project string
+    if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+        project = parts[1]
+    }
+<%  end -%>
 <%  if object.async.nil? -%>
-    _, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
+    _, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate))
 <%  else -%>
-    res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
+    res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate))
 <% end -%>
 
     if err != nil {
     return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
     }
 
-<%  unless object.async.nil? -%>
-<%  if has_project -%>
-    project, err := getProject(d, config)
+<%  if !object.async.nil? && object.async.allow?('update') -%>
+<%    if object.async.is_a? Api::PollAsync -%>
+    waitURL, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
     if err != nil {
         return err
     }
-<%  end -%>
-<% if object.autogen_async -%>
 
+    err = <%= client_name_camel -%>PollingWaitTime(
+        config, res, <% if has_project -%> project, <% end -%> waitURL, "Updating <%= object.name -%>",
+        int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+
+    if err != nil {
+        return err
+    }
+<%    end -%>
+<%    if object.async.is_a? Api::OpAsync -%>
     err = <%= client_name_camel -%>OperationWaitTime(
-    config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
-    int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-<% else -%>
-    op := &<%= client_name_lower -%>.Operation{}
-    err = Convert(res, op)
-    if err != nil {
-        return err
-    }
-
-    err = <%= client_name_camel -%>OperationWaitTime(
-    config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
-    int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-<% end -%>
+        config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
+        int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 
     if err != nil {
         return err
     }
+<%    end -%>
 <%  end -%>
 <%  end # if object.input -%>
 
@@ -511,7 +580,17 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <% end # if updatable? -%>
 
 func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
+<% if object.custom_code.custom_delete -%>
+<%= lines(compile(object.custom_code.custom_delete)) -%>
+<% else -%>
     config := meta.(*Config)
+
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return err
+    }
+<%  end -%>
 
 <%  if object.mutex -%>
     lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
@@ -522,7 +601,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    url, err := replaceVars(d, config, "<%= object.full_delete_url -%>")
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.delete_uri}" -%>")
     if err != nil {
         return err
     }
@@ -530,35 +609,31 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%# If the deletion of the object requires sending a request body, the custom code will set 'obj' -%>
     var obj map[string]interface{}
 <%= lines(compile(object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
+<%  if object.nested_query&.modify_by_patch -%>
+<%# Keep this after mutex - patch request data relies on current resource state %>
+    obj, err = resource<%= resource_name -%>PatchDeleteEncoder(d, meta, obj)
+    if err != nil {
+        return handleNotFoundError(err, d, "<%= object.name -%>")
+    }
+<%  end -%>
+<%  if object.supports_indirect_user_project_override -%>
+    var project string
+    if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+        project = parts[1]
+    }
+<%  end -%>
     log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
-    res, err := sendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", url, obj, d.Timeout(schema.TimeoutDelete))
+
+    res, err := sendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutDelete))
     if err != nil {
         return handleNotFoundError(err, d, "<%= object.name -%>")
     }
 
-<%  unless object.async.nil? -%>
-<%  if has_project -%>
-    project, err := getProject(d, config)
-    if err != nil {
-        return err
-    }
-<%  end -%>
-<% if object.autogen_async -%>
+<%  if !object.async.nil? && object.async.allow?('delete') -%>
 
     err = <%= client_name_camel -%>OperationWaitTime(
         config, res, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
         int(d.Timeout(schema.TimeoutDelete).Minutes()))
-<% else -%>
-    op := &<%= client_name_lower -%>.Operation{}
-    err = Convert(res, op)
-    if err != nil {
-        return err
-    }
-
-    err = <%= client_name_camel -%>OperationWaitTime(
-        config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
-        int(d.Timeout(schema.TimeoutDelete).Minutes()))
-<% end -%>
 
     if err != nil {
         return err
@@ -567,6 +642,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
     log.Printf("[DEBUG] Finished deleting <%= object.name -%> %q: %#v", d.Id(), res)
     return nil
+<% end -%>
 }
 
 <% unless object.exclude_import -%>
@@ -575,16 +651,27 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <%= lines(compile(object.custom_code.custom_import)) -%>
 <% else -%>
     config := meta.(*Config)
-    if err := parseImportId([]string{"<%= import_id_formats(object).map{|s| format2regex s}.join('","') -%>"}, d, config); err != nil {
+    if err := parseImportId([]string{
+<%   for import_id in import_id_formats(object) -%>
+        "<%= format2regex(import_id) %>",
+<%   end -%>
+    }, d, config); err != nil {
       return nil, err
     }
 
     // Replace import id for the resource id
-    id, err := replaceVars(d, config, "<%= object.id_format -%>")
+    id, err := replaceVars(d, config, "<%= id_format(object) -%>")
     if err != nil {
         return nil, fmt.Errorf("Error constructing id: %s", err)
     }
     d.SetId(id)
+
+<%-  unless object.virtual_fields.empty? -%>
+    // Explicitly set virtual fields to default values on import
+  <%-  object.virtual_fields.each do |field| -%>
+    d.Set("<%= field.name %>", false)
+  <%   end -%>
+<%   end -%>
 <%= lines(compile(object.custom_code.post_import)) if object.custom_code.post_import -%>
 
     return []*schema.ResourceData{d}, nil
@@ -593,11 +680,11 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <% end -%>
 
 <% object.gettable_properties.reject(&:ignore_read).each do |prop| -%>
-<%= lines(build_flatten_method(resource_name, prop), 1) -%>
+<%= lines(build_flatten_method(resource_name, prop, object), 1) -%>
 <% end -%>
 
 <% object.settable_properties.each do |prop| -%>
-<%= lines(build_expand_method(resource_name, prop), 1) -%>
+<%= lines(build_expand_method(resource_name, prop, object), 1) -%>
 <% end -%>
 
 <% if object.custom_code.encoder -%>
@@ -613,12 +700,10 @@ func resource<%= resource_name -%>UpdateEncoder(d *schema.ResourceData, meta int
 <% end -%>
 
 <%  if object.nested_query -%>
-func flattenNested<%= resource_name -%>(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
-    <%=     compile_template('templates/terraform/nested_query.go.erb',
-                         object: object,
-                         settable_properties: object.settable_properties,
-                         resource_name: resource_name) -%>
-}
+<%= compile_template('templates/terraform/nested_query.go.erb',
+                 object: object,
+                 settable_properties: object.settable_properties,
+                 resource_name: resource_name) -%>
 <% end -%>
 
 <% if object.custom_code.decoder -%>
@@ -626,3 +711,7 @@ func resource<%= resource_name -%>Decoder(d *schema.ResourceData, meta interface
 <%= lines(compile(object.custom_code.decoder)) -%>
 }
 <% end -%>
+
+<% if object.schema_version -%>
+<%= lines(compile("templates/terraform/state_migrations/#{product_ns.underscore}_#{object.name.underscore}.go.erb")) -%>
+<%  end -%>

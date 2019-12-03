@@ -1,0 +1,93 @@
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Bigtable
+display_name: Bigtable
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://bigtableadmin.googleapis.com/v2/
+scopes:
+  - https://www.googleapis.com/auth/bigtable
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Bigtable API
+    url: https://console.cloud.google.com/apis/library/bigtable.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: 'AppProfile'
+    kind: 'bigtable#appProfile'
+    base_url: projects/{{project}}/instances/{{instance}}/appProfiles?appProfileId={{app_profile_id}}
+    update_url: projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}?ignoreWarnings={{ignore_warnings}}
+    delete_url: projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}?ignoreWarnings={{ignore_warnings}}
+    update_verb: :PATCH
+    update_mask: true
+    self_link: 'projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}'
+    description: |
+      App profile is a configuration object describing how Cloud Bigtable should treat traffic from a particular end user application.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'appProfileId'
+        description: 'The unique name of the app profile in the form `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
+        required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'instance'
+        description: 'The name of the instance to create the app profile within.'
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'ignoreWarnings'
+        description: 'If true, ignore safety checks when deleting/updating the app profile.'
+        default_value: false
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'The unique name of the requested app profile. Values are of the form `projects/<project>/instances/<instance>/appProfiles/<appProfileId>`.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          Long form description of the use case for this app profile.
+      - !ruby/object:Api::Type::Boolean
+        name: 'multiClusterRoutingUseAny'
+        exactly_one_of:
+          - single_cluster_routing
+          - multi_cluster_routing_use_any
+        description: |
+          If true, read/write requests are routed to the nearest cluster in the instance, and will fail over to the nearest cluster that is available
+          in the event of transient errors or delays. Clusters in a region are considered equidistant. Choosing this option sacrifices read-your-writes
+          consistency to improve availability.
+        input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'singleClusterRouting'
+        exactly_one_of:
+          - single_cluster_routing
+          - multi_cluster_routing_use_any
+        description: |
+          Use a single-cluster routing policy.
+        input: true
+        properties:
+            - !ruby/object:Api::Type::String
+              name: 'clusterId'
+              required: true
+              description: |
+                The cluster to which read/write requests should be routed.
+            - !ruby/object:Api::Type::Boolean
+              name: 'allowTransactionalWrites'
+              description: |
+                If true, CheckAndMutateRow and ReadModifyWriteRow requests are allowed by this app profile.
+                It is unsafe to send these requests to the same table/row/column in multiple clusters.

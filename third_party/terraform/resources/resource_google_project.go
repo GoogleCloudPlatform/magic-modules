@@ -1,17 +1,20 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"log"
-	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/googleapi"
+	"google.golang.org/api/serviceusage/v1"
 )
 
 // resourceGoogleProject returns a *schema.Resource that allows a customer
@@ -28,6 +31,14 @@ func resourceGoogleProject() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceProjectImportState,
 		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(4 * time.Minute),
+			Update: schema.DefaultTimeout(4 * time.Minute),
+			Read:   schema.DefaultTimeout(4 * time.Minute),
+			Delete: schema.DefaultTimeout(4 * time.Minute),
+		},
+
 		MigrateState: resourceGoogleProjectMigrateState,
 
 		Schema: map[string]*schema.Schema{
@@ -63,17 +74,6 @@ func resourceGoogleProject() *schema.Resource {
 				Computed:  true,
 				StateFunc: parseFolderId,
 			},
-			"policy_data": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Removed:  "Use the 'google_project_iam_policy' resource to define policies for a Google Project",
-			},
-			"policy_etag": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "Use the the 'google_project_iam_policy' resource to define policies for a Google Project",
-			},
 			"number": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -86,109 +86,6 @@ func resourceGoogleProject() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-			"app_engine": {
-				Type:     schema.TypeList,
-				Elem:     appEngineResource(),
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-		},
-	}
-}
-
-func appEngineResource() *schema.Resource {
-	return &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"auth_domain": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"location_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"serving_status": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"feature_settings": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-				Elem:     appEngineFeatureSettingsResource(),
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"url_dispatch_rule": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-				Elem:     appEngineURLDispatchRuleResource(),
-			},
-			"code_bucket": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"default_hostname": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"default_bucket": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"gcr_domain": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-		},
-	}
-}
-
-func appEngineURLDispatchRuleResource() *schema.Resource {
-	return &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"domain": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"path": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-			"service": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
-			},
-		},
-	}
-}
-
-func appEngineFeatureSettingsResource() *schema.Resource {
-	return &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"split_health_checks": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Removed:  "This field has been removed. Use the google_app_engine_application resource instead.",
 			},
 		},
 	}
@@ -215,7 +112,11 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		project.Labels = expandLabels(d)
 	}
 
-	op, err := config.clientResourceManager.Projects.Create(project).Do()
+	var op *cloudresourcemanager.Operation
+	err = retryTimeDuration(func() (reqErr error) {
+		op, reqErr = config.clientResourceManager.Projects.Create(project).Do()
+		return reqErr
+	}, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("error creating project %s (%s): %s. "+
 			"If you received a 403 error, make sure you have the"+
@@ -223,7 +124,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 			project.ProjectId, project.Name, err)
 	}
 
-	d.SetId(pid)
+	d.SetId(fmt.Sprintf("projects/%s", pid))
 
 	// Wait for the operation to complete
 	opAsMap, err := ConvertToMap(op)
@@ -257,12 +158,16 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	// a network and deleting it in the background.
 	if !d.Get("auto_create_network").(bool) {
 		// The compute API has to be enabled before we can delete a network.
-		if err = enableService("compute.googleapis.com", project.ProjectId, config); err != nil {
+		if err = enableServiceUsageProjectServices([]string{"compute.googleapis.com"}, project.ProjectId, config, d.Timeout(schema.TimeoutCreate)); err != nil {
 			return fmt.Errorf("Error enabling the Compute Engine API required to delete the default network: %s", err)
 		}
 
-		if err = forceDeleteComputeNetwork(project.ProjectId, "default", config); err != nil {
-			return fmt.Errorf("Error deleting default network in project %s: %s", project.ProjectId, err)
+		if err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default"); err != nil {
+			if isGoogleApiErrorWithCode(err, 404) {
+				log.Printf("[DEBUG] Default network not found for project %q, no need to delete it", project.ProjectId)
+			} else {
+				return fmt.Errorf("Error deleting default network in project %s: %s", project.ProjectId, err)
+			}
 		}
 	}
 	return nil
@@ -270,10 +175,10 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 
 func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	pid := d.Id()
+	parts := strings.Split(d.Id(), "/")
+	pid := parts[len(parts)-1]
 
-	// Read the project
-	p, err := config.clientResourceManager.Projects.Get(pid).Do()
+	p, err := readGoogleProject(d, config)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Project %q", pid))
 	}
@@ -290,10 +195,6 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("name", p.Name)
 	d.Set("labels", p.Labels)
 
-	// We get app_engine.#: "" => "<computed>" without this set
-	// Remove when app_engine field is removed from schema completely
-	d.Set("app_engine", nil)
-
 	if p.Parent != nil {
 		switch p.Parent.Type {
 		case "organization":
@@ -305,8 +206,12 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	var ba *cloudbilling.ProjectBillingInfo
+	err = retryTimeDuration(func() (reqErr error) {
+		ba, reqErr = config.clientBilling.Projects.GetBillingInfo(prefixedProject(pid)).Do()
+		return reqErr
+	}, d.Timeout(schema.TimeoutRead))
 	// Read the billing account
-	ba, err := config.clientBilling.Projects.GetBillingInfo(prefixedProject(pid)).Do()
 	if err != nil && !isApiNotEnabledError(err) {
 		return fmt.Errorf("Error reading billing account for project %q: %v", prefixedProject(pid), err)
 	} else if isApiNotEnabledError(err) {
@@ -367,15 +272,16 @@ func parseFolderId(v interface{}) string {
 
 func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	pid := d.Id()
+	parts := strings.Split(d.Id(), "/")
+	pid := parts[len(parts)-1]
 	project_name := d.Get("name").(string)
 
 	// Read the project
 	// we need the project even though refresh has already been called
 	// because the API doesn't support patch, so we need the actual object
-	p, err := config.clientResourceManager.Projects.Get(pid).Do()
+	p, err := readGoogleProject(d, config)
 	if err != nil {
-		if v, ok := err.(*googleapi.Error); ok && v.Code == http.StatusNotFound {
+		if isGoogleApiErrorWithCode(err, 404) {
 			return fmt.Errorf("Project %q does not exist.", pid)
 		}
 		return fmt.Errorf("Error checking project %q: %s", pid, err)
@@ -387,10 +293,13 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 	if ok := d.HasChange("name"); ok {
 		p.Name = project_name
 		// Do update on project
-		p, err = config.clientResourceManager.Projects.Update(p.ProjectId, p).Do()
-		if err != nil {
+		if err = retryTimeDuration(func() (updateErr error) {
+			p, updateErr = config.clientResourceManager.Projects.Update(p.ProjectId, p).Do()
+			return updateErr
+		}, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return fmt.Errorf("Error updating project %q: %s", project_name, err)
 		}
+
 		d.SetPartial("name")
 	}
 
@@ -401,8 +310,10 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 
 		// Do update on project
-		p, err = config.clientResourceManager.Projects.Update(p.ProjectId, p).Do()
-		if err != nil {
+		if err = retryTimeDuration(func() (updateErr error) {
+			p, updateErr = config.clientResourceManager.Projects.Update(p.ProjectId, p).Do()
+			return updateErr
+		}, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return fmt.Errorf("Error updating project %q: %s", project_name, err)
 		}
 		d.SetPartial("org_id")
@@ -422,8 +333,10 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 		p.Labels = expandLabels(d)
 
 		// Do Update on project
-		p, err = config.clientResourceManager.Projects.Update(p.ProjectId, p).Do()
-		if err != nil {
+		if err = retryTimeDuration(func() (updateErr error) {
+			p, updateErr = config.clientResourceManager.Projects.Update(p.ProjectId, p).Do()
+			return updateErr
+		}, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return fmt.Errorf("Error updating project %q: %s", project_name, err)
 		}
 		d.SetPartial("labels")
@@ -437,10 +350,13 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 	config := meta.(*Config)
 	// Only delete projects if skip_delete isn't set
 	if !d.Get("skip_delete").(bool) {
-		pid := d.Id()
-		_, err := config.clientResourceManager.Projects.Delete(pid).Do()
-		if err != nil {
-			return fmt.Errorf("Error deleting project %q: %s", pid, err)
+		parts := strings.Split(d.Id(), "/")
+		pid := parts[len(parts)-1]
+		if err := retryTimeDuration(func() error {
+			_, delErr := config.clientResourceManager.Projects.Delete(pid).Do()
+			return delErr
+		}, d.Timeout(schema.TimeoutDelete)); err != nil {
+			return handleNotFoundError(err, d, fmt.Sprintf("Project %s", pid))
 		}
 	}
 	d.SetId("")
@@ -448,6 +364,21 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceProjectImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	pid := parts[len(parts)-1]
+	// Prevent importing via project number, this will cause issues later
+	matched, err := regexp.MatchString("^\\d+$", pid)
+	if err != nil {
+		return nil, fmt.Errorf("Error matching project %q: %s", pid, err)
+	}
+
+	if matched {
+		return nil, fmt.Errorf("Error importing project %q, please use project_id", pid)
+	}
+
+	// Ensure the id format includes projects/
+	d.SetId(fmt.Sprintf("projects/%s", pid))
+
 	// Explicitly set to default as a workaround for `ImportStateVerify` tests, and so that users
 	// don't see a diff immediately after import.
 	d.Set("auto_create_network", true)
@@ -455,8 +386,11 @@ func resourceProjectImportState(d *schema.ResourceData, meta interface{}) ([]*sc
 }
 
 // Delete a compute network along with the firewall rules inside it.
-func forceDeleteComputeNetwork(projectId, networkName string, config *Config) error {
-	networkLink := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, networkName)
+func forceDeleteComputeNetwork(d *schema.ResourceData, config *Config, projectId, networkName string) error {
+	networkLink, err := replaceVars(d, config, fmt.Sprintf("{{ComputeBasePath}}projects/%s/global/networks/%s", projectId, networkName))
+	if err != nil {
+		return err
+	}
 
 	token := ""
 	for paginate := true; paginate; {
@@ -473,7 +407,7 @@ func forceDeleteComputeNetwork(projectId, networkName string, config *Config) er
 			if err != nil {
 				return fmt.Errorf("Error deleting firewall: %s", err)
 			}
-			err = computeSharedOperationWait(config.clientCompute, op, projectId, "Deleting Firewall")
+			err = computeOperationWait(config, op, projectId, "Deleting Firewall")
 			if err != nil {
 				return err
 			}
@@ -487,7 +421,8 @@ func forceDeleteComputeNetwork(projectId, networkName string, config *Config) er
 }
 
 func updateProjectBillingAccount(d *schema.ResourceData, config *Config) error {
-	pid := d.Id()
+	parts := strings.Split(d.Id(), "/")
+	pid := parts[len(parts)-1]
 	name := d.Get("billing_account").(string)
 	ba := &cloudbilling.ProjectBillingInfo{}
 	// If we're unlinking an existing billing account, an empty request does that, not an empty-string billing account.
@@ -524,9 +459,169 @@ func deleteComputeNetwork(project, network string, config *Config) error {
 		return fmt.Errorf("Error deleting network: %s", err)
 	}
 
-	err = computeOperationWaitTime(config.clientCompute, op, project, "Deleting Network", 10)
+	err = computeOperationWaitTime(config, op, project, "Deleting Network", 10)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func readGoogleProject(d *schema.ResourceData, config *Config) (*cloudresourcemanager.Project, error) {
+	var p *cloudresourcemanager.Project
+	// Read the project
+	parts := strings.Split(d.Id(), "/")
+	pid := parts[len(parts)-1]
+	err := retryTimeDuration(func() (reqErr error) {
+		p, reqErr = config.clientResourceManager.Projects.Get(pid).Do()
+		return reqErr
+	}, d.Timeout(schema.TimeoutRead))
+	return p, err
+}
+
+// Enables services. WARNING: Use BatchRequestEnableServices for better batching if possible.
+func enableServiceUsageProjectServices(services []string, project string, config *Config, timeout time.Duration) error {
+	// ServiceUsage does not allow more than 20 services to be enabled per
+	// batchEnable API call. See
+	// https://cloud.google.com/service-usage/docs/reference/rest/v1/services/batchEnable
+	for i := 0; i < len(services); i += maxServiceUsageBatchSize {
+		j := i + maxServiceUsageBatchSize
+		if j > len(services) {
+			j = len(services)
+		}
+		nextBatch := services[i:j]
+		if len(nextBatch) == 0 {
+			// All batches finished, return.
+			return nil
+		}
+
+		if err := doEnableServicesRequest(nextBatch, project, config, timeout); err != nil {
+			return err
+		}
+		log.Printf("[DEBUG] Finished enabling next batch of %d project services: %+v", len(nextBatch), nextBatch)
+	}
+
+	log.Printf("[DEBUG] Verifying that all services are enabled")
+	return waitForServiceUsageEnabledServices(services, project, config, timeout)
+}
+
+func doEnableServicesRequest(services []string, project string, config *Config, timeout time.Duration) error {
+	var op *serviceusage.Operation
+
+	err := retryTimeDuration(func() error {
+		var rerr error
+		if len(services) == 1 {
+			// BatchEnable returns an error for a single item, so just enable
+			// using service endpoint.
+			name := fmt.Sprintf("projects/%s/services/%s", project, services[0])
+			req := &serviceusage.EnableServiceRequest{}
+			op, rerr = config.clientServiceUsage.Services.Enable(name, req).Do()
+		} else {
+			// Batch enable for multiple services.
+			name := fmt.Sprintf("projects/%s", project)
+			req := &serviceusage.BatchEnableServicesRequest{ServiceIds: services}
+			op, rerr = config.clientServiceUsage.Services.BatchEnable(name, req).Do()
+		}
+		return handleServiceUsageRetryableError(rerr)
+	}, timeout)
+	if err != nil {
+		return errwrap.Wrapf("failed to send enable services request: {{err}}", err)
+	}
+	// Poll for the API to return
+	waitErr := serviceUsageOperationWait(config, op, fmt.Sprintf("Enable Project %q Services: %+v", project, services))
+	if waitErr != nil {
+		return waitErr
+	}
+	return nil
+}
+
+// Retrieve a project's services from the API
+// if a service has been renamed, this function will list both the old and new
+// forms of the service. LIST responses are expected to return only the old or
+// new form, but we'll always return both.
+func listCurrentlyEnabledServices(project string, config *Config, timeout time.Duration) (map[string]struct{}, error) {
+	// Verify project for services still exists
+	p, err := config.clientResourceManager.Projects.Get(project).Do()
+	if err != nil {
+		return nil, err
+	}
+	if p.LifecycleState == "DELETE_REQUESTED" {
+		// Construct a 404 error for handleNotFoundError
+		return nil, &googleapi.Error{
+			Code:    404,
+			Message: "Project deletion was requested",
+		}
+	}
+
+	log.Printf("[DEBUG] Listing enabled services for project %s", project)
+	apiServices := make(map[string]struct{})
+	err = retryTimeDuration(func() error {
+		ctx := context.Background()
+		return config.clientServiceUsage.Services.
+			List(fmt.Sprintf("projects/%s", project)).
+			Fields("services/name,nextPageToken").
+			Filter("state:ENABLED").
+			Pages(ctx, func(r *serviceusage.ListServicesResponse) error {
+				for _, v := range r.Services {
+					// services are returned as "projects/{{project}}/services/{{name}}"
+					name := GetResourceNameFromSelfLink(v.Name)
+
+					// if name not in ignoredProjectServicesSet
+					if _, ok := ignoredProjectServicesSet[name]; !ok {
+						apiServices[name] = struct{}{}
+
+						// if a service has been renamed, set both. We'll deal
+						// with setting the right values later.
+						if v, ok := renamedServicesByOldAndNewServiceNames[name]; ok {
+							log.Printf("[DEBUG] Adding service alias for %s to enabled services: %s", name, v)
+							apiServices[v] = struct{}{}
+						}
+					}
+				}
+				return nil
+			})
+	}, timeout)
+	if err != nil {
+		return nil, errwrap.Wrapf(fmt.Sprintf("Failed to list enabled services for project %s: {{err}}", project), err)
+	}
+	return apiServices, nil
+}
+
+// waitForServiceUsageEnabledServices doesn't resend enable requests - it just
+// waits for service enablement status to propagate. Essentially, it waits until
+// all services show up as enabled when listing services on the project.
+func waitForServiceUsageEnabledServices(services []string, project string, config *Config, timeout time.Duration) error {
+	missing := make([]string, 0, len(services))
+	delay := time.Duration(0)
+	interval := time.Second
+	err := retryTimeDuration(func() error {
+		// Get the list of services that are enabled on the project
+		enabledServices, err := listCurrentlyEnabledServices(project, config, timeout)
+		if err != nil {
+			return err
+		}
+
+		missing := make([]string, 0, len(services))
+		for _, s := range services {
+			if _, ok := enabledServices[s]; !ok {
+				missing = append(missing, s)
+			}
+		}
+		if len(missing) > 0 {
+			log.Printf("[DEBUG] waiting %v before reading project %s services...", delay, project)
+			time.Sleep(delay)
+			delay += interval
+			interval += delay
+
+			// Spoof a googleapi Error so retryTime will try again
+			return &googleapi.Error{
+				Code:    503,
+				Message: fmt.Sprintf("The service(s) %q are still being enabled for project %s. This isn't a real API error, this is just eventual consistency.", missing, project),
+			}
+		}
+		return nil
+	}, timeout)
+	if err != nil {
+		return errwrap.Wrap(err, fmt.Errorf("failed to enable some service(s) %q for project %s", missing, project))
 	}
 	return nil
 }

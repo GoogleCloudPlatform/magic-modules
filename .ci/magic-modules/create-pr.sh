@@ -46,8 +46,14 @@ LABELS=""
 
 # Check the files between this commit and HEAD
 # If they're only contained in third_party, add the third_party label.
-if [ ! git diff --name-only HEAD^1 | grep -v "third_party" | grep -v ".gitmodules" | grep -r "build/" ]; then
+if [ -z "$(git diff --name-only HEAD^1 | grep -v "third_party" | grep -v ".gitmodules" | grep -r "build/")" ]; then
   LABELS="${LABELS}only_third_party,"
+fi
+
+VALIDATOR_WARN_FILES="$(git show --name-only "${LAST_USER_COMMIT}" | grep -v ".gitmodules" | grep -v "build/" | grep -Ff '.ci/magic-modules/vars/validator_handwritten_files.txt' | sed 's/^/* /')"
+if [ -n "${VALIDATOR_WARN_FILES}" ]; then
+  MESSAGE="${MESSAGE}${NEWLINE}**WARNING**: The following files changed in commit ${LAST_USER_COMMIT} may need corresponding changes in third_party/validator:"
+  MESSAGE="${MESSAGE}${NEWLINE}${VALIDATOR_WARN_FILES}${NEWLINE}"
 fi
 
 # Terraform
@@ -97,7 +103,7 @@ if [ -n "$ANSIBLE_REPO_USER" ]; then
   fi
 
   git checkout -b "$BRANCH_NAME"
-  if hub pull-request -b "$ANSIBLE_REPO_USER/ansible:devel" -h "$ORIGINAL_PR_BRANCH" -F ./downstream_body > ./ansible_pr 2> ./ansible_pr_err ; then
+  if hub pull-request -b "$ANSIBLE_REPO_USER/ansible_collections_google:master" -h "$ORIGINAL_PR_BRANCH" -F ./downstream_body > ./ansible_pr 2> ./ansible_pr_err ; then
     DEPENDENCIES="${DEPENDENCIES}depends: $(cat ./ansible_pr) ${NEWLINE}"
     LABELS="${LABELS}ansible,"
   else

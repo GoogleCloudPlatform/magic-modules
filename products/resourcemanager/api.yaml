@@ -33,23 +33,21 @@ objects:
     description: |
       Represents a GCP Project. A project is a container for ACLs, APIs, App
       Engine Apps, VMs, and other Google Cloud Platform resources.
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'projects'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'notinuse'
         path: 'name'
         base_url: '{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         resource_inside_response: true
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'done'
         complete: true
         allowed:
           - True
           - False
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
     parameters:
@@ -179,8 +177,6 @@ objects:
     name: 'Folder'
     base_url: 'folders?parent={{parent}}'
     self_link: '{{name}}'
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'folders'
     description: A Folder in an Organization's resource hierarchy, used to organize that Organization's resources.
     parameters:
       - !ruby/object:Api::Type::String
@@ -224,8 +220,6 @@ objects:
     name: 'Organization'
     base_url: 'organizations'
     collection_url: organizations:search
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'organizations'
     description: A Folder in an Organization's resource hierarchy, used to organize that Organization's resources.
     properties:
       - !ruby/object:Api::Type::String

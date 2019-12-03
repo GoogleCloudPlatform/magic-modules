@@ -1,28 +1,29 @@
-<!-- 
-Note: You may see "This branch is out-of-date with the base branch"
-when you submit a pull request. This is fine! We don't use the GitHub
-merge button to merge PRs, and you can safely ignore that message.
+<!-- AUTOCHANGELOG for Downstream PRs.
+
+EXTERNAL CONTRIBUTORS: Ignore please - your reviewer will handle.
+
+INTERNAL CONTRIBUTORS AND REVIEWERS: See .ci/RELEASE_NOTES_GUIDE.md
+for writing good release notes.
+
+NO CHANGELOG NOTE: Please add "changelog: no-release-note" label to this PR.
+
+Otherwise, fill the template out (replace the heading).
+You can add more release notes if you want more than one CHANGELOG entry for
+this PR, but make sure not to indent notes and to leave newlines between
+code blocks for Markdown's sake.
+
+For Terraform PRs, we use the following "release-note:" headings
+    - release-note:enhancement
+    - release-note:bug
+    - release-note:note
+    - release-note:new-resource
+    - release-note:new-datasource
+    - release-note:deprecation
+    - release-note:breaking-change
 -->
 
-<!-- Your regular pull request description goes here -->
+**Release Note Template for Downstream PRs (will be copied)**
 
+```release-note:REPLACEME
 
-
-
-<!--
-For each repository you expect to modify with this PR, fill in a repo-specific
-PR title under the corresponding tag. We use repo-specified PR titles to ensure
-that each downstream has a clear, easy to understand history.
-
-If the Magician generates a PR for a repo with no specified title, it will use
-the title of this PR. [terraform-beta] will inherit the title of [terraform]
-if it has no specified title.
--->
-
-<!-- Optional PR titles that describe your downstream changes -->
------------------------------------------------------------------
-# [all]
-## [terraform]
-### [terraform-beta]
-## [ansible]
-## [inspec]
+```

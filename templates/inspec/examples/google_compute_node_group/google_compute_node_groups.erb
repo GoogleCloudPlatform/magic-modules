@@ -1,0 +1,9 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% node_group = grab_attributes['node_group'] -%>
+<% gcp_zone = "#{external_attribute('gcp_zone', doc_generation)}" %>
+describe google_compute_node_groups(project: <%= gcp_project_id -%>, zone: <%= gcp_zone -%>) do
+  it { should exist }
+  its('descriptions') { should include <%= doc_generation ? "'#{node_group['description']}'" : "node_group['description']" -%> }
+  its('sizes') { should include <%= doc_generation ? "'#{node_group['size']}'" : "node_group['size']" -%> }
+  its('names') { should include <%= doc_generation ? "'#{node_group['name']}'" : "node_group['name']" -%> }
+end

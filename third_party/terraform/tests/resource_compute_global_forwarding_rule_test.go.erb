@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccComputeGlobalForwardingRule_updateTarget(t *testing.T) {
@@ -119,61 +119,100 @@ func TestAccComputeGlobalForwardingRule_labels(t *testing.T) {
 }
 <% end -%>
 
+<% unless version == 'ga' -%>
+func TestAccComputeGlobalForwardingRule_internalLoadBalancing(t *testing.T) {
+	t.Parallel()
+
+	fr := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+	proxy := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+	backend := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+	hc := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+	urlmap := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+	igm := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+	it := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeGlobalForwardingRule_internalLoadBalancing(fr, proxy, backend, hc, urlmap, igm, it),
+			},
+			{
+				ResourceName:      "google_compute_global_forwarding_rule.forwarding_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeGlobalForwardingRule_internalLoadBalancingUpdate(fr, proxy, backend, hc, urlmap, igm, it),
+			},
+			{
+				ResourceName:      "google_compute_global_forwarding_rule.forwarding_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
+
 func testAccComputeGlobalForwardingRule_httpProxy(fr, targetProxy, proxy, proxy2, backend, hc, urlmap string) string {
 	return fmt.Sprintf(`
-	resource "google_compute_global_forwarding_rule" "forwarding_rule" {
-		description = "Resource created for Terraform acceptance testing"
-		ip_protocol = "TCP"
-		name = "%s"
-		port_range = "80"
-		target = "${google_compute_target_http_proxy.%s.self_link}"
-	}
+resource "google_compute_global_forwarding_rule" "forwarding_rule" {
+  description = "Resource created for Terraform acceptance testing"
+  ip_protocol = "TCP"
+  name        = "%s"
+  port_range  = "80"
+  target      = google_compute_target_http_proxy.%s.self_link
+}
 
-	resource "google_compute_target_http_proxy" "proxy" {
-		description = "Resource created for Terraform acceptance testing"
-		name = "%s"
-		url_map = "${google_compute_url_map.url_map.self_link}"
-	}
+resource "google_compute_target_http_proxy" "proxy" {
+  description = "Resource created for Terraform acceptance testing"
+  name        = "%s"
+  url_map     = google_compute_url_map.url_map.self_link
+}
 
-	resource "google_compute_target_http_proxy" "proxy2" {
-		description = "Resource created for Terraform acceptance testing"
-		name = "%s"
-		url_map = "${google_compute_url_map.url_map.self_link}"
-	}
+resource "google_compute_target_http_proxy" "proxy2" {
+  description = "Resource created for Terraform acceptance testing"
+  name        = "%s"
+  url_map     = google_compute_url_map.url_map.self_link
+}
 
-	resource "google_compute_backend_service" "backend" {
-		name = "%s"
-		health_checks = ["${google_compute_http_health_check.zero.self_link}"]
-	}
+resource "google_compute_backend_service" "backend" {
+  name          = "%s"
+  health_checks = [google_compute_http_health_check.zero.self_link]
+}
 
-	resource "google_compute_http_health_check" "zero" {
-		name = "%s"
-		request_path = "/"
-		check_interval_sec = 1
-		timeout_sec = 1
-	}
+resource "google_compute_http_health_check" "zero" {
+  name               = "%s"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}
 
-	resource "google_compute_url_map" "url_map" {
-		name = "%s"
-		default_service = "${google_compute_backend_service.backend.self_link}"
-		host_rule {
-			hosts = ["mysite.com", "myothersite.com"]
-			path_matcher = "boop"
-		}
-		path_matcher {
-			default_service = "${google_compute_backend_service.backend.self_link}"
-			name = "boop"
-			path_rule {
-				paths = ["/*"]
-				service = "${google_compute_backend_service.backend.self_link}"
-			}
-		}
-		test {
-			host = "mysite.com"
-			path = "/*"
-			service = "${google_compute_backend_service.backend.self_link}"
-		}
-	}`, fr, targetProxy, proxy, proxy2, backend, hc, urlmap)
+resource "google_compute_url_map" "url_map" {
+  name            = "%s"
+  default_service = google_compute_backend_service.backend.self_link
+  host_rule {
+    hosts        = ["mysite.com", "myothersite.com"]
+    path_matcher = "boop"
+  }
+  path_matcher {
+    default_service = google_compute_backend_service.backend.self_link
+    name            = "boop"
+    path_rule {
+      paths   = ["/*"]
+      service = google_compute_backend_service.backend.self_link
+    }
+  }
+  test {
+    host    = "mysite.com"
+    path    = "/*"
+    service = google_compute_backend_service.backend.self_link
+  }
+}
+`, fr, targetProxy, proxy, proxy2, backend, hc, urlmap)
 }
 
 <% unless version == 'ga' -%>
@@ -181,54 +220,55 @@ func testAccComputeGlobalForwardingRule_labels(fr, proxy, backend, hc, urlmap st
 	return fmt.Sprintf(`
 resource "google_compute_global_forwarding_rule" "forwarding_rule" {
   name       = "%s"
-  target = "${google_compute_target_http_proxy.proxy.self_link}"
+  target     = google_compute_target_http_proxy.proxy.self_link
   port_range = "80"
 
   labels = {
-    my-label = "a-value"
+    my-label          = "a-value"
     a-different-label = "my-second-label-value"
   }
 }
 
 resource "google_compute_target_http_proxy" "proxy" {
-	description = "Resource created for Terraform acceptance testing"
-	name = "%s"
-	url_map = "${google_compute_url_map.urlmap.self_link}"
+  description = "Resource created for Terraform acceptance testing"
+  name        = "%s"
+  url_map     = google_compute_url_map.urlmap.self_link
 }
 
 resource "google_compute_backend_service" "backend" {
-	name = "%s"
-	health_checks = ["${google_compute_http_health_check.zero.self_link}"]
+  name          = "%s"
+  health_checks = [google_compute_http_health_check.zero.self_link]
 }
 
 resource "google_compute_http_health_check" "zero" {
-	name = "%s"
-	request_path = "/"
-	check_interval_sec = 1
-	timeout_sec = 1
+  name               = "%s"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
 }
 
 resource "google_compute_url_map" "urlmap" {
-	name = "%s"
-	default_service = "${google_compute_backend_service.backend.self_link}"
-	host_rule {
-		hosts = ["mysite.com", "myothersite.com"]
-		path_matcher = "boop"
-	}
-	path_matcher {
-		default_service = "${google_compute_backend_service.backend.self_link}"
-		name = "boop"
-		path_rule {
-			paths = ["/*"]
-			service = "${google_compute_backend_service.backend.self_link}"
-		}
-	}
-	test {
-		host = "mysite.com"
-		path = "/*"
-		service = "${google_compute_backend_service.backend.self_link}"
-	}
-}`, fr, proxy, backend, hc, urlmap)
+  name            = "%s"
+  default_service = google_compute_backend_service.backend.self_link
+  host_rule {
+    hosts        = ["mysite.com", "myothersite.com"]
+    path_matcher = "boop"
+  }
+  path_matcher {
+    default_service = google_compute_backend_service.backend.self_link
+    name            = "boop"
+    path_rule {
+      paths   = ["/*"]
+      service = google_compute_backend_service.backend.self_link
+    }
+  }
+  test {
+    host    = "mysite.com"
+    path    = "/*"
+    service = google_compute_backend_service.backend.self_link
+  }
+}
+`, fr, proxy, backend, hc, urlmap)
 }
 <% end -%>
 
@@ -237,105 +277,332 @@ func testAccComputeGlobalForwardingRule_labelsUpdated(fr, proxy, backend, hc, ur
 	return fmt.Sprintf(`
 resource "google_compute_global_forwarding_rule" "forwarding_rule" {
   name       = "%s"
-  target = "${google_compute_target_http_proxy.proxy.self_link}"
+  target     = google_compute_target_http_proxy.proxy.self_link
   port_range = "80"
 
   labels = {
-    my-label = "a-new-value"
+    my-label          = "a-new-value"
     a-different-label = "my-third-label-value"
   }
 }
 
 resource "google_compute_target_http_proxy" "proxy" {
-	description = "Resource created for Terraform acceptance testing"
-	name = "%s"
-	url_map = "${google_compute_url_map.urlmap.self_link}"
+  description = "Resource created for Terraform acceptance testing"
+  name        = "%s"
+  url_map     = google_compute_url_map.urlmap.self_link
 }
 
 resource "google_compute_backend_service" "backend" {
-	name = "%s"
-	health_checks = ["${google_compute_http_health_check.zero.self_link}"]
+  name          = "%s"
+  health_checks = [google_compute_http_health_check.zero.self_link]
 }
 
 resource "google_compute_http_health_check" "zero" {
-	name = "%s"
-	request_path = "/"
-	check_interval_sec = 1
-	timeout_sec = 1
+  name               = "%s"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
 }
 
 resource "google_compute_url_map" "urlmap" {
-	name = "%s"
-	default_service = "${google_compute_backend_service.backend.self_link}"
-	host_rule {
-		hosts = ["mysite.com", "myothersite.com"]
-		path_matcher = "boop"
-	}
-	path_matcher {
-		default_service = "${google_compute_backend_service.backend.self_link}"
-		name = "boop"
-		path_rule {
-			paths = ["/*"]
-			service = "${google_compute_backend_service.backend.self_link}"
-		}
-	}
-	test {
-		host = "mysite.com"
-		path = "/*"
-		service = "${google_compute_backend_service.backend.self_link}"
-	}
-}`, fr, proxy, backend, hc, urlmap)
+  name            = "%s"
+  default_service = google_compute_backend_service.backend.self_link
+  host_rule {
+    hosts        = ["mysite.com", "myothersite.com"]
+    path_matcher = "boop"
+  }
+  path_matcher {
+    default_service = google_compute_backend_service.backend.self_link
+    name            = "boop"
+    path_rule {
+      paths   = ["/*"]
+      service = google_compute_backend_service.backend.self_link
+    }
+  }
+  test {
+    host    = "mysite.com"
+    path    = "/*"
+    service = google_compute_backend_service.backend.self_link
+  }
+}
+`, fr, proxy, backend, hc, urlmap)
 }
 <% end -%>
 
 func testAccComputeGlobalForwardingRule_ipv6(fr, proxy, backend, hc, urlmap string) string {
 	return fmt.Sprintf(`
-	resource "google_compute_global_forwarding_rule" "forwarding_rule" {
-		description = "Resource created for Terraform acceptance testing"
-		ip_protocol = "TCP"
-		name = "%s"
-		port_range = "80"
-		target = "${google_compute_target_http_proxy.proxy.self_link}"
-		ip_version = "IPV6"
-	}
-
-	resource "google_compute_target_http_proxy" "proxy" {
-		description = "Resource created for Terraform acceptance testing"
-		name = "%s"
-		url_map = "${google_compute_url_map.urlmap.self_link}"
-	}
-
-	resource "google_compute_backend_service" "backend" {
-		name = "%s"
-		health_checks = ["${google_compute_http_health_check.zero.self_link}"]
-	}
-
-	resource "google_compute_http_health_check" "zero" {
-		name = "%s"
-		request_path = "/"
-		check_interval_sec = 1
-		timeout_sec = 1
-	}
-
-	resource "google_compute_url_map" "urlmap" {
-		name = "%s"
-		default_service = "${google_compute_backend_service.backend.self_link}"
-		host_rule {
-			hosts = ["mysite.com", "myothersite.com"]
-			path_matcher = "boop"
-		}
-		path_matcher {
-			default_service = "${google_compute_backend_service.backend.self_link}"
-			name = "boop"
-			path_rule {
-				paths = ["/*"]
-				service = "${google_compute_backend_service.backend.self_link}"
-			}
-		}
-		test {
-			host = "mysite.com"
-			path = "/*"
-			service = "${google_compute_backend_service.backend.self_link}"
-		}
-	}`, fr, proxy, backend, hc, urlmap)
+resource "google_compute_global_forwarding_rule" "forwarding_rule" {
+  description = "Resource created for Terraform acceptance testing"
+  ip_protocol = "TCP"
+  name        = "%s"
+  port_range  = "80"
+  target      = google_compute_target_http_proxy.proxy.self_link
+  ip_version  = "IPV6"
 }
+
+resource "google_compute_target_http_proxy" "proxy" {
+  description = "Resource created for Terraform acceptance testing"
+  name        = "%s"
+  url_map     = google_compute_url_map.urlmap.self_link
+}
+
+resource "google_compute_backend_service" "backend" {
+  name          = "%s"
+  health_checks = [google_compute_http_health_check.zero.self_link]
+}
+
+resource "google_compute_http_health_check" "zero" {
+  name               = "%s"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}
+
+resource "google_compute_url_map" "urlmap" {
+  name            = "%s"
+  default_service = google_compute_backend_service.backend.self_link
+  host_rule {
+    hosts        = ["mysite.com", "myothersite.com"]
+    path_matcher = "boop"
+  }
+  path_matcher {
+    default_service = google_compute_backend_service.backend.self_link
+    name            = "boop"
+    path_rule {
+      paths   = ["/*"]
+      service = google_compute_backend_service.backend.self_link
+    }
+  }
+  test {
+    host    = "mysite.com"
+    path    = "/*"
+    service = google_compute_backend_service.backend.self_link
+  }
+}
+`, fr, proxy, backend, hc, urlmap)
+}
+
+<% unless version == 'ga' -%>
+func testAccComputeGlobalForwardingRule_internalLoadBalancing(fr, proxy, backend, hc, urlmap, igm, it string) string {
+	return fmt.Sprintf(`
+resource "google_compute_global_forwarding_rule" "forwarding_rule" {
+  name                  = "%s"
+  target                = google_compute_target_http_proxy.default.self_link
+  port_range            = "80"
+  load_balancing_scheme = "INTERNAL_SELF_MANAGED"
+  ip_address            = "0.0.0.0"
+  metadata_filters {
+    filter_match_criteria = "MATCH_ANY"
+    filter_labels {
+      name  = "PLANET"
+      value = "NEPTUNE"
+    }
+  }
+}
+
+resource "google_compute_target_http_proxy" "default" {
+  name        = "%s"
+  description = "a description"
+  url_map     = google_compute_url_map.default.self_link
+}
+
+resource "google_compute_backend_service" "default" {
+  name                  = "%s"
+  port_name             = "http"
+  protocol              = "HTTP"
+  timeout_sec           = 10
+  load_balancing_scheme = "INTERNAL_SELF_MANAGED"
+
+  backend {
+    group                 = google_compute_instance_group_manager.igm.instance_group
+    balancing_mode        = "RATE"
+    capacity_scaler       = 0.4
+    max_rate_per_instance = 50
+  }
+
+  health_checks = [google_compute_health_check.default.self_link]
+}
+
+resource "google_compute_health_check" "default" {
+  name               = "%s"
+  check_interval_sec = 1
+  timeout_sec        = 1
+
+  tcp_health_check {
+    port = "80"
+  }
+}
+
+resource "google_compute_url_map" "default" {
+  name            = "%s"
+  description     = "a description"
+  default_service = google_compute_backend_service.default.self_link
+
+  host_rule {
+    hosts        = ["mysite.com"]
+    path_matcher = "allpaths"
+  }
+
+  path_matcher {
+    name            = "allpaths"
+    default_service = google_compute_backend_service.default.self_link
+
+    path_rule {
+      paths   = ["/*"]
+      service = google_compute_backend_service.default.self_link
+    }
+  }
+}
+
+data "google_compute_image" "debian_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_group_manager" "igm" {
+  name = "%s"
+  version {
+    instance_template = google_compute_instance_template.instance_template.self_link
+    name              = "primary"
+  }
+  base_instance_name = "internal-igm"
+  zone               = "us-central1-f"
+  target_size        = 1
+}
+
+resource "google_compute_instance_template" "instance_template" {
+  name         = "%s"
+  machine_type = "n1-standard-1"
+
+  network_interface {
+    network = "default"
+  }
+
+  disk {
+    source_image = data.google_compute_image.debian_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+}
+`, fr, proxy, backend, hc, urlmap, igm, it)
+}
+
+func testAccComputeGlobalForwardingRule_internalLoadBalancingUpdate(fr, proxy, backend, hc, urlmap, igm, it string) string {
+	return fmt.Sprintf(`
+resource "google_compute_global_forwarding_rule" "forwarding_rule" {
+  name                  = "%s"
+  target                = google_compute_target_http_proxy.default.self_link
+  port_range            = "80"
+  load_balancing_scheme = "INTERNAL_SELF_MANAGED"
+  ip_address            = "0.0.0.0"
+  metadata_filters {
+    filter_match_criteria = "MATCH_ANY"
+    filter_labels {
+      name  = "PLANET"
+      value = "NEPTUNE"
+    }
+    filter_labels {
+      name  = "PLANET"
+      value = "JUPITER"
+    }
+  }
+  metadata_filters {
+    filter_match_criteria = "MATCH_ALL"
+    filter_labels {
+      name  = "STAR"
+      value = "PROXIMA CENTAURI"
+    }
+    filter_labels {
+      name  = "SPECIES"
+      value = "ALIEN"
+    }
+  }
+}
+
+resource "google_compute_target_http_proxy" "default" {
+  name        = "%s"
+  description = "a description"
+  url_map     = google_compute_url_map.default.self_link
+}
+
+resource "google_compute_backend_service" "default" {
+  name                  = "%s"
+  port_name             = "http"
+  protocol              = "HTTP"
+  timeout_sec           = 10
+  load_balancing_scheme = "INTERNAL_SELF_MANAGED"
+
+  backend {
+    group                 = google_compute_instance_group_manager.igm.instance_group
+    balancing_mode        = "RATE"
+    capacity_scaler       = 0.4
+    max_rate_per_instance = 50
+  }
+
+  health_checks = [google_compute_health_check.default.self_link]
+}
+
+resource "google_compute_health_check" "default" {
+  name               = "%s"
+  check_interval_sec = 1
+  timeout_sec        = 1
+
+  tcp_health_check {
+    port = "80"
+  }
+}
+
+resource "google_compute_url_map" "default" {
+  name            = "%s"
+  description     = "a description"
+  default_service = google_compute_backend_service.default.self_link
+
+  host_rule {
+    hosts        = ["mysite.com"]
+    path_matcher = "allpaths"
+  }
+
+  path_matcher {
+    name            = "allpaths"
+    default_service = google_compute_backend_service.default.self_link
+
+    path_rule {
+      paths   = ["/*"]
+      service = google_compute_backend_service.default.self_link
+    }
+  }
+}
+
+data "google_compute_image" "debian_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_group_manager" "igm" {
+  name = "%s"
+  version {
+    instance_template = google_compute_instance_template.instance_template.self_link
+    name              = "primary"
+  }
+  base_instance_name = "internal-igm"
+  zone               = "us-central1-f"
+  target_size        = 1
+}
+
+resource "google_compute_instance_template" "instance_template" {
+  name         = "%s"
+  machine_type = "n1-standard-1"
+
+  network_interface {
+    network = "default"
+  }
+
+  disk {
+    source_image = data.google_compute_image.debian_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+}
+`, fr, proxy, backend, hc, urlmap, igm, it)
+}
+<% end -%>

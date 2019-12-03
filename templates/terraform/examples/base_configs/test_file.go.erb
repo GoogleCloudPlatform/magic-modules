@@ -6,25 +6,23 @@ import (
   "fmt"
   "testing"
 
-  "github.com/hashicorp/terraform/helper/acctest"
-  "github.com/hashicorp/terraform/helper/resource"
+  "github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+  "github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 <%
 raise 'skip_test should be true if resource is not importable' \
   if object.exclude_import
 resource_name = product_ns + object.name
-if @config.legacy_name.nil?
-	terraform_name = "google_" + (product_ns + object.name).underscore
-else
-	terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
-end
+tf_product = (@config.legacy_name || product_ns).underscore
+tf_resource = object.name.underscore
+terraform_name = object.legacy_name || "google_#{tf_product}_#{tf_resource}"
 %>
 <%
-# @api.version_obj_or_default(version) is slightly wrong; we want the _object_ version or the generation version.
+# @api.version_obj_or_closest(version) is slightly wrong; we want the _object_ version or the generation version.
 # Ultimately this won't matter though, since the API default should always be less than the object default.
 object.examples
          .reject(&:skip_test)
-         .reject { |e| @api.version_obj_or_default(version) < @api.version_obj_or_default(e.min_version) }
+         .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
          .each do |example| -
 
 
@@ -49,31 +47,19 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
   t.Parallel()
 
 	context := map[string]interface{} {
-	<% example.test_env_vars.each do |var_name, var_type| -%>
-		<% if var_type == :ORG_ID  -%>
-			"<%= var_name -%>": getTestOrgFromEnv(t),
-		<% elsif var_type == :CREDENTIALS -%>
-			"<%= var_name -%>": getTestCredsFromEnv(t),
-		<% elsif var_type == :REGION -%>
-			"<%= var_name -%>": getTestRegionFromEnv(t),
-		<% elsif var_type == :ORG_TARGET -%>
-			"<%= var_name -%>": getTestOrgTargetFromEnv(t),
-		<% elsif var_type == :BILLING_ACCT -%>
-			"<%= var_name -%>": getTestBillingAccountFromEnv(t),
-		<% elsif var_type == :SERVICE_ACCT -%>
-			"<%= var_name -%>": getTestServiceAccountFromEnv(t),
-		<% elsif var_type == :PROJECT_NAME -%>
-			"<%= var_name -%>": getTestProjectFromEnv(t),
-		<% elsif var_type == :FIRESTORE_PROJECT_NAME -%>
-			"<%= var_name -%>": getTestFirestoreProjectFromEnv(t),
-		<% end -%>
+<%= lines(indent(compile('templates/terraform/env_var_context.go.erb'), 4)) -%>
+	<% unless example.test_custom_context.nil? -%>
+	<% example.test_custom_context.each do |var_name, custom_val| -%>
+			"<%= var_name %>": <%= custom_val %>,
+	<% end -%>
 	<% end -%>
 			"random_suffix": acctest.RandString(10),
 	}
 
+<% versioned_provider = !example_version.nil? && example_version != 'ga' -%>
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		<% if example_version == 'ga' -%>
+		<% unless versioned_provider -%>
 		Providers:    testAccProviders,
 		<% else -%>
 		Providers:    testAccProvidersOiCS,
@@ -84,7 +70,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 				Config: testAcc<%= test_slug -%>(context),
 			},
 		<%#- The Terraform test runner doesn't let us import resources with aliased providers (yet) -%>
-		<% if example_version == 'ga' -%>
+		<% unless versioned_provider -%>
 			{
 				ResourceName:      "<%= terraform_name -%>.<%= example.primary_resource_id -%>",
 				ImportState:       true,
@@ -112,17 +98,21 @@ func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
 			continue
 		}
 
+	<% if object.custom_code.test_check_destroy -%>
+<%= lines(compile(object.custom_code.test_check_destroy)) -%>
+	<% else -%>
 	config := testAccProvider.Meta().(*Config)
 
-	url, err := replaceVarsForTest(rs, "<%= object.self_link_url -%>")
+	url, err := replaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
 	if err != nil {
 		return err
 	}
 
-	_, err = sendRequest(config, "GET", url, nil)
+	_, err = sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", "", url, nil)
 	if err == nil {
 			return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
 		}
+	<% end -%>
 	}
 
 	return nil

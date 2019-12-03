@@ -141,6 +141,79 @@ variable "region_backend_service" {
   type = "map"
 }
 
+variable "org_sink" {
+  type = "map"
+}
+
+variable "standardappversion" {
+  type = "map"
+}
+
+variable "ml_model" {
+  type = "map"
+}
+
+variable "dataproc_cluster" {
+  type = any
+}
+
+variable "folder_exclusion" {
+  type = "map"
+}
+
+variable "filestore_instance" {
+  type = "map"
+}
+
+variable "folder_sink" {
+  type = "map"
+}
+
+variable "runtimeconfig_config" {
+  type = "map"
+}
+
+variable "runtimeconfig_variable" {
+  type = "map"
+}
+
+variable "redis" {
+  type = "map"
+}
+
+variable "network_endpoint_group" {
+  type = "map"
+}
+
+variable "node_template" {
+  type = "map"
+}
+
+variable "node_group" {
+  type = "map"
+}
+
+variable "router_nat" {
+  type = "map"
+}
+
+variable "service" {
+  type = "map"
+}
+
+variable "spannerinstance" {
+  type = "map"
+}
+
+variable "spannerdatabase" {
+  type = "map"
+}
+
+variable "scheduler_job" {
+  type = "map"
+}
+
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -202,7 +275,7 @@ resource "google_compute_autoscaler" "gcp-inspec-autoscaler" {
   zone    = "${var.gcp_zone}"
   target  = "${google_compute_instance_group_manager.gcp-inspec-igm.self_link}"
 
-  autoscaling_policy = {
+  autoscaling_policy {
     max_replicas    = "${var.autoscaler["max_replicas"]}"
     min_replicas    = "${var.autoscaler["min_replicas"]}"
     cooldown_period = "${var.autoscaler["cooldown_period"]}"
@@ -224,10 +297,10 @@ resource "google_compute_target_pool" "gcp-inspec-target-pool" {
 }
 
 resource "google_cloudbuild_trigger" "gcp-inspec-cloudbuild-trigger" {
-  project = "${var.gcp_project_id}"
+  project = var.gcp_project_id
   trigger_template {
     branch_name = "${var.trigger["trigger_template_branch"]}"
-    project     = "${var.trigger["trigger_template_project"]}"
+    project_id  = "${var.trigger["trigger_template_project"]}"
     repo_name   = "${var.trigger["trigger_template_repo"]}"
   }
   filename = "${var.trigger["filename"]}"
@@ -406,6 +479,12 @@ resource "google_container_cluster" "gcp-inspec-regional-cluster" {
   region = "${var.gcp_location}"
   initial_node_count = 1
   remove_default_node_pool = true
+
+  maintenance_policy {
+    daily_maintenance_window {
+      start_time = "23:00"
+    }
+  }
 }
 
 resource "google_compute_route" "gcp-inspec-route" {
@@ -439,14 +518,22 @@ resource "google_compute_router" "gcp-inspec-router" {
   }
 }
 
+resource "google_compute_disk" "snapshot-disk" {
+  project = "${var.gcp_project_id}"
+  name  = var.snapshot["disk_name"]
+  type  = var.snapshot["disk_type"]
+  zone  = "${var.gcp_zone}"
+  image = var.snapshot["disk_image"]
+  labels = {
+    environment = "generic_compute_disk_label"
+  }
+}
+
 resource "google_compute_snapshot" "gcp-inspec-snapshot" {
   project = "${var.gcp_project_id}"
   name = "${var.snapshot["name"]}"
-  source_disk = "${google_compute_disk.generic_compute_disk.name}"
+  source_disk = "${google_compute_disk.snapshot-disk.name}"
   zone = "${var.gcp_zone}"
-  # Depends on the instance of the disk we are using. Allow instance to spin up
-  # Before snapshotting the disk to avoid resourceInUse errors
-  depends_on  = ["google_compute_instance.generic_external_vm_instance_data_disk"]
 }
 
 resource "google_compute_ssl_certificate" "gcp-inspec-ssl-certificate" {
@@ -503,9 +590,9 @@ resource "google_sourcerepo_repository" "gcp-inspec-sourcerepo-repository" {
 }
 
 resource "google_folder" "inspec-gcp-folder" {
-  count = "${var.gcp_organization_id == "none" ? 0 : var.gcp_enable_privileged_resources}"
+  count = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
   display_name = "${var.folder["display_name"]}"
-  parent       = "${var.gcp_organization_id}"
+  parent       = "organizations/${var.gcp_organization_id}"
 }
 
 resource "google_storage_bucket_object" "archive" {
@@ -525,7 +612,7 @@ resource "google_cloudfunctions_function" "function" {
   trigger_http          = "${var.cloudfunction["trigger_http"]}"
   timeout               = "${var.cloudfunction["timeout"]}"
   entry_point           = "${var.cloudfunction["entry_point"]}"
-  runtime               = "nodejs6"
+  runtime               = "nodejs8"
 
   environment_variables = {
     MY_ENV_VAR = "${var.cloudfunction["env_var_value"]}"
@@ -546,4 +633,281 @@ resource "google_container_node_pool" "inspec-gcp-regional-node-pool" {
   region     = "${var.gcp_location}"
   cluster    = "${google_container_cluster.gcp-inspec-regional-cluster.name}"
   node_count = "${var.regional_node_pool["node_count"]}"
+}
+
+resource "google_logging_organization_sink" "my-sink" {
+  count       = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  name        = "${var.org_sink.name}"
+  org_id      = "${var.gcp_organization_id}"
+
+  # Can export to pubsub, cloud storage, or bigquery
+  destination = "storage.googleapis.com/${google_storage_bucket.generic-storage-bucket.name}"
+
+  # Log all WARN or higher severity messages relating to instances
+  filter      = "${var.org_sink.filter}"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name          = "inspec-gcp-static-${var.gcp_project_id}"
+  project       = var.gcp_project_id
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "hello-world.zip"
+  bucket = "${google_storage_bucket.bucket.name}"
+  source = "../configuration/hello-world.zip"
+}
+
+resource "google_app_engine_standard_app_version" "default" {
+  project         = "${var.gcp_project_id}"
+  version_id      = "${var.standardappversion["version_id"]}"
+  service         = "${var.standardappversion["service"]}"
+  runtime         = "${var.standardappversion["runtime"]}"
+  noop_on_destroy = true
+  entrypoint {
+    shell         = "${var.standardappversion["entrypoint"]}"
+  }
+
+  deployment {
+    zip {
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/hello-world.zip"
+    }
+  }
+
+  env_variables = {
+    port          = "${var.standardappversion["port"]}"
+  }
+}
+
+resource "google_ml_engine_model" "inspec-gcp-model" {
+  project                           = var.gcp_project_id
+  name                              = var.ml_model["name"]
+  description                       = var.ml_model["description"]
+  regions                           = ["${var.ml_model["region"]}"]
+  online_prediction_logging         = var.ml_model["online_prediction_logging"]
+  online_prediction_console_logging = var.ml_model["online_prediction_console_logging"]
+}
+
+resource "google_compute_firewall" "dataproc" {
+  project = var.gcp_project_id
+  name    = "dataproc-firewall"
+  network = "${google_compute_network.dataproc.name}"
+
+  source_ranges = ["10.128.0.0/9"]
+  allow {
+    protocol = "icmp"
+  }
+
+  allow {
+    protocol = "tcp"
+    ports    = ["0-65535"]
+  }
+  allow {
+    protocol = "udp"
+    ports    = ["0-65535"]
+  }
+}
+
+resource "google_compute_network" "dataproc" {
+  project = var.gcp_project_id
+  name    = "dataproc-network"
+}
+
+resource "google_dataproc_cluster" "mycluster" {
+  project = var.gcp_project_id
+  region  = var.gcp_location
+  name    = var.dataproc_cluster["name"]
+
+  labels = {
+    "${var.dataproc_cluster["label_key"]}" = "${var.dataproc_cluster["label_value"]}"
+  }
+
+  cluster_config {
+    master_config {
+      num_instances = var.dataproc_cluster["config"]["master_config"]["num_instances"]
+      machine_type  = var.dataproc_cluster["config"]["master_config"]["machine_type"]
+      disk_config {
+        boot_disk_type    = var.dataproc_cluster["config"]["master_config"]["boot_disk_type"]
+        boot_disk_size_gb = var.dataproc_cluster["config"]["master_config"]["boot_disk_size_gb"]
+      }
+    }
+
+    worker_config {
+      num_instances    = var.dataproc_cluster["config"]["worker_config"]["num_instances"]
+      machine_type     = var.dataproc_cluster["config"]["worker_config"]["machine_type"]
+      disk_config {
+        boot_disk_size_gb = var.dataproc_cluster["config"]["worker_config"]["boot_disk_size_gb"]
+        num_local_ssds    = var.dataproc_cluster["config"]["worker_config"]["num_local_ssds"]
+      }
+    }
+
+    # Override or set some custom properties
+    software_config {
+      override_properties = {
+        "${var.dataproc_cluster["config"]["software_config"]["prop_key"]}" = "${var.dataproc_cluster["config"]["software_config"]["prop_value"]}"
+      }
+    }
+
+    gce_cluster_config {
+      network = google_compute_network.dataproc.self_link
+      tags    = [var.dataproc_cluster["config"]["gce_cluster_config"]["tag"]]
+    }
+  }
+}
+
+resource "google_logging_folder_exclusion" "my-exclusion" {
+  count       = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  name        = var.folder_exclusion["name"]
+  folder      = google_folder.inspec-gcp-folder.0.name
+
+  description = var.folder_exclusion["description"]
+
+  filter      = var.folder_exclusion["filter"]
+}
+
+resource "google_filestore_instance" "instance" {
+  project = var.gcp_project_id
+  name    = var.filestore_instance["name"]
+  zone    = var.filestore_instance["zone"]
+  tier    = var.filestore_instance["tier"]
+
+  file_shares {
+    capacity_gb = var.filestore_instance["fileshare_capacity_gb"]
+    name        = var.filestore_instance["fileshare_name"]
+  }
+
+  networks {
+    network = var.filestore_instance["network_name"]
+    modes   = [var.filestore_instance["network_mode"]]
+  }
+}
+
+resource "google_logging_folder_sink" "folder-sink" {
+  count       = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  name        = var.folder_sink.name
+  folder      = google_folder.inspec-gcp-folder.0.name
+
+  destination = "storage.googleapis.com/${google_storage_bucket.generic-storage-bucket.name}"
+
+  filter      = var.folder_sink.filter
+}
+
+resource "google_runtimeconfig_config" "inspec-runtime-config" {
+  project = var.gcp_project_id
+  name = var.runtimeconfig_config["name"]
+  description = var.runtimeconfig_config["description"]
+}
+
+resource "google_runtimeconfig_variable" "inspec-runtime-variable" {
+  project = var.gcp_project_id
+  parent = "${google_runtimeconfig_config.inspec-runtime-config.name}"
+  name = var.runtimeconfig_variable["name"]
+  text = var.runtimeconfig_variable["text"]
+}
+
+resource "google_redis_instance" "inspec-redis" {
+  project        = var.gcp_project_id
+  name           = var.redis["name"]
+  tier           = var.redis["tier"]
+  memory_size_gb = var.redis["memory_size_gb"]
+
+  location_id             = var.redis["location_id"]
+  alternative_location_id = var.redis["alternative_location_id"]
+
+  redis_version     = var.redis["redis_version"]
+  display_name      = var.redis["display_name"]
+  reserved_ip_range = var.redis["reserved_ip_range"]
+
+  labels = {
+    "${var.redis["label_key"]}" = var.redis["label_value"]
+  }
+}
+
+resource "google_compute_network_endpoint_group" "inspec-endpoint-group" {
+  project      = var.gcp_project_id
+  name         = var.network_endpoint_group["name"]
+  network      = google_compute_subnetwork.inspec-gcp-subnetwork.network
+  subnetwork   = google_compute_subnetwork.inspec-gcp-subnetwork.self_link
+  default_port = var.network_endpoint_group["default_port"]
+  zone         = var.gcp_zone
+}
+
+data "google_compute_node_types" "zone-node-type" {
+  project = var.gcp_project_id
+  zone    = var.gcp_zone
+}
+
+resource "google_compute_node_template" "inspec-template" {
+  project = var.gcp_project_id
+  region = var.gcp_location
+
+  name = var.node_template["name"]
+  node_type = "${data.google_compute_node_types.zone-node-type.names[0]}"
+
+  node_affinity_labels = {
+    "${var.node_template["label_key"]}" = "${var.node_template["label_value"]}"
+  }
+}
+
+resource "google_compute_node_group" "inspec-node-group" {
+  project = var.gcp_project_id
+  name = var.node_group["name"]
+  zone = var.gcp_zone
+  description = var.node_group["description"]
+
+  size = var.node_group["size"]
+  node_template = "${google_compute_node_template.inspec-template.self_link}"
+}
+
+resource "google_compute_router_nat" "inspec-nat" {
+  project                            = var.gcp_project_id
+  name                               = var.router_nat["name"]
+  router                             = google_compute_router.gcp-inspec-router.name
+  region                             = google_compute_router.gcp-inspec-router.region
+  nat_ip_allocate_option             = var.router_nat["nat_ip_allocate_option"]
+  source_subnetwork_ip_ranges_to_nat = var.router_nat["source_subnetwork_ip_ranges_to_nat"]
+  min_ports_per_vm                   = var.router_nat["min_ports_per_vm"]
+
+  log_config {
+    enable = var.router_nat["log_config_enable"]
+    filter = var.router_nat["log_config_filter"]
+  }
+}
+
+resource "google_project_service" "project" {
+  project = var.gcp_project_id
+  service = var.service["name"]
+}
+
+resource "google_spanner_instance" "spanner_instance" {
+  project      = "${var.gcp_project_id}"
+  config       = "${var.spannerinstance["config"]}"
+  name         = "${var.spannerinstance["name"]}"
+  display_name = "${var.spannerinstance["display_name"]}"
+  num_nodes    = "${var.spannerinstance["num_nodes"]}"
+  labels = {
+    "${var.spannerinstance["label_key"]}" = "${var.spannerinstance["label_value"]}"
+  }
+}
+
+resource "google_spanner_database" "database" {
+  project      = "${var.gcp_project_id}"
+  instance     = "${google_spanner_instance.spanner_instance.name}"
+  name         = "${var.spannerdatabase["name"]}"
+  ddl          = ["${var.spannerdatabase["ddl"]}"]
+}
+
+resource "google_cloud_scheduler_job" "job" {
+  project  = var.gcp_project_id
+  region   = var.scheduler_job["region"]
+  name     = var.scheduler_job["name"]
+  description = var.scheduler_job["description"]
+  schedule = var.scheduler_job["schedule"]
+  time_zone = var.scheduler_job["time_zone"]
+
+  http_target {
+    http_method = var.scheduler_job["http_method"]
+    uri = var.scheduler_job["http_target_uri"]
+  }
 }

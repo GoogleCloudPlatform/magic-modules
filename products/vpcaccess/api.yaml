@@ -1,0 +1,108 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: VPCAccess
+display_name: Serverless VPC Access
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://vpcaccess.googleapis.com/v1beta1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Serverless VPC Access API
+    url: https://console.cloud.google.com/apis/library/vpcaccess.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Connector'
+    kind: 'vpcaccess#Connector'
+    description: 'Serverless VPC Access connector resource.'
+    min_version: beta
+    input: true
+    base_url: projects/{{project}}/locations/{{region}}/connectors
+    create_url: projects/{{project}}/locations/{{region}}/connectors?connectorId={{name}}
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Configuring Serverless VPC Access': 'https://cloud.google.com/vpc/docs/configure-serverless-vpc-access'
+      api: 'https://cloud.google.com/vpc/docs/reference/vpcaccess/rest/v1beta1/projects.locations.connectors'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'region'
+        description: |
+          Region where the VPC Access connector resides
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          The name of the resource (Max 25 characters).
+        required: true
+      - !ruby/object:Api::Type::String
+        name: network
+        description: |
+          Name of a VPC network.
+      - !ruby/object:Api::Type::String
+        name: ipCidrRange
+        description: |
+          The range of internal addresses that follows RFC 4632 notation. Example: `10.132.0.0/28`.
+        required: true
+      - !ruby/object:Api::Type::Enum
+        name: state
+        description: |
+          State of the VPC access connector.
+        output: true
+        exclude: true
+        values:
+          - :READY
+          - :CREATING
+          - :DELETING
+          - :ERROR
+          - :UPDATING
+      - !ruby/object:Api::Type::Integer
+        name: minThroughput
+        description: |
+          Minimum throughput of the connector in Mbps. Default and min is 200.
+        default_value: 200
+      - !ruby/object:Api::Type::Integer
+        name: maxThroughput
+        # The API documentation says this will default to 200, but when I tried that I got an error that the minimum
+        # throughput must be lower than the maximum. The console defaults to 1000, so I changed it to that.
+        description: |
+          Maximum throughput of the connector in Mbps, must be greater than `min_throughput`. Default is 1000.
+        default_value: 1000
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        description: |
+          The fully qualified name of this VPC connector
+        output: true

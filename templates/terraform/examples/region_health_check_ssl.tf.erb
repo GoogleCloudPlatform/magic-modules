@@ -1,0 +1,11 @@
+resource "google_compute_region_health_check" "ssl-region-health-check" {
+  provider = google-beta
+  name     = "<%= ctx[:vars]['health_check_name'] %>"
+
+  timeout_sec        = 1
+  check_interval_sec = 1
+
+  ssl_health_check {
+    port = "443"
+  }
+}

@@ -1,0 +1,14 @@
+resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
+  name         = "<%= ctx[:vars]['topic_name'] %>"
+  kms_key_name = google_kms_crypto_key.crypto_key.self_link
+}
+
+resource "google_kms_crypto_key" "crypto_key" {
+  name     = "<%= ctx[:vars]['key_name'] %>"
+  key_ring = google_kms_key_ring.key_ring.self_link
+}
+
+resource "google_kms_key_ring" "key_ring" {
+  name     = "<%= ctx[:vars]['keyring_name'] %>"
+  location = "global"
+}

@@ -1,4 +1,5 @@
 ---
+subcategory: "Cloud SQL"
 layout: "google"
 page_title: "Google: google_sql_database_instance"
 sidebar_current: "docs-google-sql-database-instance"
@@ -26,8 +27,9 @@ resource "random_id" "db_name_suffix" {
 }
 
 resource "google_sql_database_instance" "master" {
-  name = "master-instance-${random_id.db_name_suffix.hex}"
+  name             = "master-instance-${random_id.db_name_suffix.hex}"
   database_version = "MYSQL_5_6"
+
   # First-generation instance regions are not the conventional
   # Google Compute Engine regions. See argument reference below.
   region = "us-central"
@@ -42,9 +44,9 @@ resource "google_sql_database_instance" "master" {
 
 ```hcl
 resource "google_sql_database_instance" "master" {
-  name = "master-instance"
+  name             = "master-instance"
   database_version = "POSTGRES_9_6"
-  region = "us-central1"
+  region           = "us-central1"
 
   settings {
     # Second-generation instance tiers are based on the machine
@@ -77,40 +79,42 @@ resource "google_compute_instance" "apps" {
   }
 }
 
-data "null_data_source" "auth_netw_postgres_allowed_1" {
-  count = "${length(google_compute_instance.apps.*.self_link)}"
-
-  inputs = {
-    name  = "apps-${count.index + 1}"
-    value = "${element(google_compute_instance.apps.*.network_interface.0.access_config.0.nat_ip, count.index)}"
-  }
-}
-
-data "null_data_source" "auth_netw_postgres_allowed_2" {
-  count = 2
-
-  inputs = {
-    name  = "onprem-${count.index + 1}"
-    value = "${element(list("192.168.1.2", "192.168.2.3"), count.index)}"
-  }
-}
-
 resource "random_id" "db_name_suffix" {
   byte_length = 4
 }
 
+locals {
+  onprem = ["192.168.1.2", "192.168.2.3"]
+}
+
 resource "google_sql_database_instance" "postgres" {
-  name = "postgres-instance-${random_id.db_name_suffix.hex}"
+  name             = "postgres-instance-${random_id.db_name_suffix.hex}"
   database_version = "POSTGRES_9_6"
 
   settings {
     tier = "db-f1-micro"
 
     ip_configuration {
-      authorized_networks = [
-        "${data.null_data_source.auth_netw_postgres_allowed_1.*.outputs}",
-        "${data.null_data_source.auth_netw_postgres_allowed_2.*.outputs}",
-      ]
+
+      dynamic "authorized_networks" {
+        for_each = google_compute_instance.apps
+        iterator = apps
+
+        content {
+          name  = apps.value.name
+          value = apps.value.network_interface.0.access_config.0.nat_ip
+        }
+      }
+
+      dynamic "authorized_networks" {
+        for_each = local.onprem
+        iterator = onprem
+
+        content {
+          name  = "onprem-${onprem.key}"
+          value = onprem.value
+        }
+      }
     }
   }
 }
@@ -121,27 +125,27 @@ resource "google_sql_database_instance" "postgres" {
 
 ```hcl
 resource "google_compute_network" "private_network" {
-  provider = "google-beta"
+  provider = google-beta
 
-  name       = "private-network"
+  name = "private-network"
 }
 
 resource "google_compute_global_address" "private_ip_address" {
-  provider = "google-beta"
+  provider = google-beta
 
   name          = "private-ip-address"
   purpose       = "VPC_PEERING"
-  address_type = "INTERNAL"
+  address_type  = "INTERNAL"
   prefix_length = 16
-  network       = "${google_compute_network.private_network.self_link}"
+  network       = google_compute_network.private_network.self_link
 }
 
 resource "google_service_networking_connection" "private_vpc_connection" {
-  provider = "google-beta"
+  provider = google-beta
 
-  network       = "${google_compute_network.private_network.self_link}"
-  service       = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = ["${google_compute_global_address.private_ip_address.name}"]
+  network                 = google_compute_network.private_network.self_link
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
 }
 
 resource "random_id" "db_name_suffix" {
@@ -149,25 +153,23 @@ resource "random_id" "db_name_suffix" {
 }
 
 resource "google_sql_database_instance" "instance" {
-  provider = "google-beta"
+  provider = google-beta
 
-  name = "private-instance-${random_id.db_name_suffix.hex}"
+  name   = "private-instance-${random_id.db_name_suffix.hex}"
   region = "us-central1"
 
-  depends_on = [
-    "google_service_networking_connection.private_vpc_connection"
-  ]
+  depends_on = [google_service_networking_connection.private_vpc_connection]
 
   settings {
     tier = "db-f1-micro"
     ip_configuration {
-      ipv4_enabled = "false"
-      private_network = "${google_compute_network.private_network.self_link}"
+      ipv4_enabled    = false
+      private_network = google_compute_network.private_network.self_link
     }
   }
 }
 
-provider "google-beta"{
+provider "google-beta" {
   region = "us-central1"
   zone   = "us-central1-a"
 }
@@ -190,9 +192,10 @@ The following arguments are supported:
 
 - - -
 
-* `database_version` - (Optional, Default: `MYSQL_5_6`) The MySQL or PostgreSQL version to
-    use. Can be `MYSQL_5_6`, `MYSQL_5_7` or `POSTGRES_9_6` for second-generation
+* `database_version` - (Optional, Default: `MYSQL_5_6`) The MySQL, PostgreSQL or MS SQL Server (beta) version to
+    use. Can be `MYSQL_5_6`, `MYSQL_5_7`, `POSTGRES_9_6` or `POSTGRES_11` (beta) for second-generation
     instances, or `MYSQL_5_5` or `MYSQL_5_6` for first-generation instances.
+    MS SQL Server supported versions: `SQLSERVER_2017_STANDARD`, `SQLSERVER_2017_ENTERPRISE`, `SQLSERVER_2017_EXPRESS`, `SQLSERVER_2017_WEB`, `SQLSERVER_ENTERPRISE_2016`.
     See [Second Generation Capabilities](https://cloud.google.com/sql/docs/1st-2nd-gen-differences)
     for more information.
 
@@ -210,6 +213,8 @@ The following arguments are supported:
 
 * `replica_configuration` - (Optional) The configuration for replication. The
     configuration is detailed below.
+    
+* `root_password` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Initial root password. Required for MS SQL Server, ignored by MySQL and PostgreSQL.
 
 The required `settings` block supports:
 
@@ -232,7 +237,7 @@ The required `settings` block supports:
 * `crash_safe_replication` - (Optional) Specific to read instances, indicates
     when crash-safe replication flags are enabled.
 
-* `disk_autoresize` - (Optional, Second Generation, Default: `true`) Configuration to increase storage size automatically.
+* `disk_autoresize` - (Optional, Second Generation, Default: `true`) Configuration to increase storage size automatically.  Note that future `terraform apply` calls will attempt to resize the disk to the value specified in `disk_size` - if this is set, do not set `disk_size`.
 
 * `disk_size` - (Optional, Second Generation, Default: `10`) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased.
 
@@ -248,14 +253,14 @@ The required `settings` block supports:
 
 The optional `settings.database_flags` sublist supports:
 
-* `name` - (Optional) Name of the flag.
+* `name` - (Required) Name of the flag.
 
-* `value` - (Optional) Value of the flag.
+* `value` - (Required) Value of the flag.
 
 The optional `settings.backup_configuration` subblock supports:
 
 * `binary_log_enabled` - (Optional) True if binary logging is enabled. If
-    `settings.backup_configuration.enabled` is false, this must be as well. 
+    `settings.backup_configuration.enabled` is false, this must be as well.
     Cannot be used with Postgres.
 
 * `enabled` - (Optional) True if backup configuration is enabled.
@@ -270,9 +275,11 @@ a public IPV4 address. Either `ipv4_enabled` must be enabled or a
 `private_network` must be configured.
 
 * `private_network` - (Optional) The VPC network from which the Cloud SQL
-instance is accessible for private IP. Specifying a network enables private IP.
+instance is accessible for private IP. For example, projects/myProject/global/networks/default.
+Specifying a network enables private IP.
 Either `ipv4_enabled` must be enabled or a `private_network` must be configured.
- 
+This setting can be updated, but it cannot be removed after it is set.
+
 * `require_ssl` - (Optional) True if mysqld should default to `REQUIRE X509`
     for users connecting over IP.
 
@@ -283,7 +290,7 @@ The optional `settings.ip_configuration.authorized_networks[]` sublist supports:
 
 * `name` - (Optional) A name for this whitelist entry.
 
-* `value` - (Optional) A CIDR notation IPv4 or IPv6 address that is allowed to
+* `value` - (Required) A CIDR notation IPv4 or IPv6 address that is allowed to
     access this instance. Must be set even if other two attributes are not for
     the whitelist to become active.
 
@@ -362,11 +369,11 @@ instance. This property is applicable only to Second Generation instances.
 * `ip_address.0.type` - The type of this IP address.
 
   * A `PRIMARY` address is an address that can accept incoming connections.
-  
+
   * An `OUTGOING` address is the source address of connections originating from the instance, if supported.
-  
+
   * A `PRIVATE` address is an address for an instance which has been configured to use private networking see: [Private IP](https://cloud.google.com/sql/docs/mysql/private-ip).
-  
+
 * `first_ip_address` - The first IPv4 address of any type assigned. This is to
 support accessing the [first address in the list in a terraform output](https://github.com/terraform-providers/terraform-provider-google/issues/912)
 when the resource is configured with a `count`.
@@ -399,9 +406,9 @@ performing filtering in a Terraform config.
 `google_sql_database_instance` provides the following
 [Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
 
-- `create` - Default is 10 minutes.
-- `update` - Default is 10 minutes.
-- `delete` - Default is 10 minutes.
+- `create` - Default is 20 minutes.
+- `update` - Default is 20 minutes.
+- `delete` - Default is 20 minutes.
 
 ## Import
 

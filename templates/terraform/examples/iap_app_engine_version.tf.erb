@@ -1,0 +1,27 @@
+resource "google_storage_bucket" "bucket" {
+  name = "appengine-static-content-%{random_suffix}"
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "hello-world.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "./test-fixtures/appengine/hello-world.zip"
+}
+
+resource "google_app_engine_standard_app_version" "version" {
+  version_id      = "%{random_suffix}"
+  service         = "default"
+  runtime         = "nodejs10"
+  noop_on_destroy = false
+  entrypoint {
+    shell = "node ./app.js"
+  }
+  deployment {
+    zip {
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/hello-world.zip"
+    }
+  }
+  env_variables = {
+    port = "8080"
+  }
+}

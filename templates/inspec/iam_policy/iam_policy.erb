@@ -7,7 +7,7 @@ require 'google/iam/property/iam_policy_bindings'
 
 # A provider to manage <%= @api.product_full_name -%> IAM Policy resources.
 class <%= object.name -%>IamPolicy < GcpResourceBase
-  name '<%= resource_name(object, product_ns) -%>_iam_policy'
+  name '<%= resource_name(object, product) -%>_iam_policy'
   desc '<%= object.name -%> Iam Policy'
   supports platform: 'gcp'
 
@@ -18,7 +18,7 @@ class <%= object.name -%>IamPolicy < GcpResourceBase
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
     @params = params
-    @fetched = @connection.fetch(product_url, resource_base_url, params)
+    @fetched = @connection.fetch(product_url, resource_base_url, params, '<%= object.iam_policy.fetch_iam_policy_verb.capitalize -%>')
     parse unless @fetched.nil?
   end
 
@@ -31,8 +31,12 @@ class <%= object.name -%>IamPolicy < GcpResourceBase
     !@fetched.nil?
   end
 
+<%
+individual_url = object.self_link || object.base_url + '/{{name}}' 
+identifiers = extract_identifiers(individual_url)
+-%>
   def to_s
-    "<%= object.name -%> IamPolicy #{@params[:name]}"
+    "<%= object.name -%> IamPolicy #{@params[:<%= identifiers.last.underscore -%>]}"
   end
 
   private
@@ -41,8 +45,13 @@ class <%= object.name -%>IamPolicy < GcpResourceBase
     '<%= object.product_url || object.__product.base_url %>'
   end
 
-<% individual_url = object.self_link || object.base_url + '/{{name}}' -%>
+<%
+# snake_case all identifiers in the URL
+identifiers.each do |identifier|
+  individual_url = individual_url.gsub("{{#{identifier}}}", "{{#{identifier.underscore}}}")
+end
+-%>
   def resource_base_url
-    '<%= individual_url -%>/getIamPolicy'
+    '<%= individual_url -%><%= object.iam_policy.method_name_separator -%>getIamPolicy'
   end
 end

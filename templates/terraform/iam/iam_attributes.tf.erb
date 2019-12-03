@@ -1,0 +1,13 @@
+<% example = object.examples
+         .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
+         .first -%>
+<% parent_resource_last_param_name = extract_identifiers(object.self_link_url).last -%>
+<% parent_resource_type_type = object.iam_policy.parent_resource_type || resource_ns -%>
+<% extract_identifiers(object.self_link_url).each_with_index do |p, i| -%>
+<% if i == extract_identifiers(object.self_link_url).size - 1 -%>
+<% attribute_val = object.iam_policy.parent_resource_attribute || parent_resource_last_param_name.underscore -%>
+<% else -%>
+<% attribute_val = p.underscore -%>
+<% end -%>
+	<%= attribute_val.underscore -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= p.underscore -%>}"
+<% end -%>

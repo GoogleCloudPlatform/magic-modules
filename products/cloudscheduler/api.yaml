@@ -28,7 +28,11 @@ objects:
     input: true
     description: |
       A scheduled job that can publish a pubsub message or a http request
-      every X interval of time, using crontab format string
+      every X interval of time, using crontab format string.
+
+      To use Cloud Scheduler your project must contain an App Engine app
+      that is located in one of the supported regions. If your project
+      does not have an App Engine app, you must create one.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/scheduler/'
@@ -86,6 +90,12 @@ objects:
               Values greater than 5 and negative values are not allowed.
             required: false
             input: true
+            at_least_one_of:
+              - retry_config.0.retry_count
+              - retry_config.0.max_retry_duration
+              - retry_config.0.min_backoff_duration
+              - retry_config.0.max_backoff_duration
+              - retry_config.0.max_doublings
           - !ruby/object:Api::Type::String
             name: maxRetryDuration
             description: |
@@ -94,6 +104,12 @@ objects:
               A duration in seconds with up to nine fractional digits, terminated by 's'.
             required: false
             input: true
+            at_least_one_of:
+              - retry_config.0.retry_count
+              - retry_config.0.max_retry_duration
+              - retry_config.0.min_backoff_duration
+              - retry_config.0.max_backoff_duration
+              - retry_config.0.max_doublings
           - !ruby/object:Api::Type::String
             name: minBackoffDuration
             description: |
@@ -101,6 +117,12 @@ objects:
               A duration in seconds with up to nine fractional digits, terminated by 's'.
             required: false
             input: true
+            at_least_one_of:
+              - retry_config.0.retry_count
+              - retry_config.0.max_retry_duration
+              - retry_config.0.min_backoff_duration
+              - retry_config.0.max_backoff_duration
+              - retry_config.0.max_doublings
           - !ruby/object:Api::Type::String
             name: maxBackoffDuration
             description: |
@@ -108,6 +130,12 @@ objects:
               A duration in seconds with up to nine fractional digits, terminated by 's'.
             required: false
             input: true
+            at_least_one_of:
+              - retry_config.0.retry_count
+              - retry_config.0.max_retry_duration
+              - retry_config.0.min_backoff_duration
+              - retry_config.0.max_backoff_duration
+              - retry_config.0.max_doublings
           - !ruby/object:Api::Type::Integer
             name: maxDoublings
             description: |
@@ -117,6 +145,12 @@ objects:
               and finally retries retries at intervals of maxBackoffDuration up to retryCount times.
             required: false
             input: true
+            at_least_one_of:
+              - retry_config.0.retry_count
+              - retry_config.0.max_retry_duration
+              - retry_config.0.min_backoff_duration
+              - retry_config.0.max_backoff_duration
+              - retry_config.0.max_doublings
       - !ruby/object:Api::Type::NestedObject
         name: pubsubTarget
         description: |
@@ -124,9 +158,10 @@ objects:
           If the job providers a Pub/Sub target the cron will publish
           a message to the provided topic
         input: true
-        conflicts: 
-          - httpTarget
-          - appEngineHttpTarget
+        exactly_one_of:
+          - pubsub_target
+          - http_target
+          - app_engine_http_target
         properties:
           - !ruby/object:Api::Type::String
             name: topicName
@@ -157,9 +192,10 @@ objects:
           If the job providers a App Engine HTTP target the cron will 
           send a request to the service instance
         input: true
-        conflicts: 
-          - pubsubTarget
-          - httpTarget
+        exactly_one_of:
+          - pubsub_target
+          - http_target
+          - app_engine_http_target
         properties:
           - !ruby/object:Api::Type::String
             name: httpMethod
@@ -179,6 +215,10 @@ objects:
                 description: |
                   App service.
                   By default, the job is sent to the service which is the default service when the job is attempted.
+                at_least_one_of:
+                  - app_engine_http_target.0.app_engine_routing.0.service
+                  - app_engine_http_target.0.app_engine_routing.0.version
+                  - app_engine_http_target.0.app_engine_routing.0.instance
                 required: false
                 input: true
               - !ruby/object:Api::Type::String
@@ -186,6 +226,10 @@ objects:
                 description: |
                   App version.
                   By default, the job is sent to the version which is the default version when the job is attempted.
+                at_least_one_of:
+                  - app_engine_http_target.0.app_engine_routing.0.service
+                  - app_engine_http_target.0.app_engine_routing.0.version
+                  - app_engine_http_target.0.app_engine_routing.0.instance
                 required: false
                 input: true
               - !ruby/object:Api::Type::String
@@ -193,6 +237,10 @@ objects:
                 description: |
                   App instance.
                   By default, the job is sent to an instance which is available when the job is attempted.
+                at_least_one_of:
+                  - app_engine_http_target.0.app_engine_routing.0.service
+                  - app_engine_http_target.0.app_engine_routing.0.version
+                  - app_engine_http_target.0.app_engine_routing.0.instance
                 required: false
                 input: true
           - !ruby/object:Api::Type::String
@@ -227,9 +275,10 @@ objects:
           If the job providers a http_target the cron will 
           send a request to the targeted url
         input: true
-        conflicts: 
-          - pubsubTarget
-          - appEngineHttpTarget
+        exactly_one_of:
+          - pubsub_target
+          - http_target
+          - app_engine_http_target
         properties:
           - !ruby/object:Api::Type::String
             name: uri
@@ -254,3 +303,39 @@ objects:
               This map contains the header field names and values. 
               Repeated headers are not supported, but a header value can contain commas.
             required: false
+          - !ruby/object:Api::Type::NestedObject
+            name: 'oauthToken'
+            description: |
+              Contains information needed for generating an OAuth token.
+              This type of authorization should be used when sending requests to a GCP endpoint.
+            input: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: serviceAccountEmail
+                required: true
+                description: |
+                  Service account email to be used for generating OAuth token.
+                  The service account must be within the same project as the job.
+              - !ruby/object:Api::Type::String
+                name: scope
+                description: |
+                  OAuth scope to be used for generating OAuth access token. If not specified,
+                  "https://www.googleapis.com/auth/cloud-platform" will be used.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'oidcToken'
+            description: |
+              Contains information needed for generating an OpenID Connect token.
+              This type of authorization should be used when sending requests to third party endpoints or Cloud Run.
+            input: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: serviceAccountEmail
+                required: true
+                description: |
+                  Service account email to be used for generating OAuth token.
+                  The service account must be within the same project as the job.
+              - !ruby/object:Api::Type::String
+                name: audience
+                description: |
+                  Audience to be used when generating OIDC token. If not specified,
+                  the URI specified in target will be used.

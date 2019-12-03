@@ -23,21 +23,18 @@ module Api
       include Comparable
 
       attr_reader :base_url
-      attr_reader :default
       attr_reader :name
 
-      ORDER = %w[ga beta alpha].freeze
+      ORDER = %w[ga beta alpha private].freeze
 
       def validate
         super
-        check :default, type: :boolean, default: false
         check :base_url, type: String, required: true
         check :name, type: String, allowed: ORDER, required: true
       end
 
       def to_s
         str = "#{name}: #{base_url}"
-        str += ' (default)' if default
         str
       end
 

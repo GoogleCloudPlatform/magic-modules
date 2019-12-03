@@ -1,0 +1,22 @@
+toDelete := make(map[string]interface{})
+instanceProp, err := expandComputeNetworkEndpointInstance(d.Get("instance"), d, config)
+if err != nil {
+  return err
+}
+toDelete["instance"] = instanceProp
+
+portProp, err := expandComputeNetworkEndpointPort(d.Get("port"), d, config)
+if err != nil {
+  return err
+}
+toDelete["port"] = portProp
+
+ipAddressProp, err := expandComputeNetworkEndpointIpAddress(d.Get("ip_address"), d, config)
+if err != nil {
+  return err
+}
+toDelete["ipAddress"] = ipAddressProp
+
+obj = map[string]interface{}{
+  "networkEndpoints": []map[string]interface{}{toDelete},
+} 

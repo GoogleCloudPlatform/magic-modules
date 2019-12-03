@@ -1,0 +1,10 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% redis = grab_attributes['redis'] -%>
+describe google_redis_instances(project: <%= gcp_project_id -%>, region: <%= doc_generation ? "'#{redis['region']}'" : "redis['region']" -%>) do
+  its('tiers') { should include <%= doc_generation ? "'#{redis['tier']}'" : "redis['tier']" -%> }
+  its('memory_size_gbs') { should include <%= doc_generation ? "'#{redis['memory_size_gb']}'" : "redis['memory_size_gb']" -%> }
+  its('alternative_location_ids') { should include <%= doc_generation ? "'#{redis['alternative_location_id']}'" : "redis['alternative_location_id']" -%> }
+  its('redis_versions') { should include <%= doc_generation ? "'#{redis['redis_version']}'" : "redis['redis_version']" -%> }
+  its('display_names') { should include <%= doc_generation ? "'#{redis['display_name']}'" : "redis['display_name']" -%> }
+  its('reserved_ip_ranges') { should include <%= doc_generation ? "'#{redis['reserved_ip_range']}'" : "redis['reserved_ip_range']" -%> }
+end

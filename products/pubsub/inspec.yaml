@@ -14,13 +14,16 @@
 --- !ruby/object:Provider::Inspec::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Topic: !ruby/object:Overrides::Inspec::ResourceOverride
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         name_from_self_link: true
   Subscription: !ruby/object:Overrides::Inspec::ResourceOverride
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         name_from_self_link: true
-files: !ruby/object:Provider::Config::Files
-  copy:
-    'Gemfile': 'provider/inspec/Gemfile'

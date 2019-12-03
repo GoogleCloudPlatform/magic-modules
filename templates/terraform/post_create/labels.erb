@@ -16,22 +16,17 @@ if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(v)) && (ok ||
     labelFingerprintProp := d.Get("label_fingerprint")
     obj["labelFingerprint"] = labelFingerprintProp
 
-    url, err = replaceVars(d, config, "<%= object.self_link_url -%>/setLabels")
+    url, err = replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>/setLabels")
     if err != nil {
         return err
     }
-    res, err = sendRequest(config, "POST", url, obj)
+    res, err = sendRequest(config, "POST", project, url, obj)
     if err != nil {
       return fmt.Errorf("Error adding labels to <%= resource_name -%> %q: %s", d.Id(), err)
     }
 
-    err = Convert(res, op)
-    if err != nil {
-        return err
-    }
-
     err = computeOperationWaitTime(
-        config.clientCompute, op, project, "Updating <%= resource_name -%> Labels",
+        config, res, project, "Updating <%= resource_name -%> Labels",
         int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 
     if err != nil {

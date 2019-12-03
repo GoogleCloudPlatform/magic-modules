@@ -1,7 +1,8 @@
 <%
   module_name = ["gcp_#{object.__product.api_name}",
                  object.name.underscore,
-                 'facts'].join('_')
+                 'info'].join('_')
+  module_name = "google.cloud.#{module_name}" unless @__example&.provider&.is_a?(Provider::Ansible::Devel)
 -%>
 - name: verify that <%= object.name.underscore -%> was <%= lines(verbs[_state.to_sym]) -%>
   <%= module_name -%>:
@@ -41,6 +42,11 @@
 <% if object.facts.has_filters -%>
       - results['resources'] | length == <%= _state == 'present' ? 1 : 0 %>
 <% else # object.has_filters -%>
+<% # use maps on names to make tests less flakey -%>
+<% if object.all_user_properties.any? { |x| x.name == 'name' } -%>
+      - results['resources'] | map(attribute='name') | select("match", ".*<%= name_parameter -%>.*") | list | length == <%= _state == 'present' ? 1 : 0 %>
+<% else -%>
       - results['resources'] | length <%= _state == 'present' ? '>= 1' : '== 0' %>
+<% end # x.name == 'name' -%>
 <% end  # object.has_filters -%>
 <% end # object.facts.test -%>

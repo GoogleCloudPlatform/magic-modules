@@ -12,8 +12,11 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Inspec::Config
+legacy_name: bigquery
 overrides: !ruby/object:Overrides::ResourceOverrides
   Dataset: !ruby/object:Overrides::Inspec::ResourceOverride
+    # Override self_link due to GoogleCloudPlatform/magic-modules#2219
+    self_link: "projects/{{project}}/datasets/{{name}}"
     properties:
       description: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude_plural: true

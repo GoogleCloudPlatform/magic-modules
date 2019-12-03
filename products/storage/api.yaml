@@ -26,32 +26,6 @@ apis_required:
     url: https://console.cloud.google.com/apis/library/storage-component.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
-    name: 'Object'
-    base_url: b/{{bucket}}/o/
-    description: Upload or download a file from a GCS bucket.
-    properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'action'
-        description: 'Upload or download from the bucket'
-        values:
-          - :download
-          - :upload
-      - !ruby/object:Api::Type::Boolean
-        name: 'overwrite'
-        description: >
-          'Overwrite the file on the bucket/local machine. If overwrite is
-          false and a difference exists between GCS + local, module will fail
-          with error'
-      - !ruby/object:Api::Type::Path
-        name: 'src'
-        description: Source location of file (may be local machine or cloud depending on action)
-      - !ruby/object:Api::Type::Path
-        name: 'dest'
-        description: Destination location of file (may be local machine or cloud depending on action)
-      - !ruby/object:Api::Type::String
-        name: 'bucket'
-        description: 'The name of the bucket'
-  - !ruby/object:Api::Resource
     name: 'Bucket'
     kind: 'storage#bucket'
     base_url: b?project={{project}}
@@ -240,7 +214,7 @@ objects:
               values:
                 - :OWNER
                 - :READER
-      # | 'etag' is not applicable for state convergene.
+      # | 'etag' is not applicable for state convergence.
       - !ruby/object:Api::Type::String
         name: 'id'
         description: |
@@ -465,6 +439,8 @@ objects:
       and call all BucketAccessControls methods on the bucket.  For more
       information, see Access Control, with the caveat that this API uses
       READER, WRITER, and OWNER instead of READ, WRITE, and FULL_CONTROL.
+    identity:
+      - entity
     properties:
       - !ruby/object:Api::Type::ResourceRef
         name: 'bucket'
@@ -472,6 +448,7 @@ objects:
         imports: 'name'
         description: 'The name of the bucket.'
         required: true
+        input: true
       - !ruby/object:Api::Type::String
         name: 'domain'
         description: 'The domain associated with the entity.'
@@ -499,9 +476,11 @@ objects:
             To refer to all members of the Google Apps for Business domain
             example.com, the entity would be domain-example.com.
         required: true
+        input: true
       - !ruby/object:Api::Type::String
         name: 'entityId'
         description: 'The ID for the entity'
+        output: true
       # | 'etag' is not applicable for state convergence.
       - !ruby/object:Api::Type::String
         name: 'id'
@@ -510,6 +489,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'projectTeam'
         description: 'The project team associated with the entity'
+        output: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'projectNumber'

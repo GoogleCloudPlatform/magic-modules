@@ -47,7 +47,7 @@ dependencies:
     code:
       name: <%= dependency_name('backendService', 'globalForwardingRule') %>
       backends:
-        - group: "{{ instancegroup }}"
+        - group: "{{ instancegroup.selfLink }}"
       health_checks:
         - "{{ healthcheck.selfLink }}"
       enable_cdn: true

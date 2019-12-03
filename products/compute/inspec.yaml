@@ -19,7 +19,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  DiskResourcePolicyAttachment: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   DiskType: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  ExternalVpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
@@ -44,9 +48,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Network: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  NodeGroup: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
-  NodeTemplate: !ruby/object:Overrides::Inspec::ResourceOverride
+  NetworkEndpoint: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Inspec::ResourceOverride
     additional_functions: |
@@ -63,6 +65,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RegionDisk: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  RegionHealthCheck: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  RegionSslCertificate: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  RegionTargetHttpProxy: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  RegionTargetHttpsProxy: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  RegionUrlMap: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  Reservation: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  ResourcePolicy: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  RouterBgpPeer: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Subnetwork: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude_resource: true
@@ -81,6 +99,3 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Zone: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-files: !ruby/object:Provider::Config::Files
-  copy:
-    'Gemfile': 'provider/inspec/Gemfile'

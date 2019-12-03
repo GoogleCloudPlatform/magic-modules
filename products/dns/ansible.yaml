@@ -21,10 +21,10 @@ datasources: !ruby/object:Overrides::ResourceOverrides
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
         exists: |
-          "'www.testzone-4.com.'in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'www.testzone-4.com.'in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
-          "'www.testzone-4.com.'not in \"{{ results['items'] | map(attribute='name') | list }}\""
-    collection: "https://www.googleapis.com/dns/v1/projects/{project}/managedZones/{managed_zone}/rrsets"
+          "'www.testzone-4.com.'not in \"{{ results['resources'] | map(attribute='name') | list }}\""
+    base_url: "projects/{{project}}/managedZones/{{managed_zone}}/rrsets"
   ManagedZone: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       filter: !ruby/object:Provider::Ansible::FilterProp
@@ -39,39 +39,50 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - copy
       - datetime
       - time
-    create: |
-      change = create_change(None, updated_record(module), module)
-      change_id = int(change['id'])
-      if change['status'] == 'pending':
-          wait_for_change_to_complete(change_id, module)
-      return fetch_wrapped_resource(module, 'dns#resourceRecordSet',
-                                    'dns#resourceRecordSetsListResponse',
-                                    'rrsets')
-    delete: |
-      change = create_change(fetch, None, module)
-      change_id = int(change['id'])
-      if change['status'] == 'pending':
-          wait_for_change_to_complete(change_id, module)
-      return fetch_wrapped_resource(module, 'dns#resourceRecordSet',
-                                    'dns#resourceRecordSetsListResponse',
-                                    'rrsets')
-    update: |
-      change = create_change(fetch, updated_record(module), module)
-      change_id = int(change['id'])
-      if change['status'] == 'pending':
-          wait_for_change_to_complete(change_id, module)
-      return fetch_wrapped_resource(module, 'dns#resourceRecordSet',
-                                    'dns#resourceRecordSetsListResponse',
-                                    'rrsets')
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      pre_action: |
+        if 'dnsName' not in module.params.get('managed_zone') or 'name' not in module.params.get('managed_zone'):
+          module.fail_json(msg="managed_zone dictionary must contain both the name of the zone and the dns name of the zone")
+      create: |
+        change = create_change(None, updated_record(module), module)
+        change_id = int(change['id'])
+        if change['status'] == 'pending':
+            wait_for_change_to_complete(change_id, module)
+        return fetch_wrapped_resource(module, 'dns#resourceRecordSet',
+                                      'dns#resourceRecordSetsListResponse',
+                                      'rrsets')
+      delete: |
+        change = create_change(fetch, None, module)
+        change_id = int(change['id'])
+        if change['status'] == 'pending':
+            wait_for_change_to_complete(change_id, module)
+        return fetch_wrapped_resource(module, 'dns#resourceRecordSet',
+                                      'dns#resourceRecordSetsListResponse',
+                                      'rrsets')
+      update: |
+        change = create_change(fetch, updated_record(module), module)
+        change_id = int(change['id'])
+        if change['status'] == 'pending':
+            wait_for_change_to_complete(change_id, module)
+        return fetch_wrapped_resource(module, 'dns#resourceRecordSet',
+                                      'dns#resourceRecordSetsListResponse',
+                                      'rrsets')
     provider_helpers:
       - 'products/dns/helpers/ansible/provider_resource_set.py.erb'
     hidden:
       - unwrap_resource
       - resource_to_request
       - return_if_object
+    properties:
+      managed_zone: !ruby/object:Overrides::Ansible::PropertyOverride
+        description: |
+          Identifies the managed zone addressed by this request. This must be a dictionary that
+          contains both a 'name' key and a 'dnsName' key. You can pass in the results of the
+          gcp_dns_managed_zone module, which will contain both.
+        contain_extra_docs: false
   Project: !ruby/object:Overrides::Ansible::ResourceOverride
     # TODO(alexstephen): Re-evaluate merging Project into Ansible
     exclude: true
 files: !ruby/object:Provider::Config::Files
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

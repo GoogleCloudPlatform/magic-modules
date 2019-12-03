@@ -16,6 +16,9 @@ name: ContainerAnalysis
 display_name: Container Registry
 versions:
   - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://containeranalysis.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://containeranalysis.googleapis.com/v1beta1/
 scopes:

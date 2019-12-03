@@ -1,0 +1,16 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
+<% router = grab_attributes['router'] -%>
+<% router_nat = grab_attributes['router_nat'] -%>
+describe google_compute_router_nat(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, router: <%= doc_generation ? "'#{router['name']}'" : "router['name']" -%>, name: <%= doc_generation ? "'#{router_nat['name']}'" : "router_nat['name']" -%>) do
+  it { should exist }
+  its('nat_ip_allocate_option') { should cmp <%= doc_generation ? "'#{router_nat['nat_ip_allocate_option']}'" : "router_nat['nat_ip_allocate_option']" -%> }
+  its('source_subnetwork_ip_ranges_to_nat') { should cmp <%= doc_generation ? "'#{router_nat['source_subnetwork_ip_ranges_to_nat']}'" : "router_nat['source_subnetwork_ip_ranges_to_nat']" -%> }
+  its('min_ports_per_vm') { should cmp <%= doc_generation ? "'#{router_nat['min_ports_per_vm']}'" : "router_nat['min_ports_per_vm']" -%> }
+  its('log_config.enable') { should cmp <%= doc_generation ? "'#{router_nat['log_config_enable']}'" : "router_nat['log_config_enable']" -%> }
+  its('log_config.filter') { should cmp <%= doc_generation ? "'#{router_nat['log_config_filter']}'" : "router_nat['log_config_filter']" -%> }
+end
+
+describe google_compute_router(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, router: 'nonexistent', name: 'nonexistent') do
+  it { should_not exist }
+end

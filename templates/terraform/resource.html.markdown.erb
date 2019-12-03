@@ -36,16 +36,19 @@
     directly inserted from YAML.
 -%>
 <%
-  if @config.legacy_name.nil?
-    terraform_name = "google_" + (product_ns + object.name).underscore
-  else
-    terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
-  end
+  tf_product = (@config.legacy_name || product_ns).underscore
+  tf_subcategory = (object.__product.display_name)
+  terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   properties = object.all_user_properties
-  timeouts = object.async.nil? ? Api::Timeouts.new : object.timeouts
+  # In order of preference, use TF override,
+  # general defined timeouts, or default Timeouts
+  timeouts = object.timeouts
+  timeouts ||= object&.async&.operation&.timeouts
+  timeouts ||= Api::Timeouts.new
 -%>
 ---
 <%= lines(autogen_notice :yaml) -%>
+subcategory: "<%= tf_subcategory -%>"
 layout: "google"
 page_title: "Google: <%= terraform_name -%>"
 sidebar_current: "docs-<%= terraform_name.gsub("_", "-") -%>"
@@ -59,7 +62,7 @@ description: |-
 
 <% if object.min_version.name == 'beta' -%>
 ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta resources.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 <% end -%>
 
 <% if !object.references.nil? -%>
@@ -91,7 +94,7 @@ To get more information about <%= object.name -%>, see:
   </a>
 </div>
     <%- end -%>
-## Example Usage - <%= example.name.camelize(:upper).uncombine %>
+## Example Usage - <%= example.name.camelize(:upper).titleize %>
 
 
 <%= example.config_documentation -%>
@@ -101,16 +104,8 @@ To get more information about <%= object.name -%>, see:
 
 The following arguments are supported:
 
-<% properties.select(&:required).each do |prop| -%>
-<%   if prop.flatten_object -%>
-<%     if prop.nested_properties? -%>
-<%       prop.nested_properties.each do |p| -%>
-<%=        lines(build_property_documentation(p)) -%>
-<%       end -%>
-<%     end -%>
-<%   else -%>
+<% object.root_properties.select(&:required).each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
-<%   end -%>
 <% end -%>
 
 <% properties.select(&:required).each do |prop| -%>
@@ -122,16 +117,8 @@ The following arguments are supported:
 
 - - -
 
-<% properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%   if prop.flatten_object -%>
-<%     if prop.nested_properties? -%>
-<%       prop.nested_properties.each do |p| -%>
-<%=        lines(build_property_documentation(p)) -%>
-<%       end -%>
-<%     end -%>
-<%   else -%>
+<% object.root_properties.reject(&:required).reject(&:output).each do |prop| -%>
 <%=    lines(build_property_documentation(prop)) -%>
-<%   end -%>
 <% end -%>
 <% if object.base_url.include?("{{project}}")-%>
 <%# The following new line allow for project to be bullet-formatted properly. -%>
@@ -140,11 +127,16 @@ The following arguments are supported:
     If it is not provided, the provider project is used.
 <% end -%>
 
-<% properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop)) -%>
+<%- unless object.virtual_fields.empty? -%>
+<%-   object.virtual_fields.each do |field| -%>
+* `<%= field.name -%>` - (Optional) <%= field.description -%>
+<%    end -%>
 <% end -%>
 <%- unless object.docs.optional_properties.nil? -%>
 <%= "\n" + object.docs.optional_properties -%>
+<% end -%>
+<% properties.reject(&:required).reject(&:output).each do |prop| -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
 
 <% unless properties.select(&:output).empty? && object.docs.attributes.nil? -%>
@@ -152,7 +144,7 @@ The following arguments are supported:
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
-<% properties.select(&:output).each do |prop| -%>
+<% object.root_properties.select(&:output).each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
 <% end -%>
 <% if object.has_self_link -%>
@@ -172,11 +164,11 @@ In addition to the arguments listed above, the following computed attributes are
 This resource provides the following
 [Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
 
-- `create` - Default is <%= timeouts.insert_sec / 60 -%> minutes.
+- `create` - Default is <%= timeouts.insert_minutes -%> minutes.
 <% if updatable?(object, properties) -%>
-- `update` - Default is <%= timeouts.update_sec / 60 -%> minutes.
+- `update` - Default is <%= timeouts.update_minutes -%> minutes.
 <% end -%>
-- `delete` - Default is <%= timeouts.delete_sec / 60 -%> minutes.
+- `delete` - Default is <%= timeouts.delete_minutes -%> minutes.
 
 ## Import
 
@@ -190,3 +182,9 @@ $ terraform import <% if object.min_version.name == 'beta' %>-provider=google-be
 
 -> If you're importing a resource with beta features, make sure to include `-provider=google-beta`
 as an argument so that Terraform uses the correct provider to import your resource.
+
+<% if object.base_url.include?("{{project}}") || object.supports_indirect_user_project_override -%>
+## User Project Overrides
+
+This resource supports [User Project Overrides](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#user_project_override).
+<% end -%>

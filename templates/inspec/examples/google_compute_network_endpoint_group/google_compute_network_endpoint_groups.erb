@@ -1,0 +1,7 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% network_endpoint_group = grab_attributes['network_endpoint_group'] -%>
+<% gcp_zone = "#{external_attribute('gcp_zone', doc_generation)}" %>
+describe google_compute_network_endpoint_groups(project: <%= gcp_project_id -%>, zone: <%= gcp_zone -%>) do
+  its('default_ports') { should include <%= doc_generation ? "'#{network_endpoint_group['default_port']}'" : "network_endpoint_group['default_port']" -%> }
+  its('names') { should include <%= doc_generation ? "'#{network_endpoint_group['name']}'" : "network_endpoint_group['name']" -%> }
+end

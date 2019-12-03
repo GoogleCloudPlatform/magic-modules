@@ -18,6 +18,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # there exists a `container_cluster` resource in InSpec already
     # that can handle zonal resources only
     name: 'RegionalCluster'
+    properties:
+      kubectlPath: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true
+      kubectlContext: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true
   NodePool: !ruby/object:Overrides::Inspec::ResourceOverride
     # See note on RegionalCluster, similar for NodePool
     name: 'RegionalNodePool'
@@ -25,8 +30,3 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       cluster: !ruby/object:Overrides::Inspec::PropertyOverride
         resource: 'RegionalCluster'
-  KubeConfig: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
-files: !ruby/object:Provider::Config::Files
-  copy:
-    'Gemfile': 'provider/inspec/Gemfile'

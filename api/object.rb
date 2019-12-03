@@ -26,6 +26,37 @@ module Api
         attr_reader :name
       end
 
+      def deep_merge(arr1, arr2)
+        # Merge any elements that exist in both
+        result = arr1.map do |el1|
+          other = arr2.select { |el2| el1.name == el2.name }.first
+          other.nil? ? el1 : el1.merge(other)
+        end
+
+        # Add any elements of arr2 that don't exist in arr1
+        result + arr2.reject do |el2|
+          arr1.any? { |el1| el2.name == el1.name }
+        end
+      end
+
+      def merge(other)
+        result = self.class.new
+        instance_variables.each do |v|
+          result.instance_variable_set(v, instance_variable_get(v))
+        end
+
+        other.instance_variables.each do |v|
+          if other.instance_variable_get(v).class == Array
+            result.instance_variable_set(v, deep_merge(result.instance_variable_get(v),
+                                                       other.instance_variable_get(v)))
+          else
+            result.instance_variable_set(v, other.instance_variable_get(v))
+          end
+        end
+
+        result
+      end
+
       include Properties
 
       # original value of :name before the provider override happens

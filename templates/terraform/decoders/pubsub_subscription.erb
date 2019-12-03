@@ -13,6 +13,8 @@
 	# limitations under the License.
 -%>
 
-	path := fmt.Sprintf("projects/%s/subscriptions/%s", d.Get("project"), d.Get("name"))
-	d.Set("path", path)
+// path is a derived field from the API-side `name`
+path := fmt.Sprintf("projects/%s/subscriptions/%s", d.Get("project"), d.Get("name"))
+d.Set("path", path)
+
 return res, nil

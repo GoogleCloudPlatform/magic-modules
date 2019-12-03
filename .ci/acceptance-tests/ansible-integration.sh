@@ -3,31 +3,37 @@
 # CI sets the contents of our json account secret in our environment; dump it
 # to disk for use in tests.
 echo "${SERVICE_ACCOUNT_KEY}" > /tmp/google-account.json
-echo "${ANSIBLE_TEMPLATE}" > /tmp/ansible-template.yml
+echo "${ANSIBLE_TEMPLATE}" > /tmp/ansible-template.ini
 
 set -e
 set -x
 
-# Get the newest version of Ansible from the PR
-pushd magic-modules-gcp
-bundle install
-for i in $(find products/ -name 'ansible.yaml' -printf '%h\n');
-do
-  bundle exec compiler -p $i -e ansible -o "build/ansible/"
-done
+# Install ansible from source
+git clone https://github.com/ansible/ansible.git
+pushd ansible
+pip install -r requirements.txt
+source hacking/env-setup
 popd
 
-# Go to the newly-compiled version of Ansible
-pushd magic-modules-gcp/build/ansible
+# Clone ansible_collections_google because submodules
+# break collections
+git clone https://github.com/ansible/ansible_collections_google.git
+
+# Build newest modules
+pushd magic-modules-gcp
+bundle install
+bundle exec compiler -a -e ansible -o ../ansible_collections_google
+popd
+
+# Install collection
+pushd ansible_collections_google
+ansible-galaxy collection build .
+ansible-galaxy collection install *.gz
+popd
 
 # Setup Cloud configuration template with variables
-cp /tmp/ansible-template.yml test/integration/cloud-config-gcp.yml
-
-# Install dependencies for ansible
-pip install -r requirements.txt
-
-# Setup ansible
-source hacking/env-setup
+pushd ~/.ansible/collections/ansible_collections/google/cloud
+cp /tmp/ansible-template.ini tests/integration/cloud-config-gcp.ini
 
 # Run ansible
-ansible-test integration -v --allow-unsupported --continue-on-error $(find test/integration/targets -name "gcp*" -type d -printf "%P ")
+ansible-test integration -v --allow-unsupported --continue-on-error $(find tests/integration/targets -name "gcp*" -type d -printf "%P ")

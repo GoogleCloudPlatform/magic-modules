@@ -1,0 +1,17 @@
+context := map[string]interface{}{
+	"random_suffix": acctest.RandString(10),
+	"role":          "<%= object.iam_policy.allowed_iam_role -%>",
+<% unless object.iam_policy.test_project_name.nil? -%>
+	"project_id" : fmt.Sprintf("<%= object.iam_policy.test_project_name -%>%s", acctest.RandString(10)),
+<% end -%>
+<%= lines(compile('templates/terraform/env_var_context.go.erb')) -%>
+<% unless example.test_custom_context.nil? -%>
+<% example.test_custom_context.each do |var_name, custom_val| -%>
+	"<%= var_name %>": <%= custom_val %>,
+<% end -%>
+<% end -%>
+<% unless version == 'ga' || object.iam_policy.iam_conditions_request_type.nil? -%>
+	"condition_title": "expires_after_2019_12_31",
+	"condition_expr": `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
+<% end -%>
+}

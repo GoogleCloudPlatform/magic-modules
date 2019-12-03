@@ -10,3 +10,4 @@ gcp_network_name: gcp-inspec-network
 gcp_organization_id: 190694428152
 gcp_storage_bucket_name: gcp-inspec-storage-bucket
 gcp_cloud_function_region: europe-west1
+gcp_billing_account: billingAccounts/012345-567890-ABCDEF

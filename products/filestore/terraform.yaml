@@ -15,12 +15,10 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
-      insert_sec: 360
-      update_sec: 360
-      delete_sec: 360
+      insert_minutes: 6
+      update_minutes: 6
+      delete_minutes: 6
     autogen_async: true
-    id_format: "{{project}}/{{zone}}/{{name}}"
-    import_format: ["projects/{{project}}/locations/{{zone}}/instances/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "filestore_instance_basic"

@@ -5,9 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 var (
@@ -20,10 +19,6 @@ var (
 	roleEntityEditors = "OWNER:project-editors-" + os.Getenv("GOOGLE_PROJECT_NUMBER")
 	roleEntityViewers = "READER:project-viewers-" + os.Getenv("GOOGLE_PROJECT_NUMBER")
 )
-
-func testBucketName() string {
-	return fmt.Sprintf("%s-%d", "tf-test-acl-bucket", acctest.RandInt())
-}
 
 func TestAccStorageBucketAcl_basic(t *testing.T) {
 	t.Parallel()
@@ -213,12 +208,12 @@ func testAccStorageBucketAclDestroy(s *terraform.State) error {
 func testGoogleStorageBucketsAclBasic1(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-	name = "%s"
+  name = "%s"
 }
 
 resource "google_storage_bucket_acl" "acl" {
-	bucket = "${google_storage_bucket.bucket.name}"
-	role_entity = ["%s", "%s", "%s", "%s", "%s"]
+  bucket      = google_storage_bucket.bucket.name
+  role_entity = ["%s", "%s", "%s", "%s", "%s"]
 }
 `, bucketName, roleEntityOwners, roleEntityEditors, roleEntityViewers, roleEntityBasic1, roleEntityBasic2)
 }
@@ -226,12 +221,12 @@ resource "google_storage_bucket_acl" "acl" {
 func testGoogleStorageBucketsAclBasic2(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-	name = "%s"
+  name = "%s"
 }
 
 resource "google_storage_bucket_acl" "acl" {
-	bucket = "${google_storage_bucket.bucket.name}"
-	role_entity = ["%s", "%s", "%s", "%s", "%s"]
+  bucket      = google_storage_bucket.bucket.name
+  role_entity = ["%s", "%s", "%s", "%s", "%s"]
 }
 `, bucketName, roleEntityOwners, roleEntityEditors, roleEntityViewers, roleEntityBasic2, roleEntityBasic3_owner)
 }
@@ -239,12 +234,12 @@ resource "google_storage_bucket_acl" "acl" {
 func testGoogleStorageBucketsAclBasicDelete(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-	name = "%s"
+  name = "%s"
 }
 
 resource "google_storage_bucket_acl" "acl" {
-	bucket = "${google_storage_bucket.bucket.name}"
-	role_entity = []
+  bucket      = google_storage_bucket.bucket.name
+  role_entity = []
 }
 `, bucketName)
 }
@@ -252,12 +247,12 @@ resource "google_storage_bucket_acl" "acl" {
 func testGoogleStorageBucketsAclBasic3(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-	name = "%s"
+  name = "%s"
 }
 
 resource "google_storage_bucket_acl" "acl" {
-	bucket = "${google_storage_bucket.bucket.name}"
-	role_entity = ["%s", "%s", "%s", "%s", "%s"]
+  bucket      = google_storage_bucket.bucket.name
+  role_entity = ["%s", "%s", "%s", "%s", "%s"]
 }
 `, bucketName, roleEntityOwners, roleEntityEditors, roleEntityViewers, roleEntityBasic2, roleEntityBasic3_reader)
 }
@@ -269,7 +264,7 @@ resource "google_storage_bucket" "bucket" {
 }
 
 resource "google_storage_bucket_acl" "acl" {
-  bucket = "${google_storage_bucket.bucket.name}"
+  bucket      = google_storage_bucket.bucket.name
   role_entity = ["%s", "%s", "%s", "%s", "%s"]
 }
 `, bucketName, roleEntityBasic1, roleEntityViewers, roleEntityOwners, roleEntityBasic2, roleEntityEditors)
@@ -278,13 +273,13 @@ resource "google_storage_bucket_acl" "acl" {
 func testGoogleStorageBucketsAclPredefined(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-	name = "%s"
+  name = "%s"
 }
 
 resource "google_storage_bucket_acl" "acl" {
-	bucket = "${google_storage_bucket.bucket.name}"
-	predefined_acl = "projectPrivate"
-	default_acl = "projectPrivate"
+  bucket         = google_storage_bucket.bucket.name
+  predefined_acl = "projectPrivate"
+  default_acl    = "projectPrivate"
 }
 `, bucketName)
 }

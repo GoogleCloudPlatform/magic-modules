@@ -1,0 +1,26 @@
+<% object.all_user_properties.select(&:pattern).each do |p| -%>
+<%
+  prop_names = p.pattern.scan(/{{([a-z]*)}}/).flatten
+  props = object.all_user_properties.select { |p| prop_names.include?(p.name) }
+-%>
+def <%= p.name.underscore -%>_pattern(name, module):
+    if name is None:
+        return
+
+    regex = r<%= lines(build_url(regex_url(p.pattern))) -%>
+
+    if not re.match(regex, name):
+<% if props.any? { |p| p.is_a?(Api::Type::ResourceRef) } -%>
+        formatted_params = {
+          'project': module.params['project'],
+<% props.each do |url_prop| -%>
+          '<%= url_prop.name -%>': replace_resource_dict(module.params['<%= url_prop.name -%>'], '<%= url_prop.imports -%>'),
+<% end -%>
+        }
+        name = <%= build_url(p.pattern) -%>.format(**formatted_params)
+<% else -%>
+        name = <%= build_url(p.pattern) -%>.format(**module.params)
+<% end -%>
+
+    return name
+<% end -%>

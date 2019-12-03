@@ -1,0 +1,4 @@
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
+gcp_billing_account = attribute(:gcp_billing_account, default: '<%= external_attribute('gcp_billing_account') -%>', description: 'The GCP billing account name.')
+gcp_organization_id = attribute(:gcp_organization_id, default: <%= external_attribute('gcp_organization_id') -%>, description: 'The identifier of the organization')
+gcp_enable_privileged_resources = attribute(:gcp_enable_privileged_resources, default:0, description:'Flag to enable privileged resources requiring elevated privileges in GCP.')

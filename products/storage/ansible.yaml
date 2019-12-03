@@ -18,20 +18,15 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Bucket: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  Object: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   ObjectAccessControl: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   DefaultObjectACL: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
-  Object: !ruby/object:Overrides::Ansible::ResourceOverride
-    template: 'products/storage/helpers/ansible/object_template.erb'
-    has_tests: false
   ObjectAccessControl: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   DefaultObjectACL: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

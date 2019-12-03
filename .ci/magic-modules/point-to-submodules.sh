@@ -31,7 +31,7 @@ fi
 
 if [ "$ANSIBLE_ENABLED" = "true" ]; then
   git config -f .gitmodules submodule.build/ansible.branch "$BRANCH"
-  git config -f .gitmodules submodule.build/ansible.url "https://github.com/$GH_USERNAME/ansible.git"
+  git config -f .gitmodules submodule.build/ansible.url "https://github.com/$GH_USERNAME/ansible_collections_google.git"
   git submodule sync build/ansible
   ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/ansible"
   git add build/ansible

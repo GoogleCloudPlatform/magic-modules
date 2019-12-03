@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"google.golang.org/api/servicemanagement/v1"
 )
 
@@ -34,12 +34,6 @@ func resourceEndpointsService() *schema.Resource {
 			"grpc_config": {
 				Type:     schema.TypeString,
 				Optional: true,
-			},
-			"protoc_output": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Removed:  "Please use protoc_output_base64 instead.",
 			},
 			"protoc_output_base64": {
 				Type:     schema.TypeString,

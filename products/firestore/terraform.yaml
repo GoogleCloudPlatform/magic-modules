@@ -15,9 +15,9 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Index: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
-      insert_sec: 600
-      update_sec: 600
-      delete_sec: 600
+      insert_minutes: 10
+      update_minutes: 10
+      delete_minutes: 10
     autogen_async: true
     import_format: ["{{name}}"]
     description: |

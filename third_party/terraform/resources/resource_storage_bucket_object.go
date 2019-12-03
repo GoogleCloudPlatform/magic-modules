@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
 	"crypto/md5"
 	"encoding/base64"
@@ -83,13 +83,6 @@ func resourceStorageBucketObject() *schema.Resource {
 			"md5hash": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-
-			"predefined_acl": {
-				Type:     schema.TypeString,
-				Removed:  "Please use resource \"storage_object_acl.predefined_acl\" instead.",
-				Optional: true,
-				ForceNew: true,
 			},
 
 			"source": {

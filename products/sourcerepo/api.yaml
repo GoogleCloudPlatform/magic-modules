@@ -36,8 +36,7 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/source-repositories/'
       api: 'https://cloud.google.com/source-repositories/docs/reference/rest/v1/projects.repos'
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'repos'
+    collection_url_key: 'repos'
     description: |
       A repository (or repo) is a Git repository storing versioned source content.
     properties:
@@ -48,6 +47,7 @@ objects:
         description: |
           Resource name of the repository, of the form projects/{{project}}/repos/{{repo}}.
           The repo name may contain slashes. eg, projects/myproject/repos/name/with/slash
+        pattern: 'projects/{{project}}/repos/{{name}}'
       - !ruby/object:Api::Type::String
         name: 'url'
         output: true

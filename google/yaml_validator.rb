@@ -47,7 +47,7 @@ module Google
     # :default   - the default value for this variable if its nil
     # :type      - the allowed types (single or array) that this value can be
     # :item_type - the allowed types that all values in this array should be
-    #              (impllied that type == array)
+    #              (implied that type == array)
     # :allowed   - the allowed values that this non-array variable should be.
     # :required  - is the variable required? (defaults: false)
     def check(variable, **opts)
@@ -82,6 +82,16 @@ module Google
         unless opts[:allowed].include?(value)
     end
 
+    def conflicts(list)
+      value_checked = false
+      list.each do |item|
+        next if instance_variable_get("@#{item}").nil?
+        raise "#{list.join(',')} cannot be set at the same time" if value_checked
+
+        value_checked = true
+      end
+    end
+
     private
 
     def check_type(name, object, type)
@@ -90,7 +100,8 @@ module Google
       elsif type.is_a? ::Array
         return if type.find_index(:boolean) && [TrueClass, FalseClass].find_index(object.class)
         return unless type.find_index(object.class).nil?
-      elsif object.is_a?(type)
+      # check if class is or inherits from type
+      elsif object.class <= type
         return
       end
       raise "Property '#{name}' is '#{object.class}' instead of '#{type}'"

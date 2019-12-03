@@ -19,7 +19,7 @@ require 'compile/core'
 require 'json'
 
 module Api
-  # Repesents a product to be managed
+  # Represents a product to be managed
   class Product < Api::Object::Named
     include Compile::Core
 
@@ -62,7 +62,7 @@ module Api
 
       check :async, type: Api::Async
 
-      validate_versions
+      check :versions, type: Array, item_type: Api::Product::Version, required: true
     end
 
     # ====================
@@ -84,12 +84,15 @@ module Api
       end
     end
 
-    def default_version
-      @versions.each do |v|
-        return v if v.default
+    # Most general version that exists for the product
+    # If GA is present, use that, else beta, else alpha
+    def lowest_version
+      Version::ORDER.each do |ordered_version_name|
+        @versions.each do |product_version|
+          return product_version if ordered_version_name == product_version.name
+        end
       end
-
-      return @versions.last if @versions.length == 1
+      raise "Unable to find lowest version for product #{product_full_name}"
     end
 
     def version_obj(name)
@@ -100,8 +103,20 @@ module Api
       raise "API version '#{name}' does not exist for product '#{@name}'"
     end
 
-    def version_obj_or_default(name)
-      exists_at_version(name) ? version_obj(name) : default_version
+    # Get the version of the object specified by the version given if present
+    # Or else fall back to the closest version in the chain defined by Version::ORDER
+    def version_obj_or_closest(name)
+      return version_obj(name) if exists_at_version(name)
+
+      # versions should fall back to the closest version to them that exists
+      name ||= Version::ORDER[0]
+      lower_versions = Version::ORDER[0..Version::ORDER.index(name)]
+
+      lower_versions.reverse_each do |version|
+        return version_obj(version) if exists_at_version(version)
+      end
+
+      raise "Could not find object for version #{name} and product #{product_full_name}"
     end
 
     def exists_at_version_or_lower(name)
@@ -164,24 +179,6 @@ module Api
       end
 
       JSON.generate(json_out, opts)
-    end
-
-    private
-
-    def validate_versions
-      check :versions, type: Array, item_type: Api::Product::Version, required: true
-
-      # Confirm that at most one version is the default
-      defaults = 0
-      @versions.each do |v|
-        defaults += 1 if v.default
-      end
-
-      raise "Product '#{@name}' must specify at most one default API version" \
-        if defaults > 1
-
-      raise "Product '#{@name}' must specify a default API version" \
-        if defaults.zero? && @versions.length > 1
     end
   end
 end

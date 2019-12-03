@@ -14,10 +14,27 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Topic: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "projects/{{project}}/topics/{{name}}"
+    error_retry_predicates: ["pubsubTopicProjectNotReady"]
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      parent_resource_attribute: 'topic'
+      method_name_separator: ':'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "pubsub_topic_basic"
+        primary_resource_id: "example"
+        primary_resource_name: "fmt.Sprintf(\"example-topic%s\", context[\"random_suffix\"])"
+        vars:
+          topic_name: "example-topic"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "pubsub_topic_cmek"
+        primary_resource_id: "example"
+        skip_test: true
+        vars:
+          topic_name: "example-topic"
+          key_name: "example-key"
+          keyring_name: "example-keyring"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "pubsub_topic_geo_restricted"
         primary_resource_id: "example"
         vars:
           topic_name: "example-topic"
@@ -26,8 +43,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      messageStoragePolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/no_send_name.go.erb
+      update_encoder: templates/terraform/update_encoder/pubsub_topic.erb
   Subscription: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "projects/{{project}}/subscriptions/{{name}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "pubsub_subscription_push"
@@ -56,8 +77,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         * `path`: Path of the subscription in the format `projects/{project}/subscriptions/{name}`
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'comparePubsubSubscriptionBasename'
-        custom_expand: templates/terraform/custom_expand/computed_subscription_name.erb
+        custom_expand: templates/terraform/custom_expand/shortname_to_url.go.erb
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       topic: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
@@ -71,6 +91,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/subscription.go.erb
       decoder: templates/terraform/decoders/pubsub_subscription.erb
+      encoder: templates/terraform/encoders/no_send_name.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/pubsub_subscription_path.erb
       update_encoder: templates/terraform/update_encoder/pubsub_subscription.erb
 

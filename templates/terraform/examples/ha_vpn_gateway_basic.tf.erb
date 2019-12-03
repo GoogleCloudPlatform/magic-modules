@@ -1,0 +1,12 @@
+resource "google_compute_ha_vpn_gateway" "ha_gateway1" {
+  provider = google-beta
+  region   = "us-central1"
+  name     = "<%= ctx[:vars]['ha_vpn_gateway1_name'] %>"
+  network  = google_compute_network.network1.self_link
+}
+
+resource "google_compute_network" "network1" {
+  provider                = google-beta
+  name                    = "<%= ctx[:vars]['network1_name'] %>"
+  auto_create_subnetworks = false
+}

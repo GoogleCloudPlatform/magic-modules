@@ -12,17 +12,20 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Inspec::Config
+legacy_name: resourcemanager
 overrides: !ruby/object:Overrides::ResourceOverrides
   Lien: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Project: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    self_link: projects/{{projectId}}
+    exclude_resource: true
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
   Organization: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Folder: !ruby/object:Overrides::Inspec::ResourceOverride
     product_url: https://cloudresourcemanager.googleapis.com/v2/
     # Creating and viewing folders requires organization level privileges
     privileged: true
-files: !ruby/object:Provider::Config::Files
-  copy:
-    'Gemfile': 'provider/inspec/Gemfile'

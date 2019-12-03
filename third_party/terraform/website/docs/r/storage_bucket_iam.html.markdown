@@ -1,4 +1,5 @@
 ---
+subcategory: "Cloud Storage"
 layout: "google"
 page_title: "Google: google_storage_bucket_iam"
 sidebar_current: "docs-google-storage-bucket-iam"
@@ -22,7 +23,7 @@ Three different resources help you manage your IAM policy for storage bucket. Ea
 ```hcl
 resource "google_storage_bucket_iam_binding" "binding" {
   bucket = "your-bucket-name"
-  role        = "roles/storage.objectViewer"
+  role   = "roles/storage.objectViewer"
 
   members = [
     "user:jane@example.com",
@@ -35,8 +36,8 @@ resource "google_storage_bucket_iam_binding" "binding" {
 ```hcl
 resource "google_storage_bucket_iam_member" "member" {
   bucket = "your-bucket-name"
-  role        = "roles/storage.objectViewer"
-  member      = "user:jane@example.com"
+  role   = "roles/storage.objectViewer"
+  member = "user:jane@example.com"
 }
 ```
 
@@ -53,13 +54,13 @@ data "google_iam_policy" "foo-policy" {
   binding {
     role = "roles/your-role"
 
-    members = [ "group:yourgroup@example.com" ]
+    members = ["group:yourgroup@example.com"]
   }
 }
 
 resource "google_storage_bucket_iam_policy" "member" {
-  bucket = "your-bucket-name"
-  policy_data = "${data.google_iam_policy.foo-policy.policy_data}"
+  bucket      = "your-bucket-name"
+  policy_data = data.google_iam_policy.foo-policy.policy_data
 }
 ```
 
@@ -88,3 +89,18 @@ In addition to the arguments listed above, the following computed attributes are
 exported:
 
 * `etag` - (Computed) The etag of the storage bucket's IAM policy.
+
+
+## Import
+
+For `google_storage_bucket_iam_policy`:
+
+IAM member imports use space-delimited identifiers - generally the resource in question, the role, and the member identity (i.e. `serviceAccount: my-sa@my-project.iam.gserviceaccount.com` or `user:foo@example.com`). Policies, bindings, and members can be respectively imported as follows:
+
+```
+$ terraform import google_storage_bucket_iam_policy.policy "my-bucket user:foo@example.com"
+
+$ terraform import google_storage_bucket_iam_binding.binding "my-bucket roles/my-role "
+
+$ terraform import google_storage_bucket_iam_member.member "my-bucket roles/my-role user:foo@example.com"
+```

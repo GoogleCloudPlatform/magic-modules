@@ -1,14 +1,14 @@
 resource "google_monitoring_alert_policy" "<%= ctx[:primary_resource_id] %>" {
   display_name = "<%= ctx[:vars]["alert_policy_display_name"] %>"
-  combiner = "OR"
+  combiner     = "OR"
   conditions {
     display_name = "test condition"
     condition_threshold {
-      filter = "metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\""
-      duration = "60s"
+      filter     = "metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\""
+      duration   = "60s"
       comparison = "COMPARISON_GT"
       aggregations {
-        alignment_period = "60s"
+        alignment_period   = "60s"
         per_series_aligner = "ALIGN_RATE"
       }
     }

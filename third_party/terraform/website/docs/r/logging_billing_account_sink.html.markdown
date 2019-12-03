@@ -1,4 +1,5 @@
 ---
+subcategory: "Stackdriver Logging"
 layout: "google"
 page_title: "Google: google_logging_billing_account_sink"
 sidebar_current: "docs-google-logging-billing-account-sink"
@@ -21,23 +22,23 @@ typical IAM roles granted on a project.
 
 ```hcl
 resource "google_logging_billing_account_sink" "my-sink" {
-    name = "my-sink"
-    billing_account = "ABCDEF-012345-GHIJKL"
+  name            = "my-sink"
+  billing_account = "ABCDEF-012345-GHIJKL"
 
-    # Can export to pubsub, cloud storage, or bigquery
-    destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
+  # Can export to pubsub, cloud storage, or bigquery
+  destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
 }
 
 resource "google_storage_bucket" "log-bucket" {
-    name     = "billing-logging-bucket"
+  name = "billing-logging-bucket"
 }
 
 resource "google_project_iam_binding" "log-writer" {
-    role = "roles/storage.objectCreator"
+  role = "roles/storage.objectCreator"
 
-    members = [
-        "${google_logging_billing_account_sink.my-sink.writer_identity}",
-    ]
+  members = [
+    google_logging_billing_account_sink.my-sink.writer_identity,
+  ]
 }
 ```
 

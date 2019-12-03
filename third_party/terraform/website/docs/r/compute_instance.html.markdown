@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute Engine"
 layout: "google"
 page_title: "Google: google_compute_instance"
 sidebar_current: "docs-google-compute-instance-x"
@@ -32,6 +33,7 @@ resource "google_compute_instance" "default" {
 
   // Local SSD disk
   scratch_disk {
+    interface = "SCSI"
   }
 
   network_interface {
@@ -88,9 +90,6 @@ The following arguments are supported:
     packets with non-matching source or destination IPs.
     This defaults to false.
 
-* `create_timeout` - (Optional) Configurable timeout in minutes for creating instances. Default is 4 minutes.
-    Changing this forces a new resource to be created.
-
 * `description` - (Optional) A brief description of this resource.
 
 * `deletion_protection` - (Optional) Enable deletion protection on this instance. Defaults to false.
@@ -103,11 +102,15 @@ The following arguments are supported:
 * `guest_accelerator` - (Optional) List of the type and count of accelerator cards attached to the instance. Structure documented below.
     **Note:** GPU accelerators can only be used with [`on_host_maintenance`](#on_host_maintenance) option set to TERMINATE.
 
-* `labels` - (Optional) A set of key/value label pairs to assign to the instance.
+* `labels` - (Optional) A map of key/value label pairs to assign to the instance.
 
 * `metadata` - (Optional) Metadata key/value pairs to make available from
     within the instance. Ssh keys attached in the Cloud Console will be removed.
     Add them to your config in order to keep them attached to your instance.
+
+-> On import, `metadata_startup_script` will be set while 
+`metadata.startup-script` will not be. You'll need to match 
+`metadata_startup_script` to your `startup-script` value.
 
 * `metadata_startup_script` - (Optional) An alternative to using the
     startup-script metadata key, except this one forces the instance to be
@@ -137,6 +140,10 @@ The following arguments are supported:
 * `shielded_instance_config` - (Optional) Enable [Shielded VM](https://cloud.google.com/security/shielded-cloud/shielded-vm) on this instance. Shielded VM provides verifiable integrity to prevent against malware and rootkits. Defaults to disabled. Structure is documented below.
 	**Note**: [`shielded_instance_config`](#shielded_instance_config) can only be used with boot images with shielded vm support. See the complete list [here](https://cloud.google.com/compute/docs/images#shielded-images).
 
+* `enable_display` - (Optional) Enable [Virtual Displays](https://cloud.google.com/compute/docs/instances/enable-instance-virtual-display#verify_display_driver) on this instance.
+**Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true in order to update this field.
+
+
 ---
 
 The `boot_disk` block supports:
@@ -146,6 +153,9 @@ The `boot_disk` block supports:
 
 * `device_name` - (Optional) Name with which attached disk will be accessible.
     On the instance, this device will be `/dev/disk/by-id/google-{{device_name}}`.
+
+* `mode` - (Optional) The mode in which to attach this disk, either `READ_WRITE`
+  or `READ_ONLY`. If not specified, the default is to attach the disk in `READ_WRITE` mode.
 
 * `disk_encryption_key_raw` - (Optional) A 256-bit [customer-supplied encryption key]
     (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption),
@@ -184,15 +194,14 @@ The `initialize_params` block supports:
 
 The `scratch_disk` block supports:
 
-* `interface` - (Optional) The disk interface to use for attaching this disk; either SCSI or NVME.
-    Defaults to SCSI.
+* `interface` - (Required) The disk interface to use for attaching this disk; either SCSI or NVME.
 
 The `attached_disk` block supports:
 
 * `source` - (Required) The name or self_link of the disk to attach to this instance.
 
 * `device_name` - (Optional) Name with which the attached disk will be accessible
-    under `/dev/disk/by-id/`
+    under `/dev/disk/by-id/google-*`
 
 * `mode` - (Optional) Either "READ_ONLY" or "READ_WRITE", defaults to "READ_WRITE"
     If you have a persistent disk with data that you want to share
@@ -347,6 +356,15 @@ exported:
 * `disk.0.disk_encryption_key_sha256` - The [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
     encoded SHA-256 hash of the [customer-supplied encryption key]
     (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption) that protects this resource.
+
+## Timeouts
+
+This resource provides the following
+[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+
+- `create` - Default is 20 minutes.
+- `update` - Default is 20 minutes.
+- `delete` - Default is 20 minutes.
 
 ## Import
 

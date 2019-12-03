@@ -15,7 +15,6 @@ require 'api/object'
 require 'api/resource/iam_policy'
 require 'api/resource/nested_query'
 require 'api/resource/reference_links'
-require 'api/resource/response_list'
 require 'google/string_utils'
 
 module Api
@@ -59,11 +58,11 @@ module Api
       #
       # [Optional] The "identity" URL of the resource. Defaults to:
       # * base_url when the create_verb is :POST
-      # * self_link when the create_verb is :PUT
+      # * self_link when the create_verb is :PUT  or :PATCH
       attr_reader :self_link
       # [Optional] The URL used to creating the resource. Defaults to:
       # * collection url when the create_verb is :POST
-      # * self_link when the create_verb is :PUT
+      # * self_link when the create_verb is :PUT or :PATCH
       attr_reader :create_url
       # [Optional] The URL used to delete the resource. Defaults to the self
       # link.
@@ -73,29 +72,34 @@ module Api
       attr_reader :update_url
       # [Optional] The HTTP verb used during create. Defaults to :POST.
       attr_reader :create_verb
+      # [Optional] The HTTP verb used during read. Defaults to :GET.
+      attr_reader :read_verb
       # [Optional] The HTTP verb used during update. Defaults to :PUT.
       attr_reader :update_verb
       # [Optional] The HTTP verb used during delete. Defaults to :DELETE.
       attr_reader :delete_verb
-
       # ====================
       # Collection / Identity URL Configuration
       # ====================
       #
-      # [Optional] (Api::Resource::ResponseList) This is the type of response
-      # from the collection URL. It contains the name of the list of items
-      # within the json, as well as the type that this list should be.
-      attr_reader :collection_url_response
-      # [Optional] This is an array with items that uniquely identify the
-      # resource.
-      # This is useful in case an API returns a list result and we need
-      # to fetch the particular resource we're interested in from that
-      # list.  Otherwise, it's safe to leave empty.
-      # If empty, we assume that `name` is the identifier.
+      # [Optional] This is the name of the list of items
+      # within the collection (list) json. Will default to the
+      # camelcase pluralize name of the resource.
+      attr_reader :collection_url_key
+      # [Optional] An ordered list of names of parameters that uniquely identify
+      # the resource.
+      # Generally, it's safe to leave empty, in which case it defaults to `name`.
+      # Other values are normally useful in cases where an object has a parent
+      # and is identified by some non-name value, such as an ip+port pair.
+      # If you're writing a fine-grained resource (eg with nested_query) a value
+      # must be set.
       attr_reader :identity
+
       # [Optional] (Api::Resource::NestedQuery) This is useful in case you need
       # to change the query made for GET requests only. In particular, this is
       # often used to extract an object from a parent object or a collection.
+      # Note that if both nested_query and custom_code.decoder are provided,
+      # the decoder will be included within the code handling the nested query.
       attr_reader :nested_query
 
       # ====================
@@ -148,10 +152,10 @@ module Api
               `has exactly one :identity property"'
       end
 
-      check :collection_url_response, default: Api::Resource::ResponseList.new,
-                                      type: Api::Resource::ResponseList
+      check :collection_url_key, default: @name.pluralize.camelize(:lower)
 
-      check :create_verb, type: Symbol, default: :POST, allowed: %i[POST PUT]
+      check :create_verb, type: Symbol, default: :POST, allowed: %i[POST PUT PATCH]
+      check :read_verb, type: Symbol, default: :GET, allowed: %i[GET POST]
       check :delete_verb, type: Symbol, default: :DELETE, allowed: %i[POST PUT PATCH DELETE]
       check :update_verb, type: Symbol, default: :PUT, allowed: %i[POST PUT PATCH]
 
@@ -191,7 +195,8 @@ module Api
     end
 
     # Return the user-facing properties in client tools; this ends up meaning
-    # both properties and parameters.
+    # both properties and parameters but without any that are excluded due to
+    # version mismatches or manual exclusion
     def all_user_properties
       properties + parameters
     end
@@ -219,6 +224,18 @@ module Api
       all_user_properties.reject(&:url_param_only)
     end
 
+    # Returns the list of top-level properties once any nested objects with flatten_object
+    # set to true have been collapsed
+    def root_properties
+      all_user_properties.flat_map do |p|
+        if p.flatten_object
+          p.root_properties
+        else
+          p
+        end
+      end
+    end
+
     # Return the product-level async object, or the resource-specific one
     # if one exists.
     def async
@@ -234,7 +251,7 @@ module Api
       if @identity.nil?
         props.select { |p| p.name == Api::Type::String::NAME.name }
       else
-        props.select { |p| @identity.include?(p.name) }
+        props.select { |p| @identity.include?(p.name) }.sort_by { |p| @identity.index p.name }
       end
     end
 
@@ -256,7 +273,7 @@ module Api
 
     def min_version
       if @min_version.nil?
-        @__product.default_version
+        @__product.lowest_version
       else
         @__product.version_obj(@min_version)
       end
@@ -287,65 +304,64 @@ module Api
     # In newer resources there is much less standardisation in terms of value.
     # Generally for them though, it's the product.base_url + resource.name
     def self_link_url
-      base_url = @__product.base_url.split("\n").map(&:strip).compact
+      [@__product.base_url, self_link_uri].flatten.join
+    end
+
+    # Returns the partial uri / relative path of a resource. In newer resources,
+    # this is the name. This fn is named self_link_uri for consistency, but
+    # could otherwise be considered to be "path"
+    def self_link_uri
       if @self_link.nil?
-        [base_url, [@base_url, '{{name}}'].join('/')].flatten.join
+        [@base_url, '{{name}}'].join('/')
       else
-        self_link = @self_link.split("\n").map(&:strip).compact
-        [base_url, self_link].flatten.join
+        @self_link
       end
     end
 
     def collection_url
-      [
-        @__product.base_url.split("\n").map(&:strip).compact,
-        @base_url.split("\n").map(&:strip).compact
-      ].flatten.join
+      [@__product.base_url, collection_uri].flatten.join
+    end
+
+    def collection_uri
+      @base_url
     end
 
     def async_operation_url
-      raise 'Not an async resource' if async.nil?
-
-      [@__product.base_url, async.operation.base_url].flatten.join
+      [@__product.base_url, async_operation_uri].flatten.join
     end
 
-    def default_create_url
-      if @create_verb.nil? || @create_verb == :POST
-        collection_url
-      elsif @create_verb == :PUT
-        self_link_url
-      else
-        raise "unsupported create verb #{@create_verb}"
-      end
+    def async_operation_uri
+      raise 'Not an async resource' if async.nil?
+
+      async.operation.base_url
     end
 
     def full_create_url
+      [@__product.base_url, create_uri].flatten.join
+    end
+
+    def create_uri
       if @create_url.nil?
-        default_create_url
+        if @create_verb.nil? || @create_verb == :POST
+          collection_uri
+        else
+          self_link_uri
+        end
       else
-        [
-          @__product.base_url.split("\n").map(&:strip).compact,
-          @create_url.split("\n").map(&:strip).compact
-        ].flatten.join
+        @create_url
       end
     end
 
     def full_delete_url
-      if @delete_url.nil?
-        self_link_url
-      else
-        [
-          @__product.base_url.split("\n").map(&:strip).compact,
-          @delete_url
-        ].flatten.join
-      end
+      [@__product.base_url, delete_uri].flatten.join
     end
 
-    # A regex to check if a full URL was returned or just a shortname.
-    def regex_url
-      self_link_url.gsub('{{project}}', '.*')
-                   .gsub('{{name}}', '[a-z1-9\-]*')
-                   .gsub('{{zone}}', '[a-z1-9\-]*')
+    def delete_uri
+      if @delete_url.nil?
+        self_link_uri
+      else
+        @delete_url
+      end
     end
 
     # ====================
@@ -366,7 +382,7 @@ module Api
     def to_json(opts = nil)
       # ignore fields that will contain references to parent resources
       ignored_fields = %i[@__product @__parent @__resource @api_name
-                          @collection_url_response @properties @parameters]
+                          @properties @parameters]
       json_out = {}
 
       instance_variables.each do |v|

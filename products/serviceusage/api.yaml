@@ -1,0 +1,103 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+--- !ruby/object:Api::Product
+name: ServiceUsage
+display_name: Service Usage
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://serviceusage.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Service Usage API
+    url: https://console.cloud.google.com/apis/library/serviceusage.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: Service
+    base_url: projects/{{project}}/services
+    self_link: projects/{{project}}/services/{{name}}
+    create_url: projects/{{project}}/services/{{name}}:enable
+    delete_url: projects/{{project}}/services/{{name}}:disable
+    delete_verb: :POST
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Getting Started': 'https://cloud.google.com/service-usage/docs/getting-started'
+    description: |
+      A service that is available for use
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        description: |
+          The resource name of the service
+        pattern: projects/{{project}}/services/{{name}}
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: parent
+        description: |
+          The name of the parent of this service. For example 'projects/123'
+        output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        description: Whether or not the service has been enabled for use by the consumer.
+        values:
+          - STATE_UNSPECIFIED
+          - DISABLED
+          - ENABLED
+        output: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'disableDependentServices'
+        description: |
+          Indicates if dependent services should also be disabled. Can only be turned on if service
+          is disabled.
+      - !ruby/object:Api::Type::NestedObject
+        name: config
+        description: The service configuration of the available service.
+        output: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: name
+            description: The DNS address at which this service is available.
+          - !ruby/object:Api::Type::String
+            name: title
+            description: The product title for this service
+          - !ruby/object:Api::Type::Array
+            name: apis
+            description: The list of API interfaces exported by this service.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'name'
+                  description: Name of the API
+                - !ruby/object:Api::Type::String
+                  name: 'version'
+                  description: The version of the API

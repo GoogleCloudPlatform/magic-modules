@@ -18,11 +18,20 @@ def wait_for_operation(module, response):
 <% if object.nested_query.nil? -%>
     wait_done = wait_for_completion(status, op_result, module)
 <% if object.async.result.resource_inside_response -%>
-    raise_if_errors(op_result, <%= err_path -%>, module)
+    raise_if_errors(wait_done, <%= err_path -%>, module)
     return navigate_hash(wait_done, ['response'])
 <% else #if object.async.result.resource_inside_response -%>
 <% res_path = python_literal(object.async.result.path.split('/')) -%>
-    return <%= method_call('fetch_resource', ['module', "navigate_hash(wait_done, #{res_path})", (quote_string(object.kind) if object.kind?)]) %>
+<% method = method_call('fetch_resource', ['module', "navigate_hash(wait_done, #{res_path})", (quote_string(object.kind) if object.kind?)]) -%>
+<% if object.decoder? -%>
+    response = <%= method %>
+    if response:
+        return <%= method_call('decode_response', ['response', 'module']) %>
+    else:
+        return {}
+<% else -%>
+    return <%= method -%>
+<% end # if object.decoder? -%>
 <% end #if object.async.result.resource_inside_response -%>
 <% else # object.nested_query.nil? -%>
     wait_for_completion(status, op_result, module)
@@ -44,7 +53,11 @@ def wait_for_completion(status, op_result, module):
 <%
 -%>
     op_id = navigate_hash(op_result, <%= op_path -%>)
+<% if object.async.operation&.full_url -%>
+    op_uri = navigate_hash(op_result, <%= python_literal(object.async.operation.full_url.split('/')) -%>)
+<% else -%>
     op_uri = async_op_url(module, {'op_id': op_id})
+<% end -%>
 <% if object.async.status.complete == true -%>
     while not status:
 <% else -%>

@@ -48,9 +48,10 @@ def prefetch_soa_resource(module):
         'name': replace_resource_dict(module.params['managed_zone'], 'dnsName'),
         'project': module.params['project'],
         'scopes': module.params['scopes'],
-        'service_account_file': module.params['service_account_file'],
+        'service_account_file': module.params.get('service_account_file'),
         'auth_kind': module.params['auth_kind'],
-        'service_account_email': module.params['service_account_email']
+        'service_account_email': module.params.get('service_account_email'),
+        'service_account_contents': module.params.get('service_account_contents')
     }, module)
 
     result = fetch_wrapped_resource(resource, 'dns#resourceRecordSet',

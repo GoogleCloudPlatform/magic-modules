@@ -39,7 +39,7 @@ dependencies:
     code:
       name: <%= dependency_name('backendService', 'targetHttpsProxy') %>
       backends:
-        - group: "{{ instancegroup }}"
+        - group: "{{ instancegroup.selfLink }}"
       health_checks:
         - "{{ healthcheck.selfLink }}"
       enable_cdn: true
@@ -61,7 +61,7 @@ dependencies:
     code:
       name: <%= dependency_name('sslCert', 'targetHttpsProxy') %>
       description: A certificate for testing. Do not use this certificate in production
-      certificate: >
+      certificate: |
         -----BEGIN CERTIFICATE-----
         MIICqjCCAk+gAwIBAgIJAIuJ+0352Kq4MAoGCCqGSM49BAMCMIGwMQswCQYDVQQG
         EwJVUzETMBEGA1UECAwKV2FzaGluZ3RvbjERMA8GA1UEBwwIS2lya2xhbmQxFTAT
@@ -79,7 +79,7 @@ dependencies:
         M3jcqgA4fSW/oKw6UJxp+M6a+nGMX+UJR3YgAiEAvvl39QRVAiv84hdoCuyON0lJ
         zqGNhIPGq2ULqXKK8BY=
         -----END CERTIFICATE-----
-      private_key: >
+      private_key: |
         -----BEGIN EC PRIVATE KEY-----
         MHcCAQEEIObtRo8tkUqoMjeHhsOh2ouPpXCgBcP+EDxZCB/tws15oAoGCCqGSM49
         AwEHoUQDQgAEHGzpcRJ4XzfBJCCPMQeXQpTXwlblimODQCuQ4mzkzTv0dXyB750f

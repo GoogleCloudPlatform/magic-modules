@@ -2,10 +2,14 @@
 :facts:
   :Address:
     :version_added: '2.7'
+  :Autoscaler:
+    :version_added: '2.9'
   :BackendBucket:
     :version_added: '2.7'
   :BackendService:
     :version_added: '2.7'
+  :RegionBackendService:
+    :version_added: '2.10'
   :Disk:
     :version_added: '2.7'
   :Firewall:
@@ -36,14 +40,24 @@
     :version_added: '2.8'
   :Network:
     :version_added: '2.7'
+  :NetworkEndpointGroup:
+    :version_added: '2.10'
+  :NodeGroup:
+    :version_added: '2.10'
+  :NodeTemplate:
+    :version_added: '2.10'
   :RegionDisk:
     :version_added: '2.8'
   :Route:
     :version_added: '2.7'
   :Router:
     :version_added: '2.7'
+  :Snapshot:
+    :version_added: '2.9'
   :SslCertificate:
     :version_added: '2.7'
+  :Reservation:
+    :version_added: '2.10'
   :SslPolicy:
     :version_added: '2.7'
   :Subnetwork:
@@ -52,6 +66,8 @@
     :version_added: '2.7'
   :TargetHttpsProxy:
     :version_added: '2.7'
+  :TargetInstance:
+    :version_added: '2.10'
   :TargetPool:
     :version_added: '2.7'
   :TargetSslProxy:
@@ -75,12 +91,52 @@
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
+    :purpose:
+      :version_added: '2.10'
     :networkTier:
       :version_added: '2.8'
     :subnetwork:
       :version_added: '2.7'
     :region:
       :version_added: '2.6'
+  :Autoscaler:
+    :version_added: '2.9'
+    :name:
+      :version_added: '2.9'
+    :description:
+      :version_added: '2.9'
+    :autoscalingPolicy:
+      :version_added: '2.9'
+      :minNumReplicas:
+        :version_added: '2.9'
+      :maxNumReplicas:
+        :version_added: '2.9'
+      :coolDownPeriodSec:
+        :version_added: '2.9'
+      :cpuUtilization:
+        :version_added: '2.9'
+        :utilizationTarget:
+          :version_added: '2.9'
+      :customMetricUtilizations:
+        :version_added: '2.9'
+        :metric:
+          :version_added: '2.9'
+        :singleInstanceAssignment:
+          :version_added: '2.9'
+        :utilizationTarget:
+          :version_added: '2.9'
+        :utilizationTargetType:
+          :version_added: '2.9'
+        :filter:
+          :version_added: '2.9'
+      :loadBalancingUtilization:
+        :version_added: '2.9'
+        :utilizationTarget:
+          :version_added: '2.9'
+    :target:
+      :version_added: '2.9'
+    :zone:
+      :version_added: '2.9'
   :BackendBucket:
     :version_added: '2.6'
     :bucketName:
@@ -113,10 +169,14 @@
         :version_added: '2.6'
       :maxConnectionsPerInstance:
         :version_added: '2.6'
+      :maxConnectionsPerEndpoint:
+        :version_added: '2.9'
       :maxRate:
         :version_added: '2.6'
       :maxRatePerInstance:
         :version_added: '2.6'
+      :maxRatePerEndpoint:
+        :version_added: '2.9'
       :maxUtilization:
         :version_added: '2.6'
     :cdnPolicy:
@@ -167,6 +227,36 @@
       :version_added: '2.6'
     :timeoutSec:
       :version_added: '2.6'
+  :RegionBackendService:
+    :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :healthChecks:
+      :version_added: '2.10'
+    :backends:
+      :version_added: '2.10'
+      :description:
+        :version_added: '2.10'
+      :group:
+        :version_added: '2.10'
+      :failover:
+        :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :protocol:
+      :version_added: '2.10'
+    :sessionAffinity:
+      :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
+    :timeoutSec:
+      :version_added: '2.10'
+    :connectionDraining:
+      :version_added: '2.10'
+      :drainingTimeoutSec:
+        :version_added: '2.10'
+    :loadBalancingScheme:
+      :version_added: '2.10'
   :Disk:
     :version_added: '2.6'
     :description:
@@ -289,8 +379,14 @@
       :version_added: '2.6'
     :ipVersion:
       :version_added: '2.6'
+    :prefixLength:
+      :version_added: '2.9'
     :addressType:
       :version_added: '2.8'
+    :purpose:
+      :version_added: '2.9'
+    :network:
+      :version_added: '2.9'
   :GlobalForwardingRule:
     :version_added: '2.6'
     :description:
@@ -303,6 +399,16 @@
       :version_added: '2.6'
     :loadBalancingScheme:
       :version_added: '2.6'
+    :metadataFilters:
+      :version_added: '2.10'
+      :filterMatchCriteria:
+        :version_added: '2.10'
+      :filterLabels:
+        :version_added: '2.10'
+        :name:
+          :version_added: '2.10'
+        :value:
+          :version_added: '2.10'
     :name:
       :version_added: '2.6'
     :network:
@@ -381,6 +487,8 @@
         :version_added: '2.6'
       :proxyHeader:
         :version_added: '2.6'
+      :portSpecification:
+        :version_added: '2.9'
     :httpsHealthCheck:
       :version_added: '2.6'
       :host:
@@ -395,6 +503,8 @@
         :version_added: '2.6'
       :proxyHeader:
         :version_added: '2.6'
+      :portSpecification:
+        :version_added: '2.9'
     :tcpHealthCheck:
       :version_added: '2.6'
       :request:
@@ -407,6 +517,8 @@
         :version_added: '2.6'
       :proxyHeader:
         :version_added: '2.6'
+      :portSpecification:
+        :version_added: '2.9'
     :sslHealthCheck:
       :version_added: '2.6'
       :request:
@@ -419,6 +531,24 @@
         :version_added: '2.6'
       :proxyHeader:
         :version_added: '2.6'
+      :portSpecification:
+        :version_added: '2.9'
+    :http2HealthCheck:
+      :version_added: '2.10'
+      :host:
+        :version_added: '2.10'
+      :requestPath:
+        :version_added: '2.10'
+      :response:
+        :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+      :portName:
+        :version_added: '2.10'
+      :proxyHeader:
+        :version_added: '2.10'
+      :portSpecification:
+        :version_added: '2.10'
   :InstanceTemplate:
     :version_added: '2.6'
     :description:
@@ -469,6 +599,8 @@
           :version_added: '2.6'
         :type:
           :version_added: '2.6'
+      :labels:
+        :version_added: '2.9'
       :machineType:
         :version_added: '2.6'
       :minCpuPlatform:
@@ -491,6 +623,12 @@
             :version_added: '2.6'
           :type:
             :version_added: '2.6'
+          :setPublicPtr:
+            :version_added: '2.10'
+          :publicPtrDomainName:
+            :version_added: '2.10'
+          :networkTier:
+            :version_added: '2.10'
         :aliasIpRanges:
           :version_added: '2.6'
           :ipCidrRange:
@@ -571,6 +709,8 @@
     :version_added: '2.6'
     :canIpForward:
       :version_added: '2.6'
+    :deletionProtection:
+      :version_added: '2.9'
     :disks:
       :version_added: '2.6'
       :autoDelete:
@@ -615,6 +755,8 @@
         :version_added: '2.6'
       :acceleratorType:
         :version_added: '2.6'
+    :hostname:
+      :version_added: '2.9'
     :labels:
       :version_added: '2.9'
     :metadata:
@@ -635,6 +777,12 @@
           :version_added: '2.6'
         :type:
           :version_added: '2.6'
+        :setPublicPtr:
+          :version_added: '2.10'
+        :publicPtrDomainName:
+          :version_added: '2.10'
+        :networkTier:
+          :version_added: '2.10'
       :aliasIpRanges:
         :version_added: '2.6'
         :ipCidrRange:
@@ -661,6 +809,14 @@
         :version_added: '2.6'
       :scopes:
         :version_added: '2.6'
+    :shieldedInstanceConfig:
+      :version_added: '2.9'
+      :enableSecureBoot:
+        :version_added: '2.9'
+      :enableVtpm:
+        :version_added: '2.9'
+      :enableIntegrityMonitoring:
+        :version_added: '2.9'
     :status:
       :version_added: '2.8'
     :tags:
@@ -717,10 +873,14 @@
       :version_added: '2.6'
   :InterconnectAttachment:
     :version_added: '2.8'
+    :adminEnabled:
+      :version_added: '2.9'
     :interconnect:
       :version_added: '2.8'
     :description:
       :version_added: '2.8'
+    :bandwidth:
+      :version_added: '2.9'
     :edgeAvailabilityDomain:
       :version_added: '2.8'
     :type:
@@ -749,6 +909,52 @@
       :version_added: '2.8'
       :routingMode:
         :version_added: '2.8'
+  :NetworkEndpointGroup:
+    :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :networkEndpointType:
+      :version_added: '2.10'
+    :network:
+      :version_added: '2.10'
+    :subnetwork:
+      :version_added: '2.10'
+    :defaultPort:
+      :version_added: '2.10'
+    :zone:
+      :version_added: '2.10'
+  :NodeGroup:
+    :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :nodeTemplate:
+      :version_added: '2.10'
+    :size:
+      :version_added: '2.10'
+    :zone:
+      :version_added: '2.10'
+  :NodeTemplate:
+    :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :nodeAffinityLabels:
+      :version_added: '2.10'
+    :nodeType:
+      :version_added: '2.10'
+    :nodeTypeFlexibility:
+      :version_added: '2.10'
+      :cpus:
+        :version_added: '2.10'
+      :memory:
+        :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
   :RegionDisk:
     :version_added: '2.8'
     :description:
@@ -829,6 +1035,30 @@
           :version_added: '2.7'
     :region:
       :version_added: '2.7'
+  :Snapshot:
+    :version_added: '2.9'
+    :name:
+      :version_added: '2.9'
+    :description:
+      :version_added: '2.9'
+    :labels:
+      :version_added: '2.9'
+    :sourceDisk:
+      :version_added: '2.9'
+    :zone:
+      :version_added: '2.9'
+    :snapshotEncryptionKey:
+      :version_added: '2.9'
+      :rawKey:
+        :version_added: '2.9'
+      :kmsKeyName:
+        :version_added: '2.9'
+    :sourceDiskEncryptionKey:
+      :version_added: '2.9'
+      :rawKey:
+        :version_added: '2.9'
+      :kmsKeyName:
+        :version_added: '2.9'
   :SslCertificate:
     :version_added: '2.6'
     :certificate:
@@ -839,6 +1069,38 @@
       :version_added: '2.6'
     :privateKey:
       :version_added: '2.6'
+  :Reservation:
+    :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :specificReservationRequired:
+      :version_added: '2.10'
+    :specificReservation:
+      :version_added: '2.10'
+      :count:
+        :version_added: '2.10'
+      :instanceProperties:
+        :version_added: '2.10'
+        :machineType:
+          :version_added: '2.10'
+        :minCpuPlatform:
+          :version_added: '2.10'
+        :guestAccelerators:
+          :version_added: '2.10'
+          :acceleratorType:
+            :version_added: '2.10'
+          :acceleratorCount:
+            :version_added: '2.10'
+        :localSsds:
+          :version_added: '2.10'
+          :interface:
+            :version_added: '2.10'
+          :diskSizeGb:
+            :version_added: '2.10'
+    :zone:
+      :version_added: '2.10'
   :SslPolicy:
     :version_added: '2.7'
     :description:
@@ -895,6 +1157,18 @@
       :version_added: '2.8'
     :urlMap:
       :version_added: '2.6'
+  :TargetInstance:
+    :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :instance:
+      :version_added: '2.10'
+    :natPolicy:
+      :version_added: '2.10'
+    :zone:
+      :version_added: '2.10'
   :TargetPool:
     :version_added: '2.6'
     :backupPool:

@@ -14,7 +14,7 @@
 # TODO(nelsonjr): Make all Zone and Region resource ref
 
 --- !ruby/object:Api::Product
-name: Iam
+name: IAM
 display_name: Cloud IAM
 versions:
   - !ruby/object:Api::Product::Version
@@ -30,11 +30,9 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Role'
     base_url: projects/{{project}}/roles
-    description: >
+    description: |
       A role in the Identity and Access Management API
     update_mask: true
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'roles'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -42,7 +40,7 @@ objects:
         required: true
       - !ruby/object:Api::Type::String
         name: 'title'
-        description: >
+        description: |
           A human-readable title for the role. Typically this is limited to 100
           UTF-8 bytes.
       - !ruby/object:Api::Type::String
@@ -69,6 +67,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'ServiceAccount'
     base_url: projects/{{project}}/serviceAccounts
+    collection_url_key: 'accounts'
     description: |
       A service account in the Identity and Access Management API.
     properties:

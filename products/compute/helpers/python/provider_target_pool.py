@@ -26,7 +26,7 @@ def encode_request(request, module):
 
 # Mask healthChecks into a single element.
 # @see encode_request for details
-def decode_request(response, module):
+def decode_response(response, module):
     if response['kind'] != 'compute#targetPool':
         return response
 

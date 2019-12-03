@@ -18,13 +18,13 @@ module  Api
   class Timeouts < Api::Object
     # Default timeout for all operation types is 4 minutes. This can be
     # overridden for each resource.
-    DEFAULT_INSERT_TIMEOUT_SEC = 4 * 60
-    DEFAULT_UPDATE_TIMEOUT_SEC = 4 * 60
-    DEFAULT_DELETE_TIMEOUT_SEC = 4 * 60
+    DEFAULT_INSERT_TIMEOUT_MINUTES = 4
+    DEFAULT_UPDATE_TIMEOUT_MINUTES = 4
+    DEFAULT_DELETE_TIMEOUT_MINUTES = 4
 
-    attr_reader :insert_sec
-    attr_reader :update_sec
-    attr_reader :delete_sec
+    attr_reader :insert_minutes
+    attr_reader :update_minutes
+    attr_reader :delete_minutes
 
     def initialize
       validate
@@ -33,9 +33,9 @@ module  Api
     def validate
       super
 
-      check :insert_sec, type: Integer, default: DEFAULT_INSERT_TIMEOUT_SEC
-      check :update_sec, type: Integer, default: DEFAULT_UPDATE_TIMEOUT_SEC
-      check :delete_sec, type: Integer, default: DEFAULT_DELETE_TIMEOUT_SEC
+      check :insert_minutes, type: Integer, default: DEFAULT_INSERT_TIMEOUT_MINUTES
+      check :update_minutes, type: Integer, default: DEFAULT_UPDATE_TIMEOUT_MINUTES
+      check :delete_minutes, type: Integer, default: DEFAULT_DELETE_TIMEOUT_MINUTES
     end
   end
 end

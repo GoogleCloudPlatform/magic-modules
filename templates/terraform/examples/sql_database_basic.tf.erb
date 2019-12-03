@@ -1,0 +1,12 @@
+resource "google_sql_database" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['database_name'] %>"
+  instance = google_sql_database_instance.instance.name
+}
+
+resource "google_sql_database_instance" "instance" {
+  name   = "<%= ctx[:vars]['database_instance_name'] %>"
+  region = "us-central"
+  settings {
+    tier = "D0"
+  }
+}

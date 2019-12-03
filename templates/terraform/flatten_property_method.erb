@@ -16,12 +16,6 @@
 <%= lines(compile_template(property.custom_flatten,
                            prefix: prefix,
                            property: property)) -%>
-<% elsif property.flatten_object -%>
-<%   if property.nested_properties? -%>
-  <%   property.nested_properties.each do |prop| -%>
-    <%=   lines(build_flatten_method(prefix + titlelize_property(property), prop), 1) -%>
-  <%   end -%>
-<%   end -%>
 <% else -%>
 <% if tf_types.include?(property.class) -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
@@ -30,13 +24,24 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     return nil
   }
   original := v.(map[string]interface{})
+  <% unless property.allow_empty_object -%>
   if len(original) == 0 {
     return nil
   }
+  <% end -%>
   transformed := make(map[string]interface{})
   <% property.properties.each do |prop| -%>
+    <% if prop.flatten_object -%>
+    if <%= prop.api_name -%> := flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d); <%= prop.api_name -%> != nil {
+      obj := <%= prop.api_name -%>.([]interface{})[0]
+      for k, v := range obj.(map[string]interface{}) {
+        transformed[k] = v
+      }
+    }
+    <% else -%>
     transformed["<%= prop.name.underscore -%>"] =
     flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d)
+    <% end -%>
   <% end -%>
   return []interface{}{transformed}
 <% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject) -%>
@@ -46,7 +51,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
   l := v.([]interface{})
 <%   if property.is_set -%>
 <%     if property.set_hash_func.nil? -%>
-  transformed := schema.NewSet(schema.HashResource(<%= prefix.camelize(:lower) -%><%= property.name.camelize -%>Schema()), []interface{}{})
+  transformed := schema.NewSet(schema.HashResource(<%= namespace_property_from_object(property, object) -%>Schema()), []interface{}{})
 <%     else -%>
   transformed := schema.NewSet(<%= property.set_hash_func -%>, []interface{}{})
 <%     end -%>
@@ -120,7 +125,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 }
 <% if property.nested_properties? -%>
   <% property.nested_properties.each do |prop| -%>
-    <%= lines(build_flatten_method(prefix + titlelize_property(property), prop), 1) -%>
+    <%= lines(build_flatten_method(prefix + titlelize_property(property), prop, object), 1) -%>
   <% end -%>
 <% end -%>
 <% else -%>

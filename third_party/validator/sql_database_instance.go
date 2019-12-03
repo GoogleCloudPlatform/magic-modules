@@ -11,8 +11,8 @@ package google
 import (
 	"regexp"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
 	"google.golang.org/api/googleapi"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -229,5 +229,6 @@ func expandBackupConfiguration(configured []interface{}) *sqladmin.BackupConfigu
 		BinaryLogEnabled: _backupConfiguration["binary_log_enabled"].(bool),
 		Enabled:          _backupConfiguration["enabled"].(bool),
 		StartTime:        _backupConfiguration["start_time"].(string),
+		Location:         _backupConfiguration["location"].(string),
 	}
 }

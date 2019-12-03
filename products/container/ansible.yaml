@@ -17,13 +17,17 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     properties:
       location: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ["region", "zone"]
+      kubectlPath: !ruby/object:Overrides::Ansible::PropertyOverride
+        exclude: true
+      kubectlContext: !ruby/object:Overrides::Ansible::PropertyOverride
+        exclude: true
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
         exists: |
-          "'my-cluster' in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'my-cluster' in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
-          "'my-cluster' not in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'my-cluster' not in \"{{ results['resources'] | map(attribute='name') | list }}\""
   NodePool: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       location: !ruby/object:Overrides::Ansible::PropertyOverride
@@ -34,23 +38,32 @@ datasources: !ruby/object:Overrides::ResourceOverrides
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
         exists: |
-          "'my-pool' in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'my-pool' in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
-          "'my-pool' not in \"{{ results['items'] | map(attribute='name') | list }}\""
-  KubeConfig: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
+          "'my-pool' not in \"{{ results['resources'] | map(attribute='name') | list }}\""
 overrides: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Ansible::ResourceOverride
+    notes:
+      - This module does not create any node pools (including default). Please use
+        the M(gcp_container_node_pool) module to create node pools.
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
     properties:
+      locations: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['nodeLocations']
       location: !ruby/object:Overrides::Ansible::PropertyOverride
-        aliases:
-          - zone
+        aliases: ['zone']
+      addonsConfig.kubernetesDashboard: !ruby/object:Overrides::Ansible::PropertyOverride
+        exclude: true
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      post_create: |
+        delete_default_node_pool(module)
+      post_action: |
+        if module.params.get('kubectl_path'):
+            Kubectl(module).write_file()
     provider_helpers:
       - 'products/container/helpers/python/provider_cluster.py'
-  KubeConfig: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
+      - 'products/container/helpers/python/kubectl.py'
   NodePool: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
@@ -60,5 +73,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       location: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ["region", "zone"]
 files: !ruby/object:Provider::Config::Files
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

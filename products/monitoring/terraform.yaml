@@ -18,6 +18,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     mutex: alertPolicy/{{project}}
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        # skipping tests because the API is full of race conditions
+        skip_test: true
         name: "monitoring_alert_policy_basic"
         primary_resource_id: "alert_policy"
         vars:
@@ -35,13 +37,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "monitoring_group_basic"
         primary_resource_id: "basic"
         vars:
-          display_name: "New Test Group"
+          display_name: "MonitoringGroup"
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_group_subgroup"
         primary_resource_id: "subgroup"
         vars:
-          display_name: "New Test SubGroup"
-          display_name2: "New Test SubGroup"
+          display_name: "MonitoringParentGroup"
+          display_name2: "MonitoringSubGroup"
     properties:
       parentName: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkRelativePaths'
@@ -89,6 +91,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "http"
         vars:
           display_name: "http-uptime-check"
+        test_env_vars:
+          project_id: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "uptime_check_config_https"
+        primary_resource_id: "https"
+        vars:
+          display_name: "https-uptime-check"
+        test_env_vars:
+          project_id: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
         name: "uptime_check_tcp"
         primary_resource_id: "tcp_group"
@@ -97,6 +108,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           group_display_name: "uptime-check-group"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      extra_schema_entry: 'templates/terraform/extra_schema_entry/monitoring_uptime_check_config_internal.go.erb'
       post_create: templates/terraform/post_create/set_computed_name.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride

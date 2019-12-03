@@ -3,7 +3,7 @@ package google
 import (
 	"fmt"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/storage/v1"
 )
@@ -14,6 +14,11 @@ var IamStorageBucketSchema = map[string]*schema.Schema{
 		Required: true,
 		ForceNew: true,
 	},
+}
+
+func StorageBucketIdParseFunc(d *schema.ResourceData, _ *Config) error {
+	d.Set("bucket", d.Id())
+	return nil
 }
 
 type StorageBucketIamUpdater struct {

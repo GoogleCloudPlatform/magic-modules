@@ -1,0 +1,9 @@
+resource "google_storage_bucket_access_control" "<%= ctx[:primary_resource_id] %>" {
+  bucket = google_storage_bucket.bucket.name
+  role   = "READER"
+  entity = "allUsers"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name = "<%= ctx[:vars]['bucket_name'] %>"
+}

@@ -32,49 +32,39 @@ if [ "$GITHUB_ORG" = "terraform-providers" ]; then
     # "-wholename": entire relative path - including directory names - matches following wildcard.
     # "-name": filename alone matches following string.  e.g. -name README.md matches ./README.md *and* ./foo/bar/README.md
     # "-exec": for each file found, execute the command following until the literal ';'
-    find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name GNUmakefile -not -name LICENSE -not -name README.md -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf"  -exec git rm {} \;
+    find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \;
 fi
 
 popd
 
 pushd magic-modules-branched
-LAST_COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
-bundle install
 
-# Build all terraform products
+# Choose the author of the most recent commit as the downstream author
+# Note that we don't use the last submitted commit, we use the primary GH email
+# of the GH PR submitted. If they've enabled a private email, we'll actually
+# use their GH noreply email which isn't compatible with CLAs.
+COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
+
 if [ -n "$OVERRIDE_PROVIDER" ] && [ "$OVERRIDE_PROVIDER" != "null" ]; then
   bundle exec compiler -a -e terraform -f "$OVERRIDE_PROVIDER" -o "${GOPATH}/src/github.com/$GITHUB_ORG/$PROVIDER_NAME/"
 else
   bundle exec compiler -a -e terraform -o "${GOPATH}/src/github.com/$GITHUB_ORG/$PROVIDER_NAME/" -v "$VERSION"
 fi
 
-# This command can crash - if that happens, the script should not fail.
-set +e
-TERRAFORM_COMMIT_MSG="$(python .ci/magic-modules/extract_from_pr_description.py --tag "$SHORT_NAME" < .git/body)"
-set -e
-if [ -z "$TERRAFORM_COMMIT_MSG" ]; then
-  TERRAFORM_COMMIT_MSG="$(cat .git/title)"
-fi
+TERRAFORM_COMMIT_MSG="$(cat .git/title)"
 
 pushd "build/$SHORT_NAME"
 
-# Begin building our commit; we need to set the committer details, and add our modified files.
-#
-# Note that we need to perform `go mod vendor` _after_ adding the files because we're skipping
-# the vendor step if Terraform has no changes. Ideally it would happen before, but because we
-# deleted all of the existing files earlier in this script we'll see changes until we've staged
-# our generated changes.
-
+# These config entries will set the "committer".
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
 
 git add -A
 
-# Set the "author" to the commit's real author.
-git commit -m "$TERRAFORM_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
+git commit -m "$TERRAFORM_COMMIT_MSG" --author="$COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
 
-apply_patches "$PATCH_DIR/$GITHUB_ORG/$PROVIDER_NAME" "$TERRAFORM_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "master"
+apply_patches "$PATCH_DIR/$GITHUB_ORG/$PROVIDER_NAME" "$TERRAFORM_COMMIT_MSG" "$COMMIT_AUTHOR" "master"
 
 popd
 popd

@@ -15,7 +15,6 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Database: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    id_format: "{{project}}/{{instance}}/{{name}}"
     import_format:
       - "projects/{{project}}/instances/{{instance}}/databases/{{name}}"
       - "instances/{{instance}}/databases/{{name}}"

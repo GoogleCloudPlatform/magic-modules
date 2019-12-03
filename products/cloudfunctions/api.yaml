@@ -19,7 +19,7 @@ versions:
     name: ga
     base_url: https://cloudfunctions.googleapis.com/v1/
 scopes:
-  - https://www.googleapis.com/auth/cloudfunctions
+  - https://www.googleapis.com/auth/cloud-platform
 apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Cloud Functions API
@@ -31,6 +31,39 @@ objects:
     create_verb: :POST
     description: |
       A Cloud Function that contains user computation executed in response to an event.
+    collection_url_key: 'functions'
+    update_mask: true
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        required: true
+        description: The location of this cloud function.
+        # This is not a real API field.
+        # This is a more user-centric way for users to specify
+        # that they want to use a HTTP Trigger rather than
+        # send httpsTrigger with an empty dictionary.
+      - !ruby/object:Api::Type::Boolean
+        name: 'trigger_http'
+        description: 'Use HTTP to trigger this function'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -38,6 +71,7 @@ objects:
         description: |
           A user-defined name of the function. Function names must
           be unique globally and match pattern `projects/*/locations/*/functions/*`.
+        pattern: projects/{{project}}/locations/{{location}}/functions/{{name}}
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'User-provided description of a function.'
@@ -102,17 +136,30 @@ objects:
         description: |
           The Google Cloud Storage URL, starting with gs://, pointing to the zip
           archive which contains the function.
+        exactly_one_of:
+          - source_repository
+          - source_archive_url
+          - source_upload_url
       - !ruby/object:Api::Type::String
         name: 'sourceUploadUrl'
         description: |
           The Google Cloud Storage signed URL used for source uploading.
+        exactly_one_of:
+          - source_repository
+          - source_archive_url
+          - source_upload_url
       - !ruby/object:Api::Type::NestedObject
         name: 'sourceRepository'
         description: |
           The source repository where a function is hosted.
+        exactly_one_of:
+          - source_repository
+          - source_archive_url
+          - source_upload_url
         properties:
           - !ruby/object:Api::Type::String
             name: 'url'
+            required: true
             description: |
               The URL pointing to the hosted repository where the function is defined
           - !ruby/object:Api::Type::String
@@ -152,5 +199,3 @@ objects:
             name: 'service'
             description: |
               The hostname of the service that should be observed.
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'functions'

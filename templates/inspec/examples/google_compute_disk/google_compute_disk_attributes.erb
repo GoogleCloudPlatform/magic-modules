@@ -1,5 +1,6 @@
 gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
 gcp_zone = attribute(:gcp_zone, default: '<%= external_attribute('gcp_zone') -%>', description: 'The GCP project zone.')
-gcp_compute_disk_name = attribute(:gcp_compute_disk_name, default: '<%= external_attribute('gcp_compute_disk_name') -%>', description: 'GCP Compute disk name.')
-gcp_compute_disk_image = attribute(:gcp_compute_disk_image, default: '<%= external_attribute('gcp_compute_disk_image') -%>', description: 'GCP Compute image identifier.')
-gcp_compute_disk_type = attribute(:gcp_compute_disk_type, default: '<%= external_attribute('gcp_compute_disk_type') -%>', description: 'GCP Compute disk type.')
+snapshot = attribute('snapshot', default: <%= JSON.pretty_generate(grab_attributes['snapshot']) -%>, description: 'Disk snapshot description')
+gcp_compute_disk_name = snapshot["disk_name"]
+gcp_compute_disk_image = snapshot["disk_image"]
+gcp_compute_disk_type = snapshot["disk_type"]

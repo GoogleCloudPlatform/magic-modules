@@ -17,11 +17,3 @@ func isShrinkageIpCidr(old, new, _ interface{}) bool {
 
 	return true
 }
-
-
-func splitSubnetID(id string) (region string, name string) {
-	parts := strings.Split(id, "/")
-	region = parts[0]
-	name = parts[1]
-	return
-}

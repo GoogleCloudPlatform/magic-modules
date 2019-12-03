@@ -1,5 +1,5 @@
 resource "google_firestore_index" "<%= ctx[:primary_resource_id] %>" {
-  project    = "<%= ctx[:test_env_vars]['project_id'] %>"
+  project = "<%= ctx[:test_env_vars]['project_id'] %>"
 
   collection = "chatrooms"
 

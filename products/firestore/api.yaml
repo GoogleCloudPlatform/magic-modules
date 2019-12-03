@@ -20,21 +20,21 @@ versions:
     base_url: https://firestore.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-async: !ruby/object:Api::Async
-  operation: !ruby/object:Api::Async::Operation
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::Async::Result
+  result: !ruby/object:Api::OpAsync::Result
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::Async::Status
+  status: !ruby/object:Api::OpAsync::Status
     path: 'done'
     complete: true
     allowed:
       - true
       - false
-  error: !ruby/object:Api::Async::Error
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
 objects:
@@ -69,10 +69,12 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: queryScope
         description: |
-          The scope at which a query is run. Defaults to `"COLLECTION"`.
+          The scope at which a query is run. One of `"COLLECTION"` or
+          `"COLLECTION_GROUP"`. Defaults to `"COLLECTION"`.
         default_value: :COLLECTION
         values:
           - :COLLECTION
+          - :COLLECTION_GROUP
       - !ruby/object:Api::Type::Array
         name: fields
         description: |
@@ -93,6 +95,7 @@ objects:
                 Name of the field.
             - !ruby/object:Api::Type::Enum
               name: 'order'
+              # TODO (mbang): Exactly one of order or arrayConfig must be set
               description: |
                 Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=.
                 Only one of `order` and `arrayConfig` can be specified.
@@ -101,6 +104,7 @@ objects:
                 - :DESCENDING
             - !ruby/object:Api::Type::Enum
               name: 'arrayConfig'
+              # TODO (mbang): Exactly one of order or arrayConfig must be set
               description: |
                 Indicates that this field supports operations on arrayValues. Only one of `order` and `arrayConfig` can
                 be specified.

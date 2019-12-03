@@ -1,0 +1,7 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
+<% dataproc_cluster = grab_attributes['dataproc_cluster'] -%>
+describe google_dataproc_clusters(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>) do
+  its('count') { should be >= 1 }
+  its('cluster_names') { should include <%= doc_generation ? "'#{dataproc_cluster['name']}'" : "dataproc_cluster['name']" -%> }
+end

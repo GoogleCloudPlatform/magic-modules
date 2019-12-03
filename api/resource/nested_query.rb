@@ -17,8 +17,9 @@ require 'google/string_utils'
 module Api
   # An object available in the product
   class Resource < Api::Object::Named
-    # Query information for finding resource nested in an returned API object
-    # i.e. fine-grained resources
+    # Metadata for resources that are nested within a parent resource, as
+    # a list of resources or single object within the parent.
+    # e.g. Fine-grained resources
     class NestedQuery < Api::Object
       # A list of keys to traverse in order.
       # i.e. backendBucket --> cdnPolicy.signedUrlKeyNames
@@ -32,7 +33,19 @@ module Api
       # rather than a list of the actual key objects
       attr_reader :is_list_of_ids
 
-      # This is used by Ansible, but may not be necessary.
+      # If true, the resource is created/updated/deleted by patching
+      # the parent resource and appropriate encoders/update_encoders/pre_delete
+      # custom code will be included automatically. Only use if parent resource
+      # does not have a separate endpoint (set as create/delete/update_urls)
+      # for updating this resource.
+      # The resulting encoded data will be mapped as
+      # {
+      #  keys[-1] : list_of_objects
+      # }
+      attr_reader :modify_by_patch
+
+      # Nested resources generally don't have a kind field.
+      # This is used as a (potentially unnecessary) placeholder by Ansible
       attr_reader :kind
 
       def validate
@@ -40,6 +53,7 @@ module Api
 
         check :keys, type: Array, item_type: String, required: true
         check :is_list_of_ids, type: :boolean, default: false
+        check :modify_by_patch, type: :boolean, default: false
 
         check :kind, type: String
       end

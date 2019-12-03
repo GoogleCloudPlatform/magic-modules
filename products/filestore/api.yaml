@@ -26,29 +26,29 @@ versions:
     base_url: https://file.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-async: !ruby/object:Api::Async
-  operation: !ruby/object:Api::Async::Operation
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::Async::Result
+  result: !ruby/object:Api::OpAsync::Result
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::Async::Status
+  status: !ruby/object:Api::OpAsync::Status
     path: 'done'
     complete: True
     allowed:
       - True
       - False
-  error: !ruby/object:Api::Async::Error
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
 objects:
   - !ruby/object:Api::Resource
     name: 'Instance'
-    base_url: |
-      projects/{{project}}/locations/{{zone}}/instances?instanceId={{name}}
+    create_url:  projects/{{project}}/locations/{{zone}}/instances?instanceId={{name}}
     self_link: projects/{{project}}/locations/{{zone}}/instances/{{name}}
+    base_url:  projects/{{project}}/locations/{{zone}}/instances
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -77,6 +77,7 @@ objects:
           The resource name of the instance.
         required: true
         url_param_only: true
+        pattern: projects/{{project}}/locations/{{zone}}/instances/{{name}}
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
@@ -129,7 +130,8 @@ objects:
             - !ruby/object:Api::Type::Integer
               name: 'capacityGb'
               description: |
-                File share capacity in GB.
+                File share capacity in GiB. This must be at least 1024 GiB
+                for the standard tier, or 2560 GiB for the premium tier.
               required: true
       - !ruby/object:Api::Type::Array
         name: 'networks'

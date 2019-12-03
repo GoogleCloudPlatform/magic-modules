@@ -11,7 +11,7 @@ import (
 func GetProjectCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
 	// NOTE: asset.name should use the project number, but we use project_id b/c
 	// the number is computed server-side.
-	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
+	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project_id_or_project}}")
 	if err != nil {
 		return Asset{}, err
 	}
@@ -76,7 +76,7 @@ func getParentResourceId(d TerraformResourceData, p *cloudresourcemanager.Projec
 }
 
 func GetProjectBillingInfoCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
-	name, err := assetName(d, config, "//cloudbilling.googleapis.com/projects/{{project}}/billingInfo")
+	name, err := assetName(d, config, "//cloudbilling.googleapis.com/projects/{{project_id_or_project}}/billingInfo")
 	if err != nil {
 		return Asset{}, err
 	}

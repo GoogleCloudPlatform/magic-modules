@@ -1,0 +1,16 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% redis = grab_attributes['redis'] -%>
+describe google_redis_instance(project: <%= gcp_project_id -%>, region: <%= doc_generation ? "'#{redis['region']}'" : "redis['region']" -%>, name: <%= doc_generation ? "'#{redis['name']}'" : "redis['name']" -%>) do
+  it { should exist }
+  its('tier') { should cmp <%= doc_generation ? "'#{redis['tier']}'" : "redis['tier']" -%> }
+  its('memory_size_gb') { should cmp <%= doc_generation ? "'#{redis['memory_size_gb']}'" : "redis['memory_size_gb']" -%> }
+  its('alternative_location_id') { should cmp <%= doc_generation ? "'#{redis['alternative_location_id']}'" : "redis['alternative_location_id']" -%> }
+  its('redis_version') { should cmp <%= doc_generation ? "'#{redis['redis_version']}'" : "redis['redis_version']" -%> }
+  its('display_name') { should cmp <%= doc_generation ? "'#{redis['display_name']}'" : "redis['display_name']" -%> }
+  its('reserved_ip_range') { should cmp <%= doc_generation ? "'#{redis['reserved_ip_range']}'" : "redis['reserved_ip_range']" -%> }
+  its('labels') { should include(<%= doc_generation ? "'#{redis['label_key']}'" : "redis['label_key']" -%> => <%= doc_generation ? "'#{redis['label_value']}'" : "redis['label_value']" -%>) }
+end
+
+describe google_redis_instance(project: <%= gcp_project_id -%>, region: <%= doc_generation ? "'#{redis['region']}'" : "redis['region']" -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

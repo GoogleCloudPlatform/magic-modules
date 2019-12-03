@@ -16,16 +16,22 @@ client_name: 'SqlAdmin'
 overrides: !ruby/object:Overrides::ResourceOverrides
   Database: !ruby/object:Overrides::Terraform::ResourceOverride
     mutex: "google-sql-database-instance-{{project}}-{{instance}}"
-    id_format: "{{instance}}:{{name}}"
     import_format: ["projects/{{project}}/instances/{{instance}}/databases/{{name}}",
                     "{{project}}/{{instance}}/{{name}}",
                     "instances/{{instance}}/databases/{{name}}",
                     "{{instance}}/{{name}}",
                     "{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_database_basic"
+        primary_resource_id: "database"
+        vars:
+          database_name: "my-database"
+          database_instance_name: "my-database-instance"
     timeouts: !ruby/object:Api::Timeouts
-      insert_sec: 900
-      update_sec: 600
-      delete_sec: 600
+      insert_minutes: 15
+      update_minutes: 10
+      delete_minutes: 10
     properties:
       collation: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Sql
+name: SQL
 display_name: Cloud SQL
 versions:
   - !ruby/object:Api::Product::Version
@@ -24,22 +24,22 @@ apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Cloud SQL Admin API
     url: https://console.cloud.google.com/apis/library/sqladmin.googleapis.com/
-async: !ruby/object:Api::Async
-  operation: !ruby/object:Api::Async::Operation
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     kind: 'sql#operation'
     path: 'name'
     base_url: 'projects/{{project}}/operations/{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::Async::Result
+  result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
-  status: !ruby/object:Api::Async::Status
+  status: !ruby/object:Api::OpAsync::Status
     path: 'status'
     complete: 'DONE'
     allowed:
       - 'PENDING'
       - 'RUNNING'
       - 'DONE'
-  error: !ruby/object:Api::Async::Error
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
 objects:
@@ -56,6 +56,7 @@ objects:
       Represents a Cloud SQL instance. Cloud SQL instances are SQL databases
       hosted in Google's cloud. The Instances resource provides methods for
       common configuration and management tasks.
+    collection_url_key: 'items'
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'backendType'
@@ -237,7 +238,7 @@ objects:
                   Path to a SQL dump file in Google Cloud Storage from which the
                   slave instance is to be created. The URI is in the form
                   gs://bucketName/fileName. Compressed gzip files (.gz) are
-                  also supported. Dumps should have the binlog co-ordinates from
+                  also supported. Dumps should have the binlog coordinates from
                   which replication should begin. This can be accomplished by
                   setting --master-data to 1 when using mysqldump.
               # TODO(nelsonjr): Is this needed or output only?
@@ -286,6 +287,24 @@ objects:
         name: 'settings'
         description: 'The user settings.'
         properties:
+          - !ruby/object:Api::Type::Array
+            name: 'databaseFlags'
+            description: The database flags passed to the instance at startup
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'name'
+                  description: |
+                    The name of the flag. These flags are passed at instance
+                    startup, so include both server options and system
+                    variables for MySQL. Flags should be specified with
+                    underscores, not hyphens.
+                - !ruby/object:Api::Type::String
+                  name: 'value'
+                  description: |
+                    The value of the flag. Booleans should be set to on for
+                    true and off for false. This field must be omitted if the
+                    flag doesn't take a value.
           #- !ruby/object:Api::Type::Constant
           #  name: 'kind'
           #  value: 'sql#settings'
@@ -382,6 +401,7 @@ objects:
     kind: 'sql#database'
     base_url: projects/{{project}}/instances/{{instance}}/databases
     has_self_link: true
+    collection_url_key: 'items'
     description: |
       Represents a SQL database inside the Cloud SQL instance, hosted in
       Google's cloud.
@@ -396,10 +416,20 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'charset'
-        description: 'The MySQL charset value.'
+        description: |
+          The charset value. See MySQL's
+          [Supported Character Sets and Collations](https://dev.mysql.com/doc/refman/5.7/en/charset-charsets.html)
+          and Postgres' [Character Set Support](https://www.postgresql.org/docs/9.6/static/multibyte.html)
+          for more details and supported values. Postgres databases only support
+          a value of `UTF8` at creation time.
       - !ruby/object:Api::Type::String
         name: 'collation'
-        description: 'The MySQL collation value.'
+        description: |
+          The collation value. See MySQL's
+          [Supported Character Sets and Collations](https://dev.mysql.com/doc/refman/5.7/en/charset-charsets.html)
+          and Postgres' [Collation Support](https://www.postgresql.org/docs/9.6/static/collation.html)
+          for more details and supported values. Postgres databases only support
+          a value of `en_US.UTF8` at creation time.
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
@@ -411,12 +441,11 @@ objects:
     name: 'User'
     kind: 'sql#user'
     base_url: projects/{{project}}/instances/{{instance}}/users
-    self_link: |
-      projects/{{project}}/instances/{{instance}}/users
-      ?name={{name}}&host={{host}}
+    self_link: 'projects/{{project}}/instances/{{instance}}/users?name={{name}}&host={{host}}'
     nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'sql#usersList'
       keys: ['items']
+    collection_url_key: 'items'
     identity:
       - name
       - host
@@ -452,9 +481,7 @@ objects:
     name: 'SslCert'
     kind: 'sql#sslCert'
     base_url: projects/{{project}}/instances/{{instance}}/sslCerts
-    self_link: |
-      projects/{{project}}/instances/{{instance}}/sslCerts/
-      {{sha1_fingerprint}}
+    self_link: 'projects/{{project}}/instances/{{instance}}/sslCerts/{{sha1_fingerprint}}'
     readonly: true # we're not enforcing state as it is all server-side driven.
     description: |
       Represents an SSL certificate created for a Cloud SQL instance. To use the

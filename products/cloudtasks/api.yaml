@@ -1,0 +1,175 @@
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: CloudTasks
+display_name: Cloud Tasks
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://cloudtasks.googleapis.com/v2/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Cloud Tasks
+    url: https://console.cloud.google.com/apis/library/cloudtasks.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Queue'
+    base_url: projects/{{project}}/locations/{{location}}/queues
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A named resource to which messages are sent by publishers.
+    parameters:
+      - !ruby/object:Api::Type::Enum
+        name: 'status'
+        api_name: 'state'
+        # This is output-only in the API but we need to alter it in order to pause/resume the
+        # task queue.
+        output: false
+        description: The current state of the queue.
+        values:
+          - RUNNING
+          - PAUSED
+          - DISABLED
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        required: true
+        input: true
+        description: The location of the queue
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        input: true
+        description: The queue name.
+        pattern: projects/{{project}}/locations/{{location}}/queues/{{name}}
+      - !ruby/object:Api::Type::NestedObject
+        name: 'appEngineRoutingOverride'
+        description: |
+          Overrides for task-level appEngineRouting. These settings apply only
+          to App Engine tasks in this queue
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'service'
+            description: |
+              App service.
+
+              By default, the task is sent to the service which is the default service when the task is attempted.
+          - !ruby/object:Api::Type::String
+            name: 'version'
+            description: |
+              App version.
+
+              By default, the task is sent to the version which is the default version when the task is attempted.
+          - !ruby/object:Api::Type::String
+            name: 'instance'
+            description: |
+              App instance.
+
+              By default, the task is sent to an instance which is available when the task is attempted.
+          - !ruby/object:Api::Type::String
+            name: 'host'
+            output: true
+            description: The host that the task is sent to.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'rateLimits'
+        description: |
+          Rate limits for task dispatches. 
+
+          The queue's actual dispatch rate is the result of:
+
+          * Number of tasks in the queue
+          * User-specified throttling: rateLimits, retryConfig, and the queue's state.
+          * System throttling due to 429 (Too Many Requests) or 503 (Service
+            Unavailable) responses from the worker, high error rates, or to
+            smooth sudden large traffic spikes.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'maxDispatchesPerSecond'
+            description: |
+              The maximum rate at which tasks are dispatched from this queue.
+
+              If unspecified when the queue is created, Cloud Tasks will pick the default.
+          - !ruby/object:Api::Type::Integer
+            name: 'maxConcurrentDispatches'
+            description: |
+              The maximum number of concurrent tasks that Cloud Tasks allows to
+              be dispatched for this queue. After this threshold has been
+              reached, Cloud Tasks stops dispatching tasks until the number of
+              concurrent requests decreases.
+          - !ruby/object:Api::Type::Integer
+            name: 'maxBurstSize'
+            output: true
+            description: |
+              The max burst size.
+
+              Max burst size limits how fast tasks in queue are processed when many tasks are
+              in the queue and the rate is high. This field allows the queue to have a high
+              rate so processing starts shortly after a task is enqueued, but still limits
+              resource usage when many tasks are enqueued in a short period of time.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'retryConfig'
+        description: Settings that determine the retry behavior.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'maxAttempts'
+            description: |
+              Number of attempts per task.
+
+              Cloud Tasks will attempt the task maxAttempts times (that is, if
+              the first attempt fails, then there will be maxAttempts - 1
+              retries). Must be >= -1.
+
+              If unspecified when the queue is created, Cloud Tasks will pick
+              the default.
+
+              -1 indicates unlimited attempts.
+          - !ruby/object:Api::Type::String
+            name: 'maxRetryDuration'
+            description: |
+              If positive, maxRetryDuration specifies the time limit for
+              retrying a failed task, measured from when the task was first
+              attempted. Once maxRetryDuration time has passed and the task has
+              been attempted maxAttempts times, no further attempts will be
+              made and the task will be deleted.
+
+              If zero, then the task age is unlimited.
+          - !ruby/object:Api::Type::String
+            name: 'minBackoff'
+            description: |
+              A task will be scheduled for retry between minBackoff and
+              maxBackoff duration after it fails, if the queue's RetryConfig
+              specifies that the task should be retried.
+          - !ruby/object:Api::Type::String
+            name: 'maxBackoff'
+            description: |
+              A task will be scheduled for retry between minBackoff and
+              maxBackoff duration after it fails, if the queue's RetryConfig
+              specifies that the task should be retried.
+          - !ruby/object:Api::Type::Integer
+            name: 'maxDoublings'
+            description: |
+              The time between retries will double maxDoublings times.
+
+              A task's retry interval starts at minBackoff, then doubles maxDoublings times,
+              then increases linearly, and finally retries retries at intervals of maxBackoff
+              up to maxAttempts times.
+          - !ruby/object:Api::Type::Time
+            name: 'purgeTime'
+            output: true
+            description: The last time this queue was purged.
+
+
+

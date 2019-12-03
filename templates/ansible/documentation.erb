@@ -12,11 +12,11 @@ ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
 
 DOCUMENTATION = '''
 ---
-<%= to_yaml({
+<%= ansible_style_yaml({
   'module' => module_name(object),
   'description' => format_description(object.description),
   'short_description' => "Creates a GCP #{object.name}",
-  'version_added' => version_added(object).to_f,
+  'version_added' => version_added(object),
   'author' => "Google Inc. (@googlecloudplatform)",
   'requirements' => ["python >= 2.6", "requests >= 2.18.4", "google-auth >= 1.3.0"],
   'options' => [
@@ -24,16 +24,18 @@ DOCUMENTATION = '''
       'state' => {
         'description' => ['Whether the given object should exist in GCP'],
         'choices' => ['present', 'absent'],
-        'default' => 'present'
+        'default' => 'present',
+        'type' => 'str'
       },
     },
-    object.all_user_properties.reject(&:output).map { |p| documentation_for_property(p) }
+    object.all_user_properties.reject(&:output).map { |p| documentation_for_property(p) },
+    auth_docs,
   ].flatten.compact.reduce({}, :merge),
-  'extends_documentation_fragment' => 'gcp',
   'notes' => (
     [
       ("API Reference: U(#{object.references.api})" if object.references.api),
       (object.references.guides.map { |guide, link| "#{guide}: U(#{link})" } if object.references),
+      auth_notes,
       (object.notes if object.notes)
     ].flatten.compact if object.references
   )
@@ -42,7 +44,7 @@ DOCUMENTATION = '''
 
 <% if example -%>
 EXAMPLES = '''
-<% res_readable_name = object.name.uncombine -%>
+<% res_readable_name = object.name.titleize -%>
 <% if example.dependencies -%>
 <%   example.dependencies.each do |depend| -%>
 <%= lines(depend.build_test('present', object, false), 1) -%>
@@ -53,5 +55,5 @@ EXAMPLES = '''
 <% end -%>
 
 RETURN = '''
-<%= to_yaml(object.all_user_properties.map { |p| returns_for_property(p) }.reduce({}, :merge)) -%>
+<%= ansible_style_yaml(object.all_user_properties.map { |p| returns_for_property(p) }.reduce({}, :merge)) -%>
 '''

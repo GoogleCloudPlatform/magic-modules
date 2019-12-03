@@ -27,8 +27,8 @@
 <%= lines(emit_requires(requires)) -%>
 
 # A provider to manage <%= @api.product_full_name -%> resources.
-class <%= object.name -%> < GcpResourceBase
-  name '<%= resource_name(object, product_ns) -%>'
+class <%= object.__product.name.camelize(:upper) -%><%= object.name -%> < GcpResourceBase
+  name '<%= resource_name(object, product) -%>'
   desc '<%= object.name -%>'
   supports platform: 'gcp'
 
@@ -42,14 +42,14 @@ class <%= object.name -%> < GcpResourceBase
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
     @params = params
-    @fetched = @connection.fetch(product_url, resource_base_url, params)
+    @fetched = @connection.fetch(product_url, resource_base_url, params, 'Get')
     parse unless @fetched.nil?
   end
 <% else # object.nested_query.nil? -%>
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
     @params = params
-    fetched = @connection.fetch(product_url, resource_base_url, params)
+    fetched = @connection.fetch(product_url, resource_base_url, params, 'Get')
     @fetched = unwrap(fetched, params)
     parse unless @fetched.nil?
   end
@@ -60,7 +60,7 @@ class <%= object.name -%> < GcpResourceBase
   end
 
   def collection_item
-    '<%= object.collection_url_response.items -%>'
+    '<%= object.collection_url_key -%>'
   end
 
   def unwrap(fetched, params)
@@ -101,10 +101,17 @@ best_guess_identifier = extract_identifiers(individual_url).last
   private
 
   def product_url
-    '<%= object.product_url || object.__product.base_url %>'
+    '<%= object.product_url || object.__product.base_url -%>'
   end
 
+<% url = object.self_link || object.base_url + '/{{name}}' -%>
+<% url_params = extract_identifiers(individual_url) -%>
+<%
+url_params.each do |p|
+  url = url.gsub("{{#{p}}}", "{{#{p.underscore}}}")
+end
+-%>
   def resource_base_url
-    '<%= object.self_link || object.base_url + '/{{name}}' %>'
+    '<%= url %>'
   end
 end

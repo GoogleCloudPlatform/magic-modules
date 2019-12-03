@@ -1,0 +1,12 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% node_group = grab_attributes['node_group'] -%>
+<% gcp_zone = "#{external_attribute('gcp_zone', doc_generation)}" %>
+describe google_compute_node_group(project: <%= gcp_project_id -%>, zone: <%= gcp_zone -%>, name: <%= doc_generation ? "'#{node_group['name']}'" : "node_group['name']" -%>) do
+  it { should exist }
+  its('description') { should cmp <%= doc_generation ? "'#{node_group['description']}'" : "node_group['description']" -%> }
+  its('size') { should cmp <%= doc_generation ? "'#{node_group['size']}'" : "node_group['size']" -%> }
+end
+
+describe google_compute_node_group(project: <%= gcp_project_id -%>, zone: <%= gcp_zone -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

@@ -15,11 +15,9 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Node: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
-      insert_sec: 900
-      update_sec: 900
-      delete_sec: 900
-    id_format: "{{project}}/{{zone}}/{{name}}"
-    import_format: ["projects/{{project}}/locations/{{zone}}/nodes/{{name}}"]
+      insert_minutes: 15
+      update_minutes: 15
+      delete_minutes: 15
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -32,7 +30,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "tpu"
         vars:
           node_name: "test-tpu"
-          network_name: "test-tpu-network"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'

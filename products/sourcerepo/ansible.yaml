@@ -18,8 +18,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
 overrides: !ruby/object:Overrides::ResourceOverrides
-  Repository: !ruby/object:Overrides::Ansible::ResourceOverride
-    self_link: "{{name}}"
 files: !ruby/object:Provider::Config::Files
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

@@ -54,23 +54,22 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/spanner/'
       api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances'
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'instances'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      actions: ['create', 'update']
+      operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'response'
         resource_inside_response: true
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'done'
         complete: True
         allowed:
           - True
           - False
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
     properties:
@@ -126,12 +125,28 @@ objects:
     description: |
       A Cloud Spanner Database which is hosted on a Spanner instance.
     input: true
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'databases'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/spanner/'
       api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances.databases'
+    async: !ruby/object:Api::OpAsync
+      actions: ['create', 'update']
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'instance'
@@ -139,7 +154,6 @@ objects:
         imports: 'name'
         description: 'The instance to create the database on.'
         required: true
-        input: true
     properties:
       # This resource returns only one attribute ("name") from which we parse
       # "instance", "name", and "project".  You will need custom code handling

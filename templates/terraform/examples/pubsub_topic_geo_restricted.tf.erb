@@ -1,0 +1,9 @@
+resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['topic_name'] %>"
+
+  message_storage_policy {
+    allowed_persistence_regions = [
+      "europe-west3",
+    ]
+  }
+}

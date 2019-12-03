@@ -68,6 +68,9 @@ objects:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: googleAccount
+            at_least_one_of:
+              - authentication.0.google_account
+              - authentication.0.custom_account
             description: |
               Describes authentication configuration that uses a Google account.
             properties:
@@ -85,6 +88,9 @@ objects:
                   in GCP.
           - !ruby/object:Api::Type::NestedObject
             name: customAccount
+            at_least_one_of:
+              - authentication.0.google_account
+              - authentication.0.custom_account
             description: |
               Describes authentication configuration that uses a custom account.
             properties:

@@ -14,11 +14,6 @@
 require 'spec_helper'
 
 describe Google::StringUtils do
-  context '#camelize' do
-    subject { described_class.camelize('some_string_with_underscores') }
-    it { is_expected.to eq 'someStringWithUnderscores' }
-  end
-
   context '#underscore' do
     subject { described_class.underscore('aStringInCamelCase') }
     it { is_expected.to eq 'a_string_in_camel_case' }

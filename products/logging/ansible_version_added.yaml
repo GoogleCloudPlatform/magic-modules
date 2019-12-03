@@ -1,0 +1,55 @@
+---
+:facts:
+  :Metric:
+    :version_added: '2.10'
+:regular:
+  :Metric:
+    :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :filter:
+      :version_added: '2.10'
+    :metricDescriptor:
+      :version_added: '2.10'
+      :unit:
+        :version_added: '2.10'
+      :valueType:
+        :version_added: '2.10'
+      :metricKind:
+        :version_added: '2.10'
+      :labels:
+        :version_added: '2.10'
+        :key:
+          :version_added: '2.10'
+        :description:
+          :version_added: '2.10'
+        :valueType:
+          :version_added: '2.10'
+    :labelExtractors:
+      :version_added: '2.10'
+    :valueExtractor:
+      :version_added: '2.10'
+    :bucketOptions:
+      :version_added: '2.10'
+      :linearBuckets:
+        :version_added: '2.10'
+        :numFiniteBuckets:
+          :version_added: '2.10'
+        :width:
+          :version_added: '2.10'
+        :offset:
+          :version_added: '2.10'
+      :exponentialBuckets:
+        :version_added: '2.10'
+        :numFiniteBuckets:
+          :version_added: '2.10'
+        :growthFactor:
+          :version_added: '2.10'
+        :scale:
+          :version_added: '2.10'
+      :explicitBuckets:
+        :version_added: '2.10'
+        :bounds:
+          :version_added: '2.10'

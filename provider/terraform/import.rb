@@ -17,7 +17,13 @@ module Provider
   class Terraform < Provider::AbstractCore
     # Functions to support 'terraform import'.
     module Import
-      # Returns a list of acceptable import id formats for a given resource.
+      # Returns a list of import id formats for a given resource. If an id
+      # contains provider-default values, this fn will return formats both
+      # including and omitting the value.
+      #
+      # If a resource has an explicit import_format value set, that will be the
+      # base import url used. Next, the values of `identity` will be used to
+      # construct a URL. Finally, `{{name}}` will be used by default.
       #
       # For instance, if the resource base url is:
       #   projects/{{project}}/global/networks
@@ -26,35 +32,43 @@ module Provider
       # a) self_link: projects/{{project}}/global/networks/{{name}}
       # b) short id: {{project}}/{{name}}
       # c) short id w/o defaults: {{name}}
-      #
-      # Fields with default values are `project`, `region` and `zone`.
       def import_id_formats(resource)
         if resource.import_format.nil? || resource.import_format.empty?
           underscored_base_url = resource.base_url.gsub(
             /{{[[:word:]]+}}/, &:underscore
           )
 
-          # We assume that all resources have a name field
-          id_formats = [underscored_base_url + '/{{name}}']
+          if resource.identity.nil? || resource.identity.empty?
+            id_formats = [underscored_base_url + '/{{name}}']
+          else
+            identity_path = resource.identity
+                                    .map { |v| "{{#{v.name.underscore}}}" }
+                                    .join('/')
+            id_formats = [underscored_base_url + '/' + identity_path]
+          end
         else
           id_formats = resource.import_format
-        end
-
-        unless resource.id_format.nil? || resource.id_format == '{{name}}'
-          id_formats << resource.id_format
         end
 
         # short id: {{project}}/{{zone}}/{{name}}
         field_markers = id_formats[0].scan(/{{[[:word:]]+}}/)
         short_id_format = field_markers.join('/')
 
-        # short id without fields with provider-level default: {{name}}
+        # short ids without fields with provider-level defaults:
+
+        # without project
+        field_markers -= ['{{project}}']
+        short_id_default_project_format = field_markers.join('/')
+
+        # without project or location
         field_markers -= ['{{project}}', '{{region}}', '{{zone}}']
         short_id_default_format = field_markers.join('/')
 
         # Regexes should be unique and ordered from most specific to least specific
-        (id_formats + [short_id_format, short_id_default_format])
-          .uniq.reject(&:empty?).sort_by { |i| i.count('/') }.reverse
+        # We sort by number of `/` characters (the standard block separator)
+        # followed by number of variables (`{{`) to make `{{name}}` appear last.
+        (id_formats + [short_id_format, short_id_default_project_format, short_id_default_format])
+          .uniq.reject(&:empty?).sort_by { |i| [i.count('/'), i.count('{{')] }.reverse
       end
     end
   end

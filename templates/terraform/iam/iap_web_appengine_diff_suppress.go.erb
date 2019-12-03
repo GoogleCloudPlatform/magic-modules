@@ -1,0 +1,12 @@
+func <%= resource_name -%>DiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	newParts := strings.Split(new, "appengine-")
+
+	if len(newParts) == 1 {
+		// `new` is only the app engine id
+		// `old` is always a long name
+		if strings.HasSuffix(old, fmt.Sprintf("appengine-%s", new)) {
+			return true
+		}
+	}
+	return old == new
+}

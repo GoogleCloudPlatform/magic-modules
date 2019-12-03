@@ -1,4 +1,5 @@
 ---
+subcategory: "BigQuery"
 layout: "google"
 page_title: "Google: google_bigquery_table"
 sidebar_current: "docs-google-bigquery-table"
@@ -29,7 +30,7 @@ resource "google_bigquery_dataset" "default" {
 }
 
 resource "google_bigquery_table" "default" {
-  dataset_id = "${google_bigquery_dataset.default.dataset_id}"
+  dataset_id = google_bigquery_dataset.default.dataset_id
   table_id   = "bar"
 
   time_partitioning {
@@ -40,7 +41,41 @@ resource "google_bigquery_table" "default" {
     env = "default"
   }
 
-  schema = "${file("schema.json")}"
+  schema = <<EOF
+[
+  {
+    "name": "permalink",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The Permalink"
+  },
+  {
+    "name": "state",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "State where the head office is located"
+  }
+]
+EOF
+
+}
+
+resource "google_bigquery_table" "sheet" {
+  dataset_id = google_bigquery_dataset.default.dataset_id
+  table_id   = "sheet"
+
+  external_data_configuration {
+    autodetect    = true
+    source_format = "GOOGLE_SHEETS"
+
+    google_sheets_options {
+      skip_leading_rows = 1
+    }
+
+    source_uris = [
+      "https://docs.google.com/spreadsheets/d/123456789012345",
+    ]
+  }
 }
 ```
 
@@ -64,17 +99,100 @@ The following arguments are supported:
     indefinitely. Expired tables will be deleted and their storage
     reclaimed.
 
+* `external_data_configuration` - (Optional) Describes the data format,
+    location, and other properties of a table stored outside of BigQuery.
+    By defining these properties, the data source can then be queried as
+    if it were a standard BigQuery table. Structure is documented below.
+
 * `friendly_name` - (Optional) A descriptive name for the table.
 
 * `labels` - (Optional) A mapping of labels to assign to the resource.
 
-* `schema` - (Optional) A JSON schema for the table.
+* `schema` - (Optional) A JSON schema for the table. Schema is required
+    for CSV and JSON formats and is disallowed for Google Cloud
+    Bigtable, Cloud Datastore backups, and Avro formats when using
+    external tables. For more information see the
+    [BigQuery API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#resource).
 
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is documented below.
 
+* `clustering` - (Optional) Specifies column names to use for data clustering.
+    Up to four top-level columns are allowed, and should be specified in
+    descending priority order.
+
 * `view` - (Optional) If specified, configures this table as a view.
     Structure is documented below.
+
+The `external_data_configuration` block supports:
+
+* `autodetect` - (Required) - Let BigQuery try to autodetect the schema
+    and format of the table.
+
+* `compression` (Optional) - The compression type of the data source.
+    Valid values are "NONE" or "GZIP".
+
+* `csv_options` (Optional) - Additional properties to set if
+    `source_format` is set to "CSV". Structure is documented below.
+
+* `google_sheets_options` (Optional) - Additional options if
+    `source_format` is set to "GOOGLE_SHEETS". Structure is
+    documented below.
+
+* `ignore_unknown_values` (Optional) - Indicates if BigQuery should
+    allow extra values that are not represented in the table schema.
+    If true, the extra values are ignored. If false, records with
+    extra columns are treated as bad records, and if there are too
+    many bad records, an invalid error is returned in the job result.
+    The default value is false.
+
+* `max_bad_records` (Optional) - The maximum number of bad records that
+    BigQuery can ignore when reading data.
+
+* `source_format` (Required) - The data format. Supported values are:
+    "CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO",
+    and "DATSTORE_BACKUP". To use "GOOGLE_SHEETS"
+    the `scopes` must include
+    "https://www.googleapis.com/auth/drive.readonly".
+
+* `source_uris` - (Required) A list of the fully-qualified URIs that point to
+    your data in Google Cloud.
+
+The `csv_options` block supports:
+
+* `quote` (Required) - The value that is used to quote data sections in a
+    CSV file. If your data does not contain quoted sections, set the
+    property value to an empty string. If your data contains quoted newline
+    characters, you must also set the `allow_quoted_newlines` property to true.
+    The API-side default is `"`, specified in Terraform escaped as `\"`. Due to
+    limitations with Terraform default values, this value is required to be
+    explicitly set. 
+
+* `allow_jagged_rows` (Optional) - Indicates if BigQuery should accept rows
+    that are missing trailing optional columns.
+
+* `allow_quoted_newlines` (Optional) - Indicates if BigQuery should allow
+    quoted data sections that contain newline characters in a CSV file.
+    The default value is false.
+
+* `encoding` (Optional) - The character encoding of the data. The supported
+    values are UTF-8 or ISO-8859-1.
+
+* `field_delimiter` (Optional) - The separator for fields in a CSV file.
+
+* `skip_leading_rows` (Optional) - The number of rows at the top of a CSV
+    file that BigQuery will skip when reading the data.
+
+The `google_sheets_options` block supports:
+
+* `range` (Optional) - Range of a sheet to query from. Only used when
+    non-empty. At least one of `range` or `skip_leading_rows` must be set.
+    Typical format: "sheet_name!top_left_cell_id:bottom_right_cell_id"
+    For example: "sheet1!A1:B20"
+
+* `skip_leading_rows` (Optional) - The number of rows at the top of the sheet
+    that BigQuery will skip when reading the data. At least one of `range` or
+    `skip_leading_rows` must be set.
 
 The `time_partitioning` block supports:
 
@@ -127,5 +245,5 @@ exported:
 BigQuery tables can be imported using the `project`, `dataset_id`, and `table_id`, e.g.
 
 ```
-$ terraform import google_bigquery_table.default gcp-project:foo.bar
+$ terraform import google_bigquery_table.default gcp-project/foo/bar
 ```

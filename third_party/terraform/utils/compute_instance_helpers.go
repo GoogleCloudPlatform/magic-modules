@@ -3,8 +3,8 @@ package google
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/googleapi"
 )
@@ -107,12 +107,12 @@ func expandScheduling(v interface{}) (*computeBeta.Scheduling, error) {
 				continue
 			}
 			nodeAff := nodeAffRaw.(map[string]interface{})
-			tranformed := &computeBeta.SchedulingNodeAffinity{
+			transformed := &computeBeta.SchedulingNodeAffinity{
 				Key:      nodeAff["key"].(string),
 				Operator: nodeAff["operator"].(string),
 				Values:   convertStringArr(nodeAff["values"].(*schema.Set).List()),
 			}
-			scheduling.NodeAffinities = append(scheduling.NodeAffinities, tranformed)
+			scheduling.NodeAffinities = append(scheduling.NodeAffinities, transformed)
 		}
 	}
 
@@ -304,7 +304,7 @@ func resourceInstanceTags(d TerraformResourceData) *computeBeta.Tags {
 	return tags
 }
 
-func expandShieldedVmConfigs(d *schema.ResourceData) *computeBeta.ShieldedVmConfig {
+func expandShieldedVmConfigs(d TerraformResourceData) *computeBeta.ShieldedVmConfig {
 	if _, ok := d.GetOk("shielded_instance_config"); !ok {
 		return nil
 	}
@@ -328,4 +328,22 @@ func flattenShieldedVmConfig(shieldedVmConfig *computeBeta.ShieldedVmConfig) []m
 		"enable_vtpm":                 shieldedVmConfig.EnableVtpm,
 		"enable_integrity_monitoring": shieldedVmConfig.EnableIntegrityMonitoring,
 	}}
+}
+
+func expandDisplayDevice(d TerraformResourceData) *computeBeta.DisplayDevice {
+	if _, ok := d.GetOk("enable_display"); !ok {
+		return nil
+	}
+	return &computeBeta.DisplayDevice{
+		EnableDisplay:   d.Get("enable_display").(bool),
+		ForceSendFields: []string{"EnableDisplay"},
+	}
+}
+
+func flattenEnableDisplay(displayDevice *computeBeta.DisplayDevice) interface{} {
+	if displayDevice == nil {
+		return nil
+	}
+
+	return displayDevice.EnableDisplay
 }

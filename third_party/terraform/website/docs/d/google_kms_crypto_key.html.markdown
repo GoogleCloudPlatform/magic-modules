@@ -1,4 +1,5 @@
 ---
+subcategory: "Cloud KMS"
 layout: "google"
 page_title: "Google: google_kms_crypto_key"
 sidebar_current: "docs-google-datasource-kms-crypto-key"
@@ -25,8 +26,8 @@ data "google_kms_key_ring" "my_key_ring" {
 }
 
 data "google_kms_crypto_key" "my_crypto_key" {
-  name            = "my-crypto-key"
-  key_ring        = "${data.google_kms_key_ring.my_key_ring.self_link}"
+  name     = "my-crypto-key"
+  key_ring = data.google_kms_key_ring.my_key_ring.self_link
 }
 ```
 
@@ -47,6 +48,8 @@ exported:
 * `rotation_period` - Every time this period passes, generate a new CryptoKeyVersion and set it as
     the primary. The first rotation will take place after the specified period. The rotation period has the format
     of a decimal number with up to 9 fractional digits, followed by the letter s (seconds).
+
+* `purpose` - Defines the cryptographic capabilities of the key.
 
 * `self_link` - The self link of the created CryptoKey. Its format is `projects/{projectId}/locations/{location}/keyRings/{keyRingName}/cryptoKeys/{cryptoKeyName}`.
 

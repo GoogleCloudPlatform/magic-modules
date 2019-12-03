@@ -1,0 +1,11 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% node_template = grab_attributes['node_template'] -%>
+<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" %>
+describe google_compute_node_template(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: <%= doc_generation ? "'#{node_template['name']}'" : "node_template['name']" -%>) do
+  it { should exist }
+  its('node_affinity_labels') { should include(<%= doc_generation ? "'#{node_template['label_key']}'" : "node_template['label_key']" -%> => <%= doc_generation ? "'#{node_template['label_value']}'" : "node_template['label_value']" -%>) }
+end
+
+describe google_compute_node_template(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

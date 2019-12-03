@@ -1,0 +1,103 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: BigqueryDataTransfer
+display_name: BigQueryDataTransfer
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://bigquerydatatransfer.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/bigquery
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: BigQueryDataTransfer API
+    url: https://console.cloud.google.com/apis/api/bigquerydatatransfer.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Config'
+    base_url: projects/{{project}}/locations/{{location}}/transferConfigs
+    self_link: "{{name}}"
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Represents a data transfer configuration. A transfer configuration
+      contains all metadata needed to perform a data transfer.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        "Official Documentation": "https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/"
+      api: "https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/v1/projects.locations.transferConfigs/create"
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        url_param_only: true
+        input: true
+        default_value: US
+        description: |
+          The geographic location where the transfer config should reside.
+          Examples: US, EU, asia-northeast1. The default value is US.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        input: true
+        required: true
+        description: |
+          The user specified display name for the transfer config.
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: |
+          The resource name of the transfer config. Transfer config names have the
+          form projects/{projectId}/locations/{location}/transferConfigs/{configId}.
+          Where configId is usually a uuid, but this is not required.
+          The name is ignored when creating a transfer config.
+      - !ruby/object:Api::Type::String
+        name: 'destinationDatasetId'
+        required: true
+        description: |
+          The BigQuery target dataset id.
+      - !ruby/object:Api::Type::String
+        name: 'dataSourceId'
+        input: true
+        required: true
+        description: |
+          The data source id. Cannot be changed once the transfer config is created.
+      - !ruby/object:Api::Type::String
+        name: 'schedule'
+        description: |
+          Data transfer schedule. If the data source does not support a custom
+          schedule, this should be empty. If it is empty, the default value for
+          the data source will be used. The specified times are in UTC. Examples
+          of valid format: 1st,3rd monday of month 15:30, every wed,fri of jan,
+          jun 13:15, and first sunday of quarter 00:00. See more explanation
+          about the format here:
+          https://cloud.google.com/appengine/docs/flexible/python/scheduling-jobs-with-cron-yaml#the_schedule_format
+          NOTE: the granularity should be at least 8 hours, or less frequent.
+      - !ruby/object:Api::Type::Integer
+        name: 'dataRefreshWindowDays'
+        description: |
+          The number of days to look back to automatically refresh the data.
+          For example, if dataRefreshWindowDays = 10, then every day BigQuery
+          reingests data for [today-10, today-1], rather than ingesting data for
+          just [today-1]. Only valid if the data source supports the feature.
+          Set the value to 0 to use the default value.
+      - !ruby/object:Api::Type::Boolean
+        name: 'disabled'
+        description: |
+          When set to true, no runs are scheduled for a given transfer.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'params'
+        required: true
+        description: |
+          These parameters are specific to each data source.

@@ -1,6 +1,6 @@
 resource "google_monitoring_notification_channel" "<%= ctx[:primary_resource_id] %>" {
   display_name = "<%= ctx[:vars]["display_name"] %>"
-  type = "email"
+  type         = "email"
   labels = {
     email_address = "fake_email@blahblah.com"
   }

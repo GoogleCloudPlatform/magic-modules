@@ -1,0 +1,18 @@
+resource "google_compute_health_check" "https-health-check" {
+  name        = "<%= ctx[:vars]['health_check_name'] %>"
+  description = "Health check via https"
+
+  timeout_sec         = 1
+  check_interval_sec  = 1
+  healthy_threshold   = 4
+  unhealthy_threshold = 5
+
+  https_health_check {
+    port_name          = "health-check-port"
+    port_specification = "USE_NAMED_PORT"
+    host               = "1.2.3.4"
+    request_path       = "/mypath"
+    proxy_header       = "NONE"
+    response           = "I AM HEALTHY"
+  }
+}

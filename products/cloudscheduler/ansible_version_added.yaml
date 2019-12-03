@@ -1,0 +1,77 @@
+---
+:facts:
+  :Job:
+    :version_added: '2.9'
+:regular:
+  :Job:
+    :version_added: '2.9'
+    :name:
+      :version_added: '2.9'
+    :description:
+      :version_added: '2.9'
+    :schedule:
+      :version_added: '2.9'
+    :timeZone:
+      :version_added: '2.9'
+    :retryConfig:
+      :version_added: '2.9'
+      :retryCount:
+        :version_added: '2.9'
+      :maxRetryDuration:
+        :version_added: '2.9'
+      :minBackoffDuration:
+        :version_added: '2.9'
+      :maxBackoffDuration:
+        :version_added: '2.9'
+      :maxDoublings:
+        :version_added: '2.9'
+    :pubsubTarget:
+      :version_added: '2.9'
+      :topicName:
+        :version_added: '2.9'
+      :data:
+        :version_added: '2.9'
+      :attributes:
+        :version_added: '2.9'
+    :appEngineHttpTarget:
+      :version_added: '2.9'
+      :httpMethod:
+        :version_added: '2.9'
+      :appEngineRouting:
+        :version_added: '2.9'
+        :service:
+          :version_added: '2.9'
+        :version:
+          :version_added: '2.9'
+        :instance:
+          :version_added: '2.9'
+      :relativeUri:
+        :version_added: '2.9'
+      :body:
+        :version_added: '2.9'
+      :headers:
+        :version_added: '2.9'
+    :httpTarget:
+      :version_added: '2.9'
+      :uri:
+        :version_added: '2.9'
+      :httpMethod:
+        :version_added: '2.9'
+      :body:
+        :version_added: '2.9'
+      :headers:
+        :version_added: '2.9'
+      :oauthToken:
+        :version_added: '2.9'
+        :serviceAccountEmail:
+          :version_added: '2.9'
+        :scope:
+          :version_added: '2.9'
+      :oidcToken:
+        :version_added: '2.9'
+        :serviceAccountEmail:
+          :version_added: '2.9'
+        :audience:
+          :version_added: '2.9'
+    :region:
+      :version_added: '2.9'

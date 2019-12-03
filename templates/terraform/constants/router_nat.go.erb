@@ -1,0 +1,90 @@
+<%- # the license inside this block applies to this file
+	# Copyright 2019 Google Inc.
+	# Licensed under the Apache License, Version 2.0 (the "License");
+	# you may not use this file except in compliance with the License.
+	# You may obtain a copy of the License at
+	#
+	#     http://www.apache.org/licenses/LICENSE-2.0
+	#
+	# Unless required by applicable law or agreed to in writing, software
+	# distributed under the License is distributed on an "AS IS" BASIS,
+	# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	# See the License for the specific language governing permissions and
+	# limitations under the License.
+-%>
+func resourceNameSetFromSelfLinkSet(v interface{}) *schema.Set {
+	if v == nil {
+		return schema.NewSet(schema.HashString, nil)
+	}
+	vSet := v.(*schema.Set)
+	ls := make([]interface{}, 0, vSet.Len())
+	for _, v := range vSet.List() {
+		if v == nil {
+			continue
+		}
+		ls = append(ls, GetResourceNameFromSelfLink(v.(string)))
+	}
+	return schema.NewSet(schema.HashString, ls)
+}
+
+// drain_nat_ips MUST be set from (just set) previous values of nat_ips
+// so this customizeDiff func makes sure drainNatIps values:
+//   - aren't set at creation time
+//   - are in old value of nat_ips but not in new values
+func resourceComputeRouterNatDrainNatIpsCustomDiff(diff *schema.ResourceDiff, meta interface{}) error {
+	o, n := diff.GetChange("drain_nat_ips")
+	oSet := resourceNameSetFromSelfLinkSet(o)
+	nSet := resourceNameSetFromSelfLinkSet(n)
+	addDrainIps := nSet.Difference(oSet)
+
+	// We don't care if there are no new drainNatIps
+	if addDrainIps.Len() == 0 {
+		return nil
+	}
+
+	// Resource hasn't been created yet - return error
+	if diff.Id() == "" {
+		return fmt.Errorf("New RouterNat cannot have drain_nat_ips, got values %+v", addDrainIps.List())
+	}
+	//
+	o, n = diff.GetChange("nat_ips")
+	oNatSet := resourceNameSetFromSelfLinkSet(o)
+	nNatSet := resourceNameSetFromSelfLinkSet(n)
+
+	// Resource is being updated - make sure new drainNatIps were in natIps prior d and no longer are in natIps.
+	for _, v := range addDrainIps.List() {
+		if !oNatSet.Contains(v) {
+			return fmt.Errorf("drain_nat_ip %q was not previously set in nat_ips %+v", v.(string), oNatSet.List())
+		}
+		if nNatSet.Contains(v) {
+			return fmt.Errorf("drain_nat_ip %q cannot be drained if still set in nat_ips %+v", v.(string), nNatSet.List())
+		}
+	}
+	return nil
+}
+
+func computeRouterNatSubnetworkHash(v interface{}) int {
+	obj := v.(map[string]interface{})
+	name := obj["name"]
+	sourceIpRanges := obj["source_ip_ranges_to_nat"]
+	sourceIpRangesHash := 0
+	if sourceIpRanges != nil {
+		sourceIpSet := sourceIpRanges.(*schema.Set)
+
+		for _, ipRange := range sourceIpSet.List() {
+			sourceIpRangesHash += schema.HashString(ipRange.(string))
+		}
+	}
+
+	secondaryIpRangeNames := obj["secondary_ip_range_names"]
+	secondaryIpRangeHash := 0
+	if secondaryIpRangeNames != nil {
+		secondaryIpRangeSet := secondaryIpRangeNames.(*schema.Set)
+
+		for _, secondaryIp := range secondaryIpRangeSet.List() {
+			secondaryIpRangeHash += schema.HashString(secondaryIp.(string))
+		}
+	}
+	
+	return schema.HashString(NameFromSelfLinkStateFunc(name)) + sourceIpRangesHash + secondaryIpRangeHash
+}

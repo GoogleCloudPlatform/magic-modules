@@ -1,0 +1,6 @@
+resource "google_healthcare_dataset" "default" {
+  name      = "<%= ctx[:vars]['dataset_name'] %>"
+  location  = "us-central1"
+  time_zone = "UTC"
+  provider  = google-beta
+}

@@ -1,0 +1,8 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_billing_account = "#{external_attribute('gcp_billing_account', doc_generation)}" -%>
+describe google_billing_project_billing_info(project_id: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>) do
+  it { should exist }
+
+  its('billing_account_name') { should eq <%= doc_generation ? "#{gcp_billing_account}" : "gcp_billing_account" -%> }
+  its('billing_enabled') { should eq true }
+end

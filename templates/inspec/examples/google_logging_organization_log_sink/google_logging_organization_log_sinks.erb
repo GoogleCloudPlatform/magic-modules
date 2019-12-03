@@ -1,0 +1,5 @@
+<% gcp_organization_id = "#{external_attribute('gcp_organization_id', doc_generation)}" -%>
+<% org_sink = grab_attributes['org_sink'] -%>
+describe google_logging_organization_log_sinks(organization: <%= gcp_organization_id -%>) do
+  its('names') { should include <%= doc_generation ? "'#{org_sink['name']}'" : "org_sink['name']" -%> }
+end

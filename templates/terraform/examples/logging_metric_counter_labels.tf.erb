@@ -1,0 +1,16 @@
+resource "google_logging_metric" "<%= ctx[:primary_resource_id] %>" {
+  name   = "<%= ctx[:vars]["logging_metric_name"] %>"
+  filter = "resource.type=gae_app AND severity>=ERROR"
+  metric_descriptor {
+    metric_kind = "DELTA"
+    value_type  = "INT64"
+    labels {
+      key         = "mass"
+      value_type  = "STRING"
+      description = "amount of matter"
+    }
+  }
+  label_extractors = {
+    "mass" = "EXTRACT(jsonPayload.request)"
+  }
+}

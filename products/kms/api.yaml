@@ -1,0 +1,138 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: KMS
+display_name: Cloud KMS
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://cloudkms.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloudkms
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Cloud Key Management Service (KMS) API
+    url: https://console.cloud.google.com/apis/library/cloudkms.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: 'KeyRing'
+    base_url: 'projects/{{project}}/locations/{{location}}/keyRings'
+    create_url: 'projects/{{project}}/locations/{{location}}/keyRings?keyRingId={{name}}'
+    self_link: 'projects/{{project}}/locations/{{location}}/keyRings/{{name}}'
+    input: true
+    description: |
+      A `KeyRing` is a toplevel logical grouping of `CryptoKeys`.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        description: |
+          The location for the KeyRing.
+          A full list of valid locations can be found by running `gcloud kms locations list`.
+        required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource name for the KeyRing.
+        required: true
+      - !ruby/object:Api::Type::Time
+        name: 'creationTime'
+        description: |
+          The time that this resource was created on the server.
+          This is in RFC3339 text format.
+        output: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating a key ring':
+          'https://cloud.google.com/kms/docs/creating-keys#create_a_key_ring'
+      api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings'
+  - !ruby/object:Api::Resource
+    name: 'CryptoKey'
+    base_url: '{{key_ring}}/cryptoKeys'
+    create_url: '{{key_ring}}/cryptoKeys?cryptoKeyId={{name}}'
+    self_link: '{{key_ring}}/cryptoKeys/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A `CryptoKey` represents a logical key that can be used for cryptographic operations.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'keyRing'
+        description: |
+          The KeyRing that this key belongs to.
+          Format: `'projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}'`.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource name for the CryptoKey.
+        required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::Time
+        name: 'creationTime'
+        description: |
+          The time that this resource was created on the server.
+          This is in RFC3339 text format.
+        output: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Labels with user-defined metadata to apply to this resource.
+      - !ruby/object:Api::Type::Enum
+        name: 'purpose'
+        description: |
+          The immutable purpose of this CryptoKey. See the
+          [purpose reference](https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys#CryptoKeyPurpose)
+          for possible inputs.
+        values:
+          - "ENCRYPT_DECRYPT"
+          - "ASYMMETRIC_SIGN"
+          - "ASYMMETRIC_DECRYPT"
+        default_value: :ENCRYPT_DECRYPT
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'rotationPeriod'
+        description: |
+          Every time this period passes, generate a new CryptoKeyVersion and set it as the primary.
+          The first rotation will take place after the specified period. The rotation period has
+          the format of a decimal number with up to 9 fractional digits, followed by the
+          letter `s` (seconds). It must be greater than a day (ie, 86400).
+      - !ruby/object:Api::Type::NestedObject
+        name: 'versionTemplate'
+        description: |
+          A template describing settings for new crypto key versions.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'algorithm'
+            description: |
+               The algorithm to use when creating a version based on this template.
+               See the [algorithm reference](https://cloud.google.com/kms/docs/reference/rest/v1/CryptoKeyVersionAlgorithm) for possible inputs.
+            required: true
+          - !ruby/object:Api::Type::Enum
+            name: 'protectionLevel'
+            description: |
+              The protection level to use when creating a version based on this template.
+            values:
+              - "SOFTWARE"
+              - "HSM"
+            input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating a key':
+          'https://cloud.google.com/kms/docs/creating-keys#create_a_key'
+      api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys'

@@ -1,0 +1,7 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
+<% router = grab_attributes['router'] -%>
+<% router_nat = grab_attributes['router_nat'] -%>
+describe google_compute_router_nats(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, router: <%= doc_generation ? "'#{router['name']}'" : "router['name']" -%>) do
+  its('names') { should include <%= doc_generation ? "'#{router_nat['name']}'" : "router_nat['name']" -%> }
+end

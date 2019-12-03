@@ -62,7 +62,11 @@ module Provider
         end
       end
 
-      def request_output(prop, hash_name, module_name)
+      def request_output(prop, hash_name, module_name, allow_pattern = true)
+        # If type has a pattern, use the function.
+        return "#{prop.name.underscore}_pattern(#{request_output(prop, hash_name, module_name, false)}, module)" \
+          if prop.pattern && allow_pattern
+
         return "response.get(#{quote_string(prop.name)})" \
           if prop.is_a? Api::Type::FetchedExternal
 

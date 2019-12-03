@@ -19,13 +19,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
      - !ruby/object:Provider::Terraform::Examples
       name: "binary_authorization_attestor_basic"
       primary_resource_id: "attestor"
+      primary_resource_name: "fmt.Sprintf(\"test-attestor%s\", context[\"random_suffix\"])"
+      vars:
+        attestor_name: "test-attestor"
+        note_name: "test-attestor-note"
+     - !ruby/object:Provider::Terraform::Examples
+      name: "binary_authorization_attestor_kms"
+      primary_resource_id: "attestor"
       skip_test: true
       vars:
         attestor_name: "test-attestor"
         note_name: "test-attestor-note"
+        key_name: "test-attestor-key"
+        keyring_name: "test-attestor-key-ring"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/binauth_attestor_note_field_name.go.erb
+      decoder: templates/terraform/decoders/binauth_attestor_note_field_name.go.erb
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
       attestationAuthorityNote.noteReference: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/container_analysis_note.erb'
         diff_suppress_func: 'compareSelfLinkOrResourceName'
@@ -37,8 +50,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           An attestation by this attestor is stored as a Container Analysis
           ATTESTATION_AUTHORITY Occurrence that names a container image
           and that links to this Note.
+      attestationAuthorityNote.publicKeys.id: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   Policy: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{project}}"
+    id_format: "projects/{{project}}"
     import_format: ["projects/{{project}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/binaryauthorization_policy.erb'
@@ -51,7 +66,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       vars:
         attestor_name: "test-attestor"
         note_name: "test-attestor-note"
+     - !ruby/object:Provider::Terraform::Examples
+      name: "binary_authorization_policy_global_evaluation"
+      primary_resource_id: "policy"
+      skip_test: true
+      vars:
+        attestor_name: "test-attestor"
+        note_name: "test-attestor-note"
     properties:
+      globalPolicyEvaluationMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       clusterAdmissionRules: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: |-
@@ -62,13 +86,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
             // overall hash here respects that so changing the attestor format doesn't
             // change the hash code of cluster_admission_rules.
             raw := v.(map[string]interface{})
-            at := raw["require_attestations_by"].(*schema.Set)
+
+            // modifying raw actually modifies the values passed to the provider.
+            // Use a copy to avoid that.
+            copy := make((map[string]interface{}))
+            for key, value := range raw {
+              copy[key] = value
+            }
+            at := copy["require_attestations_by"].(*schema.Set)
             if at != nil {
               t := convertAndMapStringArr(at.List(), GetResourceNameFromSelfLink)
-              raw["require_attestations_by"] = schema.NewSet(selfLinkNameHash, convertStringArrToInterface(t))
+              copy["require_attestations_by"] = schema.NewSet(selfLinkNameHash, convertStringArrToInterface(t))
             }
             var buf bytes.Buffer
-            schema.SerializeResourceForHash(&buf, raw, resourceBinaryAuthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
+            schema.SerializeResourceForHash(&buf, copy, resourceBinaryAuthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
             return hashcode.String(buf.String())
           }
       clusterAdmissionRules.requireAttestationsBy: !ruby/object:Overrides::Terraform::PropertyOverride

@@ -3,7 +3,7 @@
 
 # Magic Modules
 
-<img src="images/magic-modules.svg" width="300" align="right" />
+<img src="images/magic-modules.svg" alt="Magic Modules Logo" width="300" align="right" />
 
 ## Overview
 
@@ -26,7 +26,7 @@ features/tools:
 * Terraform in Cloud Shell
 
 Importantly, Magic Modules *isn't* full code generation. Every change is made
-manually; more than a code generator, Magic Modules is a force multiplier for 
+manually; more than a code generator, Magic Modules is a force multiplier for
 development. While many Magic Modules resources are defined exactly based on the
 GCP API, we use Magic Modules to preemptively solve issues across each tool by
 encoding our field-tested learnings from other tools in those definitions. In
@@ -34,9 +34,22 @@ effect, an issue solved in one tool will be solved for each other tool.
 
 ## Getting Started with Magic Modules
 
-We've prepared an interactive tutorial that you can try out with Open in Cloud
-Shell below; if you're getting set up on a local workstation, this guide serves
-as a reference.
+We've prepared a codelab to introduce you to Magic Modules:
+
+[![Magic Modules Codelab](images/mm-codelab.png)](https://codelabs.developers.google.com/codelabs/magic-modules/index.html)
+
+It will walk you through adding a GCP service as a product to Magic Modules.
+It's more extensive than the contents of this README, and will help you if
+you're interested in adding a new resource or if you're modifying generated ones.
+
+If you're in this repo to modify a handwritten Terraform resource, or you just
+need a refresher, you can read the shorter quickstart below.
+
+---
+
+You can try out Magic Modules immediately with Open in Cloud Shell below; if
+you're getting set up on a local workstation, this guide serves as a reference
+to help you get it set up.
 
 [![Open in Cloud Shell](http://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/magic-modules&tutorial=TUTORIAL.md)
 
@@ -48,6 +61,8 @@ To get started, you'll need:
   * You can use `rbenv` to manage your Ruby version(s)
 * [`Bundler`](https://github.com/bundler/bundler)
   * This can be installed with `gem install bundler`
+* If you are getting "Too many open files" ulimit needs to be raised.
+  * Mac OSX: `ulimit -n 1000`
 
 ### Preparing Magic Modules / One-time setup
 
@@ -76,6 +91,10 @@ example:
 git clone https://github.com/terraform-providers/terraform-provider-google.git $GOPATH/src/github.com/terraform-providers/terraform-provider-google
 git clone https://github.com/terraform-providers/terraform-provider-google-beta.git $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta
 ```
+
+Magic Modules won't work with old versions of the Terraform provider repos. If
+you're encountering issues with vendoring and paths, make sure both MM and the
+Terraform provider are running on up to date copies of `master`.
 
 Once you've prepared the target folders for the tools, run the following to
 finish getting Magic Modules set up by installing the Ruby gems it needs to run:

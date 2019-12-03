@@ -1,0 +1,66 @@
+{{- $notes := newStringList -}}
+{{- $unknown := newStringList -}}
+{{- $breaking := newStringList -}}
+{{- $deprecations := newStringList -}}
+{{- $features := newStringList -}}
+{{- $improvements := newStringList -}}
+{{- $bugs := newStringList -}}
+{{- range . -}}
+	{{if eq "note" .Type -}}
+		{{$notes = append $notes (renderReleaseNote .) -}}
+	{{else if eq "breaking-change" .Type -}}
+		{{$breaking = append $breaking (renderReleaseNote .) -}}
+	{{else if eq "deprecation" .Type -}}
+		{{$deprecations = append $deprecations (renderReleaseNote .) -}}
+	{{else if or (eq "new-resource" .Type) (eq "new-datasource" .Type) (eq "feature" .Type) -}}
+		{{$features = append $features (renderReleaseNote .) -}}
+	{{else if or (eq "improvement" .Type) (eq "enhancement" .Type) -}}
+		{{$improvements = append $improvements (renderReleaseNote .) -}}
+	{{ else if eq "bug" .Type -}}
+		{{$bugs = append $bugs (renderReleaseNote .) -}}
+	{{ else -}}
+		{{$unknown = append $unknown (renderReleaseNote .) -}}
+	{{end -}}
+{{- end -}}
+{{- if gt (len $unknown) 0 -}}
+UNKNOWN CHANGELOG TYPE:
+{{range $unknown | sortAlpha -}}
+* {{. }}
+{{- end -}}
+{{- end -}}
+{{- if gt (len $notes) 0 -}}
+NOTES:
+{{range $notes | sortAlpha -}}
+* {{. }}
+{{- end -}}
+{{- end -}}
+{{- if gt (len $deprecations) 0 -}}
+DEPRECATIONS:
+{{range $deprecations | sortAlpha -}}
+* {{. }}
+{{- end -}}
+{{- end -}}
+{{- if gt (len $breaking) 0 -}}
+BREAKING CHANGES:
+{{range $breaking | sortAlpha -}}
+* {{. }}
+{{- end -}}
+{{- end -}}
+{{- if gt (len $features) 0}}
+FEATURES:
+{{range $features | sortAlpha -}}
+* {{. }}
+{{- end -}}
+{{- end -}}
+{{- if gt (len $improvements) 0}}
+IMPROVEMENTS:
+{{range $improvements | sortAlpha -}}
+* {{. }}
+{{- end -}}
+{{- end -}}
+{{- if gt (len $bugs) 0}}
+BUG FIXES:
+{{range $bugs | sortAlpha -}}
+* {{. }}
+{{- end -}}
+{{- end -}}

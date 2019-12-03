@@ -3,10 +3,6 @@ set -e
 set -x
 
 pushd "magic-modules"
-# "codegen-pr" vs "codegen-sha" is *LOAD-BEARING*.  Don't change
-# them (or introduce other options) unless you also change the
-# logic in create-or-update-pr - because we decide whether to
-# create or to update by which one of these we're prefixed by.
 export GH_TOKEN
 if PR_ID=$(git config --get pullrequest.id) &&
   [ -z "$USE_SHA" ] &&
@@ -32,3 +28,16 @@ chmod 400 ~/github_private_key
 ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init $ALL_SUBMODULES"
 
 cp -r ./ ../magic-modules-branched/
+
+if [ "true" == "$INCLUDE_PREVIOUS" ] ; then
+    # Since this is fetched after a merge commit, HEAD~ is
+    # the newest commit on the branch being merged into.
+    git reset --hard HEAD~
+    BRANCH="$BRANCH-previous"
+    git checkout -B "$BRANCH"
+    # ./branchname is intentionally never committed - it isn't necessary once
+    # this output is no longer available.
+    echo "$BRANCH" > ./branchname
+    ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init $ALL_SUBMODULES"
+    cp -r ./ ../magic-modules-previous/
+fi

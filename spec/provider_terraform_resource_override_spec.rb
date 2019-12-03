@@ -23,6 +23,75 @@ class File
 end
 
 describe Overrides::Terraform::ResourceOverride do
+  context 'advanced overrides' do
+    describe 'should not override a previously overridden property with a default' do
+      let(:overrides) do
+        Overrides::ResourceOverrides.new(
+          'AnotherResource' => Overrides::Terraform::ResourceOverride.new(
+            'properties' => {
+              'array-property' => Overrides::Terraform::PropertyOverride.new(
+                'is_set' => true
+              )
+            }
+          )
+        )
+      end
+      let(:overrides2) do
+        Overrides::ResourceOverrides.new(
+          'AnotherResource' => Overrides::Terraform::ResourceOverride.new(
+            'properties' => {
+              'array-property' => Overrides::Terraform::PropertyOverride.new
+            }
+          )
+        )
+      end
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
+
+      it {
+        new_api = Overrides::Runner.build(api, overrides,
+                                          Overrides::Terraform::ResourceOverride,
+                                          Overrides::Terraform::PropertyOverride)
+        final_api = Overrides::Runner.build(new_api, overrides2,
+                                            Overrides::Terraform::ResourceOverride,
+                                            Overrides::Terraform::PropertyOverride)
+        resource = final_api.objects.select { |p| p.name == 'AnotherResource' }.first
+        prop = resource.properties.select { |p| p.name == 'array-property' }.first
+        expect(prop.is_set).to eq(
+          true
+        )
+      }
+    end
+
+    describe 'should not override a previously overridden resource field with a default' do
+      let(:overrides) do
+        Overrides::ResourceOverrides.new(
+          'AnotherResource' => Overrides::Terraform::ResourceOverride.new(
+            'exclude_import' => true
+          )
+        )
+      end
+      let(:overrides2) do
+        Overrides::ResourceOverrides.new(
+          'AnotherResource' => Overrides::Terraform::ResourceOverride.new
+        )
+      end
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
+
+      it {
+        new_api = Overrides::Runner.build(api, overrides,
+                                          Overrides::Terraform::ResourceOverride,
+                                          Overrides::Terraform::PropertyOverride)
+        final_api = Overrides::Runner.build(new_api, overrides2,
+                                            Overrides::Terraform::ResourceOverride,
+                                            Overrides::Terraform::PropertyOverride)
+        resource = final_api.objects.select { |p| p.name == 'AnotherResource' }.first
+        expect(resource.exclude_import).to eq(
+          true
+        )
+      }
+    end
+  end
+
   context 'good resource' do
     let(:resource) do
       Overrides::Terraform::ResourceOverride.parse(

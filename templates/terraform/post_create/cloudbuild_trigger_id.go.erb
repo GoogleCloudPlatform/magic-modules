@@ -7,7 +7,7 @@ d.Set("trigger_id", triggerId.(string))
 
 // Store the ID now. We tried to set it before and it failed because
 // trigger_id didn't exist yet.
-id, err = replaceVars(d, config, "{{project}}/{{trigger_id}}")
+id, err = replaceVars(d, config, "projects/{{project}}/triggers/{{trigger_id}}")
 if err != nil {
   return fmt.Errorf("Error constructing id: %s", err)
 }

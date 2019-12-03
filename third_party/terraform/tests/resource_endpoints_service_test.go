@@ -6,9 +6,9 @@ import (
 
 	"fmt"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"google.golang.org/api/servicemanagement/v1"
 )
 
@@ -97,9 +97,10 @@ func TestEndpointsService_grpcMigrateState(t *testing.T) {
 }
 
 func testAccEndpointsService_basic(random_name string) string {
-	return fmt.Sprintf(`resource "google_endpoints_service" "endpoints_service" {
-  service_name = "%s.endpoints.%s.cloud.goog"
-  project = "%s"
+	return fmt.Sprintf(`
+resource "google_endpoints_service" "endpoints_service" {
+  service_name   = "%s.endpoints.%s.cloud.goog"
+  project        = "%s"
   openapi_config = <<EOF
 swagger: "2.0"
 info:
@@ -141,14 +142,17 @@ definitions:
       message:
         type: "string"
 EOF
-}`, random_name, getTestProjectFromEnv(), getTestProjectFromEnv(), random_name, getTestProjectFromEnv())
+
+}
+`, random_name, getTestProjectFromEnv(), getTestProjectFromEnv(), random_name, getTestProjectFromEnv())
 }
 
 func testAccEndpointsService_grpc(random_name string) string {
-	return fmt.Sprintf(`resource "google_endpoints_service" "endpoints_service" {
+	return fmt.Sprintf(`
+resource "google_endpoints_service" "endpoints_service" {
   service_name = "%s.endpoints.%s.cloud.goog"
-  project = "%s"
-  grpc_config = <<EOF
+  project      = "%s"
+  grpc_config  = <<EOF
 type: google.api.Service
 config_version: 3
 name: %s.endpoints.%s.cloud.goog
@@ -157,8 +161,10 @@ usage:
   - selector: endpoints.examples.bookstore.Bookstore.ListShelves
     allow_unregistered_calls: true
 EOF
-  protoc_output_base64 = "${filebase64("test-fixtures/test_api_descriptor.pb")}"
-}`, random_name, getTestProjectFromEnv(), getTestProjectFromEnv(), random_name, getTestProjectFromEnv())
+
+  protoc_output_base64 = filebase64("test-fixtures/test_api_descriptor.pb")
+}
+`, random_name, getTestProjectFromEnv(), getTestProjectFromEnv(), random_name, getTestProjectFromEnv())
 }
 
 func testAccCheckEndpointExistsByName(random_name string) resource.TestCheckFunc {

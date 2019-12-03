@@ -1,0 +1,7 @@
+resource "google_app_engine_domain_mapping" "<%= ctx[:primary_resource_id] %>" {
+  domain_name = "<%= ctx[:vars]["domain"] %>.gcp.tfacc.hashicorptest.com"
+
+  ssl_settings {
+    ssl_management_type = "AUTOMATIC"
+  }
+}

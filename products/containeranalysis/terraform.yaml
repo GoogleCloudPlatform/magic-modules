@@ -14,9 +14,12 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Note: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "projects/{{project}}/notes/{{name}}"
     import_format: ["projects/{{project}}/notes/{{name}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: 'templates/terraform/pre_update/containeranalysis_note.erb'
+      encoder: templates/terraform/encoders/containeranalysis_attestation_field_name.go.erb
+      decoder: templates/terraform/decoders/containeranalysis_attestation_field_name.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "container_analysis_note_basic"

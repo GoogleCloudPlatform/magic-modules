@@ -47,7 +47,7 @@ module Provider
         object.all_user_properties
               .map(&:name)
               .select { |para| properties.include? para }
-              .map { |para| { para => handwritten_example[para] } }
+              .map { |para| { para.underscore => handwritten_example[para.underscore] } }
               .reduce({}, :merge)
       end
     end
@@ -66,8 +66,12 @@ module Provider
       attr_reader :facts
       attr_reader :vars
 
+      attr_accessor :provider
+
       def validate
         super
+        @task&.set_variable(self, :__example)
+        @dependencies&.each { |d| d.set_variable(self, :__example) }
 
         check :task, type: Task, required: true
         check :verifier, type: Verifier, default: FactsVerifier.new
@@ -89,44 +93,56 @@ module Provider
       attr_reader :scopes
       attr_reader :register
 
+      attr_reader :__example
+
       def validate
         super
         check :name, type: String, required: true
         check :code, type: Hash, required: true
         check :scopes, type: Array, item_type: ::String
+
+        @name = "google.cloud.#{@name}" unless @__example&.provider&.is_a?(Provider::Ansible::Devel)
       end
 
       def build_test(state, object, noop = false)
-        to_yaml([build_task(state, INTEGRATION_TEST_DEFAULTS, object, noop)])
+        ansible_style_yaml([build_task(state, INTEGRATION_TEST_DEFAULTS, object, noop)])
       end
 
       def build_example(state, object)
-        to_yaml([build_task(state, EXAMPLE_DEFAULTS, object)])
+        ansible_style_yaml([build_task(state, EXAMPLE_DEFAULTS, object)])
       end
 
       private
 
       def build_task(state, hash, _object, noop = false)
+        code = compiled_code(@code, hash)
+        code = code.merge('state' => state) if state != 'facts'
+
         {
           'name' => message(state, @name, noop),
-          @name => compiled_code(@code, hash).merge('state' => state),
+          @name => code,
           'register' => @register
         }.reject { |_, v| v.nil? }
       end
 
       def message(state, name, noop)
-        verb = {
-          present: 'create',
-          absent: 'delete'
-        }[state.to_sym]
-        again = if noop && state == 'present'
-                  ' that already exists'
-                elsif noop && state == 'absent'
-                  ' that does not exist'
-                else
-                  ''
-                end
-        "#{verb} a #{object_name_from_module_name(name)}#{again}"
+        if state != 'facts'
+          verb = {
+            present: 'create',
+            absent: 'delete'
+          }[state.to_sym]
+          again = if noop && state == 'present'
+                    ' that already exists'
+                  elsif noop && state == 'absent'
+                    ' that does not exist'
+                  else
+                    ''
+                  end
+          "#{verb} a #{object_name_from_module_name(name)}#{again}"
+        else
+          item_name = object_name_from_module_name(name)
+          "get info on #{a_or_an(item_name)} #{item_name}"
+        end
       end
 
       def compiled_code(code, hash)
@@ -135,15 +151,25 @@ module Provider
         elsif code.is_a?(Hash)
           code.map { |k, vv| [k, compiled_code(vv, hash)] }.to_h
         elsif code.is_a?(TrueClass) || code.is_a?(FalseClass) || code.is_a?(String)
-          compile_string(hash, code.to_s.delete("\n")).join
+          compile_string(hash, code.to_s).join("\n")
         else
           code
         end
       end
 
+      def a_or_an(item_name)
+        words_to_use_a = %w[user]
+        return 'a' if words_to_use_a.include?(item_name.split(' ').first)
+
+        %w[a e i o u].include?(item_name[0].downcase) ? 'an' : 'a'
+      end
+
       def object_name_from_module_name(mod_name)
+        words_to_capitalize = %w[https http tcp ssl url]
         product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures.first
-        product_name.tr('_', ' ')
+        product_name = product_name.gsub('_info', '').tr('_', ' ')
+        words_to_capitalize.each { |w| product_name.gsub!(w, w.upcase) }
+        product_name
       end
 
       def dependency_name(dependency, resource)
@@ -344,7 +370,7 @@ module Provider
         @code = build_code(object, INTEGRATION_TEST_DEFAULTS)
         @name = ["gcp_#{object.__product.api_name}",
                  object.name.underscore,
-                 'facts'].join('_')
+                 'info'].join('_')
         super(state, object, noop)
       end
 
@@ -352,7 +378,7 @@ module Provider
         @code = build_code(object, EXAMPLE_DEFAULTS)
         @name = ["gcp_#{object.__product.api_name}",
                  object.name.underscore,
-                 'facts'].join('_')
+                 'info'].join('_')
         super(state, object)
       end
 

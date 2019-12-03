@@ -37,9 +37,11 @@ set -x
 chmod 400 ~/github_private_key
 popd
 
-pushd "magic-modules-gcp/build/ansible"
+# Clone ansible/ansible
+ssh-agent bash -c "ssh-add ~/github_private_key; git clone git@github.com:modular-magician/ansible.git"
 
 # Setup Git config and remotes.
+pushd "ansible"
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
 
@@ -48,6 +50,20 @@ git remote add origin git@github.com:modular-magician/ansible.git
 git remote add upstream git@github.com:ansible/ansible.git
 git remote add magician git@github.com:modular-magician/ansible.git
 echo "Remotes setup properly"
+popd
+
+# Copy code into ansible/ansible + commit to our fork
+# By using the "ansible_devel" provider, we get versions of the resources that work
+# with ansible devel.
+pushd "magic-modules-gcp"
+ruby compiler.rb -a -e ansible -f ansible_devel -o ../ansible/
+popd
+
+# Commit code from magic modules into our fork
+pushd "ansible"
+git add lib/ansible/modules/cloud/google/gcp_* test/integration/targets/gcp_*
+git commit -m "Migrating code from collection"
+ssh-agent bash -c "ssh-add ~/github_private_key; git push magician devel"
 
 set -e
 
@@ -72,19 +88,20 @@ for filename in mm-bug*; do
 
   while read p; do
     git checkout magician/devel -- "lib/ansible/modules/cloud/google/$p.py"
-    if [[ $p != *"facts"* ]]; then
+    if [[ $p != *"info"* ]]; then
       git checkout magician/devel -- "test/integration/targets/$p"
     fi
   done < $filename
 
   git checkout magician/devel -- "lib/ansible/module_utils/gcp_utils.py"
+  git checkout magician/devel -- "lib/ansible/plugins/doc_fragments/gcp.py"
 
   # This commit may be empty
   set +e
   git commit -m "Bug fixes for GCP modules"
 
   # Create a PR message + save to file
-  ruby ../../tools/ansible-pr/generate_template.rb > bug_fixes$filename
+  ruby ../magic-modules-gcp/tools/ansible-pr/generate_template.rb > bug_fixes$filename
 
   # Create PR
   ssh-agent bash -c "ssh-add ~/github_private_key; git push origin bug_fixes$filename --force"
@@ -103,7 +120,7 @@ while read module; do
   git checkout -b $module
 
   git checkout magician/devel -- "lib/ansible/modules/cloud/google/$module.py"
-  if [[ $module != *"facts"* ]]; then
+  if [[ $module != *"info"* ]]; then
     git checkout magician/devel -- "test/integration/targets/$module"
   fi
 
@@ -112,7 +129,7 @@ while read module; do
   # Create a PR message + save to file
   set +e
   git commit -m "New Module: $module"
-  ruby ../../tools/ansible-pr/generate_template.rb --new-module-name $module > $module
+  ruby ../magic-modules-gcp/tools/ansible-pr/generate_template.rb --new-module-name $module > $module
 
   # Create PR
   ssh-agent bash -c "ssh-add ~/github_private_key; git push origin $module --force"

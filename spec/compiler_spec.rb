@@ -16,14 +16,14 @@ require 'api/compiler'
 
 describe Api::Compiler do
   context 'should fail if file does not exist' do
-    subject { -> { Api::Compiler.new('spec/data/somedummyfile').run } }
+    subject { -> { Api::Compiler.new(File.read('spec/data/somedummyfile')).run } }
     it { is_expected.to raise_error(Errno::ENOENT) }
   end
 
   context 'should use the file provided' do
     let(:reader) { mock('reader') }
 
-    subject { -> { Api::Compiler.new('my-file-to-parse.yaml').run } }
+    subject { -> { Api::Compiler.new(File.read('my-file-to-parse.yaml')).run } }
 
     before do
       # File will only be read once because there's no
@@ -40,7 +40,7 @@ describe Api::Compiler do
   end
 
   context 'parses file' do
-    subject { Api::Compiler.new('spec/data/good-file.yaml').run }
+    subject { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
     before do
       subject.validate
@@ -55,7 +55,7 @@ describe Api::Compiler do
     let(:reader) { mock('reader') }
 
     subject do
-      -> { Api::Compiler.new('my-file-to-parse.yaml').run.validate }
+      -> { Api::Compiler.new(File.read('my-file-to-parse.yaml')).run.validate }
     end
 
     before do

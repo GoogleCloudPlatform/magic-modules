@@ -17,7 +17,6 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: http://myproduct.google.com/api/
-    default: true
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: http://myproduct.google.com/api/beta/

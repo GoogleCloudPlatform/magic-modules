@@ -1,0 +1,108 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  KeyRing: !ruby/object:Overrides::Terraform::ResourceOverride
+    description: |
+      {{description}}
+
+      ~> **Note:** KeyRings cannot be deleted from Google Cloud Platform.
+      Destroying a Terraform-managed KeyRing will remove it from state but
+      *will not delete the resource on the server.*
+    id_format: "projects/{{project}}/locations/{{location}}/keyRings/{{name}}"
+    import_format: ["projects/{{project}}/locations/{{location}}/keyRings/{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "kms_key_ring_basic"
+        primary_resource_id: "example-keyring"
+        # Because we can't really delete the resource, we get an error of
+        # dangling resources with the auto generated tests. The hand-written
+        # tests do a better job at testing that the key was removed from state
+        # and that no keyrings are left behind since they create (and destroy)
+        # a project just for this test, but they require org level IAM roles
+        # for the test service account.
+        skip_test: true
+    docs: !ruby/object:Provider::Terraform::Docs
+      attributes: |
+        * `self_link`: The self link of the created KeyRing in the format `projects/{project}/locations/{location}/keyRings/{name}`
+    properties:
+      creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      location: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
+      decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
+      encoder: templates/terraform/encoders/send_nil_body.go.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/kms_self_link.erb
+  CryptoKey: !ruby/object:Overrides::Terraform::ResourceOverride
+    description: |
+      {{description}}
+
+      ~> **Note:** CryptoKeys cannot be deleted from Google Cloud Platform.
+      Destroying a Terraform-managed CryptoKey will remove it from state
+      and delete all CryptoKeyVersions, rendering the key unusable, but *will
+      not delete the resource on the server.* When Terraform destroys these keys,
+      any data previously encrypted with these keys will be irrecoverable.
+      For this reason, it is strongly recommended that you add lifecycle hooks
+      to the resource to prevent accidental destruction.
+    id_format: "{{key_ring}}/cryptoKeys/{{name}}"
+    import_format: ["{{key_ring}}/cryptoKeys/{{name}}"]
+    supports_indirect_user_project_override: true
+    schema_version: 1
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "kms_crypto_key_basic"
+        primary_resource_id: "example-key"
+        skip_test: true
+      - !ruby/object:Provider::Terraform::Examples
+        name: "kms_crypto_key_asymmetric_sign"
+        primary_resource_id: "example-asymmetric-sign-key"
+        skip_test: true
+    docs: !ruby/object:Provider::Terraform::Docs
+      attributes: |
+        * `self_link`: The self link of the created CryptoKey. Its format is `{{key_ring}}/cryptoKeys/{{name}}`.
+    properties:
+      creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      keyRing: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'kmsCryptoKeyRingsEquivalent'
+        ignore_read: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      rotationPeriod: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'orEmpty(validateKmsCryptoKeyRotationPeriod)'
+        update_mask_fields:
+          - "rotationPeriod"
+          - "nextRotationTime"
+      versionTemplate: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        update_mask_fields:
+          - "versionTemplate.algorithm"
+      versionTemplate.protectionLevel: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_value: :SOFTWARE
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_delete: templates/terraform/custom_delete/kms_crypto_key.erb
+      custom_import: templates/terraform/custom_import/kms_crypto_key.go.erb
+      decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
+      encoder: templates/terraform/encoders/kms_crypto_key.go.erb
+      update_encoder: templates/terraform/update_encoder/kms_crypto_key.go.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/kms_self_link.erb
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

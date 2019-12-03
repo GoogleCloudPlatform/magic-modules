@@ -1,18 +1,15 @@
 {% import "vars.tmpl" as vars %}
 
-# These resource types are here until the PRs get merged in upstream.  :)
 resource_types:
     - name: merged-downstreams
       type: docker-image
       source:
-          # Note: resource types cannot use credhub substitution - "gcr.io/magic-modules" is hardcoded here.
           repository: gcr.io/magic-modules/merged-prs-resource
           tag: '1.1'
 
     - name: git-branch
       type: docker-image
       source:
-          # Note: resource types cannot use credhub substitution - "gcr.io/magic-modules" is hardcoded here.
           repository: gcr.io/magic-modules/concourse-git-resource
           tag: '1.0'
 
@@ -43,6 +40,7 @@ resources:
           access_token: ((github-account.password))
           community_only: true
           no_label: community
+          base: master
 
     - name: magic-modules-external-prs
       type: github-pull-request
@@ -51,6 +49,7 @@ resources:
           private_key: ((repo-key.private_key))
           access_token: ((github-account.password))
           community_only: true
+          base: master
 
     - name: magic-modules-new-prs
       type: github-pull-request
@@ -60,6 +59,17 @@ resources:
           access_token: ((github-account.password))
           authorship_restriction: true
           no_label: automerged
+          base: master
+
+    - name: magic-modules-3.0-prs
+      type: github-pull-request
+      source:
+          repo: GoogleCloudPlatform/magic-modules
+          private_key: ((repo-key.private_key))
+          access_token: ((github-account.password))
+          authorship_restriction: true
+          no_label: automerged
+          base: 3.0.0
 
 {% for v in vars.terraform_v.itervalues() %}
     - name: {{ v.short_name }}-intermediate
@@ -72,7 +82,7 @@ resources:
     - name: ansible-intermediate
       type: git-branch
       source:
-          uri: git@github.com:((github-account.username))/ansible.git
+          uri: git@github.com:((github-account.username))/ansible_collections_google.git
           private_key: ((repo-key.private_key))
 
     - name: inspec-intermediate
@@ -91,6 +101,7 @@ resources:
           require_review_approval: true
           check_dependent_prs: true
           label: downstream-generated
+          base: master
 
     - name: merged-prs
       type: merged-downstreams
@@ -129,6 +140,97 @@ jobs:
             get_params:
                 skip_clone: true
 
+    - name: mm-3.0-diff
+      plan:
+          - get: magic-modules
+            resource: magic-modules-3.0-prs
+            version: every
+            trigger: true
+            attempts: 2
+            params:
+              fetch_merge: true
+            # This isn't strictly-speaking necessary - we aren't actually
+            # pushing this anywhere - but it lets us reuse all the other
+            # generation stuff.
+          - aggregate:
+              # consumes: magic-modules (detached HEAD)
+              # produces: magic-modules-branched (new branch, with submodule)
+            - task: branch-magic-modules
+              file: magic-modules/.ci/magic-modules/branch.yml
+              params:
+                GH_TOKEN: ((github-account.password))
+                CREDS: ((repo-key.private_key))
+                ALL_SUBMODULES: {{' '.join(vars.all_submodules)}}
+                INCLUDE_PREVIOUS: true
+            - put: magic-modules-3.0-prs
+              params:
+                status: pending
+                path: magic-modules
+              get_params:
+                skip_clone: true
+
+          - aggregate:
+{% for k, v in vars.terraform_v.iteritems() %}
+            - do:
+                # consumes: magic-modules-branched
+                # produces: terraform-generated
+                - task: diff-{{v.short_name}}
+                  file: magic-modules-branched/.ci/magic-modules/diff-terraform.yml
+                  params:
+                    VERSION: {{k}}
+                    PROVIDER_NAME: {{v.provider_name}}
+                    SHORT_NAME: {{v.short_name}}
+                    GITHUB_ORG: {{v.github_org}}
+                    OVERRIDE_PROVIDER: {{v.override_provider}}
+
+                - put: {{v.short_name}}-intermediate
+                  params:
+                      repository: terraform-diff/{{k}}/new
+                      branch_file: magic-modules-branched/branchname
+                      force: true
+                  get_params:
+                      skip_clone: true
+
+                - put: {{v.short_name}}-intermediate
+                  params:
+                      repository: terraform-diff/{{k}}/old
+                      branch_file: magic-modules-previous/branchname
+                      force: true
+                  get_params:
+                      skip_clone: true
+
+                - task: test-{{v.short_name}}
+                  file: magic-modules-branched/.ci/unit-tests/tf-3.yml
+                  timeout: 30m
+                  params:
+                      PROVIDER_NAME: {{v.provider_name}}
+                      TEST_DIR: {{v.test_dir}}
+                      SUBDIR: {{k}}
+
+{% endfor %}
+
+            on_failure:
+              put: magic-modules-3.0-prs
+              params:
+                status: failure
+                context: code-generation
+                path: magic-modules-3.0-prs
+              get_params:
+                skip_clone: true
+
+          - task: create-message
+            file: magic-modules-branched/.ci/magic-modules/create-diff-message.yml
+
+          - put: magic-modules-3.0-prs
+            params:
+                status: success
+                path: magic-modules
+                comment: message/message.txt
+            get_params:
+                skip_clone: true
+
+
+
     - name: mm-generate
       plan:
           - get: magic-modules
@@ -156,7 +258,7 @@ jobs:
               get_params:
                 skip_clone: true
           - aggregate:
-            {% for k, v in vars.terraform_v.iteritems() %}
+{% for k, v in vars.terraform_v.iteritems() %}
             - do:
                 # consumes: magic-modules-branched
                 # produces: terraform-generated
@@ -178,7 +280,7 @@ jobs:
                       force: true
                   get_params:
                       skip_clone: true
-            {% endfor %}
+{% endfor %}
             - do:
                 # consumes: magic-modules-branched
                 # produces: ansible-generated
@@ -247,7 +349,7 @@ jobs:
               submodules: [{{','.join(vars.terraform_submodules)}}]
           passed: [mm-generate]
         - aggregate:
-          {% for v in vars.terraform_v.itervalues() %}
+{% for v in vars.terraform_v.itervalues() %}
           - task: test-{{v.short_name}}
             file: magic-modules/.ci/unit-tests/task.yml
             timeout: 30m
@@ -255,7 +357,7 @@ jobs:
               PROVIDER_NAME: {{v.provider_name}}
               SHORT_NAME: {{v.short_name}}
               TEST_DIR: {{v.test_dir}}
-          {% endfor %}
+{% endfor %}
           on_failure:
               do:
               - get: magic-modules-new-prs
@@ -264,29 +366,6 @@ jobs:
                 params:
                   status: failure
                   context: terraform-tests
-                  path: magic-modules-new-prs
-                get_params:
-                  skip_clone: true
-
-    - name: ansible-test
-      plan:
-        - get: magic-modules
-          version: every
-          trigger: true
-          params:
-              submodules: [build/ansible]
-          passed: [mm-generate]
-        - task: test
-          file: magic-modules/.ci/unit-tests/ansible.yml
-          timeout: 30m
-          on_failure:
-              do:
-              - get: magic-modules-new-prs
-                passed: [mm-generate]
-              - put: magic-modules-new-prs
-                params:
-                  status: failure
-                  context: ansible-tests
                   path: magic-modules-new-prs
                 get_params:
                   skip_clone: true
@@ -336,7 +415,7 @@ jobs:
           # the pipeline (when a PR needs to be updated), this does that updating by pushing
           # the new code to the repository/branch from which a pull request is already open.
           - aggregate:
-            {% for v in vars.terraform_v.itervalues() %}
+{% for v in vars.terraform_v.itervalues() %}
             - put: {{v.short_name}}-intermediate
               params:
                 repository: magic-modules/build/{{ v.short_name }}
@@ -351,7 +430,7 @@ jobs:
                 force: true
               get_params:
                   skip_clone: true
-            {% endfor %}
+{% endfor %}
             - put: ansible-intermediate
               params:
                 repository: magic-modules/build/ansible
@@ -376,7 +455,7 @@ jobs:
                 GITHUB_TOKEN: ((github-account.password))
                 # This is what tells us which terraform repo to write PRs against - this
                 # is what you change if you want to test this in a non-live environment.
-                ANSIBLE_REPO_USER: modular-magician
+                ANSIBLE_REPO_USER: ansible
                 INSPEC_REPO_USER: modular-magician
                 TERRAFORM_VERSIONS: "{{','.join(vars.terraform_properties_serialized)}}"
             on_failure:
@@ -387,7 +466,6 @@ jobs:
                   path: mm-initial-pr
               get_params:
                   skip_clone: true
-
           - put: magic-modules
             params:
               repository: magic-modules/
@@ -396,7 +474,6 @@ jobs:
               force: true
             get_params:
                 skip_clone: true
-
           # Once everything is done and working, post the updated information to the
           # magic-modules PR.
           - put: magic-modules-new-prs
@@ -408,28 +485,39 @@ jobs:
                 label_file: magic-modules-with-comment/label_file
             get_params:
                 skip_clone: true
+          # Downstream changelog metadata
+          - task: downstream-changelog-metadata
+            file: magic-modules-with-comment/.ci/magic-modules/downstream-changelog-metadata.yml
+            params:
+              GITHUB_TOKEN: ((github-account.password))
+              DOWNSTREAM_REPOS: "{{','.join(vars.downstreams_with_changelogs)}}"
     - name: terraform-acceptance-tests
       plan:
         - get: magic-modules
           version: every
           trigger: true
           params:
-              submodules: [{{','.join(vars.terraform_submodules)}}]
+              submodules: [{{', '.join(vars.terraform_submodules)}}]
           passed: [create-prs]
         - aggregate:
-          {% for v in vars.terraform_v.itervalues() %}
+{% for v in vars.terraform_v.itervalues() %}
           - task: test-{{v.short_name}}
             file: magic-modules/.ci/acceptance-tests/terraform-acceptance.yml
             params:
               PROVIDER_NAME: {{v.provider_name}}
               SHORT_NAME: {{v.short_name}}
               TEST_DIR: {{v.test_dir}}
-          {% endfor %}
+{% endfor %}
 
     - name: merge-prs
       plan:
           - get: mm-approved-prs
             attempts: 2
+          - task: downstream-changelog-metadata
+            file: mm-approved-prs/.ci/magic-modules/downstream-changelog-metadata-mergeprs.yml
+            params:
+              GITHUB_TOKEN: ((github-account.password))
+              DOWNSTREAM_REPOS: "{{','.join(vars.downstreams_with_changelogs)}}"
           - task: ensure-downstreams-merged
             file: mm-approved-prs/.ci/magic-modules/ensure-downstreams-merged.yml
             params:

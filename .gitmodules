@@ -1,7 +1,7 @@
 [submodule "build/ansible"]
 	path = build/ansible
-	url = https://github.com/modular-magician/ansible
-	branch = devel
+	url = https://github.com/ansible/ansible_collections_google
+	branch = master
 [submodule "build/terraform"]
 	path = build/terraform
 	url = https://github.com/terraform-providers/terraform-provider-google

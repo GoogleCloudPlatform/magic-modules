@@ -51,6 +51,9 @@ module Overrides
 
       def build(api, overrides, res_override_class = Overrides::ResourceOverride,
                 prop_override_class = Overrides::PropertyOverride)
+
+        overrides = Overrides::ResourceOverrides.new if overrides.nil?
+
         validator = Overrides::Validator.new(api, overrides)
         validator.run
         build_product(api, overrides, resource: res_override_class, property: prop_override_class)
@@ -87,6 +90,8 @@ module Overrides
       # return a new Api::Resource with overrides applied.
       def build_resource(old_resource, res_override, override_classes)
         res_override = override_classes[:resource].new if res_override.nil? || res_override.empty?
+
+        explicit_overrides = res_override.instance_variables
         res_override.validate
         res_override.apply old_resource
 
@@ -96,7 +101,13 @@ module Overrides
         variables = (old_resource.instance_variables + res_override.instance_variables).uniq
         variables.reject { |o| %i[@properties @parameters].include?(o) }
                  .each do |var_name|
-          if !res_override[var_name].nil?
+          # Check if the variable is defined on the original api but wasn't explicitly specified
+          # on the override. This stops override defaults (such as custom_code) from clobbering
+          # properties that exist on the api already
+          if old_resource.instance_variables.include?(var_name) \
+             && !explicit_overrides.include?(var_name)
+            res.instance_variable_set(var_name, old_resource.instance_variable_get(var_name))
+          elsif !res_override[var_name].nil?
             res.instance_variable_set(var_name, res_override[var_name])
           else
             res.instance_variable_set(var_name, old_resource.instance_variable_get(var_name))
@@ -148,6 +159,7 @@ module Overrides
         prop_override = override_classes[:property].new \
           if prop_override.nil? || prop_override.empty?
 
+        explicit_overrides = prop_override.instance_variables
         prop_override.validate
         prop_override.apply old_property
 
@@ -165,7 +177,13 @@ module Overrides
 
         variables.reject { |o| o == :@properties }
                  .each do |var_name|
-          if !prop_override[var_name].nil?
+          # Check if the variable is defined on the original api but wasn't explicitly specified
+          # on the override. This stops override defaults (such as is_set) from clobbering
+          # properties that exist on the api already
+          if old_property.instance_variables.include?(var_name) \
+             && !explicit_overrides.include?(var_name)
+            prop.instance_variable_set(var_name, old_property.instance_variable_get(var_name))
+          elsif !prop_override[var_name].nil? # and not default
             prop.instance_variable_set(var_name, prop_override[var_name])
           else
             prop.instance_variable_set(var_name, old_property.instance_variable_get(var_name))
@@ -176,7 +194,7 @@ module Overrides
 
       # Overrides have additional values inside the override that do not regularly belong
       # on the Api::* object. These values need to be set + they need getters so they
-      # can be accessed propertly in the templates.
+      # can be accessed properly in the templates.
       def set_additional_values(object, override)
         override.class.attributes.each do |o|
           object.instance_variable_set("@#{o}", override[o])

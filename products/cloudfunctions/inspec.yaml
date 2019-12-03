@@ -12,6 +12,9 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Inspec::Config
-files: !ruby/object:Provider::Config::Files
-  copy:
-    'Gemfile': 'provider/inspec/Gemfile'
+legacy_name: cloudfunctions
+overrides: !ruby/object:Overrides::ResourceOverrides
+  CloudFunction: !ruby/object:Overrides::Inspec::ResourceOverride
+    properties:
+      trigger_http: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true

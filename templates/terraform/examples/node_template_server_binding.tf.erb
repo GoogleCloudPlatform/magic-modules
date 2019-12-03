@@ -4,16 +4,16 @@ provider "google-beta" {
 }
 
 data "google_compute_node_types" "central1a" {
-  provider = "google-beta"
-  zone = "us-central1-a"
+  provider = google-beta
+  zone     = "us-central1-a"
 }
 
 resource "google_compute_node_template" "<%= ctx[:primary_resource_id] %>" {
-  provider = "google-beta"
+  provider = google-beta
 
-  name = "<%= ctx[:vars]['template_name'] %>"
-  region = "us-central1"
-  node_type = "${data.google_compute_node_types.central1a.names[0]}"
+  name      = "<%= ctx[:vars]['template_name'] %>"
+  region    = "us-central1"
+  node_type = data.google_compute_node_types.central1a.names[0]
 
   node_affinity_labels = {
     foo = "baz"
@@ -23,4 +23,3 @@ resource "google_compute_node_template" "<%= ctx[:primary_resource_id] %>" {
     type = "RESTART_NODE_ON_MINIMAL_SERVERS"
   }
 }
-

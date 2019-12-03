@@ -14,15 +14,15 @@
 --- !ruby/object:Provider::Ansible::Config
 # This is where custom code would be defined eventually.
 datasources: !ruby/object:Overrides::ResourceOverrides
-  Autoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  Snapshot: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   ManagedSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  DiskResourcePolicyAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   # Readonly resources.
   DiskType: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -31,29 +31,59 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   MachineType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  NodeGroup: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  NodeTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  RegionBackendService: !ruby/object:Overrides::Ansible::ResourceOverride
+  NetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  TargetInstance:  !ruby/object:Overrides::Ansible::ResourceOverride
+  RegionHealthCheck: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionTargetHttpProxy: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionTargetHttpsProxy: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionUrlMap: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  ResourcePolicy: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RouterBgpPeer: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Autoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      autoscalingPolicy.minNumReplicas: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['minReplicas']
+      autoscalingPolicy.maxNumReplicas: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['maxReplicas']
+      autoscalingPolicy.coolDownPeriodSec: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['cooldownPeriod']
+      autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['target']
+      autoscalingPolicy.customMetricUtilizations: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['metric']
+      autoscalingPolicy.customMetricUtilizations.metric: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['name']
+      autoscalingPolicy.customMetricUtilizations.utilizationTarget: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['target']
+      autoscalingPolicy.customMetricUtilizations.utilizationTargetType: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['type']
+      autoscalingPolicy.loadBalancingUtilization.utilizationTarget: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['target']
   BackendService: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       timeoutSec: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases:
           - timeout_seconds
-  RegionBackendService: !ruby/object:Overrides::Ansible::ResourceOverride
+  DiskResourcePolicyAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Disk: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
@@ -68,6 +98,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - 'products/compute/helpers/python/provider_firewall.py'
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
+    tests: !ruby/object:Provider::Ansible::Tests
+      tests:
+        - !ruby/object:Provider::Ansible::Test
+          name: 'update'
+          path: products/compute/tests/ansible/firewall_update.yaml
     properties:
       network: !ruby/object:Overrides::Ansible::PropertyOverride
         default_value:
@@ -161,54 +196,82 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       timeoutSec: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases:
           - timeout_seconds
+  Image: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      guestOsFeatures.type: !ruby/object:Overrides::Ansible::PropertyOverride
+        # Changing this description because of line length issues.
+        description: The type of supported feature.
   InstanceGroup: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       instances: !ruby/object:Overrides::Ansible::PropertyOverride
         exclude: false
-    update: |
-      instance = InstanceLogic(module)
-      instance.run()
-    post_action: |
-      if fetch:
-          instance = InstanceLogic(module)
-          instance.run()
-          fetch.update({'instances': instance.list_instances()})
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      update: |
+        instance = InstanceLogic(module)
+        instance.run()
+      post_action: |
+        if fetch:
+            instance = InstanceLogic(module)
+            instance.run()
+            fetch.update({'instances': instance.list_instances()})
     provider_helpers:
       - 'products/compute/helpers/python/instancegroup_instances.py'
   Instance: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
       decoder: decode_response
-    post_action: |
-      if fetch:
-          instance = InstancePower(module, fetch.get('status'))
-          instance.run()
-          if module.params.get('status'):
-              fetch.update({'status': module.params['status']})
+    hidden:
+      - deletion_protection_update
+      - shielded_instance_config_update
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      post_action: |
+        if fetch:
+            instance = InstancePower(module, fetch.get('status'))
+            instance.run()
+            if module.params.get('status'):
+                fetch.update({'status': module.params['status']})
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
       - 'products/compute/helpers/python/instance_metadata.py'
       - 'products/compute/helpers/python/instance_start.py'
+      - 'products/compute/helpers/python/instance_update_methods.py'
     properties:
       canIpForward: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ["ip_forward"]
       disks.initializeParams.sourceImage: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ["image", "image_family"]
+      networkInterfaces.network: !ruby/object:Overrides::Ansible::PropertyOverride
+        description: |
+          Specifies the title of an existing network. Not setting the network
+          title will select the default network interface, which could have
+          SSH already configured
   InstanceTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
       decoder: decode_response
     provider_helpers:
-      - 'products/compute/helpers/python/provider_instance.py'
+      - 'products/compute/helpers/python/provider_instance_template.py'
       - 'products/compute/helpers/python/instance_metadata.py'
   InterconnectAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
-    has_tests: false
+    tests: !ruby/object:Provider::Ansible::Tests
+      has_autogenerated_test: false
   RegionDisk: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       sourceSnapshot: !ruby/object:Overrides::Ansible::PropertyOverride
         description: |
           The source snapshot used to create this disk. You can provide this as
           a partial or full URL to the resource.
+  ResourcePolicy: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  Reservation: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      specificReservation.instanceProperties.minCpuPlatform: !ruby/object:Overrides::Ansible::PropertyOverride
+        # Changing description becaues of line length limitations
+        description: |
+          The minimum CPU platform for the reservation. For example,
+          `"Intel Skylake"`. See
+          https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform#availablezones
+          for information on available CPU platforms.
   Route: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       nextHopGateway: !ruby/object:Overrides::Ansible::PropertyOverride
@@ -221,45 +284,60 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           * https://www.googleapis.com/compute/v1/projects/project/global/gateways/default-internet-gateway
           * projects/project/global/gateways/default-internet-gateway
           * global/gateways/default-internet-gateway
+  Subnetwork: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      fingerprint: !ruby/object:Overrides::Ansible::PropertyOverride
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+      logConfig: !ruby/object:Overrides::Ansible::PropertyOverride
+        exclude: true
   TargetPool: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
-      decoder: decode_request
+      decoder: decode_response
     provider_helpers:
       - 'products/compute/helpers/python/provider_target_pool.py'
   TargetVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: false
   # Not yet implemented.
-  Autoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
+  RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  # Ansible tasks must alter infrastructure.
+  # This means that virtual objects are a poor fit.
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  Snapshot: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  # Ansible tasks must alter infrastructure.
-  # This means that virtual objects are a poor fit.
   DiskType: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   License: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   MachineType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  NodeGroup: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  NodeTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
+  NetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  TargetInstance:  !ruby/object:Overrides::Ansible::ResourceOverride
+  RegionHealthCheck: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionTargetHttpProxy: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionTargetHttpsProxy: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionUrlMap: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RouterBgpPeer: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

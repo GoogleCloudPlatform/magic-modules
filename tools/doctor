@@ -1,5 +1,5 @@
 #!/bin/bash
-# Peforms basic checks for tools required by Magic Modules.
+# Performs basic checks for tools required by Magic Modules.
 
 set -e
 

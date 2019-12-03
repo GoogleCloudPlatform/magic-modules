@@ -17,7 +17,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Trigger: !ruby/object:Overrides::Terraform::ResourceOverride
     # import by default only works with old-style self links ending in a name
     import_format: ["projects/{{project}}/triggers/{{trigger_id}}"]
-    id_format: '{{project}}/{{trigger_id}}'
+    id_format: 'projects/{{project}}/triggers/{{trigger_id}}'
     self_link: 'projects/{{project}}/triggers/{{trigger_id}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -26,13 +26,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'trigger_id'
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       build.steps: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'step'
+      triggerTemplate: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}}
+          One of `trigger_template` or `github` must be provided.
+      github: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}}
+          One of `trigger_template` or `github` must be provided.
       triggerTemplate.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/cloudbuild_trigger_id.go.erb
       pre_update: templates/terraform/pre_update/cloudbuild_trigger.go.erb
+      constants: templates/terraform/constants/cloudbuild_trigger.erb
       resource_definition: templates/terraform/resource_definition/cloudbuild_trigger.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

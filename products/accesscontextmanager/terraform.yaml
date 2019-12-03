@@ -15,10 +15,11 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   AccessPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
-      insert_sec: 360
-      update_sec: 360
-      delete_sec: 360
+      insert_minutes: 6
+      update_minutes: 6
+      delete_minutes: 6
     autogen_async: true
+    id_format: "{{name}}"
     import_format: ["{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -34,9 +35,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/accesspolicy.erb
   AccessLevel: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
-      insert_sec: 360
-      update_sec: 360
-      delete_sec: 360
+      insert_minutes: 6
+      update_minutes: 6
+      delete_minutes: 6
     autogen_async: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
@@ -54,12 +55,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
-      custom_import: templates/terraform/custom_import/access_level_self_link_as_name_and_set_parent.go.erb
+      custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
   ServicePerimeter: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
-      insert_sec: 360
-      update_sec: 360
-      delete_sec: 360
+      insert_minutes: 6
+      update_minutes: 6
+      delete_minutes: 6
     autogen_async: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
@@ -79,7 +80,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         input: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
-      custom_import: templates/terraform/custom_import/access_level_self_link_as_name_and_set_parent.go.erb
+      custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

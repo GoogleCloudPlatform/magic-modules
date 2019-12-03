@@ -29,6 +29,10 @@ bundle exec compiler -a -e inspec -o "build/inspec/"
 cp templates/inspec/vcr_config.rb build/inspec
 
 pushd build/inspec
+
+# Run rubocop on the generated resources
+rubocop -c .rubocop.yml
+
 bundle
 mkdir inspec-cassettes
 # Check if PR_ID folder exists

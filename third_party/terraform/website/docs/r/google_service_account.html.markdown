@@ -1,4 +1,5 @@
 ---
+subcategory: "Cloud Platform"
 layout: "google"
 page_title: "Google: google_service_account"
 sidebar_current: "docs-google-service-account-x"
@@ -38,6 +39,8 @@ The following arguments are supported:
 
 * `display_name` - (Optional) The display name for the service account.
     Can be updated without creating a new resource.
+
+* `description` - (Optional) A text description of the service account.
 
 * `project` - (Optional) The ID of the project that the service account will be created in.
     Defaults to the provider project configuration.

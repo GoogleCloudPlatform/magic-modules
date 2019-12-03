@@ -16,7 +16,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Bucket: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   BucketAccessControl: !ruby/object:Overrides::Terraform::ResourceOverride
-    exclude: true
+    examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "storage_bucket_access_control_public_bucket"
+      primary_resource_id: "public_rule"
+      vars:
+        bucket_name: "static-content-bucket"
+    id_format: "{{bucket}}/{{entity}}"
+    import_format: ["{{bucket}}/{{entity}}"]
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      bucket: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
+      # entityId and projectTeam don't seem to actually part of the schema
+      entityId: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      projectTeam: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
   ObjectAccessControl: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
     - !ruby/object:Provider::Terraform::Examples
@@ -51,9 +68,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
         # This field is (unexpectedly) not returned from the API
         ignore_read: true
-  Object: !ruby/object:Overrides::Terraform::ResourceOverride
-    exclude: true
-
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

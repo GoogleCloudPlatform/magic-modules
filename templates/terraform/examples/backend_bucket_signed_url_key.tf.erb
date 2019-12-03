@@ -1,13 +1,13 @@
 resource "google_compute_backend_bucket_signed_url_key" "backend_key" {
   name           = "<%= ctx[:vars]['key_name'] %>"
   key_value      = "pPsVemX8GM46QVeezid6Rw=="
-  backend_bucket = "${google_compute_backend_bucket.test_backend.name}"
+  backend_bucket = google_compute_backend_bucket.test_backend.name
 }
 
 resource "google_compute_backend_bucket" "test_backend" {
   name        = "<%= ctx[:vars]['backend_name'] %>"
   description = "Contains beautiful images"
-  bucket_name = "${google_storage_bucket.bucket.name}"
+  bucket_name = google_storage_bucket.bucket.name
   enable_cdn  = true
 }
 

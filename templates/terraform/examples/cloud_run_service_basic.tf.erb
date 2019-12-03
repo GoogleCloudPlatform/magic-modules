@@ -1,0 +1,21 @@
+resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
+  location = "us-central1"
+
+  metadata {
+    namespace = "<%= ctx[:test_env_vars]['namespace'] %>"
+  }
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+      }
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}

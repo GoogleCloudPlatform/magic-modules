@@ -1,0 +1,2 @@
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
+service = attribute('service', default: <%= JSON.pretty_generate(grab_attributes['service']) -%>, description: 'Service description')

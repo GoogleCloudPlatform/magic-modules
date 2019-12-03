@@ -1,4 +1,4 @@
-readRes, err := sendRequest(config, "GET", url, nil)
+readRes, err := sendRequest(config, "GET", project, url, nil)
 if err != nil {
 	return handleNotFoundError(err, d, fmt.Sprintf("ComputeDisk %q", d.Id()))
 }
@@ -24,7 +24,7 @@ if v, ok := readRes["users"].([]interface{}); ok {
 			return fmt.Errorf("Error retrieving instance %s: %s", instance, err.Error())
 		}
 		for _, disk := range i.Disks {
-			if disk.Source == self {
+			if compareSelfLinkOrResourceName("", disk.Source, self, nil) {
 				detachCalls = append(detachCalls, detachArgs{
 					project:    instanceProject,
 					zone:       GetResourceNameFromSelfLink(i.Zone),
@@ -41,7 +41,7 @@ if v, ok := readRes["users"].([]interface{}); ok {
 			return fmt.Errorf("Error detaching disk %s from instance %s/%s/%s: %s", call.deviceName, call.project,
 				call.zone, call.instance, err.Error())
 		}
-		err = computeOperationWait(config.clientCompute, op, call.project,
+		err = computeOperationWait(config, op, call.project,
 			fmt.Sprintf("Detaching disk from %s/%s/%s", call.project, call.zone, call.instance))
 		if err != nil {
 			if opErr, ok := err.(ComputeOperationError); ok && len(opErr.Errors) == 1 && opErr.Errors[0].Code == "RESOURCE_NOT_FOUND" {

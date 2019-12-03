@@ -1,4 +1,5 @@
 ---
+subcategory: "Bigtable"
 layout: "google"
 page_title: "Google: google_bigtable_instance"
 sidebar_current: "docs-google-bigtable-instance"
@@ -17,7 +18,7 @@ Creates a Google Bigtable instance. For more information see
 
 ```hcl
 resource "google_bigtable_instance" "production-instance" {
-  name         = "tf-instance"
+  name = "tf-instance"
 
   cluster {
     cluster_id   = "tf-instance-cluster"
@@ -76,3 +77,13 @@ The `cluster` block supports the following arguments:
 ## Attributes Reference
 
 Only the arguments listed above are exposed as attributes.
+
+## Import
+
+Bigtable Instances can be imported using any of these accepted formats:
+
+```
+$ terraform import google_bigtable_instance.default projects/{{project}}/instances/{{name}}
+$ terraform import google_bigtable_instance.default {{project}}/{{name}}
+$ terraform import google_bigtable_instance.default {{name}}
+```

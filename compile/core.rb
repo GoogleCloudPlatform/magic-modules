@@ -82,28 +82,7 @@ module Compile
     # It would generate an output like:
     #
     #   We're compiling object 'Disk' for 'Google Compute Engine'.
-    #   This file is named 'build/puppet/compute/TEST.md'.
-    #
-    # The ERB compiler uses a local variable (_erbout) to track the output to be
-    # emitted and on every new instance of the ERB the output is overwritten. To
-    # enable this function to be reentrant we will store the _erbout variable to
-    # preserve the original content and combine the result of the run. Saving
-    # this context is similar to stack push/pop used in Assembly when entering
-    # and leaving a function:
-    #
-    # PROC myfunc
-    #   PUSH EBP
-    #   MOV EBP, ESP
-    #   ...
-    #   ...
-    #   POP EBP
-    # ENDP
-    #
-    # Also note that variables can be overwritten when calling the next level.
-    # For example if you want to overwrite a variable, e.g. indent_level, one
-    # can simply update the variable and call compile. But note that it is the
-    # caller responsibility to restore the variable before exiting the context
-    # (similarly to the PROC specification above).
+    #   This file is named 'build/provider/compute/TEST.md'.
     #
     # If you want to avoid the load/save you can use one helper functions, such
     # as Provider::Core.compile_file(), which take a hash with overrides. For
@@ -148,9 +127,12 @@ module Compile
       compiled = input.result(ctx)
       ctx.local_variable_set(:_erbout, content) if has_erbout # restore code
       compiled
+    rescue StandardError
+      Google::LOGGER.fatal "Error compiling #{file}"
+      raise
     end
 
-    def to_yaml(obj, options = {})
+    def ansible_style_yaml(obj, options = {})
       if obj.is_a?(::Hash)
         obj.reject { |_, v| v.nil? }.to_yaml(options).sub("---\n", '')
       else

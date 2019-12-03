@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"google.golang.org/api/compute/v1"
 )
@@ -101,6 +101,47 @@ func TestAccDataflowJobCreateWithSubnetwork(t *testing.T) {
 					testAccDataflowJobExists(
 						"google_dataflow_job.big_data"),
 					testAccDataflowJobHasSubnetwork(
+						"google_dataflow_job.big_data"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataflowJobCreateWithLabels(t *testing.T) {
+	t.Parallel()
+
+	key := "my-label"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataflowJobDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataflowJobWithLabels(key),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobExists(
+						"google_dataflow_job.with_labels"),
+					testAccDataflowJobHasLabels(
+						"google_dataflow_job.with_labels", key),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataflowJobCreateWithIpConfig(t *testing.T) {
+	t.Parallel()
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataflowJobDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataflowJobWithIpConfig,
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobExists(
 						"google_dataflow_job.big_data"),
 				),
 			},
@@ -320,131 +361,160 @@ func testAccDataflowJobRegionExists(n string) resource.TestCheckFunc {
 	}
 }
 
+func testAccDataflowJobHasLabels(n, key string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+		config := testAccProvider.Meta().(*Config)
+		job, err := config.clientDataflow.Projects.Jobs.Get(config.Project, rs.Primary.ID).Do()
+		if err != nil {
+			return fmt.Errorf("Job does not exist")
+		}
+
+		if job.Labels[key] != rs.Primary.Attributes["labels."+key] {
+			return fmt.Errorf("Labels do not match what is stored in state.")
+		}
+
+		return nil
+	}
+}
+
 var testAccDataflowJob = fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
-	name = "dfjob-test-%s-temp"
+  name = "dfjob-test-%s-temp"
 
-	force_destroy = true
+  force_destroy = true
 }
 
 resource "google_dataflow_job" "big_data" {
-	name = "dfjob-test-%s"
+  name = "dfjob-test-%s"
 
-	template_gcs_path = "gs://dataflow-templates/wordcount/template_file"
-	temp_gcs_location = "${google_storage_bucket.temp.url}"
+  template_gcs_path = "gs://dataflow-templates/wordcount/template_file"
+  temp_gcs_location = google_storage_bucket.temp.url
+  machine_type      = "n1-standard-2"
 
-	parameters = {
-		inputFile = "gs://dataflow-samples/shakespeare/kinglear.txt"
-		output    = "${google_storage_bucket.temp.url}/output"
-	}
-	zone = "us-central1-f"
-	project = "%s"
+  parameters = {
+    inputFile = "gs://dataflow-samples/shakespeare/kinglear.txt"
+    output    = "${google_storage_bucket.temp.url}/output"
+  }
+  zone    = "us-central1-f"
+  project = "%s"
 
-	on_delete = "cancel"
-}`, acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
+  on_delete = "cancel"
+}
+`, acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
 
 var testAccDataflowJobRegion = fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
-	name = "dfjob-test-%s-temp"
+  name = "dfjob-test-%s-temp"
 
-	force_destroy = true
+  force_destroy = true
 }
 
 resource "google_dataflow_job" "big_data" {
-	name = "dfjob-test-%s"
+  name = "dfjob-test-%s"
 
-	template_gcs_path = "gs://dataflow-templates/wordcount/template_file"
-	temp_gcs_location = "${google_storage_bucket.temp.url}"
+  template_gcs_path = "gs://dataflow-templates/wordcount/template_file"
+  temp_gcs_location = google_storage_bucket.temp.url
 
-	parameters = {
-		inputFile = "gs://dataflow-samples/shakespeare/kinglear.txt"
-		output    = "${google_storage_bucket.temp.url}/output"
-	}
-	region  = "us-central1"
-	zone    = "us-central1-c"
-	project = "%s"
+  parameters = {
+    inputFile = "gs://dataflow-samples/shakespeare/kinglear.txt"
+    output    = "${google_storage_bucket.temp.url}/output"
+  }
+  region  = "us-central1"
+  zone    = "us-central1-c"
+  project = "%s"
 
-	on_delete = "cancel"
-}`, acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
+  on_delete = "cancel"
+}
+`, acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
 
 var testAccDataflowJobWithNetwork = fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
-	name = "dfjob-test-%s-temp"
+  name = "dfjob-test-%s-temp"
 
-	force_destroy = true
+  force_destroy = true
 }
 
 resource "google_compute_network" "net" {
-	name = "dfjob-test-%s-net"
-	auto_create_subnetworks = true
+  name                    = "dfjob-test-%s-net"
+  auto_create_subnetworks = true
 }
 
 resource "google_dataflow_job" "big_data" {
-	name = "dfjob-test-%s"
+  name = "dfjob-test-%s"
 
-	template_gcs_path = "gs://dataflow-templates/wordcount/template_file"
-	temp_gcs_location = "${google_storage_bucket.temp.url}"
-	network = "${google_compute_network.net.name}"
+  template_gcs_path = "gs://dataflow-templates/wordcount/template_file"
+  temp_gcs_location = google_storage_bucket.temp.url
+  network           = google_compute_network.net.name
 
-	parameters = {
-		inputFile = "gs://dataflow-samples/shakespeare/kinglear.txt"
-		output    = "${google_storage_bucket.temp.url}/output"
-	}
-	zone = "us-central1-f"
-	project = "%s"
+  parameters = {
+    inputFile = "gs://dataflow-samples/shakespeare/kinglear.txt"
+    output    = "${google_storage_bucket.temp.url}/output"
+  }
+  zone    = "us-central1-f"
+  project = "%s"
 
-	on_delete = "cancel"
-}`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
+  on_delete = "cancel"
+}
+`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
 
 var testAccDataflowJobWithSubnetwork = fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
-	name = "dfjob-test-%s-temp"
+  name = "dfjob-test-%s-temp"
 
-	force_destroy = true
+  force_destroy = true
 }
 
 resource "google_compute_network" "net" {
-	name = "dfjob-test-%s-net"
-	auto_create_subnetworks = false
+  name                    = "dfjob-test-%s-net"
+  auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "subnet" {
-	name = "dfjob-test-%s-subnet"
-	ip_cidr_range = "10.2.0.0/16"
-	network = "${google_compute_network.net.self_link}"
+  name          = "dfjob-test-%s-subnet"
+  ip_cidr_range = "10.2.0.0/16"
+  network       = google_compute_network.net.self_link
 }
 
 resource "google_dataflow_job" "big_data" {
-	name = "dfjob-test-%s"
+  name = "dfjob-test-%s"
 
-	template_gcs_path = "gs://dataflow-templates/wordcount/template_file"
-	temp_gcs_location = "${google_storage_bucket.temp.url}"
-	subnetwork = "${google_compute_subnetwork.subnet.self_link}"
+  template_gcs_path = "gs://dataflow-templates/wordcount/template_file"
+  temp_gcs_location = google_storage_bucket.temp.url
+  subnetwork        = google_compute_subnetwork.subnet.self_link
 
-	parameters = {
-		inputFile = "gs://dataflow-samples/shakespeare/kinglear.txt"
-		output    = "${google_storage_bucket.temp.url}/output"
-	}
-	zone = "us-central1-f"
-	project = "%s"
+  parameters = {
+    inputFile = "gs://dataflow-samples/shakespeare/kinglear.txt"
+    output    = "${google_storage_bucket.temp.url}/output"
+  }
+  zone    = "us-central1-f"
+  project = "%s"
 
-	on_delete = "cancel"
-}`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
+  on_delete = "cancel"
+}
+`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
 
 var testAccDataflowJobWithServiceAccount = fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
-	name = "dfjob-test-%s-temp"
+  name = "dfjob-test-%s-temp"
 
-	force_destroy = true
+  force_destroy = true
 }
 
 resource "google_service_account" "dataflow-sa" {
-  account_id   = "dataflow-sa"
+  account_id   = "dfjob-test-%s"
   display_name = "DataFlow Service Account"
 }
 
 resource "google_storage_bucket_iam_member" "dataflow-gcs" {
-  bucket = "${google_storage_bucket.temp.name}"
+  bucket = google_storage_bucket.temp.name
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.dataflow-sa.email}"
 }
@@ -455,18 +525,77 @@ resource "google_project_iam_member" "dataflow-worker" {
 }
 
 resource "google_dataflow_job" "big_data" {
-	name = "dfjob-test-%s"
+  name = "dfjob-test-%s"
 
-	template_gcs_path = "gs://dataflow-templates/wordcount/template_file"
-	temp_gcs_location = "${google_storage_bucket.temp.url}"
+  template_gcs_path = "gs://dataflow-templates/wordcount/template_file"
+  temp_gcs_location = google_storage_bucket.temp.url
 
-	parameters = {
-		inputFile = "gs://dataflow-samples/shakespeare/kinglear.txt"
-		output    = "${google_storage_bucket.temp.url}/output"
-	}
-	zone = "us-central1-f"
-	project = "%s"
-	service_account_email = "${google_service_account.dataflow-sa.email}"
+  parameters = {
+    inputFile = "gs://dataflow-samples/shakespeare/kinglear.txt"
+    output    = "${google_storage_bucket.temp.url}/output"
+  }
+  zone                  = "us-central1-f"
+  project               = "%s"
+  service_account_email = google_service_account.dataflow-sa.email
 
-	on_delete = "cancel"
-}`, acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
+  on_delete = "cancel"
+}
+`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
+
+var testAccDataflowJobWithIpConfig = fmt.Sprintf(`
+resource "google_storage_bucket" "temp" {
+  name = "dfjob-test-%s-temp"
+
+  force_destroy = true
+}
+
+resource "google_dataflow_job" "big_data" {
+  name = "dfjob-test-%s"
+
+  template_gcs_path = "gs://dataflow-templates/wordcount/template_file"
+  temp_gcs_location = google_storage_bucket.temp.url
+  machine_type      = "n1-standard-2"
+
+  parameters = {
+    inputFile = "gs://dataflow-samples/shakespeare/kinglear.txt"
+    output    = "${google_storage_bucket.temp.url}/output"
+  }
+
+  ip_configuration = "WORKER_IP_PRIVATE"
+
+  zone    = "us-central1-f"
+  project = "%s"
+
+  on_delete = "cancel"
+}
+`, acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
+
+func testAccDataflowJobWithLabels(key string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "temp" {
+  name = "dfjob-test-%s-temp"
+
+  force_destroy = true
+}
+
+resource "google_dataflow_job" "with_labels" {
+  name = "dfjob-test-%s"
+
+  template_gcs_path = "gs://dataflow-templates/wordcount/template_file"
+  temp_gcs_location = google_storage_bucket.temp.url
+
+  labels = {
+    "my-label" = "test"
+  }
+
+  parameters = {
+    inputFile = "gs://dataflow-samples/shakespeare/kinglear.txt"
+    output    = "${google_storage_bucket.temp.url}/output"
+  }
+  zone    = "us-central1-f"
+  project = "%s"
+
+  on_delete = "cancel"
+}
+`, acctest.RandString(10), acctest.RandString(10), getTestProjectFromEnv())
+}

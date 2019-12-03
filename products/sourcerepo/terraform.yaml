@@ -15,16 +15,20 @@
 legacy_name: 'sourcerepo'
 overrides: !ruby/object:Overrides::ResourceOverrides
   Repository: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: '{{project}}/{{name}}'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      parent_resource_attribute: 'repository'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "sourcerepo_repository_basic"
         primary_resource_id: "my-repo"
+        primary_resource_name: "fmt.Sprintf(\"my-repository%s\", context[\"random_suffix\"])"
         vars:
           repository_name: "my-repository"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_expand: templates/terraform/custom_expand/repository_name_from_short_name.go.erb
+        custom_expand: templates/terraform/custom_expand/shortname_to_url.go.erb
         custom_flatten: templates/terraform/custom_flatten/repository_short_name_from_name.go.erb
         description: |
           Resource name of the repository, of the form `{{repo}}`.

@@ -9,12 +9,11 @@
 package google
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	computeBeta "google.golang.org/api/compute/v0.beta"
-	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/googleapi"
 )
 
@@ -45,19 +44,7 @@ func GetComputeInstanceApiObject(d TerraformResourceData, config *Config) (map[s
 		return nil, err
 	}
 
-	// Get the zone
-	z, err := getZone(d, config)
-	if err != nil {
-		return nil, err
-	}
-	log.Printf("[DEBUG] Loading zone: %s", z)
-	zone, err := config.clientCompute.Zones.Get(
-		project, z).Do()
-	if err != nil {
-		return nil, fmt.Errorf("Error loading zone '%s': %s", z, err)
-	}
-
-	instance, err := expandComputeInstance(project, zone, d, config)
+	instance, err := expandComputeInstance(project, d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -65,26 +52,24 @@ func GetComputeInstanceApiObject(d TerraformResourceData, config *Config) (map[s
 	return jsonMap(instance)
 }
 
-func expandComputeInstance(project string, zone *compute.Zone, d TerraformResourceData, config *Config) (*computeBeta.Instance, error) {
+func expandComputeInstance(project string, d TerraformResourceData, config *Config) (*computeBeta.Instance, error) {
 	// Get the machine type
 	var machineTypeUrl string
 	if mt, ok := d.GetOk("machine_type"); ok {
-		log.Printf("[DEBUG] Loading machine type: %s", mt.(string))
-		machineType, err := config.clientCompute.MachineTypes.Get(
-			project, zone.Name, mt.(string)).Do()
+		machineType, err := ParseMachineTypesFieldValue(mt.(string), d, config)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"Error loading machine type: %s",
 				err)
 		}
-		machineTypeUrl = machineType.SelfLink
+		machineTypeUrl = machineType.RelativeLink()
 	}
 
 	// Build up the list of disks
 
 	disks := []*computeBeta.AttachedDisk{}
 	if _, hasBootDisk := d.GetOk("boot_disk"); hasBootDisk {
-		bootDisk, err := expandBootDisk(d, config, zone, project)
+		bootDisk, err := expandBootDisk(d, config, project)
 		if err != nil {
 			return nil, err
 		}
@@ -92,7 +77,7 @@ func expandComputeInstance(project string, zone *compute.Zone, d TerraformResour
 	}
 
 	if _, hasScratchDisk := d.GetOk("scratch_disk"); hasScratchDisk {
-		scratchDisks, err := expandScratchDisks(d, config, zone, project)
+		scratchDisks, err := expandScratchDisks(d, config, project)
 		if err != nil {
 			return nil, err
 		}
@@ -162,6 +147,8 @@ func expandComputeInstance(project string, zone *compute.Zone, d TerraformResour
 		DeletionProtection: d.Get("deletion_protection").(bool),
 		Hostname:           d.Get("hostname").(string),
 		ForceSendFields:    []string{"CanIpForward", "DeletionProtection"},
+		ShieldedVmConfig:   expandShieldedVmConfigs(d),
+		DisplayDevice:      expandDisplayDevice(d),
 	}, nil
 }
 
@@ -196,9 +183,24 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d TerraformResourceDa
 		disk.DeviceName = v.(string)
 	}
 
-	if v, ok := diskConfig["disk_encryption_key_raw"]; ok {
-		disk.DiskEncryptionKey = &computeBeta.CustomerEncryptionKey{
-			RawKey: v.(string),
+	keyValue, keyOk := diskConfig["disk_encryption_key_raw"]
+	if keyOk {
+		if keyValue != "" {
+			disk.DiskEncryptionKey = &computeBeta.CustomerEncryptionKey{
+				RawKey: keyValue.(string),
+			}
+		}
+	}
+
+	kmsValue, kmsOk := diskConfig["kms_key_self_link"]
+	if kmsOk {
+		if keyOk && keyValue != "" && kmsValue != "" {
+			return nil, errors.New("Only one of kms_key_self_link and disk_encryption_key_raw can be set")
+		}
+		if kmsValue != "" {
+			disk.DiskEncryptionKey = &computeBeta.CustomerEncryptionKey{
+				KmsKeyName: kmsValue.(string),
+			}
 		}
 	}
 	return disk, nil
@@ -231,7 +233,7 @@ func expandInstanceGuestAccelerators(d TerraformResourceData, config *Config) ([
 	return guestAccelerators, nil
 }
 
-func expandBootDisk(d TerraformResourceData, config *Config, zone *compute.Zone, project string) (*computeBeta.AttachedDisk, error) {
+func expandBootDisk(d TerraformResourceData, config *Config, project string) (*computeBeta.AttachedDisk, error) {
 	disk := &computeBeta.AttachedDisk{
 		AutoDelete: d.Get("boot_disk.0.auto_delete").(bool),
 		Boot:       true,
@@ -242,8 +244,18 @@ func expandBootDisk(d TerraformResourceData, config *Config, zone *compute.Zone,
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.disk_encryption_key_raw"); ok {
-		disk.DiskEncryptionKey = &computeBeta.CustomerEncryptionKey{
-			RawKey: v.(string),
+		if v != "" {
+			disk.DiskEncryptionKey = &computeBeta.CustomerEncryptionKey{
+				RawKey: v.(string),
+			}
+		}
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.kms_key_self_link"); ok {
+		if v != "" {
+			disk.DiskEncryptionKey = &computeBeta.CustomerEncryptionKey{
+				KmsKeyName: v.(string),
+			}
 		}
 	}
 
@@ -264,11 +276,11 @@ func expandBootDisk(d TerraformResourceData, config *Config, zone *compute.Zone,
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.type"); ok {
 			diskTypeName := v.(string)
-			diskType, err := readDiskType(config, zone, project, diskTypeName)
+			diskType, err := readDiskType(config, d, diskTypeName)
 			if err != nil {
 				return nil, fmt.Errorf("Error loading disk type '%s': %s", diskTypeName, err)
 			}
-			disk.InitializeParams.DiskType = diskType.SelfLink
+			disk.InitializeParams.DiskType = diskType.RelativeLink()
 		}
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.image"); ok {
@@ -280,13 +292,21 @@ func expandBootDisk(d TerraformResourceData, config *Config, zone *compute.Zone,
 
 			disk.InitializeParams.SourceImage = imageUrl
 		}
+
+		if _, ok := d.GetOk("boot_disk.0.initialize_params.0.labels"); ok {
+			disk.InitializeParams.Labels = expandStringMap(d, "boot_disk.0.initialize_params.0.labels")
+		}
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.mode"); ok {
+		disk.Mode = v.(string)
 	}
 
 	return disk, nil
 }
 
-func expandScratchDisks(d TerraformResourceData, config *Config, zone *compute.Zone, project string) ([]*computeBeta.AttachedDisk, error) {
-	diskType, err := readDiskType(config, zone, project, "local-ssd")
+func expandScratchDisks(d TerraformResourceData, config *Config, project string) ([]*computeBeta.AttachedDisk, error) {
+	diskType, err := readDiskType(config, d, "local-ssd")
 	if err != nil {
 		return nil, fmt.Errorf("Error loading disk type 'local-ssd': %s", err)
 	}
@@ -299,7 +319,7 @@ func expandScratchDisks(d TerraformResourceData, config *Config, zone *compute.Z
 			Type:       "SCRATCH",
 			Interface:  d.Get(fmt.Sprintf("scratch_disk.%d.interface", i)).(string),
 			InitializeParams: &computeBeta.AttachedDiskInitializeParams{
-				DiskType: diskType.SelfLink,
+				DiskType: diskType.RelativeLink(),
 			},
 		})
 	}

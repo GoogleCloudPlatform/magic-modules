@@ -22,12 +22,28 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "logging_metric"
         vars:
           logging_metric_name: "my-(custom)/metric"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "logging_metric_counter_basic"
+        primary_resource_id: "logging_metric"
+        vars:
+          logging_metric_name: "my-(custom)/metric"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "logging_metric_counter_labels"
+        primary_resource_id: "logging_metric"
+        vars:
+          logging_metric_name: "my-(custom)/metric"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
     properties:
       metricDescriptor.labels.valueType: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+  OrganizationLogSink: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
+  FolderExclusion: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
+  FolderLogSink: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
 
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

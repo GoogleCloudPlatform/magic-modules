@@ -39,28 +39,32 @@ module Provider
     class Files < Api::Object
       attr_reader :compile
       attr_reader :copy
+      attr_reader :resource
 
       def validate
         super
         check :compile, type: Hash
         check :copy, type: Hash
+        check :resource, type: Hash
       end
     end
 
-    def self.parse(cfg_file, api = nil, version_name = 'ga')
+    def self.parse(cfg_file, api = nil, version_name = 'ga', provider_override_path = nil)
       raise 'Version passed to the compiler cannot be nil' if version_name.nil?
 
       # Compile step #1: compile with generic class to instantiate target class
       source = compile(cfg_file)
+
+      unless provider_override_path.nil?
+        # Replace overrides directory if we are running with a provider override
+        # This allows providers to reference files in their override path
+        source = source.gsub('{{override_path}}', provider_override_path)
+      end
       config = Google::YamlValidator.parse(source)
-      # Compile step 2: compile with target class (this is in case the config
-      # requires info from the config to compile)
-      source = config.compile(cfg_file)
-      config = Google::YamlValidator.parse(source)
+
       raise "Config #{cfg_file}(#{config.class}) is not a Provider::Config" \
         unless config.class <= Provider::Config
 
-      config.validate
       api = Overrides::Runner.build(api, config.overrides,
                                     config.resource_override,
                                     config.property_override)
@@ -82,8 +86,7 @@ module Provider
       super
 
       check :files, type: Provider::Config::Files
-      check :overrides, type: Overrides::ResourceOverrides,
-                        default: Overrides::ResourceOverrides.new
+      check :overrides, type: Overrides::ResourceOverrides
     end
 
     # Provides the API object to any type that requires, e.g. for validation

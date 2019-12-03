@@ -1,0 +1,12 @@
+
+  config := meta.(*Config)
+
+  dicomStoreId, err := parseHealthcareDicomStoreId(d.Id(), config)
+  if err != nil {
+    return nil, err
+  }
+
+  d.Set("dataset", dicomStoreId.DatasetId.datasetId())
+  d.Set("name", dicomStoreId.Name)
+
+  return []*schema.ResourceData{d}, nil

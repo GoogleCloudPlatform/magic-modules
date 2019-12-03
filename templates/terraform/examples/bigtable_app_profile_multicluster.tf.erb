@@ -1,0 +1,17 @@
+resource "google_bigtable_instance" "instance" {
+  name = "<%= ctx[:vars]['instance_name'] %>"
+  cluster {
+    cluster_id   = "<%= ctx[:vars]['instance_name'] %>"
+    zone         = "us-central1-b"
+    num_nodes    = 3
+    storage_type = "HDD"
+  }
+}
+
+resource "google_bigtable_app_profile" "ap" {
+  instance       = google_bigtable_instance.instance.name
+  app_profile_id = "<%= ctx[:vars]['app_profile_name'] %>"
+
+  multi_cluster_routing_use_any = true
+  ignore_warnings               = true
+}

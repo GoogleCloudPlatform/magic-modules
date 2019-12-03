@@ -1,6 +1,6 @@
 // security_policy isn't set by Create / Update
-if v, ok := d.GetOk("security_policy"); ok {
-  pol, err := ParseSecurityPolicyFieldValue(v.(string), d, config)
+if o, n := d.GetChange("security_policy"); o.(string) != n.(string) {
+		pol, err := ParseSecurityPolicyFieldValue(n.(string), d, config)
   if err != nil {
     return errwrap.Wrapf("Error parsing Backend Service security policy: {{err}}", err)
   }
@@ -11,7 +11,7 @@ if v, ok := d.GetOk("security_policy"); ok {
   if err != nil {
     return errwrap.Wrapf("Error setting Backend Service security policy: {{err}}", err)
   }
-  waitErr := computeSharedOperationWait(config.clientCompute, op, project, "Setting Backend Service Security Policy")
+  waitErr := computeOperationWait(config, op, project, "Setting Backend Service Security Policy")
   if waitErr != nil {
     return waitErr
   }

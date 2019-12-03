@@ -1,16 +1,16 @@
 resource "google_access_context_manager_service_perimeter" "<%= ctx[:primary_resource_id] %>" {
-  parent      = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/servicePerimeters/<%= ctx[:vars]['service_perimeter_name'] %>"
-  title       = "<%= ctx[:vars]['service_perimeter_name'] %>"
+  parent = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
+  name   = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/servicePerimeters/<%= ctx[:vars]['service_perimeter_name'] %>"
+  title  = "<%= ctx[:vars]['service_perimeter_name'] %>"
   status {
     restricted_services = ["storage.googleapis.com"]
   }
 }
 
 resource "google_access_context_manager_access_level" "access-level" {
-  parent      = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/<%= ctx[:vars]['access_level_name'] %>"
-  title       = "<%= ctx[:vars]['access_level_name'] %>"
+  parent = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
+  name   = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/<%= ctx[:vars]['access_level_name'] %>"
+  title  = "<%= ctx[:vars]['access_level_name'] %>"
   basic {
     conditions {
       device_policy {

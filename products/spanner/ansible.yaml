@@ -16,19 +16,9 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-      test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
-        exists: |
-          "\"{{resource_name}}\" in \"{{ results['items'] | map(attribute='name') | list }}\""
-        does_not_exist: |
-          "\"{{resource_name}}\" not in \"{{ results['items'] | map(attribute='name') | list }}\""
   Database: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-      test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
-        exists: |
-          "'webstore' in \"{{ results['items'] | map(attribute='name') | list }}\""
-        does_not_exist: |
-          "'webstore' not in \"{{ results['items'] | map(attribute='name') | list }}\""
   # Virtual => true objects that don't need dedicated resources.
   InstanceConfig: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -36,11 +26,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       decoder: decode_response
-    custom_create_resource: true
-    custom_update_resource: true
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      custom_create_resource: true
+      custom_update_resource: true
+      update: |
+        module.fail_json(msg="Spanner objects can't be updated to ensure data safety")
     provider_helpers:
       - 'products/spanner/helpers/python/instance_helpers.py.erb'
   Database: !ruby/object:Overrides::Ansible::ResourceOverride
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      # Instances return partial self-link as name, but we need the name
+      pre_action: |
+        if 'instance' in module.params and 'name' in module.params['instance']:
+          module.params['instance']['name'] = module.params['instance']['name'].split('/')[-1]
+      update: |
+        module.fail_json(msg="Spanner objects can't be updated to ensure data safety")
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
       decoder: decode_response
@@ -53,5 +53,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: decode_response
     exclude: true
 files: !ruby/object:Provider::Config::Files
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

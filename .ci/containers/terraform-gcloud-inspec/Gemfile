@@ -5,14 +5,13 @@ gem 'google-api-client'
 gem 'google-cloud'
 gem 'googleauth'
 gem 'inifile'
-gem 'inspec', '~> 3.0', '>= 3.0.25'
+gem 'inspec-bin'
 gem 'rubocop'
 
 group :development do
   gem 'github_changelog_generator'
-  gem 'passgen'
   gem 'pry-coolline'
   gem 'rake'
-  gem 'webmock'
   gem 'vcr'
+  gem 'webmock'
 end

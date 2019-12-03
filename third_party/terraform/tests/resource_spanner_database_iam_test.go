@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccSpannerDatabaseIamBinding(t *testing.T) {
@@ -102,11 +102,11 @@ func TestAccSpannerDatabaseIamPolicy(t *testing.T) {
 			// Test a few import formats
 			{
 				ResourceName: "google_spanner_database_iam_policy.foo",
-				ImportStateId: fmt.Sprintf("%s", spannerDatabaseId{
+				ImportStateId: spannerDatabaseId{
 					Instance: instance,
 					Database: database,
 					Project:  project,
-				}.terraformId()),
+				}.terraformId(),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -118,7 +118,7 @@ func testAccSpannerDatabaseIamBinding_basic(account, instance, database, roleId 
 	return fmt.Sprintf(`
 resource "google_service_account" "test_account" {
   account_id   = "%s"
-  display_name = "Spanner Iam Testing Account"
+  display_name = "Spanner Database Iam Testing Account"
 }
 
 resource "google_spanner_instance" "instance" {
@@ -129,16 +129,16 @@ resource "google_spanner_instance" "instance" {
 }
 
 resource "google_spanner_database" "database" {
-  instance = "${google_spanner_instance.instance.name}"
+  instance = google_spanner_instance.instance.name
   name     = "%s"
 }
 
 resource "google_spanner_database_iam_binding" "foo" {
-  project     = "${google_spanner_database.database.project}"
-  database    = "${google_spanner_database.database.name}"
-  instance    = "${google_spanner_database.database.instance}"
-  role        = "%s"
-  members     = ["serviceAccount:${google_service_account.test_account.email}"]
+  project  = google_spanner_database.database.project
+  database = google_spanner_database.database.name
+  instance = google_spanner_database.database.instance
+  role     = "%s"
+  members  = ["serviceAccount:${google_service_account.test_account.email}"]
 }
 `, account, instance, instance, database, roleId)
 }
@@ -147,12 +147,12 @@ func testAccSpannerDatabaseIamBinding_update(account, instance, database, roleId
 	return fmt.Sprintf(`
 resource "google_service_account" "test_account" {
   account_id   = "%s"
-  display_name = "Spanner Iam Testing Account"
+  display_name = "Spanner Database Iam Testing Account"
 }
 
 resource "google_service_account" "test_account_2" {
   account_id   = "%s-2"
-  display_name = "Spanner Iam Testing Account"
+  display_name = "Spanner Database Iam Testing Account"
 }
 
 resource "google_spanner_instance" "instance" {
@@ -163,18 +163,18 @@ resource "google_spanner_instance" "instance" {
 }
 
 resource "google_spanner_database" "database" {
-  instance = "${google_spanner_instance.instance.name}"
+  instance = google_spanner_instance.instance.name
   name     = "%s"
 }
 
 resource "google_spanner_database_iam_binding" "foo" {
-  project      = "${google_spanner_database.database.project}"
-  database     = "${google_spanner_database.database.name}"
-  instance     = "${google_spanner_database.database.instance}"
-  role         = "%s"
-  members      = [
+  project  = google_spanner_database.database.project
+  database = google_spanner_database.database.name
+  instance = google_spanner_database.database.instance
+  role     = "%s"
+  members = [
     "serviceAccount:${google_service_account.test_account.email}",
-    "serviceAccount:${google_service_account.test_account_2.email}"
+    "serviceAccount:${google_service_account.test_account_2.email}",
   ]
 }
 `, account, account, instance, instance, database, roleId)
@@ -184,7 +184,7 @@ func testAccSpannerDatabaseIamMember_basic(account, instance, database, roleId s
 	return fmt.Sprintf(`
 resource "google_service_account" "test_account" {
   account_id   = "%s"
-  display_name = "Spanner Iam Testing Account"
+  display_name = "Spanner Database Iam Testing Account"
 }
 
 resource "google_spanner_instance" "instance" {
@@ -195,16 +195,16 @@ resource "google_spanner_instance" "instance" {
 }
 
 resource "google_spanner_database" "database" {
-  instance = "${google_spanner_instance.instance.name}"
+  instance = google_spanner_instance.instance.name
   name     = "%s"
 }
 
 resource "google_spanner_database_iam_member" "foo" {
-  project     = "${google_spanner_database.database.project}"
-  database    = "${google_spanner_database.database.name}"
-  instance    = "${google_spanner_database.database.instance}"
-  role        = "%s"
-  member      = "serviceAccount:${google_service_account.test_account.email}"
+  project  = google_spanner_database.database.project
+  database = google_spanner_database.database.name
+  instance = google_spanner_database.database.instance
+  role     = "%s"
+  member   = "serviceAccount:${google_service_account.test_account.email}"
 }
 `, account, instance, instance, database, roleId)
 }
@@ -213,7 +213,7 @@ func testAccSpannerDatabaseIamPolicy_basic(account, instance, database, roleId s
 	return fmt.Sprintf(`
 resource "google_service_account" "test_account" {
   account_id   = "%s"
-  display_name = "Spanner Iam Testing Account"
+  display_name = "Spanner Database Iam Testing Account"
 }
 
 resource "google_spanner_instance" "instance" {
@@ -224,23 +224,23 @@ resource "google_spanner_instance" "instance" {
 }
 
 resource "google_spanner_database" "database" {
-  instance = "${google_spanner_instance.instance.name}"
+  instance = google_spanner_instance.instance.name
   name     = "%s"
 }
 
 data "google_iam_policy" "foo" {
-	binding {
-		role = "%s"
+  binding {
+    role = "%s"
 
-		members = ["serviceAccount:${google_service_account.test_account.email}"]
-	}
+    members = ["serviceAccount:${google_service_account.test_account.email}"]
+  }
 }
 
 resource "google_spanner_database_iam_policy" "foo" {
-  project     = "${google_spanner_database.database.project}"
-  database    = "${google_spanner_database.database.name}"
-  instance    = "${google_spanner_database.database.instance}"
-  policy_data = "${data.google_iam_policy.foo.policy_data}"
+  project     = google_spanner_database.database.project
+  database    = google_spanner_database.database.name
+  instance    = google_spanner_database.database.instance
+  policy_data = data.google_iam_policy.foo.policy_data
 }
 `, account, instance, instance, database, roleId)
 }

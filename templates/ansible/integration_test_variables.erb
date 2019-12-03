@@ -15,7 +15,7 @@
 <% autogen_exception -%>
 ---
 <%=
-  to_yaml({
+  ansible_style_yaml({
     'resource_name' => '{{ resource_prefix }}'
   }.merge(example.vars))
 -%>

@@ -1,4 +1,5 @@
 ---
+subcategory: "Cloud Platform"
 layout: "google"
 page_title: "Google: google_organization"
 sidebar_current: "docs-google-datasource-organization"
@@ -17,7 +18,7 @@ data "google_organization" "org" {
 
 resource "google_folder" "sales" {
   display_name = "Sales"
-  parent       = "${data.google_organization.org.name}"
+  parent       = data.google_organization.org.name
 }
 ```
 

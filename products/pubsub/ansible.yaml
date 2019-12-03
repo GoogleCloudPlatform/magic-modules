@@ -18,30 +18,18 @@ datasources: !ruby/object:Overrides::ResourceOverrides
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
         exists: |
-          "'test-topic1' in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'test-topic1' in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
-          "'test-topic1' not in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'test-topic1' not in \"{{ results['resources'] | map(attribute='name') | list }}\""
   Subscription: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
         exists: |
-          "\"{{resource_name}}\" in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "\"{{resource_name}}\" in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
-          "\"{{resource_name}}\" not in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "\"{{resource_name}}\" not in \"{{ results['resources'] | map(attribute='name') | list }}\""
 overrides: !ruby/object:Overrides::ResourceOverrides
-  Topic: !ruby/object:Overrides::Ansible::ResourceOverride
-    transport: !ruby/object:Overrides::Ansible::Transport
-      encoder: encode_request
-      decoder: decode_request
-    provider_helpers:
-      - 'products/pubsub/helpers/python/provider_topic.py'
-  Subscription: !ruby/object:Overrides::Ansible::ResourceOverride
-    transport: !ruby/object:Overrides::Ansible::Transport
-      encoder: encode_request
-      decoder: decode_request
-    provider_helpers:
-      - 'products/pubsub/helpers/python/provider_subscription.py'
 files: !ruby/object:Provider::Config::Files
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

@@ -14,6 +14,10 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Job: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: 'projects/{{project}}/locations/{{region}}/jobs/{{name}}'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/scheduler_auth.erb
+      resource_definition: templates/terraform/resource_definition/scheduler_auth.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "scheduler_job_pubsub"
@@ -31,18 +35,43 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "job"
         vars:
           job_name: "test-job"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "scheduler_job_oauth"
+        primary_resource_id: "job"
+        vars:
+          job_name: "test-job"
+        test_env_vars:
+          project_name: :PROJECT_NAME
+          region: :REGION
+      - !ruby/object:Provider::Terraform::Examples
+        name: "scheduler_job_oidc"
+        primary_resource_id: "job"
+        vars:
+          job_name: "test-job"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/cloudscheduler_job_name.erb'
+        custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       httpTarget.headers: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/http_headers.erb'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateHttpHeaders()'
+      httpTarget.oauthToken: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'authHeaderDiffSuppress'
+      httpTarget.oidcToken: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'authHeaderDiffSuppress'
       appEngineHttpTarget.headers: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/http_headers.erb'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateHttpHeaders()'
+      appEngineHttpTarget.appEngineRouting: !ruby/object:Overrides::Terraform::PropertyOverride
+        # `appEngineRouting` in API response is useless, so we want to ignore that and set config
+        # values to the state. `ignore_read: true` is the option for that, but it doesn't work for
+        # nested field. We use `custom_flatten` for now.
+        # ref:
+        # - https://github.com/GoogleCloudPlatform/magic-modules/pull/2270
+        # - https://github.com/GoogleCloudPlatform/magic-modules/issues/1019
+        custom_flatten: templates/terraform/custom_flatten/cloudscheduler_job_appenginerouting.go.erb
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         ignore_read: true

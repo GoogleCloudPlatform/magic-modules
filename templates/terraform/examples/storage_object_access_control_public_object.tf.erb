@@ -1,16 +1,16 @@
 resource "google_storage_object_access_control" "<%= ctx[:primary_resource_id] %>" {
-  object = "${google_storage_bucket_object.object.output_name}"
-  bucket = "${google_storage_bucket.bucket.name}"
+  object = google_storage_bucket_object.object.output_name
+  bucket = google_storage_bucket.bucket.name
   role   = "READER"
   entity = "allUsers"
 }
 
 resource "google_storage_bucket" "bucket" {
-	name = "<%= ctx[:vars]['bucket_name'] %>"
+  name = "<%= ctx[:vars]['bucket_name'] %>"
 }
 
- resource "google_storage_bucket_object" "object" {
-	name   = "<%= ctx[:vars]['object_name'] %>"
-	bucket = "${google_storage_bucket.bucket.name}"
-	source = "../static/img/header-logo.png"
+resource "google_storage_bucket_object" "object" {
+  name   = "<%= ctx[:vars]['object_name'] %>"
+  bucket = google_storage_bucket.bucket.name
+  source = "../static/img/header-logo.png"
 }

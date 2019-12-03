@@ -24,22 +24,24 @@ ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
 
 DOCUMENTATION = '''
 ---
-<%= to_yaml({
-  'module' => "#{module_name(object)}_facts",
-  'description' => ["Gather facts for GCP #{object.name}"],
-  'short_description' => "Gather facts for GCP #{object.name}",
-  'version_added' => version_added(object, :facts).to_f,
+<%= ansible_style_yaml({
+  'module' => "#{module_name(object)}_info",
+  'description' => ["Gather info for GCP #{object.name}"],
+  'short_description' => "Gather info for GCP #{object.name}",
+  'version_added' => version_added(object, :facts),
   'author' => "Google Inc. (@googlecloudplatform)",
   'requirements' => ["python >= 2.6", "requests >= 2.18.4", "google-auth >= 1.3.0"],
   'options' => [
     ({
       object.facts.filter.name.underscore => {
-        'description' => format_description(object.facts.filter.description)
+        'description' => format_description(object.facts.filter.description),
+        'type' => python_type(object.facts.filter)
       }
     } if object.facts.has_filters),
-    uri_props.map { |p| documentation_for_property(p) }
+    uri_props.map { |p| documentation_for_property(p) },
+    auth_docs
   ].flatten.compact.reduce({}, :merge),
-  'extends_documentation_fragment' => 'gcp'
+  'notes' => auth_notes
 })-%>
 '''
 
@@ -50,7 +52,7 @@ EXAMPLES = '''
 <% end -%>
 
 RETURN = '''
-<%= to_yaml({
+<%= ansible_style_yaml({
   'resources' => {
     'description' => 'List of resources',
     'returned' => 'always',
@@ -101,13 +103,8 @@ def main():
     end
   end
 -%>
-    items = <%= method_call('fetch_list', ['module', 'collection(module)', query_param]) %>
-    if items.get(<%= quote_string(object.collection_url_response.items) -%>):
-        items = items.get(<%= quote_string(object.collection_url_response.items) -%>)
-    else:
-        items = []
     return_value = {
-        'resources': items
+        'resources': <%= method_call('fetch_list', ['module', 'collection(module)', query_param]) %>
     }
     module.exit_json(**return_value)
 
@@ -118,8 +115,7 @@ def main():
 <%= method_decl('fetch_list', ['module', 'link', ('query' if object.facts.has_filters)]) %>
 <% prod_name = object.__product.api_name -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
-    response = <%= method_call('auth.get', ['link', ("params={'#{object.facts.filter_api_param}': query}" if object.facts.has_filters)]) %>
-    return return_if_object(module, response)
+    return <%= method_call('auth.list', ['link', "return_if_object", "array_name='#{object.collection_url_key}'", ("params={'#{object.facts.filter_api_param}': query}" if object.facts.has_filters)]) %>
 
 
 <% if object.facts.has_filters && object.facts.query_options -%>

@@ -64,6 +64,7 @@
 <% unless property.state_func.nil? -%>
 	StateFunc: <%= property.state_func %>,
 <% end -%>
+	Description: `<%= property.description.strip.gsub("`", "'") -%>`,
 <% if property.is_a?(Api::Type::NestedObject) -%>
   MaxItems: 1,
   Elem: &schema.Resource{
@@ -94,7 +95,7 @@
     <% end -%>
   <% elsif property.item_type.is_a?(String) # Basic type like Api::Type::String -%>
       Elem: &schema.Schema{
-        Type: <%= tf_types[property.item_type] -%>,
+        Type: <%= tf_types[property.item_type_class] -%>,
       },
   <% else # array of basic types -%>
       Elem: &schema.Schema{
@@ -142,7 +143,13 @@
 <% end -%>
 <% unless property.conflicting().empty? -%>
 <% conflicting_props = property.conflicting().map(&:name).map(&:underscore) -%>
-    ConflictsWith: <%= go_literal(conflicting_props) -%>,
+    ConflictsWith: <%= go_literal(conflicting_props.reject {|sp| property_for_schema_path(sp, object).nil? }) -%>,
+<% end -%>
+<% unless property.at_least_one_of_list().empty? -%>
+    AtLeastOneOf: <%= go_literal(property.at_least_one_of_list.reject {|sp| property_for_schema_path(sp, object).nil? }) -%>,
+<% end -%>
+<% unless property.exactly_one_of_list().empty? -%>
+    ExactlyOneOf: <%= go_literal(property.exactly_one_of_list.reject {|sp| property_for_schema_path(sp, object).nil? }) -%>,
 <% end -%>
 },
 <% else -%>

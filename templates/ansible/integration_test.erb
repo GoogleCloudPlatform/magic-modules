@@ -8,7 +8,7 @@
 <% end # if example.dependencies -%>
 <%= lines(example.task.build_test('absent', object, false)) -%>
 #----------------------------------------------------------
-<% resource_name = object.name.uncombine.downcase -%>
+<% resource_name = object.name.titleize.downcase -%>
 <%= lines(example.task.build_test('present', object, false)) -%>
   register: result
 <% if object.readonly -%>
@@ -24,9 +24,6 @@
 <% else # if object.readonly -%>
       - result.changed == true
 <% end # if object.readonly -%>
-<% if object.kind? -%>
-      - "result.kind == <%= quote_string(object.kind) -%>"
-<% end # if object.kind -%>
 <% unless example.verifier.nil? -%>
 <%= lines(example.verifier.build_task('present', object)) -%>
 <% end -%>
@@ -38,9 +35,6 @@
   assert:
     that:
       - result.changed == false
-<% if object.kind? -%>
-      - "result.kind == <%= quote_string(object.kind) -%>"
-<% end # if object.kind -%>
 #----------------------------------------------------------
 <%= lines(example.task.build_test('absent', object, false)) -%>
   register: result
@@ -48,9 +42,6 @@
   assert:
     that:
       - result.changed == true
-<% if object.kind? -%>
-      - result.has_key('kind') == False
-<% end # if object.kind? -%>
 <% unless example.verifier.nil? -%>
 <%= lines(example.verifier.build_task('absent', object)) -%>
 <% end -%>
@@ -61,9 +52,6 @@
   assert:
     that:
       - result.changed == false
-<% if object.kind? -%>
-      - result.has_key('kind') == False
-<% end # if object.kind? -%>
 <% end # object.readonly -%>
 <% if example.dependencies and !example.dependencies.empty? -%>
 #---------------------------------------------------------

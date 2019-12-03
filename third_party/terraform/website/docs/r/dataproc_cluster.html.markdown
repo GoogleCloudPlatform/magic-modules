@@ -1,4 +1,5 @@
 ---
+subcategory: "Cloud Dataproc"
 layout: "google"
 page_title: "Google: google_dataproc_cluster"
 sidebar_current: "docs-google-dataproc-cluster"
@@ -13,15 +14,15 @@ Manages a Cloud Dataproc cluster resource within GCP. For more information see
 
 
 !> **Warning:** Due to limitations of the API, all arguments except
-`labels`,`cluster_config.worker_config.num_instances` and `cluster_config.preemptible_worker_config.num_instances` are non-updateable. Changing others will cause recreation of the
+`labels`,`cluster_config.worker_config.num_instances` and `cluster_config.preemptible_worker_config.num_instances` are non-updatable. Changing others will cause recreation of the
 whole cluster!
 
 ## Example Usage - Basic
 
 ```hcl
 resource "google_dataproc_cluster" "simplecluster" {
-    name       = "simplecluster"
-    region     = "us-central1"
+  name   = "simplecluster"
+  region = "us-central1"
 }
 ```
 
@@ -29,57 +30,62 @@ resource "google_dataproc_cluster" "simplecluster" {
 
 ```hcl
 resource "google_dataproc_cluster" "mycluster" {
-    name       = "mycluster"
-    region     = "us-central1"
-    labels = {
-        foo = "bar"
+  name     = "mycluster"
+  region   = "us-central1"
+  labels = {
+    foo = "bar"
+  }
+
+  cluster_config {
+    staging_bucket = "dataproc-staging-bucket"
+
+    master_config {
+      num_instances = 1
+      machine_type  = "n1-standard-1"
+      disk_config {
+        boot_disk_type    = "pd-ssd"
+        boot_disk_size_gb = 15
+      }
     }
 
-    cluster_config {
-        staging_bucket        = "dataproc-staging-bucket"
-
-        master_config {
-            num_instances     = 1
-            machine_type      = "n1-standard-1"
-            disk_config {
-                boot_disk_type = "pd-ssd"
-                boot_disk_size_gb = 15
-            }
-        }
-
-        worker_config {
-            num_instances     = 2
-            machine_type      = "n1-standard-1"
-            disk_config {
-                boot_disk_size_gb = 15
-                num_local_ssds    = 1
-            }
-        }
-
-        preemptible_worker_config {
-            num_instances     = 0
-        }
-
-        # Override or set some custom properties
-        software_config {
-            image_version       = "1.3.7-deb9"
-            override_properties = {
-                "dataproc:dataproc.allow.zero.workers" = "true"
-            }
-        }
-
-        gce_cluster_config {
-            #network = "${google_compute_network.dataproc_network.name}"
-            tags    = ["foo", "bar"]
-        }
-
-        # You can define multiple initialization_action blocks
-        initialization_action {
-            script      = "gs://dataproc-initialization-actions/stackdriver/stackdriver.sh"
-            timeout_sec = 500
-        }
-
+    worker_config {
+      num_instances    = 2
+      machine_type     = "n1-standard-1"
+      min_cpu_platform = "Intel Skylake"
+      disk_config {
+        boot_disk_size_gb = 15
+        num_local_ssds    = 1
+      }
     }
+
+    preemptible_worker_config {
+      num_instances = 0
+    }
+
+    # Override or set some custom properties
+    software_config {
+      image_version = "1.3.7-deb9"
+      override_properties = {
+        "dataproc:dataproc.allow.zero.workers" = "true"
+      }
+    }
+
+    gce_cluster_config {
+      tags = ["foo", "bar"]
+      service_account_scopes = [
+        "https://www.googleapis.com/auth/monitoring",
+        "useraccounts-ro",
+        "storage-rw",
+        "logging-write",
+      ]
+    }
+
+    # You can define multiple initialization_action blocks
+    initialization_action {
+      script      = "gs://dataproc-initialization-actions/stackdriver/stackdriver.sh"
+      timeout_sec = 500
+    }
+  }
 }
 ```
 
@@ -87,21 +93,21 @@ resource "google_dataproc_cluster" "mycluster" {
 
 ```hcl
 resource "google_dataproc_cluster" "accelerated_cluster" {
-    name   = "my-cluster-with-gpu"
-    region = "us-central1"
+  name   = "my-cluster-with-gpu"
+  region = "us-central1"
 
-    cluster_config {
-        gce_cluster_config {
-            zone = "us-central1-a"
-        }
-
-        master_config {
-            accelerators {
-                accelerator_type  = "nvidia-tesla-k80"
-                accelerator_count = "1"
-            }
-        }
+  cluster_config {
+    gce_cluster_config {
+      zone = "us-central1-a"
     }
+
+    master_config {
+      accelerators {
+        accelerator_type  = "nvidia-tesla-k80"
+        accelerator_count = "1"
+      }
+    }
+  }
 }
 ```
 
@@ -166,6 +172,9 @@ The `cluster_config` block supports:
 * `software_config` (Optional) The config settings for software inside the cluster.
    Structure defined below.
 
+* `autoscaling_config` (Optional)  The autoscaling policy config associated with the cluster.
+   Structure defined below.
+
 * `initialization_action` (Optional) Commands to execute on each node after config is completed.
    You can specify multiple versions of these. Structure defined below.
 
@@ -176,18 +185,17 @@ The `cluster_config` block supports:
 The `cluster_config.gce_cluster_config` block supports:
 
 ```hcl
-    cluster_config {
-        gce_cluster_config {
+  cluster_config {
+    gce_cluster_config {
+      zone = "us-central1-a"
 
-            zone = "us-central1-a"
+      # One of the below to hook into a custom network / subnetwork
+      network    = google_compute_network.dataproc_network.name
+      subnetwork = google_compute_network.dataproc_subnetwork.name
 
-            # One of the below to hook into a custom network / subnetwork
-            network    = "${google_compute_network.dataproc_network.name}"
-            subnetwork = "${google_compute_network.dataproc_subnetwork.name}"
-
-            tags    = ["foo", "bar"]
-        }
+      tags = ["foo", "bar"]
     }
+  }
 ```
 
 * `zone` - (Optional, Computed) The GCP zone where your data is stored and used (i.e. where
@@ -208,10 +216,11 @@ The `cluster_config.gce_cluster_config` block supports:
 * `service_account` - (Optional) The service account to be used by the Node VMs.
 	If not specified, the "default" service account is used.
 
-* `service_account_scopes` - (Optional, Computed) The set of Google API scopes to be made available
-	on all of the node VMs under the `service_account` specified. These can be
-	either FQDNs, or scope aliases. The following scopes are necessary to ensure
-	the correct functioning of the cluster:
+* `service_account_scopes` - (Optional, Computed) The set of Google API scopes
+    to be made available on all of the node VMs under the `service_account`
+    specified. These can be	either FQDNs, or scope aliases. The following scopes
+    must be set if any other scopes are set. They're necessary to ensure the
+    correct functioning ofthe cluster, and are set automatically by the API:
 
   * `useraccounts-ro` (`https://www.googleapis.com/auth/cloud.useraccounts.readonly`)
   * `storage-rw`      (`https://www.googleapis.com/auth/devstorage.read_write`)
@@ -234,17 +243,19 @@ The `cluster_config.gce_cluster_config` block supports:
 The `cluster_config.master_config` block supports:
 
 ```hcl
-    cluster_config {
-        master_config {
-            num_instances     = 1
-            machine_type      = "n1-standard-1"
-            disk_config {
-                boot_disk_type    = "pd-ssd"
-                boot_disk_size_gb = 15
-                num_local_ssds    = 1
-            }
-        }
+cluster_config {
+  master_config {
+    num_instances    = 1
+    machine_type     = "n1-standard-1"
+    min_cpu_platform = "Intel Skylake"
+
+    disk_config {
+      boot_disk_type    = "pd-ssd"
+      boot_disk_size_gb = 15
+      num_local_ssds    = 1
     }
+  }
+}
 ```
 
 * `num_instances`- (Optional, Computed) Specifies the number of master nodes to create.
@@ -253,6 +264,11 @@ The `cluster_config.master_config` block supports:
 * `machine_type` - (Optional, Computed) The name of a Google Compute Engine machine type
    to create for the master. If not specified, GCP will default to a predetermined
    computed value (currently `n1-standard-4`).
+
+* `min_cpu_platform` - (Optional, Computed) The name of a minimum generation of CPU family
+   for the master. If not specified, GCP will default to a predetermined computed value
+   for each zone. See [the guide](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform)
+   for details about which CPU families are available (and defaulted) for each zone.
 
 * `image_uri` (Optional) The URI for the image to use for this worker.  See [the guide](https://cloud.google.com/dataproc/docs/guides/dataproc-images)
     for more information.
@@ -286,17 +302,19 @@ if you are trying to use accelerators in a given zone.
 The `cluster_config.worker_config` block supports:
 
 ```hcl
-    cluster_config {
-        worker_config {
-            num_instances     = 3
-            machine_type      = "n1-standard-1"
-            disk_config {
-                boot_disk_type    = "pd-standard"
-                boot_disk_size_gb = 15
-                num_local_ssds    = 1
-            }
-        }
+cluster_config {
+  worker_config {
+    num_instances    = 3
+    machine_type     = "n1-standard-1"
+    min_cpu_platform = "Intel Skylake"
+
+    disk_config {
+      boot_disk_type    = "pd-standard"
+      boot_disk_size_gb = 15
+      num_local_ssds    = 1
     }
+  }
+}
 ```
 
 * `num_instances`- (Optional, Computed) Specifies the number of worker nodes to create.
@@ -310,6 +328,11 @@ The `cluster_config.worker_config` block supports:
 * `machine_type` - (Optional, Computed) The name of a Google Compute Engine machine type
    to create for the worker nodes. If not specified, GCP will default to a predetermined
    computed value (currently `n1-standard-4`).
+
+* `min_cpu_platform` - (Optional, Computed) The name of a minimum generation of CPU family
+   for the master. If not specified, GCP will default to a predetermined computed value
+   for each zone. See [the guide](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform)
+   for details about which CPU families are available (and defaulted) for each zone.
 
 * `disk_config` (Optional) Disk Config
 
@@ -342,16 +365,17 @@ if you are trying to use accelerators in a given zone.
 The `cluster_config.preemptible_worker_config` block supports:
 
 ```hcl
-    cluster_config {
-        preemptible_worker_config {
-            num_instances     = 1
-            disk_config {
-                boot_disk_type    = "pd-standard"
-                boot_disk_size_gb = 15
-                num_local_ssds    = 1
-            }
-        }
+cluster_config {
+  preemptible_worker_config {
+    num_instances = 1
+
+    disk_config {
+      boot_disk_type    = "pd-standard"
+      boot_disk_size_gb = 15
+      num_local_ssds    = 1
     }
+  }
+}
 ```
 
 Note: Unlike `worker_config`, you cannot set the `machine_type` value directly. This
@@ -378,15 +402,16 @@ will be set for you based on whatever was set for the `worker_config.machine_typ
 The `cluster_config.software_config` block supports:
 
 ```hcl
-    cluster_config {
-        # Override or set some custom properties
-        software_config {
-            image_version       = "1.3.7-deb9"
-            override_properties = {
-                "dataproc:dataproc.allow.zero.workers" = "true"
-            }
-        }
+cluster_config {
+  # Override or set some custom properties
+  software_config {
+    image_version = "1.3.7-deb9"
+
+    override_properties = {
+      "dataproc:dataproc.allow.zero.workers" = "true"
     }
+  }
+}
 ```
 
 * `image_version` - (Optional, Computed) The Cloud Dataproc image version to use
@@ -402,16 +427,37 @@ The `cluster_config.software_config` block supports:
 
 - - -
 
+The `cluster_config.autoscaling_config` block supports:
+
+```hcl
+cluster_config {
+  # Override or set some custom properties
+  autoscaling_config {
+    policy_uri = "projects/projectId/locations/region/autoscalingPolicies/policyId"
+  }
+}
+```
+
+* `policy_uri` - (Required) The autoscaling policy used by the cluster.
+
+Only resource names including projectid and location (region) are valid. Examples:
+
+`https://www.googleapis.com/compute/v1/projects/[projectId]/locations/[dataproc_region]/autoscalingPolicies/[policy_id]`
+`projects/[projectId]/locations/[dataproc_region]/autoscalingPolicies/[policy_id]`
+Note that the policy must be in the same project and Cloud Dataproc region.
+
+- - -
+
 The `initialization_action` block (Optional) can be specified multiple times and supports:
 
 ```hcl
-    cluster_config {
-        # You can define multiple initialization_action blocks
-        initialization_action {
-            script      = "gs://dataproc-initialization-actions/stackdriver/stackdriver.sh"
-            timeout_sec = 500
-        }
-    }
+cluster_config {
+  # You can define multiple initialization_action blocks
+  initialization_action {
+    script      = "gs://dataproc-initialization-actions/stackdriver/stackdriver.sh"
+    timeout_sec = 500
+  }
+}
 ```
 
 * `script`- (Required) The script to be executed during initialization of the cluster.
@@ -426,11 +472,10 @@ The `initialization_action` block (Optional) can be specified multiple times and
 The `encryption_config` block supports:
 
 ```hcl
-    cluster_config {
-        encryption_config {
-            kms_key_name = "projects/projectId/locations/region/keyRings/keyRingName/cryptoKeys/keyName"
-        }
-    }
+cluster_config {
+  encryption_config {
+    kms_key_name = "projects/projectId/locations/region/keyRings/keyRingName/cryptoKeys/keyName"
+  }
 }
 ```
 
@@ -458,11 +503,12 @@ exported:
 * `cluster_config.0.software_config.0.properties` - A list of the properties used to set the daemon config files.
    This will include any values supplied by the user via `cluster_config.software_config.override_properties`
 
+
 ## Timeouts
 
-`google_dataproc_cluster` provides the following
+This resource provides the following
 [Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
 
-- `create` - (Default `10 minutes`) Used for creating clusters.
-- `update` - (Default `5 minutes`) Used for updating clusters
-- `delete` - (Default `5 minutes`) Used for destroying clusters.
+- `create` - Default is 20 minutes.
+- `update` - Default is 20 minutes.
+- `delete` - Default is 20 minutes.

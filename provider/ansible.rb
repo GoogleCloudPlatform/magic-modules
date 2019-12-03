@@ -48,25 +48,21 @@ module Provider
       include Provider::Ansible::Request
       include Provider::Ansible::VersionAdded
 
-      # FileTemplate with Ansible specific fields
-      class AnsibleFileTemplate < Provider::FileTemplate
+      # ProductFileTemplate with Ansible specific fields
+      class AnsibleProductFileTemplate < Provider::ProductFileTemplate
         # The Ansible example object.
         attr_accessor :example
       end
 
-      def api_version_setup(version_name)
-        version = @api.version_obj_or_default(version_name)
-        @api.set_properties_based_on_version(version)
-
-        # Generate version_added_file
+      def initialize(config, api, version_name, start_time)
+        super(config, api, version_name, start_time)
         @version_added = build_version_added
-        version
       end
 
       # Returns a string representation of the corresponding Python type
       # for a MM type.
       def python_type(prop)
-        prop = Module.const_get(prop).new('') unless prop.is_a?(Api::Type)
+        prop = Module.const_get(prop).new unless prop.is_a?(Api::Type)
         # All ResourceRefs are dicts with properties.
         if prop.is_a? Api::Type::ResourceRef
           return 'str' if prop.resource_ref.readonly
@@ -83,7 +79,12 @@ module Provider
       end
 
       def build_url(url)
-        "\"#{url.gsub('{{', '{').gsub('}}', '}')}\""
+        # Return a quoted string, with single pairs of {} brackets and all
+        # requested strings are underscored (as they come from the Ansible configs)
+
+        # The % character indicates that the parameter should be url-encoded. `requests`
+        # does this by default, so the % character should be removed.
+        "\"#{url.gsub(/{{%?\w+}}/) { |param| "{#{param[2..-3].underscore.tr('%', '')}}" }}\""
       end
 
       # Returns the name of the module according to Ansible naming standards.
@@ -94,8 +95,8 @@ module Provider
       end
 
       def build_object_data(object, output_folder, version)
-        # Method is overriden to add Ansible example objects to the data object.
-        data = AnsibleFileTemplate.file_for_resource(
+        # Method is overridden to add Ansible example objects to the data object.
+        data = AnsibleProductFileTemplate.file_for_resource(
           output_folder,
           object,
           version,
@@ -157,7 +158,7 @@ module Provider
 
       def rrefs_in_link(link, object)
         props_in_link = link.scan(/{([a-z_]*)}/).flatten
-        (object.parameters || []).select do |p|
+        (object.all_user_properties || []).select do |p|
           props_in_link.include?(p.name.underscore) && \
             p.is_a?(Api::Type::ResourceRef) && !p.resource_ref.readonly
         end.any?
@@ -167,7 +168,7 @@ module Provider
         props_in_link = link.scan(/{([a-z_]*)}/).flatten
         props = props_in_link.map do |p|
           # Select a resourceref if it exists.
-          rref = (object.parameters || []).select do |prop|
+          rref = (object.all_user_properties || []).select do |prop|
             prop.name.underscore == p && \
               prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly
           end
@@ -227,6 +228,7 @@ module Provider
         raise "#{cfg_file}(#{ex.class}) is not a Provider::Ansible::Example" \
           unless ex.is_a?(Provider::Ansible::Example)
 
+        ex.provider = self
         ex.validate
         ex
       end
@@ -235,7 +237,7 @@ module Provider
         target_folder = data.output_folder
         name = module_name(data.object)
         path = File.join(target_folder,
-                         "lib/ansible/modules/cloud/google/#{name}.py")
+                         "plugins/modules/#{name}.py")
         data.generate(
           data.object.template || 'templates/ansible/resource.erb',
           path,
@@ -248,27 +250,35 @@ module Provider
         path = ["products/#{data.product.api_name}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 
-        return unless data.object.has_tests
-        # Unlike other providers, all resources will not be built at once or
-        # in close timing to each other (due to external PRs).
-        # This means that examples might not be built out for every resource
-        # in a GCP product.
-        return unless File.file?(path)
+        return if data.object.tests.tests.empty?
 
         target_folder = data.output_folder
 
         name = module_name(data.object)
+
+        # Generate the main file with a list of tests.
         path = File.join(target_folder,
-                         "test/integration/targets/#{name}/tasks/main.yml")
+                         "tests/integration/targets/#{name}/tasks/main.yml")
         data.generate(
-          'templates/ansible/integration_test.erb',
+          'templates/ansible/tests_main.erb',
           path,
           self
         )
 
+        # Generate each of the tests individually
+        data.object.tests.tests.each do |t|
+          path = File.join(target_folder,
+                           "tests/integration/targets/#{name}/tasks/#{t.name}.yml")
+          data.generate(
+            t.path,
+            path,
+            self
+          )
+        end
+
         # Generate 'defaults' file that contains variables.
         path = File.join(target_folder,
-                         "test/integration/targets/#{name}/defaults/main.yml")
+                         "tests/integration/targets/#{name}/defaults/main.yml")
         data.generate(
           'templates/ansible/integration_test_variables.erb',
           path,
@@ -278,14 +288,14 @@ module Provider
 
       def compile_datasource(data)
         target_folder = data.output_folder
-        name = "#{module_name(data.object)}_facts"
+        name = module_name(data.object)
         data.generate('templates/ansible/facts.erb',
                       File.join(target_folder,
-                                "lib/ansible/modules/cloud/google/#{name}.py"),
+                                "plugins/modules/#{name}_info.py"),
                       self)
       end
 
-      def generate_objects(output_folder, types, version_name)
+      def generate_objects(output_folder, types)
         # We have two sets of overrides - one for regular modules, one for
         # datasources.
         # When building regular modules, we will potentially need some
@@ -318,8 +328,41 @@ module Provider
         parts = url.scan(/\{\{(.*?)\}\}/).flatten
         parts << 'name'
         parts.delete('project')
-        parts.map { |pt| object.all_user_properties.select { |p| p.name == pt }[0] }
+        parts.map { |pt| object.all_user_properties.select { |p| p.out_name == pt }[0] }
       end.flatten
+    end
+
+    # Convert a URL to a regex.
+    def regex_url(url)
+      url.gsub(/{{[a-z]*}}/, '.*')
+    end
+
+    # Generates files on a per-resource basis.
+    # All paths are allowed a '%s' where the module name
+    # will be added.
+    def generate_resource_files(data)
+      return unless @config&.files&.resource
+
+      files = @config.files.resource
+                     .map { |k, v| [k % module_name(data.object), v] }
+                     .to_h
+
+      file_template = ProductFileTemplate.new(
+        data.output_folder,
+        data.name,
+        @api,
+        data.version,
+        build_env
+      )
+      compile_file_list(data.output_folder, files, file_template)
+    end
+
+    def copy_common_files(output_folder, provider_name = 'ansible')
+      super(output_folder, provider_name)
+    end
+
+    def module_utils_import_path
+      'ansible_collections.google.cloud.plugins.module_utils.gcp_utils'
     end
   end
 end

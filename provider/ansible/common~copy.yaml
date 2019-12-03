@@ -11,11 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'lib/ansible/module_utils/gcp_utils.py': 'provider/ansible/gcp_utils.py'
-'lib/ansible/module_utils/gcp_utils.py': 'provider/ansible/gcp_utils.py'
-'lib/ansible/plugins/doc_fragments/gcp.py':
-  'provider/ansible/gcp_doc_frag.py'
-'test/integration/cloud-config-gcp.ini.template':
-  'provider/ansible/test_template.yaml'
-'test/runner/lib/cloud/gcp.py': 'provider/ansible/gcp_integration_runner.py'
-'test/units/module_utils/gcp/test_gcp_utils.py': 'provider/ansible/test_gcp_utils.py'
+'plugins/module_utils/gcp_utils.py': 'provider/ansible/gcp_utils.py'

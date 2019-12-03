@@ -1,4 +1,5 @@
 ---
+subcategory: "Cloud Storage"
 layout: "google"
 page_title: "Google: google_storage_bucket"
 sidebar_current: "docs-google-storage-bucket-x"
@@ -55,7 +56,7 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
-* `storage_class` - (Optional) The [Storage Class](https://cloud.google.com/storage/docs/storage-classes) of the new bucket. Supported values include: `MULTI_REGIONAL`, `REGIONAL`, `NEARLINE`, `COLDLINE`.
+* `storage_class` - (Optional, Default: 'STANDARD') The [Storage Class](https://cloud.google.com/storage/docs/storage-classes) of the new bucket. Supported values include: `STANDARD`, `MULTI_REGIONAL`, `REGIONAL`, `NEARLINE`, `COLDLINE`.
 
 * `lifecycle_rule` - (Optional) The bucket's [Lifecycle Rules](https://cloud.google.com/storage/docs/lifecycle#configuration) configuration. Multiple blocks of this type are permitted. Structure is documented below.
 
@@ -65,6 +66,8 @@ The following arguments are supported:
 
 * `cors` - (Optional) The bucket's [Cross-Origin Resource Sharing (CORS)](https://www.w3.org/TR/cors/) configuration. Multiple blocks of this type are permitted. Structure is documented below.
 
+* `retention_policy` - (Optional) Configuration of the bucket's data retention policy for how long objects in the bucket should be retained. Structure is documented below.
+
 * `labels` - (Optional) A set of key/value label pairs to assign to the bucket.
 
 * `logging` - (Optional) The bucket's [Access & Storage Logs](https://cloud.google.com/storage/docs/access-logs) configuration.
@@ -72,6 +75,8 @@ The following arguments are supported:
 * `encryption` - (Optional) The bucket's encryption configuration.
 
 * `requester_pays` - (Optional, Default: false) Enables [Requester Pays](https://cloud.google.com/storage/docs/requester-pays) on a storage bucket.
+
+* `bucket_policy_only` - (Optional, Default: false) Enables [Bucket Policy Only](https://cloud.google.com/storage/docs/bucket-policy-only) access to a bucket.
 
 The `lifecycle_rule` block supports:
 
@@ -91,9 +96,7 @@ The `condition` block supports the following elements, and requires at least one
 
 * `created_before` - (Optional) Creation date of an object in RFC 3339 (e.g. `2017-06-13`) to satisfy this condition.
 
-* `with_state` - (Optional) Match to live and/or archived objects. Unversioned buckets have only live objects. Supported values include: `"LIVE"`, `"ARCHIVED"`, `"ANY"`. Unset or empty strings will be treated as `ARCHIVED` to maintain backwards compatibility with `is_live`.
-
-* `is_live` - (Optional, Deprecated) Defaults to `false` to match archived objects. If `true`, this condition matches live objects. Unversioned buckets have only live objects.
+* `with_state` - (Optional) Match to live and/or archived objects. Unversioned buckets have only live objects. Supported values include: `"LIVE"`, `"ARCHIVED"`, `"ANY"`.
 
 * `matches_storage_class` - (Optional) [Storage Class](https://cloud.google.com/storage/docs/storage-classes) of objects to satisfy this condition. Supported values include: `MULTI_REGIONAL`, `REGIONAL`, `NEARLINE`, `COLDLINE`, `STANDARD`, `DURABLE_REDUCED_AVAILABILITY`.
 
@@ -101,7 +104,7 @@ The `condition` block supports the following elements, and requires at least one
 
 The `versioning` block supports:
 
-* `enabled` - (Optional) While set to `true`, versioning is fully enabled for this bucket.
+* `enabled` - (Required) While set to `true`, versioning is fully enabled for this bucket.
 
 The `website` block supports:
 
@@ -120,6 +123,12 @@ The `cors` block supports:
 * `response_header` - (Optional) The list of HTTP headers other than the [simple response headers](https://www.w3.org/TR/cors/#simple-response-header) to give permission for the user-agent to share across domains.
 
 * `max_age_seconds` - (Optional) The value, in seconds, to return in the [Access-Control-Max-Age header](https://www.w3.org/TR/cors/#access-control-max-age-response-header) used in preflight responses.
+
+The `retention_policy` block supports:
+
+* `is_locked` - (Optional) If set to `true`, the bucket will be [locked](https://cloud.google.com/storage/docs/using-bucket-lock#lock-bucket) and permanently restrict edits to the bucket's retention policy.  Caution: Locking a bucket is an irreversible action.
+
+* `retention_period` - (Optional) The period of time, in seconds, that objects in the bucket must be retained and cannot be deleted, overwritten, or archived. The value must be less than 3,155,760,000 seconds.
 
 The `logging` block supports:
 
@@ -156,4 +165,9 @@ e.g.
 $ terraform import google_storage_bucket.image-store image-store-bucket
 $ terraform import google_storage_bucket.image-store tf-test-project/image-store-bucket
 ```
+
+~> **Note:** Terraform will import this resource with `force_destroy` set to
+`false` in state. If you've set it to `true` in config, run `terraform apply` to
+update the value set in state. If you delete this resource before updating the
+value, objects in the bucket will not be destroyed.
 

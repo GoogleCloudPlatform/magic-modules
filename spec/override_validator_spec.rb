@@ -29,7 +29,7 @@ describe Overrides::Validator do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         runner = Overrides::Validator.new(api, overrides)
@@ -49,7 +49,7 @@ describe Overrides::Validator do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         runner = Overrides::Validator.new(api, overrides)
@@ -70,7 +70,7 @@ describe Overrides::Validator do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         runner = Overrides::Validator.new(api, overrides)
@@ -91,7 +91,7 @@ describe Overrides::Validator do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         runner = Overrides::Validator.new(api, overrides)

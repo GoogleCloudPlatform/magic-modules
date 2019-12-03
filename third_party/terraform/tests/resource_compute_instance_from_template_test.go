@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	compute "google.golang.org/api/compute/v1"
 )
 
@@ -32,6 +32,7 @@ func TestAccComputeInstanceFromTemplate_basic(t *testing.T) {
 					// Check that fields were set based on the template
 					resource.TestCheckResourceAttr(resourceName, "machine_type", "n1-standard-1"),
 					resource.TestCheckResourceAttr(resourceName, "attached_disk.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "scheduling.0.automatic_restart", "false"),
 				),
 			},
 		},
@@ -168,6 +169,29 @@ func TestAccComputeInstanceFromTemplate_012_removableFields(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstanceFromTemplate_overrideMetadataDotStartupScript(t *testing.T) {
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("terraform-test-%s", acctest.RandString(10))
+	templateName := fmt.Sprintf("terraform-test-%s", acctest.RandString(10))
+	resourceName := "google_compute_instance_from_template.inst"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeInstanceFromTemplateDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromTemplate_overrideMetadataDotStartupScript(instanceName, templateName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(resourceName, &instance),
+					resource.TestCheckResourceAttr(resourceName, "metadata.startup-script", ""),
+				),
+			},
+		},
+	})
+
+}
+
 func testAccCheckComputeInstanceFromTemplateDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
@@ -189,57 +213,71 @@ func testAccCheckComputeInstanceFromTemplateDestroy(s *terraform.State) error {
 func testAccComputeInstanceFromTemplate_basic(instance, template string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "debian-9"
-	project = "debian-cloud"
+  family  = "debian-9"
+  project = "debian-cloud"
 }
 
 resource "google_compute_disk" "foobar" {
-	name = "%s"
-	image = "${data.google_compute_image.my_image.self_link}"
-	size = 10
-	type = "pd-ssd"
-	zone = "us-central1-a"
+  name  = "%s"
+  image = data.google_compute_image.my_image.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
 }
 
 resource "google_compute_instance_template" "foobar" {
-	name = "%s"
-	machine_type = "n1-standard-1"
+  name         = "%s"
+  machine_type = "n1-standard-1"
 
-	disk {
-		source_image = "${data.google_compute_image.my_image.self_link}"
-		auto_delete = true
-		disk_size_gb = 100
-		boot = true
-	}
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    disk_size_gb = 100
+    boot         = true
+  }
 
-	disk {
-		source = "${google_compute_disk.foobar.name}"
-		auto_delete = false
-		boot = false
-	}
+  disk {
+    source      = google_compute_disk.foobar.name
+    auto_delete = false
+    boot        = false
+  }
 
-	network_interface {
-		network = "default"
-	}
+  disk {
+    disk_type    = "local-ssd"
+    type         = "SCRATCH"
+    interface    = "NVME"
+    disk_size_gb = 375
+  }
 
-	metadata = {
-		foo = "bar"
-	}
+  network_interface {
+    network = "default"
+  }
 
-	can_ip_forward = true
+  metadata = {
+    foo = "bar"
+  }
+
+  scheduling {
+    automatic_restart = true
+  }
+
+  can_ip_forward = true
 }
 
 resource "google_compute_instance_from_template" "foobar" {
-	name           = "%s"
-	zone           = "us-central1-a"
+  name = "%s"
+  zone = "us-central1-a"
 
-	source_instance_template = "${google_compute_instance_template.foobar.self_link}"
+  source_instance_template = google_compute_instance_template.foobar.self_link
 
-	// Overrides
-	can_ip_forward = false
-	labels = {
-		my_key       = "my_value"
-	}
+  // Overrides
+  can_ip_forward = false
+  labels = {
+    my_key = "my_value"
+  }
+  scheduling {
+    automatic_restart = false
+  }
 }
 `, template, template, instance)
 }
@@ -247,64 +285,64 @@ resource "google_compute_instance_from_template" "foobar" {
 func testAccComputeInstanceFromTemplate_overrideBootDisk(templateDisk, overrideDisk, template, instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "debian-9"
-	project = "debian-cloud"
+  family  = "debian-9"
+  project = "debian-cloud"
 }
 
 resource "google_compute_disk" "template_disk" {
-	name = "%s"
-	image = "${data.google_compute_image.my_image.self_link}"
-	size = 10
-	type = "pd-ssd"
-	zone = "us-central1-a"
+  name  = "%s"
+  image = data.google_compute_image.my_image.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
 }
 
 resource "google_compute_disk" "override_disk" {
-	name = "%s"
-	image = "${data.google_compute_image.my_image.self_link}"
-	size = 20
-	type = "pd-ssd"
-	zone = "us-central1-a"
+  name  = "%s"
+  image = data.google_compute_image.my_image.self_link
+  size  = 20
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
 }
 
 resource "google_compute_instance_template" "template" {
-	name = "%s"
-	machine_type = "n1-standard-1"
+  name         = "%s"
+  machine_type = "n1-standard-1"
 
-	disk {
-		source_image = "${data.google_compute_image.my_image.self_link}"
-		auto_delete = true
-		disk_size_gb = 100
-		boot = true
-	}
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    disk_size_gb = 100
+    boot         = true
+  }
 
-	disk {
-		source = "${google_compute_disk.template_disk.name}"
-		auto_delete = false
-		boot = false
-	}
+  disk {
+    source      = google_compute_disk.template_disk.name
+    auto_delete = false
+    boot        = false
+  }
 
-	network_interface {
-		network = "default"
-	}
+  network_interface {
+    network = "default"
+  }
 
-	metadata = {
-		foo = "bar"
-	}
+  metadata = {
+    foo = "bar"
+  }
 
-	can_ip_forward = true
+  can_ip_forward = true
 }
 
 resource "google_compute_instance_from_template" "inst" {
-	name           = "%s"
-	zone           = "us-central1-a"
+  name = "%s"
+  zone = "us-central1-a"
 
-	source_instance_template = "${google_compute_instance_template.template.self_link}"
+  source_instance_template = google_compute_instance_template.template.self_link
 
-	// Overrides
-	boot_disk {
-		source = "${google_compute_disk.override_disk.self_link}"
-	}
+  // Overrides
+  boot_disk {
+    source = google_compute_disk.override_disk.self_link
+  }
 }
 `, templateDisk, overrideDisk, template, instance)
 }
@@ -312,64 +350,64 @@ resource "google_compute_instance_from_template" "inst" {
 func testAccComputeInstanceFromTemplate_overrideAttachedDisk(templateDisk, overrideDisk, template, instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "debian-9"
-	project = "debian-cloud"
+  family  = "debian-9"
+  project = "debian-cloud"
 }
 
 resource "google_compute_disk" "template_disk" {
-	name = "%s"
-	image = "${data.google_compute_image.my_image.self_link}"
-	size = 10
-	type = "pd-ssd"
-	zone = "us-central1-a"
+  name  = "%s"
+  image = data.google_compute_image.my_image.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
 }
 
 resource "google_compute_disk" "override_disk" {
-	name = "%s"
-	image = "${data.google_compute_image.my_image.self_link}"
-	size = 20
-	type = "pd-ssd"
-	zone = "us-central1-a"
+  name  = "%s"
+  image = data.google_compute_image.my_image.self_link
+  size  = 20
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
 }
 
 resource "google_compute_instance_template" "template" {
-	name = "%s"
-	machine_type = "n1-standard-1"
+  name         = "%s"
+  machine_type = "n1-standard-1"
 
-	disk {
-		source_image = "${data.google_compute_image.my_image.self_link}"
-		auto_delete = true
-		disk_size_gb = 100
-		boot = true
-	}
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    disk_size_gb = 100
+    boot         = true
+  }
 
-	disk {
-		source = "${google_compute_disk.template_disk.name}"
-		auto_delete = false
-		boot = false
-	}
+  disk {
+    source      = google_compute_disk.template_disk.name
+    auto_delete = false
+    boot        = false
+  }
 
-	disk {
-		source_image = "debian-cloud/debian-9"
-		auto_delete = true
-		boot = false
-	}
+  disk {
+    source_image = "debian-cloud/debian-9"
+    auto_delete  = true
+    boot         = false
+  }
 
-	network_interface {
-		network = "default"
-	}
+  network_interface {
+    network = "default"
+  }
 }
 
 resource "google_compute_instance_from_template" "inst" {
-	name           = "%s"
-	zone           = "us-central1-a"
+  name = "%s"
+  zone = "us-central1-a"
 
-	source_instance_template = "${google_compute_instance_template.template.self_link}"
+  source_instance_template = google_compute_instance_template.template.self_link
 
-	// Overrides
-	attached_disk {
-		source = "${google_compute_disk.override_disk.name}"
-	}
+  // Overrides
+  attached_disk {
+    source = google_compute_disk.override_disk.name
+  }
 }
 `, templateDisk, overrideDisk, template, instance)
 }
@@ -377,59 +415,61 @@ resource "google_compute_instance_from_template" "inst" {
 func testAccComputeInstanceFromTemplate_overrideScratchDisk(templateDisk, overrideDisk, template, instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "debian-9"
-	project = "debian-cloud"
+  family  = "debian-9"
+  project = "debian-cloud"
 }
 
 resource "google_compute_disk" "template_disk" {
-	name = "%s"
-	image = "${data.google_compute_image.my_image.self_link}"
-	size = 10
-	type = "pd-ssd"
-	zone = "us-central1-a"
+  name  = "%s"
+  image = data.google_compute_image.my_image.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
 }
 
 resource "google_compute_disk" "override_disk" {
-	name = "%s"
-	image = "${data.google_compute_image.my_image.self_link}"
-	size = 20
-	type = "pd-ssd"
-	zone = "us-central1-a"
+  name  = "%s"
+  image = data.google_compute_image.my_image.self_link
+  size  = 20
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
 }
 
 resource "google_compute_instance_template" "template" {
-	name = "%s"
-	machine_type = "n1-standard-1"
+  name         = "%s"
+  machine_type = "n1-standard-1"
 
-	disk {
-		source_image = "${data.google_compute_image.my_image.self_link}"
-		auto_delete = true
-		disk_size_gb = 100
-		boot = true
-	}
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    disk_size_gb = 100
+    boot         = true
+  }
 
-	disk {
-		type = "SCRATCH"
-		interface = "SCSI"
-		auto_delete = true
-		boot = false
-	}
+  disk {
+    type         = "SCRATCH"
+    disk_type    = "local-ssd"
+    disk_size_gb = 375
+    interface    = "SCSI"
+    auto_delete  = true
+    boot         = false
+  }
 
-	network_interface {
-		network = "default"
-	}
+  network_interface {
+    network = "default"
+  }
 }
 
 resource "google_compute_instance_from_template" "inst" {
-	name           = "%s"
-	zone           = "us-central1-a"
+  name = "%s"
+  zone = "us-central1-a"
 
-	source_instance_template = "${google_compute_instance_template.template.self_link}"
+  source_instance_template = google_compute_instance_template.template.self_link
 
-	// Overrides
-	scratch_disk {
-		interface = "NVME"
-	}
+  // Overrides
+  scratch_disk {
+    interface = "NVME"
+  }
 }
 `, templateDisk, overrideDisk, template, instance)
 }
@@ -438,34 +478,34 @@ func testAccComputeInstanceFromTemplate_012_removableFieldsTpl(template string) 
 
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "debian-9"
-	project = "debian-cloud"
+  family  = "debian-9"
+  project = "debian-cloud"
 }
 
 resource "google_compute_instance_template" "foobar" {
-	name = "%s"
-	machine_type = "n1-standard-1"
+  name         = "%s"
+  machine_type = "n1-standard-1"
 
-	disk {
-		source_image = "${data.google_compute_image.my_image.self_link}"
-		auto_delete = true
-		disk_size_gb = 20
-		boot = true
-	}
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    disk_size_gb = 20
+    boot         = true
+  }
 
-	network_interface {
-		network = "default"
-	}
+  network_interface {
+    network = "default"
+  }
 
-	metadata = {
-		foo = "bar"
-	}
+  metadata = {
+    foo = "bar"
+  }
 
-	service_account {
-		scopes = ["userinfo-email", "compute-ro", "storage-ro"]
-	}
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
 
-	can_ip_forward = true
+  can_ip_forward = true
 }
 `, template)
 }
@@ -473,12 +513,12 @@ resource "google_compute_instance_template" "foobar" {
 func testAccComputeInstanceFromTemplate_012_removableFields1(instance string) string {
 	return fmt.Sprintf(`
 resource "google_compute_instance_from_template" "inst" {
-	name           = "%s"
-	zone           = "us-central1-a"
+  name = "%s"
+  zone = "us-central1-a"
 
-	allow_stopping_for_update = true
+  allow_stopping_for_update = true
 
-	source_instance_template = "${google_compute_instance_template.foobar.self_link}"
+  source_instance_template = google_compute_instance_template.foobar.self_link
 }
 `, instance)
 }
@@ -486,28 +526,70 @@ resource "google_compute_instance_from_template" "inst" {
 func testAccComputeInstanceFromTemplate_012_removableFields2(instance string) string {
 	return fmt.Sprintf(`
 resource "google_compute_instance_from_template" "inst" {
-	name           = "%s"
-	zone           = "us-central1-a"
+  name = "%s"
+  zone = "us-central1-a"
 
-	allow_stopping_for_update = true
+  allow_stopping_for_update = true
 
-	source_instance_template = "${google_compute_instance_template.foobar.self_link}"
+  source_instance_template = google_compute_instance_template.foobar.self_link
 
-	// Overrides
-	network_interface {
-		alias_ip_range = []
-	}
+  // Overrides
+  network_interface {
+    alias_ip_range = []
+  }
 
-	service_account = []
+  service_account = []
 
-	scratch_disk = []
+  scratch_disk = []
 
-	attached_disk = []
+  attached_disk = []
 
-	timeouts {
-		create = "10m"
-		update = "10m"
-	}
+  timeouts {
+    create = "10m"
+    update = "10m"
+  }
 }
 `, instance)
+}
+
+func testAccComputeInstanceFromTemplate_overrideMetadataDotStartupScript(instance, template string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "%s"
+  machine_type = "n1-standard-1"
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    startup-script = "#!/bin/bash\necho Hello"
+  }
+
+  can_ip_forward = true
+}
+
+resource "google_compute_instance_from_template" "inst" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_instance_template = google_compute_instance_template.foobar.self_link
+
+  // Overrides
+  metadata = {
+    startup-script = ""
+  }
+}
+`, template, instance)
 }

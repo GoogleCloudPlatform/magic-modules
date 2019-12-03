@@ -19,11 +19,11 @@ __metaclass__ = type
                                   .map(&:resource_ref)
                                   .uniq
 
-  update_props = properties_by_custom_update(object.all_user_properties)
+  update_props = properties_by_custom_update(object.all_user_properties, :old)
 -%>
 
 <%
-  import = 'from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest'
+  import = "from #{module_utils_import_path} import navigate_hash, GcpSession, GcpModule, GcpRequest"
   import += ', remove_nones_from_dict' unless properties_with_classes(object.all_user_properties).empty?
   import += ', replace_resource_dict' if nonreadonly_rrefs(object)
 -%>
@@ -32,7 +32,7 @@ import json
 <%
   imports = object.imports || []
   imports << 'time' if object.async
-  imports << 're' unless readonly_selflink_rrefs.empty?
+  imports << 're' if !readonly_selflink_rrefs.empty? || object.all_user_properties.any?(&:pattern)
 -%>
 <%= lines(imports.sort.uniq.map { |i| "import #{i}" }) -%>
 
@@ -74,6 +74,10 @@ def main():
                                    '<%= object.nested_query.keys.first -%>')
 <% end # object.nested_query.nil? -%>
     changed = False
+<% if object.custom_code.pre_action -%>
+
+<%= lines(indent(object.custom_code.pre_action, 4)) -%>
+<% end # if object.custom_code.pre_action -%>
 
     if fetch:
         if state == 'present':
@@ -116,7 +120,7 @@ def main():
     create_link = 'create_link(module)'
   elsif object.create_verb.nil? || object.create_verb == :POST
       create_link = 'collection(module)'
-  elsif object.create_verb == :PUT
+  elsif object.create_verb == :PUT || object.create_verb == :PATCH
       create_link = 'self_link(module)'
   end
 
@@ -125,16 +129,16 @@ def main():
                                   ('kind' if object.kind?)])
 -%>
             fetch = <%= method %>
-<% if object.post_create -%>
-<%= lines(indent(object.post_create, 12)) -%>
-<% end # ifobject.post_create -%>
+<% if object.custom_code.post_create -%>
+<%= lines(indent(object.custom_code.post_create, 12)) -%>
+<% end # ifobject.custom_code.post_create -%>
             changed = True
         else:
             fetch = {}
 
-<% if object.post_action -%>
-<%= lines(indent(object.post_action, 4)) -%>
-<% end # ifobject.post_create -%>
+<% if object.custom_code.post_action -%>
+<%= lines(indent(object.custom_code.post_action, 4)) -%>
+<% end # ifobject.custom_code.post_create -%>
     fetch.update({'changed': changed})
 
     module.exit_json(**fetch)
@@ -145,10 +149,10 @@ def main():
   # https://github.com/GoogleCloudPlatform/magic-modules/issues/45
 -%>
 <%= method_decl('create', ['module', 'link', ('kind' if object.kind?)]) %>
-<% if object.create.nil? -%>
+<% if object.custom_code.create.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
-  create_request = if object.custom_create_resource
+  create_request = if object.custom_code.custom_create_resource
                      'resource_to_create'
                    else
                      'resource_to_request'
@@ -156,7 +160,7 @@ def main():
 -%>
 <%
   method = method_call(
-    object.async ? 'wait_for_operation' : 'return_if_object',
+    object.async && object.async.allow?('create') ? 'wait_for_operation' : 'return_if_object',
     ['module',
      method_call("auth#{create_verb}",
                  ['link', "#{create_request}(module)"]),
@@ -166,7 +170,7 @@ def main():
 -%>
     return <%= method %>
 <% else -%>
-<%= lines(indent(object.create, 4)) -%>
+<%= lines(indent(object.custom_code.create, 4)) -%>
 <% end -%>
 
 
@@ -175,13 +179,13 @@ def main():
                                ('fetch' if object.access_api_results || !update_props.empty? || object.update_mask)]))
 -%>
 <%
-  update_request = if object.custom_update_resource
+  update_request = if object.custom_code.custom_update_resource
                      'resource_to_update'
                    else
                      'resource_to_request'
                    end
 -%>
-<% if object.update.nil? -%>
+<% if object.custom_code.update.nil? -%>
 <% unless update_props.empty? -%>
     update_fields(module, resource_to_request(module),
                   response_to_hash(module, fetch))
@@ -206,7 +210,9 @@ def main():
         'updateMask': updateMask(resource_to_request(module), response_to_hash(module, fetch))
     }
     request = resource_to_request(module)
+<% unless object.all_user_properties.select { |p| p.name == 'name' }.first&.url_param_only -%>
     del request['name']
+<% end -%>
 <%
   method_args.append("request")
   method_args.append("params=params")
@@ -217,7 +223,7 @@ def main():
 <%
   update_verb = object.update_verb.to_s.downcase
   method = method_call(
-    object.async ? 'wait_for_operation' : 'return_if_object',
+    object.async && object.async.allow?('update') ? 'wait_for_operation' : 'return_if_object',
     [
      'module',
      method_call("auth.#{update_verb}", method_args),
@@ -234,9 +240,9 @@ def main():
 -%>
     return <%= method %>
 <%   end # if object.input -%>
-<% else # object.update.nil? -%>
-<%= lines(indent(object.update, 4)) -%>
-<% end # object.update.nil? -%>
+<% else # object.custom_code.update.nil? -%>
+<%= lines(indent(object.custom_code.update, 4)) -%>
+<% end # object.custom_code.update.nil? -%>
 
 
 <% unless update_props.empty? -%>
@@ -259,7 +265,9 @@ def update_fields(module, request, response):
 
 
 <% update_props.each do |key, props| -%>
-def <%= props.first.name.underscore -%>_update(module, request, response):
+<% func_name = "#{props.first.name.underscore}_update" -%>
+<% unless object.hidden.include?(func_name) -%>
+def <%= func_name -%>(module, request, response):
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
     auth.<%= key[:update_verb].downcase -%>(
         ''.join([
@@ -269,7 +277,7 @@ def <%= props.first.name.underscore -%>_update(module, request, response):
 <%= lines(python_literal(request_properties(props), use_hash_brackets: true)) -%>
     )
 
-
+<% end # unless object.hidden.include? -%>
 <% end -%>
 <% end # unless update_props.empty? -%>
 <% if object.update_mask -%>
@@ -279,13 +287,13 @@ def <%= props.first.name.underscore -%>_update(module, request, response):
   lines(method_decl('delete', ['module', 'link', ('kind' if object.kind?),
                                ('fetch' if object.access_api_results)]))
 -%>
-<% if object.delete.nil? -%>
+<% if object.custom_code.delete.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
   delete_verb = object.delete_verb.to_s.downcase
 
   method = method_call(
-    object.async ? 'wait_for_operation' : 'return_if_object',
+    object.async && object.async.allow?('delete') ? 'wait_for_operation' : 'return_if_object',
     ['module',
      method_call("auth.#{delete_verb}", ['link']),
      ('kind' if !object.async && object.kind?)
@@ -293,9 +301,9 @@ def <%= props.first.name.underscore -%>_update(module, request, response):
   )
 -%>
     return <%= method %>
-<% else # if object.delete.nil? -%>
-<%= lines(indent(object.delete, 4)) -%>
-<% end # if object.delete.nil? -%>
+<% else # if object.custom_code.delete.nil? -%>
+<%= lines(indent(object.custom_code.delete, 4)) -%>
+<% end # if object.custom_code.delete.nil? -%>
 
 
 def resource_to_request(module):
@@ -314,12 +322,16 @@ def resource_to_request(module):
 <% if object.encoder? -%>
     request = <%= object.transport.encoder -%>(request, module)
 <% end -%>
+<% if !object.transport or object&.transport&.remove_nones_post_encoder -%>
     return_vals = {}
     for k, v in request.items():
         if v or v is False:
             return_vals[k] = v
 
     return return_vals
+<% else -%>
+    return request
+<% end -%>
 <% if object.unwrap_resource -%>
 <%
   urf_code = [
@@ -366,9 +378,9 @@ def unwrap_resource(result, module):
                                          ('kind' if object.kind?),
                                          'allow_not_found=False']))
 -%>
-<% if object.return_if_object -%>
-<%= lines(indent(object.return_if_object, 4)) -%>
-<% else # if object.return_if_object -%>
+<% if object.custom_code.return_if_object -%>
+<%= lines(indent(object.custom_code.return_if_object, 4)) -%>
+<% else # if object.custom_code.return_if_object -%>
     # If not found, return nothing.
     if allow_not_found and response.status_code == 404:
         return None
@@ -391,7 +403,7 @@ def unwrap_resource(result, module):
         module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
 
     return result
-<% end # if object.return_if_object -%>
+<% end # if object.custom_code.return_if_object -%>
 
 
 def is_different(module, response):
@@ -419,13 +431,16 @@ def is_different(module, response):
 # This is for doing comparisons with Ansible's current parameters.
 def response_to_hash(module, response):
     return <%= lines(python_literal(response_properties(object.properties), use_hash_brackets: true)) -%>
+<% if object.all_user_properties.any?(&:pattern) -%>
+<%= lines(compile('templates/ansible/pattern.py.erb')) -%>
+<% end -%>
 <% readonly_selflink_rrefs.each do |resource| -%>
 
 
 def <%= resource.name.underscore -%>_selflink(name, params):
     if name is None:
         return
-    url = r<%= lines(build_url(resource.regex_url)) -%>
+    url = r<%= lines(build_url(regex_url(resource.self_link_url))) -%>
     if not re.match(url, name):
         name = <%= build_url(resource.self_link_url).gsub('{name}', '%s') -%>.format(**params) % name
     return name

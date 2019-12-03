@@ -1,54 +1,212 @@
-	var v interface{}
-	var ok bool
+<% unless object.nested_query.nil? -%>
+func flattenNested<%= resource_name -%>(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+  var v interface{}
+  var ok bool
 
-<% object.nested_query.keys[0...-1].each do |k| -%>
-	v, ok = res["<%=k-%>"]
-	if !ok || v == nil {
-		return nil, nil
-	}
-	res = v.(map[string]interface{})
+  <% object.nested_query.keys[0...-1].each do |k| -%>
+  v, ok = res["<%=k-%>"]
+  if !ok || v == nil {
+    return nil, nil
+  }
+  res = v.(map[string]interface{})
 
-<% end -%>
-	v, ok = res["<%=object.nested_query.keys[-1]-%>"]
-	if !ok || v == nil {
-		return nil, nil
-	}
+  <% end -%>
+  v, ok = res["<%=object.nested_query.keys[-1]-%>"]
+  if !ok || v == nil {
+    return nil, nil
+  }
 
-  // Final nested resource is either a list of resources we need to filter
-	// or just the resource itself, which we return.
-	switch v.(type) {
-	case []interface{}:
-		break
-	case map[string]interface{}:
-		return v.(map[string]interface{}), nil
-	default:
-		return nil, fmt.Errorf("invalid value for <%= object.nested_query.keys.join(".") -%>: %v", v)
-	}
+  switch v.(type) {
+  case []interface{}:
+    break
+  case map[string]interface{}:
+    // Construct list out of single nested resource
+    v = []interface{}{v}
+  default:
+    return nil, fmt.Errorf("expected list or map for value <%= object.nested_query.keys.join(".") -%>. Actual value: %v", v)
+  }
 
-	items := v.([]interface{})
-	for _, vRaw := range items {
-	<% if object.nested_query.is_list_of_ids -%>
-		// If only an id is given in parent resource,
-		// construct a resource map for that id KV pair.
-		item := map[string]interface{}{"<%=object.identity.first.api_name%>": vRaw}
-	<% else -%>
-		item := vRaw.(map[string]interface{})
-	<% end -%>
-	<% object.identity.each do |prop| -%>
-	<% if settable_properties.include?(prop) -%>
-		itemIdV, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, meta.(*Config))
-		if err != nil {
-			return nil, err
-		}
-	<% else -%>
-		itemIdV := d.Get("<%= prop.name.underscore -%>")
-	<% end # settable_properties.include?(prop)-%>
-		actualIdV := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d)
-		log.Printf("[DEBUG] Checking if item's <%= prop.api_name %> (%#v) is equal to resource's (%#v)", itemIdV, actualIdV)
-		if !reflect.DeepEqual(itemIdV, actualIdV) {
-			continue
-		}
-	<% end # object.identity.each -%>
-		return item, nil
-	}
-	return nil, nil
+  _, item, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, v.([]interface{}))
+  if err != nil {
+    return nil, err
+  } 
+  return item, nil
+}
+
+func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, meta interface{}, items []interface{}) (index int, item map[string]interface{}, err error) {
+  <% object.identity.each do |id_prop| -%>
+  <%   if settable_properties.include?(id_prop) -%>
+  expected<%= titlelize_property(id_prop) -%>, err := expand<%= resource_name -%><%= titlelize_property(id_prop) -%>(d.Get("<%= id_prop.name.underscore -%>"), d, meta.(*Config))
+  if err != nil {
+    return -1, nil, err
+  }
+  <%   else -%>
+  expected<%= titlelize_property(id_prop) -%> := d.Get("<%= id_prop.name.underscore -%>")
+  <%   end # settable_properties.include?(id_prop)-%>
+  <% end # object.identity.each -%>
+
+  // Search list for this resource.
+  for idx, itemRaw := range items {
+    if itemRaw == nil {
+      continue
+    }
+    <% if object.nested_query.is_list_of_ids -%>
+    // List response only contains the ID - construct a response object.
+    item := map[string]interface{}{
+      "<%=object.identity.first.api_name%>": itemRaw,
+    }
+    <% else -%>
+    item := itemRaw.(map[string]interface{})
+    <% end -%>
+
+    <% if object.custom_code.decoder -%>
+    // Decode list item before comparing.
+    item, err := resource<%= resource_name -%>Decoder(d, meta, item)
+    if err != nil {
+        return -1, nil, err
+    }
+    <% end -%>
+
+    <% object.identity.each do |prop| -%>
+    item<%= titlelize_property(prop) -%> := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d)
+    if !reflect.DeepEqual(item<%= titlelize_property(prop) -%>, expected<%= titlelize_property(prop) -%>) {
+      log.Printf("[DEBUG] Skipping item with <%= prop.api_name %>= %#v, looking for %#v)", item<%= titlelize_property(prop) -%>, expected<%= titlelize_property(prop) -%>)
+      continue
+    }
+    <% end -%>
+    log.Printf("[DEBUG] Found item for resource %q: %#v)", d.Id(), item)
+    return idx, item, nil
+  }
+  return -1, nil, nil
+}
+<% if object.nested_query.modify_by_patch -%>
+<% 
+  list_key = object.nested_query.keys[-1]
+  has_project = object.base_url.include?('{{project}}')
+%>
+// PatchCreateEncoder handles creating request data to PATCH parent resource
+// with list including new object.
+func resource<%= resource_name -%>PatchCreateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+  currItems, err := resource<%= resource_name -%>ListForPatch(d, meta)
+  if err != nil {
+    return nil, err
+  }
+
+  _, found, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, currItems)
+  if err != nil {
+    return nil, err
+  }
+
+  // Return error if item already created.
+  if found != nil {
+    return nil, fmt.Errorf("Unable to create <%= object.name %>, existing object already found: %+v", found)
+  }
+
+  // Return list with the resource to create appended
+  return map[string]interface{}{
+    "<%= list_key %>": append(currItems, obj),
+  }, nil
+}
+
+// PatchUpdateEncoder handles creating request data to PATCH parent resource
+// with list including updated object.
+func resource<%= resource_name -%>PatchUpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+  items, err := resource<%= resource_name -%>ListForPatch(d, meta)
+  if err != nil {
+    return nil, err
+  }
+
+  idx, item, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, items)
+  if err != nil {
+    return nil, err
+  }
+
+  // Return error if item to update does not exist.
+  if item == nil {
+    return nil, fmt.Errorf("Unable to update <%= object.name %> %q - not found in list", d.Id())
+  }
+
+  // Merge new object into old.
+  for k, v := range obj {
+    item[k] = v
+  }
+  items[idx] = item
+
+  // Return list with new item added
+  return map[string]interface{}{
+    "<%= list_key %>": items,
+  }, nil
+}
+
+// PatchDeleteEncoder handles creating request data to PATCH parent resource
+// with list excluding object to delete.
+func resource<%= resource_name -%>PatchDeleteEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+  currItems, err := resource<%= resource_name -%>ListForPatch(d, meta)
+  if err != nil {
+    return nil, err
+  }
+
+  idx, item, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, currItems)
+  if err != nil {
+    return nil, err
+  }
+  if item == nil {
+    // Spoof 404 error for proper handling by Delete (i.e. no-op)
+    return nil, &googleapi.Error{
+      Code: 404, 
+      Message: "<%= object.name %> not found in list",
+    }
+  }
+
+  updatedItems := append(currItems[:idx], currItems[idx+1:]...)
+  return map[string]interface{}{
+    "<%= list_key %>": updatedItems,
+  }, nil
+}
+
+// ListForPatch handles making API request to get parent resource and 
+// extracting list of objects.
+<%# This function is similar to flattenNested...() but
+  # 1) does an API request to read the parent resource from API (flatten
+       takes in list from top-level Read() method, whereas this method 
+       is called in Create/Update/Delete)
+  # 2) returns the full list of other resources, rather than just the 
+  #    matching resource 
+-%>
+func resource<%= resource_name -%>ListForPatch(d *schema.ResourceData, meta interface{}) ([]interface{}, error) {
+  config := meta.(*Config)
+  url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+  if err != nil {
+      return nil, err
+  }
+  <% if has_project -%>
+  project, err := getProject(d, config)
+  if err != nil {
+      return nil, err
+  }
+  <% end -%>
+  res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project %>project<% else %>""<% end %>, url, nil)
+  if err != nil {
+    return nil, err
+  }
+
+  <% object.nested_query.keys[0...-1].each do |k| -%>
+  if v, ok = res["<%=k-%>"]; ok && v != nil {
+    res = v.(map[string]interface{})    
+  } else {
+    return nil, nil
+  }
+  <% end -%>
+  
+  v, ok := res["<%=object.nested_query.keys[-1]-%>"]
+  if ok && v != nil {
+    ls, lsOk := v.([]interface{})
+    if !lsOk {
+      return nil, fmt.Errorf(`expected list for nested field "<%= object.nested_query.keys[-1]%>"`)
+    }
+    return ls, nil
+  }
+  return nil, nil
+}
+<% end # if ...nested_query.modify_by_patch -%>
+<% end # unless ...nested_query.nil? -%>

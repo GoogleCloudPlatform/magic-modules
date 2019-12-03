@@ -1,0 +1,239 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: MLEngine
+display_name: ML Engine
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://ml.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Cloud ML
+    url: https://console.cloud.google.com/apis/library/ml.googleapis.com
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Model'
+    base_url: projects/{{project}}/models
+    self_link: projects/{{project}}/models/{{name}}
+    # This resources is not updatable (outside of versions, which is a version-level method)
+    input: true
+    async: !ruby/object:Api::OpAsync
+      actions: ['delete']
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    description: |
+      Represents a machine learning solution.
+
+      A model can have multiple versions, each of which is a deployed, trained model
+      ready to receive prediction requests. The model itself is just a container.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The name specified for the model.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: The description specified for the model when it was created.
+      # Ignoring most of defaultVersion.
+      # Only name should be exposed. Use the Version resource to learn more
+      # about versions.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'defaultVersion'
+        description: |
+          The default version of the model. This version will be used to handle
+          prediction requests that do not specify a version.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'name'
+            required: true
+            description: The name specified for the version when it was created.
+        # Even though only one region is supported, keeping this as an array
+        # to future-proof it.
+      - !ruby/object:Api::Type::Array
+        name: 'regions'
+        description: |
+          The list of regions where the model is going to be deployed.
+          Currently only one region per model is supported
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Boolean
+        name: 'onlinePredictionLogging'
+        description:  If true, online prediction access logs are sent to StackDriver Logging.
+      - !ruby/object:Api::Type::Boolean
+        name: 'onlinePredictionConsoleLogging'
+        description: If true, online prediction nodes send stderr and stdout streams to Stackdriver Logging
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: One or more labels that you can add, to organize your models.
+  - !ruby/object:Api::Resource
+    name: 'Version'
+    base_url: projects/{{project}}/models/{{model}}/versions
+    self_link: projects/{{project}}/models/{{model}}/versions/{{name}}
+    input: true
+    description: |
+      Each version is a trained model deployed in the cloud, ready to handle
+      prediction requests. A model can have multiple versions
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'model'
+        description: The model that this version belongs to
+        resource: Model
+        imports: name
+        required: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'isDefault'
+        description:  If true, this version will be used to handle prediction requests that do not specify a version
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The name specified for the version when it was created.
+
+          The version name must be unique within the model it is created in.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: The description specified for the version when it was created.
+      - !ruby/object:Api::Type::String
+        name: 'deploymentUri'
+        description: The Cloud Storage location of the trained model used to create the version
+        required: true
+      - !ruby/object:Api::Type::Time
+        name: 'createTime'
+        description: The time the version was created.
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'lastUseTime'
+        description: The time the version was last used for prediction.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'runtimeVersion'
+        description: The AI Platform runtime version to use for this deployment
+      - !ruby/object:Api::Type::Enum
+        name: 'machineType'
+        description: The type of machine on which to serve the model. Currently only applies to online prediction service.
+        values:
+          - mls1-c1-m2
+          - mls1-c4-m2
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        description: The state of a version
+        values:
+          - UNKNOWN
+          - READY
+          - CREATING
+          - FAILED
+          - DELETING
+          - UPDATING
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'errorMessage'
+        description: The details of a failure or cancellation
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: 'packageUris'
+        description: Cloud Storage paths (gs://…) of packages for custom prediction routines or scikit-learn pipelines with custom code.
+        output: true
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: One or more labels that you can add, to organize your model versions
+        # no etag since it's input: true
+      - !ruby/object:Api::Type::Enum
+        name: 'framework'
+        description: The machine learning framework AI Platform uses to train this version of the model
+        values:
+          - FRAMEWORK_UNSPECIFIED
+          - TENSORFLOW
+          - SCIKIT_LEARN
+          - XGBOOST
+      - !ruby/object:Api::Type::Enum
+        name: 'pythonVersion'
+        description: |
+          The version of Python used in prediction. If not set, the default
+          version is '2.7'. Python '3.5' is available when runtimeVersion is
+          set to '1.4' and above. Python '2.7' works with all supported runtime
+          versions.
+        values:
+          - '2.7'
+          - '3.5'
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccount'
+        description: Specifies the service account for resource access control.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'autoScaling'
+        description: |
+          Automatically scale the number of nodes used to serve the model in
+          response to increases and decreases in traffic. Care should be taken
+          to ramp up traffic according to the model's ability to scale or you
+          will start seeing increases in latency and 429 response codes.
+        conflicts: ['manualScaling']
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'minNodes'
+            description: The minimum number of nodes to allocate for this mode
+      - !ruby/object:Api::Type::NestedObject
+        name: 'manualScaling'
+        description: |
+          Manually select the number of nodes to use for serving the model. You
+          should generally use autoScaling with an appropriate minNodes
+          instead, but this option is available if you want more predictable
+          billing. Beware that latency and error rates will increase if the
+          traffic exceeds that capability of the system to serve it based on
+          the selected number of nodes.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'nodes'
+            description: The number of nodes to allocate for this model. These nodes are always up, starting from the time the model is deployed
+      - !ruby/object:Api::Type::String
+        name: 'predictionClass'
+        description: |
+          The fully qualified name (module_name.class_name) of a class that
+          implements the Predictor interface described in this reference
+          field. The module containing this class should be included in a
+          package provided to the packageUris field.
+

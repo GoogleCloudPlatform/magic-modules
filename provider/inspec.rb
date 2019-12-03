@@ -38,8 +38,8 @@ module Provider
       end
     end
 
-    # Subclass of FileTemplate with InSpec specific fields
-    class InspecFileTemplate < Provider::FileTemplate
+    # Subclass of ProductFileTemplate with InSpec specific fields
+    class InspecProductFileTemplate < Provider::ProductFileTemplate
       # Used within doc template to pluralize names
       attr_accessor :plural
       # If this is a file that is being compiled for doc generation
@@ -53,8 +53,8 @@ module Provider
       attr_accessor :privileged
     end
 
-    # Subclass of FileTemplate with InSpec specific fields
-    class NestedObjectFileTemplate < Provider::FileTemplate
+    # Subclass of ProductFileTemplate with InSpec specific fields
+    class NestedObjectProductFileTemplate < Provider::ProductFileTemplate
       # Property to generate this file for
       attr_accessor :property
     end
@@ -67,18 +67,20 @@ module Provider
 
       data.generate(
         'templates/inspec/singular_resource.erb',
-        File.join(target_folder, "google_#{data.product.api_name}_#{name}.rb"),
+        File.join(target_folder, "#{resource_name(data.object, data.product)}.rb"),
         self
       )
-
-      data.generate(
-        'templates/inspec/plural_resource.erb',
-        File.join(target_folder, "google_#{data.product.api_name}_#{name}".pluralize + '.rb'),
-        self
-      )
-
       generate_documentation(data.clone, name, false)
-      generate_documentation(data.clone, name, true)
+
+      unless data.object.singular_only
+        data.generate(
+          'templates/inspec/plural_resource.erb',
+          File.join(target_folder, resource_name(data.object, data.product).pluralize + '.rb'),
+          self
+        )
+        generate_documentation(data.clone, name, true)
+      end
+
       generate_properties(data.clone, data.object.all_user_properties)
     end
 
@@ -86,9 +88,8 @@ module Provider
     # IAM policies separately from the resource itself
     def generate_iam_policy(data)
       target_folder = File.join(data.output_folder, 'libraries')
-      name = data.object.name.underscore
 
-      iam_policy_resource_name = "google_#{data.product.api_name}_#{name}_iam_policy"
+      iam_policy_resource_name = "#{resource_name(data.object, data.product)}_iam_policy"
       data.generate(
         'templates/inspec/iam_policy/iam_policy.erb',
         File.join(target_folder, "#{iam_policy_resource_name}.rb"),
@@ -117,7 +118,7 @@ module Provider
     # Generate the files for the properties
     def generate_property_files(properties, data)
       properties.flatten.compact.each do |property|
-        nested_object_template = NestedObjectFileTemplate.new(
+        nested_object_template = NestedObjectProductFileTemplate.new(
           data.output_folder,
           data.name,
           data.product,
@@ -135,7 +136,13 @@ module Provider
     end
 
     def build_object_data(object, output_folder, version)
-      InspecFileTemplate.file_for_resource(output_folder, object, @config, version, build_env)
+      InspecProductFileTemplate.file_for_resource(
+        output_folder,
+        object,
+        @config,
+        version,
+        build_env
+      )
     end
 
     # Generates InSpec markdown documents for the resource
@@ -147,9 +154,11 @@ module Provider
       data.name = name
       data.plural = plural
       data.doc_generation = true
+      file_name = resource_name(data.object, data.product)
+      file_name = file_name.pluralize if plural
       data.generate(
         'templates/inspec/doc_template.md.erb',
-        File.join(docs_folder, "google_#{data.product.api_name}_#{name}.md"),
+        File.join(docs_folder, "#{file_name}.md"),
         self
       )
     end
@@ -168,12 +177,13 @@ module Provider
 
       FileUtils.cp_r 'templates/inspec/tests/.', target_folder
 
-      name = "google_#{data.product.api_name}_#{data.object.name.underscore}"
+      name = resource_name(data.object, data.product)
 
       generate_inspec_test(data.clone, name, target_folder, name)
 
       # Build test for plural resource
-      generate_inspec_test(data.clone, name.pluralize, target_folder, name)
+      generate_inspec_test(data.clone, name.pluralize, target_folder, name)\
+        unless data.object.singular_only
     end
 
     def generate_inspec_test(data, name, target_folder, attribute_file_name)
@@ -248,20 +258,26 @@ module Provider
       ).downcase
     end
 
-    def resource_name(object, product_ns)
-      "google_#{product_ns.downcase}_#{object.name.underscore}"
+    def resource_name(object, product)
+      "google_#{@config.legacy_name || product.name.underscore}_#{object.name.underscore}"
     end
 
-    def sub_property_descriptions(property)
+    # Recursively calls itself on any arrays or nested objects within this property, indenting
+    # further for each call
+    def markdown_format(property, indent = 1)
+      prop_description = "`#{property.out_name}`: #{property.description.split("\n").join(' ')}"
+      description = "#{'  ' * indent}* #{prop_description}"
       if nested_object?(property)
-        property.properties.map { |prop| markdown_format(prop) }.join("\n\n") + "\n\n"
+        description_arr = [description]
+        description_arr += property.properties.map { |prop| markdown_format(prop, indent + 1) }
+        description = description_arr.join("\n\n")
       elsif typed_array?(property)
-        property.item_type.properties.map { |prop| markdown_format(prop) }.join("\n\n") + "\n\n"
+        description_arr = [description]
+        description_arr += property.item_type.properties.map\
+          { |prop| markdown_format(prop, indent + 1) }
+        description = description_arr.join("\n\n")
       end
-    end
-
-    def markdown_format(property)
-      "    * `#{property.out_name}`: #{property.description.split("\n").join(' ')}"
+      description
     end
 
     def grab_attributes

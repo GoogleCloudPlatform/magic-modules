@@ -6,5 +6,5 @@ resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
 resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
   project = "<%= ctx[:vars]['subscription_project'] %>"
   name    = "<%= ctx[:vars]['subscription_name'] %>"
-  topic   = "${google_pubsub_topic.<%= ctx[:primary_resource_id] %>.id}"
+  topic   = google_pubsub_topic.<%= ctx[:primary_resource_id] %>.name
 }

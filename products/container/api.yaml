@@ -17,7 +17,6 @@ display_name: Google Kubernetes Engine
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    default: true
     base_url: https://container.googleapis.com/v1/
   - !ruby/object:Api::Product::Version
     name: beta
@@ -28,15 +27,15 @@ apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Kubernetes Engine API
     url: https://console.cloud.google.com/apis/library/container.googleapis.com/
-async: !ruby/object:Api::Async
-  operation: !ruby/object:Api::Async::Operation
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
     kind: 'container#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: 'projects/{{project}}/locations/{{location}}/operations/{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::Async::Result
+  result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
-  status: !ruby/object:Api::Async::Status
+  status: !ruby/object:Api::OpAsync::Status
     path: 'status'
     complete: 'DONE'
     allowed:
@@ -44,7 +43,7 @@ async: !ruby/object:Api::Async
       - 'RUNNING'
       - 'DONE'
       - 'ABORTING'
-  error: !ruby/object:Api::Async::Error
+  error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
 objects:
@@ -52,13 +51,24 @@ objects:
     name: 'Cluster'
     base_url: 'projects/{{project}}/locations/{{location}}/clusters'
     description: 'A Google Container Engine cluster.'
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'clusters'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'location'
         description: 'The location where the cluster is deployed'
         required: true
+      - !ruby/object:Api::Type::String
+        name: 'kubectlPath'
+        description: |
+          The path that the kubectl config file will be written to.
+
+          The file will not be created if this path is unset.
+
+          Any existing file at this path will be completely overwritten.
+
+          This requires the PyYaml library.
+      - !ruby/object:Api::Type::String
+        name: 'kubectlContext'
+        description: 'The name of the context for the kubectl config file. Will default to the cluster name'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -80,7 +90,8 @@ objects:
           object, since this configuration (along with the "nodeConfig") will be
           used to create a "NodePool" object with an auto-generated name. Do not
           use this and a nodePool at the same time.
-        required: true
+
+          This field has been deprecated. Please use nodePool.initial_node_count instead.
         input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'nodeConfig'
@@ -196,18 +207,61 @@ objects:
               Whether the nodes are created as preemptible VM instances. See:
               https://cloud.google.com/compute/docs/instances/preemptible for
               more information about preemptible VM instances.
+          - !ruby/object:Api::Type::Array
+            name: 'accelerators'
+            description: |
+              A list of hardware accelerators to be attached to each node. See
+              https://cloud.google.com/compute/docs/gpus for more information
+              about support for GPUs.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                  # API calls for a String, despite this being a number.
+                - !ruby/object:Api::Type::String
+                  name: 'acceleratorCount'
+                  description: The number of accelerator cards exposed to an instance.
+                - !ruby/object:Api::Type::String
+                  name: 'acceleratorType'
+                  description: The accelerator type resource name
+          - !ruby/object:Api::Type::String
+            name: 'diskType'
+            description: |
+              Type of the disk attached to each node (e.g. 'pd-standard'
+              or 'pd-ssd')
+
+              If unspecified, the default disk type is 'pd-standard'
+          - !ruby/object:Api::Type::String
+            name: 'minCpuPlatform'
+            description: |
+              Minimum CPU platform to be used by this instance. The instance
+              may be scheduled on the specified or newer CPU platform.
+          - !ruby/object:Api::Type::Array
+            name: 'taints'
+            description: >
+              List of kubernetes taints to be applied to each node.
+
+              For more information, including usage and the valid values, see:
+              https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'key'
+                  description: Key for taint
+                - !ruby/object:Api::Type::String
+                  name: 'value'
+                  description: Value for taint
+                - !ruby/object:Api::Type::Enum
+                  name: 'effect'
+                  description: Effect for taint
+                  values:
+                    - "EFFECT_UNSPECIFIED"
+                    - "NO_SCHEDULE"
+                    - "PREFER_NO_SCHEDULE"
+                    - "NO_EXECUTE"
       - !ruby/object:Api::Type::NestedObject
         name: 'masterAuth'
         description: |
           The authentication information for accessing the master endpoint.
         properties:
-          # TODO(nelsonjr): Make this a ResourceRef pointing to the Compute
-          # resources (external to this product)
-          # | - !ruby/object:Api::Type::ResourceRef
-          # |   name: 'machineType'
-          # |   product: 'Compute'
-          # |   resource: 'MachineType'
-          # |   imports: 'name'
           - !ruby/object:Api::Type::String
             name: 'username'
             description: |
@@ -218,7 +272,17 @@ objects:
             description: |
               The password to use for HTTP basic authentication to the master
               endpoint. Because the master endpoint is open to the Internet, you
-              should create a strong password.
+              should create a strong password with a minimum of 16 characters.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'clientCertificateConfig'
+            description: |
+              Configuration for client certificate authentication on the
+              cluster. For clusters before v1.12, if no configuration is
+              specified, a client certificate is issued.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'issueClientCertificate'
+                description: Issue a client certificate.
           - !ruby/object:Api::Type::String
             name: 'clusterCaCertificate'
             description: |
@@ -275,7 +339,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::Boolean
             name: 'enablePrivateNodes'
-            description: >
+            description: |
               Whether nodes have internal IP addresses only. If enabled, all
               nodes are given only RFC 1918 private addresses and communicate
               with the master via private networking.
@@ -284,7 +348,7 @@ objects:
             description: Whether the master's internal IP address is used as the cluster endpoint.
           - !ruby/object:Api::Type::String
             name: masterIpv4CidrBlock
-            description: >
+            description: |
               The IP range in CIDR notation to use for the hosted master
               network. This range will be used for assigning internal IP
               addresses to the master or set of masters, as well as the ILB
@@ -350,15 +414,153 @@ objects:
                   the cluster. When enabled, it ensures that a Heapster pod is
                   running in the cluster, which is also used by the Cloud
                   Monitoring service.
-      # TODO(nelsonjr): This is a ResourceRef but on a resource on another
-      # product (Compute). Figure out how to represent/implement this. For now
-      # making it a string.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'kubernetesDashboard'
+            description: |
+                Configuration for the Kubernetes Dashboard. This addon is deprecated,
+                and will be disabled in 1.15. It is recommended to use the Cloud Console
+                to manage and monitor your Kubernetes clusters, workloads and applications.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'disabled'
+                description: |
+                  Whether the Kubernetes Dashboard is enabled for this cluster.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'networkPolicyConfig'
+            description: |
+              Configuration for NetworkPolicy. This only tracks whether the
+              addon is enabled or not on the Master, it does not track whether
+              network policy is enabled for the nodes.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'disabled'
+                description: Whether NetworkPolicy is enabled for this cluster.
       - !ruby/object:Api::Type::String
         name: 'subnetwork'
         description: |
           The name of the Google Compute Engine subnetwork to which the cluster
           is connected.
-      # 'enableKubernetesAlpha' not supported: we are only producing GA API.
+      # TODO: figure out nodePools[]
+      - !ruby/object:Api::Type::Array
+        name: 'locations'
+        description: |
+          The list of Google Compute Engine zones in which the cluster's nodes
+          should be located.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'resourceLabels'
+        description: |
+          The resource labels for the cluster to use to annotate any related
+          Google Compute Engine resources.
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: The fingerprint of the set of labels for this cluster.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'legacyAbac'
+        description: Configuration for the legacy ABAC authorization mode.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: |
+              Whether the ABAC authorizer is enabled for this cluster. When
+              enabled, identities in the system, including service accounts,
+              nodes, and controllers, will have statically granted permissions
+              beyond those provided by the RBAC configuration or IAM.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'networkPolicy'
+        description: |
+          Configuration options for the NetworkPolicy feature.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'provider'
+            description: The selected network policy provider.
+            values:
+              - "PROVIDER_UNSPECIFIED"
+              - "CALICO"
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: Whether network policy is enabled on the cluster.
+      - !ruby/object:Api::Type::NestedObject
+            name: 'defaultMaxPodsConstraint'
+            description: |
+              The default constraint on the maximum number of pods that can be
+              run simultaneously on a node in the node pool of this cluster.
+              Only honored if cluster created with IP Alias support.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'maxPodsPerNode'
+                description: Constraint enforced on the max num of pods per node.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'ipAllocationPolicy'
+        description: Configuration for controlling how IPs are allocated in the cluster
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'useIpAliases'
+            description: Whether alias IPs will be used for pod IPs in the cluster
+          - !ruby/object:Api::Type::Boolean
+            name: 'createSubnetwork'
+            description: Whether a new subnetwork will be created automatically for the cluster
+          - !ruby/object:Api::Type::String
+            name: 'subnetworkName'
+            description: |
+              A custom subnetwork name to be used if createSubnetwork is true.
+              If this field is empty, then an automatic name will be chosen for
+              the new subnetwork.
+          - !ruby/object:Api::Type::String
+            name: 'clusterSecondaryRangeName'
+            description: |
+              The name of the secondary range to be used for the cluster CIDR
+              block. The secondary range will be used for pod IP addresses.
+              This must be an existing secondary range associated with the
+              cluster subnetwork
+          - !ruby/object:Api::Type::String
+            name: 'servicesSecondaryRangeName'
+            description: |
+              The name of the secondary range to be used as for the services
+              CIDR block. The secondary range will be used for service
+              ClusterIPs. This must be an existing secondary range associated
+              with the cluster subnetwork.
+          - !ruby/object:Api::Type::String
+            name: 'clusterIpv4CidrBlock'
+            description: |
+              The IP address range for the cluster pod IPs. If this field is
+              set, then cluster.cluster_ipv4_cidr must be left blank.
+
+              This field is only applicable when useIpAliases is true.
+
+              Set to blank to have a range chosen with the default size.
+
+              Set to /netmask (e.g. /14) to have a range chosen with a specific netmask.
+          - !ruby/object:Api::Type::String
+            name: 'nodeIpv4CidrBlock'
+            description: |
+              The IP address range of the instance IPs in this cluster.
+
+              This is applicable only if createSubnetwork is true.
+
+              Set to blank to have a range chosen with the default size.
+
+              Set to /netmask (e.g. /14) to have a range chosen with a specific netmask.
+          - !ruby/object:Api::Type::String
+            name: 'servicesIpv4CidrBlock'
+            description: |
+              The IP address range of the services IPs in this cluster. If blank, a range will be automatically chosen with the default size.
+
+              This field is only applicable when useIpAliases is true.
+
+              Set to blank to have a range chosen with the default size.
+
+              Set to /netmask (e.g. /14) to have a range chosen with a specific netmask.
+          - !ruby/object:Api::Type::String
+            name: 'tpuIpv4CidrBlock'
+            description: |
+              The IP address range of the Cloud TPUs in this cluster. If unspecified, a range will be automatically chosen with the default size.
+
+              This field is only applicable when useIpAliases is true.
+
+              If unspecified, the range will use the default size.
+
+              Set to /netmask (e.g. /14) to have a range chosen with a specific netmask.
       - !ruby/object:Api::Type::String
         name: 'endpoint'
         description: |
@@ -393,8 +595,22 @@ objects:
         description: |
           The time the cluster was created, in RFC3339 text format.
         output: true
-      # | 'status' is not applicable for state enforcement
-      # | 'statusMessage' is not applicable for state enforcement
+      - !ruby/object:Api::Type::Enum
+        name: 'status'
+        description: The current status of this cluster.
+        output: true
+        values: 
+          - STATUS_UNSPECIFIED
+          - PROVISIONING
+          - RUNNING
+          - RECONCILING
+          - STOPPING
+          - ERROR
+          - DEGRADED
+      - !ruby/object:Api::Type::String
+        name: 'statusMessage'
+        description: Additional information about the current status of this cluster, if available.
+        output: true
       - !ruby/object:Api::Type::Integer
         name: 'nodeIpv4CidrSize'
         description: |
@@ -420,9 +636,45 @@ objects:
           The time the cluster will be automatically deleted in RFC3339 text
           format.
         output: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableTpu'
+        description: Enable the ability to use Cloud TPUs in this cluster.
+      - !ruby/object:Api::Type::String
+        name: 'tpuIpv4CidrBlock'
+        description: The IP address range of the Cloud TPUs in this cluster, in CIDR notation
+      - !ruby/object:Api::Type::Array
+        name: 'conditions'
+        description: Which conditions caused the current cluster state.
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'code'
+              description: Machine-friendly representation of the condition
+            - !ruby/object:Api::Type::String
+              name: 'message'
+              description: Human-friendly representation of the condition
+      - !ruby/object:Api::Type::NestedObject
+        name: 'masterAuthorizedNetworksConfig'
+        description: Configuration for controlling how IPs are allocated in the cluster
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: Whether or not master authorized networks is enabled.
+          - !ruby/object:Api::Type::Array
+            name: 'cidrBlocks'
+            description: Define up to 50 external networks that could access Kubernetes master through HTTPS.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'displayName'
+                  description: Optional field used to identify cidr blocks
+                - !ruby/object:Api::Type::String
+                  name: 'cidrBlock'
+                  description: Block specified in CIDR notation
   - !ruby/object:Api::Resource
     name: 'NodePool'
-    base_url: projects/{{project}}/zones/{{location}}/clusters/{{cluster}}/nodePools
+    base_url: projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools
     description: |
       NodePool contains the name and configuration for a cluster's node pool.
       Node pools are a set of nodes (i.e. VM's), with a common configuration and
@@ -430,8 +682,6 @@ objects:
       set of Kubernetes labels applied to them, which may be used to reference
       them during pod scheduling. They may also be resized up or down, to
       accommodate the workload.
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'nodePools'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'cluster'
@@ -552,6 +802,41 @@ objects:
               Whether the nodes are created as preemptible VM instances. See:
               https://cloud.google.com/compute/docs/instances/preemptible for
               more information about preemptible VM instances.
+          - !ruby/object:Api::Type::Array
+            name: 'accelerators'
+            description: A list of hardware accelerators to be attached to each node
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: 'acceleratorCount'
+                  description: The number of the accelerator cards exposed to an instance.
+                - !ruby/object:Api::Type::String
+                  name: 'acceleratorType'
+                  description: The accelerator type resource name
+          - !ruby/object:Api::Type::String
+            name: 'diskType'
+            description: |
+              Type of the disk attached to each node (e.g. 'pd-standard' or 'pd-ssd')
+
+              If unspecified, the default disk type is 'pd-standard'
+          - !ruby/object:Api::Type::String
+            name: 'minCpuPlatform'
+            description: |
+              Minimum CPU platform to be used by this instance. The instance may be scheduled on the specified or newer CPU platform
+          - !ruby/object:Api::Type::Array
+            name: 'taints'
+            description: List of kubernetes taints to be applied to each node.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'key'
+                  description: Key for taint
+                - !ruby/object:Api::Type::String
+                  name: 'value'
+                  description: Value for taint
+                - !ruby/object:Api::Type::String
+                  name: 'effect'
+                  description: Effect for taint
       - !ruby/object:Api::Type::Integer
         name: 'initialNodeCount'
         description: |
@@ -560,6 +845,14 @@ objects:
           must also have available firewall and routes quota.
         required: true
         input: true
+      - !ruby/object:Api::Type::String
+        name: 'status'
+        description: 'Status of nodes in this pool instance'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'statusMessage'
+        description: 'Additional information about the current status of this node pool instance'
+        output: true
       # | 'instanceGroupUrls' not supported as it is dynamically created by the
       # |  server and admin has no way to predict it
       # NodePool updates use a different name for version for updating.
@@ -625,29 +918,29 @@ objects:
                   This field is set when upgrades are about to commence with the
                   description of the upgrade.
                 output: true
-  - !ruby/object:Api::Resource
-    name: 'KubeConfig'
-    base_url: 'unused'
-    description: |
-      Generates a compatible Kuberenetes '.kube/config' file
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        description: 'The config file kubectl settings will be written to.'
-        required: true
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'cluster'
-        resource: 'Cluster'
-        imports: 'name'
-        description: 'A reference to Cluster resource'
-        required: true
-      # TODO(nelsonjr): Make 'zone' a ResourceRef once cross-module references
-      # are possible.
-      - !ruby/object:Api::Type::String
-        name: 'location'
-        description: 'The location where the container is deployed'
-        required: true
-      - !ruby/object:Api::Type::String
-        name: 'context'
-        description: 'The name of the context. Defaults to cluster name.'
-        required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'maxPodsConstraint'
+        description: |
+          The constraint on the maximum number of pods that can be run simultaneously on a node in the node pool.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'maxPodsPerNode'
+            description: Constraint enforced on the max num of pods per node.
+      - !ruby/object:Api::Type::Array
+        name: 'conditions'
+        description: Which conditions caused the current node pool state.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: 'code'
+              description: Machine-friendly representation of the condition
+              values:
+                - UNKNOWN
+                - GCE_STOCKOUT
+                - GKE_SERVICE_ACCOUNT_DELETED
+                - GCE_QUOTA_EXCEEDED
+                - SET_BY_OPERATOR
+      - !ruby/object:Api::Type::Integer
+        name: 'podIpv4CidrSize'
+        description: The pod CIDR block size per node in this node pool.
+        output: true

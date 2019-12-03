@@ -11,14 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/terraform_example'
+require 'provider/terraform_oics'
 
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
   class TerraformObjectLibrary < Provider::Terraform
-    def generate(output_folder, types, version_name, _product_path, _dump_yaml)
-      version = @api.version_obj_or_default(version_name)
-      generate_objects(output_folder, types, version)
+    def generate(output_folder, types, _product_path, _dump_yaml)
+      @base_url = @version.base_url
+      generate_objects(output_folder, types)
     end
 
     def generate_object(object, output_folder, version_name)
@@ -40,17 +40,26 @@ module Provider
                     self)
     end
 
-    def compile_common_files(output_folder, version_name = 'ga')
+    def compile_common_files(output_folder, products, _common_compile_file)
       Google::LOGGER.info 'Compiling common files.'
+      file_template = ProviderFileTemplate.new(
+        output_folder,
+        @target_version_name,
+        build_env,
+        products
+      )
       compile_file_list(output_folder, [
                           ['google/config.go',
                            'third_party/terraform/utils/config.go.erb'],
                           ['google/utils.go',
-                           'third_party/terraform/utils/utils.go.erb']
-                        ], version_name)
+                           'third_party/terraform/utils/utils.go.erb'],
+                          ['google/provider_handwritten_endpoint.go',
+                           'third_party/terraform/utils/provider_handwritten_endpoint.go.erb']
+                        ],
+                        file_template)
     end
 
-    def copy_common_files(output_folder, _version_name)
+    def copy_common_files(output_folder)
       Google::LOGGER.info 'Copying common files.'
       copy_file_list(output_folder, [
                        ['google/constants.go',
@@ -69,6 +78,8 @@ module Provider
                         'third_party/validator/sql_database_instance.go'],
                        ['google/storage_bucket.go',
                         'third_party/validator/storage_bucket.go'],
+                       ['google/storage_bucket_iam.go',
+                        'third_party/validator/storage_bucket_iam.go'],
                        ['google/iam_helpers.go',
                         'third_party/validator/iam_helpers.go'],
                        ['google/iam_helpers_test.go',
@@ -79,6 +90,8 @@ module Provider
                         'third_party/validator/project_iam.go'],
                        ['google/folder_iam.go',
                         'third_party/validator/folder_iam.go'],
+                       ['google/container.go',
+                        'third_party/validator/container.go'],
                        ['google/image.go',
                         'third_party/terraform/utils/image.go'],
                        ['google/disk_type.go',
@@ -108,10 +121,16 @@ module Provider
                        ['google/metadata.go',
                         'third_party/terraform/utils/metadata.go'],
                        ['google/service_scope.go',
-                        'third_party/terraform/utils/service_scope.go']
+                        'third_party/terraform/utils/service_scope.go'],
+                       ['google/kms_utils.go',
+                        'third_party/terraform/utils/kms_utils.go'],
+                       ['google/batcher.go',
+                        'third_party/terraform/utils/batcher.go']
                      ])
     end
 
     def generate_resource_tests(data) end
+
+    def generate_iam_policy(data) end
   end
 end

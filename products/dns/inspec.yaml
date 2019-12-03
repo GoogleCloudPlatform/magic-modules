@@ -20,6 +20,4 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     base_url: projects/{{project}}/managedZones/{{managed_zone}}/rrsets
   Project: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-files: !ruby/object:Provider::Config::Files
-  copy:
-    'Gemfile': 'provider/inspec/Gemfile'
+

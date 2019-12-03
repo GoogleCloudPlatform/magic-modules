@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform/helper/customdiff"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	appengine "google.golang.org/api/appengine/v1"
 )
 
@@ -41,20 +41,6 @@ func resourceAppEngineApplication() *schema.Resource {
 			"location_id": {
 				Type:     schema.TypeString,
 				Required: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"northamerica-northeast1",
-					"us-central",
-					"us-west2",
-					"us-east1",
-					"us-east4",
-					"southamerica-east1",
-					"europe-west",
-					"europe-west2",
-					"europe-west3",
-					"asia-northeast1",
-					"asia-south1",
-					"australia-southeast1",
-				}, false),
 			},
 			"serving_status": {
 				Type:     schema.TypeString,
@@ -75,6 +61,10 @@ func resourceAppEngineApplication() *schema.Resource {
 				Elem:     appEngineApplicationFeatureSettingsResource(),
 			},
 			"name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"app_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -127,7 +117,7 @@ func appEngineApplicationFeatureSettingsResource() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"split_health_checks": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Required: true,
 			},
 		},
 	}
@@ -161,7 +151,7 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 	d.SetId(project)
 
 	// Wait for the operation to complete
-	waitErr := appEngineOperationWait(config.clientAppEngine, op, project, "App Engine app to create")
+	waitErr := appEngineOperationWait(config, op, project, "App Engine app to create")
 	if waitErr != nil {
 		d.SetId("")
 		return waitErr
@@ -185,6 +175,7 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 	d.Set("default_hostname", app.DefaultHostname)
 	d.Set("location_id", app.LocationId)
 	d.Set("name", app.Name)
+	d.Set("app_id", app.Id)
 	d.Set("serving_status", app.ServingStatus)
 	d.Set("gcr_domain", app.GcrDomain)
 	d.Set("project", pid)
@@ -221,7 +212,7 @@ func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}
 	}
 
 	// Wait for the operation to complete
-	waitErr := appEngineOperationWait(config.clientAppEngine, op, pid, "App Engine app to update")
+	waitErr := appEngineOperationWait(config, op, pid, "App Engine app to update")
 	if waitErr != nil {
 		return waitErr
 	}

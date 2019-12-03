@@ -1,6 +1,10 @@
 
+<% if property.flatten_object -%>
+<% property.nested_properties.each do |prop| -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
+<% end -%>
 <%
-  if property.nested_properties? && (property.flatten_object.nil? || !property.flatten_object)
+  elsif property.nested_properties?
 -%>
 The `<%= property.name.underscore -%>` block <%= if property.output then "contains" else "supports" end -%>:
 <%- if property.is_a?(Api::Type::Map) %>

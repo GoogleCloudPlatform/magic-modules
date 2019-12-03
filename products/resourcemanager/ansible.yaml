@@ -30,10 +30,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Organization: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Project: !ruby/object:Overrides::Ansible::ResourceOverride
-    return_if_object: |
-<%= lines(indent(compile('products/resourcemanager/helpers/ansible/return_if_object.py'), 6)) -%>
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      return_if_object: |
+<%= lines(indent(compile('products/resourcemanager/helpers/ansible/return_if_object.py'), 8)) -%>
 files: !ruby/object:Provider::Config::Files
-  copy:
-<%= lines(indent(compile('provider/ansible/common~copy.yaml'), 4)) -%>
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

@@ -112,7 +112,7 @@ objects:
                   (such as when aggregating multiple streams
                   on each resource to a single stream for each
                   resource or when aggregating streams across
-                  all members of a group of resrouces).
+                  all members of a group of resources).
                   Multiple aggregations are applied in the
                   order specified.
                 item_type: !ruby/object:Api::Type::NestedObject
@@ -536,7 +536,7 @@ objects:
                   (such as when aggregating multiple streams
                   on each resource to a single stream for each
                   resource or when aggregating streams across
-                  all members of a group of resrouces).
+                  all members of a group of resources).
                   Multiple aggregations are applied in the
                   order specified.This field is similar to the
                   one in the MetricService.ListTimeSeries
@@ -721,6 +721,9 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
            name: content
+           at_least_one_of:
+            - documentation.0.content
+            - documentation.0.mime_type
            description: |
             The text of the documentation, interpreted according to mimeType.
             The content may not exceed 8,192 Unicode characters and may not
@@ -728,6 +731,9 @@ objects:
             whichever is smaller.
           - !ruby/object:Api::Type::String
             name: mimeType
+            at_least_one_of:
+              - documentation.0.content
+              - documentation.0.mime_type
             default_value: text/markdown
             description: |
               The format of the content field. Presently, only the value
@@ -793,10 +799,22 @@ objects:
       when a policy violation is detected. Examples of channels include email, SMS,
       and third-party messaging applications. Fields containing sensitive information
       like authentication tokens or contact info are only partially populated on retrieval.
+
+      Notification Channels are designed to be flexible and are made up of a supported `type`
+      and labels to configure that channel. Each `type` has specific labels that need to be
+      present for that channel to be correctly configured. The labels that are required to be
+      present for one channel `type` are often different than those required for another.
+      Due to these loose constraints it's often best to set up a channel through the UI
+      and import to Terraform when setting up a brand new channel type to determine which
+      labels are required.
+
+      A list of supported channels per project the `list` endpoint can be
+      accessed programmatically or through the api explorer at  https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.notificationChannelDescriptors/list .
+      This provides the channel type and all of the required labels that must be passed.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
-        'Official Documentation':
-          'https://cloud.google.com/monitoring/api/v3/'
+        'Notification Options': 'https://cloud.google.com/monitoring/support/notification-options'
+        'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
       api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.notificationChannels'
     properties:
     - !ruby/object:Api::Type::KeyValuePairs
@@ -848,7 +866,7 @@ objects:
       name: description
       description: An optional human-readable description of this notification channel.
         This description may provide additional details, beyond the display name, for
-        the channel. This may not exceeed 1024 Unicode characters.
+        the channel. This may not exceed 1024 Unicode characters.
     - !ruby/object:Api::Type::String
       name: displayName
       required: true
@@ -859,6 +877,7 @@ objects:
     - !ruby/object:Api::Type::Boolean
       name: enabled
       default_value: true
+      send_empty_value: true
       description: Whether notifications are forwarded to the described channel. This
         makes it possible to disable delivery of notifications to a particular channel
         without removing the channel from all alerting policies that reference the channel.
@@ -920,6 +939,7 @@ objects:
         - !ruby/object:Api::Type::String
           name: content
           description: String or regex content to match (max 1024 bytes)
+          required: true
     - !ruby/object:Api::Type::Array
       name: selectedRegions
       description: The list of regions from which the check will be run. Some regions
@@ -928,65 +948,54 @@ objects:
         message is returned. Not specifying this field will result in uptime checks
         running from all regions.
       item_type: Api::Type::String
-    - !ruby/object:Api::Type::Boolean
-      name: isInternal
-      description: If this is true, then checks are made only from the 'internal_checkers'.
-        If it is false, then checks are made only from the 'selected_regions'. It is
-        an error to provide 'selected_regions' when is_internal is true, or to provide
-        'internal_checkers' when is_internal is false.
-    - !ruby/object:Api::Type::Array
-      name: internalCheckers
-      description: The internal checkers that this check will egress from. If is_internal
-        is true and this list is empty, the check will egress from all the InternalCheckers
-        configured for the project that owns this CheckConfig.
-      item_type: !ruby/object:Api::Type::NestedObject
-        properties:
-        - !ruby/object:Api::Type::String
-          name: gcpZone
-          description: The GCP zone the uptime check should egress from. Only respected
-            for internal uptime checks, where internal_network is specified.
-        - !ruby/object:Api::Type::String
-          name: peerProjectId
-          description: The GCP project_id where the internal checker lives. Not necessary
-            the same as the workspace project.
-        - !ruby/object:Api::Type::String
-          name: name
-          description: A unique resource name for this InternalChecker. The format is projects/[PROJECT_ID]/internalCheckers/[INTERNAL_CHECKER_ID].
-            PROJECT_ID is the stackdriver workspace project for the uptime check config associated
-            with the internal checker.
-        - !ruby/object:Api::Type::String
-          name: network
-          description: 'The GCP VPC network (https://cloud.google.com/vpc/docs/vpc)
-            where the internal resource lives (ex: "default").'
-        - !ruby/object:Api::Type::String
-          name: displayName
-          description: The checker's human-readable name. The display name should be
-            unique within a Stackdriver Workspace in order to make it easier to identify;
-            however, uniqueness is not enforced.
     - !ruby/object:Api::Type::NestedObject
       name: httpCheck
       description: Contains information needed to make an HTTP or HTTPS check.
-      conflicts:
-        - tcpCheck
+      exactly_one_of:
+        - http_check
+        - tcp_check
       properties:
       - !ruby/object:Api::Type::NestedObject
         name: authInfo
+        at_least_one_of:
+          - http_check.0.auth_info
+          - http_check.0.port
+          - http_check.0.headers
+          - http_check.0.path
+          - http_check.0.use_ssl
+          - http_check.0.mask_headers
         description: The authentication information. Optional when creating an HTTP
           check; defaults to empty.
         properties:
         - !ruby/object:Api::Type::String
           name: password
+          required: true
           description: The password to authenticate.
         - !ruby/object:Api::Type::String
           name: username
+          required: true
           description: The username to authenticate.
       - !ruby/object:Api::Type::Integer
         name: port
+        at_least_one_of:
+          - http_check.0.auth_info
+          - http_check.0.port
+          - http_check.0.headers
+          - http_check.0.path
+          - http_check.0.use_ssl
+          - http_check.0.mask_headers
         description: The port to the page to run the check against. Will be combined
           with host (specified within the MonitoredResource) and path to construct the
           full URL. Optional (defaults to 80 without SSL, or 443 with SSL).
       - !ruby/object:Api::Type::KeyValuePairs
         name: headers
+        at_least_one_of:
+          - http_check.0.auth_info
+          - http_check.0.port
+          - http_check.0.headers
+          - http_check.0.path
+          - http_check.0.use_ssl
+          - http_check.0.mask_headers
         description: The list of headers to send as part of the uptime check request.
           If two headers have the same key and different values, they should be entered
           as a single header, with the value being a comma-separated list of all the
@@ -996,16 +1005,42 @@ objects:
           headers allowed is 100.
       - !ruby/object:Api::Type::String
         name: path
+        at_least_one_of:
+          - http_check.0.auth_info
+          - http_check.0.port
+          - http_check.0.headers
+          - http_check.0.path
+          - http_check.0.use_ssl
+          - http_check.0.mask_headers
         default_value: "/"
         description: The path to the page to run the check against. Will be combined
           with the host (specified within the MonitoredResource) and port to construct
           the full URL. Optional (defaults to "/").
       - !ruby/object:Api::Type::Boolean
         name: useSsl
+        at_least_one_of:
+          - http_check.0.auth_info
+          - http_check.0.port
+          - http_check.0.headers
+          - http_check.0.path
+          - http_check.0.use_ssl
+          - http_check.0.mask_headers
         description: If true, use HTTPS instead of HTTP to run the check.
       - !ruby/object:Api::Type::Boolean
+        name: validateSsl
+        description: Boolean specifying whether to include SSL certificate validation
+          as a part of the Uptime check. Only applies to checks where monitoredResource
+          is set to uptime_url. If useSsl is false, setting validateSsl to true has no effect.
+      - !ruby/object:Api::Type::Boolean
         name: maskHeaders
-        description: Boolean specifiying whether to encrypt the header information.
+        at_least_one_of:
+          - http_check.0.auth_info
+          - http_check.0.port
+          - http_check.0.headers
+          - http_check.0.path
+          - http_check.0.use_ssl
+          - http_check.0.mask_headers
+        description: Boolean specifying whether to encrypt the header information.
           Encryption should be specified for any headers related to authentication that
           you do not wish to be seen when retrieving the configuration. The server will
           be responsible for encrypting the headers. On Get/List calls, if mask_headers
@@ -1013,8 +1048,9 @@ objects:
     - !ruby/object:Api::Type::NestedObject
       name: tcpCheck
       description: Contains information needed to make a TCP check.
-      conflicts:
-        - httpCheck
+      exactly_one_of:
+        - http_check
+        - tcp_check
       properties:
       - !ruby/object:Api::Type::Integer
         name: port
@@ -1025,12 +1061,16 @@ objects:
       name: resourceGroup
       input: true
       description: The group resource associated with the configuration.
-      conflicts:
-        - monitoredResource
+      exactly_one_of:
+        - monitored_resource
+        - resource_group
       properties:
       - !ruby/object:Api::Type::Enum
         name: resourceType
         input: true
+        at_least_one_of:
+          - resource_group.0.resource_type
+          - resource_group.0.group_id
         description: The resource type of the group members.
         values:
         - :RESOURCE_TYPE_UNSPECIFIED
@@ -1039,6 +1079,9 @@ objects:
       - !ruby/object:Api::Type::ResourceRef
         name: groupId
         input: true
+        at_least_one_of:
+          - resource_group.0.resource_type
+          - resource_group.0.group_id
         resource: Group
         imports: name
         description: The group of resources being monitored. Should be the `name` of a group
@@ -1048,8 +1091,9 @@ objects:
       description: 'The monitored resource (https://cloud.google.com/monitoring/api/resources)
         associated with the configuration. The following monitored resource types are
         supported for uptime checks:  uptime_url  gce_instance  gae_app  aws_ec2_instance  aws_elb_load_balancer'
-      conflicts:
-        - resourceGroup
+      exactly_one_of:
+        - monitored_resource
+        - resource_group
       properties:
       - !ruby/object:Api::Type::String
         name: type

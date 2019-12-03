@@ -15,7 +15,8 @@
 <% if property.custom_expand -%>
 <%= lines(compile_template(property.custom_expand,
                            prefix: prefix,
-                           property: property)) -%>
+                           property: property,
+                           object: object)) -%>
 <% else -%>
 
 <%# Generate expanders for Maps %>
@@ -43,6 +44,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
   }
   return m, nil
 }
+<%# End expanders for Maps %>
 
 <%# Generate expanders for KeyValuePairs %>
 <%   elsif property.is_a?(Api::Type::KeyValuePairs) -%>
@@ -59,11 +61,11 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 
 <%# Generate expanders for flattened objects %>
 <%   elsif property.flatten_object -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(d TerraformResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
   transformed := make(map[string]interface{})
 <%     property.nested_properties.each do |prop| -%>
-  // Note that nesting flattened objects won't work because we don't handle them properly here.
-  transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+  <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
+  transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
   if err != nil {
     return nil, err
 <%       if prop.send_empty_value -%>
@@ -75,8 +77,8 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(d TerraformResourc
 <%       end -%>
   }
 
-  return transformed, nil
 <%     end -%>
+  return transformed, nil
 }
 
 <%# Generate expanders for everything else %>
@@ -94,9 +96,20 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
       continue
     }
 <%       else -%>
-  if len(l) == 0 || l[0] == nil{
+<%         if property.allow_empty_object -%>
+  if len(l) == 0 {
     return nil, nil
   }
+
+  if l[0] == nil {
+    transformed := make(map[string]interface{})
+    return transformed, nil
+  }
+<%       else -%>
+  if len(l) == 0 || l[0] == nil {
+    return nil, nil
+  }
+<%         end -%>
   raw := l[0]
 <%       end -%>
     original := raw.(map[string]interface{})
@@ -130,6 +143,9 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
   l := v.([]interface{})
   req := make([]interface{}, 0, len(l))
   for _, raw := range l {
+    if raw == nil {
+      return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: nil")
+    }
     f, err := <%= build_expand_resource_ref('raw.(string)', property.item_type) %>
     if err != nil {
       return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: %s", err)
@@ -158,8 +174,10 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 
 <% if property.nested_properties? -%>
 <%   property.nested_properties.each do |prop| -%>
+<%# Map is a map from {key -> object} in the API, but Terraform can't represent that
+so we treat the key as a property of the object in Terraform schema. %>
 <%     next if property.is_a?(Api::Type::Map) && prop.name == property.key_name -%>
-<%=      lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
+<%=      lines(build_expand_method(prefix + titlelize_property(property), prop, object), 1) -%>
 <%   end -%>
 <% end -%>
 

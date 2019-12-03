@@ -31,18 +31,51 @@ objects:
     create_verb: :PUT
     description: |
       A named resource to which messages are sent by publishers.
-    input: true
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
         description: 'Name of the topic.'
+        input: true
+        pattern: 'projects/{{project}}/topics/{{name}}'
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyName'
+        description: |
+          The resource name of the Cloud KMS CryptoKey to be used to protect access
+          to messages published on this topic. Your project's PubSub service account
+          (`service-{{PROJECT_NUMBER}}@gcp-sa-pubsub.iam.gserviceaccount.com`) must have
+          `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
+          
+          The expected format is `projects/*/locations/*/keyRings/*/cryptoKeys/*`
+        input: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
           A set of key/value label pairs to assign to this Topic.
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'topics'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'messageStoragePolicy'
+        description: |
+          Policy constraining the set of Google Cloud Platform regions where
+          messages published to the topic may be stored. If not present, then no
+          constraints are in effect.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'allowedPersistenceRegions'
+            description: |
+              A list of IDs of GCP regions where messages that are published to
+              the topic may be persisted in storage. Messages published by
+              publishers running in non-allowed GCP regions (or running outside
+              of GCP altogether) will be routed for storage in one of the
+              allowed regions. An empty list means that no regions are allowed,
+              and is not a valid configuration.
+            item_type: Api::Type::String
+            required: true
+    update_verb: :PATCH
+    update_mask: true
+    update_url: projects/{{project}}/topics/{{name}}
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Topics':
@@ -58,19 +91,21 @@ objects:
     update_verb: :PATCH
     update_mask: true
     update_url: projects/{{project}}/subscriptions/{{name}}
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'subscriptions'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Subscriptions':
           'https://cloud.google.com/pubsub/docs/admin#managing_subscriptions'
       api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.subscriptions'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: true
+      method_name_separator: ':'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: 'Name of the subscription.'
         required: true
         input: true
+        pattern: 'projects/{{project}}/subscriptions/{{name}}'
       - !ruby/object:Api::Type::ResourceRef
         name: 'topic'
         resource: 'Topic'
@@ -79,6 +114,7 @@ objects:
           A reference to a Topic resource.
         required: true
         input: true
+        pattern: 'projects/{{project}}/topics/{{topic}}'
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
@@ -90,6 +126,29 @@ objects:
           configure it. An empty pushConfig signifies that the subscriber will
           pull and ack messages using API methods.
         properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'oidcToken'
+            description: |
+              If specified, Pub/Sub will generate and attach an OIDC JWT token as
+              an Authorization header in the HTTP request for every pushed message.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'serviceAccountEmail'
+                required: true
+                description: |
+                  Service account email to be used for generating the OIDC token.
+                  The caller (for subscriptions.create, subscriptions.patch, and
+                  subscriptions.modifyPushConfig RPCs) must have the
+                  iam.serviceAccounts.actAs permission for the service account.
+              - !ruby/object:Api::Type::String
+                name: 'audience'
+                description: |
+                  Audience to be used when generating OIDC token. The audience claim
+                  identifies the recipients that the JWT is intended for. The audience
+                  value is a single case-sensitive string. Having multiple values (array)
+                  for the audience field is not supported. More info about the OIDC JWT
+                  token audience here: https://tools.ietf.org/html/rfc7519#section-4.1.3
+                  Note: if not specified, the Push endpoint URL will be used.
           - !ruby/object:Api::Type::String
             name: 'pushEndpoint'
             description: |
@@ -166,21 +225,23 @@ objects:
           messageRetentionDuration window.
       - !ruby/object:Api::Type::NestedObject
         name: 'expirationPolicy'
+        allow_empty_object: true
+        send_empty_value: true
         description: |
           A policy that specifies the conditions for this subscription's expiration.
           A subscription is considered active as long as any connected subscriber
           is successfully consuming messages from the subscription or is issuing
           operations on the subscription. If expirationPolicy is not set, a default
-          policy with ttl of 31 days will be used. The minimum allowed value for
-          expirationPolicy.ttl is 1 day.
+          policy with ttl of 31 days will be used.  If it is set but ttl is "", the
+          resource never expires.  The minimum allowed value for expirationPolicy.ttl
+          is 1 day.
         properties:
           - !ruby/object:Api::Type::String
             name: 'ttl'
+            required: true
             description: |
               Specifies the "time-to-live" duration for an associated resource. The
-              resource expires if it is not active for a period of ttl. The definition
-              of "activity" depends on the type of the associated resource. The minimum
-              and maximum allowed values for ttl depend on the type of the associated
-              resource, as well. If ttl is not set, the associated resource never expires.
+              resource expires if it is not active for a period of ttl.
+              If ttl is not set, the associated resource never expires.
               A duration in seconds with up to nine fractional digits, terminated by 's'.
               Example - "3.5s".

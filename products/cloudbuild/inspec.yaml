@@ -12,10 +12,5 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Inspec::Config
+legacy_name: cloudbuild
 overrides: !ruby/object:Overrides::ResourceOverrides
-  Trigger: !ruby/object:Overrides::Inspec::ResourceOverride
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'triggers'
-files: !ruby/object:Provider::Config::Files
-  copy:
-    'Gemfile': 'provider/inspec/Gemfile'

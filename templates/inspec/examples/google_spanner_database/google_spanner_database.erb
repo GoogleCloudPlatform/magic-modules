@@ -1,0 +1,7 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% spannerdatabase = grab_attributes['spannerdatabase'] -%>
+
+describe google_spanner_database(project: <%= gcp_project_id -%>, instance: <%= doc_generation ? "'#{spannerdatabase['instance']}'" : "spannerdatabase['instance']" -%>, name: <%= doc_generation ? "'#{spannerdatabase['name']}'" : "spannerdatabase['name']" -%>) do
+  it { should exist }
+  its('name') { should match <%= doc_generation ? "'#{spannerdatabase['name']}'" : "spannerdatabase['name']" -%> }
+end
