@@ -37,10 +37,9 @@ func dataSourceDnsManagedZone() *schema.Resource {
 			"visibility": {
 				Type:     schema.TypeString,
 				Computed: true,
-			}
+			},
 
 			// Google Cloud DNS ManagedZone resources do not have a SelfLink attribute.
-
 			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
