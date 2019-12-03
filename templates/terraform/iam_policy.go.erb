@@ -28,7 +28,7 @@ import (
 )
 <% resource_name = product_ns + object.name -%>
 <%
-resource_uri = object.self_link_url
+resource_uri = object.iam_policy.base_url_override || object.self_link_uri
 parent_resource_name = object.iam_policy.parent_resource_attribute || object.name.underscore
 resource_params = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{parent_resource_name}}}"))
 -%>
@@ -87,9 +87,10 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 
 <% end # if provider_default_values.include? -%>
 <% end # resource_params.each -%>
+<% import_format = object.iam_policy.import_format_override || object.import_format -%>
 
 	// We may have gotten either a long or short name, so attempt to parse long name if possible
-	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Get("<%= parent_resource_name -%>").(string))
+	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(import_format, object.identity, object.base_url).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Get("<%= parent_resource_name -%>").(string))
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +138,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 <% end # if provider_default_values.include? -%>
 <% end # resource_params.each -%>
 
-	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Id())
+	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(import_format, object.identity, object.base_url).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Id())
 	if err != nil {
 		return err
 	}
@@ -165,7 +166,10 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	url := u.qualify<%= object.name -%>Url("getIamPolicy")
+	url, err := u.qualify<%= object.name -%>Url("getIamPolicy")
+	if err != nil {
+		return nil, err
+	}
 
 <% if resource_params.include?('project') -%>
 	project, err := getProject(u.d, u.Config)
@@ -212,7 +216,10 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 	obj := make(map[string]interface{})
 	obj["policy"] = json
 
-	url := u.qualify<%= object.name -%>Url("setIamPolicy")
+	url, err := u.qualify<%= object.name -%>Url("setIamPolicy")
+	if err != nil {
+		return err
+	}
 	
 <% if resource_params.include?('project') -%>
 	project, err := getProject(u.d, u.Config)
@@ -229,11 +236,15 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 	return nil
 }
 
-<% import_url = resource_uri.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '') -%>
-<% string_qualifiers = resource_params.map{|param| "u.#{param.camelize(:lower)}"}.join(', ') -%>
-<%# TODO(slevenick): this should use normal resource qualify methods to replace base_url -%>
-func (u *<%= resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodIdentifier string) string {
-	return fmt.Sprintf("<%= object.__product.base_url -%>%s<%= object.iam_policy.method_name_separator -%>%s", fmt.Sprintf("<%= import_url -%>", <%= string_qualifiers -%>), methodIdentifier)
+<% import_url = resource_uri.gsub(/({{)(\w+)(}})/, '%s') -%>
+<% string_qualifiers = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{parent_resource_name}}}")).map{|param| "u.#{param.camelize(:lower)}"}.join(', ') -%>
+func (u *<%= resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodIdentifier string) (string, error) {
+	urlTemplate := fmt.Sprintf("{{<%= object.__product.name -%>BasePath}}%s<%= object.iam_policy.method_name_separator -%>%s", fmt.Sprintf("<%= import_url -%>", <%= string_qualifiers -%>), methodIdentifier)
+  url, err := replaceVars(u.d, u.Config, urlTemplate)
+  if err != nil {
+      return "", err
+  }
+  return url, nil
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetResourceId() string {

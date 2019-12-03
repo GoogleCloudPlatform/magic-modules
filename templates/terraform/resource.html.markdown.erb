@@ -175,7 +175,7 @@ This resource provides the following
 <%= object.name -%> can be imported using any of these accepted formats:
 
 ```
-<% import_id_formats(object).each do |id_format| -%>
+<% import_id_formats_from_resource(object).each do |id_format| -%>
 $ terraform import <% if object.min_version.name == 'beta' %>-provider=google-beta <% end -%><%= terraform_name -%>.default <%= id_format %>
 <% end -%>
 ```

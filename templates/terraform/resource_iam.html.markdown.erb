@@ -248,8 +248,9 @@ exported:
 ## Import
 
 For all import syntaxes, the "resource in question" can take any of the following forms:
+<% import_format = object.iam_policy.import_format_override || object.import_format -%>
 
-<% import_id_formats(object).each do |id_format| -%>
+<% import_id_formats(import_format, object.identity, object.base_url).each do |id_format| -%>
 * <%= id_format %>
 <% end -%>
 

@@ -17,7 +17,7 @@ display_name: Cloud Run
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://{{location}}-run.googleapis.com/apis/
+    base_url: https://{{location}}-run.googleapis.com/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
@@ -25,7 +25,7 @@ objects:
 - !ruby/object:Api::Resource
   name: DomainMapping
   kind: DomainMapping
-  base_url: domains.cloudrun.com/v1/namespaces/{{project}}/domainmappings
+  base_url: apis/domains.cloudrun.com/v1/namespaces/{{project}}/domainmappings
   references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -219,7 +219,7 @@ objects:
 - !ruby/object:Api::Resource
   name: Service
   kind: Service
-  base_url: serving.knative.dev/v1/namespaces/{{project}}/services
+  base_url: apis/serving.knative.dev/v1/namespaces/{{project}}/services
   async: !ruby/object:Api::PollAsync
     actions: ['create', 'update']
     operation: !ruby/object:Api::PollAsync::Operation
@@ -246,6 +246,11 @@ objects:
 
     See also:
     https://github.com/knative/serving/blob/master/docs/spec/overview.md#service
+  iam_policy: !ruby/object:Api::Resource::IamPolicy
+    method_name_separator: ':'
+    parent_resource_attribute: 'service'
+    base_url_override: v1/projects/{{project}}/locations/{{location}}/services/{{service}}
+    import_format_override: ["projects/{{project}}/locations/{{location}}/services/{{service}}", "{{service}}"]
   parameters:
   - !ruby/object:Api::Type::String
     name: location
