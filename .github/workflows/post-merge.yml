@@ -1,11 +1,8 @@
 ---
 name: push-downstream
 on:
-    #    schedule:
-    #    - cron: '* * * * *'
-    push:
-        branches:
-            - master
+    schedule:
+        - cron: '*/20 * * * *'
 jobs:
     tpg:
         runs-on: ubuntu-latest
@@ -32,8 +29,23 @@ jobs:
                   ref: master
             - uses: actions/checkout@v1
               with:
-                  path: go/src/github.com/terraform-providers/terraform-provider-google-beta
-                  repository: terraform-providers/terraform-provider-google-beta
+                  path: go/src/github.com/terraform-providers/terraform-provider-google
+                  repository: terraform-providers/terraform-provider-google
+                  ref: master
+            - uses: actions/checkout@v1
+              with:
+                  path: ansible_collections_google
+                  repository: modular-magician/ansible_collections_google
+                  ref: master
+            - uses: actions/checkout@v1
+              with:
+                  path: inspec-gcp
+                  repository: modular-magician/inspec-gcp
+                  ref: master
+            - uses: actions/checkout@v1
+              with:
+                  path: go/src/github.com/GoogleCloudPlatform/terraform-google-conversion
+                  repository: GoogleCloudPlatform/terraform-google-conversion
                   ref: master
 
             - name: Configure git.
@@ -56,6 +68,9 @@ jobs:
 
                       bundle exec compiler -a -e terraform -o $GOPATH/src/github.com/terraform-providers/terraform-provider-google/ > /dev/null
                       bundle exec compiler -a -e terraform -o $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta/ > /dev/null
+                      bundle exec compiler -a -e inspec -o /home/runner/work/magic-modules/inspec-gcp > /dev/null
+                      bundle exec compiler -a -e ansible -o /home/runner/work/magic-modules/ansible_collections_google > /dev/null
+                      bundle exec compiler -a -e terraform -f validator -o $GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion > /dev/null
                       COMMIT_MSG=$(git log -1 --pretty=%B $sha)
 
                       pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google-beta
@@ -63,6 +78,18 @@ jobs:
                       popd
 
                       pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google
+                      git add . && git commit -m "$COMMIT_MSG" || true
+                      popd
+
+                      pushd /home/runner/work/magic-modules/inspec-gcp
+                      git add . && git commit -m "$COMMIT_MSG" || true
+                      popd
+
+                      pushd /home/runner/work/magic-modules/ansible_collections_google
+                      git add . && git commit -m "$COMMIT_MSG" || true
+                      popd
+
+                      pushd /home/runner/work/magic-modules/go/src/github.com/GoogleCloudPlatform/terraform-google-conversion
                       git add . && git commit -m "$COMMIT_MSG" || true
                       popd
                   done
