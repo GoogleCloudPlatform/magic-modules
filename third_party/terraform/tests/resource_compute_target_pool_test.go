@@ -137,7 +137,7 @@ func testAccCheckComputeTargetPoolHealthCheck(targetPool, healthCheck string) re
 			return fmt.Errorf("Not found: %s", healthCheck)
 		}
 
-		hcLink := healthCheckRes.Primary.Attributes["self_link"]
+		hcLink := ConvertSelfLinkToV1(healthCheckRes.Primary.Attributes["self_link"])
 		if targetPoolRes.Primary.Attributes["health_checks.0"] != hcLink {
 			return fmt.Errorf("Health check not set up. Expected %q to equal %q", targetPoolRes.Primary.Attributes["health_checks.0"], hcLink)
 		}
