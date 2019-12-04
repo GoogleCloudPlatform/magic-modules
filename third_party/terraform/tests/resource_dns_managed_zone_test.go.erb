@@ -234,7 +234,6 @@ resource "google_compute_network" "network-3" {
 func testAccDnsManagedZone_privateForwardingUpdate(suffix, first_nameserver, second_nameserver string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "private" {
-  provider    = google-beta
   name        = "private-zone-%s"
   dns_name    = "private.example.com."
   description = "Example private DNS zone"
