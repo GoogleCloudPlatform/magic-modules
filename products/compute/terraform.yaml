@@ -549,6 +549,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           forwarding_rule_name: "website-forwarding-rule"
           backend_name: "website-backend"
           network_name: "website-net"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "forwarding_rule_http_lb"
+        min_version: 'beta'
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "website-forwarding-rule"
+          backend_name: "website-backend"
+          network_name: "website-net"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/forwarding_rule.erb
