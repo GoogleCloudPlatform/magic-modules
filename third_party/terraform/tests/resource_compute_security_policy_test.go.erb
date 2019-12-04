@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -53,6 +54,7 @@ func TestAccComputeSecurityPolicy_withRule(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccComputeSecurityPolicy_withRuleExpr(t *testing.T) {
 	t.Parallel()
 
@@ -74,6 +76,7 @@ func TestAccComputeSecurityPolicy_withRuleExpr(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccComputeSecurityPolicy_update(t *testing.T) {
 	t.Parallel()
@@ -175,40 +178,6 @@ resource "google_compute_security_policy" "policy" {
 `, spName)
 }
 
-func testAccComputeSecurityPolicy_withRuleExpr(spName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_security_policy" "policy" {
-	name = "%s"
-
-	rule {
-		action   = "allow"
-		priority = "2147483647"
-		match {
-			versioned_expr = "SRC_IPS_V1"
-			config {
-				src_ip_ranges = ["*"]
-			}
-		}
-		description = "default rule"
-	}
-
-	rule {
-		action   = "allow"
-		priority = "2000"
-		match {
-			expr {
-				// These fields are not yet supported (Issue #4497: mbang)
-				// title = "Has User"
-				// description = "Determines whether the request has a user account"
-				expression = "evaluatePreconfiguredExpr('xss-canary')"
-			}
-		}
-		preview = true
-	}
-}
-`, spName)
-}
-
 func testAccComputeSecurityPolicy_update(spName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_security_policy" "policy" {
@@ -256,3 +225,39 @@ resource "google_compute_security_policy" "policy" {
 }
 `, spName)
 }
+
+<% unless version == 'ga' -%>
+func testAccComputeSecurityPolicy_withRuleExpr(spName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_security_policy" "policy" {
+	name = "%s"
+
+	rule {
+		action   = "allow"
+		priority = "2147483647"
+		match {
+			versioned_expr = "SRC_IPS_V1"
+			config {
+				src_ip_ranges = ["*"]
+			}
+		}
+		description = "default rule"
+	}
+
+	rule {
+		action   = "allow"
+		priority = "2000"
+		match {
+			expr {
+				// These fields are not yet supported (Issue #4497: mbang)
+				// title = "Has User"
+				// description = "Determines whether the request has a user account"
+				expression = "evaluatePreconfiguredExpr('xss-canary')"
+			}
+		}
+		preview = true
+	}
+}
+`, spName)
+}
+<% end -%>

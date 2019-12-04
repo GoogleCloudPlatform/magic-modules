@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -94,6 +95,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 										ValidateFunc: validation.StringInSlice([]string{"SRC_IPS_V1"}, false),
 									},
 
+<% unless version == 'ga' -%>
 									"expr": {
 										Type:     schema.TypeList,
 										Optional: true,
@@ -120,6 +122,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 											},
 										},
 									},
+<% end -%>
 								},
 							},
 						},
@@ -357,7 +360,9 @@ func expandSecurityPolicyMatch(configured []interface{}) *compute.SecurityPolicy
 	return &compute.SecurityPolicyRuleMatcher{
 		VersionedExpr: data["versioned_expr"].(string),
 		Config:        expandSecurityPolicyMatchConfig(data["config"].([]interface{})),
+<% unless version == 'ga' -%>
 		Expr:          expandSecurityPolicyMatchExpr(data["expr"].([]interface{})),
+<% end -%>
 	}
 }
 
@@ -372,6 +377,7 @@ func expandSecurityPolicyMatchConfig(configured []interface{}) *compute.Security
 	}
 }
 
+<% unless version == 'ga' -%>
 func expandSecurityPolicyMatchExpr(expr []interface{}) *compute.Expr {
 	if len(expr) == 0 || expr[0] == nil {
 		return nil
@@ -386,6 +392,7 @@ func expandSecurityPolicyMatchExpr(expr []interface{}) *compute.Expr {
 		// Location:    data["location"].(string),
 	}
 }
+<% end -%>
 
 func flattenSecurityPolicyRules(rules []*compute.SecurityPolicyRule) []map[string]interface{} {
 	rulesSchema := make([]map[string]interface{}, 0, len(rules))
@@ -399,7 +406,9 @@ func flattenSecurityPolicyRules(rules []*compute.SecurityPolicyRule) []map[strin
 				{
 					"versioned_expr": rule.Match.VersionedExpr,
 					"config":         flattenMatchConfig(rule.Match.Config),
+<% unless version == 'ga' -%>
 					"expr":           flattenMatchExpr(rule.Match),
+<% end -%>
 				},
 			},
 		}
@@ -421,6 +430,7 @@ func flattenMatchConfig(conf *compute.SecurityPolicyRuleMatcherConfig) []map[str
 	return []map[string]interface{}{data}
 }
 
+<% unless version == 'ga' -%>
 func flattenMatchExpr(match *compute.SecurityPolicyRuleMatcher) []map[string]interface{} {
 	if match.Expr == nil {
 		return nil
@@ -436,6 +446,7 @@ func flattenMatchExpr(match *compute.SecurityPolicyRuleMatcher) []map[string]int
 
 	return []map[string]interface{}{data}
 }
+<% end -%>
 
 func resourceSecurityPolicyStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
