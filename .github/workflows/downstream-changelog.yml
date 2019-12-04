@@ -28,8 +28,8 @@ jobs:
             - name: Push changelog
               uses: ad-m/github-push-action@master
               with:
-                  github_token: ${{ secrets.NATHAN_TOKEN }}
-                  repository: ndmckinley/terraform-provider-google
+                  github_token: ${{ secrets.MAGICIAN_TOKEN }}
+                  repository: terraform-providers/terraform-provider-google
                   branch: master
                   directory: /home/runner/work/magic-modules/terraform-provider-google
 
@@ -58,7 +58,7 @@ jobs:
             - name: Push changelog
               uses: ad-m/github-push-action@master
               with:
-                  github_token: ${{ secrets.NATHAN_TOKEN }}
-                  repository: ndmckinley/terraform-provider-google-beta
+                  github_token: ${{ secrets.MAGICIAN_TOKEN }}
+                  repository: terraform-providers/terraform-provider-google-beta
                   branch: master
                   directory: /home/runner/work/magic-modules/terraform-provider-google-beta
