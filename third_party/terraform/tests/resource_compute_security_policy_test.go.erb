@@ -249,7 +249,7 @@ resource "google_compute_security_policy" "policy" {
 		priority = "2000"
 		match {
 			expr {
-				// These fields are not yet supported (Issue #4497: mbang)
+				// These fields are not yet supported (Issue terraform-providers/terraform-provider-google#4497: mbang)
 				// title = "Has User"
 				// description = "Determines whether the request has a user account"
 				expression = "evaluatePreconfiguredExpr('xss-canary')"
