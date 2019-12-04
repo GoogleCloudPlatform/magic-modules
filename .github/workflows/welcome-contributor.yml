@@ -1,0 +1,22 @@
+---
+name: welcome-contributor
+on:
+    pull_request:
+        types: ["opened"]
+jobs:
+    tpg:
+        if: github.event.pull_request.author_association == "NONE"
+        runs-on: ubuntu-latest
+        name: "Build Terraform and push downstream"
+        env:
+            GOPATH: /home/runner/work/magic-modules/go
+            GO111MODULE: auto
+        steps:
+            - name: Comment on PR.
+              uses: ndmckinley/comment-on-pr@master
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  msg: |
+                      Thanks for your contribution!  A repository owner will be with you shortly.
+                  tag_list: ndmckinley,danawillow,tysen,rileykarson,alexstephen
