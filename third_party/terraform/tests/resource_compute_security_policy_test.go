@@ -196,15 +196,11 @@ resource "google_compute_security_policy" "policy" {
 		action   = "allow"
 		priority = "2000"
 		match {
-			versioned_expr = "SRC_IPS_V1"
-			config {
-				src_ip_ranges = ["10.0.0.0/24"]
-			}
-
 			expr {
-				title = "Has User"
-				description = "Determines whether the request has a user account"
-				expression = "size(request.user) > 0"
+				// These fields are not yet supported (Issue #4497: mbang)
+				// title = "Has User"
+				// description = "Determines whether the request has a user account"
+				expression = "evaluatePreconfiguredExpr('xss-canary')"
 			}
 		}
 		preview = true

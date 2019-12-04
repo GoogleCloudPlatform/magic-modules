@@ -73,7 +73,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"config": {
 										Type:     schema.TypeList,
-										Required: true,
+										Optional: true,
 										MaxItems: 1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
@@ -90,7 +90,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 
 									"versioned_expr": {
 										Type:         schema.TypeString,
-										Required:     true,
+										Optional:     true,
 										ValidateFunc: validation.StringInSlice([]string{"SRC_IPS_V1"}, false),
 									},
 
@@ -100,22 +100,23 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 										MaxItems: 1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
-												"title": {
-													Type:     schema.TypeString,
-													Optional: true,
-												},
-												"description": {
-													Type:     schema.TypeString,
-													Optional: true,
-												},
 												"expression": {
 													Type:     schema.TypeString,
 													Required: true,
 												},
-												"location": {
-													Type:     schema.TypeString,
-													Optional: true,
-												},
+												// These fields are not yet supported (Issue #4497: mbang)
+												// "title": {
+												// 	Type:     schema.TypeString,
+												// 	Optional: true,
+												// },
+												// "description": {
+												// 	Type:     schema.TypeString,
+												// 	Optional: true,
+												// },
+												// "location": {
+												// 	Type:     schema.TypeString,
+												// 	Optional: true,
+												// },
 											},
 										},
 									},
@@ -378,10 +379,11 @@ func expandSecurityPolicyMatchExpr(expr []interface{}) *compute.Expr {
 
 	data := expr[0].(map[string]interface{})
 	return &compute.Expr{
-		Title:       data["title"].(string),
-		Description: data["description"].(string),
-		Expression:  data["expression"].(string),
-		Location:    data["location"].(string),
+		Expression: data["expression"].(string),
+		// These fields are not yet supported  (Issue #4497: mbang)
+		// Title:       data["title"].(string),
+		// Description: data["description"].(string),
+		// Location:    data["location"].(string),
 	}
 }
 
@@ -396,19 +398,8 @@ func flattenSecurityPolicyRules(rules []*compute.SecurityPolicyRule) []map[strin
 			"match": []map[string]interface{}{
 				{
 					"versioned_expr": rule.Match.VersionedExpr,
-					"config": []map[string]interface{}{
-						{
-							"src_ip_ranges": schema.NewSet(schema.HashString, convertStringArrToInterface(rule.Match.Config.SrcIpRanges)),
-						},
-					},
-					"expr": []map[string]interface{}{
-						{
-							"title":       rule.Match.Expr.Title,
-							"description": rule.Match.Expr.Description,
-							"expression":  rule.Match.Expr.Expression,
-							"location":    rule.Match.Expr.Location,
-						},
-					},
+					"config":         flattenMatchConfig(rule.Match.Config),
+					"expr":           flattenMatchExpr(rule.Match),
 				},
 			},
 		}
@@ -416,6 +407,34 @@ func flattenSecurityPolicyRules(rules []*compute.SecurityPolicyRule) []map[strin
 		rulesSchema = append(rulesSchema, data)
 	}
 	return rulesSchema
+}
+
+func flattenMatchConfig(conf *compute.SecurityPolicyRuleMatcherConfig) []map[string]interface{} {
+	if conf == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"src_ip_ranges": schema.NewSet(schema.HashString, convertStringArrToInterface(conf.SrcIpRanges)),
+	}
+
+	return []map[string]interface{}{data}
+}
+
+func flattenMatchExpr(match *compute.SecurityPolicyRuleMatcher) []map[string]interface{} {
+	if match.Expr == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"expression": match.Expr.Expression,
+		// These fields are not yet supported (Issue #4497: mbang)
+		// "title":       match.Expr.Title,
+		// "description": match.Expr.Description,
+		// "location":    match.Expr.Location,
+	}
+
+	return []map[string]interface{}{data}
 }
 
 func resourceSecurityPolicyStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
