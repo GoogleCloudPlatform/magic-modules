@@ -17,6 +17,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Instance: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: false
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
     properties:
       state: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true  
