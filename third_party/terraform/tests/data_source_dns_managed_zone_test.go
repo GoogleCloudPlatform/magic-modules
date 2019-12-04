@@ -18,7 +18,7 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceDnsManagedZone_basic(),
-				Check:  checkDataSourceStateMatchesResourceStateWithIgnores(
+				Check: checkDataSourceStateMatchesResourceStateWithIgnores(
 					"data.google_dns_managed_zone.qa",
 					"google_dns_managed_zone.foo",
 					map[string]struct{}{
