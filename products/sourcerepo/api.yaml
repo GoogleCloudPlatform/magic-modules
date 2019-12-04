@@ -78,6 +78,7 @@ objects:
               values:
                 - :PROTOBUF
                 - :JSON
+              required: true
             - !ruby/object:Api::Type::String
               name: 'serviceAccountEmail'
               description: |

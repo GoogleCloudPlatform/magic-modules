@@ -39,6 +39,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           Resource name of the repository, of the form `{{repo}}`.
           The repo name may contain slashes. eg, `name/with/slash`
+      pubsubConfigs.serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       update_encoder: templates/terraform/update_encoder/source_repo_repository.erb
       post_create: templates/terraform/post_create/source_repo_repository_update.go.erb
