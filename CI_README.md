@@ -23,7 +23,14 @@ The pipeline is written in Github Actions, and is defined in the workflow .yml f
 The generation / diff pipeline has one Action per downstream.  It generates the downstream at the PR's merge commit and at the left-side parent (`HEAD~`), which guarantees isolation of exclusively the changes made by the PR in question.  It creates commits for the downstreams as before-and-after commits.  Those commits don't have relevant git history - they're not meant to be applied - but they are used in a [two-dot diff](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-comparing-branches-in-pull-requests#three-dot-and-two-dot-git-diff-comparisons).  This means that if there are no changes to the downstream, you'll see an empty diff.  These downstream branches are named `pr-$number-old` and `pr-$number-new` respectively.
 
 ### Downstream Pushing
-The downstream pushing pipeline runs on a cron job - every 20 minutes.  It checks a branch called `downstream-master` to find the commit which was most recently pushed to downstreams, then collects all commits since then.  One at a time, it generates each downstream at each commit, building an in-order history.  It pushes all the downstreams directly to master branches, but it does not use the `--force` flag - if the branch goes out of sync, the push will fail without damaging the downstream repository history.
+The downstream pushing pipeline runs on a cron job - every 20 minutes.  It checks a branch on the Magic Modules repo called `downstream-master` to find the commit which was most recently pushed to downstreams, then collects all commits since then.  One at a time, it generates each downstream at each commit, building an in-order history.  It pushes all the downstreams directly to master branches, but it does not use the `--force` flag - if the branch goes out of sync, the push will fail without damaging the downstream repository history.  When this happens, `downstream-master` will not be updated, so the next cycle, 20 minutes later, will succeed.
+
+It is safe to have more than one downstream-push running at the same time due to this property, in the event of overruns.  Each run will either
+a) make no changes to any downstream and fail
+or
+b) atomically update every downstream to a fast-forward state that represents the appropriate HEAD as of the beginning of the run
+
+It's possible, if we assume the worst, for a job to be cancelled or fail in the middle of pushing downstreams, if lightning strikes a datacenter or some other unlikely misfortune happens.  This has a chance to cause a hiccup in the downstream history, but isn't dangerous.
 
 ## Deploying the pipeline
 The code on the `master` branch is used in all cases - if you are making changes to the Actions, your changes will not apply until they are merged in.
