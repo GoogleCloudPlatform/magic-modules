@@ -95,7 +95,7 @@ jobs:
                   done
                   git branch -f downstream-master
 
-            - name: Update downstream-master
+            - name: Update downstream-master branch in this repo.
               uses: ad-m/github-push-action@master
               with:
                   github_token: ${{ secrets.NATHAN_TOKEN }}
@@ -109,7 +109,6 @@ jobs:
                   repository: ndmckinley/terraform-provider-google-beta
                   branch: master
                   directory: /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google-beta
-                  force: true
             - name: Push changes to TPG
               uses: ad-m/github-push-action@master
               with:
@@ -117,4 +116,24 @@ jobs:
                   repository: ndmckinley/terraform-provider-google
                   branch: master
                   directory: /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google
-                  force: true
+            - name: Push changes to Ansible
+              uses: ad-m/github-push-action@master
+              with:
+                  github_token: ${{ secrets.NATHAN_TOKEN }}
+                  repository: ndmckinley/ansible_collections_google
+                  branch: master
+                  directory: /home/runner/work/magic-modules/ansible_collections_google
+            - name: Push changes to Inspec
+              uses: ad-m/github-push-action@master
+              with:
+                  github_token: ${{ secrets.NATHAN_TOKEN }}
+                  repository: ndmckinley/inspec-gcp
+                  branch: master
+                  directory: /home/runner/work/magic-modules/inspec-gcp
+            - name: Push changes to tf-conversion
+              uses: ad-m/github-push-action@master
+              with:
+                  github_token: ${{ secrets.NATHAN_TOKEN }}
+                  repository: ndmckinley/terraform-google-conversion
+                  branch: master
+                  directory: /home/runner/work/magic-modules/go/src/github.com/GoogleCloudPlatform/terraform-google-conversion
