@@ -134,8 +134,9 @@ For example, to generate Terraform:
 bundle exec compiler -a -v "ga" -e terraform -o "$GOPATH/src/github.com/terraform-providers/terraform-provider-google"
 ```
 
-It's worth noting that Magic Modules will only generate new files when ran
-locally. The "Magician"- the Magic Modules CI system- handles deletion of old
+It's worth noting that Magic Modules will not delete old files by itself,
+so partial generation (runs without `-a`) will work normally.
+The "Magician"- the Magic Modules CI system- handles deletion of
 files when creating PRs.
 
 #### Terraform's `google-beta` provider
@@ -245,10 +246,9 @@ Once you've created your commit(s), you can submit the code normally as a PR in
 the GitHub UI. The PR template includes some instructions to make sure we
 generate good PR messages for the tools' repo histories.
 
-Once your PR is submitted, one of the Magic Modules maintainers will review it.
-They'll look over the code before running the "Magician", the Magic Modules CI
-system that generates PRs against each tool. Each review pass, your reviewer
-will run the Magician again to update the PRs against the tools.
+Once your PR is opened, one of the Magic Modules maintainers will be tagged in
+by our CI system ("the Magician"). Each review pass, your reviewer
+will check the diffs in the generated tools, which are updated by the Magician.
 
 If there are multiple tools affected, that first reviewer will be the "primary"
 reviewer, and for each other affected tool a maintainer for that specific tool
