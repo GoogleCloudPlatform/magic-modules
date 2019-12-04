@@ -11753,11 +11753,6 @@ objects:
               properties:
                 - !ruby/object:Api::Type::Array
                   name: 'requestHeadersToAdd'
-                  at_least_one_of:
-                    - path_matcher.0.header_action.0.request_headers_to_add
-                    - path_matcher.0.header_action.0.request_headers_to_remove
-                    - path_matcher.0.header_action.0.response_headers_to_add
-                    - path_matcher.0.header_action.0.response_headers_to_remove
                   description: |
                     Headers to add to a matching request prior to forwarding the request to the
                     backendService.
@@ -11765,64 +11760,53 @@ objects:
                     properties:
                       - !ruby/object:Api::Type::String
                         name: 'headerName'
+                        required: true
                         description: |
                           The name of the header.
                       - !ruby/object:Api::Type::String
                         name: 'headerValue'
+                        required: true
                         description: |
                           The value of the header to add.
                       - !ruby/object:Api::Type::Boolean
                         name: 'replace'
-                        default_value: false
+                        required: true
                         description: |
                           If false, headerValue is appended to any values that already exist for the
                           header. If true, headerValue is set for the header, discarding any values that
-                          were set for that header. Defaults to false.
+                          were set for that header.
                 - !ruby/object:Api::Type::Array
                   name: 'requestHeadersToRemove'
                   item_type: Api::Type::String
-                  at_least_one_of:
-                    - path_matcher.0.header_action.0.request_headers_to_add
-                    - path_matcher.0.header_action.0.request_headers_to_remove
-                    - path_matcher.0.header_action.0.response_headers_to_add
-                    - path_matcher.0.header_action.0.response_headers_to_remove
                   description: |
                     A list of header names for headers that need to be removed from the request
                     prior to forwarding the request to the backendService.
                 - !ruby/object:Api::Type::Array
                   name: 'responseHeadersToAdd'
-                  at_least_one_of:
-                    - path_matcher.0.header_action.0.request_headers_to_add
-                    - path_matcher.0.header_action.0.request_headers_to_remove
-                    - path_matcher.0.header_action.0.response_headers_to_add
-                    - path_matcher.0.header_action.0.response_headers_to_remove
                   description: |
                     Headers to add the response prior to sending the response back to the client.
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                       - !ruby/object:Api::Type::String
                         name: 'headerName'
+                        required: true
                         description: |
                           The name of the header.
                       - !ruby/object:Api::Type::String
                         name: 'headerValue'
+                        required: true
                         description: |
                           The value of the header to add.
                       - !ruby/object:Api::Type::Boolean
                         name: 'replace'
-                        default_value: false
+                        required: true
                         description: |
                           If false, headerValue is appended to any values that already exist for the
                           header. If true, headerValue is set for the header, discarding any values that
-                          were set for that header. Defaults to false.
+                          were set for that header.
                 - !ruby/object:Api::Type::Array
                   name: 'responseHeadersToRemove'
                   item_type: Api::Type::String
-                  at_least_one_of:
-                    - path_matcher.0.header_action.0.request_headers_to_add
-                    - path_matcher.0.header_action.0.request_headers_to_remove
-                    - path_matcher.0.header_action.0.response_headers_to_add
-                    - path_matcher.0.header_action.0.response_headers_to_remove
                   description: |
                     A list of header names for headers that need to be removed from the response
                     prior to sending the response back to the client.
@@ -11878,19 +11862,21 @@ objects:
                           properties:
                             - !ruby/object:Api::Type::String
                               name: 'headerName'
+                              required: true
                               description: |
                                 The name of the header.
                             - !ruby/object:Api::Type::String
                               name: 'headerValue'
+                              required: true
                               description: |
                                 The value of the header to add.
                             - !ruby/object:Api::Type::Boolean
                               name: 'replace'
-                              default_value: false
+                              required: true
                               description: |
                                 If false, headerValue is appended to any values that already exist for the
                                 header. If true, headerValue is set for the header, discarding any values that
-                                were set for that header. Defaults to false.
+                                were set for that header.
                       - !ruby/object:Api::Type::Array
                         name: 'requestHeadersToRemove'
                         item_type: Api::Type::String
@@ -11905,19 +11891,21 @@ objects:
                           properties:
                             - !ruby/object:Api::Type::String
                               name: 'headerName'
+                              required: true
                               description: |
                                 The name of the header.
                             - !ruby/object:Api::Type::String
                               name: 'headerValue'
+                              required: true
                               description: |
                                 The value of the header to add.
                             - !ruby/object:Api::Type::Boolean
                               name: 'replace'
-                              default_value: false
+                              required: true
                               description: |
                                 If false, headerValue is appended to any values that already exist for the
                                 header. If true, headerValue is set for the header, discarding any values that
-                                were set for that header. Defaults to false.
+                                were set for that header.
                       - !ruby/object:Api::Type::Array
                         name: 'responseHeadersToRemove'
                         item_type: Api::Type::String
@@ -12286,21 +12274,25 @@ objects:
                             description: |
                               Specfies one or more conditions when this retry rule applies. Valid values are:
                               - 5xx: Loadbalancer will attempt a retry if the backend service responds with
-                              any 5xx response code, or if the backend service does not respond at all,
-                              example: disconnects, reset, read timeout, connection failure, and refused
-                              streams.  - gateway-error: Similar to 5xx, but only applies to response codes
-                              502, 503 or 504. -  - connect-failure: Loadbalancer will retry on failures
-                              connecting to backend services, for example due to connection timeouts.  -
-                              retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
-                              Currently the only retriable error supported is 409.  - refused-
-                              stream:Loadbalancer will retry if the backend service resets the stream with a
-                              REFUSED_STREAM error code. This reset type indicates that it is safe to retry.
-                              - cancelledLoadbalancer will retry if the gRPC status code in the response
-                              header is set to cancelled  - deadline-exceeded: Loadbalancer will retry if the
-                              gRPC status code in the response header is set to deadline-exceeded  - resource-
-                              exhausted: Loadbalancer will retry if the gRPC status code in the response
-                              header is set to resource-exhausted  - unavailable: Loadbalancer will retry if
-                              the gRPC status code in the response header is set to unavailable
+                                any 5xx response code, or if the backend service does not respond at all,
+                                example: disconnects, reset, read timeout, connection failure, and refused
+                                streams.
+                              - gateway-error: Similar to 5xx, but only applies to response codes
+                                502, 503 or 504.
+                              - connect-failure: Loadbalancer will retry on failures
+                                connecting to backend services, for example due to connection timeouts.
+                              - retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
+                                Currently the only retriable error supported is 409.
+                              - refused-stream: Loadbalancer will retry if the backend service resets the stream with a
+                                REFUSED_STREAM error code. This reset type indicates that it is safe to retry.
+                              - cancelled: Loadbalancer will retry if the gRPC status code in the response
+                                header is set to cancelled
+                              - deadline-exceeded: Loadbalancer will retry if the
+                                gRPC status code in the response header is set to deadline-exceeded
+                              - resource-exhausted: Loadbalancer will retry if the gRPC status code in the response
+                                header is set to resource-exhausted
+                              - unavailable: Loadbalancer will retry if the gRPC status code in
+                                the response header is set to unavailable
                       - !ruby/object:Api::Type::NestedObject
                         name: 'timeout'
                         description: |
@@ -12377,19 +12369,21 @@ objects:
                                     properties:
                                       - !ruby/object:Api::Type::String
                                         name: 'headerName'
+                                        required: true
                                         description: |
                                           The name of the header.
                                       - !ruby/object:Api::Type::String
                                         name: 'headerValue'
+                                        required: true
                                         description: |
                                           The value of the header to add.
                                       - !ruby/object:Api::Type::Boolean
                                         name: 'replace'
-                                        default_value: false
+                                        required: true
                                         description: |
                                           If false, headerValue is appended to any values that already exist for the
                                           header. If true, headerValue is set for the header, discarding any values that
-                                          were set for that header. Defaults to false.
+                                          were set for that header.
                                 - !ruby/object:Api::Type::Array
                                   name: 'requestHeadersToRemove'
                                   item_type: Api::Type::String
@@ -12404,19 +12398,21 @@ objects:
                                     properties:
                                       - !ruby/object:Api::Type::String
                                         name: 'headerName'
+                                        required: true
                                         description: |
                                           The name of the header.
                                       - !ruby/object:Api::Type::String
                                         name: 'headerValue'
+                                        required: true
                                         description: |
                                           The value of the header to add.
                                       - !ruby/object:Api::Type::Boolean
                                         name: 'replace'
-                                        default_value: false
+                                        required: true
                                         description: |
                                           If false, headerValue is appended to any values that already exist for the
                                           header. If true, headerValue is set for the header, discarding any values that
-                                          were set for that header. Defaults to false.
+                                          were set for that header.
                                 - !ruby/object:Api::Type::Array
                                   name: 'responseHeadersToRemove'
                                   item_type: Api::Type::String
