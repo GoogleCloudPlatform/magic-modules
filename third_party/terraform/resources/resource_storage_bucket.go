@@ -595,11 +595,13 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 	// Get the bucket
 	bucket := d.Get("name").(string)
 
+	var listError error
 	for {
 		res, err := config.clientStorage.Objects.List(bucket).Versions(true).Do()
 		if err != nil {
 			log.Printf("Error listing contents of bucket %s: %v", bucket, err)
 			// If we can't list the contents, try deleting the bucket anyway in case it's empty
+			listError = err
 			break
 		}
 
@@ -675,6 +677,9 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 		}
 		return resource.NonRetryableError(err)
 	})
+	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 && strings.Contains(gerr.Message, "not empty") && listError != nil {
+		return fmt.Errorf("could not delete non-empty bucket due to error when listing contents: %v", listError)
+	}
 	if err != nil {
 		log.Printf("Error deleting bucket %s: %v", bucket, err)
 		return err
