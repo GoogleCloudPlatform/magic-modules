@@ -29,9 +29,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "sourcerepo_repository_full"
         primary_resource_id: "my-repo"
-        primary_resource_name: "fmt.Sprintf(\"my-repository%s\", context[\"random_suffix\"])"
         vars:
           repository_name: "my-repository"
+          account_id: "my-account"
+          topic_name: "my-topic"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/shortname_to_url.go.erb

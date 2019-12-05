@@ -1,10 +1,10 @@
 resource "google_service_account" "test-account" {
-  account_id   = "my-service-account"
+  account_id   = "<%= ctx[:vars]['account_id'] %>"
   display_name = "Test Service Account"
 }
 
 resource "google_pubsub_topic" "topic" {
-  name     = "my-topic"
+  name     = "<%= ctx[:vars]['topic_name'] %>"
 }
 
 resource "google_sourcerepo_repository" "<%= ctx[:primary_resource_id] %>" {

@@ -33,6 +33,8 @@ func TestAccSourceRepoRepository_update(t *testing.T) {
 	t.Parallel()
 
 	repositoryName := fmt.Sprintf("source-repo-repository-test-%s", acctest.RandString(10))
+	accountId := fmt.Sprintf("account-id-%s", acctest.RandString(10))
+	topicName := fmt.Sprintf("topic-name-%s", acctest.RandString(10))
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -47,7 +49,7 @@ func TestAccSourceRepoRepository_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccSourceRepoRepository_extended(repositoryName),
+				Config: testAccSourceRepoRepository_extended(accountId, topicName, repositoryName),
 			},
 			{
 				ResourceName:      "google_sourcerepo_repository.acceptance",
@@ -66,15 +68,15 @@ resource "google_sourcerepo_repository" "acceptance" {
 `, repositoryName)
 }
 
-func testAccSourceRepoRepository_extended(repositoryName string) string {
+func testAccSourceRepoRepository_extended(accountId string, topicName string, repositoryName string) string {
 	return fmt.Sprintf(`
 	resource "google_service_account" "test-account" {
-		account_id   = "service-account-update"
+		account_id   = "%s"
 		display_name = "Test Service Account"
 	  }
 	  
 	  resource "google_pubsub_topic" "topic" {
-		name     = "topic-update"
+		name     = "%s"
 	  }
 	  
 	  resource "google_sourcerepo_repository" "acceptance" {
@@ -85,5 +87,5 @@ func testAccSourceRepoRepository_extended(repositoryName string) string {
 			service_account_email = google_service_account.test-account.email
 		}
 	  }
-`, repositoryName)
+`, accountId, topicName, repositoryName)
 }
