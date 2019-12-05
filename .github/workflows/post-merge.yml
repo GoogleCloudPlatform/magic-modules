@@ -4,6 +4,7 @@ on:
     schedule:
         - cron: '*/20 * * * *'
 jobs:
+    # TODO(ndmckinley): split into 5 downstream pushes.
     push-downstream:
         runs-on: ubuntu-latest
         name: "Build and push downstreams"
