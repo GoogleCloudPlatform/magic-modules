@@ -21,10 +21,14 @@ jobs:
               run: |
                   pushd terraform-provider-google
                   mkdir -p ./.changelog/
-                  echo ${{github.event.pull_request.body}} | sed -e '/```release-note/,/```/!d' > .changelog/${{github.event.pull_request.number}}.txt
+                  echo $PR_BODY | sed -e '/```release-note/,/```/!d' > .changelog/${{github.event.pull_request.number}}.txt
                   git add .changelog
                   git commit -m "Changelog entry for MM PR #${{github.event.pull_request.number}}."
                   popd
+              # We consume user-controlled text as environment variables to avoid directly substituting
+              # unknown text into bash scripts where possible.
+              env:
+                  PR_BODY: ${{github.event.pull_request.body}}
             - name: Push changelog
               uses: ad-m/github-push-action@master
               with:
@@ -48,10 +52,12 @@ jobs:
             - name: Configure git.
               run: git config --global user.email "magic-modules@google.com" && git config --global user.name "Modular Magician"
             - name: "Add changelog entries."
+              env:
+                  PR_BODY: ${{github.event.pull_request.body}}
               run: |
                   pushd terraform-provider-google
                   mkdir -p ./.changelog/
-                  echo ${{github.event.pull_request.body}} | sed -e '/```release-note/,/```/!d' > .changelog/${{github.event.pull_request.number}}.txt
+                  echo $PR_BODY | sed -e '/```release-note/,/```/!d' > .changelog/${{github.event.pull_request.number}}.txt
                   git add .changelog
                   git commit -m "Changelog entry for MM PR #${{github.event.pull_request.number}}."
                   popd

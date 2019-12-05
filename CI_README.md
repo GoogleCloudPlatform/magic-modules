@@ -27,7 +27,7 @@ The Magician maintains a tag called `downstream-master` that tracks the Magic Mo
 
 Every 20 minutes, the downstreams are synced with the MM repo. Commit-by-commit for each commit since `downstream-master`, the Magician runs MM on a local copy of each downstream. Any changes MM generates are committed, and that commit's message will link back to the MM commit it came from.
 
-In effect, this means that each downstream commit will correspond 1:1 to an MM commit. If an MM commit had no changes in a downstream, no commit will be created.
+In effect, this means that each downstream commit will correspond 1:1 to an MM commit. If an MM commit had no changes in a downstream, no commit will be created.  We are enforcing squash-merges-only in Magic Modules.
 
 Once a set of downstream commits have been created, the Magician pushes them directly to the downstream's `master` branch. It doesn't use the `--force` flag. If the branch goes out of sync with what MM expects, the push will fail without damaging the downstream repository's history.  When a push fails, `downstream-master` will not be updated, and the commits will be reprocessed in the next sync. 
 
@@ -48,4 +48,5 @@ The code on the `master` branch is used in all cases - if you are making changes
 * The downstream push doesn't happen immediately.  We caused some delay with the cron-based approach that could have been avoided.  This ensures that two commits which are merged at about the same time will never conflict, since only one copy of the downstream push will be running at a time.
 * The downstream push doesn't open PRs against downstreams.  This may inconvenience some existing workflows which rely on the downstream PRs.  This ensures that merge conflicts never come into play, since the downstreams never have dangling PRs.
 * The downstream push is totally disconnected from the differ.  This means that the diff which is approved isn't guaranteed to be applied *exactly*, if for instance magic modules' behavior changes on master between diff generation and downstream push.  This is also intended to avoid merge conflicts by, effectively, rebasing each commit on top of master before final generation is done.
+    * Imagine the following situation: PR A and PR B are opened simultaneously. PR A changes the copyright date in each file to 2020. PR B adds a new resource. PR A is merged seconds before PR B, so they are picked up in the same push-downstream run.  The commit from PR B will produce a new file with the 2020 copyright date, even though the diff said 2019, since PR A was merged first.
 * We deleted the submodules.  They weren't useful to us and they were annoying to update - they're not in use anymore as far as we know - but it's possible there's some long-forgotten workflow that someone is using which will be damaged.

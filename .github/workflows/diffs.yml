@@ -11,10 +11,14 @@ jobs:
             GOPATH: /home/runner/work/magic-modules/go
             GO111MODULE: auto
         steps:
+            # This setup is extremely well-optimized in GH Actions.  Although we could create
+            # our own container for this action and eliminate the setup time, the total setup
+            # time overall is ~20s on a ~8m process, which is a very good trade in exchange for
+            # not taking on the maintenance burden of a custom container.
             - uses: actions/checkout@v1
             - uses: actions/setup-go@v1
               with:
-                  go-version: 1.11.x
+                  go-version: 1.13.4
             - uses: actions/setup-ruby@v1
               with:
                   ruby-version: 2.x
@@ -30,18 +34,21 @@ jobs:
             - name: Generate new commit.
               run: |
                   git config --global user.email "magic-modules@google.com" && git config --global user.name "Modular Magician"
+                  export PATH=$PATH:$GOPATH/bin
                   pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google-beta
                   find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \;
                   popd
-                  export PATH=$PATH:$GOPATH/bin
                   bundle exec compiler -a -e terraform -o $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta/ -v beta
 
                   pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google-beta
-                  git add . && git commit -m "${{ github.event.pull_request.title }}" || true
+                  git add . && git commit -m "$PR_TITLE" || true
                   popd
+              env:
+                  PR_TITLE: ${{ github.event.pull_request.title }}
 
             - name: Push new commit
-              uses: ad-m/github-push-action@master
+              # TODO(ndmckinley): stop using your personal repo, get this into this repo.
+              uses: ndmckinley/github-push-action@master
               with:
                   github_token: ${{ secrets.MAGICIAN_TOKEN }}
                   repository: modular-magician/terraform-provider-google-beta
@@ -51,20 +58,22 @@ jobs:
 
             - name: Generate old commit.
               run: |
+                  export PATH=$PATH:$GOPATH/bin
                   git reset --hard HEAD~
                   git config --global user.email "magic-modules@google.com" && git config --global user.name "Modular Magician"
                   pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google-beta
                   find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \;
                   popd
-                  export PATH=$PATH:$GOPATH/bin
                   bundle exec compiler -a -e terraform -o $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta/ -v beta
 
                   pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google-beta
-                  git add . && git commit -m "${{ github.event.pull_request.title }}" || true
+                  git add . && git commit -m "$PR_TITLE" || true
                   popd
+              env:
+                  PR_TITLE: ${{ github.event.pull_request.title }}
 
             - name: Push old commit
-              uses: ad-m/github-push-action@master
+              uses: ndmckinley/github-push-action@master
               with:
                   github_token: ${{ secrets.MAGICIAN_TOKEN }}
                   repository: modular-magician/terraform-provider-google-beta
@@ -82,7 +91,7 @@ jobs:
             - uses: actions/checkout@v1
             - uses: actions/setup-go@v1
               with:
-                  go-version: 1.11.x
+                  go-version: 1.13.4
             - uses: actions/setup-ruby@v1
               with:
                   ruby-version: 2.x
@@ -97,19 +106,21 @@ jobs:
 
             - name: Generate new commit.
               run: |
+                  export PATH=$PATH:$GOPATH/bin
                   git config --global user.email "magic-modules@google.com" && git config --global user.name "Modular Magician"
                   pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google
                   find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \;
                   popd
-                  export PATH=$PATH:$GOPATH/bin
                   bundle exec compiler -a -e terraform -o $GOPATH/src/github.com/terraform-providers/terraform-provider-google
 
                   pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google
-                  git add . && git commit -m "${{ github.event.pull_request.title }}" || true
+                  git add . && git commit -m "$PR_TITLE" || true
                   popd
+              env:
+                  PR_TITLE: ${{ github.event.pull_request.title }}
 
             - name: Push new commit
-              uses: ad-m/github-push-action@master
+              uses: ndmckinley/github-push-action@master
               with:
                   github_token: ${{ secrets.MAGICIAN_TOKEN }}
                   repository: modular-magician/terraform-provider-google
@@ -119,20 +130,22 @@ jobs:
 
             - name: Generate new commit.
               run: |
+                  export PATH=$PATH:$GOPATH/bin
                   git reset --hard HEAD~
                   git config --global user.email "magic-modules@google.com" && git config --global user.name "Modular Magician"
                   pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google
                   find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \;
                   popd
-                  export PATH=$PATH:$GOPATH/bin
                   bundle exec compiler -a -e terraform -o $GOPATH/src/github.com/terraform-providers/terraform-provider-google
 
                   pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google
-                  git add . && git commit -m "${{ github.event.pull_request.title }}" || true
+                  git add . && git commit -m "$PR_TITLE" || true
                   popd
+              env:
+                  PR_TITLE: ${{ github.event.pull_request.title }}
 
             - name: Push old commit
-              uses: ad-m/github-push-action@master
+              uses: ndmckinley/github-push-action@master
               with:
                   github_token: ${{ secrets.MAGICIAN_TOKEN }}
                   repository: modular-magician/terraform-provider-google
@@ -150,7 +163,7 @@ jobs:
             - uses: actions/checkout@v1
             - uses: actions/setup-go@v1
               with:
-                  go-version: 1.11.x
+                  go-version: 1.13.4
             - uses: actions/setup-ruby@v1
               with:
                   ruby-version: 2.x
@@ -167,12 +180,14 @@ jobs:
               run: git config --global user.email "magic-modules@google.com" && git config --global user.name "Modular Magician"
 
             - run: export PATH=$PATH:$GOPATH/bin; bundle exec compiler -a -e terraform -o $GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion/
-            - run: git add . && git commit -m "${{ github.event.pull_request.title }}"
+            - run: git add . && git commit -m "$PR_TITLE"
               working-directory: /home/runner/work/magic-modules/go/src/github.com/GoogleCloudPlatform/terraform-google-conversion
               continue-on-error: true
+              env:
+                  PR_TITLE: ${{ github.event.pull_request.title }}
 
             - name: Push new commit
-              uses: ad-m/github-push-action@master
+              uses: ndmckinley/github-push-action@master
               with:
                   github_token: ${{ secrets.MAGICIAN_TOKEN }}
                   repository: modular-magician/terraform-google-conversion
@@ -186,7 +201,7 @@ jobs:
               working-directory: /home/runner/work/magic-modules/go/src/github.com/GoogleCloudPlatform/terraform-google-conversion
               continue-on-error: true
             - name: Push old commit
-              uses: ad-m/github-push-action@master
+              uses: ndmckinley/github-push-action@master
               with:
                   github_token: ${{ secrets.MAGICIAN_TOKEN }}
                   repository: modular-magician/terraform-google-conversion
@@ -213,11 +228,13 @@ jobs:
             - name: Configure git.
               run: git config --global user.email "magic-modules@google.com" && git config --global user.name "Modular Magician"
             - run: bundle exec compiler -a -e inspec -o /home/runner/work/magic-modules/inspec-gcp
-            - run: git add . && git commit -m "${{ github.event.pull_request.title }}"
+            - run: git add . && git commit -m "$PR_TITLE"
               working-directory: /home/runner/work/magic-modules/inspec-gcp
               continue-on-error: true
+              env:
+                  PR_TITLE: ${{ github.event.pull_request.title }}
             - name: Push new commit
-              uses: ad-m/github-push-action@master
+              uses: ndmckinley/github-push-action@master
               with:
                   github_token: ${{ secrets.MAGICIAN_TOKEN }}
                   repository: modular-magician/inspec-gcp
@@ -232,7 +249,7 @@ jobs:
               working-directory: /home/runner/work/magic-modules/inspec-gcp
               continue-on-error: true
             - name: Push old commit
-              uses: ad-m/github-push-action@master
+              uses: ndmckinley/github-push-action@master
               with:
                   github_token: ${{ secrets.MAGICIAN_TOKEN }}
                   repository: modular-magician/inspec-gcp
@@ -262,11 +279,13 @@ jobs:
             - name: Configure git.
               run: git config --global user.email "magic-modules@google.com" && git config --global user.name "Modular Magician"
             - run: bundle exec compiler -a -e ansible -o /home/runner/work/magic-modules/ansible_collections_google
-            - run: git add . && git commit -m "${{ github.event.pull_request.title }}"
+            - run: git add . && git commit -m "$PR_TITLE"
+              env:
+                  PR_TITLE: ${{ github.event.pull_request.title }}
               working-directory: /home/runner/work/magic-modules/ansible_collections_google
               continue-on-error: true
             - name: Push new commit
-              uses: ad-m/github-push-action@master
+              uses: ndmckinley/github-push-action@master
               with:
                   github_token: ${{ secrets.MAGICIAN_TOKEN }}
                   repository: modular-magician/ansible_collections_google
@@ -280,7 +299,7 @@ jobs:
               working-directory: /home/runner/work/magic-modules/ansible_collections_google
               continue-on-error: true
             - name: Push old commit
-              uses: ad-m/github-push-action@master
+              uses: ndmckinley/github-push-action@master
               with:
                   github_token: ${{ secrets.MAGICIAN_TOKEN }}
                   repository: modular-magician/ansible_collections_google
@@ -296,7 +315,7 @@ jobs:
         steps:
             - uses: actions/setup-go@v1
               with:
-                  go-version: 1.11.x
+                  go-version: 1.13.4
             - uses: actions/checkout@v1
               with:
                   path: go/src/github.com/terraform-providers/terraform-provider-google
@@ -313,7 +332,7 @@ jobs:
         steps:
             - uses: actions/setup-go@v1
               with:
-                  go-version: 1.11.x
+                  go-version: 1.13.4
             - uses: actions/checkout@v1
               with:
                   path: go/src/github.com/terraform-providers/terraform-provider-google-beta
@@ -332,11 +351,13 @@ jobs:
             - tpg
             - tf-conversion
         steps:
+            # TODO(ndmckinley) remove this asap to reduce container build times.
             - name: Comment on PR.
               uses: ndmckinley/comment-on-pr@master
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
+                  # TODO(ndmckinley): don't comment with diffs if the diff is empty.
                   msg: |
                       # Diff Report
                       [Terraform GA](https://github.com/modular-magician/terraform-provider-google/compare/pr-${{ github.event.pull_request.number }}-old..pr-${{ github.event.pull_request.number }}-new).
