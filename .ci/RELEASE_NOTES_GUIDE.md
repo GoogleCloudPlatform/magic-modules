@@ -23,7 +23,7 @@ PR Description
 ...
 
 ```release-note:enhancement
-`compute`: Fixed permadiff for `bar` in `google_compute_foo`
+compute: Fixed permadiff for `bar` in `google_compute_foo`
 ```
 ~~~
 
@@ -36,11 +36,11 @@ PR Description
 ...
 
 ```release-note:deprecation
-Deprecated `region` for `google_container_cluster` - use location instead.
+container: Deprecated `region` for `google_container_cluster` - use location instead.
 ```
 
 ```release-note:enhancement
-`container`: Added general field `location` to `google_container_cluster`
+container: Added general field `location` to `google_container_cluster`
 ```
 ~~~
 
@@ -57,7 +57,7 @@ Notes SHOULD:
 - Only use present tense to suggest future behavior, i.e. for breaking
   changes, deprecations, or new behavior.
 - Impersonal third person (no “I”, “you”, etc.)
-- Start with `{{service}}` if changing an existing resource (see below)
+- Start with {{service}} if changing an existing resource (see below)
 
 See examples below for good release notes.
 
@@ -67,14 +67,14 @@ See examples below for good release notes.
 
 ~~~
 ```release-note:enhancement
-`compute`: added `foo_bar` field to `google_compute_foo` resource
+compute: added `foo_bar` field to `google_compute_foo` resource
 ```
 ~~~
 **Bugs:** fixing existing resources
 
 ~~~
 ```release-note:bug
-`container`: fixed perma-diff in `google_container_cluster`
+container: fixed perma-diff in `google_container_cluster`
 ```
 ~~~
 
@@ -82,7 +82,7 @@ See examples below for good release notes.
 
 ~~~
 ```release-note:breaking-change
-`project`: made `iam_policy` authoritative
+project: made `iam_policy` authoritative
 ```
 ~~~
 
@@ -90,7 +90,7 @@ See examples below for good release notes.
 
 ~~~
 ``` release-note:deprecation
-`container`: deprecated `region` and `zone` on `google_container_unicorn`. Use `location` instead.
+container: deprecated `region` and `zone` on `google_container_unicorn`. Use `location` instead.
 ```
 ~~~
 
@@ -117,12 +117,33 @@ Starting on Nov 1, 2019, Cloud Functions API will be private by default. Add app
 
 Don’t write notes like:
 - Add compute_instance resource
+  - not past tense
+  - no \`\` around resource
+  - doesn't start with service
 - Fix bug
+  - not past tense
+  - no indication of impact to users
+  - doesn't start with service
 - fixed a bug in google_compute_network
+  - no \`\` around resource
+  - doesn't start with service
+  - unclear impact to users
 - `google_project` now supports `blah`
+  - not past tense
+  - doesn't start with service
 - You can now create google_sql_instances in us-central1
+  - not past tense
+  - second person voice
+  - no \`\` around resource
+  - doesn't start with service
 - Adds support for `google_source_repo_repository`’s `url` field
+  - not past tense
+  - doesn't start with service
 - Users should now use location instead of zone/region on `google_container_unicorn`
+  - prescriptive instead of descriptive
+  - not past tense
+  - doesn't start with service
+  - would be fine after a "container: deprecated `location` field on `google_container_unicorn`."
 
 ## Headings
 
