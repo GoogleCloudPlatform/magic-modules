@@ -17,15 +17,21 @@ import (
 <% resource_name = product_ns + object.name -%>
 <%
 individual_url = object.self_link_url
-params = extract_identifiers(individual_url.gsub('{{name}}', "{{#{object.name.underscore}}}"))
 -%>
 <%
   tf_product = (@config.legacy_name || product_ns).underscore
   resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   resource_ns_iam = resource_ns + '_iam'
 -%>
-<% import_url = individual_url.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '') -%>
-<% import_str = Array.new(params.length, '%s').join('/') -%>
+<%
+if object.iam_policy.import_format
+	import_format = object.iam_policy.import_format.first
+else
+	import_format = individual_url
+end
+params = extract_identifiers(import_format.gsub('{{name}}', "{{#{object.name.underscore}}}"))
+import_url = import_format.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '')
+-%>
 <% import_qualifiers = [] -%>
 <% params.each_with_index do |param, i| -%>
 	<% if param == 'project' -%>

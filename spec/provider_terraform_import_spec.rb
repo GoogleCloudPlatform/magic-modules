@@ -36,9 +36,9 @@ describe Provider::Terraform do
       config.validate
     end
 
-    describe '#import_id_formats' do
+    describe '#import_id_formats_from_resource' do
       subject do
-        provider.import_id_formats(
+        provider.import_id_formats_from_resource(
           resource(
             'base_url: "projects/{{project}}/regions/{{region}}/subnetworks"'
           )

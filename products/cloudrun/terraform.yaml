@@ -53,6 +53,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_basic"
         primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tftest-cloudrun%s\", context[\"random_suffix\"])"
         vars:
           cloud_run_service_name: "tftest-cloudrun"
         test_env_vars:
