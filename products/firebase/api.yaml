@@ -1,0 +1,101 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Firebase
+display_name: Firebase Management API
+scopes:
+- https://www.googleapis.com/auth/cloud-platform
+- https://www.googleapis.com/auth/firebase
+versions:
+- !ruby/object:Api::Product::Version
+  name: ga
+  base_url: https://firebase.googleapis.com/v1beta1/
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+    - true
+    - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+objects:
+- !ruby/object:Api::Resource
+  name: 'Project'
+  base_url: 'projects/{{project}}'
+  create_url: 'projects/{{project}}:addFirebase'
+  description: A Firebase Project is the top-level Firebase entity. It is the container for Firebase Apps, Firebase Hosting sites, storage systems (Firebase Realtime Database, Cloud Firestore, Cloud Storage buckets) and other Firebase and Google Cloud Platform (GCP) resources.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation': 'https://firebase.google.com/docs'
+    api: 'https://firebase.google.com/docs/projects/api/reference/rest'
+  properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: |
+      The fully qualified resource name of the Project, in the format: projects/projectId
+    output: true
+  - !ruby/object:Api::Type::String
+    name: projectId
+    description: |
+      Immutable. The globally unique, user-assigned ID of the Project.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: projectNumber
+    description: |
+      The globally unique, Google-assigned identifier of the Project.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: displayName
+    description: |
+      The user-assigned display name of the Project.
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'resources'
+    description: |
+      The default resources associated with a FirebaseProject.
+    properties:
+    - !ruby/object:Api::Type::String
+      name: 'hostingSite'
+      description: |
+        The default Firebase Hosting site name, in the format: projectId
+        Though rare, your projectId might already be used as the name for an existing Hosting site in another project
+        (learn more about creating non-default, additional sites).
+        In these cases, your projectId is appended with a hyphen then five alphanumeric characters to create your default Hosting site name.
+        For example, if your projectId is myproject123, your default Hosting site name might be: myproject123-a5c1
+    - !ruby/object:Api::Type::String
+      name: 'realtimeDatabaseInstance'
+      description: |
+        The default Firebase Realtime Database instance name, in the format: projectId
+        Though rare, your projectId might already be used as the name for an existing Realtime Database instance in another project (learn more about database sharding).
+        In these cases, your projectId is appended with a hyphen then five alphanumeric characters to create your default Realtime Database instance name.
+        For example, if your projectId is myproject123, your default database instance name might be: myproject123-a5c16
+    - !ruby/object:Api::Type::String
+      name: 'storageBucket'
+      description: |
+        The default Cloud Storage for Firebase storage bucket, in the format: projectId.appspot.com
+    - !ruby/object:Api::Type::String
+      name: 'locationId'
+      description: |
+        The ID of the project's default GCP resource location. The location is one of the available GCP resource locations.
+        This field is omitted if the default GCP resource location has not been finalized yet.
+        To set your project's default GCP resource location, call defaultLocation.finalize after you add Firebase services to your project.

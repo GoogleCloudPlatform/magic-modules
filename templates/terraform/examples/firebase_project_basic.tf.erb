@@ -1,0 +1,3 @@
+resource "google_firebase_project" "<%= ctx[:primary_resource_id] %>" {
+  project = "<%= ctx[:test_env_vars]['project_id'] %>"
+}
