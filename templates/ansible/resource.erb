@@ -266,15 +266,30 @@ def update_fields(module, request, response):
 
 <% update_props.each do |key, props| -%>
 <% func_name = "#{props.first.name.underscore}_update" -%>
+<% fingerprint_name = props.map { |x| x.fingerprint_name }.first -%>
 <% unless object.hidden.include?(func_name) -%>
 def <%= func_name -%>(module, request, response):
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+<% if fingerprint_name -%>
+    new_resource = <%= method_call('fetch_resource', ['module', 'self_link(module)',
+                                          ('kind' if object.kind?),
+                                          ])
+                    -%>
+    fingerprint = new_resource[:<%= fingerprint_name -%>]
+<% end -%>
+<%
+    request_props = if fingerprint_name
+                      request_properties.merge({fingerprint_name => "new_resource[:#{fingerprint_name}]"})
+                    else
+                      request_properties(props)
+                    end
+-%>
     auth.<%= key[:update_verb].downcase -%>(
         ''.join([
             "<%= object.__product.base_url -%>",
             "<%= key[:update_url].gsub('{{', '{').gsub('}}', '}') -%>"
         ]).format(**module.params),
-<%= lines(python_literal(request_properties(props), use_hash_brackets: true)) -%>
+<%= lines(python_literal(request_props, use_hash_brackets: true)) -%>
     )
 
 <% end # unless object.hidden.include? -%>
