@@ -266,7 +266,7 @@ def update_fields(module, request, response):
 
 <% update_props.each do |key, props| -%>
 <% func_name = "#{props.first.name.underscore}_update" -%>
-<% fingerprint_name = props.map { |x| x.fingerprint_name }.first -%>
+<% fingerprint_name = props.map { |x| x.fingerprint_name }.compact.first -%>
 <% unless object.hidden.include?(func_name) -%>
 def <%= func_name -%>(module, request, response):
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
