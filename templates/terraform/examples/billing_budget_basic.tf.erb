@@ -1,0 +1,19 @@
+data "google_billing_account" "account" {
+  provider = google-beta
+  billing_account = "<%= ctx[:test_env_vars]['billing_acct'] -%>"
+}
+
+resource "google_billing_budget" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+  billing_account = data.google_billing_account.account.id
+  display_name = "<%= ctx[:vars]['display_name'] %>"
+  amount {
+    specified_amount {
+      currency_code = "USD"
+      units = "100000"
+    }
+  }
+  threshold_rules {
+      threshold_percent =  0.5
+  }
+}

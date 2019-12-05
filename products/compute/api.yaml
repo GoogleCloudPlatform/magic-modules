@@ -56,22 +56,22 @@ objects:
         'Reserving a Static External IP Address': 'https://cloud.google.com/compute/docs/instances-and-network'
         'Reserving a Static Internal IP Address': 'https://cloud.google.com/compute/docs/ip-addresses/reserve-static-internal-ip-address'
       api: 'https://cloud.google.com/compute/docs/reference/beta/addresses'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -188,22 +188,22 @@ objects:
       guides:
         'Autoscaling Groups of Instances': 'https://cloud.google.com/compute/docs/autoscaler/'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/autoscalers'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -432,22 +432,22 @@ objects:
       guides:
         'Using a Cloud Storage bucket as a load balancer backend': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-bucket'
       api: 'https://cloud.google.com/compute/docs/reference/v1/backendBuckets'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -522,22 +522,22 @@ objects:
       guides:
         'Using Signed URLs': 'https://cloud.google.com/cdn/docs/using-signed-urls/'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/backendBuckets'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -581,22 +581,22 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-service'
       api: 'https://cloud.google.com/compute/docs/reference/v1/backendServices'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -1477,22 +1477,22 @@ objects:
       guides:
         'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
       api: 'https://cloud.google.com/compute/docs/reference/latest/regionBackendServices'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -2304,22 +2304,22 @@ objects:
       guides:
         'Using Signed URLs': 'https://cloud.google.com/cdn/docs/using-signed-urls/'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/backendServices'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -2459,8 +2459,8 @@ objects:
     description: |
       Disk resource policies define a schedule for taking snapshots and a
       retention period for these snapshots.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
@@ -2468,16 +2468,16 @@ objects:
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 4
           delete_minutes: 4
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -2535,8 +2535,8 @@ objects:
         'Adding a persistent disk':
           'https://cloud.google.com/compute/docs/disks/add-persistent-disk'
       api: 'https://cloud.google.com/compute/docs/reference/v1/disks'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
@@ -2545,16 +2545,16 @@ objects:
         # https://github.com/terraform-providers/terraform-provider-google/issues/703
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 5
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -2827,22 +2827,22 @@ objects:
       outgoing traffic and a default "deny" for incoming traffic. For all
       networks except the default network, you must create any firewall rules
       you need.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -3093,22 +3093,22 @@ objects:
           'https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules'
       api: 'https://cloud.google.com/compute/docs/reference/v1/forwardingRule'
     input: true
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -3361,22 +3361,22 @@ objects:
           'https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address'
       api: 'https://cloud.google.com/compute/docs/reference/v1/globalAddresses'
     input: true
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -3497,22 +3497,22 @@ objects:
 
       For more information, see
       https://cloud.google.com/compute/docs/load-balancing/http/
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -3742,22 +3742,22 @@ objects:
       guides:
         'Adding Health Checks': 'https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks'
       api: 'https://cloud.google.com/compute/docs/reference/v1/httpHealthChecks'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -3839,22 +3839,22 @@ objects:
       guides:
         'Adding Health Checks': 'https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks'
       api: 'https://cloud.google.com/compute/docs/reference/v1/httpsHealthChecks'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -3944,22 +3944,22 @@ objects:
       continue to poll unhealthy instances. If an instance later responds
       successfully to some number of consecutive probes, it is marked
       healthy again and can receive new connections.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -4622,22 +4622,22 @@ objects:
 
       Tip: Disks should be set to autoDelete=true
       so that leftover disks are not left behind on machine deletion.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -5162,8 +5162,8 @@ objects:
       images are available only to your project. You can create a custom image
       from root persistent disks and other images. Then, use the custom image
       to create an instance.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
@@ -5172,16 +5172,16 @@ objects:
           insert_minutes: 6
           update_minutes: 6
           delete_minutes: 6
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -5420,8 +5420,8 @@ objects:
     has_self_link: true
     description: |
        An instance is a virtual machine (VM) hosted on Google's infrastructure.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
@@ -5432,16 +5432,16 @@ objects:
           insert_minutes: 6
           update_minutes: 6
           delete_minutes: 6
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -5994,22 +5994,22 @@ objects:
       and can contain identical or different instances. Instance groups do not
       use an instance template. Unlike managed instance groups, you must create
       and add instances to an instance group manually.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     input: true
@@ -6112,22 +6112,22 @@ objects:
       verify the status of the individual instances.
 
       A managed instance group can have up to 1000 VM instances per group.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -6306,22 +6306,22 @@ objects:
     description: |
       Represents an InterconnectAttachment (VLAN attachment) resource. For more
       information, see Creating VLAN Attachments.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -6619,22 +6619,22 @@ objects:
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networks'
     description: |
       Manages a VPC network or legacy network resource on GCP.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -6739,8 +6739,8 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
@@ -6749,16 +6749,16 @@ objects:
           insert_minutes: 6
           update_minutes: 6
           delete_minutes: 6
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -6822,22 +6822,22 @@ objects:
       backend with internal load balancers. Because NEG backends allow you to
       specify IP addresses and ports, you can distribute traffic in a granular
       fashion among applications or containers running within VM instances.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -6914,22 +6914,22 @@ objects:
         'Sole-Tenant Nodes': 'https://cloud.google.com/compute/docs/nodes/'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/nodeGroups'
     collection_url_key: 'items'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -6983,22 +6983,22 @@ objects:
       guides:
         'Sole-Tenant Nodes': 'https://cloud.google.com/compute/docs/nodes/'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/nodeTemplates'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     collection_url_key: 'items'
@@ -7210,22 +7210,22 @@ objects:
       guides:
         'Autoscaling Groups of Instances': 'https://cloud.google.com/compute/docs/autoscaler/'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionAutoscalers'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -7553,24 +7553,24 @@ objects:
         'Adding or Resizing Regional Persistent Disks':
           'https://cloud.google.com/compute/docs/disks/regional-persistent-disk'
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionDisks'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 5
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -7773,22 +7773,22 @@ objects:
     description: |
       UrlMaps are used to route requests to a backend service based on rules
       that you define for the host and path of an incoming URL.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -7956,22 +7956,22 @@ objects:
       continue to poll unhealthy instances. If an instance later responds
       successfully to some number of consecutive probes, it is marked
       healthy again and can receive new connections.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -8633,22 +8633,22 @@ objects:
     has_self_link: true
     description: |
       A policy that can be attached to a resource to specify or schedule actions on that resource.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -8847,22 +8847,22 @@ objects:
           guides:
             'Using Routes': 'https://cloud.google.com/vpc/docs/using-routes'
           api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routes'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -9012,22 +9012,22 @@ objects:
           guides:
             'Google Cloud Router': 'https://cloud.google.com/router/docs/'
           api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -9160,8 +9160,8 @@ objects:
       guides:
         'Google Cloud Router': 'https://cloud.google.com/router/docs/'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
@@ -9170,16 +9170,16 @@ objects:
           insert_minutes: 10
           update_minutes: 10
           delete_minutes: 10
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -9360,8 +9360,8 @@ objects:
       guides:
         'Google Cloud Router': 'https://cloud.google.com/router/docs/'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
@@ -9370,16 +9370,16 @@ objects:
           insert_minutes: 10
           update_minutes: 10
           delete_minutes: 10
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -9538,8 +9538,8 @@ objects:
     # 'createSnapshot' is a zonal operation while 'snapshot.delete' is a global
     # operation. we'll leave the object as global operation and use the disk's
     # zonal operation for the create action.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         full_url: 'selfLink'
@@ -9548,16 +9548,16 @@ objects:
           insert_minutes: 5
           update_minutes: 5
           delete_minutes: 5
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -9702,22 +9702,22 @@ objects:
       An SslCertificate resource, used for HTTPS load balancing. This resource
       provides a mechanism to upload an SSL key and certificate to
       the load balancer to serve secure connections from the user.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -9772,8 +9772,8 @@ objects:
       An SslCertificate resource, used for HTTPS load balancing.  This resource
       represents a certificate for which the certificate secrets are created and
       managed by Google.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
@@ -9784,16 +9784,16 @@ objects:
           # Deletes can take 20-30 minutes to complete, since they depend
           # on the provisioning process either succeeding or failing completely.
           delete_minutes: 30
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -9867,22 +9867,22 @@ objects:
       A RegionSslCertificate resource, used for HTTPS load balancing. This resource
       provides a mechanism to upload an SSL key and certificate to
       the load balancer to serve secure connections from the user.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -9947,22 +9947,22 @@ objects:
       guides:
         'Reserving zonal resources': 'https://cloud.google.com/compute/docs/instances/reserving-zonal-resources'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/reservations'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -10110,22 +10110,22 @@ objects:
           guides:
             'Using SSL Policies': 'https://cloud.google.com/compute/docs/load-balancing/ssl-policies'
           api: 'https://cloud.google.com/compute/docs/reference/rest/v1/sslPolicies'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -10241,8 +10241,8 @@ objects:
       instances in all other subnets of the same VPC network, regardless of
       region, using their RFC1918 private IP addresses. You can isolate portions
       of the network, even entire subnets, using firewall rules.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
@@ -10253,16 +10253,16 @@ objects:
           insert_minutes: 6
           update_minutes: 6
           delete_minutes: 6
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -10478,22 +10478,22 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
       api: 'https://cloud.google.com/compute/docs/reference/v1/targetHttpProxies'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -10543,22 +10543,22 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
       api: 'https://cloud.google.com/compute/docs/reference/v1/targetHttpsProxies'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -10654,22 +10654,22 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionTargetHttpProxies'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -10729,22 +10729,22 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionTargetHttpsProxies'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -10857,22 +10857,22 @@ objects:
       guides:
         'Using Protocol Forwarding': 'https://cloud.google.com/compute/docs/protocol-forwarding'
       api: 'https://cloud.google.com/compute/docs/reference/v1/targetInstances'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -10935,22 +10935,22 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/compute/docs/load-balancing/network/target-pools'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetPools'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -11075,22 +11075,22 @@ objects:
       guides:
         'Setting Up SSL proxy for Google Cloud Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/'
       api: 'https://cloud.google.com/compute/docs/reference/v1/targetSslProxies'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -11179,22 +11179,22 @@ objects:
         'Setting Up TCP proxy for Google Cloud Load Balancing':
           'https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/tcp-proxy'
       api: 'https://cloud.google.com/compute/docs/reference/v1/targetTcpProxies'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -11253,22 +11253,22 @@ objects:
       by Google, but used only by you.
     references: !ruby/object:Api::Resource::ReferenceLinks
       api: https://cloud.google.com/compute/docs/reference/rest/v1/targetVpnGateways
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -11353,22 +11353,22 @@ objects:
         'Choosing a VPN': https://cloud.google.com/vpn/docs/how-to/choosing-a-vpn
         'Cloud VPN Overview': 'https://cloud.google.com/vpn/docs/concepts/overview'
       api: https://cloud.google.com/compute/docs/reference/rest/beta/vpnGateways
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -11437,22 +11437,22 @@ objects:
       Represents a VPN gateway managed outside of GCP.
     references: !ruby/object:Api::Resource::ReferenceLinks
       api: https://cloud.google.com/compute/docs/reference/rest/beta/externalVpnGateways
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -11509,22 +11509,22 @@ objects:
     description: |
       UrlMaps are used to route requests to a backend service based on rules
       that you define for the host and path of an incoming URL.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
@@ -11675,22 +11675,22 @@ objects:
         'Cloud VPN Overview': 'https://cloud.google.com/vpn/docs/concepts/overview'
         'Networks and Tunnel Routing': 'https://cloud.google.com/vpn/docs/concepts/choosing-networks-routing'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/vpnTunnels'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:

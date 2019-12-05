@@ -54,22 +54,22 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/spanner/'
       api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances'
-    async: !ruby/object:Api::Async
+    async: !ruby/object:Api::OpAsync
       actions: ['create', 'update']
-      operation: !ruby/object:Api::Async::Operation
+      operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'response'
         resource_inside_response: true
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'done'
         complete: True
         allowed:
           - True
           - False
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
     properties:
@@ -129,22 +129,22 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/spanner/'
       api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances.databases'
-    async: !ruby/object:Api::Async
+    async: !ruby/object:Api::OpAsync
       actions: ['create', 'update']
-      operation: !ruby/object:Api::Async::Operation
+      operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'response'
         resource_inside_response: true
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'done'
         complete: True
         allowed:
           - True
           - False
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
     parameters:

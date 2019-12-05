@@ -38,21 +38,21 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/appengine/docs/standard/python/mapping-custom-domains'
       api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.domainMappings'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'response'
         resource_inside_response: true
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'done'
         complete: True
         allowed:
           - True
           - False
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
     parameters:
@@ -226,22 +226,22 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/appengine/docs/admin-api/deploying-overview'
       api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services.versions'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'appengine#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     parameters:
@@ -472,21 +472,21 @@ objects:
     update_verb: :PATCH
     references: !ruby/object:Api::Resource::ReferenceLinks
       api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps#UrlDispatchRule'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
         wait_ms: 1000
-      result: !ruby/object:Api::Async::Result
+      result: !ruby/object:Api::OpAsync::Result
         path: 'response'
-      status: !ruby/object:Api::Async::Status
+      status: !ruby/object:Api::OpAsync::Status
         path: 'status'
         complete: 'DONE'
         allowed:
           - 'PENDING'
           - 'RUNNING'
           - 'DONE'
-      error: !ruby/object:Api::Async::Error
+      error: !ruby/object:Api::OpAsync::Error
         path: 'error/errors'
         message: 'message'
     properties:
