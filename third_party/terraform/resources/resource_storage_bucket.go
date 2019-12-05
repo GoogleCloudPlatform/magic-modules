@@ -665,7 +665,7 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 	}
 
 	// remove empty bucket
-	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
+	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
 		err := config.clientStorage.Buckets.Delete(bucket).Do()
 		if err == nil {
 			return nil
