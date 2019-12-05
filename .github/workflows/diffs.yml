@@ -288,6 +288,39 @@ jobs:
                   directory: /home/runner/work/magic-modules/ansible_collections_google
                   force: true
 
+    tpg-test:
+        runs-on: ubuntu-latest
+        name: "Test TPG"
+        needs:
+            - tpg
+        steps:
+            - uses: actions/setup-go@v1
+              with:
+                  go-version: 1.11.x
+            - uses: actions/checkout@v1
+              with:
+                  path: go/src/github.com/terraform-providers/terraform-provider-google
+                  repository: modular-magician/terraform-provider-google
+                  ref: pr-${{ github.event.pull_request.number }}-new
+            - run: make lint && make test
+              working-directory: /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google
+
+    tpgb-test:
+        runs-on: ubuntu-latest
+        name: "Test TPGB"
+        needs:
+            - tpgb
+        steps:
+            - uses: actions/setup-go@v1
+              with:
+                  go-version: 1.11.x
+            - uses: actions/checkout@v1
+              with:
+                  path: go/src/github.com/terraform-providers/terraform-provider-google-beta
+                  repository: modular-magician/terraform-provider-google-beta
+                  ref: pr-${{ github.event.pull_request.number }}-new
+            - run: make lint && make test
+              working-directory: /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google-beta
 
     post-comment:
         runs-on: ubuntu-latest

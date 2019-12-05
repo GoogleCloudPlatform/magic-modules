@@ -4,9 +4,9 @@ on:
     schedule:
         - cron: '*/20 * * * *'
 jobs:
-    tpg:
+    push-downstream:
         runs-on: ubuntu-latest
-        name: "Build Terraform and push downstream"
+        name: "Build and push downstreams"
         env:
             GOPATH: /home/runner/work/magic-modules/go
             GO111MODULE: auto

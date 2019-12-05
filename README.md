@@ -136,8 +136,7 @@ bundle exec compiler -a -v "ga" -e terraform -o "$GOPATH/src/github.com/terrafor
 
 It's worth noting that Magic Modules will not delete old files by itself,
 so partial generation (runs without `-a`) will work normally.
-The "Magician"- the Magic Modules CI system- handles deletion of
-files when creating PRs.
+The "Magician"- the Magic Modules CI system- handles deletion of files.
 
 #### Terraform's `google-beta` provider
 
