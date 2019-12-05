@@ -528,7 +528,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services'
     async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
+      operation: !ruby/object:Api::OpAsync::Operation
         kind: 'appengine#operation'
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
