@@ -249,8 +249,8 @@ objects:
   iam_policy: !ruby/object:Api::Resource::IamPolicy
     method_name_separator: ':'
     parent_resource_attribute: 'service'
-    base_url_override: v1/projects/{{project}}/locations/{{location}}/services/{{service}}
-    import_format_override: ["projects/{{project}}/locations/{{location}}/services/{{service}}", "{{service}}"]
+    base_url: v1/projects/{{project}}/locations/{{location}}/services/{{service}}
+    import_format: ["projects/{{project}}/locations/{{location}}/services/{{service}}", "{{service}}"]
   parameters:
   - !ruby/object:Api::Type::String
     name: location

@@ -66,11 +66,11 @@ module Api
 
       # Allows us to override the base_url of the resource. This is required for Cloud Run as the
       # IAM resources use an entirely different base URL from the actual resource
-      attr_reader :base_url_override
+      attr_reader :base_url
 
       # Allows us to override the import format of the resource. Useful for Cloud Run where we need
       # variables that are outside of the base_url qualifiers.
-      attr_reader :import_format_override
+      attr_reader :import_format
 
       def validate
         super
@@ -83,8 +83,8 @@ module Api
         check :parent_resource_attribute, type: String, default: 'id'
         check :test_project_name, type: String
         check :iam_conditions_request_type, type: Symbol, allowed: %i[REQUEST_BODY QUERY_PARAM]
-        check :base_url_override, type: String
-        check :import_format_override, type: Array, item_type: String
+        check :base_url, type: String
+        check :import_format, type: Array, item_type: String
         check(
           :example_config_body,
           type: String, default: 'templates/terraform/iam/iam_attributes.tf.erb'

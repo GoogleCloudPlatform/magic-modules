@@ -28,7 +28,7 @@ import (
 )
 <% resource_name = product_ns + object.name -%>
 <%
-resource_uri = object.iam_policy.base_url_override || object.self_link_uri
+resource_uri = object.iam_policy.base_url || object.self_link_uri
 parent_resource_name = object.iam_policy.parent_resource_attribute || object.name.underscore
 resource_params = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{parent_resource_name}}}"))
 -%>
@@ -87,7 +87,7 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 
 <% end # if provider_default_values.include? -%>
 <% end # resource_params.each -%>
-<% import_format = object.iam_policy.import_format_override || object.import_format -%>
+<% import_format = object.iam_policy.import_format || object.import_format -%>
 
 	// We may have gotten either a long or short name, so attempt to parse long name if possible
 	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(import_format, object.identity, object.base_url).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Get("<%= parent_resource_name -%>").(string))
