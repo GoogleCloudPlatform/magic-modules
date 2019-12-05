@@ -652,7 +652,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <% else -%>
     config := meta.(*Config)
     if err := parseImportId([]string{
-<%   for import_id in import_id_formats(object) -%>
+<%   for import_id in import_id_formats_from_resource(object) -%>
         "<%= format2regex(import_id) %>",
 <%   end -%>
     }, d, config); err != nil {

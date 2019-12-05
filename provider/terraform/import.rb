@@ -17,6 +17,10 @@ module Provider
   class Terraform < Provider::AbstractCore
     # Functions to support 'terraform import'.
     module Import
+      def import_id_formats_from_resource(resource)
+        import_id_formats(resource.import_format, resource.identity, resource.base_url)
+      end
+
       # Returns a list of import id formats for a given resource. If an id
       # contains provider-default values, this fn will return formats both
       # including and omitting the value.
@@ -32,22 +36,20 @@ module Provider
       # a) self_link: projects/{{project}}/global/networks/{{name}}
       # b) short id: {{project}}/{{name}}
       # c) short id w/o defaults: {{name}}
-      def import_id_formats(resource)
-        if resource.import_format.nil? || resource.import_format.empty?
-          underscored_base_url = resource.base_url.gsub(
+      def import_id_formats(import_format, identity, base_url)
+        if import_format.nil? || import_format.empty?
+          underscored_base_url = base_url.gsub(
             /{{[[:word:]]+}}/, &:underscore
           )
 
-          if resource.identity.nil? || resource.identity.empty?
+          if identity.nil? || identity.empty?
             id_formats = [underscored_base_url + '/{{name}}']
           else
-            identity_path = resource.identity
-                                    .map { |v| "{{#{v.name.underscore}}}" }
-                                    .join('/')
+            identity_path = identity.map { |v| "{{#{v.name.underscore}}}" }.join('/')
             id_formats = [underscored_base_url + '/' + identity_path]
           end
         else
-          id_formats = resource.import_format
+          id_formats = import_format
         end
 
         # short id: {{project}}/{{zone}}/{{name}}
