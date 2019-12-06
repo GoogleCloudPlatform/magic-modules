@@ -266,11 +266,10 @@ def update_fields(module, request, response):
 
 <% update_props.each do |key, props| -%>
 <% func_name = "#{props.first.name.underscore}_update" -%>
-<% fingerprint_name = props.map { |x| x.fingerprint_name }.compact.first -%>
 <% unless object.hidden.include?(func_name) -%>
 def <%= func_name -%>(module, request, response):
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
-<% if fingerprint_name -%>
+<% if key[:fingerprint_name] -%>
     new_resource = <%= method_call('fetch_resource', ['module', 'self_link(module)',
                                           ('kind' if object.kind?),
                                           ])
@@ -279,7 +278,7 @@ def <%= func_name -%>(module, request, response):
 <% end -%>
 <%
     request_props = if fingerprint_name
-                      request_properties(props).merge({fingerprint_name => Google::PythonUtils::PythonCode.new("new_resource[:#{fingerprint_name}]")})
+                      request_properties(props).merge({fingerprint_name => Google::PythonUtils::PythonCode.new("new_resource[:#{key[:fingerprint_name]}]")})
                     else
                       request_properties(props)
                     end
