@@ -256,8 +256,8 @@ func testAcc<%= resource_name -%>IamMember_basicGenerated(context map[string]int
 
 resource "<%= resource_ns_iam -%>_member" "foo" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-	role = "%{role}"
-	member = "user:admin@hashicorptest.com"
+  role = "%{role}"
+  member = "user:admin@hashicorptest.com"
 }
 `, context)
 }
@@ -267,15 +267,15 @@ func testAcc<%= resource_name -%>IamPolicy_basicGenerated(context map[string]int
 <%= example.config_test_body -%>
 
 data "google_iam_policy" "foo" {
-	binding {
-		role = "%{role}"
-		members = ["user:admin@hashicorptest.com"]
-	}
+  binding {
+    role = "%{role}"
+    members = ["user:admin@hashicorptest.com"]
+  }
 }
 
 resource "<%= resource_ns_iam -%>_policy" "foo" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-	policy_data = "${data.google_iam_policy.foo.policy_data}"
+  policy_data = "${data.google_iam_policy.foo.policy_data}"
 }
 `, context)
 }
@@ -286,8 +286,8 @@ func testAcc<%= resource_name -%>IamBinding_basicGenerated(context map[string]in
 
 resource "<%= resource_ns_iam -%>_binding" "foo" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-	role = "%{role}"
-	members = ["user:admin@hashicorptest.com"]
+  role = "%{role}"
+  members = ["user:admin@hashicorptest.com"]
 }
 `, context)
 }
@@ -298,8 +298,8 @@ func testAcc<%= resource_name -%>IamBinding_updateGenerated(context map[string]i
 
 resource "<%= resource_ns_iam -%>_binding" "foo" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-	role = "%{role}"
-	members = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
+  role = "%{role}"
+  members = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
 }
 `, context)
 }
@@ -311,13 +311,13 @@ func testAcc<%= resource_name -%>IamBinding_withConditionGenerated(context map[s
 
 resource "<%= resource_ns_iam -%>_binding" "foo" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-	role = "%{role}"
-	members = ["user:admin@hashicorptest.com"]
-	condition {
-		title       = "%{condition_title}"
-		description = "Expiring at midnight of 2019-12-31"
-		expression  = "%{condition_expr}"
-	}
+  role = "%{role}"
+  members = ["user:admin@hashicorptest.com"]
+  condition {
+    title       = "%{condition_title}"
+    description = "Expiring at midnight of 2019-12-31"
+    expression  = "%{condition_expr}"
+  }
 }
 `, context)
 }
@@ -328,19 +328,19 @@ func testAcc<%= resource_name -%>IamBinding_withAndWithoutConditionGenerated(con
 
 resource "<%= resource_ns_iam -%>_binding" "foo" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-	role = "%{role}"
-	members = ["user:admin@hashicorptest.com"]
+  role = "%{role}"
+  members = ["user:admin@hashicorptest.com"]
 }
 
 resource "<%= resource_ns_iam -%>_binding" "foo2" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-	role = "%{role}"
-	members = ["user:admin@hashicorptest.com"]
-	condition {
-		title       = "%{condition_title}"
-		description = "Expiring at midnight of 2019-12-31"
-		expression  = "%{condition_expr}"
-	}
+  role = "%{role}"
+  members = ["user:admin@hashicorptest.com"]
+  condition {
+    title       = "%{condition_title}"
+    description = "Expiring at midnight of 2019-12-31"
+    expression  = "%{condition_expr}"
+  }
 }
 `, context)
 }
@@ -351,13 +351,13 @@ func testAcc<%= resource_name -%>IamMember_withConditionGenerated(context map[st
 
 resource "<%= resource_ns_iam -%>_member" "foo" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-	role = "%{role}"
-	member = "user:admin@hashicorptest.com"
-	condition {
-		title       = "%{condition_title}"
-		description = "Expiring at midnight of 2019-12-31"
-		expression  = "%{condition_expr}"
-	}
+  role = "%{role}"
+  member = "user:admin@hashicorptest.com"
+  condition {
+    title       = "%{condition_title}"
+    description = "Expiring at midnight of 2019-12-31"
+    expression  = "%{condition_expr}"
+  }
 }
 `, context)
 }
@@ -368,19 +368,19 @@ func testAcc<%= resource_name -%>IamMember_withAndWithoutConditionGenerated(cont
 
 resource "<%= resource_ns_iam -%>_member" "foo" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-	role = "%{role}"
-	member = "user:admin@hashicorptest.com"
+  role = "%{role}"
+  member = "user:admin@hashicorptest.com"
 }
 
 resource "<%= resource_ns_iam -%>_member" "foo2" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-	role = "%{role}"
-	member = "user:admin@hashicorptest.com"
-	condition {
-		title       = "%{condition_title}"
-		description = "Expiring at midnight of 2019-12-31"
-		expression  = "%{condition_expr}"
-	}
+  role = "%{role}"
+  member = "user:admin@hashicorptest.com"
+  condition {
+    title       = "%{condition_title}"
+    description = "Expiring at midnight of 2019-12-31"
+    expression  = "%{condition_expr}"
+  }
 }
 `, context)
 }
@@ -390,20 +390,20 @@ func testAcc<%= resource_name -%>IamPolicy_withConditionGenerated(context map[st
 <%= example.config_test_body -%>
 
 data "google_iam_policy" "foo" {
-	binding {
-		role = "%{role}"
-		members = ["user:admin@hashicorptest.com"]
-		condition {
-			title       = "%{condition_title}"
-			description = "Expiring at midnight of 2019-12-31"
-			expression  = "%{condition_expr}"
-		}
-	}
+  binding {
+    role = "%{role}"
+    members = ["user:admin@hashicorptest.com"]
+    condition {
+      title       = "%{condition_title}"
+      description = "Expiring at midnight of 2019-12-31"
+      expression  = "%{condition_expr}"
+    }
+  }
 }
 
 resource "<%= resource_ns_iam -%>_policy" "foo" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-	policy_data = "${data.google_iam_policy.foo.policy_data}"
+  policy_data = "${data.google_iam_policy.foo.policy_data}"
 }
 `, context)
 }

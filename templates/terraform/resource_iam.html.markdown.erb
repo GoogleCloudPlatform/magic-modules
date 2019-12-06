@@ -85,17 +85,17 @@ end
 
 ```hcl
 data "google_iam_policy" "admin" {
-	binding {
-		role = "<%= object.iam_policy.allowed_iam_role -%>"
-		members = [
-			"user:jane@example.com",
-		]
-	}
+  binding {
+    role = "<%= object.iam_policy.allowed_iam_role -%>"
+    members = [
+      "user:jane@example.com",
+    ]
+  }
 }
 
 resource "<%= resource_ns_iam -%>_policy" "editor" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-	policy_data = "${data.google_iam_policy.admin.policy_data}"
+  policy_data = "${data.google_iam_policy.admin.policy_data}"
 }
 ```
 
@@ -129,10 +129,10 @@ resource "<%= resource_ns_iam -%>_policy" "editor" {
 ```hcl
 resource "<%= resource_ns_iam -%>_binding" "editor" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-	role = "<%= object.iam_policy.allowed_iam_role -%>"
-	members = [
-		"user:jane@example.com",
-	]
+  role = "<%= object.iam_policy.allowed_iam_role -%>"
+  members = [
+    "user:jane@example.com",
+  ]
 }
 ```
 
@@ -160,8 +160,8 @@ resource "<%= resource_ns_iam -%>_binding" "editor" {
 ```hcl
 resource "<%= resource_ns_iam -%>_member" "editor" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-	role = "<%= object.iam_policy.allowed_iam_role -%>"
-	member = "user:jane@example.com"
+  role = "<%= object.iam_policy.allowed_iam_role -%>"
+  member = "user:jane@example.com"
 }
 ```
 
