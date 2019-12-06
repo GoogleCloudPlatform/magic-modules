@@ -21,11 +21,6 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
       }
     }
   }
-
-  traffic {
-    percent         = 100
-    latest_revision = true
-  }
 }
 
 resource "google_sql_database_instance" "instance" {
