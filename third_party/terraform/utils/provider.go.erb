@@ -103,10 +103,10 @@ func Provider() terraform.ResourceProvider {
 				Optional: true,
 			},
 
-            "synchronous_timeout": {
-                Type:     schema.TypeString,
-                Optional: true,
-            },
+			"synchronous_timeout": {
+			    Type:     schema.TypeString,
+			    Optional: true,
+			},
 
 			// Generated Products
 			<% products.each do |product| -%>
@@ -228,11 +228,11 @@ iam_resource_count = 0
 products.each do |product|
   product_definition = product[:definitions]
   product_definition.objects.reject { |r| r.exclude || r.not_in_version?(product_definition.version_obj_or_closest(version)) }.each do |object|
-    resource_count += 1 unless object&.exclude_resource
-    iam_policy = object&.iam_policy
-    unless iam_policy.nil? || iam_policy.exclude
-      iam_resource_count += 3
-    end
+	resource_count += 1 unless object&.exclude_resource
+	iam_policy = object&.iam_policy
+	unless iam_policy.nil? || iam_policy.exclude
+	  iam_resource_count += 3
+	end
   end
 end
 -%>
@@ -252,23 +252,23 @@ products.each do |product|
   product_definition = product[:definitions]
   config = product[:overrides]
   product_definition.objects.each do |object|
-    next if object.exclude || object.not_in_version?(product_definition.version_obj_or_closest(version))
-    tf_product = (config.legacy_name || product_definition.name).underscore
-    terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
+	next if object.exclude || object.not_in_version?(product_definition.version_obj_or_closest(version))
+	tf_product = (config.legacy_name || product_definition.name).underscore
+	terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
 -%>
 <% 	unless object&.exclude_resource -%>
 	"<%= terraform_name -%>": resource<%= product_definition.name + object.name -%>(),
 <%  end -%>
 <%
-    iam_policy = object&.iam_policy
-    unless iam_policy.nil? || iam_policy.exclude
-      iam_class_name = product_definition.name + object.name
+	iam_policy = object&.iam_policy
+	unless iam_policy.nil? || iam_policy.exclude
+	  iam_class_name = product_definition.name + object.name
 -%>
 	"<%= terraform_name -%>_iam_binding":              ResourceIamBinding(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
 	"<%= terraform_name -%>_iam_member":               ResourceIamMember(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
 	"<%= terraform_name -%>_iam_policy":               ResourceIamPolicy(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
 <%
-    end # unless iam_policy.nil? || iam_policy.exclude
+	end # unless iam_policy.nil? || iam_policy.exclude
   end   # product_definition.objects.each do
 end     # products.each do
 -%>
@@ -365,8 +365,8 @@ end     # products.each do
 				"google_organization_iam_binding":              ResourceIamBinding(IamOrganizationSchema, NewOrganizationIamUpdater, OrgIdParseFunc),
 				"google_organization_iam_custom_role":          resourceGoogleOrganizationIamCustomRole(),
 				"google_organization_iam_member":               ResourceIamMember(IamOrganizationSchema, NewOrganizationIamUpdater, OrgIdParseFunc),
-        "google_organization_iam_policy":               ResourceIamPolicy(IamOrganizationSchema, NewOrganizationIamUpdater, OrgIdParseFunc),
-        "google_organization_iam_audit_config":         ResourceIamAuditConfig(IamOrganizationSchema, NewOrganizationIamUpdater, OrgIdParseFunc),
+		"google_organization_iam_policy":               ResourceIamPolicy(IamOrganizationSchema, NewOrganizationIamUpdater, OrgIdParseFunc),
+		"google_organization_iam_audit_config":         ResourceIamAuditConfig(IamOrganizationSchema, NewOrganizationIamUpdater, OrgIdParseFunc),
 				"google_organization_policy":                   resourceGoogleOrganizationPolicy(),
 				"google_project":                               resourceGoogleProject(),
 				"google_project_iam_policy":                    resourceGoogleProjectIamPolicy(),
@@ -413,13 +413,13 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		terraformVersion:    terraformVersion,
 	}
 
-    if v, ok := d.GetOk("synchronous_timeout"); ok {
-        var err error
-        config.SynchronousTimeout, err = time.ParseDuration(v.(string))
-        if err != nil {
-            return nil, err
-        }
-    }
+	if v, ok := d.GetOk("synchronous_timeout"); ok {
+		var err error
+		config.RequestTimeout, err = time.ParseDuration(v.(string))
+		if err != nil {
+			return nil, err
+		}
+	}
 	// Add credential source
 	if v, ok := d.GetOk("access_token"); ok {
 		config.AccessToken = v.(string)

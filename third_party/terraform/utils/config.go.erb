@@ -70,7 +70,7 @@ type Config struct {
 	Scopes         		[]string
 	BatchingConfig		*batchingConfig
 	UserProjectOverride bool
-    SynchronousTimeout  time.Duration
+	RequestTimeout  time.Duration
 
 	client           *http.Client
 	terraformVersion string
@@ -210,7 +210,7 @@ func (c *Config) LoadAndValidate() error {
 
 	client := oauth2.NewClient(context.Background(), tokenSource)
 	client.Transport = logging.NewTransport("Google", client.Transport)
-    // This timeout is a timeout per HTTP request, not per logical operation.
+	// This timeout is a timeout per HTTP request, not per logical operation.
 	client.Timeout = c.synchronousTimeout()
 
 	tfUserAgent := httpclient.TerraformUserAgent(c.terraformVersion)
@@ -607,10 +607,10 @@ func expandProviderBatchingConfig(v interface{}) (*batchingConfig, error) {
 }
 
 func (c *Config) synchronousTimeout() time.Duration {
-    if c.SynchronousTimeout == 0 {
-        return 30 * time.Second
-    }
-    return c.SynchronousTimeout
+	if c.RequestTimeout == 0 {
+		return 30 * time.Second
+	}
+	return c.RequestTimeout
 }
 
 func (c *Config) getTokenSource(clientScopes []string) (oauth2.TokenSource, error) {
