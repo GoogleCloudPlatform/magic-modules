@@ -368,7 +368,7 @@ objects:
           name: namespace
           description: |-
             In Cloud Run the namespace must be equal to either the
-            project ID or project number.
+            project ID or project number. It will default to the resource's project.
         - !ruby/object:Api::Type::KeyValuePairs
           name: annotations
           description: |-

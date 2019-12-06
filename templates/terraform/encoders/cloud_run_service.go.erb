@@ -13,10 +13,13 @@
 	# limitations under the License.
 -%>
 name := d.Get("name").(string)
+if obj["metadata"] == nil {
+	obj["metadata"] = make(map[string]interface{})
+}
 metadata := obj["metadata"].(map[string]interface{})
 metadata["name"] = name
 
 // The only acceptable version/kind right now
 obj["apiVersion"] = "serving.knative.dev/v1"
-obj["kind"] = "<%= "#{object.name}" -%>"
+obj["kind"] = "Service"
 return obj, nil
