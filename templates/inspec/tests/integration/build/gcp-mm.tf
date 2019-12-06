@@ -880,6 +880,12 @@ resource "google_project_service" "project" {
   service = var.service["name"]
 }
 
+resource "google_service_account" "spanner_service_account" {
+  project = "${var.gcp_project_id}"
+  account_id   = "${var.gcp_service_account_display_name}-sp"
+  display_name = "${var.gcp_service_account_display_name}-sp"
+}
+
 resource "google_spanner_instance" "spanner_instance" {
   project      = "${var.gcp_project_id}"
   config       = "${var.spannerinstance["config"]}"
@@ -889,6 +895,15 @@ resource "google_spanner_instance" "spanner_instance" {
   labels = {
     "${var.spannerinstance["label_key"]}" = "${var.spannerinstance["label_value"]}"
   }
+}
+
+resource "google_spanner_instance_iam_binding" "instance" {
+  instance = google_spanner_instance.spanner_instance.name
+  role     = "roles/editor"
+
+  members = [
+    "serviceAccount:${google_service_account.spanner_service_account.email}",
+  ]
 }
 
 resource "google_spanner_database" "database" {
