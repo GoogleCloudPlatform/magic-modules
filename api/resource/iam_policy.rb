@@ -42,8 +42,8 @@ module Api
       # Last part of URL for fetching IAM policy.
       attr_reader :fetch_iam_policy_method
 
-      # Some resources allow retrieving the IAM policy with GET requests,
-      # others expect POST requests
+      # Some resources allow setting the IAM policy with POST requests,
+      # others expect PUT requests
       attr_reader :set_iam_policy_verb
 
       # Last part of URL for setting IAM policy.
