@@ -156,6 +156,39 @@ func TestAccComputeUrlMap_trafficDirectorUpdate(t *testing.T) {
 		},
 	})
 }
+
+func TestAccComputeUrlMap_trafficDirectorRemoveRouteRule(t *testing.T) {
+	t.Parallel()
+
+	randString := acctest.RandString(10)
+
+	bsName := fmt.Sprintf("urlmap-test-%s", randString)
+	hcName := fmt.Sprintf("urlmap-test-%s", randString)
+	umName := fmt.Sprintf("urlmap-test-%s", randString)
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeUrlMapDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeUrlMap_trafficDirector(bsName, hcName, umName),
+			},
+			{
+				ResourceName:      "google_compute_url_map.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeUrlMap_trafficDirectorRemoveRouteRule(bsName, hcName, umName),
+			},
+			{
+				ResourceName:      "google_compute_url_map.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
 <% end -%>
 
 func testAccComputeUrlMap_basic1(bsName, hcName, umName string) string {
@@ -431,6 +464,7 @@ resource "google_compute_url_map" "foobar" {
         response_headers_to_add {
           header_name = "AddMe"
           header_value = "MyValue"
+          replace = false
         }
       }
       match_rules {
@@ -526,10 +560,6 @@ resource "google_compute_url_map" "foobar" {
           replace = false
         }
         response_headers_to_remove = ["RemoveMe3", "AndMe4"]
-        response_headers_to_add {
-          header_name = "AddMeUpdated"
-          header_value = "MyValueUpdated"
-        }
       }
       match_rules {
         full_path_match = "a full path to match"
@@ -555,6 +585,59 @@ resource "google_compute_url_map" "foobar" {
         strip_query = false
       }
     }
+  }
+
+  test {
+    service = "${google_compute_backend_service.home.self_link}"
+    host    = "hi.com"
+    path    = "/home"
+  }
+}
+
+resource "google_compute_backend_service" "home" {
+  name        = "%s"
+  port_name   = "http"
+  protocol    = "HTTP"
+  timeout_sec = 10
+
+  health_checks = ["${google_compute_health_check.default.self_link}"]
+  load_balancing_scheme = "INTERNAL_SELF_MANAGED"
+}
+
+resource "google_compute_backend_service" "home2" {
+  name        = "%s-2"
+  port_name   = "http"
+  protocol    = "HTTP"
+  timeout_sec = 10
+
+  health_checks = ["${google_compute_health_check.default.self_link}"]
+  load_balancing_scheme = "INTERNAL_SELF_MANAGED"
+}
+
+resource "google_compute_health_check" "default" {
+  name               = "%s"
+  http_health_check {
+    port = 80
+  }
+}
+`, umName, bsName, bsName, hcName)
+}
+
+func testAccComputeUrlMap_trafficDirectorRemoveRouteRule(bsName, hcName, umName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_url_map" "foobar" {
+  name        = "%s"
+  description = "a description"
+  default_service = "${google_compute_backend_service.home2.self_link}"
+
+  host_rule {
+    hosts        = ["mysite.com"]
+    path_matcher = "allpaths2"
+  }
+
+  path_matcher {
+    name = "allpaths2"
+    default_service = "${google_compute_backend_service.home2.self_link}"
   }
 
   test {

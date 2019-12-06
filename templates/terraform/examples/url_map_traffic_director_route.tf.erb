@@ -25,6 +25,7 @@ resource "google_compute_url_map" "<%= ctx[:primary_resource_id] %>" {
         response_headers_to_add {
           header_name = "AddMe"
           header_value = "MyValue"
+          replace = false
         }
       }
       match_rules {
