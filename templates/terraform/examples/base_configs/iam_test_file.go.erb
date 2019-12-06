@@ -299,7 +299,7 @@ func testAcc<%= resource_name -%>IamBinding_updateGenerated(context map[string]i
 resource "<%= resource_ns_iam -%>_binding" "foo" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
   role = "%{role}"
-    members = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
+  members = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
 }
 `, context)
 }
