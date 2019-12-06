@@ -290,7 +290,7 @@ module Provider
       # TODO(rambleraptor): Add support to Ansible for one-at-a-time updates.
       if behavior == :old
         update_props.group_by do |p|
-          { update_url: p.update_url, update_verb: p.update_verb }
+          { update_url: p.update_url, update_verb: p.update_verb, fingerprint: p.fingerprint_name }
         end
       else
         update_props.group_by do |p|

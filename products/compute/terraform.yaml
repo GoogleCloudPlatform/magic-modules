@@ -1726,8 +1726,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       secondaryIpRanges.ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
-      fingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: false
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
         custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.erb'
