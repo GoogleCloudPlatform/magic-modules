@@ -274,7 +274,7 @@ def <%= func_name -%>(module, request, response):
     new_resource = <%= method_call('fetch_resource', ['module', 'self_link(module)',
                                           ('kind' if object.kind?),
                                           ])
-                    -%>
+                    %>
     fingerprint = new_resource[:<%= fingerprint_name -%>]
 <% end -%>
 <%
