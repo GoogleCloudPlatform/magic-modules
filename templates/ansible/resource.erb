@@ -279,7 +279,7 @@ def <%= func_name -%>(module, request, response):
 <% end -%>
 <%
     request_props = if fingerprint_name
-                      request_properties(props).merge({fingerprint_name => "new_resource[:#{fingerprint_name}]"})
+                      request_properties(props).merge({fingerprint_name => Google::PythonUtils::PythonCode.new("new_resource[:#{fingerprint_name}]")})
                     else
                       request_properties(props)
                     end

@@ -10316,12 +10316,6 @@ objects:
           Only networks that are in the distributed mode can have subnetworks.
         input: true
         required: true
-      # TODO(rileykarson): Work with rambleraptor to remove this field from downstreams.
-      - !ruby/object:Api::Type::Fingerprint
-        name: 'fingerprint'
-        description: |
-          Fingerprint of this resource. This field is used internally during
-          updates of this resource.
       - !ruby/object:Api::Type::Enum
         name: 'purpose'
         min_version: beta
