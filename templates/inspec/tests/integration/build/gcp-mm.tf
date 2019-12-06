@@ -880,11 +880,6 @@ resource "google_project_service" "project" {
   service = var.service["name"]
 }
 
-resource "google_project_service" "project" {
-  project = var.gcp_project_id
-  service = var.service["name"]
-}
-
 resource "google_service_account" "spanner_service_account" {
   project = "${var.gcp_project_id}"
   account_id   = "${var.gcp_service_account_display_name}-sp"
