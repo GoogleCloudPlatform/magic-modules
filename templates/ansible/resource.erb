@@ -274,10 +274,10 @@ def <%= func_name -%>(module, request, response):
                                           ('kind' if object.kind?),
                                           ])
                     %>
-    fingerprint = new_resource[:<%= fingerprint_name -%>]
+    fingerprint = new_resource[:<%= key[:fingerprint_name] -%>]
 <% end -%>
 <%
-    request_props = if fingerprint_name
+    request_props = if key[:fingerprint_name]
                       request_properties(props).merge({fingerprint_name => Google::PythonUtils::PythonCode.new("new_resource[:#{key[:fingerprint_name]}]")})
                     else
                       request_properties(props)
