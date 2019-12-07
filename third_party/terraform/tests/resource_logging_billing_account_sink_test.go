@@ -283,7 +283,6 @@ resource "google_logging_billing_account_sink" "bigquery" {
   billing_account  = "%s"
   destination      = "bigquery.googleapis.com/projects/%s/datasets/${google_bigquery_dataset.logging_sink.dataset_id}"
   filter           = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=WARNING"
-  include_children = true
 }
 
 resource "google_bigquery_dataset" "logging_sink" {
