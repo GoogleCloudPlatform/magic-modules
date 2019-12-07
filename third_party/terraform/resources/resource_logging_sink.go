@@ -42,7 +42,7 @@ func resourceLoggingSinkSchema() map[string]*schema.Schema {
 				Schema: map[string]*schema.Schema{
 					"use_partitioned_tables": {
 						Type:     schema.TypeBool,
-						Optional: true,
+						Required: true,
 					},
 				},
 			},
