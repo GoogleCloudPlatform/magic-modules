@@ -101,6 +101,36 @@ func TestAccComputeRegionUrlMap_noPathRulesWithUpdate(t *testing.T) {
 	})
 }
 
+func TestAccComputeRegionUrlMap_ilbPathUpdate(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeUrlMapDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionUrlMap_ilbPath(randomSuffix),
+			},
+			{
+				ResourceName:      "google_compute_region_url_map.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionUrlMap_ilbPathUpdate(randomSuffix),
+			},
+			{
+				ResourceName:      "google_compute_region_url_map.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccComputeRegionUrlMap_basic1(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
@@ -362,5 +392,226 @@ resource "google_compute_region_url_map" "foobar" {
   }
 }
 `, randomSuffix, randomSuffix, randomSuffix)
+}
+
+func testAccComputeRegionUrlMap_ilbPath(randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_url_map" "foobar" {
+  name          = "regionurlmap-test-%s"
+  description = "a description"
+  default_service = google_compute_region_backend_service.home.self_link
+
+  host_rule {
+    hosts        = ["mysite.com"]
+    path_matcher = "allpaths"
+  }
+
+  path_matcher {
+    name = "allpaths"
+    default_service = google_compute_region_backend_service.home.self_link
+
+    path_rule {
+      paths   = ["/home"]
+      route_action {
+        cors_policy {
+          allow_credentials = true
+          allow_headers = ["Allowed content"]
+          allow_methods = ["GET"]
+          allow_origins = ["Allowed origin"]
+          expose_headers = ["Exposed header"]
+          max_age = 30
+          disabled = false
+        }
+        fault_injection_policy {
+          abort {
+            http_status = 234
+            percentage = 5.6
+          }
+          delay {
+            fixed_delay {
+              seconds = 0
+              nanos = 50000
+            }
+            percentage = 7.8
+          }
+        }
+        request_mirror_policy {
+          backend_service = google_compute_region_backend_service.home.self_link
+        }
+        retry_policy {
+          num_retries = 4
+          per_try_timeout {
+            seconds = 30
+          }
+          retry_conditions = ["5xx", "deadline-exceeded"]
+        }
+        timeout {
+          seconds = 20
+          nanos = 750000000
+        }
+        url_rewrite {
+          host_rewrite = "A replacement header"
+          path_prefix_rewrite = "A replacement path"
+        }
+        weighted_backend_services {
+          backend_service = google_compute_region_backend_service.home.self_link
+          weight = 400
+          header_action {
+            request_headers_to_remove = ["RemoveMe"]
+            request_headers_to_add {
+              header_name = "AddMe"
+              header_value = "MyValue"
+              replace = true
+            }
+            response_headers_to_remove = ["RemoveMe"]
+            response_headers_to_add {
+              header_name = "AddMe"
+              header_value = "MyValue"
+              replace = false
+            }
+          }
+        }
+      }
+    }
+  }
+
+  test {
+    service = google_compute_region_backend_service.home.self_link
+    host    = "hi.com"
+    path    = "/home"
+  }
+}
+
+resource "google_compute_region_backend_service" "home" {
+  name          = "regionurlmap-test-%s"
+  protocol    = "HTTP"
+  timeout_sec = 10
+
+  health_checks = [google_compute_region_health_check.default.self_link]
+  load_balancing_scheme = "INTERNAL_MANAGED"
+}
+
+resource "google_compute_region_health_check" "default" {
+  name          = "regionurlmap-test-%s"
+  http_health_check {
+    port = 80
+  }
+}
+`, randomSuffix, randomSuffix, randomSuffix)
+}
+
+func testAccComputeRegionUrlMap_ilbPathUpdate(randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_url_map" "foobar" {
+  name          = "regionurlmap-test-%s"
+  description = "a description"
+  default_service = google_compute_region_backend_service.home2.self_link
+
+  host_rule {
+    hosts        = ["mysite.com"]
+    path_matcher = "allpaths2"
+  }
+
+  path_matcher {
+    name = "allpaths2"
+    default_service = google_compute_region_backend_service.home.self_link
+
+    path_rule {
+      paths   = ["/home2"]
+      route_action {
+        cors_policy {
+          allow_credentials = true
+          allow_headers = ["Allowed content again"]
+          allow_methods = ["PUT"]
+          allow_origins = ["Allowed origin again"]
+          expose_headers = ["Exposed header again"]
+          max_age = 31
+          disabled = true
+        }
+        fault_injection_policy {
+          abort {
+            http_status = 345
+            percentage = 6.7
+          }
+          delay {
+            fixed_delay {
+              seconds = 1
+              nanos = 51000
+            }
+            percentage = 8.9
+          }
+        }
+        request_mirror_policy {
+          backend_service = google_compute_region_backend_service.home.self_link
+        }
+        retry_policy {
+          num_retries = 6
+          per_try_timeout {
+            seconds = 31
+          }
+          retry_conditions = ["5xx"]
+        }
+        timeout {
+          seconds = 21
+          nanos = 760000000
+        }
+        url_rewrite {
+          host_rewrite = "A replacement header again"
+          path_prefix_rewrite = "A replacement path again"
+        }
+        weighted_backend_services {
+          backend_service = google_compute_region_backend_service.home.self_link
+          weight = 401
+          header_action {
+            request_headers_to_remove = ["RemoveMe2"]
+            request_headers_to_add {
+              header_name = "AddMe2"
+              header_value = "MyValue2"
+              replace = false
+            }
+            response_headers_to_remove = ["RemoveMe2"]
+            response_headers_to_add {
+              header_name = "AddMe2"
+              header_value = "MyValue2"
+              replace = true
+            }
+          }
+        }
+      }
+    }
+  }
+
+  test {
+    service = google_compute_region_backend_service.home.self_link
+    host    = "hi.com"
+    path    = "/home"
+  }
+}
+
+resource "google_compute_region_backend_service" "home" {
+  name          = "regionurlmap-test-%s"
+  protocol    = "HTTP"
+  timeout_sec = 10
+
+  health_checks = [google_compute_region_health_check.default.self_link]
+  load_balancing_scheme = "INTERNAL_MANAGED"
+}
+
+resource "google_compute_region_backend_service" "home2" {
+  name          = "regionurlmap-test-%s-2"
+  protocol    = "HTTP"
+  timeout_sec = 10
+
+  health_checks = [google_compute_region_health_check.default.self_link]
+  load_balancing_scheme = "INTERNAL_MANAGED"
+}
+
+resource "google_compute_region_health_check" "default" {
+  name          = "regionurlmap-test-%s"
+  http_health_check {
+    port = 80
+  }
+}
+`, randomSuffix, randomSuffix, randomSuffix, randomSuffix)
 }
 <% end -%>
