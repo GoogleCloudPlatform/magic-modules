@@ -210,7 +210,7 @@ objects:
                   - bucket_options.0.exponential_buckets.0.scale
                 description: |
                   Must be greater than 0.
-              - !ruby/object:Api::Type::Integer
+              - !ruby/object:Api::Type::Double
                 name: growthFactor
                 at_least_one_of:
                   - bucket_options.0.exponential_buckets.0.num_finite_buckets
