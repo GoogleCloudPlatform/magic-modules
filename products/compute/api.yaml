@@ -12130,6 +12130,7 @@ objects:
                                     prior to sending the response back to the client.
                             - !ruby/object:Api::Type::Integer
                               name: 'weight'
+                              required: true
                               description: |
                                 Specifies the fraction of traffic sent to backendService, computed as weight /
                                 (sum of all weightedBackendService weights in routeAction) . The selection of a
