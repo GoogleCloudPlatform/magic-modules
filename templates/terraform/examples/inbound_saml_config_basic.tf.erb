@@ -1,0 +1,17 @@
+resource "google_identity_platform_inbound_saml_config" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]["name"] %>"
+  display_name = "Display Name"
+  idp_config {
+    idp_entity_id = "<%= ctx[:vars]["idp_entity_id"] %>"
+    sign_request = true
+    sso_url = "example.com"
+    idp_certificates {
+      x509_certificate = file("test-fixtures/rsa_cert.pem")
+    }
+  }
+
+  sp_config {
+    sp_entity_id = "<%= ctx[:vars]["sp_entity_id"] %>"
+    callback_uri = "https://example.com"
+  }
+}

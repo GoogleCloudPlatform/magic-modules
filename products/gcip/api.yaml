@@ -59,16 +59,17 @@ objects:
     name: 'InboundSamlConfig'
     base_url: 'projects/{{project}}/inboundSamlConfigs'
     self_link: 'projects/{{project}}/inboundSamlConfigs/{{name}}'
-    create_url: 'projects/{{project}}/inboundSamlConfigs?inboundSamlConfigid={{name}}'
+    create_url: 'projects/{{project}}/inboundSamlConfigs?inboundSamlConfigId={{name}}'
     update_mask: true
     description: |
       Inbound SAML configuration for a Identity Toolkit project.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
-        output: true
         description: |
-          The name of the InboundSamlConfig resource.
+          The name of the InboundSamlConfig resource. must start with 'saml.' and can only have alphanumeric characters,
+          hyphens, underscores or periods. The part after 'saml.' must also start with a lowercase letter, end with an
+          alphanumeric character, and have at least 2 characters.
         required: true
       - !ruby/object:Api::Type::String
         name: 'displayName'
@@ -81,6 +82,7 @@ objects:
           If allows users to sign in with the provider.
       - !ruby/object:Api::Type::NestedObject
         name: 'idpConfig'
+        required: true
         description: |
           SAML IdP configuration when the project acts as the relying party
         properties:
@@ -96,11 +98,11 @@ objects:
               URL to send Authentication request to.
           - !ruby/object:Api::Type::Boolean
             name: 'signRequest'
-            required: true
             description: |
               Indicates if outbounding SAMLRequest should be signed.
           - !ruby/object:Api::Type::Array
             name: 'idpCertificates'
+            required: true
             description: |
               The IDP's certificate data to verify the signature in the SAMLResponse issued by the IDP.
             item_type: !ruby/object:Api::Type::NestedObject
@@ -111,18 +113,17 @@ objects:
                   The x509 certificate
       - !ruby/object:Api::Type::NestedObject
         name: 'spConfig'
+        required: true
         description: |
           SAML SP (Service Provider) configuration when the project acts as the relying party to receive
           and accept an authentication assertion issued by a SAML identity provider.
         properties:
           - !ruby/object:Api::Type::String
             name: 'spEntityId'
-            required: true
             description: |
               Unique identifier for all SAML entities
           - !ruby/object:Api::Type::String
             name: 'callbackUri'
-            required: true
             description: |
               Callback URI where responses from IDP are handled.
           - !ruby/object:Api::Type::Array

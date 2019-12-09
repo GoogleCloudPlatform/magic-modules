@@ -18,7 +18,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "default_supported_idp_config_basic"
-        primary_resource_id: "ip_address"
+        primary_resource_id: "idp_config"
+  InboundSamlConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "inbound_saml_config_basic"
+        primary_resource_id: "saml_config"
+        vars:
+          name: saml.tf-config
+          idp_entity_id: tf-idp
+          sp_entity_id: tf-sp
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
