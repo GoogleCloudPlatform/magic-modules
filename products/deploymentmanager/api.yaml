@@ -22,7 +22,7 @@ versions:
     name: beta
     base_url: https://www.googleapis.com/deploymentmanager/v2beta/
 scopes:
-  - https://www.googleapis.com/auth/bigtable
+  - https://www.googleapis.com/auth/cloud-platform
 apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Deployment Manager API
