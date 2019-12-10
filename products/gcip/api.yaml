@@ -32,6 +32,7 @@ objects:
     base_url: 'projects/{{project}}/defaultSupportedIdpConfigs'
     self_link: 'projects/{{project}}/defaultSupportedIdpConfigs/{{client_id}}'
     create_url: 'projects/{{project}}/defaultSupportedIdpConfigs?idpId={{client_id}}'
+    update_verb: :PATCH
     update_mask: true
     description: |
       Configurations options for authenticating with a the standard set of Identity Toolkit-trusted IDPs.
@@ -60,6 +61,7 @@ objects:
     base_url: 'projects/{{project}}/inboundSamlConfigs'
     self_link: 'projects/{{project}}/inboundSamlConfigs/{{name}}'
     create_url: 'projects/{{project}}/inboundSamlConfigs?inboundSamlConfigId={{name}}'
+    update_verb: :PATCH
     update_mask: true
     description: |
       Inbound SAML configuration for a Identity Toolkit project.
@@ -121,11 +123,11 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'spEntityId'
             description: |
-              Unique identifier for all SAML entities
+              Unique identifier for all SAML entities.
           - !ruby/object:Api::Type::String
             name: 'callbackUri'
             description: |
-              Callback URI where responses from IDP are handled.
+              Callback URI where responses from IDP are handled. Must start with `https://`.
           - !ruby/object:Api::Type::Array
             name: 'spCertificates'
             output: true
