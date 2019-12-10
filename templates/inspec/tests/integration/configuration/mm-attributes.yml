@@ -357,3 +357,4 @@ service_perimeter:
   name: restrict_all
   title: restrict_all
   restricted_service: storage.googleapis.com
+  policy_title: policytitle

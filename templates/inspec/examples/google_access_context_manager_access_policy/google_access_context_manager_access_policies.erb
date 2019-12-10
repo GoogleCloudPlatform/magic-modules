@@ -1,0 +1,7 @@
+<% gcp_organization_id = "#{external_attribute('gcp_organization_id', doc_generation)}" -%>
+<% service_perimeter = grab_attributes['service_perimeter'] -%>
+
+describe google_access_context_manager_access_policies(org_id: <%= gcp_organization_id %>) do
+	its('count') { should be >= 1 }
+	its('titles') { should include <%= doc_generation ? "'#{service_perimeter['policy_title']}'" : "service_perimeter['policy_title']" -%> }
+end

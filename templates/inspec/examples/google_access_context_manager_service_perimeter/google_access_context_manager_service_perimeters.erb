@@ -1,7 +1,11 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
-<% standardappversion = grab_attributes['standardappversion'] -%>
+<% gcp_organization_id = "#{external_attribute('gcp_organization_id', doc_generation)}" -%>
+<% service_perimeter = grab_attributes['service_perimeter'] -%>
 
-describe google_appengine_standard_app_versions(project: <%= gcp_project_id -%>, location: <%= gcp_location -%>,service: <%= doc_generation ? "'#{standardappversion['service']}'" : "standardappversion['service']" -%>) do
-  its('runtimes') { should include <%= doc_generation ? "'#{standardappversion['runtime']}'" : "standardappversion['runtime']" -%> }
+describe.one do
+	google_access_context_manager_access_policies(org_id: <%= gcp_organization_id %>).names.each do |policy_name|
+		describe google_access_context_manager_service_perimeters(policy_name: policy_name) do
+			its('names') { should include <%= doc_generation ? "'#{service_perimeter['name']}'" : "service_perimeter['name']" -%> }
+			its('titles') { should include <%= doc_generation ? "'#{service_perimeter['title']}'" : "service_perimeter['title']" -%> }
+		end
+	end
 end
