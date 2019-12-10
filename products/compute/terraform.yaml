@@ -1357,6 +1357,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       priority: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: 1000
+        send_empty_value: true
       nextHopIp: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       nextHopGateway: !ruby/object:Overrides::Terraform::PropertyOverride
