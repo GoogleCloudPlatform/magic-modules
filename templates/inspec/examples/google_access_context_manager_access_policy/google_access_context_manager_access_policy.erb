@@ -2,11 +2,11 @@
 <% service_perimeter = grab_attributes['service_perimeter'] -%>
 
 describe.one do
-	google_access_context_manager_access_policies(org_id: <%= gcp_organization_id %>).names.each do |policy_name|
-		describe google_access_context_manager_access_policy(name: policy_name) do
-			it { should exist }
-			its('title') { should cmp <%= doc_generation ? "'#{service_perimeter['policy_title']}'" : "service_perimeter['policy_title']" -%> }
-			its('parent') { should match <%= gcp_organization_id -%> }
-		end
-	end
+  google_access_context_manager_access_policies(org_id: <%= gcp_organization_id %>).names.each do |policy_name|
+    describe google_access_context_manager_access_policy(name: policy_name) do
+      it { should exist }
+      its('title') { should cmp <%= doc_generation ? "'#{service_perimeter['policy_title']}'" : "service_perimeter['policy_title']" -%> }
+      its('parent') { should match <%= gcp_organization_id -%> }
+    end
+  end
 end

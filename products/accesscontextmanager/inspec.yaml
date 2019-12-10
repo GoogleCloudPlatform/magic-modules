@@ -16,6 +16,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   AccessPolicy: !ruby/object:Overrides::Inspec::ResourceOverride
     base_url: accessPolicies?parent=organizations/{{org_id}}
     self_link: accessPolicies/{{name}}
+    privileged: true
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         name_from_self_link: true
@@ -24,6 +25,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   ServicePerimeter: !ruby/object:Overrides::Inspec::ResourceOverride
     base_url: "accessPolicies/{{policy_name}}/servicePerimeters"
     self_link: "accessPolicies/{{policy_name}}/servicePerimeters/{{name}}"
+    privileged: true
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         name_from_self_link: true
