@@ -926,3 +926,23 @@ resource "google_cloud_scheduler_job" "job" {
     uri = var.scheduler_job["http_target_uri"]
   }
 }
+
+variable "service_perimeter" {
+  type = "map"
+}
+
+resource "google_access_context_manager_service_perimeter" "service-perimeter" {
+  count  = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  parent = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}"
+  name   = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}/servicePerimeters/${var.service_perimeter["name"]}"
+  title  = var.service_perimeter["title"]
+  status {
+    restricted_services = [var.service_perimeter["restricted_service"]]
+  }
+}
+
+resource "google_access_context_manager_access_policy" "access-policy" {
+  count  = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  parent = "organizations/${var.gcp_organization_id}"
+  title  = "my policy"
+}
