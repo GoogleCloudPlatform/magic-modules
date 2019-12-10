@@ -229,7 +229,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
     if err != nil {
         <%= lines(compile(object.custom_code.post_create_failure)) if object.custom_code.post_create_failure -%>
-        // Remove ID to show resource wasn't created.
+        // The resource didn't actually create
         d.SetId("")
         return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
     }
