@@ -898,6 +898,7 @@ resource "google_spanner_instance" "spanner_instance" {
 }
 
 resource "google_spanner_instance_iam_binding" "instance" {
+  project  = "${var.gcp_project_id}"
   instance = google_spanner_instance.spanner_instance.name
   role     = "roles/editor"
 
