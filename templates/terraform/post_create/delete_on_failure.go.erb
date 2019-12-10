@@ -1,0 +1,13 @@
+log.Printf("[WARN] Checking if <%= object.name -%> %q was created with failed state", id)
+var cleanErr error
+if cleanErr = resource<%= resource_name -%>Read(d, meta); cleanErr == nil {
+	if d.Id() != "" {
+		log.Printf("[WARN] <%= object.name -%> %q still exists, attempting to delete...", id)
+		if cleanErr = resource<%= resource_name -%>Delete(d, meta); cleanErr == nil {
+			log.Printf("[WARN] failed <%= object.name -%> %q was successfully deleted", id)
+		}
+	}
+}
+if cleanErr != nil {
+	log.Printf("[WARN] Could not confirm cleanup of <%= object.name -%> %s if created in error state: %v", id, cleanErr)
+}

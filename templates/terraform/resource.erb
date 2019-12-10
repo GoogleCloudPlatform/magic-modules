@@ -193,6 +193,10 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  end -%>
     res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutCreate) <%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
+        <%  # Async block adds post-create failure code after operation instead.
+            if object.async.nil? -%>
+        <%= lines(compile(object.custom_code.post_create_failure)) if object.custom_code.post_create_failure -%>
+        <%  end -%>
         return fmt.Errorf("Error creating <%= object.name -%>: %s", err)
     }
 
@@ -224,7 +228,8 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         int(d.Timeout(schema.TimeoutCreate).Minutes()))
 
     if err != nil {
-        // The resource didn't actually create
+        <%= lines(compile(object.custom_code.post_create_failure)) if object.custom_code.post_create_failure -%>
+        // Remove ID to show resource wasn't created.
         d.SetId("")
         return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
     }
