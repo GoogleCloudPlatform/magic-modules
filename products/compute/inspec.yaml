@@ -97,7 +97,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   UrlMap: !ruby/object:Overrides::Inspec::ResourceOverride
     properties:
-      pathMatchers: !ruby/object:Overrides::Inspec::PropertyOverride
+      pathMatchers.routeRules: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
   VpnTunnel: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
