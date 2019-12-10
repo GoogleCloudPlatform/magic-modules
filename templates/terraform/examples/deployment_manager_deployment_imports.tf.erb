@@ -1,0 +1,20 @@
+resource "google_deployment_manager_deployment" "<%= ctx[:primary_resource_id] %>" {
+  name = "single_vm"
+  target {
+    config {
+      content = <<EOF
+imports:
+- path: vm_template.jinja
+
+resources:
+- name: my-vm
+  type: vm_template.jinja
+EOF
+    }
+
+    imports {
+      name = "vm_template.jinja"
+      content = file("vm_template.jinja")
+    }
+  }
+}

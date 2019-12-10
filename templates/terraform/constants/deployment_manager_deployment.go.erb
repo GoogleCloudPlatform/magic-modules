@@ -1,0 +1,21 @@
+func customDiffDeploymentManagerDeployment(d *schema.ResourceDiff, meta interface{}) error {
+	preview := d.Get("preview").(bool)
+	if !preview {
+		// If Deployment will not be in preview, no custom behavior needed.
+		return nil
+	}
+
+	log.Printf("[WARN] Deployment will be in preview - Terraform will treat Deployment as recreate-only")
+	if d.HasChange("preview") {
+		d.ForceNew("preview")
+	}
+
+	if d.HasChange("target") {
+		d.ForceNew("target")
+	}
+
+	if d.HasChange("labels") {
+		d.ForceNew("labels")
+	}
+	return nil
+}
