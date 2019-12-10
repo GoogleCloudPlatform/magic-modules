@@ -78,7 +78,7 @@ objects:
         name: 'deletePolicy'
         description: |
           Set the policy to use for deleting new resources on update/delete.
-          Valid values are `DELETE (default) or `ABANDON`. If `DELETE`,
+          Valid values are `DELETE` (default) or `ABANDON`. If `DELETE`,
           resource is deleted after removal from Deployment Manager. If
           `ABANDON`, the resource is only removed from Deployment Manager
           and is not actually deleted. Note that updating this field does not
@@ -145,7 +145,7 @@ objects:
           - !ruby/object:Api::Type::Array
             name: 'imports'
             description: |
-              Specifies any files to import for this configuration. This can be
+              Specifies import files for this configuration. This can be
               used to import templates or other files. For example, you might
               import a text file in order to use the file in a template.
             item_type: !ruby/object:Api::Type::NestedObject
