@@ -62,7 +62,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       # post-create failure: Delete deployment if an invalid deployment was created
-      post_create_failure: 'templates/terraform/post_create/delete_on_failure.go.erb'
+      post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.erb'
       # Custom diff to force new if 'preview' is true
       constants: 'templates/terraform/constants/deployment_manager_deployment.go.erb'
       resource_definition: 'templates/terraform/resource_definition/deployment_manager_deployment.go.erb'
