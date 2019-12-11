@@ -1,0 +1,70 @@
+name: downstream-changelog
+on:
+    - pull_request:
+          types:
+              - closed
+jobs:
+    tpg:
+        runs-on: ubuntu-latest
+        name: "Update TPG changelog"
+        if: github.event.pull_request.merged
+        steps:
+            - uses: actions/checkout@v1
+              if: github.event.pull_request.merged
+              with:
+                  path: terraform-provider-google
+                  repository: terraform-providers/terraform-provider-google
+                  ref: master
+            - name: Configure git.
+              run: git config --global user.email "magic-modules@google.com" && git config --global user.name "Modular Magician"
+            - name: "Add changelog entries."
+              run: |
+                  pushd terraform-provider-google
+                  mkdir -p ./.changelog/
+                  echo $PR_BODY | sed -e '/```release-note/,/```/!d' > .changelog/${{github.event.pull_request.number}}.txt
+                  git add .changelog
+                  git commit -m "Changelog entry for MM PR #${{github.event.pull_request.number}}."
+                  popd
+              # We consume user-controlled text as environment variables to avoid directly substituting
+              # unknown text into bash scripts where possible.
+              env:
+                  PR_BODY: ${{github.event.pull_request.body}}
+            - name: Push changelog
+              uses: ad-m/github-push-action@master
+              with:
+                  github_token: ${{ secrets.MAGICIAN_TOKEN }}
+                  repository: terraform-providers/terraform-provider-google
+                  branch: master
+                  directory: /home/runner/work/magic-modules/terraform-provider-google
+
+
+    tpgb:
+        runs-on: ubuntu-latest
+        if: github.event.pull_request.merged
+        name: "Update TPGB changelog"
+        steps:
+            - uses: actions/checkout@v1
+              if: github.event.pull_request.merged
+              with:
+                  path: terraform-provider-google-beta
+                  repository: terraform-providers/terraform-provider-google-beta
+                  ref: master
+            - name: Configure git.
+              run: git config --global user.email "magic-modules@google.com" && git config --global user.name "Modular Magician"
+            - name: "Add changelog entries."
+              env:
+                  PR_BODY: ${{github.event.pull_request.body}}
+              run: |
+                  pushd terraform-provider-google
+                  mkdir -p ./.changelog/
+                  echo $PR_BODY | sed -e '/```release-note/,/```/!d' > .changelog/${{github.event.pull_request.number}}.txt
+                  git add .changelog
+                  git commit -m "Changelog entry for MM PR #${{github.event.pull_request.number}}."
+                  popd
+            - name: Push changelog
+              uses: ad-m/github-push-action@master
+              with:
+                  github_token: ${{ secrets.MAGICIAN_TOKEN }}
+                  repository: terraform-providers/terraform-provider-google-beta
+                  branch: master
+                  directory: /home/runner/work/magic-modules/terraform-provider-google-beta

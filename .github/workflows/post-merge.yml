@@ -1,0 +1,188 @@
+---
+name: push-downstream
+on:
+    schedule:
+        - cron: '*/20 * * * *'
+jobs:
+    # TODO(ndmckinley): split into 5 downstream pushes.
+    push-downstream:
+        runs-on: ubuntu-latest
+        name: "Build and push downstreams"
+        env:
+            GOPATH: /home/runner/work/magic-modules/go
+            GO111MODULE: auto
+        steps:
+            - uses: actions/checkout@v1
+            - uses: actions/setup-go@v1
+              with:
+                  go-version: 1.13.4
+            - uses: actions/setup-ruby@v1
+              with:
+                  ruby-version: 2.x
+                  architecture: 'x64'
+
+            - run: go get golang.org/x/tools/cmd/goimports
+            - run: bundle install
+            - uses: actions/checkout@v1
+              with:
+                  path: go/src/github.com/terraform-providers/terraform-provider-google
+                  repository: terraform-providers/terraform-provider-google
+                  ref: master
+            - uses: actions/checkout@v1
+              with:
+                  path: go/src/github.com/terraform-providers/terraform-provider-google-beta
+                  repository: terraform-providers/terraform-provider-google-beta
+                  ref: master
+            - uses: actions/checkout@v1
+              with:
+                  path: ansible_collections_google
+                  repository: modular-magician/ansible_collections_google
+                  ref: master
+            - uses: actions/checkout@v1
+              with:
+                  path: inspec-gcp
+                  repository: modular-magician/inspec-gcp
+                  ref: master
+            - uses: actions/checkout@v1
+              with:
+                  path: go/src/github.com/GoogleCloudPlatform/terraform-google-conversion
+                  repository: GoogleCloudPlatform/terraform-google-conversion
+                  ref: master
+
+            - name: Configure git.
+              run: git config --global user.email "magic-modules@google.com" && git config --global user.name "Modular Magician"
+
+            - name: Generate downstreams
+              run: |
+                  set -e
+                  set -x
+                  export PATH=$PATH:$GOPATH/bin
+                  git fetch --all
+                  for sha in $(git log --pretty=%H $(git merge-base HEAD origin/tpgb-sync)..HEAD); do
+                      pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google-beta
+                      find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \; > /dev/null
+                      popd
+                      bundle exec compiler -a -e terraform -o $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta/ > /dev/null
+                      COMMIT_MSG=$(git log -1 --pretty=%B $sha)
+                      pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google-beta
+                      git add . && git commit -m "$COMMIT_MSG" || true
+                      popd
+                      git branch -f tpgb-sync
+                  done
+
+                  for sha in $(git log --pretty=%H $(git merge-base HEAD origin/tpg-sync)..HEAD); do
+                      pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google
+                      find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \; > /dev/null
+                      popd
+                      bundle exec compiler -a -e terraform -o $GOPATH/src/github.com/terraform-providers/terraform-provider-google/ > /dev/null
+                      COMMIT_MSG=$(git log -1 --pretty=%B $sha)
+                      pushd /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google
+                      git add . && git commit -m "$COMMIT_MSG" || true
+                      popd
+                      git branch -f tpg-sync
+                  done
+
+                  for sha in $(git log --pretty=%H $(git merge-base HEAD origin/inspec-sync)..HEAD); do
+                      bundle exec compiler -a -e inspec -o /home/runner/work/magic-modules/inspec-gcp > /dev/null
+                      COMMIT_MSG=$(git log -1 --pretty=%B $sha)
+                      pushd /home/runner/work/magic-modules/inspec-gcp
+                      git add . && git commit -m "$COMMIT_MSG" || true
+                      popd
+                      git branch -f inspec-sync
+                  done
+
+                  for sha in $(git log --pretty=%H $(git merge-base HEAD origin/ansible-sync)..HEAD); do
+                      bundle exec compiler -a -e ansible -o /home/runner/work/magic-modules/ansible_collections_google > /dev/null
+                      COMMIT_MSG=$(git log -1 --pretty=%B $sha)
+                      pushd /home/runner/work/magic-modules/ansible_collections_google
+                      git add . && git commit -m "$COMMIT_MSG" || true
+                      popd
+                      git branch -f ansible-sync
+                  done
+
+                  for sha in $(git log --pretty=%H $(git merge-base HEAD origin/tf-conv-sync)..HEAD); do
+                      bundle exec compiler -a -e terraform -f validator -o $GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion > /dev/null
+                      COMMIT_MSG=$(git log -1 --pretty=%B $sha)
+                      pushd /home/runner/work/magic-modules/go/src/github.com/GoogleCloudPlatform/terraform-google-conversion
+                      git add . && git commit -m "$COMMIT_MSG" || true
+                      popd
+                      git branch -f tf-conv-sync
+                  done
+
+            - name: Push changes to TPGB
+              uses: ndmckinley/github-push-action@master
+              with:
+                  github_token: ${{ secrets.MAGICIAN_TOKEN }}
+                  repository: terraform-providers/terraform-provider-google-beta
+                  branch: master
+                  directory: /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google-beta
+
+            - name: Update downstream TPGB.
+              uses: ndmckinley/github-push-action@master
+              with:
+                  github_token: ${{ secrets.MAGICIAN_TOKEN }}
+                  branch: tpgb-sync
+                  force: true
+
+            - name: Push changes to TPG
+              uses: ndmckinley/github-push-action@master
+              with:
+                  github_token: ${{ secrets.MAGICIAN_TOKEN }}
+                  repository: terraform-providers/terraform-provider-google
+                  branch: master
+                  directory: /home/runner/work/magic-modules/go/src/github.com/terraform-providers/terraform-provider-google
+
+            - name: Update downstream TPG.
+              uses: ndmckinley/github-push-action@master
+              with:
+                  github_token: ${{ secrets.MAGICIAN_TOKEN }}
+                  branch: tpg-sync
+                  force: true
+
+
+            - name: Push changes to Ansible
+              uses: ndmckinley/github-push-action@master
+              with:
+                  github_token: ${{ secrets.MAGICIAN_TOKEN }}
+                  repository: modular-magician/ansible_collections_google
+                  branch: master
+                  directory: /home/runner/work/magic-modules/ansible_collections_google
+
+            - name: Update downstream Ansible.
+              uses: ndmckinley/github-push-action@master
+              with:
+                  github_token: ${{ secrets.MAGICIAN_TOKEN }}
+                  branch: ansible-sync
+                  force: true
+
+
+            - name: Push changes to Inspec
+              uses: ndmckinley/github-push-action@master
+              with:
+                  github_token: ${{ secrets.MAGICIAN_TOKEN }}
+                  repository: modular-magician/inspec-gcp
+                  branch: master
+                  directory: /home/runner/work/magic-modules/inspec-gcp
+
+            - name: Update downstream Inspec.
+              uses: ndmckinley/github-push-action@master
+              with:
+                  github_token: ${{ secrets.MAGICIAN_TOKEN }}
+                  branch: inspec-sync
+                  force: true
+
+
+            - name: Push changes to tf-conversion
+              uses: ndmckinley/github-push-action@master
+              with:
+                  github_token: ${{ secrets.MAGICIAN_TOKEN }}
+                  repository: GoogleCloudPlatform/terraform-google-conversion
+                  branch: master
+                  directory: /home/runner/work/magic-modules/go/src/github.com/GoogleCloudPlatform/terraform-google-conversion
+
+            - name: Update downstream tf-conversion.
+              uses: ndmckinley/github-push-action@master
+              with:
+                  github_token: ${{ secrets.MAGICIAN_TOKEN }}
+                  branch: tf-conv-sync
+                  force: true
