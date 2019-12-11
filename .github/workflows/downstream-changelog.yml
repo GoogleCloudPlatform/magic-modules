@@ -1,8 +1,8 @@
 name: downstream-changelog
 on:
-    - pull_request:
-          types:
-              - closed
+    pull_request:
+        types:
+            - closed
 jobs:
     tpg:
         runs-on: ubuntu-latest
