@@ -1,0 +1,3 @@
+gcp_organization_id = attribute(:gcp_organization_id, default: <%= external_attribute('gcp_organization_id') -%>, description: 'The identifier of the organization that is the parent of the perimeter')
+gcp_enable_privileged_resources = attribute(:gcp_enable_privileged_resources, default:0, description:'Flag to enable privileged resources requiring elevated privileges in GCP.')
+service_perimeter = attribute('service_perimeter', default: <%= JSON.pretty_generate(grab_attributes['service_perimeter']) -%>, description: 'Service perimeter definition')
