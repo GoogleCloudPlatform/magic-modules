@@ -17,7 +17,7 @@ popd
 
 # Clone ansible_collections_google because submodules
 # break collections
-git clone https://github.com/ansible/ansible_collections_google.git
+git clone https://github.com/ansible-collections/ansible_collections_google.git
 
 # Build newest modules
 pushd magic-modules-gcp

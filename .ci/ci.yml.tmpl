@@ -455,7 +455,7 @@ jobs:
                 GITHUB_TOKEN: ((github-account.password))
                 # This is what tells us which terraform repo to write PRs against - this
                 # is what you change if you want to test this in a non-live environment.
-                ANSIBLE_REPO_USER: ansible
+                ANSIBLE_REPO_USER: ansible-collections
                 INSPEC_REPO_USER: modular-magician
                 TERRAFORM_VERSIONS: "{{','.join(vars.terraform_properties_serialized)}}"
             on_failure:
