@@ -1,5 +1,4 @@
 resource "google_compute_region_health_check" "http2-region-health-check" {
-  provider = google-beta
   name     = "<%= ctx[:vars]['health_check_name'] %>"
 
   timeout_sec        = 1
