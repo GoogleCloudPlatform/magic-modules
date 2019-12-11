@@ -9003,7 +9003,6 @@ objects:
                 should be mapped to.
   - !ruby/object:Api::Resource
     name: 'RegionHealthCheck'
-    min_version: beta
     kind: 'compute#healthCheck'
     base_url: projects/{{project}}/regions/{{region}}/healthChecks
     collection_url_key: 'items'

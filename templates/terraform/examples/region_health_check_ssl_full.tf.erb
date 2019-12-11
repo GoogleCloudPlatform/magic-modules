@@ -1,5 +1,4 @@
 resource "google_compute_region_health_check" "ssl-region-health-check" {
-  provider    = google-beta
   name        = "<%= ctx[:vars]['health_check_name'] %>"
   description = "Health check via ssl"
 
