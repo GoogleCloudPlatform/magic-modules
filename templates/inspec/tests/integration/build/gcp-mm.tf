@@ -251,7 +251,7 @@ resource "google_dns_record_set" "a" {
   type = var.record_set["type"]
   ttl  = var.record_set["ttl"]
 
-  rrdatas = ["${var.record_set["rrdatas1"]}", "${var.record_set["rrdatas2"]}"]
+  rrdatas = [var.record_set["rrdatas1"], var.record_set["rrdatas2"]]
   project = var.gcp_project_id
 }
 
@@ -381,7 +381,7 @@ resource "google_compute_instance_template" "gcp-inspec-instance-template" {
   name        = var.instance_template["name"]
   description = var.instance_template["description"]
 
-  tags = ["${var.instance_template["tag"]}"]
+  tags = [var.instance_template["tag"]]
 
   instance_description = var.instance_template["instance_description"]
   machine_type         = var.instance_template["machine_type"]
@@ -404,7 +404,7 @@ resource "google_compute_instance_template" "gcp-inspec-instance-template" {
   }
 
   service_account {
-    scopes = ["${var.instance_template["service_account_scope"]}"]
+    scopes = [var.instance_template["service_account_scope"]]
   }
 }
 
@@ -422,7 +422,7 @@ resource "google_compute_url_map" "gcp-inspec-url-map" {
   default_service = "${google_compute_backend_service.gcp-inspec-backend-service.self_link}"
 
   host_rule {
-    hosts        = ["${var.url_map["host_rule_host"]}"]
+    hosts        = [var.url_map["host_rule_host"]]
     path_matcher = var.url_map["path_matcher_name"]
   }
 
@@ -431,7 +431,7 @@ resource "google_compute_url_map" "gcp-inspec-url-map" {
     default_service = "${google_compute_backend_service.gcp-inspec-backend-service.self_link}"
 
     path_rule {
-      paths   = ["${var.url_map["path_rule_path"]}"]
+      paths   = [var.url_map["path_rule_path"]]
       service = "${google_compute_backend_service.gcp-inspec-backend-service.self_link}"
     }
   }
@@ -508,7 +508,7 @@ resource "google_compute_router" "gcp-inspec-router" {
   bgp {
     asn               = var.router["bgp_asn"]
     advertise_mode    = var.router["bgp_advertise_mode"]
-    advertised_groups = ["${var.router["bgp_advertised_group"]}"]
+    advertised_groups = [var.router["bgp_advertised_group"]]
     advertised_ip_ranges {
       range = var.router["bgp_advertised_ip_range1"]
     }
@@ -684,7 +684,7 @@ resource "google_ml_engine_model" "inspec-gcp-model" {
   project                           = var.gcp_project_id
   name                              = var.ml_model["name"]
   description                       = var.ml_model["description"]
-  regions                           = ["${var.ml_model["region"]}"]
+  regions                           = [var.ml_model["region"]]
   online_prediction_logging         = var.ml_model["online_prediction_logging"]
   online_prediction_console_logging = var.ml_model["online_prediction_console_logging"]
 }
@@ -720,7 +720,7 @@ resource "google_dataproc_cluster" "mycluster" {
   name    = var.dataproc_cluster["name"]
 
   labels = {
-    "${var.dataproc_cluster["label_key"]}" = var.dataproc_cluster["label_value"]
+    var.dataproc_cluster["label_key"] = var.dataproc_cluster["label_value"]
   }
 
   cluster_config {
@@ -745,7 +745,7 @@ resource "google_dataproc_cluster" "mycluster" {
     # Override or set some custom properties
     software_config {
       override_properties = {
-        "${var.dataproc_cluster["config"]["software_config"]["prop_key"]}" = var.dataproc_cluster["config"]["software_config"]["prop_value"]
+        var.dataproc_cluster["config"]["software_config"]["prop_key"] = var.dataproc_cluster["config"]["software_config"]["prop_value"]
       }
     }
 
@@ -820,7 +820,7 @@ resource "google_redis_instance" "inspec-redis" {
   reserved_ip_range = var.redis["reserved_ip_range"]
 
   labels = {
-    "${var.redis["label_key"]}" = var.redis["label_value"]
+    var.redis["label_key"] = var.redis["label_value"]
   }
 }
 
@@ -846,7 +846,7 @@ resource "google_compute_node_template" "inspec-template" {
   node_type = "${data.google_compute_node_types.zone-node-type.names[0]}"
 
   node_affinity_labels = {
-    "${var.node_template["label_key"]}" = var.node_template["label_value"]
+    var.node_template["label_key"] = var.node_template["label_value"]
   }
 }
 
@@ -893,12 +893,12 @@ resource "google_spanner_instance" "spanner_instance" {
   display_name = var.spannerinstance["display_name"]
   num_nodes    = var.spannerinstance["num_nodes"]
   labels = {
-    "${var.spannerinstance["label_key"]}" = var.spannerinstance["label_value"]
+    var.spannerinstance["label_key"] = var.spannerinstance["label_value"]
   }
 }
 
 resource "google_spanner_instance_iam_binding" "instance" {
-  project  = "${var.gcp_project_id}"
+  project  = var.gcp_project_id
   instance = google_spanner_instance.spanner_instance.name
   role     = "roles/editor"
 
@@ -911,7 +911,7 @@ resource "google_spanner_database" "database" {
   project      = var.gcp_project_id
   instance     = google_spanner_instance.spanner_instance.name
   name         = var.spannerdatabase["name"]
-  ddl          = ["${var.spannerdatabase["ddl"]}"]
+  ddl          = [var.spannerdatabase["ddl"]]
 }
 
 resource "google_cloud_scheduler_job" "job" {
