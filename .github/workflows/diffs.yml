@@ -9,7 +9,7 @@ jobs:
         name: "Build TPGB"
         env:
             GOPATH: /home/runner/work/magic-modules/go
-            GO111MODULE: auto
+            GO111MODULE: off
         steps:
             # This setup is extremely well-optimized in GH Actions.  Although we could create
             # our own container for this action and eliminate the setup time, the total setup
@@ -86,7 +86,7 @@ jobs:
         name: "Build TPG"
         env:
             GOPATH: /home/runner/work/magic-modules/go
-            GO111MODULE: auto
+            GO111MODULE: off
         steps:
             - uses: actions/checkout@v1
             - uses: actions/setup-go@v1
@@ -158,7 +158,7 @@ jobs:
         name: "Build conversion lib"
         env:
             GOPATH: /home/runner/work/magic-modules/go
-            GO111MODULE: auto
+            GO111MODULE: off
         steps:
             - uses: actions/checkout@v1
             - uses: actions/setup-go@v1
