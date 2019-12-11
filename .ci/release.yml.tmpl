@@ -1,0 +1,130 @@
+{% import "vars.tmpl" as vars %}
+# These resource types are here until the PRs get merged in upstream.  :)
+resource_types:
+    - name: git-branch
+      type: docker-image
+      source:
+          # Note: resource types cannot use credhub substitution - "gcr.io/magic-modules" is hardcoded here.
+          repository: gcr.io/magic-modules/concourse-git-resource
+          tag: '1.0'
+
+    - name: gcs-resource
+      type: docker-image
+      source:
+        repository: frodenas/gcs-resource
+
+    - name: github-pull-request
+      type: docker-image
+      source:
+          repository: gcr.io/magic-modules/concourse-github-pr-resource
+          tag: '1.1'
+
+resources:
+    - name: magic-modules-gcp
+      type: git-branch
+      source:
+          uri: git@github.com:GoogleCloudPlatform/magic-modules.git
+          private_key: ((repo-key.private_key))
+
+    - name: gcp-bucket
+      type: gcs-resource
+      source:
+        bucket: ((gcp-bucket))
+        json_key: ((gcp-bucket-json-key))
+        regexp: dist/terraform-provider-google.*
+
+    - name: night-trigger
+      type: time
+      source:
+        start: 11:00 PM
+        stop: 11:59 PM
+        location: America/Los_Angeles
+
+    - name: terraform-head
+      type: git-branch
+      source:
+          uri: git@github.com:terraform-providers/terraform-provider-google.git
+          private_key: ((repo-key.private_key))
+jobs:
+    - name: ansible-nightly-release
+      plan:
+          - get: night-trigger
+            trigger: true
+          - get: magic-modules-gcp
+            trigger: false
+          - task: build
+            file: magic-modules-gcp/.ci/magic-modules/release-ansible.yml
+            params:
+                GITHUB_TOKEN: ((github-account.password))
+                CREDS: ((repo-key.private_key))
+    - name: coverage-spreadsheet-release
+      plan:
+          - get: night-trigger
+            trigger: true
+          - get: magic-modules-gcp
+            trigger: false
+          - task: build
+            file: magic-modules-gcp/.ci/magic-modules/coverage-spreadsheet-upload.yml
+            params:
+                SERVICE_ACCOUNT: ((magic-modules-service-account))
+    - name: nightly-build
+      plan:
+          - get: night-trigger
+            trigger: true
+          - get: magic-modules-gcp
+          - get: terraform-head
+
+          - task: build
+            file: magic-modules-gcp/.ci/magic-modules/generate-terraform-all-platforms.yml
+
+{% for arch in ['darwin_amd64', 'freebsd_386', 'freebsd_amd64', 'freebsd_arm',
+'linux_386', 'linux_amd64', 'linux_arm', 'openbsd_386', 'openbsd_amd64',
+'solaris_amd64', 'windows_386.exe', 'windows_amd64.exe'] %}
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.{{arch}}
+{% endfor %}
+
+    - name: inspec-integration-test
+      serial: true
+      plan:
+        - get: night-trigger
+          trigger: true
+        - get: magic-modules-gcp
+        - task: inspec-integration
+          file: magic-modules-gcp/.ci/acceptance-tests/inspec-integration.yml
+          params:
+            TERRAFORM_KEY: ((terraform-key))
+            PROJECT_NAME: ((inspec-project-name))
+            PROJECT_NUMBER: ((inspec-project-number))
+
+{% for v in vars.terraform_v.itervalues() %}
+    - name: {{v.short_name}}-integration-test
+      serial: true
+      serial_groups: [terraform-integration]
+      plan:
+{% if v.short_name == "terraform-beta" %}
+        - get: night-trigger
+          trigger: true
+{% endif %}
+        - get: magic-modules-gcp
+        - task: {{v.short_name}}-integration
+          file: magic-modules-gcp/.ci/acceptance-tests/terraform-integration.yml
+          params:
+            PROVIDER_NAME: {{v.provider_name}}
+            SHORT_NAME: {{v.short_name}}
+            TEST_DIR: {{v.test_dir}}
+{% endfor %}
+
+    - name: ansible-integration-test
+      serial: true
+      plan:
+        - get: night-trigger
+          trigger: true
+        - get: magic-modules-gcp
+        - task: ansible-integration
+          file: magic-modules-gcp/.ci/acceptance-tests/ansible-integration.yml
+          params:
+            SERVICE_ACCOUNT_KEY: ((ansible-integration-key))
+            ANSIBLE_TEMPLATE: ((ansible-integration-template))
+            IMAGE_KEY: ((image-key))

@@ -1,0 +1,17 @@
+---
+platform: linux
+
+image_resource:
+    type: docker-image
+    source:
+        repository: gcr.io/magic-modules/python
+        tag: '1.0'
+
+inputs:
+    - name: magic-modules-gcp
+
+outputs:
+    - name: comment
+
+run:
+    path: magic-modules-gcp/.ci/magic-modules/welcome-contributor.sh

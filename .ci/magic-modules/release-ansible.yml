@@ -1,0 +1,19 @@
+---
+# This file takes one input: magic-modules-branched in detached-HEAD state
+# It will create a series of PRs on Ansible.
+platform: linux
+
+image_resource:
+    type: docker-image
+    source:
+        repository: gcr.io/magic-modules/hub
+        tag: '1.2'
+
+inputs:
+    - name: magic-modules-gcp
+
+run:
+    path: "magic-modules-gcp/.ci/magic-modules/release-ansible.sh"
+
+params:
+  GITHUB_TOKEN: ""

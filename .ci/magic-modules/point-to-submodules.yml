@@ -1,0 +1,29 @@
+---
+# This file takes two inputs: magic-modules-branched in detached-HEAD state, and the CI repo.
+# It spits out "terraform-generated", a terraform repo on a new branch (named after the
+# HEAD commit on the PR), with the new generated code in it.
+platform: linux
+
+image_resource:
+    type: docker-image
+    source:
+        repository: gcr.io/magic-modules/go-ruby
+        tag: '1.11.5-2.6.0'
+
+inputs:
+    - name: magic-modules-branched
+
+outputs:
+    - name: magic-modules-submodules
+
+run:
+    path: magic-modules-branched/.ci/magic-modules/point-to-submodules.sh
+
+params:
+  GH_USERNAME: ""
+  CREDS: ""
+  TERRAFORM_ENABLED: false
+  TERRAFORM_VERSIONS: ""
+  ANSIBLE_ENABLED: false
+  INSPEC_ENABLED: false
+

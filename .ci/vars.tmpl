@@ -1,0 +1,45 @@
+{% set terraform_v = {
+    'ga': {
+      'provider_name': 'terraform-provider-google',
+      'short_name': 'terraform',
+      'test_dir': 'google',
+      'github_org': 'terraform-providers',
+      'override_provider': ''
+    },
+    'beta': {
+      'provider_name': 'terraform-provider-google-beta',
+      'short_name': 'terraform-beta',
+      'test_dir': 'google-beta',
+      'github_org': 'terraform-providers',
+      'override_provider': ''
+    },
+    'validator': {
+      'provider_name': 'terraform-google-conversion',
+      'short_name': 'terraform-mapper',
+      'test_dir': 'google',
+      'github_org': 'GoogleCloudPlatform',
+      'override_provider': 'validator'
+    }
+  }
+%}
+{% set downstreams_with_changelogs = [
+  'terraform-providers/terraform-provider-google-beta',
+  'terraform-providers/terraform-provider-google'
+  ]
+%}
+{% macro build_folder(names) -%}
+{% for name in names %}
+build/{{name}}
+{%- endfor %}
+{% endmacro -%}
+{% set terraform_submodules = build_folder(terraform_v.values()|map(attribute='short_name')).split() %}
+{% set all_submodules =
+     (terraform_submodules + ['build/ansible'] + ['build/inspec'])
+%}
+{% set all_submodules_yaml_format = '[' + ','.join(all_submodules) + ']' %}
+{% macro serialize_terraform_properties(objs) -%}
+{% for obj in objs %}
+{{obj.provider_name}}:{{obj.short_name}}:{{obj.github_org}}
+{%- endfor %}
+{% endmacro -%}
+{% set terraform_properties_serialized = serialize_terraform_properties(terraform_v.values()).split() %}
