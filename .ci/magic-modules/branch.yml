@@ -1,0 +1,30 @@
+---
+# This file takes one input: magic-modules in detached-HEAD state.
+# It spits out "magic-modules-branched", a magic-modules repo on a new branch (named
+# after the HEAD commit on the PR).
+platform: linux
+
+image_resource:
+    type: docker-image
+    source:
+        # This task requires a container with 'git', 'python', and the pip
+        # package 'pygithub'.
+        repository: gcr.io/magic-modules/python
+        tag: '1.0'
+
+inputs:
+    - name: magic-modules
+
+outputs:
+    - name: magic-modules-branched
+    - name: magic-modules-previous
+
+params:
+  USE_SHA: ""
+  GH_TOKEN: ""
+  CREDS: ""
+  ALL_SUBMODULES: ""
+  INCLUDE_PREVIOUS: ""
+
+run:
+    path: magic-modules/.ci/magic-modules/branch-magic-modules.sh

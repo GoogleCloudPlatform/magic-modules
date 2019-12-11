@@ -1,0 +1,17 @@
+---
+platform: linux
+
+image_resource:
+    type: docker-image
+    source:
+        repository: gcr.io/magic-modules/python
+        tag: '1.0'
+
+inputs:
+    - name: mm-initial-pr
+
+outputs:
+    - name: branchname
+
+run:
+    path: mm-initial-pr/.ci/magic-modules/write-branch-name.sh

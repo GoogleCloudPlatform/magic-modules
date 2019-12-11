@@ -1,0 +1,23 @@
+---
+# This takes in the approved PR and CI repo, and updates the PR so that
+# its submodules track the `master` branch on their assorted repos.
+platform: linux
+
+image_resource:
+    type: docker-image
+    source:
+        repository: gcr.io/magic-modules/go-ruby
+        tag: '1.11.5-2.6.0'
+
+inputs:
+    - name: mm-approved-prs
+
+outputs:
+    - name: mm-output
+
+run:
+    path: mm-approved-prs/.ci/magic-modules/merge-pr.sh
+
+params:
+    CREDS: ""
+    ALL_SUBMODULES: ""

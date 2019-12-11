@@ -1,0 +1,28 @@
+---
+# This file takes in mm-approved-prs (magic-modules) to get code that it runs
+# and upstream PR.
+# Required information:
+#  - Github API token.
+#  - Upstream PR (magic modules) number
+# It produces no output.
+
+platform: linux
+
+image_resource:
+    type: docker-image
+    source:
+        # This task requires python + pip package 'pygithub'.
+        repository: gcr.io/magic-modules/python
+        tag: '1.0'
+
+inputs:
+    - name: mm-approved-prs
+
+params:
+    GITHUB_TOKEN: ""
+    DOWNSTREAM_REPOS: ""
+
+run:
+    path: mm-approved-prs/.ci/magic-modules/downstream_changelog_metadata.py
+    args:
+        - mm-approved-prs/.git/id

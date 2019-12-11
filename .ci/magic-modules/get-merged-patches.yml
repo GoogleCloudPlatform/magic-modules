@@ -1,0 +1,28 @@
+---
+# This file takes in only magic-modules, to get the code that
+# it runs.  It does need the github API token.
+# It produces "patches", a set of directories that contain
+# `git format-patch` style patches for any PR which was generated
+# by MagicModules, and which has already been merged, despite
+# the upstream MagicModules PR not yet being merged.
+platform: linux
+
+image_resource:
+    type: docker-image
+    source:
+        # This task requires a container with python and the pip
+        # package 'pygithub'.
+        repository: gcr.io/magic-modules/python
+        tag: '1.0'
+
+inputs:
+    - name: magic-modules
+
+outputs:
+    - name: patches
+
+params:
+  GH_TOKEN: ""
+
+run:
+    path: magic-modules/.ci/magic-modules/get_merged_patches.py
