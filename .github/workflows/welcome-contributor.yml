@@ -5,7 +5,7 @@ on:
         types: ["opened"]
 jobs:
     tpg:
-        if: github.event.pull_request.author_association == "NONE"
+        if: github.event.pull_request.author_association == 'NONE'
         runs-on: ubuntu-latest
         name: "Welcome Message"
         env:
