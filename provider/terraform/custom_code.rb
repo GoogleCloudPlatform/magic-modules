@@ -78,6 +78,10 @@ module Provider
       # This code is run after the Create call succeeds.  It's placed
       # in the Create function directly without modification.
       attr_reader :post_create
+      # This code is run after the Create call fails before the error is
+      # returned. It's placed in the Create function directly without
+      # modification.
+      attr_reader :post_create_failure
       # This code is run before the Update call happens.  It's placed
       # in the Update function, just after the encoder call, before
       # the Update call.  Just like the encoder, it is only used if
