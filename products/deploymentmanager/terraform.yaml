@@ -30,6 +30,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         will likely result in errors or unexpected behavior as the two tools
         fight over ownership. We strongly discourage doing so unless you are an
         experienced user of both tools.
+
+        In addition, due to limitations of the API, Terraform will treat
+        deployments in preview as recreate-only for any update operation other
+        than actually deploying an in-preview deployment (i.e. `preview=true` to
+        `preview=false`).
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "deployment_manager_deployment_basic"
