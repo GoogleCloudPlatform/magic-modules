@@ -713,7 +713,7 @@ func resource<%= resource_name -%>UpdateEncoder(d *schema.ResourceData, meta int
 <% end -%>
 
 <% if object.custom_code.decoder -%>
-func resource<%= resource_name -%>Decoder(d *schema.ResourceData, meta interface{}) {
+func resource<%= resource_name -%>Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
 <%= lines(compile(object.custom_code.decoder)) -%>
 }
 <% end -%>
