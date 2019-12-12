@@ -12,35 +12,31 @@ import (
 <%
 raise 'skip_test should be true if resource is not importable' \
   if object.exclude_import
+
 resource_name = product_ns + object.name
 tf_product = (@config.legacy_name || product_ns).underscore
 tf_resource = object.name.underscore
 terraform_name = object.legacy_name || "google_#{tf_product}_#{tf_resource}"
-%>
+-%>
 <%
 # @api.version_obj_or_closest(version) is slightly wrong; we want the _object_ version or the generation version.
 # Ultimately this won't matter though, since the API default should always be less than the object default.
 object.examples
-         .reject(&:skip_test)
-         .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
-         .each do |example| -
-
+  .reject(&:skip_test)
+  .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
+  .each do |example|
 
 	# {Compute}{Address}_{addressBasic}
-	test_slug = "#{resource_name}_#{example.name.camelize(:lower)}Example"
-	  ignore_read = object.all_user_properties
-                 .select(&:ignore_read)
-                 .map { |p| p.name.underscore }
-                 .concat(example.ignore_read_extra)
+    test_slug = "#{resource_name}_#{example.name.camelize(:lower)}Example"
 
+    ignore_read = object.all_user_properties
+      .select{|p| p.url_param_only || p.ignore_read }
+      .map { |p| p.name.underscore }
+      .concat(example.ignore_read_extra)
 
-	# If we've set an explicit version for the example use that, otherwise use the
-	# object version.
-  if example.min_version.nil?
-  	example_version = object.min_version.name
-  else
-    example_version = example.min_version
-  end
+    # Use explicit version for the example if given.
+    # Otherwise, use object version.
+    example_version = example.min_version || object.min_version.name
 -%>
 
 func TestAcc<%= test_slug -%>(t *testing.T) {
@@ -75,9 +71,9 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 				ResourceName:      "<%= terraform_name -%>.<%= example.primary_resource_id -%>",
 				ImportState:       true,
 				ImportStateVerify: true,
-        <%- unless ignore_read.empty? -%>
-        ImportStateVerifyIgnore: <%= go_literal(ignore_read) %>,
-        <%- end -%>
+		<%- unless ignore_read.empty? -%>
+				ImportStateVerifyIgnore: <%= go_literal(ignore_read) %>,
+		<%- end -%>
 			},
 		<% end -%>
 		},
