@@ -3,19 +3,12 @@ resource "google_deployment_manager_deployment" "<%= ctx[:primary_resource_id] %
 
   target {
     config {
-      content = <<EOF
-resources:
-- name: my-account
-  type: iam.v1.serviceAccount
-  properties:
-    accountId: <%= ctx[:vars]['service_account_id'] %>
-    displayName: Test service account created by a DM Deployment, created in Terraform
-EOF
+      content = file("path/to/config.yml")
     }
   }
 
   labels {
     key = "foo"
-    value = "foovalue"
+    value = "bar"
   }
 }

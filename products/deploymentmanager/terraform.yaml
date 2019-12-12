@@ -37,18 +37,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_name: "fmt.Sprintf(\"my-deployment-%s\", context[\"random_suffix\"])"
         vars:
           deployment_name: "my-deployment"
-          service_account_id: "tf-dm-account"
+        skip_test: true
       - !ruby/object:Provider::Terraform::Examples
         name: "deployment_manager_deployment_imports"
         primary_resource_id: "deployment"
+        primary_resource_name: "fmt.Sprintf(\"my-deployment-%s\", context[\"random_suffix\"])"
+        vars:
+          deployment_name: "my-deployment"
         skip_test: true
     properties:
-      createPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
-      deletePolicy: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
       preview: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
         description: |
           {{description}} ~>**NOTE**: Deployment Manager does not allow update
           of a deployment in preview (unless updating to preview=false). Thus,
@@ -66,10 +64,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       # Custom diff to force new if 'preview' is true
       constants: 'templates/terraform/constants/deployment_manager_deployment.go.erb'
       resource_definition: 'templates/terraform/resource_definition/deployment_manager_deployment.go.erb'
-      # 'preview' must be updated by itself - pre/post-update to handle seperate
-      # update and turning Partial mode on/off
-      pre_update: 'templates/terraform/pre_update/deployment_manager_deployment.go.erb'
-      post_update: 'templates/terraform/post_update/deployment_manager_deployment.go.erb'
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

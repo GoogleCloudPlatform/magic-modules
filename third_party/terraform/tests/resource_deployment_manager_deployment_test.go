@@ -15,13 +15,46 @@
 package google
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"io/ioutil"
 	"regexp"
+	"strings"
 	"testing"
 )
+
+func TestAccDeploymentManagerDeployment_basicFile(t *testing.T) {
+	t.Parallel()
+
+	randSuffix := acctest.RandString(10)
+	deploymentId := "tf-dm-" + randSuffix
+	accountId := "tf-dm-account-" + randSuffix
+	yamlPath := createYamlConfigFileForTest(t, "test-fixtures/deploymentmanager/service_account.yaml", map[string]interface{}{
+		"account_id": accountId,
+	})
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: resource.ComposeTestCheckFunc(
+			testAccCheckDeploymentManagerDeploymentDestroy,
+			testDeploymentManagerDeploymentVerifyServiceAccountMissing(accountId)),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDeploymentManagerDeployment_basicFile(deploymentId, yamlPath),
+			},
+			{
+				ResourceName:            "google_deployment_manager_deployment.deployment",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"target", "create_policy", "delete_policy", "preview"},
+			},
+		},
+	})
+}
 
 func TestAccDeploymentManagerDeployment_deleteInvalidOnCreate(t *testing.T) {
 	t.Parallel()
@@ -74,6 +107,9 @@ func TestAccDeploymentManagerDeployment_imports(t *testing.T) {
 	randStr := acctest.RandString(10)
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-" + randStr
+	importFilepath := createYamlConfigFileForTest(t, "test-fixtures/deploymentmanager/service_account.yaml", map[string]interface{}{
+		"account_id": "{{ env['name'] }}",
+	})
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -83,7 +119,7 @@ func TestAccDeploymentManagerDeployment_imports(t *testing.T) {
 			testDeploymentManagerDeploymentVerifyServiceAccountMissing(accountId)),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDeploymentManagerDeployment_imports(deploymentName, accountId),
+				Config: testAccDeploymentManagerDeployment_imports(deploymentName, accountId, importFilepath),
 				Check:  testDeploymentManagerDeploymentVerifyServiceAccountExists(accountId),
 			},
 			{
@@ -146,6 +182,25 @@ func TestAccDeploymentManagerDeployment_update(t *testing.T) {
 	})
 }
 
+func testAccDeploymentManagerDeployment_basicFile(deploymentName, yamlPath string) string {
+	return fmt.Sprintf(`
+resource "google_deployment_manager_deployment" "deployment" {
+  name = "%s"
+
+  target {
+    config {
+      content = file("%s")
+    }
+  }
+
+  labels {
+    key = "foo"
+    value = "bar"
+  }
+}
+`, deploymentName, yamlPath)
+}
+
 func testAccDeploymentManagerDeployment_invalidCreatePolicy(deployment, accountId string) string {
 	// The service account doesn't exist, so create policy acquire fails
 	return fmt.Sprintf(`
@@ -202,7 +257,7 @@ EOF
 `, deployment, accountId)
 }
 
-func testAccDeploymentManagerDeployment_imports(deployment, accountId string) string {
+func testAccDeploymentManagerDeployment_imports(deployment, accountId, importYamlPath string) string {
 	return fmt.Sprintf(`
 resource "google_deployment_manager_deployment" "deployment" {
   name = "%s"
@@ -220,18 +275,11 @@ EOF
 
     imports {
       name = "service_account.jinja"
-      content = <<EOF
-resources:
-- name: {{ env['name'] }}
-  type: iam.v1.serviceAccount
-  properties:
-    accountId: {{ env['name'] }}
-    displayName: Test account {{ env['name'] }} for Terraform DM deployment 
-EOF
+      content = file("%s")
     }
   }
 }
-`, deployment, accountId)
+`, deployment, accountId, importYamlPath)
 }
 
 func testAccDeploymentManagerDeployment_preview(deployment, accountId string) string {
@@ -376,4 +424,51 @@ func testAccCheckDeploymentManagerDestroyInvalidDeployment(deploymentName string
 		}
 		return nil
 	}
+}
+
+func testAccCheckDeploymentManagerDeploymentDestroy(s *terraform.State) error {
+	for name, rs := range s.RootModule().Resources {
+		if rs.Type != "google_deployment_manager_deployment" {
+			continue
+		}
+		if strings.HasPrefix(name, "data.") {
+			continue
+		}
+
+		config := testAccProvider.Meta().(*Config)
+
+		url, err := replaceVarsForTest(config, rs, "{{DeploymentManagerBasePath}}projects/{{project}}/global/deployments/{{name}}")
+		if err != nil {
+			return err
+		}
+
+		_, err = sendRequest(config, "GET", "", url, nil)
+		if err == nil {
+			return fmt.Errorf("DeploymentManagerDeployment still exists at %s", url)
+		}
+	}
+
+	return nil
+}
+
+func createYamlConfigFileForTest(t *testing.T, sourcePath string, context map[string]interface{}) string {
+	source, err := ioutil.ReadFile(sourcePath)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	// Create a buffer to write our archive to.
+	buf := new(bytes.Buffer)
+	buf.WriteString(Nprintf(string(source), context))
+	// Create temp file to write zip to
+	tmpfile, err := ioutil.TempFile("", "*.yml")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	if _, err := tmpfile.Write(buf.Bytes()); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := tmpfile.Close(); err != nil {
+		t.Fatal(err.Error())
+	}
+	return tmpfile.Name()
 }
