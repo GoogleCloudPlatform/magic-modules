@@ -10062,7 +10062,6 @@ objects:
           - next_hop_ip
           - next_hop_vpn_tunnel
           - next_hop_ilb
-        min_version: beta
   - !ruby/object:Api::Resource
     name: 'Router'
     kind: 'compute#router'
@@ -12761,7 +12760,7 @@ objects:
                   - https://www.googleapis.com/compute/v1/projects/project/global/backendServices/backen
                 dService
                   - compute/v1/projects/project/global/backendServices/backendService
-                  - global/backendServices/backendService 
+                  - global/backendServices/backendService
                 If defaultRouteAction is additionally
                 specified, advanced routing actions like URL Rewrites, etc. take effect prior to
                 sending the request to the backend. However, if defaultService is specified,
