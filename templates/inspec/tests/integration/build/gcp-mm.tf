@@ -1,117 +1,117 @@
 variable "ssl_policy" {
-  type = "map"
+  type = any
 }
 
 variable "topic" {
-  type = "map"
+  type = any
 }
 
 variable "subscription" {
-  type = "map"
+  type = any
 }
 
 variable "managed_zone" {
-	type = "map"
+	type = any
 }
 
 variable "record_set" {
-	type = "map"
+	type = any
 }
 
 variable "instance_group_manager" {
-  type = "map"
+  type = any
 }
 
 variable "autoscaler" {
-  type = "map"
+  type = any
 }
 
 variable "target_pool" {
-  type = "map"
+  type = any
 }
 
 variable "trigger" {
-  type = "map"
+  type = any
 }
 
 variable "health_check" {
-  type = "map"
+  type = any
 }
 
 variable "backend_service" {
-  type = "map"
+  type = any
 }
 
 variable "http_health_check" {
-  type = "map"
+  type = any
 }
 
 variable "https_health_check" {
-  type = "map"
+  type = any
 }
 
 variable "instance_template" {
-  type = "map"
+  type = any
 }
 
 variable "global_address" {
-  type = "map"
+  type = any
 }
 
 variable "url_map" {
-  type = "map"
+  type = any
 }
 
 variable "http_proxy" {
-  type = "map"
+  type = any
 }
 
 variable "global_forwarding_rule" {
-  type = "map"
+  type = any
 }
 
 variable "target_tcp_proxy" {
-  type = "map"
+  type = any
 }
 
 variable "regional_cluster" {
-  type = "map"
+  type = any
 }
 
 variable "route" {
-  type = "map"
+  type = any
 }
 
 variable "router" {
-  type = "map"
+  type = any
 }
 
 variable "snapshot" {
-  type = "map"
+  type = any
 }
 
 variable "https_proxy" {
-  type = "map"
+  type = any
 }
 
 variable "ssl_certificate" {
-  type = "map"
+  type = any
 }
 
 variable "dataset" {
-  type = "map"
+  type = any
 }
 
 variable "bigquery_table" {
-  type = "map"
+  type = any
 }
 
 variable "repository" {
-  type = "map"
+  type = any
 }
 
 variable "folder" {
-  type = "map"
+  type = any
 }
 
 variable "gcp_organization_id" {
@@ -120,37 +120,37 @@ variable "gcp_organization_id" {
 }
 
 variable "cloudfunction" {
-  type = "map"
+  type = any
 }
 
 variable "backend_bucket" {
-  type = "map"
+  type = any
 }
 
 variable "gcp_cloud_function_region" {}
 
 variable "regional_node_pool" {
-  type = "map"
+  type = any
 }
 
 variable "region_backend_service_health_check" {
-  type = "map"
+  type = any
 }
 
 variable "region_backend_service" {
-  type = "map"
+  type = any
 }
 
 variable "org_sink" {
-  type = "map"
+  type = any
 }
 
 variable "standardappversion" {
-  type = "map"
+  type = any
 }
 
 variable "ml_model" {
-  type = "map"
+  type = any
 }
 
 variable "dataproc_cluster" {
@@ -158,59 +158,59 @@ variable "dataproc_cluster" {
 }
 
 variable "folder_exclusion" {
-  type = "map"
+  type = any
 }
 
 variable "filestore_instance" {
-  type = "map"
+  type = any
 }
 
 variable "folder_sink" {
-  type = "map"
+  type = any
 }
 
 variable "runtimeconfig_config" {
-  type = "map"
+  type = any
 }
 
 variable "runtimeconfig_variable" {
-  type = "map"
+  type = any
 }
 
 variable "redis" {
-  type = "map"
+  type = any
 }
 
 variable "network_endpoint_group" {
-  type = "map"
+  type = any
 }
 
 variable "node_template" {
-  type = "map"
+  type = any
 }
 
 variable "node_group" {
-  type = "map"
+  type = any
 }
 
 variable "router_nat" {
-  type = "map"
+  type = any
 }
 
 variable "service" {
-  type = "map"
+  type = any
 }
 
 variable "spannerinstance" {
-  type = "map"
+  type = any
 }
 
 variable "spannerdatabase" {
-  type = "map"
+  type = any
 }
 
 variable "scheduler_job" {
-  type = "map"
+  type = any
 }
 
 
@@ -273,7 +273,7 @@ resource "google_compute_autoscaler" "gcp-inspec-autoscaler" {
   project = var.gcp_project_id
   name    = var.autoscaler["name"]
   zone    = var.gcp_zone
-  target  = "${google_compute_instance_group_manager.gcp-inspec-igm.self_link}"
+  target  = google_compute_instance_group_manager.gcp-inspec-igm.self_link
 
   autoscaling_policy {
     max_replicas    = var.autoscaler["max_replicas"]
@@ -328,10 +328,10 @@ resource "google_compute_backend_service" "gcp-inspec-backend-service" {
   enable_cdn  = var.backend_service["enable_cdn"]
 
   backend {
-    group = "${google_compute_instance_group_manager.gcp-inspec-igm.instance_group}"
+    group = google_compute_instance_group_manager.gcp-inspec-igm.instance_group
   }
 
-  health_checks = ["${google_compute_health_check.gcp-inspec-health-check.self_link}"]
+  health_checks = [google_compute_health_check.gcp-inspec-health-check.self_link]
 }
 
 resource "google_compute_health_check" "gcp-inspec-region-backend-service-hc" {
@@ -354,7 +354,7 @@ resource "google_compute_region_backend_service" "gcp-inspec-region-backend-serv
   protocol    = var.region_backend_service["protocol"]
   timeout_sec = var.region_backend_service["timeout_sec"]
 
-  health_checks = ["${google_compute_health_check.gcp-inspec-region-backend-service-hc.self_link}"]
+  health_checks = [google_compute_health_check.gcp-inspec-region-backend-service-hc.self_link]
 }
 
 resource "google_compute_http_health_check" "gcp-inspec-http-health-check" {
@@ -419,7 +419,7 @@ resource "google_compute_url_map" "gcp-inspec-url-map" {
   name        = var.url_map["name"]
   description = var.url_map["description"]
 
-  default_service = "${google_compute_backend_service.gcp-inspec-backend-service.self_link}"
+  default_service = google_compute_backend_service.gcp-inspec-backend-service.self_link
 
   host_rule {
     hosts        = [var.url_map["host_rule_host"]]
@@ -428,16 +428,16 @@ resource "google_compute_url_map" "gcp-inspec-url-map" {
 
   path_matcher {
     name            = var.url_map["path_matcher_name"]
-    default_service = "${google_compute_backend_service.gcp-inspec-backend-service.self_link}"
+    default_service = google_compute_backend_service.gcp-inspec-backend-service.self_link
 
     path_rule {
       paths   = [var.url_map["path_rule_path"]]
-      service = "${google_compute_backend_service.gcp-inspec-backend-service.self_link}"
+      service = google_compute_backend_service.gcp-inspec-backend-service.self_link
     }
   }
 
   test {
-    service = "${google_compute_backend_service.gcp-inspec-backend-service.self_link}"
+    service = google_compute_backend_service.gcp-inspec-backend-service.self_link
     host    = var.url_map["test_host"]
     path    = var.url_map["test_path"]
   }
@@ -446,14 +446,14 @@ resource "google_compute_url_map" "gcp-inspec-url-map" {
 resource "google_compute_target_http_proxy" "gcp-inspec-http-proxy" {
   project     = var.gcp_project_id
   name        = var.http_proxy["name"]
-  url_map     = "${google_compute_url_map.gcp-inspec-url-map.self_link}"
+  url_map     = google_compute_url_map.gcp-inspec-url-map.self_link
   description = var.http_proxy["description"]
 }
 
 resource "google_compute_global_forwarding_rule" "gcp-inspec-global-forwarding-rule" {
   project    = var.gcp_project_id
   name       = var.global_forwarding_rule["name"]
-  target     = "${google_compute_target_http_proxy.gcp-inspec-http-proxy.self_link}"
+  target     = google_compute_target_http_proxy.gcp-inspec-http-proxy.self_link
   port_range = var.global_forwarding_rule["port_range"]
 }
 
@@ -463,14 +463,14 @@ resource "google_compute_backend_service" "gcp-inspec-tcp-backend-service" {
   protocol      = "TCP"
   timeout_sec   = 10
 
-  health_checks = ["${google_compute_health_check.gcp-inspec-health-check.self_link}"]
+  health_checks = [google_compute_health_check.gcp-inspec-health-check.self_link]
 }
 
 resource "google_compute_target_tcp_proxy" "gcp-inspec-target-tcp-proxy" {
   project         = var.gcp_project_id
   name            = var.target_tcp_proxy["name"]
   proxy_header    = var.target_tcp_proxy["proxy_header"]
-  backend_service = "${google_compute_backend_service.gcp-inspec-tcp-backend-service.self_link}"
+  backend_service = google_compute_backend_service.gcp-inspec-tcp-backend-service.self_link
 }
 
 resource "google_container_cluster" "gcp-inspec-regional-cluster" {
@@ -491,7 +491,7 @@ resource "google_compute_route" "gcp-inspec-route" {
   project     = var.gcp_project_id
   name        = var.route["name"]
   dest_range  = var.route["dest_range"]
-  network     = "${google_compute_network.inspec-gcp-network.name}"
+  network     = google_compute_network.inspec-gcp-network.name
   next_hop_ip = var.route["next_hop_ip"]
   priority    = var.route["priority"]
   # google_compute_route depends on next_hop_ip belonging to a subnetwork
@@ -504,7 +504,7 @@ resource "google_compute_route" "gcp-inspec-route" {
 resource "google_compute_router" "gcp-inspec-router" {
   project = var.gcp_project_id
   name    = var.router["name"]
-  network = "${google_compute_network.inspec-gcp-network.name}"
+  network = google_compute_network.inspec-gcp-network.name
   bgp {
     asn               = var.router["bgp_asn"]
     advertise_mode    = var.router["bgp_advertise_mode"]
@@ -532,7 +532,7 @@ resource "google_compute_disk" "snapshot-disk" {
 resource "google_compute_snapshot" "gcp-inspec-snapshot" {
   project = var.gcp_project_id
   name = var.snapshot["name"]
-  source_disk = "${google_compute_disk.snapshot-disk.name}"
+  source_disk = google_compute_disk.snapshot-disk.name
   zone = var.gcp_zone
 }
 
@@ -547,9 +547,9 @@ resource "google_compute_ssl_certificate" "gcp-inspec-ssl-certificate" {
 resource "google_compute_target_https_proxy" "gcp-inspec-https-proxy" {
   project     = var.gcp_project_id
   name        = var.https_proxy["name"]
-  url_map     = "${google_compute_url_map.gcp-inspec-url-map.self_link}"
+  url_map     = google_compute_url_map.gcp-inspec-url-map.self_link
   description = var.https_proxy["description"]
-  ssl_certificates = ["${google_compute_ssl_certificate.gcp-inspec-ssl-certificate.self_link}"]
+  ssl_certificates = [google_compute_ssl_certificate.gcp-inspec-ssl-certificate.self_link]
 }
 
 resource "google_bigquery_dataset" "gcp-inspec-dataset" {
@@ -573,7 +573,7 @@ resource "google_bigquery_dataset" "gcp-inspec-dataset" {
 
 resource "google_bigquery_table" "gcp-inspec-bigquery-table" {
   project    = var.gcp_project_id
-  dataset_id = "${google_bigquery_dataset.gcp-inspec-dataset.dataset_id}"
+  dataset_id = google_bigquery_dataset.gcp-inspec-dataset.dataset_id
   table_id   = var.bigquery_table["table_id"]
 
   time_partitioning {
@@ -597,7 +597,7 @@ resource "google_folder" "inspec-gcp-folder" {
 
 resource "google_storage_bucket_object" "archive" {
   name   = "index.js.zip"
-  bucket = "${google_storage_bucket.generic-storage-bucket.name}"
+  bucket = google_storage_bucket.generic-storage-bucket.name
   source = "../configuration/index.js.zip"
 }
 
@@ -607,7 +607,7 @@ resource "google_cloudfunctions_function" "function" {
   name                  = var.cloudfunction["name"]
   description           = var.cloudfunction["description"]
   available_memory_mb   = var.cloudfunction["available_memory_mb"]
-  source_archive_bucket = "${google_storage_bucket.generic-storage-bucket.name}"
+  source_archive_bucket = google_storage_bucket.generic-storage-bucket.name
   source_archive_object = google_storage_bucket_object.archive.name
   trigger_http          = var.cloudfunction["trigger_http"]
   timeout               = var.cloudfunction["timeout"]
@@ -623,7 +623,7 @@ resource "google_compute_backend_bucket" "image_backend" {
   project     = var.gcp_project_id
   name        = var.backend_bucket["name"]
   description = var.backend_bucket["description"]
-  bucket_name = "${google_storage_bucket.generic-storage-bucket.name}"
+  bucket_name = google_storage_bucket.generic-storage-bucket.name
   enable_cdn  = var.backend_bucket["enable_cdn"]
 }
 
@@ -631,7 +631,7 @@ resource "google_container_node_pool" "inspec-gcp-regional-node-pool" {
   project    = var.gcp_project_id
   name       = var.regional_node_pool["name"]
   region     = var.gcp_location
-  cluster    = "${google_container_cluster.gcp-inspec-regional-cluster.name}"
+  cluster    = google_container_cluster.gcp-inspec-regional-cluster.name
   node_count = var.regional_node_pool["node_count"]
 }
 
@@ -720,7 +720,7 @@ resource "google_dataproc_cluster" "mycluster" {
   name    = var.dataproc_cluster["name"]
 
   labels = {
-    var.dataproc_cluster["label_key"] = var.dataproc_cluster["label_value"]
+    "${var.dataproc_cluster["label_key"]}" = var.dataproc_cluster["label_value"]
   }
 
   cluster_config {
@@ -745,7 +745,7 @@ resource "google_dataproc_cluster" "mycluster" {
     # Override or set some custom properties
     software_config {
       override_properties = {
-        var.dataproc_cluster["config"]["software_config"]["prop_key"] = var.dataproc_cluster["config"]["software_config"]["prop_value"]
+        "${var.dataproc_cluster["config"]["software_config"]["prop_key"]}" = var.dataproc_cluster["config"]["software_config"]["prop_value"]
       }
     }
 
@@ -801,7 +801,7 @@ resource "google_runtimeconfig_config" "inspec-runtime-config" {
 
 resource "google_runtimeconfig_variable" "inspec-runtime-variable" {
   project = var.gcp_project_id
-  parent = "${google_runtimeconfig_config.inspec-runtime-config.name}"
+  parent = google_runtimeconfig_config.inspec-runtime-config.name
   name = var.runtimeconfig_variable["name"]
   text = var.runtimeconfig_variable["text"]
 }
@@ -820,7 +820,7 @@ resource "google_redis_instance" "inspec-redis" {
   reserved_ip_range = var.redis["reserved_ip_range"]
 
   labels = {
-    var.redis["label_key"] = var.redis["label_value"]
+    "${var.redis["label_key"]}" = var.redis["label_value"]
   }
 }
 
@@ -843,10 +843,10 @@ resource "google_compute_node_template" "inspec-template" {
   region = var.gcp_location
 
   name = var.node_template["name"]
-  node_type = "${data.google_compute_node_types.zone-node-type.names[0]}"
+  node_type = data.google_compute_node_types.zone-node-type.names[0]
 
   node_affinity_labels = {
-    var.node_template["label_key"] = var.node_template["label_value"]
+    "${var.node_template["label_key"]}" = var.node_template["label_value"]
   }
 }
 
@@ -857,7 +857,7 @@ resource "google_compute_node_group" "inspec-node-group" {
   description = var.node_group["description"]
 
   size = var.node_group["size"]
-  node_template = "${google_compute_node_template.inspec-template.self_link}"
+  node_template = google_compute_node_template.inspec-template.self_link
 }
 
 resource "google_compute_router_nat" "inspec-nat" {
@@ -893,7 +893,7 @@ resource "google_spanner_instance" "spanner_instance" {
   display_name = var.spannerinstance["display_name"]
   num_nodes    = var.spannerinstance["num_nodes"]
   labels = {
-    var.spannerinstance["label_key"] = var.spannerinstance["label_value"]
+    "${var.spannerinstance["label_key"]}" = var.spannerinstance["label_value"]
   }
 }
 
@@ -929,7 +929,7 @@ resource "google_cloud_scheduler_job" "job" {
 }
 
 variable "service_perimeter" {
-  type = "map"
+  type = any
 }
 
 resource "google_access_context_manager_service_perimeter" "service-perimeter" {
