@@ -7,7 +7,7 @@ gem 'google-cloud'
 gem 'googleauth'
 gem 'inifile'
 gem 'inspec-bin', '4.16.0'
-gem 'rubocop'
+gem 'rubocop', '>= 0.70.0'
 
 group :development do
   gem 'github_changelog_generator'
