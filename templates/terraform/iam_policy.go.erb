@@ -213,11 +213,11 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 		return err
 	}
 
-	obj := make(map[string]interface{})
 <% if object.iam_policy.wrapped_policy_obj -%>
+	obj := make(map[string]interface{})
 	obj["policy"] = json
 <% else -%>
-	obj = json
+	obj := json
 <% end -%>
 
 	url, err := u.qualify<%= object.name -%>Url("<%= object.iam_policy.set_iam_policy_method -%>")
