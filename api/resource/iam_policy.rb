@@ -39,9 +39,27 @@ module Api
       # others expect POST requests
       attr_reader :fetch_iam_policy_verb
 
+      # Last part of URL for fetching IAM policy.
+      attr_reader :fetch_iam_policy_method
+
+      # Some resources allow setting the IAM policy with POST requests,
+      # others expect PUT requests
+      attr_reader :set_iam_policy_verb
+
+      # Last part of URL for setting IAM policy.
+      attr_reader :set_iam_policy_method
+
+      # Whether the policy JSON is contained inside of a 'policy' object.
+      attr_reader :wrapped_policy_obj
+
       # Certain resources allow different sets of roles to be set with IAM policies
       # This is a role that is acceptable for the given IAM policy resource for use in tests
       attr_reader :allowed_iam_role
+
+      # This is a role that grants create/read/delete for the parent resource for use in tests.
+      # If set, the test runner will receive a binding to this role in _policy tests in order to
+      # avoid getting locked out of the resource.
+      attr_reader :admin_iam_role
 
       # Certain resources need an attribute other than "id" from their parent resource
       # Especially when a parent is not the same type as the IAM resource
@@ -79,7 +97,12 @@ module Api
         check :method_name_separator, type: String, default: '/'
         check :parent_resource_type, type: String
         check :fetch_iam_policy_verb, type: Symbol, default: :GET, allowed: %i[GET POST]
+        check :fetch_iam_policy_method, type: String, default: 'getIamPolicy'
+        check :set_iam_policy_verb, type: Symbol, default: :POST, allowed: %i[POST PUT]
+        check :set_iam_policy_method, type: String, default: 'setIamPolicy'
+        check :wrapped_policy_obj, type: :boolean, default: true
         check :allowed_iam_role, type: String, default: 'roles/viewer'
+        check :admin_iam_role, type: String
         check :parent_resource_attribute, type: String, default: 'id'
         check :test_project_name, type: String
         check :iam_conditions_request_type, type: Symbol, allowed: %i[REQUEST_BODY QUERY_PARAM]

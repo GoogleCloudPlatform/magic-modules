@@ -1,6 +1,9 @@
 context := map[string]interface{}{
 	"random_suffix": acctest.RandString(10),
 	"role":          "<%= object.iam_policy.allowed_iam_role -%>",
+<% unless object.iam_policy.admin_iam_role.nil? -%>
+	"admin_role": "<%= object.iam_policy.admin_iam_role-%>",
+<% end -%>
 <% unless object.iam_policy.test_project_name.nil? -%>
 	"project_id" : fmt.Sprintf("<%= object.iam_policy.test_project_name -%>%s", acctest.RandString(10)),
 <% end -%>

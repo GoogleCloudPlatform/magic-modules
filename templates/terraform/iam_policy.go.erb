@@ -166,7 +166,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	url, err := u.qualify<%= object.name -%>Url("getIamPolicy")
+	url, err := u.qualify<%= object.name -%>Url("<%= object.iam_policy.fetch_iam_policy_method -%>")
 	if err != nil {
 		return nil, err
 	}
@@ -213,14 +213,17 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 		return err
 	}
 
+<% if object.iam_policy.wrapped_policy_obj -%>
 	obj := make(map[string]interface{})
 	obj["policy"] = json
+<% else -%>
+	obj := json
+<% end -%>
 
-	url, err := u.qualify<%= object.name -%>Url("setIamPolicy")
+	url, err := u.qualify<%= object.name -%>Url("<%= object.iam_policy.set_iam_policy_method -%>")
 	if err != nil {
 		return err
 	}
-	
 <% if resource_params.include?('project') -%>
 	project, err := getProject(u.d, u.Config)
 	if err != nil {
@@ -228,7 +231,7 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 	}
 <% end -%>
 
-	_, err = sendRequestWithTimeout(u.Config, "POST", <% if resource_params.include?('project')  %>project<% else %>""<% end %>, url, obj, u.d.Timeout(schema.TimeoutCreate))
+	_, err = sendRequestWithTimeout(u.Config, "<%= object.iam_policy.set_iam_policy_verb.to_s.upcase -%>", <% if resource_params.include?('project')  %>project<% else %>""<% end %>, url, obj, u.d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}

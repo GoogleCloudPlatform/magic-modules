@@ -1,0 +1,4 @@
+resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
+  name               = "<%= ctx[:vars]['name'] %>"
+  bucket_policy_only = true
+}
