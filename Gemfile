@@ -7,7 +7,7 @@ gem 'rake'
 group :test do
   gem 'mocha', '~> 1.3.0'
   gem 'rspec'
-  gem 'rubocop', '~> 0.63.1'
+  gem 'rubocop', '>= 0.77.0'
 end
 
 group :pr_script do
