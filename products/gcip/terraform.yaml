@@ -19,6 +19,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "default_supported_idp_config_basic"
         primary_resource_id: "idp_config"
+        test_env_vars:
+          org_id: :ORG_ID
   InboundSamlConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
