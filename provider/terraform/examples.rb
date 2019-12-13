@@ -136,6 +136,7 @@ module Provider
               ))
       end
 
+      # rubocop:disable Style/FormatStringToken
       def config_test_body
         @vars ||= {}
         @test_env_vars ||= {}
@@ -181,7 +182,6 @@ module Provider
         )
       end
 
-      # rubocop:disable Style/FormatStringToken
       def substitute_test_paths(config)
         config.gsub!('../static/img/header-logo.png', 'test-fixtures/header-logo.png')
         config.gsub!('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
