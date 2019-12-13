@@ -141,7 +141,7 @@ module Provider
         @test_env_vars ||= {}
         body = lines(compile_file(
                        {
-                         vars: vars.map { |k, str| [k, "#{str}%{random_suffix}"] }.to_h,
+                         vars: vars.map { |k, str| [k, "#{str}%<random_suffix>s"] }.to_h,
                          test_env_vars: test_env_vars.map { |k, _| [k, "%{#{k}}"] }.to_h,
                          primary_resource_id: primary_resource_id
                        },
