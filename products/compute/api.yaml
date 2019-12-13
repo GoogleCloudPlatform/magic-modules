@@ -3293,6 +3293,15 @@ objects:
         update_verb: :POST
         update_url:
           'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
+      - !ruby/object:Api::Type::Boolean
+        name: 'allowGlobalAccess'
+        min_version: beta
+        description: |
+          If true, clients can access ILB from all regions.
+          Otherwise only allows from the local region the ILB is located at.
+        send_empty_value: true
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
