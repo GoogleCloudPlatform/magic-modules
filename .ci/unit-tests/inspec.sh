@@ -30,10 +30,10 @@ cp templates/inspec/vcr_config.rb build/inspec
 
 pushd build/inspec
 
-# Run rubocop on the generated resources
-rubocop -c .rubocop.yml
-
 bundle
+# Run rubocop on the generated resources
+bundle exec rubocop -c .rubocop.yml
+
 mkdir inspec-cassettes
 # Check if PR_ID folder exists
 set +e

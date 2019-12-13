@@ -7,7 +7,7 @@ image_resource:
     type: docker-image
     source:
         repository: gcr.io/magic-modules/terraform-gcloud-inspec
-        tag: '0.12.7-4.0'
+        tag: '0.12.16-4.0'
 
 run:
     path: mm-approved-prs/.ci/acceptance-tests/inspec-post-merge.sh
