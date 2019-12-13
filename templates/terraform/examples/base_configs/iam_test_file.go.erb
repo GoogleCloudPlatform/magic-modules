@@ -108,6 +108,9 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 	t.Parallel()
 
 <%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
+<% unless object.iam_policy.admin_iam_role.nil? -%>
+	context["service_account"] = getTestServiceAccountFromEnv(t)
+<% end -%>
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -231,6 +234,9 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 	t.Parallel()
 
 <%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
+<% unless object.iam_policy.admin_iam_role.nil? -%>
+	context["service_account"] = getTestServiceAccountFromEnv(t)
+<% end -%>
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -271,6 +277,12 @@ data "google_iam_policy" "foo" {
     role = "%{role}"
     members = ["user:admin@hashicorptest.com"]
   }
+<% unless object.iam_policy.admin_iam_role.nil? -%>
+  binding {
+    role = "%{admin_role}"
+    members = ["serviceAccount:%{service_account}"]
+  }
+<% end -%>
 }
 
 resource "<%= resource_ns_iam -%>_policy" "foo" {
@@ -399,6 +411,12 @@ data "google_iam_policy" "foo" {
       expression  = "%{condition_expr}"
     }
   }
+<% unless object.iam_policy.admin_iam_role.nil? -%>
+  binding {
+    role = "%{admin_role}"
+    members = ["serviceAccount:%{service_account}"]
+  }
+<% end -%>
 }
 
 resource "<%= resource_ns_iam -%>_policy" "foo" {

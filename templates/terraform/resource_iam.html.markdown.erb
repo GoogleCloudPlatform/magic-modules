@@ -86,7 +86,7 @@ end
 ```hcl
 data "google_iam_policy" "admin" {
   binding {
-    role = "<%= object.iam_policy.allowed_iam_role -%>"
+    role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
     members = [
       "user:jane@example.com",
     ]
@@ -105,7 +105,7 @@ With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_
 ```hcl
 data "google_iam_policy" "admin" {
   binding {
-    role = "<%= object.iam_policy.allowed_iam_role -%>"
+    role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
     members = [
       "user:jane@example.com",
     ]
@@ -129,7 +129,7 @@ resource "<%= resource_ns_iam -%>_policy" "editor" {
 ```hcl
 resource "<%= resource_ns_iam -%>_binding" "editor" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-  role = "<%= object.iam_policy.allowed_iam_role -%>"
+  role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   members = [
     "user:jane@example.com",
   ]
@@ -142,7 +142,7 @@ With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_
 ```hcl
 resource "<%= resource_ns_iam -%>_binding" "editor" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-  role = "<%= object.iam_policy.allowed_iam_role -%>"
+  role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   members = [
     "user:jane@example.com",
   ]
@@ -160,7 +160,7 @@ resource "<%= resource_ns_iam -%>_binding" "editor" {
 ```hcl
 resource "<%= resource_ns_iam -%>_member" "editor" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-  role = "<%= object.iam_policy.allowed_iam_role -%>"
+  role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   member = "user:jane@example.com"
 }
 ```
@@ -171,7 +171,7 @@ With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_
 ```hcl
 resource "<%= resource_ns_iam -%>_member" "editor" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-  role = "<%= object.iam_policy.allowed_iam_role -%>"
+  role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   member = "user:jane@example.com"
 
   condition {
