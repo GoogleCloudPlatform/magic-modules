@@ -87,6 +87,9 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 
 <% end # if provider_default_values.include? -%>
 <% end # resource_params.each -%>
+<% if object.custom_code.custom_import -%>
+<%= lines(compile(object.iam_policy.custom_import)) -%>
+<% else -%>
 <% import_format = object.iam_policy.import_format || object.import_format -%>
 
 	// We may have gotten either a long or short name, so attempt to parse long name if possible
@@ -98,6 +101,7 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 	for k, v := range m {
 		values[k] = v
 	}
+<% end -%>
 
 	u := &<%= resource_name -%>IamUpdater{
 <% resource_params.each do |param| -%>
@@ -138,6 +142,9 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 <% end # if provider_default_values.include? -%>
 <% end # resource_params.each -%>
 
+<% if object.custom_code.custom_import -%>
+<%= lines(compile(object.iam_policy.custom_import)) -%>
+<% else -%>
 	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(import_format, object.identity, object.base_url).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{parent_resource_name}>")}.join('","') -%>"}, d, config, d.Id())
 	if err != nil {
 		return err
@@ -146,6 +153,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 	for k, v := range m {
     values[k] = v
 	}
+<% end -%>
 
 	u := &<%= resource_name -%>IamUpdater{
 <% resource_params.each do |param| -%>

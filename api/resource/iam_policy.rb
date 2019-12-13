@@ -90,6 +90,12 @@ module Api
       # variables that are outside of the base_url qualifiers.
       attr_reader :import_format
 
+      # This code replaces the portion of code that manipulates the import format after getting
+      # the import id qualifiers.  It's useful in checking the the qualifiers were parsed correctly
+      # in cases that they may not have been (for example, if the name of the resource has a forward
+      # slash in it)
+      attr_reader :custom_import
+
       def validate
         super
 

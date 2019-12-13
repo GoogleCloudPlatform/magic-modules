@@ -1,0 +1,10 @@
+
+	repo := values["repository"]
+	if repo == "" {
+		repo = d.Id()
+	}
+
+	stringParts := strings.SplitN(repo, "/", 4)
+	if len(stringParts) == 4 {
+		values["repository"] = stringParts[3]
+	}

@@ -19,6 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       exclude: false
       method_name_separator: ':'
       parent_resource_attribute: 'repository'
+      custom_import: templates/terraform/custom_import/source_repo_name_from_self_link_iam.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "sourcerepo_repository_basic"
@@ -43,6 +44,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pubsubConfigs.serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/source_repo_name_from_self_link.go.erb
       update_encoder: templates/terraform/update_encoder/source_repo_repository.erb
       post_create: templates/terraform/post_create/source_repo_repository_update.go.erb
 # This is for copying files over
