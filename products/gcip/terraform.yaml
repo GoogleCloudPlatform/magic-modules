@@ -19,6 +19,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "default_supported_idp_config_basic"
         primary_resource_id: "idp_config"
+        vars:
+          project_id: "test-project"
         test_env_vars:
           org_id: :ORG_ID
   InboundSamlConfig: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -33,6 +35,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           name: saml.tf-config
           idp_entity_id: tf-idp
           sp_entity_id: tf-sp
+  OauthIdpConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "oauth_idp_config_basic"
+        primary_resource_id: "oauth_idp_config"
+        vars:
+          name: oidc.oauth-idp-config
+  Tenant: !ruby/object:Overrides::Terraform::ResourceOverride
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/gcip_tenant.go.erb
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "tenant_basic"
+        primary_resource_id: "tenant"
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

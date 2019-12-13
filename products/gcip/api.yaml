@@ -69,7 +69,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
-          The name of the InboundSamlConfig resource. must start with 'saml.' and can only have alphanumeric characters,
+          The name of the InboundSamlConfig resource. Must start with 'saml.' and can only have alphanumeric characters,
           hyphens, underscores or periods. The part after 'saml.' must also start with a lowercase letter, end with an
           alphanumeric character, and have at least 2 characters.
         required: true
@@ -139,3 +139,72 @@ objects:
                 name: 'x509Certificate'
                 description: |
                   The x509 certificate
+  - !ruby/object:Api::Resource
+    name: 'OauthIdpConfig'
+    base_url: 'projects/{{project}}/oauthIdpConfigs'
+    self_link: 'projects/{{project}}/oauthIdpConfigs/{{name}}'
+    create_url: 'projects/{{project}}/oauthIdpConfigs?oauthIdpConfigId={{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Oidc Idp configuration for a Identity Toolkit project.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The name of the OauthIdpConfig. Must start with `oidc.`.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          Human friendly display name.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        description: |
+          If allows users to sign in with the provider.
+      - !ruby/object:Api::Type::String
+        name: 'issuer'
+        description: |
+          For OIDC Idps, the issuer identifier.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'clientId'
+        description: |
+          The client id of an OAuth client.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'clientSecret'
+        description: |
+          The client secret of the OAuth client, to enable OIDC code flow.
+  - !ruby/object:Api::Resource
+    name: 'Tenant'
+    base_url: 'projects/{{project}}/tenants'
+    self_link: 'projects/{{project}}/tenants/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Oidc Idp configuration for a Identity Toolkit project.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The name of the OauthIdpConfig. Must start with `oidc.`.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          Human friendly display name.
+      - !ruby/object:Api::Type::Boolean
+        name: 'allowPasswordSignup'
+        description: |
+          Whether to allow email/password user authentication.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableEmailLinkSignin'
+        description: |
+          Whether to enable email link user authentication.
+      - !ruby/object:Api::Type::Boolean
+        name: 'disableAuth'
+        description: |
+          Whether authentication is disabled for the tenant. If true, the users under
+          the disabled tenant are not allowed to sign-in. Admins of the disabled tenant
+          are not able to manage its users.
