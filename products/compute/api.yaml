@@ -10903,8 +10903,8 @@ objects:
             name: 'domains'
             description: |
               Domains for which a managed SSL certificate will be valid.  Currently,
-              there can only be one domain in this list.
-            max_size: 1
+              there can be up to 100 domains in this list.
+            max_size: 100
             item_type: Api::Type::String
             required: true
       - !ruby/object:Api::Type::Enum
