@@ -2859,7 +2859,9 @@ objects:
           The list of ALLOW rules specified by this firewall. Each rule
           specifies a protocol and port-range tuple that describes a permitted
           connection.
-        exactly_one_of:
+        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
+        # once hashicorp/terraform-plugin-sdk#280 is fixed
+        at_least_one_of:
           - allow
           - deny
         item_type: !ruby/object:Api::Type::NestedObject
@@ -2892,7 +2894,9 @@ objects:
         output: true
       - !ruby/object:Api::Type::Array
         name: 'denied'
-        exactly_one_of:
+        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
+        # once hashicorp/terraform-plugin-sdk#280 is fixed
+        at_least_one_of:
           - allow
           - deny
         description: |
@@ -4042,7 +4046,9 @@ objects:
           - :HTTP2
       - !ruby/object:Api::Type::NestedObject
         name: 'httpHealthCheck'
-        exactly_one_of:
+        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
+        # once hashicorp/terraform-plugin-sdk#280 is fixed
+        at_least_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
@@ -4165,7 +4171,9 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'httpsHealthCheck'
-        exactly_one_of:
+        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
+        # once hashicorp/terraform-plugin-sdk#280 is fixed
+        at_least_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
@@ -4288,7 +4296,9 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'tcpHealthCheck'
-        exactly_one_of:
+        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
+        # once hashicorp/terraform-plugin-sdk#280 is fixed
+        at_least_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
@@ -4392,7 +4402,9 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'sslHealthCheck'
-        exactly_one_of:
+        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
+        # once hashicorp/terraform-plugin-sdk#280 is fixed
+        at_least_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
@@ -4496,7 +4508,9 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'http2HealthCheck'
-        exactly_one_of:
+        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
+        # once hashicorp/terraform-plugin-sdk#280 is fixed
+        at_least_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
@@ -9126,7 +9140,9 @@ objects:
           - :HTTP2
       - !ruby/object:Api::Type::NestedObject
         name: 'httpHealthCheck'
-        exactly_one_of:
+        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
+        # once hashicorp/terraform-plugin-sdk#280 is fixed
+        at_least_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
@@ -9249,7 +9265,9 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'httpsHealthCheck'
-        exactly_one_of:
+        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
+        # once hashicorp/terraform-plugin-sdk#280 is fixed
+        at_least_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
@@ -9372,7 +9390,9 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'tcpHealthCheck'
-        exactly_one_of:
+        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
+        # once hashicorp/terraform-plugin-sdk#280 is fixed
+        at_least_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
@@ -9476,7 +9496,9 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'sslHealthCheck'
-        exactly_one_of:
+        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
+        # once hashicorp/terraform-plugin-sdk#280 is fixed
+        at_least_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
@@ -9580,7 +9602,9 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'http2HealthCheck'
-        exactly_one_of:
+        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
+        # once hashicorp/terraform-plugin-sdk#280 is fixed
+        at_least_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
