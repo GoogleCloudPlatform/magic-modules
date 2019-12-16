@@ -53,7 +53,7 @@ module Provider
         end
 
         # short id: {{project}}/{{zone}}/{{name}}
-        field_markers = id_formats[0].scan(/{{[\%[:word:]]+}}/)
+        field_markers = id_formats[0].scan(/{{[[:word:]]+}}/)
         short_id_format = field_markers.join('/')
 
         # short ids without fields with provider-level defaults:
