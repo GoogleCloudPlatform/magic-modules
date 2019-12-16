@@ -15,17 +15,19 @@
 legacy_name: 'sourcerepo'
 overrides: !ruby/object:Overrides::ResourceOverrides
   Repository: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/repos/{{%name}}", "{{%name}}"]
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ':'
       parent_resource_attribute: 'repository'
+      custom_diff_suppress: 'templates/terraform/iam/sourcerepo_diff_suppress.go.erb'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "sourcerepo_repository_basic"
         primary_resource_id: "my-repo"
-        primary_resource_name: "fmt.Sprintf(\"my-repository%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"my-repository/%s\", context[\"random_suffix\"])"
         vars:
-          repository_name: "my-repository"
+          repository_name: "my-repository/"
       - !ruby/object:Provider::Terraform::Examples
         name: "sourcerepo_repository_full"
         primary_resource_id: "my-repo"
