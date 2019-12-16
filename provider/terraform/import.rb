@@ -73,8 +73,10 @@ module Provider
           # If the id format can include `/` characters we cannot allow short forms such as:
           # `{{project}}/{{%name}}` as there is no way to differentiate between
           # project-name/resource-name and resource-name/with-slash
-          return (id_formats).uniq.reject(&:empty?).sort_by { |i| [i.count('/'), i.count('{{')] }.reverse
+          return \
+            id_formats.uniq.reject(&:empty?).sort_by { |i| [i.count('/'), i.count('{{')] }.reverse
         end
+
         (id_formats + [short_id_format, short_id_default_project_format, short_id_default_format])
           .uniq.reject(&:empty?).sort_by { |i| [i.count('/'), i.count('{{')] }.reverse
       end
