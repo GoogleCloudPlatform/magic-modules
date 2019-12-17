@@ -19,6 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "identity_platform_default_supported_idp_config_basic"
         primary_resource_id: "idp_config"
+        skip_test: true
   TenantDefaultSupportedIdpConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{client_id}}"]
     examples:
