@@ -12,8 +12,6 @@ func TestAccIdentityPlatformDefaultSupportedIdpConfig_defaultSupportedIdpConfigU
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(10),
-		"org_id":        getTestOrgFromEnv(t),
-		"pid":           acctest.RandomWithPrefix("tf-test"),
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -43,14 +41,7 @@ func TestAccIdentityPlatformDefaultSupportedIdpConfig_defaultSupportedIdpConfigU
 
 func testAccIdentityPlatformDefaultSupportedIdpConfig_defaultSupportedIdpConfigBasic(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_project" "acceptance" {
-  project_id = "%{pid}"
-  name       = "%{pid}"
-  org_id     = "%{org_id}"
-}
-
 resource "google_identity_platform_default_supported_idp_config" "idp_config" {
-	project = google_project.acceptance.project_id
   enabled = true
   client_id = "playgames.google.com"
   client_secret = "secret"
@@ -60,14 +51,7 @@ resource "google_identity_platform_default_supported_idp_config" "idp_config" {
 
 func testAccIdentityPlatformDefaultSupportedIdpConfig_defaultSupportedIdpConfigUpdate(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_project" "acceptance" {
-  project_id = "%{pid}"
-  name       = "%{pid}"
-  org_id     = "%{org_id}"
-}
-
 resource "google_identity_platform_default_supported_idp_config" "idp_config" {
-	project = google_project.acceptance.project_id
   enabled = false
   client_id = "playgames.google.com"
   client_secret = "anothersecret"

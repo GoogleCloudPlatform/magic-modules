@@ -17,20 +17,34 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["projects/{{project}}/defaultSupportedIdpConfigs/{{client_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "default_supported_idp_config_basic"
+        name: "identity_platform_default_supported_idp_config_basic"
         primary_resource_id: "idp_config"
-        vars:
-          project_id: "test-project"
-        test_env_vars:
-          org_id: :ORG_ID
+  TenantDefaultSupportedIdpConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{client_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "identity_platform_tenant_default_supported_idp_config_basic"
+        primary_resource_id: "idp_config"
   InboundSamlConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "inbound_saml_config_basic"
+        name: "identity_platform_inbound_saml_config_basic"
         primary_resource_id: "saml_config"
+        vars:
+          name: saml.tf-config
+          idp_entity_id: tf-idp
+          sp_entity_id: tf-sp
+  TenantInboundSamlConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "identity_platform_tenant_inbound_saml_config_basic"
+        primary_resource_id: "tenant_saml_config"
         vars:
           name: saml.tf-config
           idp_entity_id: tf-idp
@@ -41,8 +55,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "oauth_idp_config_basic"
+        name: "identity_platform_oauth_idp_config_basic"
         primary_resource_id: "oauth_idp_config"
+        vars:
+          name: oidc.oauth-idp-config
+  TenantOauthIdpConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "identity_platform_tenant_oauth_idp_config_basic"
+        primary_resource_id: "tenant_oauth_idp_config"
         vars:
           name: oidc.oauth-idp-config
   Tenant: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -53,7 +77,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/gcip_tenant.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "tenant_basic"
+        name: "identity_platform_tenant_basic"
         primary_resource_id: "tenant"
 
 # This is for copying files over

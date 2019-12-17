@@ -57,6 +57,41 @@ objects:
         description: |
           If this IDP allows the user to sign in
   - !ruby/object:Api::Resource
+    name: 'TenantDefaultSupportedIdpConfig'
+    base_url: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs'
+    self_link: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{client_id}}'
+    create_url: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs?idpId={{client_id}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Configurations options for the tenant for authenticating with a the standard set of Identity Toolkit-trusted IDPs.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: |
+          The name of the default supported IDP config resource
+      - !ruby/object:Api::Type::String
+        name: 'tenant'
+        required: true
+        url_param_only: true
+        description: |
+          The name of the tenant where this DefaultSupportedIdpConfig resource exists
+      - !ruby/object:Api::Type::String
+        name: 'clientId'
+        description: |
+          OAuth client ID
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'clientSecret'
+        description: |
+          OAuth client secret
+        required: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        description: |
+          If this IDP allows the user to sign in
+  - !ruby/object:Api::Resource
     name: 'InboundSamlConfig'
     base_url: 'projects/{{project}}/inboundSamlConfigs'
     self_link: 'projects/{{project}}/inboundSamlConfigs/{{name}}'
@@ -78,6 +113,95 @@ objects:
         description: |
           Human friendly display name.
         required: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        description: |
+          If allows users to sign in with the provider.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'idpConfig'
+        required: true
+        description: |
+          SAML IdP configuration when the project acts as the relying party
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'idpEntityId'
+            required: true
+            description: |
+              Unique identifier for all SAML entities
+          - !ruby/object:Api::Type::String
+            name: 'ssoUrl'
+            required: true
+            description: |
+              URL to send Authentication request to.
+          - !ruby/object:Api::Type::Boolean
+            name: 'signRequest'
+            description: |
+              Indicates if outbounding SAMLRequest should be signed.
+          - !ruby/object:Api::Type::Array
+            name: 'idpCertificates'
+            required: true
+            description: |
+              The IDP's certificate data to verify the signature in the SAMLResponse issued by the IDP.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+              - !ruby/object:Api::Type::String
+                name: 'x509Certificate'
+                description: |
+                  The x509 certificate
+      - !ruby/object:Api::Type::NestedObject
+        name: 'spConfig'
+        required: true
+        description: |
+          SAML SP (Service Provider) configuration when the project acts as the relying party to receive
+          and accept an authentication assertion issued by a SAML identity provider.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'spEntityId'
+            description: |
+              Unique identifier for all SAML entities.
+          - !ruby/object:Api::Type::String
+            name: 'callbackUri'
+            description: |
+              Callback URI where responses from IDP are handled. Must start with `https://`.
+          - !ruby/object:Api::Type::Array
+            name: 'spCertificates'
+            output: true
+            description: |
+              The IDP's certificate data to verify the signature in the SAMLResponse issued by the IDP.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+              - !ruby/object:Api::Type::String
+                name: 'x509Certificate'
+                description: |
+                  The x509 certificate
+  - !ruby/object:Api::Resource
+    name: 'TenantInboundSamlConfig'
+    base_url: 'projects/{{project}}/tenants/{{tenant}}/inboundSamlConfigs'
+    self_link: 'projects/{{project}}/tenants/{{tenant}}/inboundSamlConfigs/{{name}}'
+    create_url: 'projects/{{project}}/tenants/{{tenant}}/inboundSamlConfigs?inboundSamlConfigId={{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Inbound SAML configuration for a Identity Toolkit project.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The name of the InboundSamlConfig resource. Must start with 'saml.' and can only have alphanumeric characters,
+          hyphens, underscores or periods. The part after 'saml.' must also start with a lowercase letter, end with an
+          alphanumeric character, and have at least 2 characters.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          Human friendly display name.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'tenant'
+        required: true
+        url_param_only: true
+        description: |
+          The name of the tenant where this inbound SAML config resource exists
       - !ruby/object:Api::Type::Boolean
         name: 'enabled'
         description: |
@@ -177,9 +301,10 @@ objects:
         description: |
           The client secret of the OAuth client, to enable OIDC code flow.
   - !ruby/object:Api::Resource
-    name: 'Tenant'
-    base_url: 'projects/{{project}}/tenants'
-    self_link: 'projects/{{project}}/tenants/{{name}}'
+    name: 'TenantOauthIdpConfig'
+    base_url: 'projects/{{project}}/tenants/{{tenant}}/oauthIdpConfigs'
+    self_link: 'projects/{{project}}/tenants/{{tenant}}/oauthIdpConfigs/{{name}}'
+    create_url: 'projects/{{project}}/tenants/{{tenant}}/oauthIdpConfigs?oauthIdpConfigId={{name}}'
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -189,11 +314,53 @@ objects:
         name: 'name'
         description: |
           The name of the OauthIdpConfig. Must start with `oidc.`.
-        output: true
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'tenant'
+        required: true
+        url_param_only: true
+        description: |
+          The name of the tenant where this OIDC IDP configuration resource exists
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: |
           Human friendly display name.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        description: |
+          If allows users to sign in with the provider.
+      - !ruby/object:Api::Type::String
+        name: 'issuer'
+        description: |
+          For OIDC Idps, the issuer identifier.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'clientId'
+        description: |
+          The client id of an OAuth client.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'clientSecret'
+        description: |
+          The client secret of the OAuth client, to enable OIDC code flow.
+  - !ruby/object:Api::Resource
+    name: 'Tenant'
+    base_url: 'projects/{{project}}/tenants'
+    self_link: 'projects/{{project}}/tenants/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Tenant configuration in a multi-tenant project.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The name of the tenant that is generated by the server
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          Human friendly display name of the tenant.
       - !ruby/object:Api::Type::Boolean
         name: 'allowPasswordSignup'
         description: |
