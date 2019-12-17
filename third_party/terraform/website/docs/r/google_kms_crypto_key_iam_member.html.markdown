@@ -27,6 +27,21 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
 }
 ```
 
+With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
+```hcl
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = "your-crypto-key-id"
+  role          = "roles/editor"
+  member        = "user:alice@gmail.com"
+
+  condition {
+    title       = "expires_after_2019_12_31"
+    description = "Expiring at midnight of 2019-12-31"
+    expression  = "request.time < timestamp(\"2020-01-01T00:00:00Z\")"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -40,6 +55,24 @@ The following arguments are supported:
     `{project_id}/{location_name}/{key_ring_name}/{crypto_key_name}` or
     `{location_name}/{key_ring_name}/{crypto_key_name}`. In the second form,
     the provider's project setting will be used as a fallback.
+
+* `condition` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) An [IAM Condition](https://cloud.google.com/iam/docs/conditions-overview) for a given binding.
+  Structure is documented below.
+
+---
+
+The `condition` block supports:
+
+* `expression` - (Required) Textual representation of an expression in Common Expression Language syntax.
+
+* `title` - (Required) A title for the expression, i.e. a short string describing its purpose.
+
+* `description` - (Optional) An optional description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
+
+~> **Warning:** Terraform considers the `role` and condition contents (`title`+`description`+`expression`) as the
+  identifier for the binding. This means that if any part of the condition is changed out-of-band, Terraform will
+  consider it to be an entirely different resource and will treat it as such.
+
 
 ## Attributes Reference
 
@@ -55,3 +88,6 @@ IAM member imports use space-delimited identifiers; the resource in question, th
 ```
 $ terraform import google_kms_crypto_key_iam_member.member "your-project-id/location-name/key-ring-name/key-name roles/viewer user:foo@example.com"
 ```
+
+-> If you're importing a resource with beta features, make sure to include `-provider=google-beta`
+as an argument so that Terraform uses the correct provider to import your resource.
