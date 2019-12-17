@@ -1,0 +1,7 @@
+func <%= resource_name -%>DiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+  oldParts := regexp.MustCompile("projects/[^/]+/repos/").Split(old, -1)
+  if len(oldParts) == 2 {
+    return oldParts[1] == new
+  }
+  return new == old
+}
