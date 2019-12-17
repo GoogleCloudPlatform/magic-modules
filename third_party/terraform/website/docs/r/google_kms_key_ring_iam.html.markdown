@@ -22,6 +22,11 @@ Three different resources help you manage your IAM policy for KMS key ring. Each
 ## google\_kms\_key\_ring\_iam\_policy
 
 ```hcl
+resource "google_kms_key_ring" "keyring" {
+  name     = "keyring-example"
+  location = "global"
+}
+
 data "google_iam_policy" "admin" {
   binding {
     role = "roles/editor"
@@ -33,7 +38,7 @@ data "google_iam_policy" "admin" {
 }
 
 resource "google_kms_key_ring_iam_policy" "key_ring" {
-  key_ring_id = "your-key-ring-id"
+  key_ring_id = google_kms_key_ring.keyring.id
   policy_data = data.google_iam_policy.admin.policy_data
 }
 ```
@@ -41,6 +46,11 @@ resource "google_kms_key_ring_iam_policy" "key_ring" {
 With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 
 ```hcl
+resource "google_kms_key_ring" "keyring" {
+  name     = "keyring-example"
+  location = "global"
+}
+
 data "google_iam_policy" "admin" {
   binding {
     role = "roles/editor"
@@ -58,7 +68,7 @@ data "google_iam_policy" "admin" {
 }
 
 resource "google_kms_key_ring_iam_policy" "key_ring" {
-  key_ring_id = "your-key-ring-id"
+  key_ring_id = google_kms_key_ring.keyring.id
   policy_data = data.google_iam_policy.admin.policy_data
 }
 ```

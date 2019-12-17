@@ -19,9 +19,24 @@ an existing Google Cloud KMS crypto key.
 ## Example Usage
 
 ```hcl
+resource "google_kms_key_ring" "keyring" {
+  name     = "keyring-example"
+  location = "global"
+}
+
+resource "google_kms_crypto_key" "key" {
+  name            = "crypto-key-example"
+  key_ring        = google_kms_key_ring.keyring.id
+  rotation_period = "100000s"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
 resource "google_kms_crypto_key_iam_binding" "crypto_key" {
-  crypto_key_id = "my-gcp-project/us-central1/my-key-ring/my-crypto-key"
-  role          = "roles/editor"
+  crypto_key_id = "google_kms_crypto_key.key.id"
+  role          = "roles/cloudkms.cryptoKeyEncrypter"
 
   members = [
     "user:alice@gmail.com",
@@ -31,9 +46,24 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key" {
 
 With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 ```hcl
+resource "google_kms_key_ring" "keyring" {
+  name     = "keyring-example"
+  location = "global"
+}
+
+resource "google_kms_crypto_key" "key" {
+  name            = "crypto-key-example"
+  key_ring        = google_kms_key_ring.keyring.id
+  rotation_period = "100000s"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
 resource "google_kms_crypto_key_iam_binding" "crypto_key" {
-  crypto_key_id = "my-gcp-project/us-central1/my-key-ring/my-crypto-key"
-  role          = "roles/editor"
+  crypto_key_id = "google_kms_crypto_key.key.id"
+  role          = "roles/cloudkms.cryptoKeyEncrypter"
 
   members = [
     "user:alice@gmail.com",
