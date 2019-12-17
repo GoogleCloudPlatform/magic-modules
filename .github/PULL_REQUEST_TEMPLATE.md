@@ -20,6 +20,7 @@ For Terraform PRs, we use the following "release-note:" headings
     - release-note:new-datasource
     - release-note:deprecation
     - release-note:breaking-change
+    - release-note:none
 -->
 
 **Release Note Template for Downstream PRs (will be copied)**
