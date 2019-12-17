@@ -23,6 +23,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       fetch_iam_policy_verb: :POST
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
       parent_resource_attribute: 'project'
+      iam_conditions_request_type: :REQUEST_BODY
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "iap_project"
@@ -38,6 +39,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       parent_resource_attribute: 'project'
       fetch_iam_policy_verb: :POST
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
+      iam_conditions_request_type: :REQUEST_BODY
     id_format: "projects/{{project}}/iap_web/compute"
     import_format: ["projects/{{project}}/iap_web/compute"]
     examples:
@@ -57,6 +59,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
       test_project_name: "tf-test"
       custom_diff_suppress: 'templates/terraform/iam/iap_web_appengine_diff_suppress.go.erb'
+      iam_conditions_request_type: :REQUEST_BODY
     id_format: "projects/{{project}}/iap_web/appengine-{{appId}}"
     import_format: ["projects/{{project}}/iap_web/appengine-{{appId}}"]
     examples:
@@ -96,6 +99,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
       test_project_name: "tf-test"
       example_config_body: 'templates/terraform/iam/example_config_body/app_engine_service.tf.erb'
+      iam_conditions_request_type: :REQUEST_BODY
     id_format: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}'
     import_format: ['projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}', '{{service}}']
     examples:
