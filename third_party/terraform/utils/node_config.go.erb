@@ -210,14 +210,12 @@ var schemaNodeConfig = &schema.Schema{
 <% end -%>
 				Type:       schema.TypeList,
 				Optional:   true,
-				ForceNew:   true,
 				MaxItems:   1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"node_metadata": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{"UNSPECIFIED", "SECURE", "EXPOSE", "GKE_METADATA_SERVER"}, false),
 						},
 					},

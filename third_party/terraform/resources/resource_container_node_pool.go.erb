@@ -857,6 +857,38 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			d.SetPartial("upgrade_settings")
 		}
 	}
+
+	if d.HasChange(prefix + "workload_metadata_config") {
+		workloadMetadata := &containerBeta.WorkloadMetadataConfig{}
+		if v, ok := d.GetOk(prefix + "workload_metadata_config"); ok {
+			workloadMetadataConfig := v.([]interface{})[0].(map[string]interface{})
+			workloadMetadata.NodeMetadata = string(workloadMetadataConfig["node_metadata"].(string))
+		}
+		req := &containerBeta.UpdateNodePoolRequest{
+			WorkloadMetadataConfig: workloadMetadata,
+		}
+		updateF := func() error {
+			op, err := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req).Do()
+
+			if err != nil {
+				return err
+			}
+
+			// Wait until it's updated
+			return containerOperationWait(config, op, nodePoolInfo.project, nodePoolInfo.location, "updating GKE node pool workload metadata config", timeoutInMinutes)
+		}
+
+		// Call update serially.
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] Updated workload metadata config in Node Pool %s", name)
+
+		if prefix == "" {
+			d.SetPartial("workload_metadata_config")
+		}
+	}
 <% end -%>
 
 	return nil
