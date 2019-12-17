@@ -1,0 +1,101 @@
+---
+steps:
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["-"]
+      args:
+          - 'head'
+          - 'terraform'
+          - 'ga'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["-"]
+      args:
+          - 'base'
+          - 'terraform'
+          - 'ga'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["-"]
+      args:
+          - 'head'
+          - 'terraform'
+          - 'beta'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["-"]
+      args:
+          - 'base'
+          - 'terraform'
+          - 'beta'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["-"]
+      args:
+          - 'head'
+          - 'ansible'
+          - 'ga'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["-"]
+      args:
+          - 'base'
+          - 'ansible'
+          - 'ga'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["-"]
+      args:
+          - 'head'
+          - 'inspec'
+          - 'ga'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["-"]
+      args:
+          - 'base'
+          - 'inspec'
+          - 'ga'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["-"]
+      args:
+          - 'head'
+          - 'tf-conversion'
+          - 'ga'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["-"]
+      args:
+          - 'base'
+          - 'tf-conversion'
+          - 'ga'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/github-differ'
+      secretEnv: ["GITHUB_TOKEN"]
+      args:
+          - $_PR_NUMBER
+
+secrets:
+    - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/github-token
+      secretEnv:
+          GITHUB_TOKEN: CiQADkR4NnCVXo1OLSWFuPX7eSiifaOfQVzSYmKi2jZdVbKlfYMSUQBfF82vNAgpvSVyhzM8JsQaP6Oky0SAdoR5fPED5cU3qxsCB9wArmdGcgQoRzP7S6jEWHRcvxv/xauznjkJQMWCORzcbUbk6T7k80bdo2mpqw==
