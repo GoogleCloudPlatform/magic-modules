@@ -31,29 +31,8 @@ func resourceDataflowJobLabelDiffSuppress(k, old, new string, d *schema.Resource
 		return true
 	}
 
-	// Example Diff: "labels.%: 2 => 0
-	// If k is comparing length of maps, compare old and new value.
+	// Let diff be determined by labels (above)
 	if strings.HasPrefix(k, "labels.%") {
-		o, n := d.GetChange("labels")
-		oldLabels := o.(map[string]interface{})
-		newLabels := n.(map[string]interface{})
-
-		// If new labels includes labels not in old value, don't suppress.
-		for labelK, newV := range newLabels {
-			if oldV, ok := oldLabels[labelK]; !ok || oldV.(string) != newV.(string) {
-				return false
-			}
-		}
-		// If we reached this point, old labels is superset of new labels
-		// Don't suppress diff if a old-only label appears to be user-provided
-		for labelK := range oldLabels {
-			if _, ok := newLabels[labelK]; !ok {
-				if !strings.HasPrefix(labelK, resourceDataflowJobGoogleProvidedLabelPrefix) {
-					return false
-				}
-			}
-		}
-		// All old-only labels appear to be Google-created - ignore diff.
 		return true
 	}
 
