@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -62,6 +63,7 @@ func TestAccKmsCryptoKeyIamBinding(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccKmsCryptoKeyIamBinding_withCondition(t *testing.T) {
 	t.Parallel()
 
@@ -95,6 +97,7 @@ func TestAccKmsCryptoKeyIamBinding_withCondition(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccKmsCryptoKeyIamMember(t *testing.T) {
 	t.Parallel()
@@ -133,6 +136,7 @@ func TestAccKmsCryptoKeyIamMember(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccKmsCryptoKeyIamMember_withCondition(t *testing.T) {
 	t.Parallel()
 
@@ -166,6 +170,7 @@ func TestAccKmsCryptoKeyIamMember_withCondition(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func testAccCheckGoogleKmsCryptoKeyIamBindingExists(bindingResourceName, roleId string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -337,6 +342,7 @@ resource "google_kms_crypto_key_iam_binding" "foo" {
 `, projectId, orgId, billingAccount, account, account, keyRingName, cryptoKeyName, roleId)
 }
 
+<% unless version == 'ga' -%>
 func testAccKmsCryptoKeyIamBinding_withCondition(projectId, orgId, billingAccount, account, keyRingName, cryptoKeyName, roleId, conditionTitle string) string {
 	return fmt.Sprintf(`
 resource "google_project" "test_project" {
@@ -385,6 +391,7 @@ resource "google_kms_crypto_key_iam_binding" "foo" {
 }
 `, projectId, orgId, billingAccount, account, keyRingName, cryptoKeyName, roleId, conditionTitle)
 }
+<% end -%>
 
 func testAccKmsCryptoKeyIamMember_basic(projectId, orgId, billingAccount, account, keyRingName, cryptoKeyName, roleId string) string {
 	return fmt.Sprintf(`
@@ -430,6 +437,7 @@ resource "google_kms_crypto_key_iam_member" "foo" {
 `, projectId, orgId, billingAccount, account, keyRingName, cryptoKeyName, roleId)
 }
 
+<% unless version == 'ga' -%>
 func testAccKmsCryptoKeyIamMember_withCondition(projectId, orgId, billingAccount, account, keyRingName, cryptoKeyName, roleId, conditionTitle string) string {
 	return fmt.Sprintf(`
 resource "google_project" "test_project" {
@@ -478,3 +486,4 @@ resource "google_kms_crypto_key_iam_member" "foo" {
 }
 `, projectId, orgId, billingAccount, account, keyRingName, cryptoKeyName, roleId, conditionTitle)
 }
+<% end -%>
