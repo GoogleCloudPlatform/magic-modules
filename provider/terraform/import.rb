@@ -75,7 +75,7 @@ module Provider
 
         # Regexes should be unique and ordered from most specific to least specific
         # We sort by number of `/` characters (the standard block separator)
-        # followed by number of variables (`{{`) to make `{{name}}` appear last.        
+        # followed by number of variables (`{{`) to make `{{name}}` appear last.
         id_formats.uniq.reject(&:empty?).sort_by { |i| [i.count('/'), i.count('{{')] }.reverse
       end
     end
