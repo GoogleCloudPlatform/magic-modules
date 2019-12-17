@@ -14,6 +14,8 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
+const resourceDataflowJobGoogleProvidedLabelPrefix = "labels.goog-dataflow-provided"
+
 var dataflowTerminalStatesMap = map[string]struct{}{
 	"JOB_STATE_DONE":      {},
 	"JOB_STATE_FAILED":    {},
@@ -22,12 +24,51 @@ var dataflowTerminalStatesMap = map[string]struct{}{
 	"JOB_STATE_DRAINED":   {},
 }
 
+func resourceDataflowJobLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if !strings.HasPrefix(k, "labels.") {
+		return false
+	}
+
+	// Example Diff: "labels.goog-dataflow-provided-template-version": "word_count" => ""
+	if strings.HasPrefix(k, resourceDataflowJobGoogleProvidedLabelPrefix) && new == "" {
+		// Suppress diff if field is a Google Dataflow-provided label key and has no explicitly set value in Config.
+		return true
+	}
+
+	// If k is comparing length of maps, compare old and new value.
+	if strings.HasPrefix(k, "labels.%") {
+		o, n := d.GetChange("labels")
+		oldLabels := o.(map[string]interface{})
+		newLabels := n.(map[string]interface{})
+
+		// If new labels includes labels not in old value, don't suppress.
+		for labelK, newV := range newLabels {
+			if oldV, ok := oldLabels[labelK]; !ok || oldV.(string) != newV.(string) {
+				return false
+			}
+		}
+		// If we reached this point, old labels is superset of new labels
+		// Don't suppress diff if a old-only label appears to be user-provided
+		for labelK := range oldLabels {
+			if _, ok := newLabels[labelK]; !ok {
+				if !strings.HasPrefix(labelK, resourceDataflowJobGoogleProvidedLabelPrefix) {
+					return false
+				}
+			}
+		}
+		// All old-only labels appear to be Google-created - ignore diff.
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
+
 func resourceDataflowJob() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDataflowJobCreate,
 		Read:   resourceDataflowJobRead,
 		Delete: resourceDataflowJobDelete,
-
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -72,9 +113,10 @@ func resourceDataflowJob() *schema.Resource {
 			},
 
 			"labels": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				ForceNew: true,
+				Type:             schema.TypeMap,
+				Optional:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: resourceDataflowJobLabelDiffSuppress,
 			},
 
 			"on_delete": {
