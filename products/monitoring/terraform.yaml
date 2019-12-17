@@ -16,6 +16,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: alertPolicy/{{project}}
+    error_retry_predicates: ["isMonitoringRetryableError"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         # skipping tests because the API is full of race conditions
@@ -28,10 +29,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/alert_policy.erb
+
   Group: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: stackdriver/groups/{{project}}
+    error_retry_predicates: ["isMonitoringRetryableError"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_group_basic"
@@ -55,6 +58,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: stackdriver/notifications/{{project}}
+    error_retry_predicates: ["isMonitoringRetryableError"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "notification_channel_basic"
@@ -85,6 +89,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   UptimeCheckConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
+    error_retry_predicates: ["isMonitoringRetryableError"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "uptime_check_config_http"
