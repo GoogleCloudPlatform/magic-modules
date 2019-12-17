@@ -33,19 +33,19 @@ RUN rbenv rehash
 RUN gem update --system "$RUBYGEMS_VERSION"
 RUN gem install bundler --version "$BUNDLER_VERSION" --force
 
-ADD Gemfile Gemfile
-ADD Gemfile.lock Gemfile.lock
+RUN apt-get update
+RUN apt-get install -y git build-essential libbz2-dev libssl-dev libreadline-dev \
+                        libffi-dev libsqlite3-dev tk-dev libpng-dev libfreetype6-dev \
+                        make build-essential libssl-dev zlib1g-dev libbz2-dev \
+                        libreadline-dev libsqlite3-dev curl llvm libncurses5-dev libncursesw5-dev \
+                        xz-utils tk-dev libffi-dev liblzma-dev python-openssl
+
+RUN wget https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/master/Gemfile
+RUN wget https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/master/Gemfile.lock
 RUN bundle install
 RUN rbenv rehash
+RUN rm Gemfile Gemfile.lock
 
-RUN apt-get update
-RUN apt-get install -y git
-RUN apt-get install -y build-essential libbz2-dev libssl-dev libreadline-dev \
-                        libffi-dev libsqlite3-dev tk-dev
-RUN apt-get install -y libpng-dev libfreetype6-dev    
-RUN apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev \
-    libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
-    xz-utils tk-dev libffi-dev liblzma-dev python-openssl
 RUN curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
 ENV PATH="/root/.pyenv/bin:${PATH}"
 RUN eval "$(pyenv init -)"
