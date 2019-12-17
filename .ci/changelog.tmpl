@@ -18,6 +18,7 @@
 		{{$improvements = append $improvements (renderReleaseNote .) -}}
 	{{ else if eq "bug" .Type -}}
 		{{$bugs = append $bugs (renderReleaseNote .) -}}
+	{{ else if eq "none" .Type -}}
 	{{ else -}}
 		{{$unknown = append $unknown (renderReleaseNote .) -}}
 	{{end -}}
