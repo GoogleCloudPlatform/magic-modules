@@ -153,13 +153,13 @@ objects:
             name: 'idpCertificates'
             required: true
             description: |
-              The IDP's certificate data to verify the signature in the SAMLResponse issued by the IDP.
+              The IdP's certificate data to verify the signature in the SAMLResponse issued by the IDP.
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
               - !ruby/object:Api::Type::String
                 name: 'x509Certificate'
                 description: |
-                  The x509 certificate
+                  The IdP's x509 certificate.
       - !ruby/object:Api::Type::NestedObject
         name: 'spConfig'
         required: true
