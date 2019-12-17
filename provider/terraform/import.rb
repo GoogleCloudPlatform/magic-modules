@@ -66,19 +66,17 @@ module Provider
         field_markers -= ['{{project}}', '{{region}}', '{{zone}}']
         short_id_default_format = field_markers.join('/')
 
-        # Regexes should be unique and ordered from most specific to least specific
-        # We sort by number of `/` characters (the standard block separator)
-        # followed by number of variables (`{{`) to make `{{name}}` appear last.
-        if id_formats[0].include?('%')
-          # If the id format can include `/` characters we cannot allow short forms such as:
-          # `{{project}}/{{%name}}` as there is no way to differentiate between
-          # project-name/resource-name and resource-name/with-slash
-          return \
-            id_formats.uniq.reject(&:empty?).sort_by { |i| [i.count('/'), i.count('{{')] }.reverse
+        # If the id format can include `/` characters we cannot allow short forms such as:
+        # `{{project}}/{{%name}}` as there is no way to differentiate between
+        # project-name/resource-name and resource-name/with-slash
+        unless id_formats[0].include?('%')
+          id_formats += [short_id_format, short_id_default_project_format, short_id_default_format]
         end
 
-        (id_formats + [short_id_format, short_id_default_project_format, short_id_default_format])
-          .uniq.reject(&:empty?).sort_by { |i| [i.count('/'), i.count('{{')] }.reverse
+        # Regexes should be unique and ordered from most specific to least specific
+        # We sort by number of `/` characters (the standard block separator)
+        # followed by number of variables (`{{`) to make `{{name}}` appear last.        
+        id_formats.uniq.reject(&:empty?).sort_by { |i| [i.count('/'), i.count('{{')] }.reverse
       end
     end
   end
