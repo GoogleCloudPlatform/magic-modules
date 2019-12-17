@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -48,7 +49,11 @@ func KeyRingIdParseFunc(d *schema.ResourceData, config *Config) error {
 }
 
 func (u *KmsKeyRingIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
+<% if version == 'ga' -%>
 	p, err := u.Config.clientKms.Projects.Locations.KeyRings.GetIamPolicy(u.resourceId).Do()
+<% else -%>
+	p, err := u.Config.clientKms.Projects.Locations.KeyRings.GetIamPolicy(u.resourceId).OptionsRequestedPolicyVersion(iamPolicyVersion).Do()
+<% end -%>
 
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
