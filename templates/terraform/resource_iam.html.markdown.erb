@@ -100,7 +100,7 @@ resource "<%= resource_ns_iam -%>_policy" "editor" {
 ```
 
 <% unless version == 'ga' || object.iam_policy.iam_conditions_request_type.nil? -%>
-With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html), Whitelist-only):
+With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 
 ```hcl
 data "google_iam_policy" "admin" {
@@ -137,7 +137,7 @@ resource "<%= resource_ns_iam -%>_binding" "editor" {
 ```
 
 <% unless version == 'ga' || object.iam_policy.iam_conditions_request_type.nil? -%>
-With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html), Whitelist-only):
+With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 
 ```hcl
 resource "<%= resource_ns_iam -%>_binding" "editor" {
@@ -166,7 +166,7 @@ resource "<%= resource_ns_iam -%>_member" "editor" {
 ```
 
 <% unless version == 'ga' || object.iam_policy.iam_conditions_request_type.nil? -%>
-With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html), Whitelist-only):
+With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 
 ```hcl
 resource "<%= resource_ns_iam -%>_member" "editor" {
@@ -221,7 +221,7 @@ The following arguments are supported:
   a `google_iam_policy` data source.
 
 <% unless version == 'ga' || object.iam_policy.iam_conditions_request_type.nil? -%>
-* `condition` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) An [IAM Condition](https://cloud.google.com/iam/docs/conditions-overview) for a given binding. You must be whitelisted for the IAM Conditions private beta in order to use them in Terraform.
+* `condition` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) An [IAM Condition](https://cloud.google.com/iam/docs/conditions-overview) for a given binding.
   Structure is documented below.
 
 ---
