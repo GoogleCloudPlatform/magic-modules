@@ -25,16 +25,13 @@ var dataflowTerminalStatesMap = map[string]struct{}{
 }
 
 func resourceDataflowJobLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	if !strings.HasPrefix(k, "labels.") {
-		return false
-	}
-
 	// Example Diff: "labels.goog-dataflow-provided-template-version": "word_count" => ""
 	if strings.HasPrefix(k, resourceDataflowJobGoogleProvidedLabelPrefix) && new == "" {
 		// Suppress diff if field is a Google Dataflow-provided label key and has no explicitly set value in Config.
 		return true
 	}
 
+	// Example Diff: "labels.%: 2 => 0
 	// If k is comparing length of maps, compare old and new value.
 	if strings.HasPrefix(k, "labels.%") {
 		o, n := d.GetChange("labels")
