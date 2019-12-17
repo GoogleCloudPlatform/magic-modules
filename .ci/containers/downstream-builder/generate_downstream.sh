@@ -1,8 +1,6 @@
 #! /bin/bash
 
 set -e
-# REMOVE THIS BEFORE SUBMITTING AS IT WILL PRINT SECRETS.
-set -x
 
 function clone_repo() {
     if [ "$REPO" == "terraform" ]; then
