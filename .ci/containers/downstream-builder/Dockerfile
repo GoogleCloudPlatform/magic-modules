@@ -27,7 +27,7 @@ RUN mkdir -p "$(rbenv root)"/plugins
 RUN git clone https://github.com/rbenv/ruby-build.git "$(rbenv root)"/plugins/ruby-build
 
 RUN rbenv install $RUBY_VERSION
-RUN rbenv global 2.6.0
+RUN rbenv global $RUBY_VERSION
 RUN rbenv rehash
 
 RUN gem update --system "$RUBYGEMS_VERSION"
