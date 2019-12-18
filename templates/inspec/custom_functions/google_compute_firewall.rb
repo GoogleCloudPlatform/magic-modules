@@ -177,7 +177,6 @@ def single_port_matches(rule_port, single_port)
 end
 
 def log_config_enabled?
-  byebug
   return false if !defined?(log_config) || !defined?(log_config.enable)
   return log_config.enable
 end

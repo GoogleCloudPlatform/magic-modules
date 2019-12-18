@@ -358,3 +358,7 @@ service_perimeter:
   title: restrict_all
   restricted_service: storage.googleapis.com
   policy_title: policytitle
+
+firewall:
+  name: inspec-gcp-firewall
+  source_tag: some-tag

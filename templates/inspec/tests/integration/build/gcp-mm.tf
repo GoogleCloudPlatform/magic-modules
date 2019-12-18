@@ -949,3 +949,21 @@ resource "google_access_context_manager_access_policy" "access-policy" {
   parent = "organizations/${var.gcp_organization_id}"
   title  = var.service_perimeter["policy_title"]
 }
+
+variable "firewall" {
+  type = any
+}
+
+resource "google_compute_firewall" "mm-firewall" {
+  project  = var.gcp_project_id
+  name = var.firewall["name"]
+  enable_logging = true
+  network = google_compute_network.inspec-gcp-network.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "8080", "1000-2000"]
+  }
+
+  source_tags = [var.firewall["source_tag"]]
+}

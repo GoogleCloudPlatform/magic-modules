@@ -25,6 +25,7 @@ module Overrides
           product_url
           privileged
           singular_only
+          singular_extra_examples
         ]
       end
 
@@ -39,6 +40,8 @@ module Overrides
         # resource manager Folder is an example of a privileged resource
         check :privileged, type: :boolean, default: false
         check :singular_only, type: :boolean, default: false
+        # Points to a markdown file with extra examples to include in documentation
+        check :singular_extra_examples, type: String
       end
     end
   end

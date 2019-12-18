@@ -1,1 +1,7 @@
-google_compute_firewall.erb
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% firewall = grab_attributes['firewall'] -%>
+describe google_compute_firewall(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{firewall['name']}'" : "firewall['name']" -%>) do
+  its('direction') { should cmp 'INGRESS' }
+  its('log_config_enabled?') { should be true }
+  its('source_tags') { should include <%= doc_generation ? "'#{firewall['source_tag']}'" : "firewall['source_tag']" -%> }
+end

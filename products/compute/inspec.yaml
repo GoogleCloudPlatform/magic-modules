@@ -28,6 +28,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Firewall: !ruby/object:Overrides::Inspec::ResourceOverride
     additional_functions: |
 <%= lines(indent(compile('templates/inspec/custom_functions/google_compute_firewall.rb'), 6)) -%>
+    singular_extra_examples: 'templates/inspec/documentation/firewall_examples.md'
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: firewall_name
