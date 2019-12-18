@@ -200,16 +200,18 @@ module Provider
         elsif types.empty? && object.not_in_version?(@version)
           Google::LOGGER.info "Excluding #{object.name} per API version"
         else
-          Google::LOGGER.info "Generating #{object.name}"
-          # exclude_if_not_in_version must be called in order to filter out
-          # beta properties that are nested within GA resources
-          object.exclude_if_not_in_version!(@version)
+          Thread.new do
+            Google::LOGGER.info "Generating #{object.name}"
+            # exclude_if_not_in_version must be called in order to filter out
+            # beta properties that are nested within GA resources
+            object.exclude_if_not_in_version!(@version)
 
-          # Make object immutable.
-          object.freeze
-          object.all_user_properties.each(&:freeze)
+            # Make object immutable.
+            object.freeze
+            object.all_user_properties.each(&:freeze)
 
-          generate_object object, output_folder, @target_version_name
+            generate_object object, output_folder, @target_version_name
+          end
         end
       end
     end
