@@ -64,16 +64,12 @@ fi
 
 if [ "$REPO" == "terraform" ]; then
     pushd $LOCAL_PATH
-    go get -v
     find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \;
-    popd
-elif [ "$REPO" == "tf-conversion" ]; then
-    pushd $LOCAL_PATH
-    go get -v ./google
     popd
 fi
 
 if [ "$REPO" == "tf-conversion" ]; then
+    # Special case - use terraform generator with validator overrides.
     bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
 else
     bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION

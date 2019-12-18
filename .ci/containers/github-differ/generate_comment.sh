@@ -85,6 +85,6 @@ else
     DIFFS="Hi!  I'm the modular magician.  Your PR generated some diffs in downstreams - here they are.$NEWLINE# Diff report:$NEWLINE$NEWLINE$DIFFS"
 fi
 
-curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
-     -X POST -d "{\"body\": \"$DIFFS\"}" \
+curl -H "Authorization: token ${GITHUB_TOKEN}" \
+     -d "{\"body\": \"$DIFFS\"}" \
       "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}/comments"
