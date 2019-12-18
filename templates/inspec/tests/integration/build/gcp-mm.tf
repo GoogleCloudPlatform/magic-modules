@@ -478,7 +478,7 @@ resource "google_compute_target_tcp_proxy" "gcp-inspec-target-tcp-proxy" {
 resource "google_container_cluster" "gcp-inspec-regional-cluster" {
   project = var.gcp_project_id
   name = var.regional_cluster["name"]
-  region = var.gcp_location
+  location = var.gcp_location
   initial_node_count = 1
   remove_default_node_pool = true
 
@@ -632,7 +632,7 @@ resource "google_compute_backend_bucket" "image_backend" {
 resource "google_container_node_pool" "inspec-gcp-regional-node-pool" {
   project    = var.gcp_project_id
   name       = var.regional_node_pool["name"]
-  region     = var.gcp_location
+  location   = var.gcp_location
   cluster    = google_container_cluster.gcp-inspec-regional-cluster.name
   node_count = var.regional_node_pool["node_count"]
 }
