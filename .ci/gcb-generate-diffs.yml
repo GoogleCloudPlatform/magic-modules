@@ -1,8 +1,44 @@
 ---
 steps:
+    - name: 'alpine'
+      args:
+          - sh
+          - -c
+          - rm -rfv ./* ./.* || true
+    - name: 'alpine'
+      args:
+          - ls
+          - -lash
+    - name: 'gcr.io/cloud-builders/git'
+      args:
+          - clone
+          - https://github.com/GoogleCloudPlatform/magic-modules
+          - .
+    - name: 'gcr.io/cloud-builders/git'
+      args:
+          - config
+          - --global
+          - user.email
+          - magic-modules+differ@google.com
+    - name: 'gcr.io/cloud-builders/git'
+      args:
+          - config
+          - --global
+          - user.name
+          - "Modular Magician Diff Process"
+    - name: 'gcr.io/cloud-builders/git'
+      args:
+          - checkout
+          - $_HEAD_BRANCH
+    - name: 'gcr.io/cloud-builders/git'
+      id: merged
+      args:
+          - merge
+          - origin/$_BASE_BRANCH
+
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["-"]
+      waitFor: ["merged"]
       args:
           - 'head'
           - 'terraform'
@@ -11,7 +47,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["-"]
+      waitFor: ["merged"]
       args:
           - 'base'
           - 'terraform'
@@ -20,7 +56,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["-"]
+      waitFor: ["merged"]
       args:
           - 'head'
           - 'terraform'
@@ -29,7 +65,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["-"]
+      waitFor: ["merged"]
       args:
           - 'base'
           - 'terraform'
@@ -38,7 +74,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["-"]
+      waitFor: ["merged"]
       args:
           - 'head'
           - 'ansible'
@@ -47,7 +83,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["-"]
+      waitFor: ["merged"]
       args:
           - 'base'
           - 'ansible'
@@ -56,7 +92,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["-"]
+      waitFor: ["merged"]
       args:
           - 'head'
           - 'inspec'
@@ -65,7 +101,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["-"]
+      waitFor: ["merged"]
       args:
           - 'base'
           - 'inspec'
@@ -74,7 +110,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["-"]
+      waitFor: ["merged"]
       args:
           - 'head'
           - 'tf-conversion'
@@ -83,7 +119,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["-"]
+      waitFor: ["merged"]
       args:
           - 'base'
           - 'tf-conversion'
@@ -94,6 +130,9 @@ steps:
       secretEnv: ["GITHUB_TOKEN"]
       args:
           - $_PR_NUMBER
+
+options:
+    machineType: 'N1_HIGHCPU_8'
 
 secrets:
     - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/github-token
