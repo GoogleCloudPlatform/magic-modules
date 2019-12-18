@@ -115,7 +115,7 @@ variable "folder" {
 }
 
 variable "gcp_organization_id" {
-  type = "string"
+  type = string
   default = "none"
 }
 
@@ -259,7 +259,9 @@ resource "google_compute_instance_group_manager" "gcp-inspec-igm" {
   project           = var.gcp_project_id
   zone              = var.gcp_zone
   name              = var.instance_group_manager["name"]
-  instance_template = google_compute_instance_template.default.self_link
+  version {
+    instance_template = google_compute_instance_template.default.self_link
+  }
   base_instance_name        = var.instance_group_manager["base_instance_name"]
   target_pools = []
   target_size  = 0
@@ -498,7 +500,7 @@ resource "google_compute_route" "gcp-inspec-route" {
   # of the named network in this block. Since inspec-gcp-network does not
   # automatically create subnetworks, we need to create a dependency so
   # the route is not created before the subnetwork 
-  depends_on  = ["google_compute_subnetwork.inspec-gcp-subnetwork"]
+  depends_on  = [google_compute_subnetwork.inspec-gcp-subnetwork]
 }
 
 resource "google_compute_router" "gcp-inspec-router" {
