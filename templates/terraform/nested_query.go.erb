@@ -185,7 +185,7 @@ func resource<%= resource_name -%>ListForPatch(d *schema.ResourceData, meta inte
       return nil, err
   }
   <% end -%>
-  res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project %>project<% else %>""<% end %>, url, nil)
+  res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project %>project<% else %>""<% end %>, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
   if err != nil {
     return nil, err
   }
