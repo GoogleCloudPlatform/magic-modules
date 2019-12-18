@@ -23,7 +23,7 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
   }
   // Returns the proper get.
   url := fmt.Sprintf("<%= [object.__product.base_url, async.operation.base_url].flatten.join.gsub('{{op_id}}', '%s') -%>", w.CommonOperationWaiter.Op.Name)
-  return sendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, nil)
+  return sendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 }
 
 func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op map[string]interface{},<% if has_project -%> project,<% end -%> activity string, timeoutMinutes int) error {

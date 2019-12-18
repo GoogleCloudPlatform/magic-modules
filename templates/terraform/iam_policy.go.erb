@@ -192,7 +192,7 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 	}
 <%    end  -%>
 <%  end -%>
-	
+
 	policy, err := sendRequest(u.Config, "<%= object.iam_policy.fetch_iam_policy_verb.to_s.upcase -%>", <% if resource_params.include?('project')  %>project<% else %>""<% end %>, url, obj)
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
