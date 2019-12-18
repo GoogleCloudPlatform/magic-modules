@@ -2864,6 +2864,8 @@ objects:
         at_least_one_of:
           - allow
           - deny
+        conflicts:
+          - denied
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             # IPProtocol has to be string, instead of Enum because user can
@@ -2899,6 +2901,8 @@ objects:
         at_least_one_of:
           - allow
           - deny
+        conflicts:
+          - allow
         description: |
           The list of DENY rules specified by this firewall. Each rule specifies
           a protocol and port-range tuple that describes a denied connection.
@@ -4054,6 +4058,11 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+        conflicts:
+          - httpsHealthCheck
+          - http2HealthCheck
+          - tcpHealthCheck
+          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4179,6 +4188,11 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+        conflicts:
+          - httpHealthCheck
+          - http2HealthCheck
+          - tcpHealthCheck
+          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4304,6 +4318,11 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+        conflicts:
+          - httpHealthCheck
+          - httpsHealthCheck
+          - http2HealthCheck
+          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -4410,6 +4429,11 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+        conflicts:
+          - httpHealthCheck
+          - httpsHealthCheck
+          - http2HealthCheck
+          - tcpHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -4516,6 +4540,11 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+        conflicts:
+          - httpHealthCheck
+          - httpsHealthCheck
+          - tcpHealthCheck
+          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -9148,6 +9177,11 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+        conflicts:
+          - httpsHealthCheck
+          - http2HealthCheck
+          - tcpHealthCheck
+          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -9273,6 +9307,11 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+        conflicts:
+          - httpHealthCheck
+          - http2HealthCheck
+          - tcpHealthCheck
+          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -9398,6 +9437,11 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+        conflicts:
+          - httpHealthCheck
+          - httpsHealthCheck
+          - http2HealthCheck
+          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -9504,6 +9548,11 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+        conflicts:
+          - httpHealthCheck
+          - httpsHealthCheck
+          - http2HealthCheck
+          - tcpHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -9610,6 +9659,11 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+        conflicts:
+          - httpHealthCheck
+          - httpsHealthCheck
+          - tcpHealthCheck
+          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
