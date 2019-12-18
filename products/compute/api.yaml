@@ -2902,7 +2902,7 @@ objects:
           - allow
           - deny
         conflicts:
-          - allow
+          - allowed
         description: |
           The list of DENY rules specified by this firewall. Each rule specifies
           a protocol and port-range tuple that describes a denied connection.
