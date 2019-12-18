@@ -65,6 +65,9 @@ module Overrides
 
           :schema_version,
 
+          # If true, skip sweeper generation for this resource
+          :skip_sweeper,
+
           # This enables resources that get their project via a reference to a different resource
           # instead of a project field to use User Project Overrides
           :supports_indirect_user_project_override
@@ -97,6 +100,7 @@ module Overrides
         check :timeouts, type: Api::Timeouts
         check :error_retry_predicates, type: Array, item_type: String
         check :schema_version, type: Integer
+        check :skip_sweeper, type: :boolean, default: false
         check :supports_indirect_user_project_override, type: :boolean, default: false
       end
 

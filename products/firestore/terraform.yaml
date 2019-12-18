@@ -19,6 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_minutes: 10
       delete_minutes: 10
     autogen_async: true
+    skip_sweeper: true
     import_format: ["{{name}}"]
     description: |
       {{description}} This resource manages composite indexes and not single

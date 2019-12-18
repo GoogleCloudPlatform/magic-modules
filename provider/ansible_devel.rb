@@ -96,6 +96,8 @@ module Provider
         end
       end
 
+      def generate_resource_sweepers(data) end
+
       def compile_common_files(_arg1, _arg2, _arg3) end
 
       def copy_common_files(output_folder, provider_name = nil)

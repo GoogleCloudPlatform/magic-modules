@@ -19,6 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_minutes: 6
       delete_minutes: 6
     autogen_async: true
+    skip_sweeper: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     examples:
@@ -39,6 +40,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_minutes: 6
       delete_minutes: 6
     autogen_async: true
+    skip_sweeper: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     examples:
@@ -62,6 +64,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_minutes: 6
       delete_minutes: 6
     autogen_async: true
+    skip_sweeper: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     examples:

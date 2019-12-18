@@ -1,0 +1,115 @@
+<%= lines(autogen_notice :go) -%>
+
+package google
+
+import (
+  "fmt"
+  "testing"
+  "strings"
+  "github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+  "github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+)
+
+<%
+sweeper_name = product_ns + object.name
+wrap_path = object&.nested_query&.keys&.first || object.collection_url_key
+-%>
+
+func init() {
+	resource.AddTestSweepers("<%= sweeper_name -%>", &resource.Sweeper{
+		Name: "<%= sweeper_name -%>",
+		F:    testSweep<%= sweeper_name -%>,
+	})
+}
+
+func testSweep<%= sweeper_name -%>(region string) error {
+	resource_name := "<%= sweeper_name -%>"
+	log.Printf("[SWEEP_LOG] Sweeping %s",resource_name)
+
+	config, err := sharedConfigForRegion(region)
+	if err != nil {
+		log.Fatalf("[SWEEP_LOG] error getting shared config for region: %s", err)
+	}
+
+	err = config.LoadAndValidate(context.Background())
+	if err != nil {
+		log.Fatalf("[SWEEP_LOG] error loading: %s", err)
+	}
+
+	list_template := strings.Split("<%= object.__product.base_url + object.base_url -%>","?")[0]
+
+	d := &ResourceDataMock{
+		FieldsInSchema: map[string]interface{}{
+			"project":config.Project,
+			"region":region,
+			"location":region,
+			"zone":"-",
+		},
+	}
+
+	list_url, err := replaceVars(d, config, list_template)
+
+	if err != nil {
+		log.Printf("[SWEEP_LOG] error preparing sweeper list url: %s", err)
+		return nil
+	}
+
+	if strings.Count(list_url,"//") > 1 {
+		log.Printf("[SWEEP_LOG] Invalid list url for %s sweeper: %s",resource_name,list_url)
+		return nil
+	}
+
+	res, err := sendRequest(config, "GET", config.Project, list_url, nil)
+	if err != nil {
+		log.Printf("[SWEEP_LOG] Unable to list %s: %s",resource_name, err)
+		return nil
+	}
+
+	resource_list, ok := res["<%= wrap_path -%>"]
+	if !ok {
+		log.Printf("[SWEEP_LOG] Nothing found in response.")
+		return nil
+	}
+
+	rl := resource_list.([]interface{})
+
+	log.Printf("[SWEEP_LOG] Found %d items in %s list response.", len(rl), resource_name)
+	non_prefix_count := 0
+	for _, ri := range rl {
+		r := ri.(map[string]interface{})
+		if r["name"] == nil {
+			log.Printf("[SWEEP_LOG] %s resource name was nil", resource_name)
+			return nil
+		}
+
+		name_segs := strings.Split(r["name"].(string),"/")
+		name := name_segs[len(name_segs)-1]
+
+		// Only sweep resources with the test prefix
+		if strings.HasPrefix(name, "tf-test") {
+			delete_template := "<%= object.__product.base_url + object.delete_uri -%>"
+
+			delete_url, err := replaceVars(d, config, delete_template)
+			if err != nil {
+				log.Printf("[SWEEP_LOG] error preparing delete url: %s", err)
+				return nil
+			}
+			delete_url = delete_url+name
+
+			_, err = sendRequest(config, "DELETE", config.Project, delete_url, nil)
+			if err != nil {
+				log.Printf("[SWEEP_LOG] Error deleting for url %s : %s", delete_url, err)
+			} else {
+				log.Printf("[SWEEP_LOG] Deleted %s resource: %s", resource_name, name)
+			}
+		} else {
+			non_prefix_count++
+		}
+	}
+
+	if non_prefix_count > 0 {
+		log.Printf("[SWEEP_LOG] %d items without tf_test prefix remain.", non_prefix_count)
+	}
+
+	return nil
+}

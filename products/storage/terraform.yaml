@@ -43,6 +43,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         bucket_name: "static-content-bucket"
     id_format: "{{bucket}}/{{entity}}"
     import_format: ["{{bucket}}/{{entity}}"]
+    skip_sweeper: true
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -63,6 +64,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         object_name: "public-object"
     id_format: "{{bucket}}/{{object}}/{{entity}}"
     import_format: ["{{bucket}}/{{object}}/{{entity}}"]
+    skip_sweeper: true
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -80,6 +82,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         bucket_name: "static-content-bucket"
     id_format: "{{bucket}}/{{entity}}"
     import_format: ["{{bucket}}/{{entity}}"]
+    skip_sweeper: true
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
