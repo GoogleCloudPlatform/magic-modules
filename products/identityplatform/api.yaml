@@ -50,6 +50,7 @@ objects:
         name: 'clientId'
         description: |
           OAuth client ID
+        input: true
         required: true
       - !ruby/object:Api::Type::String
         name: 'clientSecret'
@@ -83,18 +84,20 @@ objects:
         name: 'tenant'
         required: true
         url_param_only: true
+        input: true
         description: |
           The name of the tenant where this DefaultSupportedIdpConfig resource exists
       - !ruby/object:Api::Type::String
         name: 'clientId'
+        input: true
+        required: true
         description: |
           OAuth client ID
-        required: true
       - !ruby/object:Api::Type::String
         name: 'clientSecret'
+        required: true
         description: |
           OAuth client secret
-        required: true
       - !ruby/object:Api::Type::Boolean
         name: 'enabled'
         description: |
@@ -115,20 +118,21 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
+        input: true
         description: |
           The name of the InboundSamlConfig resource. Must start with 'saml.' and can only have alphanumeric characters,
           hyphens, underscores or periods. The part after 'saml.' must also start with a lowercase letter, end with an
           alphanumeric character, and have at least 2 characters.
-        required: true
       - !ruby/object:Api::Type::String
         name: 'displayName'
+        required: true
         description: |
           Human friendly display name.
-        required: true
       - !ruby/object:Api::Type::Boolean
         name: 'enabled'
         description: |
-          If allows users to sign in with the provider.
+          If this config allows users to sign in with the provider.
       - !ruby/object:Api::Type::NestedObject
         name: 'idpConfig'
         required: true
@@ -184,6 +188,7 @@ objects:
               properties:
               - !ruby/object:Api::Type::String
                 name: 'x509Certificate'
+                output: true
                 description: |
                   The x509 certificate
   - !ruby/object:Api::Resource
@@ -202,26 +207,28 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
+        input: true
         description: |
           The name of the InboundSamlConfig resource. Must start with 'saml.' and can only have alphanumeric characters,
           hyphens, underscores or periods. The part after 'saml.' must also start with a lowercase letter, end with an
           alphanumeric character, and have at least 2 characters.
-        required: true
-      - !ruby/object:Api::Type::String
-        name: 'displayName'
-        description: |
-          Human friendly display name.
-        required: true
       - !ruby/object:Api::Type::String
         name: 'tenant'
         required: true
+        input: true
         url_param_only: true
         description: |
           The name of the tenant where this inbound SAML config resource exists
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        required: true
+        description: |
+          Human friendly display name.
       - !ruby/object:Api::Type::Boolean
         name: 'enabled'
         description: |
-          If allows users to sign in with the provider.
+          If this config allows users to sign in with the provider.
       - !ruby/object:Api::Type::NestedObject
         name: 'idpConfig'
         required: true
@@ -262,10 +269,12 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'spEntityId'
+            required: true
             description: |
               Unique identifier for all SAML entities.
           - !ruby/object:Api::Type::String
             name: 'callbackUri'
+            required: true
             description: |
               Callback URI where responses from IDP are handled. Must start with `https://`.
           - !ruby/object:Api::Type::Array
@@ -277,6 +286,7 @@ objects:
               properties:
               - !ruby/object:Api::Type::String
                 name: 'x509Certificate'
+                output: true
                 description: |
                   The x509 certificate
   - !ruby/object:Api::Resource
@@ -295,9 +305,10 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
+        input: true
         description: |
           The name of the OauthIdpConfig. Must start with `oidc.`.
-        required: true
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: |
@@ -305,7 +316,7 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'enabled'
         description: |
-          If allows users to sign in with the provider.
+          If this config allows users to sign in with the provider.
       - !ruby/object:Api::Type::String
         name: 'issuer'
         description: |
@@ -336,23 +347,26 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
+        input: true
         description: |
           The name of the OauthIdpConfig. Must start with `oidc.`.
-        required: true
       - !ruby/object:Api::Type::String
         name: 'tenant'
         required: true
         url_param_only: true
+        input: true
         description: |
           The name of the tenant where this OIDC IDP configuration resource exists
       - !ruby/object:Api::Type::String
         name: 'displayName'
+        required: true
         description: |
           Human friendly display name.
       - !ruby/object:Api::Type::Boolean
         name: 'enabled'
         description: |
-          If allows users to sign in with the provider.
+          If this config allows users to sign in with the provider.
       - !ruby/object:Api::Type::String
         name: 'issuer'
         description: |
@@ -390,6 +404,7 @@ objects:
         output: true
       - !ruby/object:Api::Type::String
         name: 'displayName'
+        required: true
         description: |
           Human friendly display name of the tenant.
       - !ruby/object:Api::Type::Boolean
