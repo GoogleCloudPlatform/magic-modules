@@ -26,6 +26,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   StandardAppVersion: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
     mutex: "apps/{{project}}"
+    error_retry_predicates: ["isAppEngineRetryableError"]
     parameters:
       service: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -97,6 +98,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{project}}"
     import_format: ["{{project}}"]
     mutex: "apps/{{project}}"
+    error_retry_predicates: ["isAppEngineRetryableError"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.erb
     examples:
