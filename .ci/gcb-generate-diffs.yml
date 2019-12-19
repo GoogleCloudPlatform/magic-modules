@@ -1,19 +1,24 @@
 ---
 steps:
+    # The GCB / GH integration doesn't satisfy our use case perfectly.
+    # It doesn't check out the merge commit, and it doesn't check out the repo
+    # itself - it only gives us the actual code, not the repo. So we need
+    # to handle that access ourselves - which means deleting the code
+    # and cloning the repo to the present directory.  We need to use
+    # 'sh' to evaluate the '*' arguments, which otherwise would be
+    # passed literally to 'rm'.
     - name: 'alpine'
       args:
           - sh
           - -c
-          - rm -rfv ./* ./.* || true
-    - name: 'alpine'
-      args:
-          - ls
-          - -lash
+          - rm -rf ./* ./.* || true
     - name: 'gcr.io/cloud-builders/git'
       args:
           - clone
           - https://github.com/GoogleCloudPlatform/magic-modules
           - .
+    # We need to configure git since creating the merge commit is
+    # technically a commit.
     - name: 'gcr.io/cloud-builders/git'
       args:
           - config
@@ -26,6 +31,9 @@ steps:
           - --global
           - user.name
           - "Modular Magician Diff Process"
+    # Then we check out the branch provided, and merge it into
+    # the base branch provided.  This matches the behavior
+    # we're used to from Concourse.
     - name: 'gcr.io/cloud-builders/git'
       args:
           - checkout
