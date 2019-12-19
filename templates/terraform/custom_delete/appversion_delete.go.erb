@@ -24,7 +24,7 @@ if d.Get("delete_service_on_destroy") == true {
 	}
 	var obj map[string]interface{}
 	log.Printf("[DEBUG] Deleting Service %q", d.Id())
-	res, err := sendRequestWithTimeout(config, "DELETE", project, url, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := sendRequestWithTimeout(config, "DELETE", project, url, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 	if err != nil {
 		return handleNotFoundError(err, d, "Service")
 	}
@@ -44,7 +44,7 @@ if d.Get("delete_service_on_destroy") == true {
 	}
 	var obj map[string]interface{}
 	log.Printf("[DEBUG] Deleting StandardAppVersion %q", d.Id())
-	res, err := sendRequestWithTimeout(config, "DELETE", project, url, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := sendRequestWithTimeout(config, "DELETE", project, url, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 	if err != nil {
 		return handleNotFoundError(err, d, "StandardAppVersion")
 	}
