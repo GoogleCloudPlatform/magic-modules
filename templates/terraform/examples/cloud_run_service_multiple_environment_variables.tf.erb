@@ -6,14 +6,14 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
     spec {
       containers {
         image = "gcr.io/cloudrun/hello"
-      }
-      env { 
-        name = "SOURCE"
-        value = "remote"
-      }
-      env { 
-        name = "TARGET"
-        value = "home"
+        env {
+          name = "SOURCE"
+          value = "remote"
+        }
+        env {
+          name = "TARGET"
+          value = "home"
+        }
       }
     }
   }
