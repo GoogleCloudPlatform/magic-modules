@@ -96,20 +96,7 @@ link_query_items = object&.nested_query&.keys&.first || object.collection_url_ke
 
   private
 
-<% ga_api_url = object.product_url || ga_version.base_url -%>
-<% beta_api_url = object.product_url || object.__product.base_url -%>
-<% unless ga_api_url == beta_api_url -%>
-  def product_url(beta = false)
-    if beta
-      '<%= object.product_url || object.__product.base_url %>'
-    else
-      '<%= object.product_url || ga_version.base_url %>'
-    end
-<% else -%>
-  def product_url(_)
-    '<%= ga_api_url %>'
-<% end -%>
-  end
+<%= compile('templates/inspec/product_url.erb') -%>
 
   def resource_base_url
     '<%= object.base_url %>'

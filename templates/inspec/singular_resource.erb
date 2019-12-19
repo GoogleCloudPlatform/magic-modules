@@ -102,20 +102,7 @@ best_guess_identifier = extract_identifiers(individual_url).last
 
   private
 
-<% ga_api_url = object.product_url || ga_version.base_url -%>
-<% beta_api_url = object.product_url || object.__product.base_url -%>
-<% unless ga_api_url == beta_api_url -%>
-  def product_url(beta = false)
-    if beta
-      '<%= object.product_url || object.__product.base_url %>'
-    else
-      '<%= object.product_url || ga_version.base_url %>'
-    end
-<% else -%>
-  def product_url(_)
-    '<%= ga_api_url %>'
-<% end -%>
-  end
+<%= compile('templates/inspec/product_url.erb') -%>
 
 <% url = object.self_link || object.base_url + '/{{name}}' -%>
 <% url_params = extract_identifiers(individual_url) -%>
