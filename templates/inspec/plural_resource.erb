@@ -96,8 +96,18 @@ link_query_items = object&.nested_query&.keys&.first || object.collection_url_ke
 
   private
 
-  def product_url
-    '<%= object.product_url || object.__product.base_url %>'
+<% ga_api_url = object.product_url || ga_version.base_url -%>
+<% beta_api_url = object.product_url || object.__product.base_url -%>
+  def product_url(beta = false)
+<% unless ga_api_url == beta_api_url -%>
+    if beta
+      '<%= object.product_url || object.__product.base_url %>'
+    else
+      '<%= object.product_url || ga_version.base_url %>'
+    end
+<% else -%>
+    '<%= ga_api_url %>'
+<% end -%>
   end
 
   def resource_base_url
