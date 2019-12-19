@@ -187,8 +187,10 @@ The following arguments are supported:
     instances *and* for second-generation instances if the provider region is not supported with Cloud SQL.
     If you choose not to provide the `region` argument for this resource, make sure you understand this.
 
-* `settings` - (Required) The settings to use for the database. The
-    configuration is detailed below.
+* `settings` - (Required for [GA](https://www.terraform.io/docs/providers/google/guides/provider_versions.html#google), Optional for 
+    [Beta](https://www.terraform.io/docs/providers/google/guides/provider_versions.html#google-beta) ) The settings to use for the database.
+    Conflicts with `on_premises_configuration` block in Beta provider version.
+    The configuration is detailed below. 
 
 - - -
 
@@ -207,15 +209,21 @@ instances support `MYSQL_5_5` or `MYSQL_5_6`.
 
 * `master_instance_name` - (Optional) The name of the instance that will act as
     the master in the replication setup. Note, this requires the master to have
-    `binary_log_enabled` set, as well as existing backups.
+    `binary_log_enabled` set, as well as existing backups. Conflicts with
+    `on_premises_configuration` block in [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html).
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
-* `replica_configuration` - (Optional) The configuration for replication. The
-    configuration is detailed below.
+* `replica_configuration` - (Optional) The configuration for replication. Conflicts with
+    `on_premises_configuration` block in [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html).
+    The configuration is detailed below.
     
 * `root_password` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Initial root password. Required for MS SQL Server, ignored by MySQL and PostgreSQL.
+
+* `on_premises_configuration` - (Optional, [Beta](https://www.terraform.io/docs/providers/google/guides/provider_versions.html#google-beta)) The configuration for the external master raplication.
+    Cannot be set if the `settings`, `replica_configuration` or `master_instance_name` block's are set.
+    The configuration is detailed below.
 
 The required `settings` block supports:
 
@@ -348,6 +356,11 @@ to work, cannot be updated, and supports:
 
 * `verify_server_certificate` - (Optional) True if the master's common name
     value is checked during the SSL handshake.
+
+The optional `on_premises_configuration` block supports:
+
+* `host_port` - (Optional) Public IP address and port, separated by `:`,
+    used to connect to and replicate from the [external `MySQL` data source](https://cloud.google.com/sql/docs/mysql/replicatiohttps://cloud.google.com/sql/docs/mysql/replication/replication-from-external#setupn/replication-from-external#setup).
 
 ## Attributes Reference
 

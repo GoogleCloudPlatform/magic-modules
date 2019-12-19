@@ -78,6 +78,14 @@ var (
 		"replica_configuration.0.username",
 		"replica_configuration.0.verify_server_certificate",
 	}
+<% unless version == 'ga' -%>
+	externalReplicaConflictKeys = []string{
+		"settings",
+		"replica_configuration",
+		"root_password",
+		"master_instance_name",
+	}
+<% end -%>
 )
 
 func resourceSqlDatabaseInstance() *schema.Resource {
@@ -109,7 +117,11 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 
 			"settings": {
 				Type:     schema.TypeList,
+				<% if version == 'ga' -%>
 				Required: true,
+				<% else %>
+				Optional: true,
+				<% end -%>
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -333,12 +345,29 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 				ForceNew:  true,
 				Sensitive: true,
 			},
+			"on_premises_configuration": {
+                                Type:           schema.TypeList,
+                                Optional:       true,
+                                ConflictsWith:  externalReplicaConflictKeys,
+                                MaxItems:       1,
+                                Elem: &schema.Resource{
+                                        Schema: map[string]*schema.Schema{
+                                                "host_port": {
+                                                        Optional: true,
+                                                        Type:     schema.TypeString,
+                                                },
+                                        },
+                                },
+                        },
 			<% end -%>
 
 			"ip_address": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem: &schema.Resource{
+				<% unless version == 'ga' -%>
+				Optional: true,
+				<% end -%>
+				Elem:     &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip_address": {
 							Type:     schema.TypeString,
@@ -561,12 +590,18 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	d.Set("name", name)
 
 	instance := &sqladmin.DatabaseInstance{
+		<% if version == 'ga' -%>
 		Name:                 name,
 		Region:               region,
 		Settings:             expandSqlDatabaseInstanceSettings(d.Get("settings").([]interface{}), !isFirstGen(d)),
 		DatabaseVersion:      d.Get("database_version").(string),
 		MasterInstanceName:   d.Get("master_instance_name").(string),
 		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
+		<% else %>
+		Name:            name,
+		Region:          region,
+		DatabaseVersion: d.Get("database_version").(string),
+		<% end -%>
 	}
 
 	<% unless version == 'ga' -%>
@@ -574,12 +609,26 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	if strings.Contains(instance.DatabaseVersion, "SQLSERVER") {
 		instance.RootPassword = d.Get("root_password").(string)
 	}
+
+	if sqlDatabaseIsOnPremises(d) {
+		instance.OnPremisesConfiguration = expandOnPremisesConfiguration(d.Get("on_premises_configuration").([]interface{}))
+	} else {
+	<% end -%>
+		instance.Settings = expandSqlDatabaseInstanceSettings(d.Get("settings").([]interface{}), !isFirstGen(d))
+		instance.ReplicaConfiguration = expandReplicaConfiguration(d.Get("replica_configuration").([]interface{}))
+		instance.MasterInstanceName = d.Get("master_instance_name").(string)
+	<% unless version == 'ga' -%>
+	}
 	<% end -%>
 
 	// Modifying a replica during Create can cause problems if the master is
 	// modified at the same time. Lock the master until we're done in order
 	// to prevent that.
+	<% if version == 'ga' -%>
 	if !sqlDatabaseIsMaster(d) {
+	<% else %>
+	if !sqlDatabaseIsMaster(d) && !sqlDatabaseIsOnPremises(d) {
+	<% end -%>
 		mutexKV.Lock(instanceMutexKey(project, instance.MasterInstanceName))
 		defer mutexKV.Unlock(instanceMutexKey(project, instance.MasterInstanceName))
 	}
@@ -612,7 +661,11 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	// If a default root user was created with a wildcard ('%') hostname, delete it.
 	// Users in a replica instance are inherited from the master instance and should be left alone.
-	if sqlDatabaseIsMaster(d) {
+	<% if version == 'ga' -%>
+        if sqlDatabaseIsMaster(d) {
+        <% else %>
+        if sqlDatabaseIsMaster(d) && !sqlDatabaseIsOnPremises(d) {
+        <% end -%>
 		var users *sqladmin.UsersListResponse
 		err = retryTimeDuration(func() error {
 			users, err = config.clientSqlAdmin.Users.List(project, instance.Name).Do()
@@ -792,6 +845,27 @@ func expandBackupConfiguration(configured []interface{}) *sqladmin.BackupConfigu
 	}
 }
 
+<% unless version == 'ga' -%>
+func expandOnPremisesConfiguration(configured []interface{}) *sqladmin.OnPremisesConfiguration {
+        if len(configured) == 0 || configured[0] == nil {
+                return nil
+        }
+
+        _onPremisesConfiguration := configured[0].(map[string]interface{})
+        return &sqladmin.OnPremisesConfiguration{
+                HostPort: _onPremisesConfiguration["host_port"].(string),
+        }
+}
+
+func flattenOnPremisesConfiguration(onPremisesConfiguration *sqladmin.OnPremisesConfiguration) interface{} {
+        data := map[string]interface{}{
+                "host_port": onPremisesConfiguration.HostPort,
+        }
+
+        return []map[string]interface{}{data}
+}
+<% end -%>
+
 func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
@@ -812,45 +886,56 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	d.Set("name", instance.Name)
 	d.Set("region", instance.Region)
 	d.Set("database_version", instance.DatabaseVersion)
-	d.Set("connection_name", instance.ConnectionName)
-	d.Set("service_account_email_address", instance.ServiceAccountEmailAddress)
+	<% unless version == 'ga' -%>
+	// Set external master config if there is any.
+	if instance.OnPremisesConfiguration != nil {
+		if err := d.Set("on_premises_configuration", flattenOnPremisesConfiguration(instance.OnPremisesConfiguration)); err != nil {
+			log.Printf("[WARN] Failed to set On-Premises Configuration")
+		}
+	} else {
+	<% end -%>
+		d.Set("connection_name", instance.ConnectionName)
+		d.Set("service_account_email_address", instance.ServiceAccountEmailAddress)
 
-	if err := d.Set("settings", flattenSettings(instance.Settings)); err != nil {
-		log.Printf("[WARN] Failed to set SQL Database Instance Settings")
-	}
-
-	if err := d.Set("replica_configuration", flattenReplicaConfiguration(instance.ReplicaConfiguration, d)); err != nil {
-		log.Printf("[WARN] Failed to set SQL Database Instance Replica Configuration")
-	}
-	ipAddresses := flattenIpAddresses(instance.IpAddresses)
-	if err := d.Set("ip_address", ipAddresses); err != nil {
-		log.Printf("[WARN] Failed to set SQL Database Instance IP Addresses")
-	}
-
-	if len(ipAddresses) > 0 {
-		d.Set("first_ip_address", ipAddresses[0]["ip_address"])
-	}
-
-	publicIpAddress := ""
-	privateIpAddress := ""
-	for _, ip := range instance.IpAddresses {
-		if publicIpAddress == "" && ip.Type == "PRIMARY" {
-			publicIpAddress = ip.IpAddress
+		if err := d.Set("settings", flattenSettings(instance.Settings)); err != nil {
+			log.Printf("[WARN] Failed to set SQL Database Instance Settings")
 		}
 
-		if privateIpAddress == "" && ip.Type == "PRIVATE" {
-			privateIpAddress = ip.IpAddress
+		if err := d.Set("replica_configuration", flattenReplicaConfiguration(instance.ReplicaConfiguration, d)); err != nil {
+			log.Printf("[WARN] Failed to set SQL Database Instance Replica Configuration")
 		}
-	}
+		ipAddresses := flattenIpAddresses(instance.IpAddresses)
+		if err := d.Set("ip_address", ipAddresses); err != nil {
+			log.Printf("[WARN] Failed to set SQL Database Instance IP Addresses")
+		}
 
-	d.Set("public_ip_address", publicIpAddress)
-	d.Set("private_ip_address", privateIpAddress)
+		if len(ipAddresses) > 0 {
+			d.Set("first_ip_address", ipAddresses[0]["ip_address"])
+		}
+
+		publicIpAddress := ""
+		privateIpAddress := ""
+		for _, ip := range instance.IpAddresses {
+			if publicIpAddress == "" && ip.Type == "PRIMARY" {
+				publicIpAddress = ip.IpAddress
+			}
+
+			if privateIpAddress == "" && ip.Type == "PRIVATE" {
+				privateIpAddress = ip.IpAddress
+			}
+		}
+
+		d.Set("public_ip_address", publicIpAddress)
+		d.Set("private_ip_address", privateIpAddress)
+		d.Set("master_instance_name", strings.TrimPrefix(instance.MasterInstanceName, project+":"))
+	<% unless version == 'ga' -%>
+	}
+	<% end -%>
 
 	if err := d.Set("server_ca_cert", flattenServerCaCert(instance.ServerCaCert)); err != nil {
 		log.Printf("[WARN] Failed to set SQL Database CA Certificate")
 	}
 
-	d.Set("master_instance_name", strings.TrimPrefix(instance.MasterInstanceName, project+":"))
 	d.Set("project", project)
 	d.Set("self_link", instance.SelfLink)
 	d.SetId(instance.Name)
@@ -866,10 +951,18 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	// Update only updates the settings, so they are all we need to set.
-	instance := &sqladmin.DatabaseInstance{
-		Settings: expandSqlDatabaseInstanceSettings(d.Get("settings").([]interface{}), !isFirstGen(d)),
+	instance := &sqladmin.DatabaseInstance{}
+	<% unless version == 'ga' -%>
+	if sqlDatabaseIsOnPremises(d) {
+		instance.OnPremisesConfiguration = &sqladmin.OnPremisesConfiguration{
+			HostPort: d.Get("source_host_port").(string),
+		}
+	} else {
+	<% end -%>
+		instance.Settings = expandSqlDatabaseInstanceSettings(d.Get("settings").([]interface{}), !isFirstGen(d))
+	<% unless version == 'ga' -%>
 	}
+	<% end -%>
 
 	// Lock on the master_instance_name just in case updating any replica
 	// settings causes operations on the master.
@@ -1139,3 +1232,12 @@ func sqlDatabaseIsMaster(d *schema.ResourceData) bool {
 	_, ok := d.GetOk("master_instance_name")
 	return !ok
 }
+<% unless version == 'ga' -%>
+// sqlDatabaseIsOnPremises returns true if the provided schema.ResourceData represents a
+// external master MySQL Instance.
+func sqlDatabaseIsOnPremises(d *schema.ResourceData) bool {
+	_, ok := d.GetOk("on_premises_configuration")
+	matched, _ := regexp.MatchString(`MYSQL_5_(6|7)`, d.Get("database_version").(string))
+	return matched && ok
+	}
+<% end %>

@@ -252,6 +252,29 @@ func TestAccSqlDatabaseInstance_basicMSSQL(t *testing.T) {
 		},
 	})
 }
+
+func TestAccSqlDatabaseInstance_externalMaster(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-external-master-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlDatabaseInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_external_master, databaseName),
+			},
+			{
+				ResourceName:      "google_sql_database_instance.instance",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
 <% end -%>
 
 func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
@@ -725,6 +748,16 @@ resource "google_sql_database_instance" "instance" {
   root_password    = "%s"
   settings {
     tier = "db-custom-1-3840"
+  }
+}
+`
+
+var testGoogleSqlDatabaseInstance_external_master = `
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  database_version = "MYSQL_5_7"
+  on_premises_configuration {
+    host_port = "127.0.0.1:3306"
   }
 }
 `
