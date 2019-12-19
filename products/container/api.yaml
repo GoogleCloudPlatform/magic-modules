@@ -368,16 +368,14 @@ objects:
           The IP address range of the container pods in this cluster, in CIDR
           notation (e.g. 10.96.0.0/14). Leave blank to have one automatically
           chosen or specify a /14 block in 10.0.0.0/8.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Boolean
         name: 'enableTpu'
-        min_version: beta
         description: |
           (Optional) Whether to enable Cloud TPU resources in this cluster.
           See the official documentation - https://cloud.google.com/tpu/docs/kubernetes-engine-setup
       - !ruby/object:Api::Type::String
         name: 'tpuIpv4CidrBlock'
         output: true
-        min_version: beta
         description: |
           The IP address range of the Cloud TPUs in this cluster, in
           [CIDR](http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing)
@@ -636,12 +634,6 @@ objects:
           The time the cluster will be automatically deleted in RFC3339 text
           format.
         output: true
-      - !ruby/object:Api::Type::Boolean
-        name: 'enableTpu'
-        description: Enable the ability to use Cloud TPUs in this cluster.
-      - !ruby/object:Api::Type::String
-        name: 'tpuIpv4CidrBlock'
-        description: The IP address range of the Cloud TPUs in this cluster, in CIDR notation
       - !ruby/object:Api::Type::Array
         name: 'conditions'
         description: Which conditions caused the current cluster state.
