@@ -1,0 +1,85 @@
+---
+steps:
+    # The GCB / GH integration doesn't satisfy our use case perfectly.
+    # It doesn't check out the repo itself - it only gives us the actual code.
+    # So we need to handle that access ourselves - which means deleting the code
+    # and cloning the repo to the present directory.  We need to use
+    # 'sh' to evaluate the '*' arguments, which otherwise would be
+    # passed literally to 'rm'.
+    - name: 'alpine'
+      args:
+          - sh
+          - -c
+          - rm -rf ./* ./.* || true
+    - name: 'gcr.io/cloud-builders/git'
+      id: clone
+      args:
+          - clone
+          - https://github.com/GoogleCloudPlatform/magic-modules
+          - .
+
+    - name: 'gcr.io/cloud-builders/git'
+      id: checkout
+      args:
+          - checkout
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/graphite-docker-images/downstream-waiter'
+      id: tpg-sync
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["checkout"]
+      args:
+          - 'tpg-sync'
+          - $BRANCH_NAME
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      id: tpg-push
+      waitFor: ["tpg-sync"]
+      args:
+          - 'downstream'
+          - 'terraform'
+          - 'ga'
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/cloud-builders/git'
+      waitFor: ["tpg-push"]
+      secretEnv: ["GITHUB_TOKEN"]
+      entrypoint: 'bash'
+      args:
+          - -c
+          - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpg-sync
+
+    - name: 'gcr.io/graphite-docker-images/downstream-waiter'
+      id: tpgb-sync
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["checkout"]
+      args:
+          - 'tpgb-sync'
+          - $BRANCH_NAME
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      id: tpgb-push
+      waitFor: ["tpgb-sync"]
+      args:
+          - 'downstream'
+          - 'terraform'
+          - 'beta'
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/cloud-builders/git'
+      waitFor: ["tpgb-push"]
+      secretEnv: ["GITHUB_TOKEN"]
+      entrypoint: 'bash'
+      args:
+          - -c
+          - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpgb-sync
+
+
+secrets:
+    - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/github-token
+      secretEnv:
+          GITHUB_TOKEN: CiQADkR4NnCVXo1OLSWFuPX7eSiifaOfQVzSYmKi2jZdVbKlfYMSUQBfF82vNAgpvSVyhzM8JsQaP6Oky0SAdoR5fPED5cU3qxsCB9wArmdGcgQoRzP7S6jEWHRcvxv/xauznjkJQMWCORzcbUbk6T7k80bdo2mpqw==
