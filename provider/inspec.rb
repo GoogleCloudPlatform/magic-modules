@@ -294,11 +294,9 @@ module Provider
     # Recursively calls itself on any arrays or nested objects within this property, indenting
     # further for each call
     def markdown_format(property, indent = 1)
-      beta_description = ''
-      if property.min_version.name == 'beta'
-        beta_description = '(Beta only) '
-      end
-      prop_description = "`#{property.out_name}`: #{beta_description}#{property.description.split("\n").join(' ')}"
+      beta_description = property.min_version.name == 'beta' ? '(Beta only) ' : ''
+      desc = "#{beta_description}#{property.description.split("\n").join(' ')}"
+      prop_description = "`#{property.out_name}`: #{desc}"
       description = "#{'  ' * indent}* #{prop_description}"
       if nested_object?(property)
         description_arr = [description]
