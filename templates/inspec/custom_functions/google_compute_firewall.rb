@@ -178,5 +178,5 @@ end
 
 def log_config_enabled?
   return false if !defined?(log_config) || !defined?(log_config.enable)
-  return log_config.enable
+  log_config.enable
 end

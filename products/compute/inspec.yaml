@@ -50,7 +50,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   InstanceGroup: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    additional_functions: |
+<%= lines(indent(compile('templates/inspec/custom_functions/google_compute_instance_group.rb'), 6)) -%>
+    properties:
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "instance_group_id"
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "instance_group_name"
   InterconnectAttachment: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   License: !ruby/object:Overrides::Inspec::ResourceOverride

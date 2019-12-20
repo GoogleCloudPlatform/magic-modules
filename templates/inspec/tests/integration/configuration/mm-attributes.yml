@@ -367,3 +367,9 @@ address:
   name: inspec-gcp-global-address
   address_type: INTERNAL
   address: "10.0.42.42"
+
+instance_group:
+  name: inspec-instance-group
+  description: My instance group for testing
+  named_port_name: https
+  named_port_port: 8080

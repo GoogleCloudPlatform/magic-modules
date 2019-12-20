@@ -980,3 +980,19 @@ resource "google_compute_address" "internal_with_subnet_and_address" {
   address      = var.address["address"]
   region       = var.gcp_location
 }
+
+variable "instance_group" {
+  type = any
+}
+
+resource "google_compute_instance_group" "inspec-instance-group" {
+  project     = var.gcp_project_id
+  zone        = var.gcp_zone
+  name        = var.instance_group["name"]
+  description = var.instance_group["description"]
+
+  named_port {
+    name = var.instance_group["named_port_name"]
+    port = var.instance_group["named_port_port"]
+  }
+}

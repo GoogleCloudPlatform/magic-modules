@@ -1,0 +1,14 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_zone = "#{external_attribute('gcp_zone', doc_generation)}" %>
+<% instance_group = grab_attributes['instance_group'] -%>
+describe google_compute_instance_group(project: <%= gcp_project_id -%>, zone: <%= gcp_zone -%>, name: <%= doc_generation ? "'#{instance_group['name']}'" : "instance_group['name']" -%>) do
+  it { should exist }
+  its('description') { should cmp <%= doc_generation ? "'#{instance_group['description']}'" : "instance_group['description']" -%> }
+  its('named_ports.count') { should cmp 1 }
+  its('named_ports.first.name') { should cmp <%= doc_generation ? "'#{instance_group['named_port_name']}'" : "instance_group['named_port_name']" -%> }
+  its('named_ports.first.port') { should cmp <%= doc_generation ? "'#{instance_group['named_port_port']}'" : "instance_group['named_port_port']" -%> }
+end
+
+describe google_compute_instance_group(project: <%= gcp_project_id -%>, zone: <%= gcp_zone -%>, name: 'nonexistent') do
+  it { should_not exist }
+end
