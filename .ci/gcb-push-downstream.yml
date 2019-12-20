@@ -24,6 +24,7 @@ steps:
           - checkout
           - $COMMIT_SHA
 
+    # TPG
     - name: 'gcr.io/graphite-docker-images/downstream-waiter'
       id: tpg-sync
       secretEnv: ["GITHUB_TOKEN"]
@@ -51,6 +52,7 @@ steps:
           - -c
           - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpg-sync
 
+    # TPGB
     - name: 'gcr.io/graphite-docker-images/downstream-waiter'
       id: tpgb-sync
       secretEnv: ["GITHUB_TOKEN"]
@@ -78,6 +80,89 @@ steps:
           - -c
           - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpgb-sync
 
+    # TF-CONV
+    - name: 'gcr.io/graphite-docker-images/downstream-waiter'
+      id: tf-conv-sync
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["checkout"]
+      args:
+          - 'tf-conv-sync'
+          - $BRANCH_NAME
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      id: tf-conv-push
+      waitFor: ["tf-conv-sync"]
+      args:
+          - 'downstream'
+          - 'tf-conversion'
+          - 'ga'
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/cloud-builders/git'
+      waitFor: ["tf-conv-push"]
+      secretEnv: ["GITHUB_TOKEN"]
+      entrypoint: 'bash'
+      args:
+          - -c
+          - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-conv-sync
+
+    # Ansible
+    - name: 'gcr.io/graphite-docker-images/downstream-waiter'
+      id: ansible-sync
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["checkout"]
+      args:
+          - 'ansible-sync'
+          - $BRANCH_NAME
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      id: ansible-push
+      waitFor: ["ansible-sync"]
+      args:
+          - 'downstream'
+          - 'ansible'
+          - 'ga'
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/cloud-builders/git'
+      waitFor: ["ansible-push"]
+      secretEnv: ["GITHUB_TOKEN"]
+      entrypoint: 'bash'
+      args:
+          - -c
+          - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:ansible-sync
+
+    # Inspec
+    - name: 'gcr.io/graphite-docker-images/downstream-waiter'
+      id: inspec-sync
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["checkout"]
+      args:
+          - 'inspec-sync'
+          - $BRANCH_NAME
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      id: inspec-push
+      waitFor: ["inspec-sync"]
+      args:
+          - 'downstream'
+          - 'inspec'
+          - 'ga'
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/cloud-builders/git'
+      waitFor: ["inspec-push"]
+      secretEnv: ["GITHUB_TOKEN"]
+      entrypoint: 'bash'
+      args:
+          - -c
+          - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:inspec-sync
 
 secrets:
     - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/github-token
