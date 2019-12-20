@@ -2,5 +2,5 @@
 <% gcp_zone = "#{external_attribute('gcp_zone', doc_generation)}" %>
 <% instance_group = grab_attributes['instance_group'] -%>
 describe google_compute_instance_groups(project: <%= gcp_project_id -%>, zone: <%= gcp_zone -%>) do
-  its('names') { should include <%= doc_generation ? "'#{instance_group['name']}'" : "instance_group['name']" -%> }
+  its('instance_group_names') { should include <%= doc_generation ? "'#{instance_group['name']}'" : "instance_group['name']" -%> }
 end

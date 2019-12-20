@@ -64,6 +64,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           If it is not provided, the provider region is used.
       subnetwork: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      status: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
           * `address` - The IP of the created resource.

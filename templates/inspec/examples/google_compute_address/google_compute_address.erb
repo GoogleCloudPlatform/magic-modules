@@ -1,13 +1,13 @@
 <% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
 <% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
 <% address = grab_attributes['address'] -%>
-describe google_compute_address(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: <%= doc_generation ? "'#{address['name']}'" : "address['name']" -%>) do
+describe google_compute_address(project: <%= gcp_project_id -%>, location: <%= gcp_location -%>, name: <%= doc_generation ? "'#{address['name']}'" : "address['name']" -%>) do
   it { should exist }
   its('address') { should eq <%= doc_generation ? "'#{address['address']}'" : "address['address']" -%> }
   its('address_type') { should eq <%= doc_generation ? "'#{address['address_type']}'" : "address['address_type']" -%> }
   its('user_count') { should eq 0 }
 end
 
-describe google_compute_address(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: 'nonexistent') do
+describe google_compute_address(project: <%= gcp_project_id -%>, location: <%= gcp_location -%>, name: 'nonexistent') do
   it { should_not exist }
 end

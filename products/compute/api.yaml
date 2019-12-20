@@ -171,6 +171,18 @@ objects:
         update_url: 'projects/{{project}}/regions/{{region}}/addresses/{{name}}/setLabels'
         update_verb: :POST
         min_version: beta
+      - !ruby/object:Api::Type::Enum
+        name: 'status'
+        output: true
+        description: |
+          The status of the address, which can be one of RESERVING, RESERVED, or IN_USE.
+          An address that is RESERVING is currently in the process of being reserved.
+          A RESERVED address is currently reserved and available to use. An IN_USE address
+          is currently being used by another resource and is not available.
+        values:
+          - :RESERVING
+          - :RESERVED
+          - :IN_USE
   - !ruby/object:Api::Resource
     name: 'Autoscaler'
     kind: 'compute#autoscaler'

@@ -4,6 +4,7 @@ end
 
 # How many users are there for the address
 def user_count
+	return 0 if @users.nil?
   @users.count
 end
 

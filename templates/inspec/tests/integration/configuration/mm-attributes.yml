@@ -366,7 +366,7 @@ firewall:
 address:
   name: inspec-gcp-global-address
   address_type: INTERNAL
-  address: "10.0.42.42"
+  address: "10.2.0.3"
 
 instance_group:
   name: inspec-instance-group

@@ -14,6 +14,7 @@
 --- !ruby/object:Provider::Inspec::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Address: !ruby/object:Overrides::Inspec::ResourceOverride
+    base_url: projects/{{project}}/regions/{{location}}/addresses
     additional_functions: |
 <%= lines(indent(compile('templates/inspec/custom_functions/google_compute_address.rb'), 6)) -%>
     singular_extra_examples: 'templates/inspec/documentation/address_examples.md'
