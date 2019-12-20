@@ -25,7 +25,7 @@ func testSweepAccessContextManagerPolicies(region string) error {
 		log.Fatalf("error getting shared config for region %q: %s", region, err)
 	}
 
-	err := config.LoadAndValidate(context.Background())
+	err = config.LoadAndValidate(context.Background())
 	if err != nil {
 		log.Fatalf("error loading and validating shared config for region %q: %s", region, err)
 	}
