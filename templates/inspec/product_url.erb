@@ -6,7 +6,7 @@
       '<%= ga_api_url(object) %>'
     end
 <% else -%>
-  def product_url(_)
+  def product_url(_ = nil)
     '<%= ga_api_url(object) %>'
 <% end -%>
   end
