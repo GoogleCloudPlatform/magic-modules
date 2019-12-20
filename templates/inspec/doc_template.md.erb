@@ -22,6 +22,12 @@ platform: gcp
 ## Syntax
 A `<%= resource_underscored_name -%>` is used to test a Google <%= object.name -%> resource
 
+<% if has_beta(object) -%>
+
+## Beta Resource
+This resource has beta fields available. To retrieve these fields, include `beta: true` in the constructor for the resource
+
+<% end -%>
 ## Examples
 ```
 <%= compile("templates/inspec/examples/#{resource_name(object, product)}/#{resource_underscored_name}.erb") -%>

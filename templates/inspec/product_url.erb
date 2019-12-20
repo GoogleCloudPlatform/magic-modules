@@ -1,14 +1,12 @@
-<% ga_api_url = object.product_url || ga_version.base_url -%>
-<% beta_api_url = object.product_url || object.__product.base_url -%>
-<% unless ga_api_url == beta_api_url -%>
+<% if has_beta(object) -%>
   def product_url(beta = false)
     if beta
-      '<%= object.product_url || object.__product.base_url %>'
+      '<%= beta_api_url(object) %>'
     else
-      '<%= object.product_url || ga_version.base_url %>'
+      '<%= ga_api_url(object) %>'
     end
 <% else -%>
   def product_url(_)
-    '<%= ga_api_url %>'
+    '<%= ga_api_url(object) %>'
 <% end -%>
   end
