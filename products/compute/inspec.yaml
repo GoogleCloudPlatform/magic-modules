@@ -14,7 +14,9 @@
 --- !ruby/object:Provider::Inspec::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Address: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    additional_functions: |
+<%= lines(indent(compile('templates/inspec/custom_functions/google_compute_address.rb'), 6)) -%>
+    singular_extra_examples: 'templates/inspec/documentation/address_examples.md'
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Inspec::ResourceOverride

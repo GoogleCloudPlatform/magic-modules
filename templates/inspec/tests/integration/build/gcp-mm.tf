@@ -967,3 +967,16 @@ resource "google_compute_firewall" "mm-firewall" {
 
   source_tags = [var.firewall["source_tag"]]
 }
+
+variable "address" {
+  type = any
+}
+
+resource "google_compute_address" "internal_with_subnet_and_address" {
+  project      = var.gcp_project_id
+  name         = var.address["name"]
+  subnetwork   = google_compute_subnetwork.inspec-gcp-subnetwork.self_link
+  address_type = var.address["address_type"]
+  address      = var.address["address"]
+  region       = var.gcp_location
+}

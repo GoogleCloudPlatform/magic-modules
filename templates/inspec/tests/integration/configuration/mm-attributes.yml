@@ -362,3 +362,8 @@ service_perimeter:
 firewall:
   name: inspec-gcp-firewall
   source_tag: some-tag
+
+address:
+  name: inspec-gcp-global-address
+  address_type: INTERNAL
+  address: "10.0.42.42"
