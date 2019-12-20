@@ -30,6 +30,12 @@ func testSweepAccessContextManagerPolicies(region string) error {
 		log.Fatalf("error loading and validating shared config for region %q: %s", region, err)
 	}
 
+	testOrg := getTestOrgFromEnv(nil)
+	if testOrg == "" {
+		log.Printf("test org not set for test environment, skip sweep")
+		return nil
+	}
+
 	log.Printf("[DEBUG] Listing Access Policies for org %q", testOrg)
 
 	parent := neturl.QueryEscape(fmt.Sprintf("organizations/%s", testOrg))
