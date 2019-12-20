@@ -75,6 +75,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cloud_run_service_name: "tftest-cloudrun"
         test_env_vars:
           project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_multiple_environment_variables"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tftest-cloudrun%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_service_name: "tftest-cloudrun"
+        test_env_vars:
+          project: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: 'templates/terraform/encoders/cloud_run_service.go.erb'
       decoder: 'templates/terraform/decoders/cloud_run.go.erb'
