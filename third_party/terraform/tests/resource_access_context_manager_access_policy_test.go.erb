@@ -24,14 +24,10 @@ func testSweepAccessContextManagerPolicies(region string) error {
 	if err != nil {
 		log.Fatalf("error getting shared config for region %q: %s", region, err)
 	}
-	if err := config.LoadAndValidate(context.Background()); err != nil {
-		log.Fatalf("error loading and validating shared config for region %q: %s", region, err)
-	}
 
-	testOrg := getTestOrgFromEnv(nil)
-	if testOrg == "" {
-		log.Printf("test org not set for test environment, skip sweep")
-		return nil
+	err := config.LoadAndValidate(context.Background())
+	if err != nil {
+		log.Fatalf("error loading and validating shared config for region %q: %s", region, err)
 	}
 
 	log.Printf("[DEBUG] Listing Access Policies for org %q", testOrg)
