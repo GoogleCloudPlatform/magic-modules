@@ -21,6 +21,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
                     "instances/{{instance}}/databases/{{name}}",
                     "{{instance}}/{{name}}",
                     "{{name}}"]
+    # This resource is a child resource
     skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples

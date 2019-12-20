@@ -19,6 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_minutes: 10
       delete_minutes: 10
     autogen_async: true
+    # This resource is a child resource
     skip_sweeper: true
     import_format: ["{{name}}"]
     description: |

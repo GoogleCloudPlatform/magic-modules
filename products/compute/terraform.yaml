@@ -70,6 +70,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
   Autoscaler: !ruby/object:Overrides::Terraform::ResourceOverride
+    # TODO: Remove when aggregatedList is handled in sweeper generation
     skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1006,6 +1007,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: templates/terraform/decoders/unwrap_resource.go.erb
       encoder: templates/terraform/encoders/compute_network_endpoint.go.erb
   NetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
+    # TODO: Remove when aggregatedList is handled in sweeper generation
     skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1025,6 +1027,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
   NodeGroup: !ruby/object:Overrides::Terraform::ResourceOverride
+    # TODO: Remove when aggregatedList is handled in sweeper generation
     skip_sweeper: true
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
@@ -1337,6 +1340,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       snapshotSchedulePolicy.snapshotProperties.storageLocations: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
   Reservation: !ruby/object:Overrides::Terraform::ResourceOverride
+    # TODO: Remove when aggregatedList is handled in sweeper generation
     skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1886,6 +1890,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
   TargetInstance: !ruby/object:Overrides::Terraform::ResourceOverride
+    # TODO: Remove when aggregatedList is handled in sweeper generation
     skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
