@@ -33,6 +33,7 @@ objects:
       api: 'https://cloud.google.com/run/docs/reference/rest/v1alpha1/projects.locations.domainmappings'
   description: |-
     Resource to hold the state and status of a user's domain mapping.
+  input: true
   parameters:
   - !ruby/object:Api::Type::String
     name: location
