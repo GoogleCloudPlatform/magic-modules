@@ -424,8 +424,8 @@ maintenance_policy {
 ```
 maintenance_policy {
   recurring_window {
-    start_time = "2019-01-01T09:00:00-0400"
-    end_time = "2019-01-01T17:00:00-0400"
+    start_time = "2019-01-01T09:00:00-04:00"
+    end_time = "2019-01-01T17:00:00-04:00"
     recurrence = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"
   }
 }
