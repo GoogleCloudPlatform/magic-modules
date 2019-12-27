@@ -135,10 +135,8 @@ objects:
         It is recommended that the user leaves this empty to receive an error
         warning about a potential conflict and only set it once the respective UI
         has given such a warning.
-    - !ruby/object:Api::Type::ResourceRef
+    - !ruby/object:Api::Type::String
       name: routeName
-      resource: Service
-      imports: name
       required: true
       description: |-
         The name of the Cloud Run Service that this DomainMapping applies to.
