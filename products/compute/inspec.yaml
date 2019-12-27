@@ -49,7 +49,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Image: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Instance: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    additional_functions: |
+<%= lines(indent(compile('templates/inspec/custom_functions/google_compute_instance.rb'), 6)) -%>
+    singular_extra_examples: 'templates/inspec/documentation/instance_examples.md'
+    properties:
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "instance_id"
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "instance_name"
   InstanceGroup: !ruby/object:Overrides::Inspec::ResourceOverride
     additional_functions: |
 <%= lines(indent(compile('templates/inspec/custom_functions/google_compute_instance_group.rb'), 6)) -%>
@@ -65,7 +72,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   MachineType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Network: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    additional_functions: |
+<%= lines(indent(compile('templates/inspec/custom_functions/google_compute_network.rb'), 6)) -%>
+    singular_extra_examples: 'templates/inspec/documentation/network_examples.md'
+    properties:
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "network_id"
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "network_name"
   NetworkEndpoint: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Inspec::ResourceOverride

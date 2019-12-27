@@ -373,3 +373,17 @@ instance_group:
   description: My instance group for testing
   named_port_name: https
   named_port_port: 8080
+
+instance:
+  name: inspec-instance
+  machine_type: n1-standard-1
+  tag_1: foo
+  tag_2: bar
+  metadata_key: '123'
+  metadata_value: asdf
+  sa_scope: compute-ro
+  startup_script: "echo hi > /test.txt"
+
+network:
+  name: inspec-network
+  routing_mode: REGIONAL

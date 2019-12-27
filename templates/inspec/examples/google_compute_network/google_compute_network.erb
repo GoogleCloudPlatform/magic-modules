@@ -1,0 +1,10 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% network = grab_attributes['network'] -%>
+describe google_compute_network(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{network['name']}'" : "network['name']" -%>) do
+  it { should exist }
+  its('routing_mode') { should cmp <%= doc_generation ? "'#{network['routing_mode']}'" : "network['routing_mode']" -%> }
+end
+
+describe google_compute_network(project: <%= gcp_project_id -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

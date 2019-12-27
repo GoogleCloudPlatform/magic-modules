@@ -480,7 +480,6 @@ resource "google_container_cluster" "gcp-inspec-regional-cluster" {
   name = var.regional_cluster["name"]
   location = var.gcp_location
   initial_node_count = 1
-  remove_default_node_pool = true
 
   maintenance_policy {
     daily_maintenance_window {
@@ -995,4 +994,51 @@ resource "google_compute_instance_group" "inspec-instance-group" {
     name = var.instance_group["named_port_name"]
     port = var.instance_group["named_port_port"]
   }
+}
+
+variable "instance" {
+  type = any
+}
+
+resource "google_compute_instance" "inspec-instance" {
+  project      = var.gcp_project_id
+  zone         = var.gcp_zone
+  name         = var.instance["name"]
+  machine_type = var.instance["machine_type"]
+
+  tags = [var.instance["tag_1"], var.instance["tag_2"]]
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-9"
+    }
+  }
+
+  network_interface {
+    network = "default"
+
+    access_config {
+      // Ephemeral IP
+    }
+  }
+
+  metadata = {
+    "${var.instance["metadata_key"]}" = var.instance["metadata_value"]
+  }
+
+  metadata_startup_script = var.instance["startup_script"]
+
+  service_account {
+    scopes = [var.instance["sa_scope"]]
+  }
+}
+
+variable "network" {
+  type = any
+}
+
+resource "google_compute_network" "inspec-network" {
+  project      = var.gcp_project_id
+  name         = var.network["name"]
+  routing_mode = var.network["routing_mode"]
 }

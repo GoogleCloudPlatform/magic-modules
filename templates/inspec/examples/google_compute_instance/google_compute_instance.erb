@@ -1,0 +1,16 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_zone = "#{external_attribute('gcp_zone', doc_generation)}" %>
+<% instance = grab_attributes['instance'] -%>
+describe google_compute_instance(project: <%= gcp_project_id -%>, zone: <%= gcp_zone -%>, name: <%= doc_generation ? "'#{instance['name']}'" : "instance['name']" -%>) do
+  it { should exist }
+  its('machine_type') { should cmp <%= doc_generation ? "'#{instance['machine_type']}'" : "instance['machine_type']" -%> }
+  its('metadata') { should include(<%= doc_generation ? "'#{instance['metadata_key']}'" : "instance['metadata_key']" -%> => <%= doc_generation ? "'#{instance['metadata_value']}'" : "instance['metadata_value']" -%>) }
+  its('tags') { should include <%= doc_generation ? "'#{instance['tag_1']}'" : "instance['tag_1']" -%> }
+  its('tags') { should include <%= doc_generation ? "'#{instance['tag_2']}'" : "instance['tag_2']" -%> }
+  its('tag_count') { should cmp 2 }
+  its('service_account_scopes') { should include <%= doc_generation ? "'#{instance['sa_scope']}'" : "instance['sa_scope']" -%> }
+end
+
+describe google_compute_instance(project: <%= gcp_project_id -%>, zone: <%= gcp_zone -%>, name: 'nonexistent') do
+  it { should_not exist }
+end
