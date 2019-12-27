@@ -115,7 +115,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RouterBgpPeer: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Subnetwork: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude_resource: true
+    additional_functions: |
+<%= lines(indent(compile('templates/inspec/custom_functions/google_compute_subnetwork.rb'), 6)) -%>
+    singular_extra_examples: 'templates/inspec/documentation/subnetwork_examples.md'
+    properties:
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "subnetwork_id"
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "subnetwork_name"
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
   TargetInstance:  !ruby/object:Overrides::Inspec::ResourceOverride

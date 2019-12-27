@@ -1042,3 +1042,21 @@ resource "google_compute_network" "inspec-network" {
   name         = var.network["name"]
   routing_mode = var.network["routing_mode"]
 }
+
+variable "subnetwork" {
+  type = any
+}
+
+resource "google_compute_subnetwork" "subnet-with-logging" {
+  project       = var.gcp_project_id
+  region        = var.gcp_location  
+  name          = var.subnetwork["name"]
+  ip_cidr_range = var.subnetwork["ip_cidr_range"]
+  network       = google_compute_network.inspec-network.self_link
+
+  log_config {
+    aggregation_interval = var.subnetwork["log_interval"]
+    flow_sampling        = var.subnetwork["log_sampling"]
+    metadata             = var.subnetwork["log_metadata"]
+  }
+}

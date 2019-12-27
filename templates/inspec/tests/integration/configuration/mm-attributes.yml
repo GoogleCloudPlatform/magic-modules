@@ -387,3 +387,10 @@ instance:
 network:
   name: inspec-network
   routing_mode: REGIONAL
+
+subnetwork:
+  name: inspec-subnet
+  ip_cidr_range: "10.2.0.0/16"
+  log_interval: INTERVAL_10_MIN
+  log_sampling: .5
+  log_metadata: INCLUDE_ALL_METADATA
