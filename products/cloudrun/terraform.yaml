@@ -46,6 +46,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: templates/terraform/custom_flatten/set_to_project.go.erb
       metadata.name: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      spec.routeName: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "locations/{{location}}/namespaces/{{project}}/services/{{name}}"
     import_format: ["locations/{{location}}/namespaces/{{project}}/services/{{name}}"]
