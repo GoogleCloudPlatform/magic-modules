@@ -342,6 +342,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         Because the API does not return the sensitive key value,
         we cannot confirm or reverse changes to a key outside of Terraform.
   DiskResourcePolicyAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "disk_resource_policy_attachment_basic"
+        primary_resource_id: "attachment"
+        vars:
+          disk_name: "my-disk"
+          policy_name: "my-resource-policy"
     id_format: "{{project}}/{{zone}}/{{disk}}/{{name}}"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/compute_disk_resource_policies_attachment.go.erb
