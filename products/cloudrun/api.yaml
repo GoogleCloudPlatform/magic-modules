@@ -33,6 +33,12 @@ objects:
       api: 'https://cloud.google.com/run/docs/reference/rest/v1alpha1/projects.locations.domainmappings'
   description: |-
     Resource to hold the state and status of a user's domain mapping.
+  async: !ruby/object:Api::PollAsync
+    actions: ['create', 'update']
+    operation: !ruby/object:Api::PollAsync::Operation
+      timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 6
+          update_minutes: 6
   input: true
   parameters:
   - !ruby/object:Api::Type::String
