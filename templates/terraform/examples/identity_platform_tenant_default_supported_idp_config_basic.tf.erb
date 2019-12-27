@@ -1,0 +1,10 @@
+resource "google_identity_platform_tenant" "tenant" {
+  display_name  = "tenant"
+}
+
+resource "google_identity_platform_tenant_default_supported_idp_config" "<%= ctx[:primary_resource_id] %>" {
+  enabled       = true
+  tenant        = google_identity_platform_tenant.tenant.name
+  client_id     = "playgames.google.com"
+  client_secret = "secret"
+}

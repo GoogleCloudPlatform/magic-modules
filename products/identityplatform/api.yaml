@@ -1,0 +1,423 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: IdentityPlatform
+display_name: Identity Platform
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://identitytoolkit.googleapis.com/v2/
+scopes:
+  - https://www.googleapis.com/auth/identitytoolkit
+  - https://www.googleapis.com/auth/firebase
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Google Identity Platform
+    url: https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity/
+objects:
+  - !ruby/object:Api::Resource
+    name: 'DefaultSupportedIdpConfig'
+    base_url: 'projects/{{project}}/defaultSupportedIdpConfigs'
+    self_link: 'projects/{{project}}/defaultSupportedIdpConfigs/{{client_id}}'
+    create_url: 'projects/{{project}}/defaultSupportedIdpConfigs?idpId={{client_id}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Configurations options for authenticating with a the standard set of Identity Toolkit-trusted IDPs.
+
+      You must enable the
+      ((Google Identity Platform)[https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity])
+      in the marketplace prior to using this resource.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: |
+          The name of the DefaultSupportedIdpConfig resource
+      - !ruby/object:Api::Type::String
+        name: 'clientId'
+        description: |
+          OAuth client ID
+        input: true
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'clientSecret'
+        description: |
+          OAuth client secret
+        required: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        description: |
+          If this IDP allows the user to sign in
+  - !ruby/object:Api::Resource
+    name: 'TenantDefaultSupportedIdpConfig'
+    base_url: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs'
+    self_link: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{client_id}}'
+    create_url: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs?idpId={{client_id}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Configurations options for the tenant for authenticating with a the standard set of Identity Toolkit-trusted IDPs.
+
+      You must enable the
+      ((Google Identity Platform)[https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity])
+      in the marketplace prior to using this resource.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: |
+          The name of the default supported IDP config resource
+      - !ruby/object:Api::Type::String
+        name: 'tenant'
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The name of the tenant where this DefaultSupportedIdpConfig resource exists
+      - !ruby/object:Api::Type::String
+        name: 'clientId'
+        input: true
+        required: true
+        description: |
+          OAuth client ID
+      - !ruby/object:Api::Type::String
+        name: 'clientSecret'
+        required: true
+        description: |
+          OAuth client secret
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        description: |
+          If this IDP allows the user to sign in
+  - !ruby/object:Api::Resource
+    name: 'InboundSamlConfig'
+    base_url: 'projects/{{project}}/inboundSamlConfigs'
+    self_link: 'projects/{{project}}/inboundSamlConfigs/{{name}}'
+    create_url: 'projects/{{project}}/inboundSamlConfigs?inboundSamlConfigId={{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Inbound SAML configuration for a Identity Toolkit project.
+
+      You must enable the
+      ((Google Identity Platform)[https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity])
+      in the marketplace prior to using this resource.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        input: true
+        description: |
+          The name of the InboundSamlConfig resource. Must start with 'saml.' and can only have alphanumeric characters,
+          hyphens, underscores or periods. The part after 'saml.' must also start with a lowercase letter, end with an
+          alphanumeric character, and have at least 2 characters.
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        required: true
+        description: |
+          Human friendly display name.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        description: |
+          If this config allows users to sign in with the provider.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'idpConfig'
+        required: true
+        description: |
+          SAML IdP configuration when the project acts as the relying party
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'idpEntityId'
+            required: true
+            description: |
+              Unique identifier for all SAML entities
+          - !ruby/object:Api::Type::String
+            name: 'ssoUrl'
+            required: true
+            description: |
+              URL to send Authentication request to.
+          - !ruby/object:Api::Type::Boolean
+            name: 'signRequest'
+            description: |
+              Indicates if outbounding SAMLRequest should be signed.
+          - !ruby/object:Api::Type::Array
+            name: 'idpCertificates'
+            required: true
+            description: |
+              The IdP's certificate data to verify the signature in the SAMLResponse issued by the IDP.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+              - !ruby/object:Api::Type::String
+                name: 'x509Certificate'
+                description: |
+                  The IdP's x509 certificate.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'spConfig'
+        required: true
+        description: |
+          SAML SP (Service Provider) configuration when the project acts as the relying party to receive
+          and accept an authentication assertion issued by a SAML identity provider.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'spEntityId'
+            description: |
+              Unique identifier for all SAML entities.
+          - !ruby/object:Api::Type::String
+            name: 'callbackUri'
+            description: |
+              Callback URI where responses from IDP are handled. Must start with `https://`.
+          - !ruby/object:Api::Type::Array
+            name: 'spCertificates'
+            output: true
+            description: |
+              The IDP's certificate data to verify the signature in the SAMLResponse issued by the IDP.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+              - !ruby/object:Api::Type::String
+                name: 'x509Certificate'
+                output: true
+                description: |
+                  The x509 certificate
+  - !ruby/object:Api::Resource
+    name: 'TenantInboundSamlConfig'
+    base_url: 'projects/{{project}}/tenants/{{tenant}}/inboundSamlConfigs'
+    self_link: 'projects/{{project}}/tenants/{{tenant}}/inboundSamlConfigs/{{name}}'
+    create_url: 'projects/{{project}}/tenants/{{tenant}}/inboundSamlConfigs?inboundSamlConfigId={{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Inbound SAML configuration for a Identity Toolkit tenant.
+
+      You must enable the
+      ((Google Identity Platform)[https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity])
+      in the marketplace prior to using this resource.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        input: true
+        description: |
+          The name of the InboundSamlConfig resource. Must start with 'saml.' and can only have alphanumeric characters,
+          hyphens, underscores or periods. The part after 'saml.' must also start with a lowercase letter, end with an
+          alphanumeric character, and have at least 2 characters.
+      - !ruby/object:Api::Type::String
+        name: 'tenant'
+        required: true
+        input: true
+        url_param_only: true
+        description: |
+          The name of the tenant where this inbound SAML config resource exists
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        required: true
+        description: |
+          Human friendly display name.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        description: |
+          If this config allows users to sign in with the provider.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'idpConfig'
+        required: true
+        description: |
+          SAML IdP configuration when the project acts as the relying party
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'idpEntityId'
+            required: true
+            description: |
+              Unique identifier for all SAML entities
+          - !ruby/object:Api::Type::String
+            name: 'ssoUrl'
+            required: true
+            description: |
+              URL to send Authentication request to.
+          - !ruby/object:Api::Type::Boolean
+            name: 'signRequest'
+            description: |
+              Indicates if outbounding SAMLRequest should be signed.
+          - !ruby/object:Api::Type::Array
+            name: 'idpCertificates'
+            required: true
+            description: |
+              The IDP's certificate data to verify the signature in the SAMLResponse issued by the IDP.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+              - !ruby/object:Api::Type::String
+                name: 'x509Certificate'
+                description: |
+                  The x509 certificate
+      - !ruby/object:Api::Type::NestedObject
+        name: 'spConfig'
+        required: true
+        description: |
+          SAML SP (Service Provider) configuration when the project acts as the relying party to receive
+          and accept an authentication assertion issued by a SAML identity provider.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'spEntityId'
+            required: true
+            description: |
+              Unique identifier for all SAML entities.
+          - !ruby/object:Api::Type::String
+            name: 'callbackUri'
+            required: true
+            description: |
+              Callback URI where responses from IDP are handled. Must start with `https://`.
+          - !ruby/object:Api::Type::Array
+            name: 'spCertificates'
+            output: true
+            description: |
+              The IDP's certificate data to verify the signature in the SAMLResponse issued by the IDP.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+              - !ruby/object:Api::Type::String
+                name: 'x509Certificate'
+                output: true
+                description: |
+                  The x509 certificate
+  - !ruby/object:Api::Resource
+    name: 'OauthIdpConfig'
+    base_url: 'projects/{{project}}/oauthIdpConfigs'
+    self_link: 'projects/{{project}}/oauthIdpConfigs/{{name}}'
+    create_url: 'projects/{{project}}/oauthIdpConfigs?oauthIdpConfigId={{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      OIDC IdP configuration for a Identity Toolkit project.
+
+      You must enable the
+      ((Google Identity Platform)[https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity])
+      in the marketplace prior to using this resource.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        input: true
+        description: |
+          The name of the OauthIdpConfig. Must start with `oidc.`.
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          Human friendly display name.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        description: |
+          If this config allows users to sign in with the provider.
+      - !ruby/object:Api::Type::String
+        name: 'issuer'
+        description: |
+          For OIDC Idps, the issuer identifier.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'clientId'
+        description: |
+          The client id of an OAuth client.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'clientSecret'
+        description: |
+          The client secret of the OAuth client, to enable OIDC code flow.
+  - !ruby/object:Api::Resource
+    name: 'TenantOauthIdpConfig'
+    base_url: 'projects/{{project}}/tenants/{{tenant}}/oauthIdpConfigs'
+    self_link: 'projects/{{project}}/tenants/{{tenant}}/oauthIdpConfigs/{{name}}'
+    create_url: 'projects/{{project}}/tenants/{{tenant}}/oauthIdpConfigs?oauthIdpConfigId={{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      OIDC IdP configuration for a Identity Toolkit project within a tenant.
+
+      You must enable the
+      ((Google Identity Platform)[https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity])
+      in the marketplace prior to using this resource.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        input: true
+        description: |
+          The name of the OauthIdpConfig. Must start with `oidc.`.
+      - !ruby/object:Api::Type::String
+        name: 'tenant'
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The name of the tenant where this OIDC IDP configuration resource exists
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        required: true
+        description: |
+          Human friendly display name.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        description: |
+          If this config allows users to sign in with the provider.
+      - !ruby/object:Api::Type::String
+        name: 'issuer'
+        description: |
+          For OIDC Idps, the issuer identifier.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'clientId'
+        description: |
+          The client id of an OAuth client.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'clientSecret'
+        description: |
+          The client secret of the OAuth client, to enable OIDC code flow.
+  - !ruby/object:Api::Resource
+    name: 'Tenant'
+    base_url: 'projects/{{project}}/tenants'
+    self_link: 'projects/{{project}}/tenants/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Tenant configuration in a multi-tenant project.
+
+      You must enable the
+      ((Google Identity Platform)[https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity])
+      in the marketplace prior to using this resource.
+
+      You must ((enable multi-tenancy)[https://cloud.google.com/identity-platform/docs/multi-tenancy-quickstart])
+      via the Cloud Console prior to creating tenants.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The name of the tenant that is generated by the server
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        required: true
+        description: |
+          Human friendly display name of the tenant.
+      - !ruby/object:Api::Type::Boolean
+        name: 'allowPasswordSignup'
+        description: |
+          Whether to allow email/password user authentication.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableEmailLinkSignin'
+        description: |
+          Whether to enable email link user authentication.
+      - !ruby/object:Api::Type::Boolean
+        name: 'disableAuth'
+        description: |
+          Whether authentication is disabled for the tenant. If true, the users under
+          the disabled tenant are not allowed to sign-in. Admins of the disabled tenant
+          are not able to manage its users.
