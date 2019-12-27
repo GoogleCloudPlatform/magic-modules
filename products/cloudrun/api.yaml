@@ -491,7 +491,6 @@ objects:
                 More info: https://kubernetes.io/docs/concepts/containers/images
             - !ruby/object:Api::Type::Array
               name: command
-              input: true
               description: |-
                 Entrypoint array. Not executed within a shell.
                 The docker image's ENTRYPOINT is used if this is not provided.
@@ -505,7 +504,6 @@ objects:
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: env
-              input: true
               description: |-
                 List of environment variables to set in the container.
               item_type: !ruby/object:Api::Type::NestedObject
