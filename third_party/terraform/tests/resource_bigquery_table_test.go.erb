@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -64,6 +65,31 @@ func TestAccBigQueryTable_Kms(t *testing.T) {
 		},
 	})
 }
+
+<% unless version == 'ga' -%>
+func TestAccBigQueryTable_RangePartitioning(t *testing.T) {
+	t.Parallel()
+	resourceName := "google_bigquery_table.test"
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigQueryTableDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableRangePartitioning(datasetID, tableID),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
 
 func TestAccBigQueryTable_View(t *testing.T) {
 	t.Parallel()
@@ -267,7 +293,7 @@ resource "google_bigquery_table" "test" {
 
 	time_partitioning {
 		type = "DAY"
-		field = "ts"	
+		field = "ts"
 	}
 
 	encryption_configuration {
@@ -305,6 +331,60 @@ EOH
 }
 `, datasetID, cryptoKeyName, tableID)
 }
+
+<% unless version == 'ga' -%>
+func testAccBigQueryTableRangePartitioning(datasetID, tableID string) string {
+	return fmt.Sprintf(`
+	resource "google_bigquery_dataset" "test" {
+		dataset_id = "%s"
+	}
+
+	resource "google_bigquery_table" "test" {
+		provider   = google-beta
+		table_id   = "%s"
+		dataset_id = google_bigquery_dataset.test.dataset_id
+
+		range_partitioning {
+			field = "id"
+			range {
+				start    = 1
+				end      = 10000
+				interval = 100
+			}
+		}
+
+		schema = <<EOH
+[
+	{
+		"name": "ts",
+		"type": "TIMESTAMP"
+	},
+	{
+		"name": "id",
+		"type": "INTEGER"
+	},
+	{
+		"name": "city",
+		"type": "RECORD",
+		"fields": [
+	{
+		"name": "coord",
+		"type": "RECORD",
+		"fields": [
+		{
+		"name": "lon",
+		"type": "FLOAT"
+		}
+		]
+	}
+		]
+	}
+]
+EOH
+}
+	`, datasetID, tableID)
+}
+<% end -%>
 
 func testAccBigQueryTableWithView(datasetID, tableID string) string {
 	return fmt.Sprintf(`
