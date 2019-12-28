@@ -1,20 +1,20 @@
 def disk_count
-  @disks.count
+  @disks&.count
 end
 
 def tag_count
-  @tags.count
+  @tags&.items&.count
 end
 
 def network_interfaces_count
-  @network_interfaces.count
+  @network_interfaces&.count
 end
 
 # TBD: Below few methods are present to make the tests simpler e.g. avoid looping over arrays etc.
 #     but passing index arguments from the inspec test would be better
 
 def first_network_interface_nat_ip_exists
-  !@network_interfaces[0].access_configs[0].nat_ip.nil?
+  !@network_interfaces[0]&.access_configs[0]&.nat_ip.nil?
 end
 
 def first_network_interface_name
@@ -36,11 +36,6 @@ end
 def second_disks_device_name
   return '' if @disks[1].nil? || !defined?(@disks[1].device_name) || @disks[1].device_name.nil?
   disks[1].device_name
-end
-
-def second_disks_kind
-  return '' if @disks[1].nil? || !defined?(@disks[1].kind) || @disks[1].kind.nil?
-  @disks[1].kind
 end
 
 def second_disks_source_name
@@ -71,18 +66,18 @@ end
 # helper for returning label keys to perform checks
 def labels_keys
   return [] if !defined?(@labels) || @labels.nil?
-  @labels.item.keys
+  @labels.items.keys
 end
 
 # helper for returning label values to perform checks
 def labels_values
   return [] if !defined?(@labels) || @labels.nil?
-  @labels.item.values
+  @labels.items.values
 end
 
 def label_value_by_key(label_key)
   return [] if !defined?(@labels) || @labels.nil?
-  @labels.item[label_key]
+  @labels.items[label_key]
 end
 
 def metadata_keys

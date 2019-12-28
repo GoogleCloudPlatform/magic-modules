@@ -236,6 +236,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - 'products/compute/helpers/python/instance_start.py'
       - 'products/compute/helpers/python/instance_update_methods.py'
     properties:
+      disks.licenses: !ruby/object:Overrides::Ansible::PropertyOverride
+        exclude: true
       canIpForward: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ["ip_forward"]
       disks.initializeParams.sourceImage: !ruby/object:Overrides::Ansible::PropertyOverride

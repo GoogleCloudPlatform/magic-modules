@@ -1,0 +1,15 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
+<% rigm = grab_attributes['rigm'] -%>
+describe google_compute_region_instance_group_manager(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: <%= doc_generation ? "'#{rigm['name']}'" : "rigm['name']" -%>) do
+  it { should exist }
+  its('base_instance_name') { should eq <%= doc_generation ? "'#{rigm['base_instance_name']}'" : "rigm['base_instance_name']" -%> }
+  its('target_size') { should eq <%= doc_generation ? "'#{rigm['target_size']}'" : "rigm['target_size']" -%> }
+  its('named_ports.first.name') { should eq <%= doc_generation ? "'#{rigm['named_port_name']}'" : "rigm['named_port_name']" -%> }
+  its('named_ports.first.port') { should eq <%= doc_generation ? "'#{rigm['named_port_port']}'" : "rigm['named_port_port']" -%> }
+  its('auto_healing_policies.first.initial_delay_sec') { should eq <%= doc_generation ? "'#{rigm['healing_delay']}'" : "rigm['healing_delay']" -%> }
+end
+
+describe google_compute_region_instance_group_manager(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

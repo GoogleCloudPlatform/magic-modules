@@ -100,6 +100,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionHealthCheck: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  RegionInstanceGroupManager: !ruby/object:Overrides::Inspec::ResourceOverride
+    singular_extra_examples: 'templates/inspec/documentation/region_instance_group_manager_examples.md'
+    additional_functions: |
+<%= lines(indent(compile('templates/inspec/custom_functions/google_compute_region_instance_group_manager.rb'), 6)) -%>
+    properties:
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "instance_group_manager_id"
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "instance_group_manager_name"
   RegionSslCertificate: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   RegionTargetHttpProxy: !ruby/object:Overrides::Inspec::ResourceOverride

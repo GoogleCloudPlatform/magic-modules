@@ -381,7 +381,7 @@ instance:
   tag_2: bar
   metadata_key: '123'
   metadata_value: asdf
-  sa_scope: compute-ro
+  sa_scope: https://www.googleapis.com/auth/compute.readonly
   startup_script: "echo hi > /test.txt"
 
 network:
@@ -394,3 +394,11 @@ subnetwork:
   log_interval: INTERVAL_10_MIN
   log_sampling: .5
   log_metadata: INCLUDE_ALL_METADATA
+
+rigm:
+  name: inspec-rigm
+  base_name: rigm1
+  target_size: 1
+  named_port_name: https
+  named_port_port: 8888
+  healing_delay: 300

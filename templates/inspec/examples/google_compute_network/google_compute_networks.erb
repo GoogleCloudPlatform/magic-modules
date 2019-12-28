@@ -1,6 +1,5 @@
 <% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
 <% network = grab_attributes['network'] -%>
 describe google_compute_networks(project: <%= gcp_project_id -%>) do
-	its('names') { should include <%= doc_generation ? "'#{network['name']}'" : "network['name']" -%> }
-  its('routing_modes') { should include <%= doc_generation ? "'#{network['routing_mode']}'" : "network['routing_mode']" -%> }
+	its('network_names') { should include <%= doc_generation ? "'#{network['name']}'" : "network['name']" -%> }
 end

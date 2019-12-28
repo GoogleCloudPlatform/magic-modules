@@ -4752,6 +4752,10 @@ objects:
               created from this template.
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
+                - !ruby/object:Api::Type::Array
+                  name: 'licenses'
+                  description: Any applicable license URI.
+                  item_type: Api::Type::String
                 - !ruby/object:Api::Type::Boolean
                   name: 'autoDelete'
                   description: |
@@ -6344,6 +6348,197 @@ objects:
           The region this managed instance group resides
           (for regional resources).
         output: true
+      - !ruby/object:Api::Type::Array
+        name: 'targetPools'
+        description: |
+          TargetPool resources to which instances in the instanceGroup field are
+          added. The target pools automatically apply to all of the instances in
+          the managed instance group.
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'targetPool'
+          description: 'The targetPool to receive managed instances.'
+          resource: 'TargetPool'
+          imports: 'selfLink'
+      - !ruby/object:Api::Type::Integer
+        name: 'targetSize'
+        description: |
+          The target number of running instances for this managed instance
+          group. Deleting or abandoning instances reduces this number. Resizing
+          the group changes this number.
+  - !ruby/object:Api::Resource
+    name: 'RegionInstanceGroupManager'
+    kind: 'compute#instanceGroupManager'
+    base_url: projects/{{project}}/regions/{{region}}/instanceGroupManagers
+    collection_url_key: 'items'
+    has_self_link: true
+    description: |
+      Creates a managed instance group using the information that you specify in
+      the request. After the group is created, it schedules an action to create
+      instances in the group using the specified instance template. This
+      operation is marked as DONE when the group is created even if the
+      instances in the group have not yet been created. You must separately
+      verify the status of the individual instances.
+
+      A managed instance group can have up to 1000 VM instances per group.
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        description: 'The region the managed instance group resides.'
+        required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'baseInstanceName'
+        description: |
+          The base instance name to use for instances in this group. The value
+          must be 1-58 characters long. Instances are named by appending a
+          hyphen and a random four-character string to the base instance name.
+          The base instance name must comply with RFC1035.
+        required: true
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: |
+          The creation timestamp for this managed instance group in RFC3339
+          text format.
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'currentActions'
+        description: |
+          The list of instance actions and the number of instances in this
+          managed instance group that are scheduled for each of those actions.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'abandoning'
+            description: |
+              The total number of instances in the managed instance group that
+              are scheduled to be abandoned. Abandoning an instance removes it
+              from the managed instance group without deleting it.
+            output: true
+          - !ruby/object:Api::Type::Integer
+            name: 'creating'
+            description: |
+              The number of instances in the managed instance group that are
+              scheduled to be created or are currently being created. If the
+              group fails to create any of these instances, it tries again until
+              it creates the instance successfully.
+
+              If you have disabled creation retries, this field will not be
+              populated; instead, the creatingWithoutRetries field will be
+              populated.
+            output: true
+          - !ruby/object:Api::Type::Integer
+            name: 'creatingWithoutRetries'
+            description: |
+              The number of instances that the managed instance group will
+              attempt to create. The group attempts to create each instance only
+              once. If the group fails to create any of these instances, it
+              decreases the group's targetSize value accordingly.
+            output: true
+          - !ruby/object:Api::Type::Integer
+            name: 'deleting'
+            description: |
+              The number of instances in the managed instance group that are
+              scheduled to be deleted or are currently being deleted.
+            output: true
+          - !ruby/object:Api::Type::Integer
+            name: 'none'
+            description: |
+              The number of instances in the managed instance group that are
+              running and have no scheduled actions.
+            output: true
+          - !ruby/object:Api::Type::Integer
+            name: 'recreating'
+            description: |
+              The number of instances in the managed instance group that are
+              scheduled to be recreated or are currently being being recreated.
+              Recreating an instance deletes the existing root persistent disk
+              and creates a new disk from the image that is defined in the
+              instance template.
+            output: true
+          - !ruby/object:Api::Type::Integer
+            name: 'refreshing'
+            description: |
+              The number of instances in the managed instance group that are
+              being reconfigured with properties that do not require a restart
+              or a recreate action. For example, setting or removing target
+              pools for the instance.
+            output: true
+          - !ruby/object:Api::Type::Integer
+            name: 'restarting'
+            description: |
+              The number of instances in the managed instance group that are
+              scheduled to be restarted or are currently being restarted.
+            output: true
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource. Provide this property when
+          you create the resource.
+        input: true
+      # fingerprint ignored as it is an internal locking detail
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'A unique identifier for this resource'
+        output: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'instanceGroup'
+        resource: 'InstanceGroup'
+        imports: 'selfLink'
+        description: 'The instance group being managed'
+        output: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'instanceTemplate'
+        resource: 'InstanceTemplate'
+        imports: 'selfLink'
+        description: |
+          The instance template that is specified for this managed instance
+          group. The group uses this template to create all new instances in the
+          managed instance group.
+        required: true
+      # kind is internal transport detail
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The name of the managed instance group. The name must be 1-63
+          characters long, and comply with RFC1035.
+        required: true
+      # TODO(nelsonjr): Make namedPorts a NameValue(name[string], port[integer])
+      - !ruby/object:Api::Type::Array
+        name: 'namedPorts'
+        description:
+          Named ports configured for the Instance Groups complementary to this
+          Instance Group Manager.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              description: |
+                The name for this named port. The name must be 1-63 characters
+                long, and comply with RFC1035.
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              description:
+                The port number, which can be a value between 1 and 65535.
       - !ruby/object:Api::Type::Array
         name: 'targetPools'
         description: |
@@ -11565,6 +11760,9 @@ objects:
           logs will be exported to Stackdriver. This field cannot be set if the `purpose` of this
           subnetwork is `INTERNAL_HTTPS_LOAD_BALANCER`
         properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enable'
+            description: If logging is enabled for this subnetwork
           - !ruby/object:Api::Type::Enum
             name: 'aggregationInterval'
             at_least_one_of:

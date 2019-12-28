@@ -1049,7 +1049,7 @@ variable "subnetwork" {
 
 resource "google_compute_subnetwork" "subnet-with-logging" {
   project       = var.gcp_project_id
-  region        = var.gcp_location  
+  region        = var.gcp_location
   name          = var.subnetwork["name"]
   ip_cidr_range = var.subnetwork["ip_cidr_range"]
   network       = google_compute_network.inspec-network.self_link
@@ -1058,5 +1058,34 @@ resource "google_compute_subnetwork" "subnet-with-logging" {
     aggregation_interval = var.subnetwork["log_interval"]
     flow_sampling        = var.subnetwork["log_sampling"]
     metadata             = var.subnetwork["log_metadata"]
+  }
+}
+
+variable "rigm" {
+  type = any
+}
+
+resource "google_compute_region_instance_group_manager" "appserver" {
+  project                    = var.gcp_project_id
+  region                     = var.gcp_location  
+  name                       = var.rigm["name"]
+
+  base_instance_name         = var.rigm["base_name"]
+
+  version {
+    instance_template = google_compute_instance_template.gcp-inspec-instance-template.self_link
+  }
+
+  target_pools = [google_compute_target_pool.gcp-inspec-target-pool.self_link]
+  target_size  = var.rigm["target_size"]
+
+  named_port {
+    name = var.rigm["named_port_name"]
+    port = var.rigm["named_port_port"]
+  }
+
+  auto_healing_policies {
+    health_check      = google_compute_health_check.gcp-inspec-health-check.self_link
+    initial_delay_sec = var.rigm["healing_delay"]
   }
 }
