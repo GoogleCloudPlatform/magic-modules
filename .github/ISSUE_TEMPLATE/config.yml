@@ -1,0 +1,6 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Terraform-Specific Issue Tracking
+    url: https://github.com/terraform-providers/terraform-provider-google/issues/new/choose
+    about: |
+      Please submit Terraform-specific issues or FRs here.
