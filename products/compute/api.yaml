@@ -923,6 +923,7 @@ objects:
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'includeHost'
+                send_empty_value: true
                 at_least_one_of:
                   - cdn_policy.0.cache_key_policy.0.include_host
                   - cdn_policy.0.cache_key_policy.0.include_protocol
@@ -933,6 +934,7 @@ objects:
                   If true requests to different hosts will be cached separately.
               - !ruby/object:Api::Type::Boolean
                 name: 'includeProtocol'
+                send_empty_value: true
                 at_least_one_of:
                   - cdn_policy.0.cache_key_policy.0.include_host
                   - cdn_policy.0.cache_key_policy.0.include_protocol
@@ -943,6 +945,7 @@ objects:
                   If true, http and https requests will be cached separately.
               - !ruby/object:Api::Type::Boolean
                 name: 'includeQueryString'
+                send_empty_value: true
                 at_least_one_of:
                   - cdn_policy.0.cache_key_policy.0.include_host
                   - cdn_policy.0.cache_key_policy.0.include_protocol
@@ -959,6 +962,7 @@ objects:
                   key entirely.
               - !ruby/object:Api::Type::Array
                 name: 'queryStringBlacklist'
+                send_empty_value: true
                 at_least_one_of:
                   - cdn_policy.0.cache_key_policy.0.include_host
                   - cdn_policy.0.cache_key_policy.0.include_protocol
@@ -974,6 +978,7 @@ objects:
                   delimiters.
                 item_type: Api::Type::String
               - !ruby/object:Api::Type::Array
+                send_empty_value: true
                 name: 'queryStringWhitelist'
                 at_least_one_of:
                   - cdn_policy.0.cache_key_policy.0.include_host
