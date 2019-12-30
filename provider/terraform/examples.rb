@@ -182,12 +182,13 @@ module Provider
         )
       end
 
+      # rubocop:disable Metrics/LineLength
       def substitute_test_paths(config)
         config.gsub!('../static/img/header-logo.png', 'test-fixtures/header-logo.png')
         config.gsub!('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
         config.gsub!('path/to/certificate.crt', 'test-fixtures/ssl_cert/test.crt')
         config.gsub!('path/to/index.zip', '%{zip_path}')
-        config.gsub!('verified-domain.com', '%{verified_domain}')
+        config.gsub!('verified-domain.com', 'tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com')
         config
       end
 
@@ -197,6 +198,7 @@ module Provider
         config.gsub!('path/to/certificate.crt', '../static/ssl_cert/test.crt')
         config
       end
+      # rubocop:enable Metrics/LineLength
       # rubocop:enable Style/FormatStringToken
 
       def validate

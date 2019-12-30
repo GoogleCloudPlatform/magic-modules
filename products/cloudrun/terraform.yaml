@@ -22,8 +22,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           cloud_run_service_name: "tftest-cloudrun"
-        test_custom_context:
-          verified_domain: "\"tftest-domainmapping.com\""
         test_env_vars:
           namespace: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
