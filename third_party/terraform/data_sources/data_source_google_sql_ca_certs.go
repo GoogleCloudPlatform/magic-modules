@@ -17,23 +17,16 @@ func dataSourceGoogleSQLCaCerts() *schema.Resource {
 		Read: dataSourceGoogleSQLCaCertsRead,
 
 		Schema: map[string]*schema.Schema{
+			"active_version": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"certs": {
 				Type:     schema.TypeList,
 				Elem:     &certSchema,
 				Computed: true,
 			},
-			"active_version": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"instance": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
-			},
-			"self_link": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -44,6 +37,12 @@ func dataSourceGoogleSQLCaCerts() *schema.Resource {
 				Computed: true,
 				Optional: true,
 				ForceNew: true,
+			},
+			"self_link": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
 			},
 		},
 	}
