@@ -10,14 +10,6 @@ import (
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
-func getResourcePropertiesFromSQLSelfLinkString(link string) (string, string) {
-	parts := strings.Split(link, "/")
-	if len(parts) >= 3 {
-		return parts[len(parts)-3], parts[len(parts)-1]
-	}
-	return nil, nil
-}
-
 func dataSourceGoogleSQLCaCerts() *schema.Resource {
 	certSchema := datasourceSchemaFromResourceSchema(resourceSqlSslCert().Schema)
 
@@ -60,19 +52,21 @@ func dataSourceGoogleSQLCaCerts() *schema.Resource {
 func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-
-	var params []string
-	var instance string
+	var project, instance string
 	if v, ok := d.GetOk("instance"); ok {
+		p, err := getProject(d, config)
+		if err != nil {
+			return err
+		}
+		project = p
 		instance = v.(string)
-		params = []string{project, instance}
-	} else if v, ok := d.GetOk("self_link"); ok {
-		project, instance = getResourcePropertiesFromSQLSelfLinkString(v.(string))
-		params = []string{project, instance}
+	} else if selfLink, ok := d.GetOk("self_link"); ok {
+		fv, err := parseProjectFieldValue("instances", selfLink, "project", d, config, false)
+		if err != nil {
+			return err
+		}
+		project = fv.Project
+		instance = fv.Name
 	} else {
 		return fmt.Errorf("one of instance or self_link must be set")
 	}
@@ -84,11 +78,13 @@ func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("error retrieving CA certs: %s", err)
 	}
 
+	log.Printf("[DEBUG] Fetched CA certs from instance %s", instance)
+
 	d.Set("project", project)
 	d.Set("instance", instance)
 	d.Set("certs", response.Certs)
 	d.Set("active_version", response.ActiveVersion)
-	d.SetId(strings.Join(params, "/"))
+	d.SetId(fmt.Sprintf("projects/%s/instance/%s", project, instance))
 
 	return nil
 }
