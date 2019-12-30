@@ -78,8 +78,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_domain_mapping_basic"
         primary_resource_id: "domain_mapping"
-        vars:
-          domain: "dm-test-"
     custom_code:  !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/domain_mapping.erb
     properties:
