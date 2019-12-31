@@ -81,7 +81,7 @@ func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) er
 
 	d.Set("project", project)
 	d.Set("instance", instance)
-	d.Set("certs", response.Certs)
+	d.Set("certs", flattenServerCaCerts(response.Certs))
 	d.Set("active_version", response.ActiveVersion)
 	d.SetId(fmt.Sprintf("projects/%s/instance/%s", project, instance))
 
