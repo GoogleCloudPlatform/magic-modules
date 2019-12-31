@@ -23,7 +23,9 @@ func TestAccDataSourceGoogleSQLCaCerts_basic(t *testing.T) {
 				Config: testAccDataSourceGoogleSQLCaCertsConfig(instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceGoogleSQLCaCertsCheck("data.google_sql_ca_certs.ca_certs", "google_sql_database_instance.foo"),
+					testAccDataSourceGoogleSQLCaCertsCheck("data.google_sql_ca_certs.ca_certs_self_link", "google_sql_database_instance.foo"),
 					resource.TestCheckResourceAttr("data.google_sql_ca_certs.ca_certs", "certs.#", "1"),
+					resource.TestCheckResourceAttr("data.google_sql_ca_certs.ca_certs_self_link", "certs.#", "1"),
 				),
 			},
 		},
@@ -81,6 +83,10 @@ resource "google_sql_database_instance" "foo" {
 
 data "google_sql_ca_certs" "ca_certs" {
   instance = google_sql_database_instance.foo.name
+}
+
+data "google_sql_ca_certs" "ca_certs_self_link" {
+  instance_self_link = google_sql_database_instance.foo.self_link
 }
 `, instanceName)
 }
