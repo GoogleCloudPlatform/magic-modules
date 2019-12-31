@@ -8,8 +8,6 @@ import (
 )
 
 func dataSourceGoogleSQLCaCerts() *schema.Resource {
-	certSchema := datasourceSchemaFromResourceSchema(resourceSqlSslCert().Schema)
-
 	return &schema.Resource{
 		Read: dataSourceGoogleSQLCaCertsRead,
 
@@ -19,8 +17,31 @@ func dataSourceGoogleSQLCaCerts() *schema.Resource {
 				Computed: true,
 			},
 			"certs": {
-				Type:     schema.TypeList,
-				Elem:     &certSchema,
+				Type: schema.TypeList,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"cert": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"common_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"create_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"expiration_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"sha1_fingerprint": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
 				Computed: true,
 			},
 			"instance": {
