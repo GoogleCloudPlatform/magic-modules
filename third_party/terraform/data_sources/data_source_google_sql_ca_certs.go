@@ -3,11 +3,8 @@ package google
 import (
 	"fmt"
 	"log"
-	"strconv"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
 func dataSourceGoogleSQLCaCerts() *schema.Resource {
@@ -60,7 +57,7 @@ func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) er
 		project = p
 		instance = v.(string)
 	} else if selfLink, ok := d.GetOk("self_link"); ok {
-		fv, err := parseProjectFieldValue("instances", selfLink, "project", d, config, false)
+		fv, err := parseProjectFieldValue("instances", selfLink.(string), "project", d, config, false)
 		if err != nil {
 			return err
 		}
@@ -72,7 +69,7 @@ func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) er
 
 	log.Printf("[DEBUG] Fetching CA certs from instance %s", instance)
 
-	response, err := config.clientSqlAdmin.Service.Instances.ListServerCas(project, instance).Do()
+	response, err := config.clientSqlAdmin.Instances.ListServerCas(project, instance).Do()
 	if err != nil {
 		return fmt.Errorf("error retrieving CA certs: %s", err)
 	}
