@@ -370,7 +370,7 @@ module Provider
       property_list.any? { |sub_property| time?(sub_property) }
     end
 
-    def has_beta(object)
+    def beta?(object)
       beta_api_url(object) != ga_api_url(object)
     end
 

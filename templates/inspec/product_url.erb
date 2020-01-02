@@ -1,4 +1,4 @@
-<% if has_beta(object) -%>
+<% if beta?(object) -%>
   def product_url(beta = false)
     if beta
       '<%= beta_api_url(object) %>'
