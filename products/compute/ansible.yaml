@@ -325,6 +325,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionHealthCheck: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  RegionInstanceGroupManager: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   RegionSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionTargetHttpProxy: !ruby/object:Overrides::Ansible::ResourceOverride
