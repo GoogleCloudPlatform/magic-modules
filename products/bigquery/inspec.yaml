@@ -31,7 +31,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       lastModifiedTime: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude_plural: true
     additional_functions: |
-<%= lines(indent(compile('templates/inspec/custom_functions/bigquery_dataset_name.rb'), 6)) -%>
+<%= lines(indent(compile('third_party/inspec/custom_functions/bigquery_dataset_name.rb'), 6)) -%>
 
   Table: !ruby/object:Overrides::Inspec::ResourceOverride
     properties:
