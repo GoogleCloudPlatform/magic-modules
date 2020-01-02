@@ -6560,6 +6560,21 @@ objects:
           The target number of running instances for this managed instance
           group. Deleting or abandoning instances reduces this number. Resizing
           the group changes this number.
+      - !ruby/object:Api::Type::Array
+        name: 'autoHealingPolicies'
+        description: |
+          The autohealing policy for this managed instance group
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'healthCheck'
+              description: |
+                The URL for the health check that signals autohealing.
+            - !ruby/object:Api::Type::Integer
+              name: 'initialDelaySec'
+              description: |
+                The number of seconds that the managed instance group waits
+                before it applies autohealing policies to new instances or recently recreated instances
   - !ruby/object:Api::Resource
     name: 'InterconnectAttachment'
     kind: 'compute#interconnectAttachment'

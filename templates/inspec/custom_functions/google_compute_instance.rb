@@ -1,20 +1,20 @@
 def disk_count
-  @disks&.count
+  @disks&.count || 0
 end
 
 def tag_count
-  @tags&.items&.count
+  @tags&.items&.count || 0
 end
 
 def network_interfaces_count
-  @network_interfaces&.count
+  @network_interfaces&.count || 0
 end
 
 # TBD: Below few methods are present to make the tests simpler e.g. avoid looping over arrays etc.
 #     but passing index arguments from the inspec test would be better
 
 def first_network_interface_nat_ip_exists
-  !@network_interfaces[0]&.access_configs[0]&.nat_ip.nil?
+  !@network_interfaces[0].access_configs[0].nat_ip.nil?
 end
 
 def first_network_interface_name

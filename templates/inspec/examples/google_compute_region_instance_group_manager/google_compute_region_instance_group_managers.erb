@@ -2,6 +2,6 @@
 <% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
 <% rigm = grab_attributes['rigm'] -%>
 describe google_compute_region_instance_group_managers(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>) do
-	its('names') { should include <%= doc_generation ? "'#{rigm['name']}'" : "rigm['name']" -%> }
+	its('instance_group_manager_names') { should include <%= doc_generation ? "'#{rigm['name']}'" : "rigm['name']" -%> }
   its('base_instance_names') { should include <%= doc_generation ? "'#{rigm['base_instance_name']}'" : "rigm['base_instance_name']" -%> }
 end

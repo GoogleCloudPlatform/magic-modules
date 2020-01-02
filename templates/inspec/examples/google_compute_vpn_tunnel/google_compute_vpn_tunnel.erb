@@ -4,7 +4,6 @@
 describe google_compute_vpn_tunnel(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: <%= doc_generation ? "'#{vpn_tunnel['name']}'" : "vpn_tunnel['name']" -%>) do
   it { should exist }
   its('peer_ip') { should eq <%= doc_generation ? "'#{vpn_tunnel['peer_ip']}'" : "vpn_tunnel['peer_ip']" -%> }
-  its('shared_secret') { should eq <%= doc_generation ? "'#{vpn_tunnel['shared_secret']}'" : "vpn_tunnel['shared_secret']" -%> }
 end
 
 describe google_compute_vpn_tunnel(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: 'nonexistent') do

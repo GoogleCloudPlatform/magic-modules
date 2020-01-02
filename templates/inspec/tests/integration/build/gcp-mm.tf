@@ -1083,7 +1083,13 @@ resource "google_compute_vpn_tunnel" "tunnel1" {
   peer_ip       = var.vpn_tunnel["peer_ip"]
   shared_secret = var.vpn_tunnel["shared_secret"]
 
+  remote_traffic_selector = ["0.0.0.0/0"]
+  local_traffic_selector  = ["0.0.0.0/0"]
   target_vpn_gateway = google_compute_vpn_gateway.inspec-gcp-vpn-gateway.self_link
 
-  depends_on = [google_compute_forwarding_rule.inspec-gcp-fr-esp]
+  depends_on = [
+    google_compute_forwarding_rule.inspec-gcp-fr-esp,
+    google_compute_forwarding_rule.inspec-gcp-fr-udp500,
+    google_compute_forwarding_rule.inspec-gcp-fr-udp4500,
+  ]
 }
