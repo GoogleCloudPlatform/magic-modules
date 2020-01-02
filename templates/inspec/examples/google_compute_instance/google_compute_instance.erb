@@ -4,7 +4,6 @@
 describe google_compute_instance(project: <%= gcp_project_id -%>, zone: <%= gcp_zone -%>, name: <%= doc_generation ? "'#{instance['name']}'" : "instance['name']" -%>) do
   it { should exist }
   its('machine_type') { should match <%= doc_generation ? "'#{instance['machine_type']}'" : "instance['machine_type']" -%> }
-  its('metadata') { should include(<%= doc_generation ? "'#{instance['metadata_key']}'" : "instance['metadata_key']" -%> => <%= doc_generation ? "'#{instance['metadata_value']}'" : "instance['metadata_value']" -%>) }
   its('tags.items') { should include <%= doc_generation ? "'#{instance['tag_1']}'" : "instance['tag_1']" -%> }
   its('tags.items') { should include <%= doc_generation ? "'#{instance['tag_2']}'" : "instance['tag_2']" -%> }
   its('tag_count') { should cmp 2 }

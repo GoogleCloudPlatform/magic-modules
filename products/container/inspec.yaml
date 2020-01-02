@@ -14,19 +14,16 @@
 --- !ruby/object:Provider::Inspec::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Inspec::ResourceOverride
-    # Change the name of the resulting resource. Do this because
-    # there exists a `container_cluster` resource in InSpec already
-    # that can handle zonal resources only
-    name: 'RegionalCluster'
+    additional_functions: |
+<%= lines(indent(compile('templates/inspec/custom_functions/google_container_cluster.rb'), 6)) -%>
     properties:
       kubectlPath: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
       kubectlContext: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
-  NodePool: !ruby/object:Overrides::Inspec::ResourceOverride
-    # See note on RegionalCluster, similar for NodePool
-    name: 'RegionalNodePool'
-    base_url: projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools
-    properties:
-      cluster: !ruby/object:Overrides::Inspec::PropertyOverride
-        resource: 'RegionalCluster'
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: cluster_name
+      status: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: cluster_status
+      network: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: cluster_network

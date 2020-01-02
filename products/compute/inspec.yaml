@@ -150,6 +150,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pathMatchers.pathRules: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
   VpnTunnel: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "vpn_tunnel_name"
   Zone: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true

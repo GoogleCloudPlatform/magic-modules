@@ -31,6 +31,7 @@ instance_group_manager:
   base_instance_name: 'igm'
   named_port_name: 'port'
   named_port_port: 80
+
 autoscaler:
   name: 'inspec-gcp-autoscaler'
   max_replicas: 5
@@ -127,10 +128,6 @@ target_tcp_proxy:
   name: inspec-gcp-target-tcp-proxy
   proxy_header: NONE
   tcp_backend_service_name: gcp-inspec-tcp-backend-service
-
-regional_cluster:
-  name: inspec-gcp-regional-cluster
-  initial_node_count: 1
 
 route:
   name: inspec-gcp-route
@@ -397,8 +394,13 @@ subnetwork:
 
 rigm:
   name: inspec-rigm
-  base_name: rigm1
+  base_instance_name: rigm1
   target_size: 1
   named_port_name: https
   named_port_port: 8888
   healing_delay: 300
+
+vpn_tunnel:
+  name: inspec-vpn-tunnel
+  peer_ip: "15.0.0.120"
+  shared_secret: super secret

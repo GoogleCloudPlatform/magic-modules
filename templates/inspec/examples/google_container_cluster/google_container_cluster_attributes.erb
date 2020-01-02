@@ -1,0 +1,8 @@
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
+gcp_kube_cluster_name = attribute(:gcp_kube_cluster_name, default: '<%= external_attribute('gcp_kube_cluster_name') -%>', description: 'GCP container cluster name')
+gcp_kube_cluster_zone = attribute(:gcp_kube_cluster_zone, default: '<%= external_attribute('gcp_kube_cluster_zone') -%>', description: 'GCP container cluster zone')
+gcp_kube_cluster_size = attribute(:gcp_kube_cluster_size, default: '<%= external_attribute('gcp_kube_cluster_size') -%>', description: 'GCP container cluster size')
+gcp_kube_cluster_zone_extra1 = attribute(:gcp_kube_cluster_zone_extra1, default: '<%= external_attribute('gcp_kube_cluster_zone_extra1') -%>', description: 'First extra zone for the cluster')
+gcp_kube_cluster_zone_extra2 = attribute(:gcp_kube_cluster_zone_extra2, default: '<%= external_attribute('gcp_kube_cluster_zone_extra2') -%>', description: 'Second extra zone for the cluster')
+gcp_kube_cluster_master_user = attribute(:gcp_kube_cluster_master_user, default: '<%= external_attribute('gcp_kube_cluster_master_user') -%>', description: 'GCP container cluster admin username')
+gcp_kube_cluster_master_pass = attribute(:gcp_kube_cluster_master_pass, default: '<%= external_attribute('gcp_kube_cluster_master_pass') -%>', description: 'GCP container cluster admin password')

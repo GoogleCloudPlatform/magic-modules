@@ -1,0 +1,8 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
+<% vpn_tunnel = grab_attributes['vpn_tunnel'] -%>
+describe google_compute_vpn_tunnels(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>) do
+	its('vpn_tunnel_names') { should include <%= doc_generation ? "'#{vpn_tunnel['name']}'" : "vpn_tunnel['name']" -%> }
+  its('peer_ips') { should include <%= doc_generation ? "'#{vpn_tunnel['peer_ip']}'" : "vpn_tunnel['peer_ip']" -%> }
+  its('shared_secrets') { should include <%= doc_generation ? "'#{vpn_tunnel['shared_secret']}'" : "vpn_tunnel['shared_secret']" -%> }
+end

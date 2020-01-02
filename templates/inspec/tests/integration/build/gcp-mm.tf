@@ -74,10 +74,6 @@ variable "target_tcp_proxy" {
   type = any
 }
 
-variable "regional_cluster" {
-  type = any
-}
-
 variable "route" {
   type = any
 }
@@ -475,19 +471,6 @@ resource "google_compute_target_tcp_proxy" "gcp-inspec-target-tcp-proxy" {
   backend_service = google_compute_backend_service.gcp-inspec-tcp-backend-service.self_link
 }
 
-resource "google_container_cluster" "gcp-inspec-regional-cluster" {
-  project = var.gcp_project_id
-  name = var.regional_cluster["name"]
-  location = var.gcp_location
-  initial_node_count = 1
-
-  maintenance_policy {
-    daily_maintenance_window {
-      start_time = "23:00"
-    }
-  }
-}
-
 resource "google_compute_route" "gcp-inspec-route" {
   project     = var.gcp_project_id
   name        = var.route["name"]
@@ -628,11 +611,11 @@ resource "google_compute_backend_bucket" "image_backend" {
   enable_cdn  = var.backend_bucket["enable_cdn"]
 }
 
-resource "google_container_node_pool" "inspec-gcp-regional-node-pool" {
+resource "google_container_node_pool" "inspec-gcp-node-pool" {
   project    = var.gcp_project_id
   name       = var.regional_node_pool["name"]
-  location   = var.gcp_location
-  cluster    = google_container_cluster.gcp-inspec-regional-cluster.name
+  location   = google_container_cluster.primary.location
+  cluster    = google_container_cluster.primary.name
   node_count = var.regional_node_pool["node_count"]
 }
 
@@ -1065,12 +1048,12 @@ variable "rigm" {
   type = any
 }
 
-resource "google_compute_region_instance_group_manager" "appserver" {
+resource "google_compute_region_instance_group_manager" "inspec-rigm" {
   project                    = var.gcp_project_id
   region                     = var.gcp_location  
   name                       = var.rigm["name"]
 
-  base_instance_name         = var.rigm["base_name"]
+  base_instance_name         = var.rigm["base_instance_name"]
 
   version {
     instance_template = google_compute_instance_template.gcp-inspec-instance-template.self_link
@@ -1088,4 +1071,19 @@ resource "google_compute_region_instance_group_manager" "appserver" {
     health_check      = google_compute_health_check.gcp-inspec-health-check.self_link
     initial_delay_sec = var.rigm["healing_delay"]
   }
+}
+
+variable "vpn_tunnel" {
+  type = any
+}
+
+resource "google_compute_vpn_tunnel" "tunnel1" {
+  project       = var.gcp_project_id
+  name          = var.vpn_tunnel["name"]
+  peer_ip       = var.vpn_tunnel["peer_ip"]
+  shared_secret = var.vpn_tunnel["shared_secret"]
+
+  target_vpn_gateway = google_compute_vpn_gateway.inspec-gcp-vpn-gateway.self_link
+
+  depends_on = [google_compute_forwarding_rule.inspec-gcp-fr-esp]
 }

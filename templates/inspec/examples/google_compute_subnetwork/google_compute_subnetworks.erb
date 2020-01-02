@@ -3,5 +3,5 @@
 <% subnetwork = grab_attributes['subnetwork'] -%>
 describe google_compute_subnetworks(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>) do
   its('ip_cidr_ranges') { should include <%= doc_generation ? "'#{subnetwork['ip_cidr_range']}'" : "subnetwork['ip_cidr_range']" -%> }
-  its('names') { should include <%= doc_generation ? "'#{subnetwork['name']}'" : "subnetwork['name']" -%> }
+  its('subnetwork_names') { should include <%= doc_generation ? "'#{subnetwork['name']}'" : "subnetwork['name']" -%> }
 end

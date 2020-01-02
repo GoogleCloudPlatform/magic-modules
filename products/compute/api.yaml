@@ -5708,6 +5708,10 @@ objects:
               values:
                 - :SCRATCH
                 - :PERSISTENT
+            - !ruby/object:Api::Type::Array
+              name: 'licenses'
+              description: 'Any applicable publicly visible licenses.'
+              item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'guestAccelerators'
         description: |
