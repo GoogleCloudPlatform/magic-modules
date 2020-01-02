@@ -318,6 +318,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  RegionInstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true
     exclude_validator: true
