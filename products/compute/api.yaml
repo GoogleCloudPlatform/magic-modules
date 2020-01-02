@@ -3093,11 +3093,18 @@ objects:
         item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
+        description: |
+          This field denotes whether to enable logging for a particular
+          firewall rule. If logging is enabled, logs will be exported to
+          Stackdriver.
         properties:
           - !ruby/object:Api::Type::Boolean
-            name: 'enable'
+            name: 'enableLogging'
+            api_name: enable
             description: |
-              Whether logging is enabled for this firewall rule
+              This field denotes whether to enable logging for a particular
+              firewall rule. If logging is enabled, logs will be exported to
+              Stackdriver.
   - !ruby/object:Api::Resource
     name: 'ForwardingRule'
     kind: 'compute#forwardingRule'
@@ -4756,6 +4763,7 @@ objects:
                   name: 'licenses'
                   description: Any applicable license URI.
                   item_type: Api::Type::String
+                  output: true
                 - !ruby/object:Api::Type::Boolean
                   name: 'autoDelete'
                   description: |
@@ -5712,6 +5720,7 @@ objects:
               name: 'licenses'
               description: 'Any applicable publicly visible licenses.'
               item_type: Api::Type::String
+              output: true
       - !ruby/object:Api::Type::Array
         name: 'guestAccelerators'
         description: |

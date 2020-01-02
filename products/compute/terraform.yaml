@@ -506,7 +506,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         input: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
-      logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
+      logConfig.enableLogging: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
