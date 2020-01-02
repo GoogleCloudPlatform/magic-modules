@@ -2980,6 +2980,20 @@ objects:
           not enforced and the network behaves as if it did not exist. If this
           is unspecified, the firewall rule will be enabled.
         send_empty_value: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'logConfig'
+        description: |
+          This field denotes whether to enable logging for a particular
+          firewall rule. If logging is enabled, logs will be exported to
+          Stackdriver.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableLogging'
+            api_name: enable
+            description: |
+              This field denotes whether to enable logging for a particular
+              firewall rule. If logging is enabled, logs will be exported to
+              Stackdriver.
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -3091,20 +3105,6 @@ objects:
           If no targetTags are specified, the firewall rule applies to all
           instances on the specified network.
         item_type: Api::Type::String
-      - !ruby/object:Api::Type::NestedObject
-        name: 'logConfig'
-        description: |
-          This field denotes whether to enable logging for a particular
-          firewall rule. If logging is enabled, logs will be exported to
-          Stackdriver.
-        properties:
-          - !ruby/object:Api::Type::Boolean
-            name: 'enableLogging'
-            api_name: enable
-            description: |
-              This field denotes whether to enable logging for a particular
-              firewall rule. If logging is enabled, logs will be exported to
-              Stackdriver.
   - !ruby/object:Api::Resource
     name: 'ForwardingRule'
     kind: 'compute#forwardingRule'
