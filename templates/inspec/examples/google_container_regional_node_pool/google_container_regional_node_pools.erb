@@ -1,7 +1,0 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
-<% regional_node_pool = grab_attributes['regional_node_pool'] -%>
-<% regional_cluster = grab_attributes['regional_cluster'] -%>
-describe google_container_regional_node_pools(project: <%= gcp_project_id -%>, location: <%= gcp_location -%>, cluster: <%= doc_generation ? "'#{regional_cluster['name']}'" : "regional_cluster['name']" -%>) do
-  its('initial_node_counts') { should include <%= doc_generation ? "'#{regional_node_pool['initial_node_count']}'" : "regional_node_pool['initial_node_count']" -%>}
-end

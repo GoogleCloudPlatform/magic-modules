@@ -1,0 +1,4 @@
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
+gcp_kube_cluster_zone = attribute(:gcp_kube_cluster_zone, default: '<%= external_attribute('gcp_kube_cluster_zone') -%>', description: 'The zone that the kube cluster resides in.')
+gcp_kube_cluster_name = attribute(:gcp_kube_cluster_name, default: '<%= external_attribute('gcp_kube_cluster_name') -%>', description: 'The parent container clusters name.')
+regional_node_pool = attribute('regional_node_pool', default: <%= JSON.pretty_generate(grab_attributes['regional_node_pool']) -%>, description: 'Regional Node Pool definition')

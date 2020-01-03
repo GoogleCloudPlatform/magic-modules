@@ -64,6 +64,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           If it is not provided, the provider region is used.
       subnetwork: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      status: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
           * `address` - The IP of the created resource.
@@ -316,6 +318,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  RegionInstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true
     exclude_validator: true
@@ -503,7 +507,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       logConfig.enableLogging: !ruby/object:Overrides::Terraform::PropertyOverride
-        api_name: enable
         send_empty_value: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -1784,6 +1787,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         send_empty_value: true
         custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.erb'
+      logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
       ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'

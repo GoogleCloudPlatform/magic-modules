@@ -1,0 +1,11 @@
+# helper for returning a list of zone short names rather than fully qualified URLs e.g.
+#   https://www.googleapis.com/compute/v1/projects/spaterson-project/zones/asia-east1-a
+def zone_names
+  return [] if !exists?
+  @zones.map { |zone| zone.split('/').last }
+end
+
+def up?
+  return false if !exists?
+  @status == 'UP'
+end

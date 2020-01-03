@@ -14,7 +14,9 @@
 --- !ruby/object:Provider::Inspec::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Address: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    base_url: projects/{{project}}/regions/{{location}}/addresses
+    additional_functions: third_party/inspec/custom_functions/google_compute_address.erb
+    singular_extra_examples: 'third_party/inspec/documentation/address_examples.md'
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Inspec::ResourceOverride
@@ -26,7 +28,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   ExternalVpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    additional_functions: third_party/inspec/custom_functions/google_compute_firewall.erb
+    singular_extra_examples: 'third_party/inspec/documentation/firewall_examples.md'
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: firewall_name
+      direction: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: firewall_direction
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: firewall_id
   ForwardingRule: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   GlobalAddress: !ruby/object:Overrides::Inspec::ResourceOverride
@@ -37,9 +47,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Image: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Instance: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    additional_functions: third_party/inspec/custom_functions/google_compute_instance.erb
+    singular_extra_examples: 'third_party/inspec/documentation/instance_examples.md'
+    properties:
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "instance_id"
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "instance_name"
   InstanceGroup: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    additional_functions: third_party/inspec/custom_functions/google_compute_instance_group.erb
+    properties:
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "instance_group_id"
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "instance_group_name"
   InterconnectAttachment: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   License: !ruby/object:Overrides::Inspec::ResourceOverride
@@ -47,12 +68,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   MachineType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Network: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    additional_functions: third_party/inspec/custom_functions/google_compute_network.erb
+    singular_extra_examples: 'third_party/inspec/documentation/network_examples.md'
+    properties:
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "network_id"
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "network_name"
   NetworkEndpoint: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Inspec::ResourceOverride
-    additional_functions: |
-<%= lines(indent(compile('templates/inspec/custom_functions/google_compute_region.rb'), 6)) -%>
+    additional_functions: third_party/inspec/custom_functions/google_compute_region.erb
     properties:
       id: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: "region_id"
@@ -68,6 +94,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionHealthCheck: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  RegionInstanceGroupManager: !ruby/object:Overrides::Inspec::ResourceOverride
+    singular_extra_examples: 'third_party/inspec/documentation/region_instance_group_manager_examples.md'
+    additional_functions: third_party/inspec/custom_functions/google_compute_region_instance_group_manager.erb
+    properties:
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "instance_group_manager_id"
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "instance_group_manager_name"
   RegionSslCertificate: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   RegionTargetHttpProxy: !ruby/object:Overrides::Inspec::ResourceOverride
@@ -83,14 +117,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RouterBgpPeer: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Subnetwork: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude_resource: true
+    additional_functions: third_party/inspec/custom_functions/google_compute_subnetwork.erb
+    singular_extra_examples: 'third_party/inspec/documentation/subnetwork_examples.md'
+    properties:
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "subnetwork_id"
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "subnetwork_name"
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
   TargetInstance:  !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   TargetPool: !ruby/object:Overrides::Inspec::ResourceOverride
-    additional_functions: |
-<%= lines(indent(compile('templates/inspec/custom_functions/google_compute_target_pool.rb'), 6)) -%>
+    additional_functions: third_party/inspec/custom_functions/google_compute_target_pool.erb
   TargetVpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   TargetSslProxy: !ruby/object:Overrides::Inspec::ResourceOverride
@@ -102,6 +141,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pathMatchers.pathRules: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
   VpnTunnel: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "vpn_tunnel_name"
   Zone: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true

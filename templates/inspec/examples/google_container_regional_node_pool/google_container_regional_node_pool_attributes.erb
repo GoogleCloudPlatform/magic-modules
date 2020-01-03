@@ -1,4 +1,0 @@
-gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
-gcp_location = attribute(:gcp_location, default: '<%= external_attribute('gcp_location') -%>', description: 'The GCP project region.')
-regional_node_pool = attribute('regional_node_pool', default: <%= JSON.pretty_generate(grab_attributes['regional_node_pool']) -%>, description: 'Regional Node Pool definition')
-regional_cluster = attribute('regional_cluster', default: <%= JSON.pretty_generate(grab_attributes['regional_cluster']) -%>, description: 'Regional container cluster definition')

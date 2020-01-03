@@ -11,3 +11,10 @@ gcp_organization_id: 190694428152
 gcp_storage_bucket_name: gcp-inspec-storage-bucket
 gcp_cloud_function_region: europe-west1
 gcp_billing_account: billingAccounts/012345-567890-ABCDEF
+gcp_kube_cluster_name: gcp-inspec-kube-cluster
+gcp_kube_cluster_zone: europe-west2-a
+gcp_kube_cluster_size: 1
+gcp_kube_cluster_zone_extra1: europe-west2-b
+gcp_kube_cluster_zone_extra2: europe-west2-c
+gcp_kube_cluster_master_user: gcp-inspec-kube-admin
+gcp_kube_cluster_master_pass: P@$$w0rD
