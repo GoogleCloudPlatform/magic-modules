@@ -37,8 +37,8 @@ objects:
     actions: ['create', 'update']
     operation: !ruby/object:Api::PollAsync::Operation
       timeouts: !ruby/object:Api::Timeouts
-          insert_minutes: 6
-          update_minutes: 6
+          insert_minutes: 20
+          update_minutes: 20
   input: true
   parameters:
   - !ruby/object:Api::Type::String
