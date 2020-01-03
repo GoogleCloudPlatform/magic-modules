@@ -203,6 +203,10 @@ module Provider
       )
     end
 
+    def generate_resource_sweepers(data)
+      # No generated sweepers for this provider
+    end
+
     def emit_requires(requires)
       requires.flatten.sort.uniq.map { |r| "require '#{r}'" }.join("\n")
     end

@@ -65,5 +65,7 @@ module Provider
 
     # We don't want to generate anything but the resource.
     def generate_resource_tests(data) end
+
+    def generate_resource_sweepers(data) end
   end
 end

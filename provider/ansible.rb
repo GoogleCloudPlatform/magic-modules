@@ -286,6 +286,10 @@ module Provider
         )
       end
 
+      def generate_resource_sweepers(data)
+        # No generated sweepers for this provider
+      end
+
       def compile_datasource(data)
         target_folder = data.output_folder
         name = module_name(data.object)
