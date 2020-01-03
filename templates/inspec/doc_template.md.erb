@@ -27,6 +27,11 @@ A `<%= resource_underscored_name -%>` is used to test a Google <%= object.name -
 <%= compile("templates/inspec/examples/#{resource_name(object, product)}/#{resource_underscored_name}.erb") -%>
 
 ```
+<% if object.singular_extra_examples && !plural -%>
+
+<%= compile(object.singular_extra_examples) -%>
+
+<% end -%>
 
 ## Properties
 Properties that can be accessed from the `<%= resource_underscored_name -%>` resource:

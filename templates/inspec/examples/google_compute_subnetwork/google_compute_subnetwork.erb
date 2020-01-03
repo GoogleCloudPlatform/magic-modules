@@ -1,0 +1,15 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
+<% subnetwork = grab_attributes['subnetwork'] -%>
+describe google_compute_subnetwork(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: <%= doc_generation ? "'#{subnetwork['name']}'" : "subnetwork['name']" -%>) do
+  it { should exist }
+  its('ip_cidr_range') { should eq <%= doc_generation ? "'#{subnetwork['ip_cidr_range']}'" : "subnetwork['ip_cidr_range']" -%> }
+  its('log_config.enable') { should be true }
+  its('log_config.flow_sampling') { should cmp <%= doc_generation ? "'#{subnetwork['log_sampling']}'" : "subnetwork['log_sampling']" -%> }
+  its('log_config.aggregation_interval') { should cmp <%= doc_generation ? "'#{subnetwork['log_interval']}'" : "subnetwork['log_interval']" -%> }
+  its('log_config.metadata') { should include <%= doc_generation ? "'#{subnetwork['log_metadata']}'" : "subnetwork['log_metadata']" -%> }
+end
+
+describe google_compute_subnetwork(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

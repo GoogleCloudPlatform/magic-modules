@@ -31,6 +31,7 @@ instance_group_manager:
   base_instance_name: 'igm'
   named_port_name: 'port'
   named_port_port: 80
+
 autoscaler:
   name: 'inspec-gcp-autoscaler'
   max_replicas: 5
@@ -127,10 +128,6 @@ target_tcp_proxy:
   name: inspec-gcp-target-tcp-proxy
   proxy_header: NONE
   tcp_backend_service_name: gcp-inspec-tcp-backend-service
-
-regional_cluster:
-  name: inspec-gcp-regional-cluster
-  initial_node_count: 1
 
 route:
   name: inspec-gcp-route
@@ -358,3 +355,52 @@ service_perimeter:
   title: restrict_all
   restricted_service: storage.googleapis.com
   policy_title: policytitle
+
+firewall:
+  name: inspec-gcp-firewall
+  source_tag: some-tag
+
+address:
+  name: inspec-gcp-global-address
+  address_type: INTERNAL
+  address: "10.2.0.3"
+
+instance_group:
+  name: inspec-instance-group
+  description: My instance group for testing
+  named_port_name: https
+  named_port_port: 8080
+
+instance:
+  name: inspec-instance
+  machine_type: n1-standard-1
+  tag_1: foo
+  tag_2: bar
+  metadata_key: '123'
+  metadata_value: asdf
+  sa_scope: https://www.googleapis.com/auth/compute.readonly
+  startup_script: "echo hi > /test.txt"
+
+network:
+  name: inspec-network
+  routing_mode: REGIONAL
+
+subnetwork:
+  name: inspec-subnet
+  ip_cidr_range: "10.2.0.0/16"
+  log_interval: INTERVAL_10_MIN
+  log_sampling: .5
+  log_metadata: INCLUDE_ALL_METADATA
+
+rigm:
+  name: inspec-rigm
+  base_instance_name: rigm1
+  target_size: 1
+  named_port_name: https
+  named_port_port: 8888
+  healing_delay: 300
+
+vpn_tunnel:
+  name: inspec-vpn-tunnel
+  peer_ip: "15.0.0.120"
+  shared_secret: super secret
