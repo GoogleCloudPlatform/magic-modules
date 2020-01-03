@@ -38,14 +38,11 @@ output "db_latest_ca_cert" {
 
 The following arguments are supported:
 
-* `instance_self_link` - (Optional) The self link of the instance. One of `name` or `instance_self_link` must be provided.
-
-* `instance` - (Optional) The name of the instance. One of `name` or `instance_self_link` must be provided.
+* `instance` - (Required) The name or self link of the instance.
 
 ---
 
-* `project` - (Optional) The ID of the project in which the resource belongs.
-    If `instance_self_link` is provided, this value is ignored.  If `project` is not provided, the provider project is used.
+* `project` - (Optional) The ID of the project in which the resource belongs. If `project` is not provided, the provider project is used.
 
 ## Attributes Reference
 

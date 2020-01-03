@@ -13,22 +13,15 @@ func dataSourceGoogleSQLCaCerts() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"instance": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				DiffSuppressFunc: compareSelfLinkOrResourceName,
 			},
 			"project": {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
 				ForceNew: true,
-			},
-			"instance_self_link": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
 			},
 			"active_version": {
 				Type:     schema.TypeString,
@@ -71,22 +64,14 @@ func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) er
 
 	var project, instance string
 	if v, ok := d.GetOk("instance"); ok {
-		p, err := getProject(d, config)
-		if err != nil {
-			return err
-		}
-		project = p
-		instance = v.(string)
-	} else if selfLink, ok := d.GetOk("instance_self_link"); ok {
-		fv, err := parseProjectFieldValue("instances", selfLink.(string), "project", d, config, false)
+		fv, err := parseProjectFieldValue("instances", v.(string), "project", d, config, false)
 		if err != nil {
 			return err
 		}
 		project = fv.Project
 		instance = fv.Name
-		d.Set("instance_self_link", selfLink)
 	} else {
-		return fmt.Errorf("one of instance or instance_self_link must be set")
+		return fmt.Errorf("instance must be set")
 	}
 
 	log.Printf("[DEBUG] Fetching CA certs from instance %s", instance)
@@ -99,7 +84,6 @@ func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) er
 	log.Printf("[DEBUG] Fetched CA certs from instance %s", instance)
 
 	d.Set("project", project)
-	d.Set("instance", instance)
 	d.Set("certs", flattenServerCaCerts(response.Certs))
 	d.Set("active_version", response.ActiveVersion)
 	d.SetId(fmt.Sprintf("projects/%s/instance/%s", project, instance))

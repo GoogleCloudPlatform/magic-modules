@@ -86,7 +86,7 @@ data "google_sql_ca_certs" "ca_certs" {
 }
 
 data "google_sql_ca_certs" "ca_certs_self_link" {
-  instance_self_link = google_sql_database_instance.foo.self_link
+  instance = google_sql_database_instance.foo.self_link
 }
 `, instanceName)
 }
