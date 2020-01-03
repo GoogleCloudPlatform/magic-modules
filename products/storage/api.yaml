@@ -30,6 +30,7 @@ objects:
     kind: 'storage#bucket'
     base_url: b?project={{project}}
     self_link: b/{{name}}?projection=full
+    collection_url_key: items
     description: |
       The Buckets resource represents a bucket in Google Cloud Storage. There is
       a single global namespace shared by all buckets. For more information, see
@@ -40,6 +41,17 @@ objects:
       use in fine-grained manipulation of an existing bucket's access controls.
 
       A bucket is always owned by the project team owners group.
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      allowed_iam_role: 'roles/storage.objectViewer'
+      admin_iam_role: 'roles/storage.admin'
+      parent_resource_attribute: 'bucket'
+      base_url: 'b/{{name}}'
+      import_format: ['b/{{name}}', '{{name}}']
+      iam_conditions_request_type: :QUERY_PARAM
+      fetch_iam_policy_method: 'iam'
+      set_iam_policy_method: 'iam'
+      set_iam_policy_verb: :PUT
+      wrapped_policy_obj: false
     properties:
       - !ruby/object:Api::Type::Array
         name: 'acl'
@@ -331,7 +343,7 @@ objects:
             name: 'entityId'
             description: 'The ID for the entity.'
             output: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'projectNumber'
         description: 'The project number of the project the bucket belongs to.'
         output: true
@@ -425,6 +437,7 @@ objects:
     kind: 'storage#bucketAccessControl'
     base_url: b/{{bucket}}/acl
     self_link: b/{{bucket}}/acl/{{entity}}
+    collection_url_key: items
     description: |
       The BucketAccessControls resource represents the Access Control Lists
       (ACLs) for buckets within Google Cloud Storage. ACLs let you specify who

@@ -1093,3 +1093,9 @@ resource "google_compute_vpn_tunnel" "tunnel1" {
     google_compute_forwarding_rule.inspec-gcp-fr-udp4500,
   ]
 }
+
+resource "google_storage_bucket" "inspec-storage-bucket" {
+  project  = var.gcp_project_id
+  name     = "${var.gcp_storage_bucket_name}2"
+  location = var.gcp_location
+}

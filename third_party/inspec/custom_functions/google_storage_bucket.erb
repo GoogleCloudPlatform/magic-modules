@@ -1,0 +1,16 @@
+# redefine project_number method to return int value for comparison
+def project_number
+  return @project_number&.to_i
+end
+
+def has_versioning_enabled?
+  return false if !defined?(@versioning)
+  return false if @versioning.nil?
+  @versioning.enabled
+end
+
+def has_logging_enabled?
+  return false if !defined?(@logging)
+  return false if @logging.nil?
+  true
+end

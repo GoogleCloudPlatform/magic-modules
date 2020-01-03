@@ -102,6 +102,28 @@ module Provider
         File.join(markdown_target_folder, "#{iam_policy_resource_name}.md"),
         self
       )
+
+      generate_iam_binding(data)
+    end
+
+    # Generate the IAM binding for this object. This is used to query and test
+    # IAM bindings in a more convienient way than using the IAM policy resource
+    def generate_iam_binding(data)
+      target_folder = File.join(data.output_folder, 'libraries')
+
+      iam_binding_resource_name = "#{resource_name(data.object, data.product)}_iam_binding"
+      data.generate(
+        'templates/inspec/iam_binding/iam_binding.erb',
+        File.join(target_folder, "#{iam_binding_resource_name}.rb"),
+        self
+      )
+
+      markdown_target_folder = File.join(data.output_folder, 'docs/resources')
+      data.generate(
+        'templates/inspec/iam_binding/iam_binding.md.erb',
+        File.join(markdown_target_folder, "#{iam_binding_resource_name}.md"),
+        self
+      )
     end
 
     def generate_properties(data, props)

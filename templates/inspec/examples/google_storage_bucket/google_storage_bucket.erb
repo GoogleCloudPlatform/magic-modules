@@ -1,0 +1,13 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
+<% gcp_storage_bucket_name = "#{external_attribute('gcp_storage_bucket_name', doc_generation)}" -%>
+describe google_storage_bucket(project: <%= gcp_project_id -%>, name: <%= doc_generation ? gcp_storage_bucket_name : "\"\#{gcp_storage_bucket_name}2\"" -%>) do
+  it { should exist }
+  its('location') { should cmp <%= gcp_location -%>.upcase }
+
+  its('storage_class') { should eq "STANDARD" }
+end
+
+describe google_storage_bucket(project: <%= gcp_project_id -%>, name: "nonexistent") do
+  it { should_not exist }
+end
