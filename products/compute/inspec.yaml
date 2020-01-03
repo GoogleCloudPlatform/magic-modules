@@ -15,8 +15,7 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Address: !ruby/object:Overrides::Inspec::ResourceOverride
     base_url: projects/{{project}}/regions/{{location}}/addresses
-    additional_functions: |
-<%= lines(indent(compile('third_party/inspec/custom_functions/google_compute_address.erb'), 6)) -%>
+    additional_functions: third_party/inspec/custom_functions/google_compute_address.erb
     singular_extra_examples: 'third_party/inspec/documentation/address_examples.md'
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
@@ -29,8 +28,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   ExternalVpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Overrides::Inspec::ResourceOverride
-    additional_functions: |
-<%= lines(indent(compile('third_party/inspec/custom_functions/google_compute_firewall.erb'), 6)) -%>
+    additional_functions: third_party/inspec/custom_functions/google_compute_firewall.erb
     singular_extra_examples: 'third_party/inspec/documentation/firewall_examples.md'
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
@@ -49,8 +47,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Image: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Instance: !ruby/object:Overrides::Inspec::ResourceOverride
-    additional_functions: |
-<%= lines(indent(compile('third_party/inspec/custom_functions/google_compute_instance.erb'), 6)) -%>
+    additional_functions: third_party/inspec/custom_functions/google_compute_instance.erb
     singular_extra_examples: 'third_party/inspec/documentation/instance_examples.md'
     properties:
       id: !ruby/object:Overrides::Inspec::PropertyOverride
@@ -58,8 +55,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: "instance_name"
   InstanceGroup: !ruby/object:Overrides::Inspec::ResourceOverride
-    additional_functions: |
-<%= lines(indent(compile('third_party/inspec/custom_functions/google_compute_instance_group.erb'), 6)) -%>
+    additional_functions: third_party/inspec/custom_functions/google_compute_instance_group.erb
     properties:
       id: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: "instance_group_id"
@@ -72,8 +68,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   MachineType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Network: !ruby/object:Overrides::Inspec::ResourceOverride
-    additional_functions: |
-<%= lines(indent(compile('third_party/inspec/custom_functions/google_compute_network.erb'), 6)) -%>
+    additional_functions: third_party/inspec/custom_functions/google_compute_network.erb
     singular_extra_examples: 'third_party/inspec/documentation/network_examples.md'
     properties:
       id: !ruby/object:Overrides::Inspec::PropertyOverride
@@ -83,8 +78,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   NetworkEndpoint: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Inspec::ResourceOverride
-    additional_functions: |
-<%= lines(indent(compile('third_party/inspec/custom_functions/google_compute_region.erb'), 6)) -%>
+    additional_functions: third_party/inspec/custom_functions/google_compute_region.erb
     properties:
       id: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: "region_id"
@@ -102,8 +96,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionInstanceGroupManager: !ruby/object:Overrides::Inspec::ResourceOverride
     singular_extra_examples: 'third_party/inspec/documentation/region_instance_group_manager_examples.md'
-    additional_functions: |
-<%= lines(indent(compile('third_party/inspec/custom_functions/google_compute_region_instance_group_manager.erb'), 6)) -%>
+    additional_functions: third_party/inspec/custom_functions/google_compute_region_instance_group_manager.erb
     properties:
       id: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: "instance_group_manager_id"
@@ -124,8 +117,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RouterBgpPeer: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Subnetwork: !ruby/object:Overrides::Inspec::ResourceOverride
-    additional_functions: |
-<%= lines(indent(compile('third_party/inspec/custom_functions/google_compute_subnetwork.erb'), 6)) -%>
+    additional_functions: third_party/inspec/custom_functions/google_compute_subnetwork.erb
     singular_extra_examples: 'third_party/inspec/documentation/subnetwork_examples.md'
     properties:
       id: !ruby/object:Overrides::Inspec::PropertyOverride
@@ -137,8 +129,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   TargetInstance:  !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   TargetPool: !ruby/object:Overrides::Inspec::ResourceOverride
-    additional_functions: |
-<%= lines(indent(compile('third_party/inspec/custom_functions/google_compute_target_pool.erb'), 6)) -%>
+    additional_functions: third_party/inspec/custom_functions/google_compute_target_pool.erb
   TargetVpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   TargetSslProxy: !ruby/object:Overrides::Inspec::ResourceOverride

@@ -95,7 +95,7 @@ best_guess_identifier = extract_identifiers(individual_url).last
   end
 <% unless object&.additional_functions.nil? -%>
 
-<%= lines(indent(object.additional_functions, 2)) -%>
+<%= lines(indent(compile(object.additional_functions), 2)) -%>
 <% end -%>
 
   private

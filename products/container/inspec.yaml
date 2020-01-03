@@ -14,8 +14,7 @@
 --- !ruby/object:Provider::Inspec::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Inspec::ResourceOverride
-    additional_functions: |
-<%= lines(indent(compile('third_party/inspec/custom_functions/google_container_cluster.erb'), 6)) -%>
+    additional_functions: third_party/inspec/custom_functions/google_container_cluster.erb
     properties:
       kubectlPath: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
