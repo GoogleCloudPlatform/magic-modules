@@ -60,6 +60,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           Immutable purpose of CryptoKey. See
           https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys#CryptoKeyPurpose
           for inputs.
+  SecretCiphertext: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>
