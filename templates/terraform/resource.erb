@@ -539,10 +539,12 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             `NullFields` is a special case of `send_empty_value` where the empty value
             in question is go's literal nil.
 -%>
-<%          unless prop.send_empty_value -%>
-        } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
-<%          else -%>
+<%          if prop.send_empty_value -%>
         } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+<%          elsif prop.flatten_object -%>
+        } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+<%          else -%>
+        } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 <%          end -%>
             obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
         }
@@ -611,10 +613,12 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
     if err != nil {
         return err
-<%      unless prop.send_empty_value -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
-<%      else -%>
+<%      if prop.send_empty_value -%>
     } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+<%      elsif prop.flatten_object -%>
+    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+<%      else -%>
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 <%      end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
