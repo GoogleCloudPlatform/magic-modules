@@ -30,6 +30,7 @@ locals {
 output "db_latest_ca_cert" {
   description = "Latest CA cert used by the primary database server"
   value       = local.latest_cert
+  sensitive   = true
 }
 ```
 
