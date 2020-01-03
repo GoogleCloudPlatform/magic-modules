@@ -15,6 +15,8 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   FirewallRule: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["apps/{{project}}/firewall/ingressRules/{{priority}}"]
+    # This resource is a child resource (requires app ID in the URL)
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_firewall_rule_basic"
@@ -97,6 +99,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["{{project}}"]
     mutex: "apps/{{project}}"
     error_retry_predicates: ["isAppEngineRetryableError"]
+    # This resource is a child resource (requires app ID in the URL)
+    skip_sweeper: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.erb
     examples:

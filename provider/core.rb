@@ -221,7 +221,7 @@ module Provider
         generate_resource data.clone
         Google::LOGGER.debug "Generating #{object.name} tests"
         generate_resource_tests data.clone
-
+        generate_resource_sweepers data.clone
         generate_resource_files data.clone
       end
 

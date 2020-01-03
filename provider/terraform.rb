@@ -200,6 +200,27 @@ module Provider
                     filepath, self)
     end
 
+    def generate_resource_sweepers(data)
+      return if data.object.skip_sweeper ||
+                data.object.custom_code.custom_delete ||
+                data.object.custom_code.pre_delete
+
+      target_folder = File.join(data.output_folder, folder_name(data.version))
+
+      name = data.object.name.underscore
+      product_name = data.product.name.underscore
+      filepath =
+        File.join(
+          target_folder,
+          "resource_#{product_name}_#{name}_sweeper_test.go"
+        )
+
+      data.product = data.product.name
+      data.resource_name = data.object.name.camelize(:upper)
+      data.generate('templates/terraform/sweeper_file.go.erb',
+                    filepath, self)
+    end
+
     def generate_operation(output_folder, _types)
       return if @api.objects.select(&:autogen_async).empty?
 

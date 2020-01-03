@@ -16,6 +16,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   AppProfile: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}"
     import_format: ["projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}"]
+    # This resource is a child resource (requires an instance in the URL)
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "bigtable_app_profile_multicluster"

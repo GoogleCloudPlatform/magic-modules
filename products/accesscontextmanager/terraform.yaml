@@ -19,6 +19,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_minutes: 6
       delete_minutes: 6
     autogen_async: true
+    # Skipping the sweeper due to the non-standard base_url
+    skip_sweeper: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     examples:
@@ -39,6 +41,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_minutes: 6
       delete_minutes: 6
     autogen_async: true
+    # Skipping the sweeper due to the non-standard base_url
+    skip_sweeper: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     examples:
@@ -62,6 +66,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_minutes: 6
       delete_minutes: 6
     autogen_async: true
+    # Skipping the sweeper due to the non-standard base_url
+    skip_sweeper: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     examples:
