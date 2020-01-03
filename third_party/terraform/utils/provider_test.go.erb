@@ -304,7 +304,7 @@ resource "google_compute_address" "default" {
 }
 
 // Set up two projects. Project 1 has a service account that is used to create a
-// binauthz policy in project 2. The binauthz API is only enabled in project 2,
+// pubsub topic in project 2. The pubsub API is only enabled in project 2,
 // which causes the create to fail unless user_project_override is set to true.
 func testAccProviderUserProjectOverride(pid, name, org, billing, sa string) string {
 	return fmt.Sprintf(`
@@ -359,10 +359,10 @@ resource "google_service_account_iam_member" "token-creator-iam" {
 
 func testAccProviderUserProjectOverride_step2(pid, name, org, billing, sa string, override bool, topicName string) string {
 	return fmt.Sprintf(`
-// See step 3 below, which is really step 2 minus the binauthz policy.
+// See step 3 below, which is really step 2 minus the pubsub topic.
 // Step 3 exists because provider configurations can't be removed while objects
 // created by that provider still exist in state. Step 3 will remove the
-// binauthz policy so the whole config can be deleted.
+// pubsub topic so the whole config can be deleted.
 %s
 
 resource "google_pubsub_topic" "project-2-topic" {
