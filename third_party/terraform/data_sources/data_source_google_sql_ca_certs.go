@@ -62,17 +62,12 @@ func dataSourceGoogleSQLCaCerts() *schema.Resource {
 func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	var project, instance string
-	if v, ok := d.GetOk("instance"); ok {
-		fv, err := parseProjectFieldValue("instances", v.(string), "project", d, config, false)
-		if err != nil {
-			return err
-		}
-		project = fv.Project
-		instance = fv.Name
-	} else {
-		return fmt.Errorf("instance must be set")
+	fv, err := parseProjectFieldValue("instances", d.Get("instance").(string), "project", d, config, false)
+	if err != nil {
+		return err
 	}
+	project := fv.Project
+	instance := fv.Name
 
 	log.Printf("[DEBUG] Fetching CA certs from instance %s", instance)
 

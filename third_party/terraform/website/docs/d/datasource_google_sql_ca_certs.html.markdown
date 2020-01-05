@@ -24,12 +24,12 @@ data "google_sql_ca_certs" "ca_certs" {
 
 locals {
   furthest_expiration_time = reverse(sort([for k, v in data.google_sql_ca_certs.ca_certs.certs : v.expiration_time]))[0]
-  latest_cert            = [for v in data.google_sql_ca_certs.ca_certs.certs : v.cert if v.expiration_time == local.furthest_expiration_time]
+  latest_ca_cert           = [for v in data.google_sql_ca_certs.ca_certs.certs : v.cert if v.expiration_time == local.furthest_expiration_time]
 }
 
 output "db_latest_ca_cert" {
   description = "Latest CA cert used by the primary database server"
-  value       = local.latest_cert
+  value       = local.latest_ca_cert
   sensitive   = true
 }
 ```
