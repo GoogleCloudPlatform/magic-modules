@@ -74,10 +74,10 @@ func resourceComputeNetworkPeering() *schema.Resource {
 			},
 
 			"auto_create_routes": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				Removed:          "auto_create_routes has been removed because it's redundant and not user-configurable. It can safely be removed from your config",
-				ForceNew:         true,
+				Type:      schema.TypeBool,
+				Optional:  true,
+				Removed:   "auto_create_routes has been removed because it's redundant and not user-configurable. It can safely be removed from your config",
+				Computed: true,
 			},
 		},
 	}
