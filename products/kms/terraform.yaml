@@ -111,6 +111,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{crypto_key}}/{{ciphertext}}"
     supports_indirect_user_project_override: true
     exclude_import: true
+    exclude_validator: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "kms_secret_ciphertext_basic"
