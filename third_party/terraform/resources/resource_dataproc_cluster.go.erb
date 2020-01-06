@@ -53,6 +53,9 @@ var (
 		"cluster_config.0.initialization_action",
 		"cluster_config.0.encryption_config",
 		"cluster_config.0.autoscaling_config",
+<% unless version == 'ga' -%>
+		"cluster_config.0.lifecycle_config",
+<% end -%>
 	}
 )
 
@@ -508,6 +511,42 @@ by Dataproc`,
 								},
 							},
 						},
+<% unless version == 'ga' -%>
+						"lifecycle_config": {
+							Type:             schema.TypeList,
+							Optional:         true,
+							MaxItems:         1,
+							AtLeastOneOf:     clusterConfigKeys,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"idle_delete_ttl": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"idle_start_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"auto_delete_time": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										ConflictsWith: []string{
+											"cluster_config.0.lifecycle_config.0.auto_delete_ttl",
+										},
+									},
+									"auto_delete_ttl": {
+										Type:             schema.TypeString,
+										Optional:         true,
+										DiffSuppressFunc: dataprocLifecycleConfigDiffSuppress,
+										ConflictsWith: []string{
+											"cluster_config.0.lifecycle_config.0.auto_delete_time",
+										},
+									},
+								},
+							},
+						},
+<% end -%>
 					},
 				},
 			},
@@ -702,7 +741,6 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 
 	log.Printf("[INFO] Dataproc cluster %s has been created", cluster.ClusterName)
 	return resourceDataprocClusterRead(d, meta)
-
 }
 
 func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.ClusterConfig, error) {
@@ -748,6 +786,12 @@ func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.Clus
 	if cfg, ok := configOptions(d, "cluster_config.0.autoscaling_config"); ok {
 		conf.AutoscalingConfig = expandAutoscalingConfig(cfg)
 	}
+
+<% unless version == 'ga' -%>
+	if cfg, ok := configOptions(d, "cluster_config.0.lifecycle_config"); ok {
+		conf.LifecycleConfig = expandLifecycleConfig(cfg)
+	}
+<% end -%>
 
 	if cfg, ok := configOptions(d, "cluster_config.0.master_config"); ok {
 		log.Println("[INFO] got master_config")
@@ -918,6 +962,22 @@ func expandAutoscalingConfig(cfg map[string]interface{}) *dataproc.AutoscalingCo
 	return conf
 }
 
+<% unless version == 'ga' -%>
+func expandLifecycleConfig(cfg map[string]interface{}) *dataproc.LifecycleConfig {
+	conf := &dataproc.LifecycleConfig{}
+	if v, ok := cfg["idle_delete_ttl"]; ok {
+		conf.IdleDeleteTtl = v.(string)
+	}
+	if v, ok := cfg["auto_delete_time"]; ok {
+		conf.AutoDeleteTime = v.(string)
+	}
+	if v, ok := cfg["auto_delete_ttl"]; ok {
+		conf.AutoDeleteTtl = v.(string)
+	}
+	return conf
+}
+<% end -%>
+
 func expandInitializationActions(v interface{}) []*dataproc.NodeInitializationAction {
 	actionList := v.([]interface{})
 
@@ -1064,6 +1124,26 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 		updMask = append(updMask, "config.secondary_worker_config.num_instances")
 	}
 
+<% unless version == 'ga' -%>
+	if d.HasChange("cluster_config.0.lifecycle_config.0.auto_delete_time") {
+		desiredDeleteTime := d.Get("cluster_config.0.lifecycle_config.0.auto_delete_time").(string)
+		cluster.Config.LifecycleConfig = &dataproc.LifecycleConfig{
+			AutoDeleteTime: desiredDeleteTime,
+		}
+
+		updMask = append(updMask, "config.lifecycle_config.auto_delete_time")
+	}
+
+	if d.HasChange("cluster_config.0.lifecycle_config.0.auto_delete_ttl") {
+		desiredDeleteTtl := d.Get("cluster_config.0.lifecycle_config.0.auto_delete_ttl").(string)
+		cluster.Config.LifecycleConfig = &dataproc.LifecycleConfig{
+			AutoDeleteTtl: desiredDeleteTtl,
+		}
+
+		updMask = append(updMask, "config.lifecycle_config.auto_delete_ttl")
+	}
+<% end -%>
+
 	if len(updMask) > 0 {
 		patch := config.clientDataprocBeta.Projects.Regions.Clusters.Patch(
 			project, region, clusterName, cluster)
@@ -1132,6 +1212,9 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 		"preemptible_worker_config": flattenPreemptibleInstanceGroupConfig(d, cfg.SecondaryWorkerConfig),
 		"encryption_config":         flattenEncryptionConfig(d, cfg.EncryptionConfig),
 		"autoscaling_config":        flattenAutoscalingConfig(d, cfg.AutoscalingConfig),
+<% unless version == 'ga' -%>
+		"lifecycle_config":          flattenLifecycleConfig(d, cfg.LifecycleConfig),
+<% end -%>
 	}
 
 	if len(cfg.InitializationActions) > 0 {
@@ -1211,6 +1294,22 @@ func flattenAutoscalingConfig(d *schema.ResourceData, ec *dataproc.AutoscalingCo
 
 	return []map[string]interface{}{data}
 }
+
+<% unless version == 'ga' -%>
+func flattenLifecycleConfig(d *schema.ResourceData, lc *dataproc.LifecycleConfig) []map[string]interface{} {
+	if lc == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"idle_delete_ttl":  lc.IdleDeleteTtl,
+		"auto_delete_time": lc.AutoDeleteTime,
+		"auto_delete_ttl":  d.Get("auto_delete_ttl"),
+	}
+
+	return []map[string]interface{}{data}
+}
+<% end -%>
 
 func flattenAccelerators(accelerators []*dataproc.AcceleratorConfig) interface{} {
 	acceleratorsTypeSet := schema.NewSet(schema.HashResource(acceleratorsSchema()), []interface{}{})
@@ -1411,3 +1510,23 @@ func parseDataprocImageVersion(version string) (*dataprocImageVersion, error) {
 		osName:   matches[4],
 	}, nil
 }
+
+<% unless version == 'ga' -%>
+// The API seems to take the autoDeleteTtl value, append it to the start time (on creation) and set the
+// autoDeleteTime that way.  Thus, the first read shows autoDeleteTtl is not set, and autoDeleteTime is new,
+// causing a diff.
+func dataprocLifecycleConfigDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	oldTime, newTime := d.GetChange("cluster_config.0.lifecycle_config.0.auto_delete_time")
+	oldTtl, newTtl := d.GetChange("cluster_config.0.lifecycle_config.0.auto_delete_ttl")
+
+	if oldTime == "" {
+		return false
+	}
+
+	if oldTtl == "" && newTtl != "" && oldTime == newTime {
+		return true
+	}
+
+	return false
+}
+<% end -%>

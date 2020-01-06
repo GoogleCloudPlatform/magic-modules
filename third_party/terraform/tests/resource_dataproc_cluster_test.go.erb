@@ -529,6 +529,54 @@ func TestAccDataprocCluster_withOptionalComponents(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+func TestAccDataprocCluster_withLifecycleConfig(t *testing.T) {
+	t.Parallel()
+
+	rnd := acctest.RandString(10)
+	var cluster dataproc.Cluster
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataprocClusterDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withLifecycleConfig(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists("google_dataproc_cluster.with_lifecycle_config", &cluster),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataprocCluster_withLifecycleConfigAutoDeleteTtl(t *testing.T) {
+	t.Parallel()
+
+	rnd := acctest.RandString(10)
+	var cluster dataproc.Cluster
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataprocClusterDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletion(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists("google_dataproc_cluster.with_lifecycle_config", &cluster),
+				),
+			},
+			{
+				Config: testAccDataprocCluster_updateWithLifecycleConfigAutoDeletion(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists("google_dataproc_cluster.with_lifecycle_config", &cluster),
+				),
+			},
+		},
+	})
+}
+<% end -%>
+
 func TestAccDataprocCluster_withLabels(t *testing.T) {
 	t.Parallel()
 
@@ -1201,6 +1249,53 @@ resource "google_dataproc_cluster" "with_opt_components" {
 }
 `, rnd)
 }
+
+<% unless version == 'ga' -%>
+func testAccDataprocCluster_withLifecycleConfig(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "with_lifecycle_config" {
+  name   = "dproc-cluster-test-%s"
+  region = "us-central1"
+
+  cluster_config {
+    lifecycle_config {
+      idle_delete_ttl = "600s"
+    }
+  }
+}
+`, rnd)
+}
+
+func testAccDataprocCluster_withLifecycleConfigAutoDeletion(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "with_lifecycle_config" {
+ name   = "dproc-cluster-test-%s"
+ region = "us-central1"
+
+  cluster_config {
+    lifecycle_config {
+      auto_delete_ttl = "610s"
+    }
+  }
+}
+`, rnd)
+}
+
+func testAccDataprocCluster_updateWithLifecycleConfigAutoDeletion(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "with_lifecycle_config" {
+ name   = "dproc-cluster-test-%s"
+ region = "us-central1"
+
+ cluster_config {
+   lifecycle_config {
+     auto_delete_ttl = "620s"
+   }
+ }
+}
+`, rnd)
+}
+<% end -%>
 
 func testAccDataprocCluster_withServiceAcc(sa string, rnd string) string {
 	return fmt.Sprintf(`
