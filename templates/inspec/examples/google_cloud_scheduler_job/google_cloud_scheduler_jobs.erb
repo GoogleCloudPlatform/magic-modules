@@ -7,6 +7,7 @@ google_cloud_scheduler_jobs(project: <%= doc_generation ? "#{gcp_project_id}" : 
 	  its('description') { should cmp <%= doc_generation ? "'#{scheduler_job['description']}'" : "scheduler_job['description']" -%> }
 	  its('schedule') { should cmp <%= doc_generation ? "'#{scheduler_job['schedule']}'" : "scheduler_job['schedule']" -%> }
 	  its('time_zone') { should cmp <%= doc_generation ? "'#{scheduler_job['time_zone']}'" : "scheduler_job['time_zone']" -%> }
+    its('attempt_deadline') { should cmp <%= doc_generation ? "'#{scheduler_job['attempt_deadline']}'" : "scheduler_job['attempt_deadline']" -%> }
 	  its('http_target.http_method') { should cmp <%= doc_generation ? "'#{scheduler_job['http_method']}'" : "scheduler_job['http_method']" -%> }
 	  its('http_target.uri') { should cmp <%= doc_generation ? "'#{scheduler_job['http_target_uri']}'" : "scheduler_job['http_target_uri']" -%> }
 	end
