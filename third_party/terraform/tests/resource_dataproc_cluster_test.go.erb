@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -550,10 +551,13 @@ func TestAccDataprocCluster_withLifecycleConfig(t *testing.T) {
 	})
 }
 
-func TestAccDataprocCluster_withLifecycleConfigAutoDeleteTtl(t *testing.T) {
+func TestAccDataprocCluster_withLifecycleConfigAutoDeletion(t *testing.T) {
 	t.Parallel()
 
 	rnd := acctest.RandString(10)
+	now := time.Now()
+	fmtString := "2006-01-02T15:04:05.072Z"
+
 	var cluster dataproc.Cluster
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -561,13 +565,13 @@ func TestAccDataprocCluster_withLifecycleConfigAutoDeleteTtl(t *testing.T) {
 		CheckDestroy: testAccCheckDataprocClusterDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletion(rnd),
+				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletion(rnd, now.Add(time.Hour * 10).Format(fmtString)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists("google_dataproc_cluster.with_lifecycle_config", &cluster),
 				),
 			},
 			{
-				Config: testAccDataprocCluster_updateWithLifecycleConfigAutoDeletion(rnd),
+				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletion(rnd, now.Add(time.Hour * 20).Format(fmtString)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists("google_dataproc_cluster.with_lifecycle_config", &cluster),
 				),
@@ -1266,7 +1270,7 @@ resource "google_dataproc_cluster" "with_lifecycle_config" {
 `, rnd)
 }
 
-func testAccDataprocCluster_withLifecycleConfigAutoDeletion(rnd string) string {
+func testAccDataprocCluster_withLifecycleConfigAutoDeletion(rnd, tm string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_lifecycle_config" {
  name   = "dproc-cluster-test-%s"
@@ -1274,26 +1278,11 @@ resource "google_dataproc_cluster" "with_lifecycle_config" {
 
   cluster_config {
     lifecycle_config {
-      auto_delete_ttl = "610s"
+      auto_delete_time = "%s"
     }
   }
 }
-`, rnd)
-}
-
-func testAccDataprocCluster_updateWithLifecycleConfigAutoDeletion(rnd string) string {
-	return fmt.Sprintf(`
-resource "google_dataproc_cluster" "with_lifecycle_config" {
- name   = "dproc-cluster-test-%s"
- region = "us-central1"
-
- cluster_config {
-   lifecycle_config {
-     auto_delete_ttl = "620s"
-   }
- }
-}
-`, rnd)
+`, rnd, tm)
 }
 <% end -%>
 

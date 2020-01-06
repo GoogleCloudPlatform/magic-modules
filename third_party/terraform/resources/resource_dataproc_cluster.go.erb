@@ -522,24 +522,24 @@ by Dataproc`,
 									"idle_delete_ttl": {
 										Type:     schema.TypeString,
 										Optional: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.lifecycle_config.0.idle_delete_ttl",
+											"cluster_config.0.lifecycle_config.0.auto_delete_time",
+										},
 									},
 									"idle_start_time": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
+									// the API also has the auto_delete_ttl option in its request, however,
+									// the value is not returned in the response, rather the auto_delete_time
+									// after calculating ttl with the update time is returned, thus, for now
+									// we will only allow auto_delete_time to updated.
 									"auto_delete_time": {
 										Type:     schema.TypeString,
 										Optional: true,
-										Computed: true,
-										ConflictsWith: []string{
-											"cluster_config.0.lifecycle_config.0.auto_delete_ttl",
-										},
-									},
-									"auto_delete_ttl": {
-										Type:             schema.TypeString,
-										Optional:         true,
-										DiffSuppressFunc: dataprocLifecycleConfigDiffSuppress,
-										ConflictsWith: []string{
+										AtLeastOneOf: []string{
+											"cluster_config.0.lifecycle_config.0.idle_delete_ttl",
 											"cluster_config.0.lifecycle_config.0.auto_delete_time",
 										},
 									},
@@ -971,9 +971,6 @@ func expandLifecycleConfig(cfg map[string]interface{}) *dataproc.LifecycleConfig
 	if v, ok := cfg["auto_delete_time"]; ok {
 		conf.AutoDeleteTime = v.(string)
 	}
-	if v, ok := cfg["auto_delete_ttl"]; ok {
-		conf.AutoDeleteTtl = v.(string)
-	}
 	return conf
 }
 <% end -%>
@@ -1132,15 +1129,6 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 
 		updMask = append(updMask, "config.lifecycle_config.auto_delete_time")
-	}
-
-	if d.HasChange("cluster_config.0.lifecycle_config.0.auto_delete_ttl") {
-		desiredDeleteTtl := d.Get("cluster_config.0.lifecycle_config.0.auto_delete_ttl").(string)
-		cluster.Config.LifecycleConfig = &dataproc.LifecycleConfig{
-			AutoDeleteTtl: desiredDeleteTtl,
-		}
-
-		updMask = append(updMask, "config.lifecycle_config.auto_delete_ttl")
 	}
 <% end -%>
 
@@ -1304,7 +1292,6 @@ func flattenLifecycleConfig(d *schema.ResourceData, lc *dataproc.LifecycleConfig
 	data := map[string]interface{}{
 		"idle_delete_ttl":  lc.IdleDeleteTtl,
 		"auto_delete_time": lc.AutoDeleteTime,
-		"auto_delete_ttl":  d.Get("auto_delete_ttl"),
 	}
 
 	return []map[string]interface{}{data}
@@ -1510,23 +1497,3 @@ func parseDataprocImageVersion(version string) (*dataprocImageVersion, error) {
 		osName:   matches[4],
 	}, nil
 }
-
-<% unless version == 'ga' -%>
-// The API seems to take the autoDeleteTtl value, append it to the start time (on creation) and set the
-// autoDeleteTime that way.  Thus, the first read shows autoDeleteTtl is not set, and autoDeleteTime is new,
-// causing a diff.
-func dataprocLifecycleConfigDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	oldTime, newTime := d.GetChange("cluster_config.0.lifecycle_config.0.auto_delete_time")
-	oldTtl, newTtl := d.GetChange("cluster_config.0.lifecycle_config.0.auto_delete_ttl")
-
-	if oldTime == "" {
-		return false
-	}
-
-	if oldTtl == "" && newTtl != "" && oldTime == newTime {
-		return true
-	}
-
-	return false
-}
-<% end -%>
