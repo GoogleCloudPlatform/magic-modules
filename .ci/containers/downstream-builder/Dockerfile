@@ -3,6 +3,7 @@ from golang:1.13-stretch as resource
 SHELL ["/bin/bash", "-c"]
 
 RUN go get golang.org/x/tools/cmd/goimports
+RUN go get github.com/github/hub
 
 # Set up Github SSH cloning.
 RUN ssh-keyscan github.com >> /known_hosts
@@ -38,7 +39,7 @@ RUN apt-get install -y git build-essential libbz2-dev libssl-dev libreadline-dev
                         libffi-dev libsqlite3-dev tk-dev libpng-dev libfreetype6-dev \
                         make build-essential libssl-dev zlib1g-dev libbz2-dev \
                         libreadline-dev libsqlite3-dev curl llvm libncurses5-dev libncursesw5-dev \
-                        xz-utils tk-dev libffi-dev liblzma-dev python-openssl
+                        xz-utils tk-dev libffi-dev liblzma-dev python-openssl jq
 
 RUN wget https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/master/Gemfile
 RUN wget https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/master/Gemfile.lock
