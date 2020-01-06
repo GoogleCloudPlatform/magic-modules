@@ -26,3 +26,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         override_name: cluster_status
       network: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: cluster_network
+  NodePool: !ruby/object:Overrides::Inspec::ResourceOverride
+    base_url: projects/{{project}}/locations/{{location}}/clusters/{{cluster_name}}/nodePools
+    self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_name}}/nodePools/{{nodepool_name}}'
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: node_pool_name
+      status: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: node_pool_status

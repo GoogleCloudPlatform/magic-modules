@@ -664,6 +664,15 @@ objects:
                 - !ruby/object:Api::Type::String
                   name: 'cidrBlock'
                   description: Block specified in CIDR notation
+      - !ruby/object:Api::Type::Array
+        name: 'nodePools'
+        description: Node pools belonging to this cluster
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              description: Name of the node pool
   - !ruby/object:Api::Resource
     name: 'NodePool'
     base_url: projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools

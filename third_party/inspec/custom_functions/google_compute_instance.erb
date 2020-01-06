@@ -66,18 +66,18 @@ end
 # helper for returning label keys to perform checks
 def labels_keys
   return [] if !defined?(@labels) || @labels.nil?
-  @labels.items.keys
+  @labels.keys
 end
 
 # helper for returning label values to perform checks
 def labels_values
   return [] if !defined?(@labels) || @labels.nil?
-  @labels.items.values
+  @labels.values
 end
 
 def label_value_by_key(label_key)
   return [] if !defined?(@labels) || @labels.nil?
-  @labels.items[label_key]
+  @labels[label_key]
 end
 
 def metadata_keys
