@@ -321,6 +321,9 @@ func resourceBigtableInstanceValidateDevelopment(diff *schema.ResourceDiff, meta
 // act like a TypeSet while it's a TypeList underneath. It preserves state
 // ordering on updates, and causes the resource to get recreated if it would
 // attempt to perform an impossible change.
+// This doesn't use the standard unordered list utility (https://github.com/GoogleCloudPlatform/magic-modules/blob/master/templates/terraform/unordered_list_customize_diff.erb)
+// because some fields can't be modified using the API and we recreate the instance
+// when they're changed. 
 func resourceBigtableInstanceClusterReorderTypeList(diff *schema.ResourceDiff, meta interface{}) error {
 	oldCount, newCount := diff.GetChange("cluster.#")
 
@@ -396,6 +399,8 @@ func resourceBigtableInstanceClusterReorderTypeList(diff *schema.ResourceDiff, m
 	// changed. This will show a diff with the old state on the left side and
 	// the unmodified new state on the right and the ForceNew attributed to the
 	// _old state index_ even if the diff appears to have moved.
+	// This depends on the clusters having been reordered already by the prior
+	// SetNew call.
 	// We've implemented it here because it doesn't return an error in the
 	// client and silently fails.
 	for i := 0; i < newCount.(int); i++ {
