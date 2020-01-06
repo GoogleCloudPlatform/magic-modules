@@ -148,8 +148,8 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'cryptoKey'
         description: |
-          The id of the CryptoKey that will be used to
-          encrypt the provided plaintext.
+          The full name of the CryptoKey that will be used to encrypt the provided plaintext.
+          Format: `'projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}/cryptoKeys/{{cryptoKey}}'`
         required: true
         url_param_only: true
     properties:

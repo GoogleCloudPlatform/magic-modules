@@ -14,8 +14,8 @@
 -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	if v == nil {
-        return nil, nil
-    }
+		return nil, nil
+	}
 
 	return base64.StdEncoding.EncodeToString([]byte(v.(string))), nil
 }

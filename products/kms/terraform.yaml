@@ -120,6 +120,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_test: true
     properties:
       cryptoKey: !ruby/object:Overrides::Terraform::PropertyOverride
+        # url_param_only already makes this ignored on read, but including
+        # to be extra clear that nothing gets read
         ignore_read: true
       plaintext: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
