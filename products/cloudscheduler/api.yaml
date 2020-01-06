@@ -73,6 +73,16 @@ objects:
         required: false
         input: true
         default_value: 'Etc/UTC'
+      - !ruby/object:Api::Type::String
+        name: attemptDeadline
+        description: |
+          The deadline for job attempts. If the request handler doesn't respond by this dealine,
+          the request is cancelled and the attempt is marked as failed. For example, 20s
+          Value must end with a unit: s for seconds, m for minutes, h for hours. You can combine them for example 15m20s
+          Allowed value for HTTP target [15s, 30m], for App Engine HTTP target [15s, 24h]
+        required: false
+        input: true
+        default_value: '180s'
       - !ruby/object:Api::Type::NestedObject
         name: retryConfig
         description: |
