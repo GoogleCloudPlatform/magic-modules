@@ -13,6 +13,8 @@
       :version_added: '2.9'
     :timeZone:
       :version_added: '2.9'
+    :attemptDeadline:
+      :version_added: '2.9'
     :retryConfig:
       :version_added: '2.9'
       :retryCount:
