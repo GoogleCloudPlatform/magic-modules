@@ -1,8 +1,9 @@
 resource "google_cloud_scheduler_job" "job" {
-  name        = "<%= ctx[:vars]['job_name'] %>"
-  schedule    = "*/4 * * * *"
-  description = "test app engine job"
-  time_zone   = "Europe/London"
+  name             = "<%= ctx[:vars]['job_name'] %>"
+  schedule         = "*/4 * * * *"
+  description      = "test app engine job"
+  time_zone        = "Europe/London"
+  attempt_deadline = "180s"
 
   app_engine_http_target {
     http_method = "POST"
