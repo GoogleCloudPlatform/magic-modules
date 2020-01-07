@@ -22,10 +22,14 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   DefaultObjectACL: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  Object: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
   ObjectAccessControl: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   DefaultObjectACL: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  Object: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
   resource:

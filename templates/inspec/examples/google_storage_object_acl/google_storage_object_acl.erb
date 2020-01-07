@@ -1,0 +1,16 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_storage_bucket_object = "#{external_attribute('gcp_storage_bucket_object', doc_generation)}" -%>
+<% gcp_service_account_display_name = "#{external_attribute('gcp_service_account_display_name', doc_generation)}" -%>
+<% gcp_storage_bucket_object_name = "#{external_attribute('gcp_storage_bucket_object_name', doc_generation)}" -%>
+<% gcp_enable_privileged_resources = "#{external_attribute('gcp_enable_privileged_resources', doc_generation)}" -%>
+describe google_storage_object_acl(bucket: <%= gcp_storage_bucket_object -%>, object: <%= gcp_storage_bucket_object_name -%>, entity: <%= doc_generation ? "user-email" : "\"user-\#{gcp_service_account_display_name}@\#{gcp_project_id}.iam.gserviceaccount.com\"" -%>) do
+  it { should exist }
+  its('role') { should cmp "OWNER" }
+
+  its('bucket') { should eq <%= gcp_storage_bucket_object -%> }
+  its('email') { should include <%= doc_generation ? "entity-email.com" : "\"\#{gcp_service_account_display_name}@\#{gcp_project_id}.iam.gserviceaccount.com\"" -%> }
+end
+
+describe google_storage_object_acl(bucket: <%= gcp_storage_bucket_object -%>, object: <%= gcp_storage_bucket_object_name -%>, entity: "allUsers") do
+  it { should_not exist }
+end

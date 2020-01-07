@@ -700,5 +700,70 @@ objects:
         values:
           - :OWNER
           - :READER
+  - !ruby/object:Api::Resource
+    name: 'Object'
+    base_url: b/{{bucket}}/o/{{object}}
+    self_link: b/{{bucket}}/o/{{object}}
+    description: |
+      Information about an object stored in a GCS bucket
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'bucket'
+        description: 'The name of the bucket.'
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'object'
+        description: 'The name of the object.'
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'contentType'
+        description: 'The Content-Type of the object data.'
+      - !ruby/object:Api::Type::String
+        name: 'crc32c'
+        description: 'CRC32c checksum.'
+      - !ruby/object:Api::Type::String
+        name: 'etag'
+        description: 'The object entity tag.'
+      - !ruby/object:Api::Type::Integer
+        name: 'generation'
+        description: 'The content generation of this object. Used for object versioning.'
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        description: 'The ID of the object, including the bucket name, object name, and generation number.'
+      - !ruby/object:Api::Type::String
+        name: 'md5Hash'
+        description: 'MD5 hash of the data; encoded using base64.'
+      - !ruby/object:Api::Type::String
+        name: 'mediaLink'
+        description: 'Media download link.'
+      - !ruby/object:Api::Type::Integer
+        name: 'metageneration'
+        description: |
+          The version of the metadata for this object at this generation. Used for preconditions and for
+          detecting changes in metadata. A metageneration number is only meaningful in the context of a
+          particular generation of a particular object.
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'The name of the object.'
+      - !ruby/object:Api::Type::Integer
+        name: 'size'
+        description: 'Content-Length of the data in bytes.'
+      - !ruby/object:Api::Type::String
+        name: 'storageClass'
+        description: 'Storage class of the object.'
+      - !ruby/object:Api::Type::Time
+        name: 'timeCreated'
+        description: 'The time this object was created.'
+      - !ruby/object:Api::Type::Time
+        name: 'timeDeleted'
+        description: |
+          The time this object was deleted. Returned if and only if this version of the object is no longer
+          a live version, but remains in the bucket as a noncurrent version.
+      - !ruby/object:Api::Type::Time
+        name: timeStorageClassUpdated
+        description: The time at which the object's storage class was last changed.
+      - !ruby/object:Api::Type::Time
+        name: timeUpdated
+        api_name: updated
+        description: The modification time of the object metadata.
 
-  

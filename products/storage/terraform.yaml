@@ -82,6 +82,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
         # This field is (unexpectedly) not returned from the API
         ignore_read: true
+  Object: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

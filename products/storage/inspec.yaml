@@ -28,9 +28,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       location: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: bucket_location
   ObjectAccessControl: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    name: ObjectACL
+    singular_only: true
+    privileged: true
+    additional_functions: third_party/inspec/custom_functions/bucket_name_from_params.erb
   DefaultObjectACL: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    singular_only: true
+    privileged: true
+    additional_functions: third_party/inspec/custom_functions/bucket_name_from_params.erb
   BucketAccessControl: !ruby/object:Overrides::Inspec::ResourceOverride
     name: BucketACL
+    singular_only: true
     privileged: true
+    additional_functions: third_party/inspec/custom_functions/bucket_name_from_params.erb
+  Object: !ruby/object:Overrides::Inspec::ResourceOverride
+    name: BucketObject
+    singular_only: true
+    privileged: true
+    additional_functions: third_party/inspec/custom_functions/bucket_name_from_params.erb
