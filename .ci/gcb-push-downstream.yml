@@ -164,6 +164,9 @@ steps:
           - -c
           - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:inspec-sync
 
+options:
+    machineType: 'N1_HIGHCPU_8'
+
 secrets:
     - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/github-token
       secretEnv:
