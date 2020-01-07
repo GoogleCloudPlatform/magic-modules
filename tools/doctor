@@ -63,14 +63,23 @@ fi
 
 count_in_path "python"
 if [ $found -eq 0 ]; then
-    warn "yel" "   python not found. See https://golang.org/doc/install for information on installing it."
+    warn "yel" "   python not found. See https://docs.python-guide.org/starting/installation/"
+    warn "yel" "   for information on installing it."
 else
     warn "grn" "   found!"
 fi
 
 count_in_path "git"
 if [ $found -eq 0 ]; then
-    warn "yel" "   git not found. See https://docs.python-guide.org/starting/installation/ "
+    warn "yel" "   git not found. See https://git-scm.com/book/en/v2/Getting-Started-Installing-Git"
+    warn "yel" "   for information on installing it."
+else
+    warn "grn" "   found!"
+fi
+
+count_in_path "black"
+if [ $found -eq 0 ]; then
+    warn "yel" "   black not found. See https://black.readthedocs.io/en/stable/installation_and_usage.html"
     warn "yel" "   for information on installing it."
 else
     warn "grn" "   found!"
