@@ -1,5 +1,5 @@
 <% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
 <% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
 describe google_storage_buckets(project: <%= gcp_project_id -%>) do
-  its('bucket_names') { should include "inspec-gcp-static-<%= gcp_project_id -%>" }
+  its('bucket_names') { should include <%= doc_generation ? "bucket-name" : "\"inspec-gcp-static-\#{gcp_project_id}\"" -%> }
 end

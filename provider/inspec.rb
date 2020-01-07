@@ -362,5 +362,10 @@ module Provider
     def extract_identifiers(url)
       url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
     end
+
+    # Returns if this property has a sub property that is a Time class
+    def has_time_prop?(property_list = [])
+      property_list.any? { |sub_property| time?(sub_property) }
+    end
   end
 end

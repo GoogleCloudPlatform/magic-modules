@@ -1,6 +1,6 @@
 <% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
 <% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
-describe google_storage_bucket(name: "inspec-gcp-static-<%= gcp_project_id -%>") do
+describe google_storage_bucket(name: <%= doc_generation ? "bucket-name" : "\"inspec-gcp-static-\#{gcp_project_id}\"" -%>) do
   it { should exist }
   its('location') { should cmp <%= gcp_location -%>.upcase }
 
