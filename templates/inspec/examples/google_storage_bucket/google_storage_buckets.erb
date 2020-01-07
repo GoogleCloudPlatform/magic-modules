@@ -2,5 +2,5 @@
 <% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
 <% gcp_storage_bucket_name = "#{external_attribute('gcp_storage_bucket_name', doc_generation)}" -%>
 describe google_storage_buckets(project: <%= gcp_project_id -%>) do
-  its('bucket_names') { should include <%= doc_generation ? gcp_storage_bucket_name : "#{gcp_storage_bucket_name}2" -%> }
+  its('bucket_names') { should include <%= gcp_storage_bucket_name -%> }
 end
