@@ -79,7 +79,7 @@ for a `DEVELOPMENT` instance.
 * `storage_type` - (Optional) The storage type to use. One of `"SSD"` or
 `"HDD"`. Defaults to `"SSD"`.
 
-!> Modifying the `storage_type` or `zone` of an existing cluster (by
+!> **Warning:** Modifying the `storage_type` or `zone` of an existing cluster (by
 `cluster_id`) will cause Terraform to delete/recreate the entire
 `google_bigtable_instance` resource. If these values are changing, use a new
 `cluster_id`.
