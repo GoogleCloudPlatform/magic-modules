@@ -170,6 +170,7 @@ This resource provides the following
 <% end -%>
 - `delete` - Default is <%= timeouts.delete_minutes -%> minutes.
 
+<% unless object.exclude_import -%>
 ## Import
 
 <%= object.name -%> can be imported using any of these accepted formats:
@@ -183,6 +184,7 @@ $ terraform import <% if object.min_version.name == 'beta' %>-provider=google-be
 -> If you're importing a resource with beta features, make sure to include `-provider=google-beta`
 as an argument so that Terraform uses the correct provider to import your resource.
 
+<% end -%>
 <% if object.base_url.include?("{{project}}") || object.supports_indirect_user_project_override -%>
 ## User Project Overrides
 

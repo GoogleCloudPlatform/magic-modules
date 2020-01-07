@@ -100,6 +100,40 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/kms_crypto_key.go.erb
       update_encoder: templates/terraform/update_encoder/kms_crypto_key.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/kms_self_link.erb
+  SecretCiphertext: !ruby/object:Overrides::Terraform::ResourceOverride
+    description: |
+      {{description}}
+
+      ~> **NOTE**: Using this resource will allow you to conceal secret data within your
+      resource definitions, but it does not take care of protecting that data in the
+      logging output, plan output, or state output.  Please take care to secure your secret
+      data outside of resource definitions.
+    id_format: "{{crypto_key}}/{{ciphertext}}"
+    supports_indirect_user_project_override: true
+    exclude_import: true
+    exclude_validator: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "kms_secret_ciphertext_basic"
+        primary_resource_id: "my_password"
+        vars:
+          instance_name: "my-instance"
+        skip_test: true
+    properties:
+      cryptoKey: !ruby/object:Overrides::Terraform::PropertyOverride
+        # url_param_only already makes this ignored on read, but including
+        # to be extra clear that nothing gets read
+        ignore_read: true
+      plaintext: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+        sensitive: true
+        custom_expand: templates/terraform/custom_expand/base64.go.erb
+      ciphertext: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
+      post_create: templates/terraform/post_create/kms_secret_ciphertext.go.erb
+      decoder: templates/terraform/decoders/noop.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
