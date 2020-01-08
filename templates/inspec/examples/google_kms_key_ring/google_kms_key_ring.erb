@@ -1,0 +1,12 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
+<% gcp_kms_key_ring_policy_name = "#{external_attribute('gcp_kms_key_ring_policy_name', doc_generation)}" -%>
+describe google_kms_key_ring(project: <%= gcp_project_id -%>, location: <%= gcp_location -%>, name: <%= gcp_kms_key_ring_policy_name -%>) do
+  it { should exist }
+  its('create_time') { should be > Time.now - 365*60*60*24*10 }
+  its('key_ring_name'){ should eq <%= gcp_kms_key_ring_policy_name -%> }
+end
+
+describe google_kms_key_ring(project: <%= gcp_project_id -%>, location: <%= gcp_location -%>, name: "nonexistent") do
+  it { should exist }
+end

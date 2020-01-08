@@ -52,6 +52,11 @@ objects:
           The time that this resource was created on the server.
           This is in RFC3339 text format.
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'keyRingUrl'
+        description: |
+          The full resource name for the KeyRing
+        exclude: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating a key ring':
