@@ -1122,7 +1122,7 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 	}
 
 <% unless version == 'ga' -%>
-	if d.HasChange("cluster_config.0.lifecycle_config") {
+	if d.HasChange("cluster_config.0.lifecycle_config.0.idle_delete_ttl") {
 		idleDeleteTtl := d.Get("cluster_config.0.lifecycle_config.0.idle_delete_ttl").(string)
 		cluster.Config.LifecycleConfig = &dataproc.LifecycleConfig{
 			IdleDeleteTtl: idleDeleteTtl,
