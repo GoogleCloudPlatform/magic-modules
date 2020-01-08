@@ -1,0 +1,36 @@
+<% iam_resource_name = "#{resource_name(object, product)}_iam_binding" -%>
+---
+title: About the <%= iam_resource_name -%> resource
+platform: gcp
+---
+
+## Syntax
+A `<%= iam_resource_name -%>` is used to test a Google <%= object.name -%> Iam Bindings
+
+## Examples
+<%
+identifiers = extract_identifiers(format_url(object.self_link_url))
+identifiers_out = identifiers.map { |id| "#{id.underscore}: #{id.inspect}" }.join(', ')
+-%>
+```
+describe <%= iam_resource_name -%>(<%= identifiers_out -%>, role: "roles/editor") do
+  it { should exist }
+  its('members') { should include 'user:testuser@example.com' }
+end
+```
+
+## Properties
+Properties that can be accessed from the `<%= iam_resource_name -%>` resource:
+
+  * `role`: Role that is assigned to members. For example, roles/viewer, roles/editor, or roles/owner.
+
+  * `members`: Specifies the identities requesting access for a Cloud Platform resource.
+
+<% unless @api.apis_required.empty? -%>
+
+## GCP Permissions
+
+<% @api.apis_required.each do |api| -%>
+Ensure the [<%= api.name -%>](<%= api.url -%>) is enabled for the current project.
+<% end # @api.apis_required.each -%>
+<% end # unless @api.apis_required.empty? -%>

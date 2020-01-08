@@ -22,7 +22,7 @@ scopes:
   - https://www.googleapis.com/auth/devstorage.full_control
 apis_required:
   - !ruby/object:Api::Product::ApiReference
-    name: Google CLoud Storage
+    name: Google Cloud Storage
     url: https://console.cloud.google.com/apis/library/storage-component.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
@@ -30,6 +30,7 @@ objects:
     kind: 'storage#bucket'
     base_url: b?project={{project}}
     self_link: b/{{name}}?projection=full
+    collection_url_key: items
     description: |
       The Buckets resource represents a bucket in Google Cloud Storage. There is
       a single global namespace shared by all buckets. For more information, see
@@ -40,6 +41,17 @@ objects:
       use in fine-grained manipulation of an existing bucket's access controls.
 
       A bucket is always owned by the project team owners group.
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      allowed_iam_role: 'roles/storage.objectViewer'
+      admin_iam_role: 'roles/storage.admin'
+      parent_resource_attribute: 'bucket'
+      base_url: 'b/{{name}}'
+      import_format: ['b/{{name}}', '{{name}}']
+      iam_conditions_request_type: :QUERY_PARAM
+      fetch_iam_policy_method: 'iam'
+      set_iam_policy_method: 'iam'
+      set_iam_policy_verb: :PUT
+      wrapped_policy_obj: false
     properties:
       - !ruby/object:Api::Type::Array
         name: 'acl'
@@ -331,7 +343,7 @@ objects:
             name: 'entityId'
             description: 'The ID for the entity.'
             output: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'projectNumber'
         description: 'The project number of the project the bucket belongs to.'
         output: true
@@ -425,6 +437,7 @@ objects:
     kind: 'storage#bucketAccessControl'
     base_url: b/{{bucket}}/acl
     self_link: b/{{bucket}}/acl/{{entity}}
+    collection_url_key: items
     description: |
       The BucketAccessControls resource represents the Access Control Lists
       (ACLs) for buckets within Google Cloud Storage. ACLs let you specify who
@@ -687,5 +700,74 @@ objects:
         values:
           - :OWNER
           - :READER
+  - !ruby/object:Api::Resource
+    name: 'Object'
+    base_url: b/{{bucket}}/o/{{object}}
+    self_link: b/{{bucket}}/o/{{object}}
+    description: |
+      Information about an object stored in a GCS bucket
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'bucket'
+        description: 'The name of the bucket.'
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'object'
+        description: 'The name of the object.'
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'contentType'
+        description: |
+          The Content-Type of the object data.
 
-  
+          See https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
+          for more information on possible Content-Types
+      - !ruby/object:Api::Type::String
+        name: 'crc32c'
+        description: 'CRC32c checksum.'
+      - !ruby/object:Api::Type::String
+        name: 'etag'
+        description: 'The object entity tag.'
+      - !ruby/object:Api::Type::Integer
+        name: 'generation'
+        description: 'The content generation of this object. Used for object versioning.'
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        description: 'The ID of the object, including the bucket name, object name, and generation number.'
+      - !ruby/object:Api::Type::String
+        name: 'md5Hash'
+        description: 'MD5 hash of the data; encoded using base64.'
+      - !ruby/object:Api::Type::String
+        name: 'mediaLink'
+        description: 'Media download link.'
+      - !ruby/object:Api::Type::Integer
+        name: 'metageneration'
+        description: |
+          The version of the metadata for this object at this generation. Used for preconditions and for
+          detecting changes in metadata. A metageneration number is only meaningful in the context of a
+          particular generation of a particular object.
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'The name of the object.'
+      - !ruby/object:Api::Type::Integer
+        name: 'size'
+        description: 'Content-Length of the data in bytes.'
+      - !ruby/object:Api::Type::String
+        name: 'storageClass'
+        description: 'Storage class of the object.'
+      - !ruby/object:Api::Type::Time
+        name: 'timeCreated'
+        description: 'The time this object was created.'
+      - !ruby/object:Api::Type::Time
+        name: 'timeDeleted'
+        description: |
+          The time this object was deleted. Returned if and only if this version of the object is no longer
+          a live version, but remains in the bucket as a noncurrent version.
+      - !ruby/object:Api::Type::Time
+        name: timeStorageClassUpdated
+        description: The time at which the object's storage class was last changed.
+      - !ruby/object:Api::Type::Time
+        name: timeUpdated
+        api_name: updated
+        description: The modification time of the object metadata.
+
