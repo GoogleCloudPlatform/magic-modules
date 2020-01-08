@@ -1853,6 +1853,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: proxyId
       quicOverride: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :NONE
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   RegionTargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
