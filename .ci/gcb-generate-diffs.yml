@@ -36,8 +36,21 @@ steps:
     # we're used to from Concourse.
     - name: 'gcr.io/cloud-builders/git'
       args:
-          - checkout
+          - remote
+          - add
+          - head
+          - $_HEAD_REPO_URL
+
+    - name: 'gcr.io/cloud-builders/git'
+      args:
+          - fetch
+          - head
           - $_HEAD_BRANCH
+
+    - name: 'gcr.io/cloud-builders/git'
+      args:
+          - checkout
+          - head/$_HEAD_BRANCH
     - name: 'gcr.io/cloud-builders/git'
       id: merged
       args:
