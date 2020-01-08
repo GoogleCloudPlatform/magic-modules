@@ -124,7 +124,7 @@ func testSweep<%= sweeper_name -%>(region string) error {
 		}
 		zoneSegs := strings.Split(obj["zone"].(string),"/")
 		zone := zoneSegs[len(zoneSegs)-1]
-		deleteTemplate = strings.ReplaceAll(deleteTemplate, "{{zone}}", zone)
+		deleteTemplate = strings.Replace(deleteTemplate, "{{zone}}", zone, -1)
 
 		<% end -%>
 		deleteUrl, err := replaceVars(d, config, deleteTemplate)
