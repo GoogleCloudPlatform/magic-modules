@@ -531,7 +531,7 @@ func TestAccDataprocCluster_withOptionalComponents(t *testing.T) {
 }
 
 <% unless version == 'ga' -%>
-func TestAccDataprocCluster_withLifecycleConfig(t *testing.T) {
+func TestAccDataprocCluster_withLifecycleConfigIdleDeleteTtl(t *testing.T) {
 	t.Parallel()
 
 	rnd := acctest.RandString(10)
@@ -542,7 +542,13 @@ func TestAccDataprocCluster_withLifecycleConfig(t *testing.T) {
 		CheckDestroy: testAccCheckDataprocClusterDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocCluster_withLifecycleConfig(rnd),
+				Config: testAccDataprocCluster_withLifecycleConfigIdleDeleteTtl(rnd, "600s"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists("google_dataproc_cluster.with_lifecycle_config", &cluster),
+				),
+			},
+			{
+				Config: testAccDataprocCluster_withLifecycleConfigIdleDeleteTtl(rnd, "610s"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists("google_dataproc_cluster.with_lifecycle_config", &cluster),
 				),
@@ -564,18 +570,36 @@ func TestAccDataprocCluster_withLifecycleConfigAutoDeletion(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(),
 		Steps: []resource.TestStep{
+			// {
+			// 	Config: testAccDataprocCluster_withLifecycleConfigAutoDeletionTtl(rnd, "600s"),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheckDataprocClusterExists("google_dataproc_cluster.with_lifecycle_config", &cluster),
+			// 	),
+			// },
 			{
-				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletion(rnd, now.Add(time.Hour * 10).Format(fmtString)),
+				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletionTime(rnd, now.Add(time.Hour * 10).Format(fmtString)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists("google_dataproc_cluster.with_lifecycle_config", &cluster),
 				),
 			},
 			{
-				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletion(rnd, now.Add(time.Hour * 20).Format(fmtString)),
+				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletionTime(rnd, now.Add(time.Hour * 20).Format(fmtString)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists("google_dataproc_cluster.with_lifecycle_config", &cluster),
 				),
 			},
+			// {
+			// 	Config: testAccDataprocCluster_withLifecycleConfigAutoDeletionTtl(rnd, "610s"),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheckDataprocClusterExists("google_dataproc_cluster.with_lifecycle_config", &cluster),
+			// 	),
+			// },
+			// {
+			// 	Config: testAccDataprocCluster_withLifecycleConfigAutoDeletionTtl(rnd, "620s"),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheckDataprocClusterExists("google_dataproc_cluster.with_lifecycle_config", &cluster),
+			// 	),
+			// },
 		},
 	})
 }
@@ -1255,7 +1279,7 @@ resource "google_dataproc_cluster" "with_opt_components" {
 }
 
 <% unless version == 'ga' -%>
-func testAccDataprocCluster_withLifecycleConfig(rnd string) string {
+func testAccDataprocCluster_withLifecycleConfigIdleDeleteTtl(rnd, tm string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_lifecycle_config" {
   name   = "dproc-cluster-test-%s"
@@ -1263,24 +1287,39 @@ resource "google_dataproc_cluster" "with_lifecycle_config" {
 
   cluster_config {
     lifecycle_config {
-      idle_delete_ttl = "600s"
+      idle_delete_ttl = "%s"
     }
   }
 }
-`, rnd)
+`, rnd, tm)
 }
 
-func testAccDataprocCluster_withLifecycleConfigAutoDeletion(rnd, tm string) string {
+// func testAccDataprocCluster_withLifecycleConfigAutoDeletionTtl(rnd, tm string) string {
+// 	return fmt.Sprintf(`
+// resource "google_dataproc_cluster" "with_lifecycle_config" {
+//  name   = "dproc-cluster-test-%s"
+//  region = "us-central1"
+
+//   cluster_config {
+//     lifecycle_config {
+//       auto_delete_ttl = "%s"
+//     }
+//   }
+// }
+// `, rnd, tm)
+// }
+
+func testAccDataprocCluster_withLifecycleConfigAutoDeletionTime(rnd, tm string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_lifecycle_config" {
  name   = "dproc-cluster-test-%s"
  region = "us-central1"
 
-  cluster_config {
-    lifecycle_config {
-      auto_delete_time = "%s"
-    }
-  }
+ cluster_config {
+   lifecycle_config {
+     auto_delete_time = "%s"
+   }
+ }
 }
 `, rnd, tm)
 }

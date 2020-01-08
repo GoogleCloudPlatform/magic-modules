@@ -1122,10 +1122,23 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 	}
 
 <% unless version == 'ga' -%>
+	if d.HasChange("cluster_config.0.lifecycle_config") {
+		idleDeleteTtl := d.Get("cluster_config.0.lifecycle_config.0.idle_delete_ttl").(string)
+		cluster.Config.LifecycleConfig = &dataproc.LifecycleConfig{
+			IdleDeleteTtl: idleDeleteTtl,
+		}
+
+		updMask = append(updMask, "config.lifecycle_config.idle_delete_ttl")
+	}
+
 	if d.HasChange("cluster_config.0.lifecycle_config.0.auto_delete_time") {
 		desiredDeleteTime := d.Get("cluster_config.0.lifecycle_config.0.auto_delete_time").(string)
-		cluster.Config.LifecycleConfig = &dataproc.LifecycleConfig{
-			AutoDeleteTime: desiredDeleteTime,
+		if cluster.Config.LifecycleConfig != nil {
+			cluster.Config.LifecycleConfig.AutoDeleteTime = desiredDeleteTime
+		} else {
+			cluster.Config.LifecycleConfig = &dataproc.LifecycleConfig{
+				AutoDeleteTime: desiredDeleteTime,
+			}
 		}
 
 		updMask = append(updMask, "config.lifecycle_config.auto_delete_time")
