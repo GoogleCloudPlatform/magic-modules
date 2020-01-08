@@ -79,7 +79,7 @@ link_query_items = object&.nested_query&.keys&.first || object.collection_url_ke
 <% end # object.all_user_properties.each -%>
     }
   end
-<% if has_time_prop?(object.all_user_properties) -%>
+<% if time_prop?(object.all_user_properties) -%>
 
   # Handles parsing RFC3339 time string
   def parse_time_string(time_string)

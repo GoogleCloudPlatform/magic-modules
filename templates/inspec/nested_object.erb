@@ -54,7 +54,7 @@ module GoogleInSpec
         def to_s
           "#{@parent_identifier} <%= class_name -%>"
         end
-<% if has_time_prop?(property.nested_properties) -%>
+<% if time_prop?(property.nested_properties) -%>
 
         # Handles parsing RFC3339 time string
         def parse_time_string(time_string)

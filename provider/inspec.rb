@@ -364,7 +364,7 @@ module Provider
     end
 
     # Returns if this property has a sub property that is a Time class
-    def has_time_prop?(property_list = [])
+    def time_prop?(property_list = [])
       property_list.any? { |sub_property| time?(sub_property) }
     end
   end

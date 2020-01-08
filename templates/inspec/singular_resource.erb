@@ -76,7 +76,7 @@ class <%= object.__product.name.camelize(:upper) -%><%= object.name -%> < GcpRes
 -%>
 <%= lines(indent(parse_code, 4)) -%>
   end
-<% if has_time_prop?(object.all_user_properties) -%>
+<% if time_prop?(object.all_user_properties) -%>
 
   # Handles parsing RFC3339 time string
   def parse_time_string(time_string)
