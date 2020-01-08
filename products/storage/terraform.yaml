@@ -16,17 +16,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Bucket: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_resource: true
     import_format: ["{{name}}"]
-    iam_policy: !ruby/object:Api::Resource::IamPolicy
-      allowed_iam_role: 'roles/storage.objectViewer'
-      admin_iam_role: 'roles/storage.admin'
-      parent_resource_attribute: 'bucket'
-      base_url: 'b/{{name}}'
-      import_format: ['b/{{name}}', '{{name}}']
-      iam_conditions_request_type: :QUERY_PARAM
-      fetch_iam_policy_method: 'iam'
-      set_iam_policy_method: 'iam'
-      set_iam_policy_verb: :PUT
-      wrapped_policy_obj: false
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_bucket_basic"
@@ -93,6 +82,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
         # This field is (unexpectedly) not returned from the API
         ignore_read: true
+  Object: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

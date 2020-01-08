@@ -18,3 +18,6 @@ gcp_kube_cluster_zone_extra1: europe-west2-b
 gcp_kube_cluster_zone_extra2: europe-west2-c
 gcp_kube_cluster_master_user: gcp-inspec-kube-admin
 gcp_kube_cluster_master_pass: P@$$w0rD
+gcp_storage_bucket_acl: storage-bucket-name
+gcp_storage_bucket_object_name: image1
+gcp_storage_bucket_object: bucket-with-object

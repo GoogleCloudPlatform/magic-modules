@@ -2,21 +2,19 @@
 
 <%= lines(autogen_notice :ruby) -%>
 require 'gcp_backend'
-require 'google/iam/property/iam_policy_audit_configs'
 require 'google/iam/property/iam_policy_bindings'
 
-# A provider to manage <%= @api.product_full_name -%> IAM Policy resources.
-class <%= object.name -%>IamPolicy < GcpResourceBase
-  name '<%= resource_name(object, product) -%>_iam_policy'
-  desc '<%= object.name -%> Iam Policy'
+# A provider to manage <%= @api.product_full_name -%> IAM Binding resources.
+class <%= object.name -%>IamBinding < GcpResourceBase
+  name '<%= resource_name(object, product) -%>_iam_binding'
+  desc '<%= object.name -%> Iam Binding'
   supports platform: 'gcp'
 
   attr_reader :params
-  attr_reader :bindings
-  attr_reader :audit_configs
 
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
+    raise "Expected 'role' to be defined for iam_binding resource" unless params.key?(:role)
     @params = params
     @fetched = @connection.fetch(product_url, resource_base_url, params, '<%= object.iam_policy.fetch_iam_policy_verb.capitalize -%>')
     parse unless @fetched.nil?
@@ -24,11 +22,19 @@ class <%= object.name -%>IamPolicy < GcpResourceBase
 
   def parse
     @bindings = GoogleInSpec::Iam::Property::IamPolicyBindingsArray.parse(@fetched['bindings'], to_s)
-    @audit_configs = GoogleInSpec::Iam::Property::IamPolicyAuditConfigsArray.parse(@fetched['auditConfigs'], to_s)
+    @bindings.each do |binding|
+      next if binding.role != params[:role]
+      @members_list = binding.members
+      @iam_binding_exists = true
+    end
   end
 
   def exists?
-    !@fetched.nil?
+    @iam_binding_exists
+  end
+
+  def members
+    @members_list
   end
 
 <%
@@ -36,7 +42,7 @@ individual_url = object.iam_policy.base_url || object.self_link || object.base_u
 identifiers = extract_identifiers(individual_url)
 -%>
   def to_s
-    "<%= object.name -%> IamPolicy #{@params[:<%= identifiers.last.underscore -%>]}"
+    "<%= object.name -%> IamBinding #{@params[:<%= identifiers.last.underscore -%>]} Role: #{@params[:role]}"
   end
 
   private

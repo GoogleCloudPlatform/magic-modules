@@ -26,6 +26,7 @@ module Overrides
           privileged
           singular_only
           singular_extra_examples
+          iam_binding
         ]
       end
 

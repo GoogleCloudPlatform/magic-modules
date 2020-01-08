@@ -634,6 +634,7 @@ resource "google_logging_organization_sink" "my-sink" {
 resource "google_storage_bucket" "bucket" {
   name          = "inspec-gcp-static-${var.gcp_project_id}"
   project       = var.gcp_project_id
+  location      = var.gcp_location
   force_destroy = true
 }
 
