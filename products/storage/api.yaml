@@ -717,7 +717,11 @@ objects:
         required: true
       - !ruby/object:Api::Type::String
         name: 'contentType'
-        description: 'The Content-Type of the object data.'
+        description: |
+          The Content-Type of the object data.
+
+          See https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
+          for more information on possible Content-Types
       - !ruby/object:Api::Type::String
         name: 'crc32c'
         description: 'CRC32c checksum.'
