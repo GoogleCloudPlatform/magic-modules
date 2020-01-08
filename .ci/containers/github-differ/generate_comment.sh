@@ -2,7 +2,6 @@
 
 set -e
 
-
 if [ $# -lt 1 ]; then
     echo "Usage: $0 pr-number"
     exit 1
@@ -86,5 +85,5 @@ else
 fi
 
 curl -H "Authorization: token ${GITHUB_TOKEN}" \
-     -d "{\"body\": \"$DIFFS\"}" \
+      -d "$(jq -r --arg diffs "$DIFFS" -n "{body: \$diffs}")" \
       "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}/comments"
