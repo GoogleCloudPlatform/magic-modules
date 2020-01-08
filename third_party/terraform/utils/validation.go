@@ -261,3 +261,16 @@ func StringNotInSlice(invalid []string, ignoreCase bool) schema.SchemaValidateFu
 		return
 	}
 }
+
+// Ensure that hourly timestamp strings "HH:MM" have the minutes zeroed out for hourly only inputs
+func validateHourlyOnly(val interface{}, key string) (warns []string, errs []error) {
+	v := val.(string)
+	parts := strings.Split(v, ":")
+	if len(parts) != 2 {
+		errs = append(errs, fmt.Errorf("%q must be in the format HH:00, got: %s", key, v))
+	}
+	if parts[1] != "00" {
+		errs = append(errs, fmt.Errorf("%q does not allow minutes, it must be in the format HH:00, got: %s", key, v))
+	}
+	return
+}
