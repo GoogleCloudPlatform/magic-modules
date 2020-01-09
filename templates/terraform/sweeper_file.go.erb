@@ -13,6 +13,12 @@ import (
 <%
 sweeper_name = product_ns + object.name
 wrap_path = object&.nested_query&.keys&.first || object.collection_url_key
+listUrlTemplate = object.__product.base_url + object.base_url
+
+listUrlTemplate.sub! "zones/{{zone}}", "aggregated"
+aggregatedList = listUrlTemplate.include? "/aggregated/"
+
+deleteUrlTemplate = object.__product.base_url + object.delete_uri
 -%>
 
 func init() {
@@ -39,7 +45,7 @@ func testSweep<%= sweeper_name -%>(region string) error {
 		return err
 	}
 
-	listTemplate := strings.Split("<%= object.__product.base_url + object.base_url -%>","?")[0]
+	listTemplate := strings.Split("<%= listUrlTemplate -%>","?")[0]
 
 	d := &ResourceDataMock{
 		FieldsInSchema: map[string]interface{}{
@@ -72,8 +78,24 @@ func testSweep<%= sweeper_name -%>(region string) error {
 		log.Printf("[INFO] Nothing found in response.")
 		return nil
 	}
+	<%  if aggregatedList -%>
+	var rl []interface{}
+	zones := resourceList.(map[string]interface{})
+	// Loop through every zone in the list response
+	for _, zonesValue := range zones {
+		zone := zonesValue.(map[string]interface{})
+		for k, v := range zone {
+			// Zone map either has resources or a warning stating there were no resources found in the zone
+			if k != "warning" {
+				resourcesInZone := v.([]interface{})
+				rl = append(rl, resourcesInZone...)
+			}
+		}
+	}
+	<%  else -%>
 
 	rl := resourceList.([]interface{})
+	<% end -%>
 
 	log.Printf("[INFO] Found %d items in %s list response.", len(rl), resourceName)
 	// items who don't match the tf-test prefix
@@ -93,7 +115,18 @@ func testSweep<%= sweeper_name -%>(region string) error {
 			nonPrefixCount++
 			continue
 		}
-		deleteTemplate := "<%= object.__product.base_url + object.delete_uri -%>"
+		deleteTemplate := "<%= deleteUrlTemplate -%>"
+		<%  if aggregatedList -%>
+
+		if obj["zone"] == nil {
+			log.Printf("[INFO] %s resource zone was nil", resourceName)
+			return nil
+		}
+		zoneSegs := strings.Split(obj["zone"].(string),"/")
+		zone := zoneSegs[len(zoneSegs)-1]
+		deleteTemplate = strings.Replace(deleteTemplate, "{{zone}}", zone, -1)
+
+		<% end -%>
 		deleteUrl, err := replaceVars(d, config, deleteTemplate)
 		if err != nil {
 			log.Printf("[INFO] error preparing delete url: %s", err)
