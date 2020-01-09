@@ -19,8 +19,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     plural_custom_logic: third_party/inspec/custom_functions/kms_key_ring_name.erb
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
-        override_name: key_ring_name
+        # This is added back via custom methods
+        exclude: true
       keyRingUrl: !ruby/object:Overrides::Inspec::PropertyOverride
+        # Allows us to use the `name` field as the full URL
         exclude: false
         api_name: name
     iam_policy: !ruby/object:Api::Resource::IamPolicy

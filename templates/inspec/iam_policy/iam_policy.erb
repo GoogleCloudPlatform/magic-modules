@@ -40,7 +40,7 @@ identifiers = extract_identifiers(individual_url)
   end
 
   def iam_binding_roles
-    @bindings.map { |binding| binding.role }
+    @bindings.map(&:role)
   end
 
   def count
