@@ -309,8 +309,8 @@ data "google_iam_policy" "foo" {
 }
 
 resource "<%= resource_ns_iam -%>_policy" "foo" {
-<%= lines(compile('templates/terraform/iam/iam_attributes.go.erb')) -%>
-	policy_data = "${data.google_iam_policy.foo.policy_data}"
+<%= lines(compile(object.iam_policy.example_config_body)) -%>
+  policy_data = "${data.google_iam_policy.foo.policy_data}"
 }
 `, context)
 }
