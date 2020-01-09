@@ -1,0 +1,15 @@
+def has_ip_configuration_require_ssl?
+  return false if @settings&.ip_configuration&.require_ssl.nil?
+  return true if @settings.ip_configuration.require_ssl.to_s.casecmp('true').zero?
+  false
+end
+
+def authorized_networks
+  return [] if @settings&.ip_configuration&.authorized_networks.nil?
+  @database.settings.ip_configuration.authorized_networks.map(&:value)
+end
+
+def primary_ip_address
+  return '' if !@ip_addresses.size == 0 || @ip_addresses[0].ip_address.nil?
+  @ip_addresses[0].ip_address
+end

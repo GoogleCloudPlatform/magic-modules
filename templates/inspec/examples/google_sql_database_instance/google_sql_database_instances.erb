@@ -1,0 +1,8 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
+<% gcp_db_instance_name = "#{external_attribute('gcp_db_instance_name', doc_generation)}" -%>
+
+describe google_sql_database_instances(project: <%= gcp_project_id -%>) do
+  its('instance_states') { should include 'RUNNABLE' }
+  its('instance_names') { should include <%= gcp_db_instance_name -%> }
+end
