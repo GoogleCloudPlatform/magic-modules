@@ -59,6 +59,9 @@ link_query_items = object&.nested_query&.keys&.first || object.collection_url_ke
           name, value = transform(key, hash)
           hash_with_symbols[name] = value
         end
+<% if object.plural_custom_logic -%>
+<%= lines(indent(compile(object.plural_custom_logic), 8)) -%>
+<% end -%>
         converted.push(hash_with_symbols)
       end
     end

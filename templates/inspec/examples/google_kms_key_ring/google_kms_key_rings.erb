@@ -4,3 +4,11 @@
 describe google_kms_key_rings(project: <%= gcp_project_id -%>, location: <%= gcp_location -%>) do
   its('key_ring_names'){ should include <%= gcp_kms_key_ring_policy_name -%> }
 end
+
+describe.one do
+  google_kms_key_rings(project: <%= gcp_project_id -%>, location: <%= gcp_location -%>).key_ring_urls do |url|
+    describe url do
+      it { should match <%= gcp_kms_key_ring_policy_name -%> }
+    end
+  end
+end

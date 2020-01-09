@@ -16,13 +16,28 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   KeyRing: !ruby/object:Overrides::Inspec::ResourceOverride
     privileged: true
     additional_functions: third_party/inspec/custom_functions/kms_key_ring.erb
+    plural_custom_logic: third_party/inspec/custom_functions/kms_key_ring_name.erb
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
-        exclude: true
+        override_name: key_ring_name
       keyRingUrl: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: false
         api_name: name
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      base_url: 'projects/{{project}}/locations/{{location}}/keyRings/{{key_ring_name}}'
+      exclude: false
+      method_name_separator: ':'
   CryptoKey: !ruby/object:Overrides::Inspec::ResourceOverride
+    base_url: 'projects/{{project}}/locations/{{location}}/keyRings/{{key_ring_name}}/cryptoKeys'
+    self_link: 'projects/{{project}}/locations/{{location}}/keyRings/{{key_ring_name}}/cryptoKeys/{{name}}'
     privileged: true
-    exclude: true
-  
+    additional_functions: third_party/inspec/custom_functions/kms_crypto_key.erb
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        name: cryptoKeyName
+        api_name: name
+        name_from_self_link: true
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      base_url: 'projects/{{project}}/locations/{{location}}/keyRings/{{key_ring_name}}/cryptoKeys/{{crypto_key_name}}'
+      exclude: false
+      method_name_separator: ':'
