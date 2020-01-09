@@ -268,9 +268,16 @@ func validateHourlyOnly(val interface{}, key string) (warns []string, errs []err
 	parts := strings.Split(v, ":")
 	if len(parts) != 2 {
 		errs = append(errs, fmt.Errorf("%q must be in the format HH:00, got: %s", key, v))
+		return
 	}
 	if parts[1] != "00" {
 		errs = append(errs, fmt.Errorf("%q does not allow minutes, it must be in the format HH:00, got: %s", key, v))
+	}
+	i, err := strconv.Atoi(parts[0])
+	if err != nil {
+		errs = append(errs, fmt.Errorf("%q cannot be parsed, it must be in the format HH:00, got: %s", key, v))
+	} else if i < 0 || i > 23 {
+		errs = append(errs, fmt.Errorf("%q does not specify a valid hour, it must be in the format HH:00 where HH : [00-23], got: %s", key, v))
 	}
 	return
 }
