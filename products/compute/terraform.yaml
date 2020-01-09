@@ -1332,6 +1332,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
+      snapshotSchedulePolicy.schedule.dailySchedule.startTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateHourlyOnly'
+      snapshotSchedulePolicy.schedule.hourlySchedule.startTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateHourlyOnly'
       snapshotSchedulePolicy.schedule.weeklySchedule.dayOfWeeks: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       snapshotSchedulePolicy.snapshotProperties.storageLocations: !ruby/object:Overrides::Terraform::PropertyOverride
