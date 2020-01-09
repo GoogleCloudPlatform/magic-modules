@@ -195,7 +195,7 @@ func TestRequestBatcher_errInSend(t *testing.T) {
 
 				// We shouldn't get error for non-failure index
 				if err != nil {
-					t.Errorf("expected request %d to succeed, got error: %v", i, err)
+					t.Errorf("expected request %d to succeed, got error: %v", idx, err)
 				}
 			}
 		}(i)
