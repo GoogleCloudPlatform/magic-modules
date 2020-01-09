@@ -27,6 +27,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           alert_policy_display_name: "My Alert Policy"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      decoder: 'templates/terraform/decoders/alert_policy_removed_fields.go.erb'
       post_create: templates/terraform/post_create/set_computed_name.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/alert_policy.erb
 
