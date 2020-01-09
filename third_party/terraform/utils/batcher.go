@@ -245,7 +245,7 @@ func (b *RequestBatcher) sendBatchWithSingleRetry(batchKey string, batch *starte
 	// If the batch failed and combines more than one request, retry each single request.
 	if resp.IsError() && len(batch.subscribers) > 1 {
 		log.Printf("[DEBUG] Batch failed with error: %v", resp.err)
-		log.Printf("[DEBUG] Sending each request in batch seperately")
+		log.Printf("[DEBUG] Sending each request in batch separately")
 		for _, sub := range batch.subscribers {
 			log.Printf("[DEBUG] Retrying single request %q", sub.singleRequest.DebugId)
 			singleResp := sub.singleRequest.send()
