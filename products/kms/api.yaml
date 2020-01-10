@@ -47,11 +47,16 @@ objects:
           The resource name for the KeyRing.
         required: true
       - !ruby/object:Api::Type::Time
-        name: 'creationTime'
+        name: 'createTime'
         description: |
           The time that this resource was created on the server.
           This is in RFC3339 text format.
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'keyRingUrl'
+        description: |
+          The full resource name for the KeyRing
+        exclude: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating a key ring':
@@ -84,7 +89,7 @@ objects:
         input: true
         url_param_only: true
       - !ruby/object:Api::Type::Time
-        name: 'creationTime'
+        name: 'createTime'
         description: |
           The time that this resource was created on the server.
           This is in RFC3339 text format.
@@ -131,6 +136,11 @@ objects:
               - "SOFTWARE"
               - "HSM"
             input: true
+      - !ruby/object:Api::Type::Time
+        name: 'nextRotationTime'
+        description: |
+          The time when KMS will create a new version of this Crypto Key.
+        output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating a key':

@@ -1,0 +1,47 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Inspec::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  KeyRing: !ruby/object:Overrides::Inspec::ResourceOverride
+    privileged: true
+    additional_functions: third_party/inspec/custom_functions/kms_key_ring.erb
+    plural_custom_logic: third_party/inspec/custom_functions/kms_key_ring_name.erb
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        # This is added back via custom methods
+        exclude: true
+      keyRingUrl: !ruby/object:Overrides::Inspec::PropertyOverride
+        # Allows us to use the `name` field as the full URL
+        exclude: false
+        api_name: name
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      base_url: 'projects/{{project}}/locations/{{location}}/keyRings/{{key_ring_name}}'
+      exclude: false
+      method_name_separator: ':'
+  CryptoKey: !ruby/object:Overrides::Inspec::ResourceOverride
+    base_url: 'projects/{{project}}/locations/{{location}}/keyRings/{{key_ring_name}}/cryptoKeys'
+    self_link: 'projects/{{project}}/locations/{{location}}/keyRings/{{key_ring_name}}/cryptoKeys/{{name}}'
+    privileged: true
+    additional_functions: third_party/inspec/custom_functions/kms_crypto_key.erb
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        name: cryptoKeyName
+        api_name: name
+        name_from_self_link: true
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      base_url: 'projects/{{project}}/locations/{{location}}/keyRings/{{key_ring_name}}/cryptoKeys/{{crypto_key_name}}'
+      exclude: false
+      method_name_separator: ':'
+  SecretCiphertext: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true

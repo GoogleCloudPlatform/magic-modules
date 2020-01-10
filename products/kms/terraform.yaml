@@ -37,7 +37,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       attributes: |
         * `self_link`: The self link of the created KeyRing in the format `projects/{project}/locations/{location}/keyRings/{name}`
     properties:
-      creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
+      createTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       location: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
@@ -74,7 +74,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       attributes: |
         * `self_link`: The self link of the created CryptoKey. Its format is `{{key_ring}}/cryptoKeys/{{name}}`.
     properties:
-      creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
+      createTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       keyRing: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'kmsCryptoKeyRingsEquivalent'
@@ -93,6 +93,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "versionTemplate.algorithm"
       versionTemplate.protectionLevel: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :SOFTWARE
+      nextRotationTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/kms_crypto_key.erb
       custom_import: templates/terraform/custom_import/kms_crypto_key.go.erb
