@@ -583,6 +583,7 @@ func stringInSlice(arr []string, str string) bool {
 
 	return false
 }
+<% unless version == 'ga' -%>
 
 func timestampDiffSuppress(format string) schema.SchemaDiffSuppressFunc {
 	return func(_, old, new string, _ *schema.ResourceData) bool {
@@ -599,3 +600,4 @@ func timestampDiffSuppress(format string) schema.SchemaDiffSuppressFunc {
 		return oldT == newT
 	}
 }
+<% end -%>
