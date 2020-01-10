@@ -132,6 +132,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
+							Deprecated: "This property is only applicable to First Generation instances, and First Generation instances are now deprecated.",
 						},
 						"availability_type": {
 							Type:             schema.TypeString,
@@ -179,6 +180,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Computed: true,
+							Deprecated: "This property is only applicable to First Generation instances, and First Generation instances are now deprecated.",
 						},
 						"database_flags": {
 							Type:     schema.TypeList,
@@ -299,7 +301,6 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 						"pricing_plan": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Deprecated: "This property is only applicable to First Generation instances, and First Generation instances are now deprecated.",
 							Default:  "PER_USE",
 						},
 						"replication_type": {

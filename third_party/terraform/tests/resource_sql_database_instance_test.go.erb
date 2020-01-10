@@ -655,7 +655,6 @@ resource "google_sql_database_instance" "instance" {
   region = "us-central1"
   settings {
     tier                   = "db-f1-micro"
-    crash_safe_replication = false
   }
 }
 `
@@ -782,7 +781,6 @@ resource "google_sql_database_instance" "instance" {
   region = "us-central1"
   settings {
     tier                   = "db-f1-micro"
-    crash_safe_replication = false
     location_preference {
       zone = "us-central1-f"
     }
@@ -948,7 +946,6 @@ resource "google_sql_database_instance" "instance" {
   region = "us-central1"
   settings {
     tier                   = "db-f1-micro"
-    crash_safe_replication = false
 
     ip_configuration {
       ipv4_enabled = "true"
@@ -967,7 +964,6 @@ resource "google_sql_database_instance" "instance" {
   region = "us-central1"
   settings {
     tier                   = "db-f1-micro"
-    crash_safe_replication = false
 
     ip_configuration {
       ipv4_enabled = "true"
@@ -982,7 +978,6 @@ resource "google_sql_database_instance" "instance" {
   region = "us-central1"
   settings {
     tier                   = "db-f1-micro"
-    crash_safe_replication = false
   }
 }
 
