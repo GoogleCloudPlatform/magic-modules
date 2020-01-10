@@ -54,6 +54,10 @@ REPO=$2
 VERSION=$3
 REFERENCE=$4
 
+mkdir ../mm-$REPO-$VERSION-$COMMAND
+cp -rp ./. ../mm-$REPO-$VERSION-$COMMAND
+pushd ../mm-$REPO-$VERSION-$COMMAND
+
 clone_repo
 
 git config --global user.name "Modular Magician"
@@ -63,7 +67,7 @@ if [ "$COMMAND" == "head" ]; then
     BRANCH=auto-pr-$REFERENCE
     COMMIT_MESSAGE="New generated code for MM PR $REFERENCE."
 elif [ "$COMMAND" == "base" ]; then
-    git checkout HEAD~
+    git checkout HEAD^2
     BRANCH=auto-pr-$REFERENCE-old
     COMMIT_MESSAGE="Old generated code for MM PR $REFERENCE."
 elif [ "$COMMAND" == "downstream" ]; then
