@@ -10,6 +10,6 @@ def authorized_networks
 end
 
 def primary_ip_address
-  return '' if !@ip_addresses.size == 0 || @ip_addresses[0].ip_address.nil?
+  return '' if !@ip_addresses.size.zero? || @ip_addresses[0].ip_address.nil?
   @ip_addresses[0].ip_address
 end
