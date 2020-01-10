@@ -1,0 +1,6 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% project_exclusion = grab_attributes['folder_exclusion'] -%>
+
+describe google_logging_project_exclusions(project: <%= gcp_project_id -%>) do
+  its('names'){ should include <%= doc_generation ? "'#{project_exclusion['name']}'" : "project_exclusion['name']" -%> }
+end

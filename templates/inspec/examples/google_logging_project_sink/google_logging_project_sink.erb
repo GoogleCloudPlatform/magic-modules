@@ -1,0 +1,10 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% project_sink = grab_attributes['project_sink'] -%>
+describe google_logging_project_sink(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{project_sink['name']}'" : "project_sink['name']" -%>) do
+  it { should exist }
+  its('filter') { should cmp <%= doc_generation ? "'#{project_sink['filter']}'" : "project_sink['filter']" -%> }
+end
+
+describe google_logging_project_sink(project: <%= gcp_project_id -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

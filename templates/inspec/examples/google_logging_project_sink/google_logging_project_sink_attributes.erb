@@ -1,0 +1,3 @@
+project_sink = attribute('project_sink', default: <%= grab_attributes['project_sink'] -%>)
+gcp_project_id = attribute(:gcp_project_id, default: <%= external_attribute('gcp_project_id') -%>, description: 'The project id.')
+gcp_enable_privileged_resources = attribute(:gcp_enable_privileged_resources, default:0, description:'Flag to enable privileged resources requiring elevated privileges in GCP.')

@@ -1,0 +1,5 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% project_sink = grab_attributes['project_sink'] -%>
+describe google_logging_project_sinks(project: <%= gcp_project_id -%>) do
+  its('names') { should include <%= doc_generation ? "'#{project_sink['name']}'" : "project_sink['name']" -%> }
+end
