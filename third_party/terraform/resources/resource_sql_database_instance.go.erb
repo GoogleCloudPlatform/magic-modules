@@ -24,6 +24,7 @@ var sqlDatabaseAuthorizedNetWorkSchemaElem *schema.Resource = &schema.Resource{
 		"expiration_time": {
 			Type:     schema.TypeString,
 			Optional: true,
+			Deprecated: "This property is only applicable to First Generation instances, and First Generation instances are now deprecated.",
 		},
 		"name": {
 			Type:     schema.TypeString,
@@ -298,11 +299,13 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 						"pricing_plan": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Deprecated: "This property is only applicable to First Generation instances, and First Generation instances are now deprecated.",
 							Default:  "PER_USE",
 						},
 						"replication_type": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Deprecated: "This property is only applicable to First Generation instances, and First Generation instances are now deprecated.",
 							Default:  "SYNCHRONOUS",
 						},
 						"user_labels": {
