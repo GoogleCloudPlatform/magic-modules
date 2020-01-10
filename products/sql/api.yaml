@@ -395,7 +395,26 @@ objects:
               update method to make sure concurrent updates are handled properly. 
               During update, use the most recent settingsVersion value for this 
               instance and do not try to update this value.
-      # TODO(nelsonjr): Add missing properties such as state.
+      - !ruby/object:Api::Type::String
+        name: 'gceZone'
+        output: true
+        description: |
+          The Compute Engine zone that the instance is currently serving from. This value could be
+          different from the zone that was specified when the instance was created if the instance
+          has failed over to its secondary zone.
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        output: true
+        description: |
+          The current serving state of the database instance.
+        values:
+          - :SQL_INSTANCE_STATE_UNSPECIFIED
+          - :RUNNABLE
+          - :SUSPENDED
+          - :PENDING_DELETE
+          - :PENDING_CREATE
+          - :MAINTENANCE
+          - :FAILED
   - !ruby/object:Api::Resource
     name: 'Database'
     kind: 'sql#database'

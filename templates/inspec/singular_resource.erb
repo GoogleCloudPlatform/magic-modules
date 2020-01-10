@@ -64,7 +64,7 @@ class <%= object.__product.name.camelize(:upper) -%><%= object.name -%> < GcpRes
   end
 
   def unwrap(fetched, params)
-    fetched[collection_item].find { |result| identity.all? { |id| result[id.to_sym] == params[id] } }
+    fetched[collection_item].find { |result| identity.all? { |id| result[id] == params[id.to_sym] } }
   end
 <% end # object.nested_query.nil? -%>
 

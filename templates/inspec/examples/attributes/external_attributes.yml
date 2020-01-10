@@ -23,3 +23,5 @@ gcp_storage_bucket_object_name: image1
 gcp_storage_bucket_object: bucket-with-object
 gcp_kms_key_ring_policy_name: kms-key-ring
 gcp_kms_crypto_key_name_policy: kms-key
+gcp_db_instance_name: my-database
+gcp_db_user_name: user-name
