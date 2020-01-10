@@ -24,6 +24,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           name: "my-bucket"
         primary_resource_name: "fmt.Sprintf(\"my-bucket%s\", context[\"random_suffix\"])"
   BucketAccessControl: !ruby/object:Overrides::Terraform::ResourceOverride
+    description: |
+      Bucket ACLs can be managed authoritatively using the
+      [`storage_bucket_acl`](https://www.terraform.io/docs/providers/google/r/storage_bucket_acl.html)
+      resource. Do not use these two resources in conjunction to manage the same bucket.
+
+      The BucketAccessControls resource manages the Access Control List
+      (ACLs) for a single entity/role pairing on a bucket. ACLs let you specify who
+      has access to your data and to what extent.
+
+      There are three roles that can be assigned to an entity:
+
+      READERs can get the bucket, though no acl property will be returned, and
+      list the bucket's objects.  WRITERs are READERs, and they can insert
+      objects into the bucket and delete the bucket's objects.  OWNERs are
+      WRITERs, and they can get the acl property of a bucket, update a bucket,
+      and call all BucketAccessControls methods on the bucket.  For more
+      information, see Access Control, with the caveat that this API uses
+      READER, WRITER, and OWNER instead of READ, WRITE, and FULL_CONTROL.
     examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "storage_bucket_access_control_public_bucket"
