@@ -149,3 +149,12 @@ objects:
         name: validBeforeTime
         description: Key can only be used before this time.
         output: true
+      - !ruby/object:Api::Type::Enum
+        name: keyType
+        output: true
+        description: |
+          Specifies the type of the key. Possible values include KEY_TYPE_UNSPECIFIED, USER_MANAGED and SYSTEM_MANAGED
+        values:
+          - :KEY_TYPE_UNSPECIFIED
+          - :USER_MANAGED
+          - :SYSTEM_MANAGED
