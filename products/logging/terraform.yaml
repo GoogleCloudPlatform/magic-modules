@@ -42,6 +42,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   OrganizationLogSink: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
+  ProjectLogSink: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
+  ProjectExclusion: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
   FolderExclusion: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   FolderLogSink: !ruby/object:Overrides::Terraform::ResourceOverride
