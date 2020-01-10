@@ -4,5 +4,5 @@
 <% gcp_db_user_name = "#{external_attribute('gcp_db_user_name', doc_generation)}" -%>
 
 describe google_sql_users(project: <%= gcp_project_id -%>, database: <%= gcp_db_instance_name -%>) do
-  its('user_instances') { should include <%= gcp_db_user_name -%> }
+  its('user_names') { should include <%= gcp_db_user_name -%> }
 end

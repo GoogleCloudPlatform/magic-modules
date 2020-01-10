@@ -5,6 +5,7 @@
 
 describe google_sql_user(project: <%= gcp_project_id -%>, database: <%= gcp_db_instance_name -%>, name: <%= gcp_db_user_name -%>, host: "example.com") do
   it { should exist }
+  its('name') { should cmp <%= gcp_db_user_name -%> }
   its('instance') { should cmp <%= gcp_db_instance_name -%> }
 end
 
