@@ -19,7 +19,7 @@ task: !ruby/object:Provider::Ansible::Task
     schedule: "*/4 * * * *"
     description: "test app engine job"
     time_zone: "Europe/London"
-    attempt_deadline: "10m30s"
+    attempt_deadline: "320s"
     app_engine_http_target:
       http_method: "POST"
       app_engine_routing:
