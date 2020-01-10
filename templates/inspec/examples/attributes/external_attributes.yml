@@ -21,3 +21,5 @@ gcp_kube_cluster_master_pass: P@$$w0rD
 gcp_storage_bucket_acl: storage-bucket-name
 gcp_storage_bucket_object_name: image1
 gcp_storage_bucket_object: bucket-with-object
+gcp_kms_key_ring_policy_name: kms-key-ring
+gcp_kms_crypto_key_name_policy: kms-key

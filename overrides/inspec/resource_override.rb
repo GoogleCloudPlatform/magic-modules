@@ -26,7 +26,7 @@ module Overrides
           privileged
           singular_only
           singular_extra_examples
-          iam_binding
+          plural_custom_logic
         ]
       end
 
@@ -43,6 +43,9 @@ module Overrides
         check :singular_only, type: :boolean, default: false
         # Points to a markdown file with extra examples to include in documentation
         check :singular_extra_examples, type: String
+        # Custom logic injected into plural resource's parse method.
+        # Allows for multiple interpretations of a single field within an API response
+        check :plural_custom_logic, type: String
       end
     end
   end
