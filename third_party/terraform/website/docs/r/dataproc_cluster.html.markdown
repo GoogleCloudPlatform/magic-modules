@@ -566,7 +566,7 @@ cluster_config {
 ```
 
 * `idle_delete_ttl` - (Optional) The duration to keep the cluster alive while idling
-  (no jobs running). After this TTL, the cluster will to be deleted. Valid range: [10m, 14d].
+  (no jobs running). After this TTL, the cluster will be deleted. Valid range: [10m, 14d].
 
 * `auto_delete_time` - (Optional) The time when cluster will be auto-deleted. Should be
   A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
