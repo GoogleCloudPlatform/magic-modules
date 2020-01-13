@@ -278,6 +278,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           region_backend_service_name: "region-backend-service"
           health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_backend_service_balancing_mode"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          region_backend_service_name: "region-backend-service"
+          region_health_check_name: "health-check"
+          network_name: "net"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/migrate_state_noop.go.erb'
       resource_definition: 'templates/terraform/resource_definition/region_backend_service.go.erb'
@@ -296,7 +304,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       backends.group: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkRelativePaths'
         custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
-      backends.capacityScaler: !ruby/object:Overrides::Terraform::PropertyOverride
+      backends.failover: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       connectionDraining: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
@@ -549,6 +557,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           forwarding_rule_name: "website-forwarding-rule"
           backend_name: "website-backend"
           network_name: "website-net"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "forwarding_rule_http_lb"
+        min_version: 'beta'
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "website-forwarding-rule"
+          region_target_http_proxy_name: "website-proxy"
+          region_url_map_name: "website-map"
+          region_backend_service_name: "website-backend"
+          region_health_check_name: "website-hc"
+          network_name: "website-net"
+          fw_name: "website-fw"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/forwarding_rule.erb
