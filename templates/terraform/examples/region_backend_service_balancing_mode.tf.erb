@@ -73,6 +73,7 @@ resource "google_compute_network" "default" {
 
 resource "google_compute_subnetwork" "default" {
   provider = google-beta
+
   name          = "<%= ctx[:vars]['network_name'] %>-default"
   ip_cidr_range = "10.1.2.0/24"
   region        = "us-central1"
