@@ -31,6 +31,10 @@ name = resource_name(object, product)
 
   <%= "filter_table_config.add(:#{(prop.override_name || prop.out_name).pluralize}, field: :#{prop.override_name || prop.out_name})" -%>
 <% end # object.all_user_properties.each do -%>
+<% object.plural_custom_attr_readers.each do |custom_attr_reader| -%>
+
+  <%= "filter_table_config.add(:#{custom_attr_reader.pluralize}, field: :#{custom_attr_reader})" -%>
+<% end -%>
 
 
   filter_table_config.connect(self, :table)

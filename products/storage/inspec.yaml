@@ -54,7 +54,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     name: BucketObject
     singular_only: true
     privileged: true
-    additional_functions: third_party/inspec/custom_functions/bucket_name_from_params.erb
+    additional_functions: third_party/inspec/custom_functions/bucket_object.erb
     properties:
       bucket: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
