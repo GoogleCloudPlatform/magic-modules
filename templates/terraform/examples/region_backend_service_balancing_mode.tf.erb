@@ -4,7 +4,7 @@ resource "google_compute_region_backend_service" "default" {
   load_balancing_scheme = "INTERNAL_MANAGED"
 
   backend {
-    group = google_compute_region_instance_group_manager.rigm.instance_group
+    group          = google_compute_region_instance_group_manager.rigm.instance_group
     balancing_mode = "UTILIZATION"
   }
 
@@ -18,12 +18,14 @@ resource "google_compute_region_backend_service" "default" {
 
 data "google_compute_image" "debian_image" {
   provider = google-beta
+
   family   = "debian-9"
   project  = "debian-cloud"
 }
 
 resource "google_compute_region_instance_group_manager" "rigm" {
   provider = google-beta
+
   region   = "us-central1"
   name     = "rigm-internal"
   version {
@@ -36,11 +38,12 @@ resource "google_compute_region_instance_group_manager" "rigm" {
 
 resource "google_compute_instance_template" "instance_template" {
   provider     = google-beta
+
   name         = "template-<%= ctx[:vars]['region_backend_service_name'] %>"
   machine_type = "n1-standard-1"
 
   network_interface {
-    network = google_compute_network.default.self_link
+    network    = google_compute_network.default.self_link
     subnetwork = google_compute_subnetwork.default.self_link
   }
 
