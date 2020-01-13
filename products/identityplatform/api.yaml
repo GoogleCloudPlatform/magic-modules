@@ -30,8 +30,8 @@ objects:
   - !ruby/object:Api::Resource
     name: 'DefaultSupportedIdpConfig'
     base_url: 'projects/{{project}}/defaultSupportedIdpConfigs'
-    self_link: 'projects/{{project}}/defaultSupportedIdpConfigs/{{client_id}}'
-    create_url: 'projects/{{project}}/defaultSupportedIdpConfigs?idpId={{client_id}}'
+    self_link: 'projects/{{project}}/defaultSupportedIdpConfigs/{{idp_id}}'
+    create_url: 'projects/{{project}}/defaultSupportedIdpConfigs?idpId={{idp_id}}'
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -47,10 +47,37 @@ objects:
         description: |
           The name of the DefaultSupportedIdpConfig resource
       - !ruby/object:Api::Type::String
+        name: 'idpId'
+        description: |
+          ID of the IDP. Possible values include:
+
+          * `apple.com`
+
+          * `facebook.com`
+
+          * `gc.apple.com`
+
+          * `github.com`
+
+          * `google.com`
+
+          * `linkedin.com`
+
+          * `microsoft.com`
+
+          * `playgames.google.com`
+
+          * `twitter.com`
+
+          * `yahoo.com`
+          
+        input: true
+        url_param_only: true
+        required: true
+      - !ruby/object:Api::Type::String
         name: 'clientId'
         description: |
           OAuth client ID
-        input: true
         required: true
       - !ruby/object:Api::Type::String
         name: 'clientSecret'
@@ -64,8 +91,8 @@ objects:
   - !ruby/object:Api::Resource
     name: 'TenantDefaultSupportedIdpConfig'
     base_url: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs'
-    self_link: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{client_id}}'
-    create_url: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs?idpId={{client_id}}'
+    self_link: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{idp_id}}'
+    create_url: 'projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs?idpId={{idp_id}}'
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -81,6 +108,34 @@ objects:
         description: |
           The name of the default supported IDP config resource
       - !ruby/object:Api::Type::String
+        name: 'idpId'
+        description: |
+          ID of the IDP. Possible values include:
+
+          * `apple.com`
+
+          * `facebook.com`
+
+          * `gc.apple.com`
+
+          * `github.com`
+
+          * `google.com`
+
+          * `linkedin.com`
+
+          * `microsoft.com`
+
+          * `playgames.google.com`
+
+          * `twitter.com`
+
+          * `yahoo.com`
+
+        input: true
+        url_param_only: true
+        required: true
+      - !ruby/object:Api::Type::String
         name: 'tenant'
         required: true
         url_param_only: true
@@ -89,7 +144,6 @@ objects:
           The name of the tenant where this DefaultSupportedIdpConfig resource exists
       - !ruby/object:Api::Type::String
         name: 'clientId'
-        input: true
         required: true
         description: |
           OAuth client ID
