@@ -27,6 +27,7 @@ module Overrides
           singular_only
           singular_extra_examples
           plural_custom_logic
+          plural_custom_attr_readers
         ]
       end
 
@@ -46,6 +47,10 @@ module Overrides
         # Custom logic injected into plural resource's parse method.
         # Allows for multiple interpretations of a single field within an API response
         check :plural_custom_logic, type: String
+
+        # Attribute readers to add to plural resource to access fields added via
+        # plural_custom_logic
+        check :plural_custom_attr_readers, type: ::Array, default: [], item_type: String
       end
     end
   end

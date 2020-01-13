@@ -17,6 +17,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     privileged: true
     additional_functions: third_party/inspec/custom_functions/kms_key_ring.erb
     plural_custom_logic: third_party/inspec/custom_functions/kms_key_ring_name.erb
+    plural_custom_attr_readers: 
+      - key_ring_name
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         # This is added back via custom methods
