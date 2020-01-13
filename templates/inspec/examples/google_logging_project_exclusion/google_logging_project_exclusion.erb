@@ -1,0 +1,12 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% project_exclusion = grab_attributes['project_exclusion'] -%>
+
+describe google_logging_project_exclusion(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{project_exclusion['name']}'" : "project_exclusion['name']" -%>) do
+	it { should exist }
+  its('description'){ should cmp <%= doc_generation ? "'#{project_exclusion['description']}'" : "project_exclusion['description']" -%> }
+  its('filter'){ should cmp <%= doc_generation ? "'#{project_exclusion['filter']}'" : "project_exclusion['filter']" -%> }
+end
+
+describe google_logging_project_exclusion(project: <%= gcp_project_id -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

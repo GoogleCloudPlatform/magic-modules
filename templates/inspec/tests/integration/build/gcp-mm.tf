@@ -631,6 +631,22 @@ resource "google_logging_organization_sink" "my-sink" {
   filter      = var.org_sink.filter
 }
 
+variable "project_sink" {
+  type = any
+}
+
+resource "google_logging_project_sink" "project-logging-sink" {
+  count = var.gcp_enable_privileged_resources
+  project = var.gcp_project_id
+
+  name = var.project_sink.name
+  destination = "storage.googleapis.com/${google_storage_bucket.project-logging-bucket[0].name}"
+
+  filter = var.project_sink.filter
+
+  unique_writer_identity = true
+}
+
 resource "google_storage_bucket" "bucket" {
   name          = "inspec-gcp-static-${var.gcp_project_id}"
   project       = var.gcp_project_id
@@ -749,6 +765,20 @@ resource "google_logging_folder_exclusion" "my-exclusion" {
   description = var.folder_exclusion["description"]
 
   filter      = var.folder_exclusion["filter"]
+}
+
+variable "project_exclusion" {
+  type = any
+}
+
+resource "google_logging_project_exclusion" "project-exclusion" {
+  count       = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  name        = var.project_exclusion["name"]
+  project     = var.gcp_project_id
+
+  description = var.project_exclusion["description"]
+
+  filter      = var.project_exclusion["filter"]
 }
 
 resource "google_filestore_instance" "instance" {

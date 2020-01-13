@@ -404,3 +404,12 @@ vpn_tunnel:
   name: inspec-vpn-tunnel
   peer_ip: "15.0.0.120"
   shared_secret: super secret
+
+project_sink:
+  name: inspec-gcp-org-sink
+  filter: resource.type = gce_instance AND severity = DEBUG
+
+project_exclusion:
+  name: inspec-project-exclusion
+  description: My project exclusion description
+  filter: resource.type = gce_instance AND severity <= DEBUG
