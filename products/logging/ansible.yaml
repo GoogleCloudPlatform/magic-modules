@@ -23,6 +23,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   FolderLogSink: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  ProjectLogSink: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  ProjectExclusion: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

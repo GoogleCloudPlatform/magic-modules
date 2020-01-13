@@ -19,8 +19,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   OrganizationLogSink: !ruby/object:Overrides::Inspec::ResourceOverride
     # Creating a log sink requires organization level privileges
     privileged: true
+  ProjectLogSink: !ruby/object:Overrides::Inspec::ResourceOverride
+    # Creating a log sink requires organization level privileges
+    name: ProjectSink
+    privileged: true
   FolderExclusion: !ruby/object:Overrides::Inspec::ResourceOverride
     # Creating a folder requires organization level privileges
+    privileged: true
+  ProjectExclusion: !ruby/object:Overrides::Inspec::ResourceOverride
     privileged: true
   FolderLogSink: !ruby/object:Overrides::Inspec::ResourceOverride
     # Creating a folder requires organization level privileges
