@@ -38,8 +38,8 @@ objects:
       Configurations options for authenticating with a the standard set of Identity Toolkit-trusted IDPs.
 
       You must enable the
-      ((Google Identity Platform)[https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity])
-      in the marketplace prior to using this resource.
+      [Google Identity Platform](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity) in
+      the marketplace prior to using this resource.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -72,8 +72,8 @@ objects:
       Configurations options for the tenant for authenticating with a the standard set of Identity Toolkit-trusted IDPs.
 
       You must enable the
-      ((Google Identity Platform)[https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity])
-      in the marketplace prior to using this resource.
+      [Google Identity Platform](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity) in
+      the marketplace prior to using this resource.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -113,8 +113,8 @@ objects:
       Inbound SAML configuration for a Identity Toolkit project.
 
       You must enable the
-      ((Google Identity Platform)[https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity])
-      in the marketplace prior to using this resource.
+      [Google Identity Platform](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity) in
+      the marketplace prior to using this resource.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -202,8 +202,8 @@ objects:
       Inbound SAML configuration for a Identity Toolkit tenant.
 
       You must enable the
-      ((Google Identity Platform)[https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity])
-      in the marketplace prior to using this resource.
+      [Google Identity Platform](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity) in
+      the marketplace prior to using this resource.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -300,8 +300,8 @@ objects:
       OIDC IdP configuration for a Identity Toolkit project.
 
       You must enable the
-      ((Google Identity Platform)[https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity])
-      in the marketplace prior to using this resource.
+      [Google Identity Platform](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity) in
+      the marketplace prior to using this resource.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -342,8 +342,8 @@ objects:
       OIDC IdP configuration for a Identity Toolkit project within a tenant.
 
       You must enable the
-      ((Google Identity Platform)[https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity])
-      in the marketplace prior to using this resource.
+      [Google Identity Platform](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity) in
+      the marketplace prior to using this resource.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -391,11 +391,11 @@ objects:
       Tenant configuration in a multi-tenant project.
 
       You must enable the
-      ((Google Identity Platform)[https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity])
-      in the marketplace prior to using this resource.
+      [Google Identity Platform](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity) in
+      the marketplace prior to using this resource.
 
-      You must ((enable multi-tenancy)[https://cloud.google.com/identity-platform/docs/multi-tenancy-quickstart])
-      via the Cloud Console prior to creating tenants.
+      You must [enable multi-tenancy](https://cloud.google.com/identity-platform/docs/multi-tenancy-quickstart) via
+      the Cloud Console prior to creating tenants.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
