@@ -1,0 +1,36 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Inspec::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Role: !ruby/object:Overrides::Inspec::ResourceOverride
+    name: CustomRole
+    base_url: projects/{{project}}/roles?view=FULL
+    self_link: projects/{{project}}/roles/{{name}}
+    privileged: true
+  ServiceAccount: !ruby/object:Overrides::Inspec::ResourceOverride
+    privileged: true
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: service_account_name
+      displayName: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: service_account_display_name
+      uniqueId: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: service_account_id
+      email: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: service_account_email
+  ServiceAccountKey: !ruby/object:Overrides::Inspec::ResourceOverride
+    privileged: true
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: key_name

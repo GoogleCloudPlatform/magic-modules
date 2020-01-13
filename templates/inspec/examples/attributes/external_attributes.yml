@@ -25,3 +25,4 @@ gcp_kms_key_ring_policy_name: kms-key-ring
 gcp_kms_crypto_key_name_policy: kms-key
 gcp_db_instance_name: my-database
 gcp_db_user_name: user-name
+gcp_project_iam_custom_role_id: admin-role
