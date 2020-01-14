@@ -21,11 +21,11 @@ To upgrade your First-generation instance, update your Terraform config that the
 * `settings.backup_configuration.binary_log_enabled=true`.  
 Apply the terraform config, then upgrade the instance in the console as described in the documentation.
 Once upgraded, update the following attributes in your Terraform config to the correct value according to
-the above documentation.
+the above documentation:
 * `region`
 * `database_version` (if applicable)
 * `tier`  
-Remove any fields that are not applicable to Second-generation instances.
+Remove any fields that are not applicable to Second-generation instances:
 * `settings.crash_safe_replication`
 * `settings.ip_configuration.authorized_networks.expiration_time`
 * `settings.replication_type`
@@ -181,7 +181,7 @@ provider "google-beta" {
 
 The following arguments are supported:
 
-* `region` - (Required) The region the instance will sit in. Note, Cloud SQL is not
+* `region` - (Optional) The region the instance will sit in. Note, Cloud SQL is not
     available in all regions - choose from one of the options listed [here](https://cloud.google.com/sql/docs/mysql/instance-locations).
     A valid region must be provided to use this resource. If a region is not provided in the resource definition,
     the provider region will be used instead, but this will be an apply-time error for instances if the provider
