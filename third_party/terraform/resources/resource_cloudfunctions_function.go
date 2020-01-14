@@ -101,7 +101,7 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateGCPName,
+				ValidateFunc: validateResourceCloudFunctionsFunctionName,
 			},
 
 			"source_archive_bucket": {
