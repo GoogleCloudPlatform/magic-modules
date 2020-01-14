@@ -306,6 +306,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
       backends.failover: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      backends.capacityScaler: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       connectionDraining: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       connectionDraining.drainingTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
