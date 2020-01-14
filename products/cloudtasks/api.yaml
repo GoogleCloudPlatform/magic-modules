@@ -86,7 +86,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'rateLimits'
         description: |
-          Rate limits for task dispatches. 
+          Rate limits for task dispatches.
 
           The queue's actual dispatch rate is the result of:
 
@@ -96,7 +96,7 @@ objects:
             Unavailable) responses from the worker, high error rates, or to
             smooth sudden large traffic spikes.
         properties:
-          - !ruby/object:Api::Type::Integer
+          - !ruby/object:Api::Type::Double
             name: 'maxDispatchesPerSecond'
             description: |
               The maximum rate at which tasks are dispatched from this queue.
