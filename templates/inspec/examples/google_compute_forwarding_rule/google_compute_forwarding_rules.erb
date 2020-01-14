@@ -1,0 +1,7 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_lb_region = "#{external_attribute('gcp_lb_region', doc_generation)}" -%>
+<% gcp_fr_udp_name = "#{external_attribute('gcp_fr_udp_name', doc_generation)}" -%>
+
+describe google_compute_forwarding_rules(project: <%= gcp_project_id -%>, region: <%= gcp_lb_region -%>) do
+  its('forwarding_rule_names') { should include <%= doc_generation ? gcp_fr_udp_name : "\"\#{gcp_fr_udp_name}-500\"" -%> }
+end
