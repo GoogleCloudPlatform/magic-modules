@@ -56,7 +56,16 @@ function cleanup {
 export INSPEC_DIR=${PWD}
 trap cleanup EXIT
 
-bundle exec rake test:integration
+seed=$RANDOM
+bundle exec rake test:init_workspace
+# Seed plan_integration_tests so VCR cassettes work with random resource suffixes
+bundle exec rake test:plan_integration_tests[$seed]
+bundle exec rake test:setup_integration_tests
+bundle exec rake test:run_integration_tests
+bundle exec rake test:cleanup_integration_tests
+
+echo $seed > inspec-cassettes/seed.txt
+
 gsutil -m cp inspec-cassettes/* gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/approved/
 
 popd

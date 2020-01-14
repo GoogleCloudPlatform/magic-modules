@@ -44,7 +44,16 @@ else
   gsutil -m cp gs://magic-modules-inspec-bucket/master/inspec-cassettes/* inspec-cassettes/
 fi
 set -e
-bundle exec rake test:generate_integration_test_variables
+
+bundle exec rake test:init_workspace
+if test -f "inspec-cassettes/seed.txt"; then
+	# Seed the plan with the seed used to record the VCR cassettes.
+	# This lets randomly generated suffixes be the same between runs
+	bundle exec rake test:plan_integration_tests[$(cat inspec-cassettes/seed.txt)]
+else
+	bundle exec rake test:plan_integration_tests
+fi
+
 bundle exec rake test:run_integration_tests
 
 popd
