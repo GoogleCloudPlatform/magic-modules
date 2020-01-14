@@ -45,6 +45,7 @@ else
 fi
 set -e
 
+bundle exec rake test:init_workspace
 if test -f "seed.txt"; then
 	# Seed the plan with the seed used to record the VCR cassettes.
 	# This lets randomly generated suffixes be the same between runs
