@@ -46,10 +46,10 @@ fi
 set -e
 
 bundle exec rake test:init_workspace
-if test -f "seed.txt"; then
+if test -f "inspec-cassettes/seed.txt"; then
 	# Seed the plan with the seed used to record the VCR cassettes.
 	# This lets randomly generated suffixes be the same between runs
-	bundle exec rake test:plan_integration_tests[$(echo seed.txt)]
+	bundle exec rake test:plan_integration_tests[$(echo inspec-cassettes/seed.txt)]
 else
 	bundle exec rake test:plan_integration_tests
 fi
