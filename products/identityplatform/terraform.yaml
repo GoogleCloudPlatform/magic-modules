@@ -14,7 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   DefaultSupportedIdpConfig: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["projects/{{project}}/defaultSupportedIdpConfigs/{{client_id}}"]
+    import_format: ["projects/{{project}}/defaultSupportedIdpConfigs/{{idp_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "identity_platform_default_supported_idp_config_basic"
@@ -23,7 +23,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # If we could spin up a project and enable identity platform we could test this separately
         skip_test: true
   TenantDefaultSupportedIdpConfig: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{client_id}}"]
+    import_format: ["projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{idp_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "identity_platform_tenant_default_supported_idp_config_basic"
