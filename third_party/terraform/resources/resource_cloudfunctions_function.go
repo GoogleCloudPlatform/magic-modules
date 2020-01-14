@@ -68,7 +68,7 @@ func joinMapKeys(mapToJoin *map[int]bool) string {
 // Differs from validateGcpName because Cloud Functions allow capital letters
 // at start/end
 func validateResourceCloudFunctionsFunctionName(v interface{}, k string) (ws []string, errors []error) {
-	re := `^(?:[a-zA-Z](?:[-a-z0-9]{0,61}[a-zA-Z0-9])?)$`
+	re := `^(?:[a-zA-Z](?:[-_a-zA-Z0-9]{0,61}[a-zA-Z0-9])?)$`
 	return validateRegexp(re)(v, k)
 }
 
