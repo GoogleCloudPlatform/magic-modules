@@ -1548,8 +1548,6 @@ objects:
                 Specifies the balancing mode for this backend. Defaults to CONNECTION.
             - !ruby/object:Api::Type::Double
               name: 'capacityScaler'
-              send_empty_value: true
-              default_value: 1.0
               description: |
                 A multiplier applied to the group's maximum servicing capacity
                 (based on UTILIZATION, RATE or CONNECTION).
