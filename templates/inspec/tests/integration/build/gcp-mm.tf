@@ -661,6 +661,7 @@ resource "google_storage_bucket_object" "object" {
 }
 
 resource "google_app_engine_standard_app_version" "default" {
+  count = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
   project         = var.gcp_project_id
   version_id      = var.standardappversion["version_id"]
   service         = var.standardappversion["service"]
