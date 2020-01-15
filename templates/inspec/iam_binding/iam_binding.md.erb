@@ -11,9 +11,10 @@ A `<%= iam_resource_name -%>` is used to test a Google <%= object.name -%> Iam B
 <%
 individual_url = object.iam_policy.base_url || object.self_link || object.base_url + '/{{name}}' 
 identifiers = extract_identifiers(individual_url)
+identifiers_out = identifiers.map { |id| "#{id.underscore}: #{id.inspect}" }.join(', ')
 -%>
 ```
-describe <%= iam_resource_name -%>(<%= identifiers -%>, role: "roles/editor") do
+describe <%= iam_resource_name -%>(<%= identifiers_out -%>, role: "roles/editor") do
   it { should exist }
   its('members') { should include 'user:testuser@example.com' }
 end
