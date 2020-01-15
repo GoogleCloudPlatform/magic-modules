@@ -76,6 +76,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   MachineType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  ManagedSslCertificate: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   Network: !ruby/object:Overrides::Inspec::ResourceOverride
     additional_functions: third_party/inspec/custom_functions/google_compute_network.erb
     singular_extra_examples: 'third_party/inspec/documentation/network_examples.md'
@@ -149,6 +151,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       pathMatchers.pathRules: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
+  VpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   VpnTunnel: !ruby/object:Overrides::Inspec::ResourceOverride
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride

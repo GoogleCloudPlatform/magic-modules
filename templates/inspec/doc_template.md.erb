@@ -22,6 +22,12 @@ platform: gcp
 ## Syntax
 A `<%= resource_underscored_name -%>` is used to test a Google <%= object.name -%> resource
 
+<% if beta?(object) -%>
+
+## Beta Resource
+This resource has beta fields available. To retrieve these fields, include `beta: true` in the constructor for the resource
+
+<% end -%>
 ## Examples
 ```
 <%= compile("templates/inspec/examples/#{resource_name(object, product)}/#{resource_underscored_name}.erb") -%>
@@ -39,7 +45,7 @@ Properties that can be accessed from the `<%= resource_underscored_name -%>` res
 <% if plural -%>
 See <%= "[#{resource_name(object, product)}.md](#{resource_name(object, product)}.md)" -%> for more detailed information
 <% object.all_user_properties.reject(&:exclude_plural).each do |prop| -%>
-  * `<%= "#{(prop.override_name || prop.out_name).pluralize}" -%>`: an array of `<%= resource_name(object, product) -%>` <%= "#{prop.out_name}" -%>
+  * `<%= "#{(prop.override_name || prop.out_name).pluralize}" -%>`: <% if prop.min_version.name == 'beta' -%><%= '(Beta only) ' -%><% end -%>an array of `<%= resource_name(object, product) -%>` <%= "#{prop.out_name}" -%>
 
 <% end -%>
 

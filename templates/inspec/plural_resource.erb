@@ -96,9 +96,7 @@ link_query_items = object&.nested_query&.keys&.first || object.collection_url_ke
 
   private
 
-  def product_url
-    '<%= object.product_url || object.__product.base_url %>'
-  end
+<%= compile('templates/inspec/product_url.erb') -%>
 
   def resource_base_url
     '<%= object.base_url %>'
