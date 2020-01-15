@@ -11,7 +11,9 @@ func dataSourceMonitoringNotificationChannel() *schema.Resource {
 	dsSchema := datasourceSchemaFromResourceSchema(resourceMonitoringNotificationChannel().Schema)
 
 	// Set 'Optional' schema elements
-	addOptionalFieldsToSchema(dsSchema, "display_name", "type")
+	addOptionalFieldsToSchema(dsSchema, "display_name")
+	addOptionalFieldsToSchema(dsSchema, "project")
+	addOptionalFieldsToSchema(dsSchema, "type")
 
 	return &schema.Resource{
 		Read:   dataSourceMonitoringNotificationChannelRead,

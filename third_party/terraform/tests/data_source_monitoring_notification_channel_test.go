@@ -113,10 +113,10 @@ func testAccDataSourceGoogleMonitoringNotificationChannel_byType(displayName str
 	return fmt.Sprintf(`
 resource "google_monitoring_notification_channel" "my" {
   display_name = "%s"
-  type         = "email"
+  type         = "sms"
 
   labels = {
-    email_address = "mailme@acme.org"
+    number = "+1555"
   }
 }
 
