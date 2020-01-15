@@ -52,9 +52,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
   Object: !ruby/object:Overrides::Inspec::ResourceOverride
     name: BucketObject
-    singular_only: true
     privileged: true
     additional_functions: third_party/inspec/custom_functions/bucket_object.erb
     properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: object_name
+      timeCreated: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: object_created_times
       bucket: !ruby/object:Overrides::Inspec::PropertyOverride
-        exclude: true
+        override_name: object_bucket
