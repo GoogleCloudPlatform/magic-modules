@@ -38,7 +38,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       id: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: firewall_id
   ForwardingRule: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: forwarding_rule_name
+      network: !ruby/object:Overrides::Inspec::PropertyOverride
+        name_from_self_link: true
+        override_name: forwarding_rule_network
+      loadBalancingScheme: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: forwarding_rule_load_balancing_scheme
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: forwarding_rule_id
   GlobalAddress: !ruby/object:Overrides::Inspec::ResourceOverride
     properties:
       address:  !ruby/object:Overrides::Inspec::PropertyOverride
