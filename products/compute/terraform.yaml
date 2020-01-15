@@ -1047,6 +1047,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
+  NetworkPeeringRoutesConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "projects/{{project}}/global/networks/{{network}}/networkPeerings/{{name}}"
+    import_format: ["projects/{{project}}/global/networks/{{network}}/networkPeerings/{{name}}"]
+    # format from google_compute_network_peering
+    mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_peering_routes_config_basic"
+        primary_resource_id: "peering_primary_routes"
+        vars:
+          peering_primary_name: "primary-peering"
+          peering_secondary_name: "secondary-peering"
+          network_primary_name: "primary-network"
+          network_secondary_name: "secondary-network"
+    properties:
+      network: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_delete: 'templates/terraform/custom_delete/skip_delete.go.erb'
+      encoder: 'templates/terraform/encoders/network_peering_routes_config.go.erb'
   NodeGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |

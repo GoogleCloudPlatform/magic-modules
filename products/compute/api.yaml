@@ -7260,6 +7260,74 @@ objects:
         required: true
         send_empty_value: true
   - !ruby/object:Api::Resource
+    name: 'NetworkPeeringRoutesConfig'
+    base_url:  'projects/{{project}}/global/networks/{{network}}'
+    self_link: 'projects/{{project}}/global/networks/{{network}}'
+    description: |
+      Manage a network peering's route settings without managing the peering as
+      a whole. This resource is primarily intended for use with GCP-generated
+      peerings that shouldn't otherwise be managed by other tools.
+    create_verb: :PATCH
+    create_url: 'projects/{{project}}/global/networks/{{network}}/updatePeering'
+    update_verb: :PATCH
+    update_url: 'projects/{{project}}/global/networks/{{network}}/updatePeering'
+    identity:
+      - name
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys:
+        - peerings
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/vpc/docs/vpc-peering'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networks/updatePeering'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 6
+          update_minutes: 6
+          delete_minutes: 6
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'network'
+        resource: 'Network'
+        imports: 'name'
+        description: |
+          The name of the primary network for the peering.
+        required: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        description: |
+          Name of the peering.
+      - !ruby/object:Api::Type::Boolean
+        name: 'exportCustomRoutes'
+        required: true
+        description: |
+          Whether to export the custom routes to the peer network.
+      - !ruby/object:Api::Type::Boolean
+        name: 'importCustomRoutes'
+        required: true
+        description: |
+          Whether to import the custom routes to the peer network.
+  - !ruby/object:Api::Resource
     name: 'NodeTemplate'
     kind: 'compute#nodeTemplate'
     base_url: projects/{{project}}/regions/{{region}}/nodeTemplates
