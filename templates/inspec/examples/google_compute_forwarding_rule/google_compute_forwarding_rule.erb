@@ -1,0 +1,16 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_lb_region = "#{external_attribute('gcp_lb_region', doc_generation)}" -%>
+<% gcp_fr_udp_name = "#{external_attribute('gcp_fr_udp_name', doc_generation)}" -%>
+
+describe google_compute_forwarding_rule(project: <%= gcp_project_id -%>, region: <%= gcp_lb_region -%>, name: <%= doc_generation ? gcp_fr_udp_name : "\"\#{gcp_fr_udp_name}-500\"" -%>) do
+  it { should exist }
+  its('region') { should match <%= gcp_lb_region -%> }
+  its('creation_timestamp') { should be > Time.now - 365*60*60*24*10 }
+  its('load_balancing_scheme') { should match 'EXTERNAL' }
+  its('port_range') { should match "500-500" }
+  its('ip_protocol') { should match "UDP" }
+end
+
+describe google_compute_forwarding_rule(project: <%= gcp_project_id -%>, region: <%= gcp_lb_region -%>, name: "nonexistent") do
+  it { should_not exist }
+end
