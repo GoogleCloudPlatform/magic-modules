@@ -9,7 +9,8 @@ A `<%= iam_resource_name -%>` is used to test a Google <%= object.name -%> Iam P
 
 ## Examples
 <%
-identifiers = extract_identifiers(format_url(object.self_link_url))
+individual_url = object.iam_policy.base_url || object.self_link || object.base_url + '/{{name}}' 
+identifiers = extract_identifiers(individual_url)
 identifiers_out = identifiers.map { |id| "#{id.underscore}: #{id.inspect}" }.join(', ')
 -%>
 ```
@@ -27,6 +28,8 @@ end
 
 ## Properties
 Properties that can be accessed from the `<%= iam_resource_name -%>` resource:
+
+  * `iam_binding_roles`: The list of roles that exist on the policy.
 
   * `bindings`: Associates a list of members to a role.
 
