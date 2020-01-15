@@ -42,14 +42,14 @@ class <%= object.__product.name.camelize(:upper) -%><%= object.name -%> < GcpRes
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
     @params = params
-    @fetched = @connection.fetch(product_url, resource_base_url, params, 'Get')
+    @fetched = @connection.fetch(product_url(params[:beta]), resource_base_url, params, 'Get')
     parse unless @fetched.nil?
   end
 <% else # object.nested_query.nil? -%>
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
     @params = params
-    fetched = @connection.fetch(product_url, resource_base_url, params, 'Get')
+    fetched = @connection.fetch(product_url(params[:beta]), resource_base_url, params, 'Get')
     @fetched = unwrap(fetched, params)
     parse unless @fetched.nil?
   end
@@ -102,9 +102,7 @@ best_guess_identifier = extract_identifiers(individual_url).last
 
   private
 
-  def product_url
-    '<%= object.product_url || object.__product.base_url -%>'
-  end
+<%= compile('templates/inspec/product_url.erb') -%>
 
 <% url = object.self_link || object.base_url + '/{{name}}' -%>
 <% url_params = extract_identifiers(individual_url) -%>

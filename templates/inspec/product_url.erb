@@ -1,0 +1,12 @@
+<% if beta?(object) -%>
+  def product_url(beta = false)
+    if beta
+      '<%= beta_api_url(object) %>'
+    else
+      '<%= ga_api_url(object) %>'
+    end
+<% else -%>
+  def product_url(_ = nil)
+    '<%= ga_api_url(object) %>'
+<% end -%>
+  end
