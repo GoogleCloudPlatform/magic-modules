@@ -24,7 +24,7 @@ pushd magic-modules
 rm build/inspec/test/integration/verify/controls/*
 export VCR_MODE=none
 bundle install
-bundle exec compiler -a -e inspec -o "build/inspec/"
+bundle exec compiler -a -e inspec -o "build/inspec/" -v beta
 
 cp templates/inspec/vcr_config.rb build/inspec
 

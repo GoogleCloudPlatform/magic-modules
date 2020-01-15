@@ -20,4 +20,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     base_url: projects/{{project}}/managedZones/{{managed_zone}}/rrsets
   Project: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  Policy: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
 
