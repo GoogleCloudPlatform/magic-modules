@@ -43,6 +43,8 @@ func TestCloudFunctionsFunction_nameValidator(t *testing.T) {
 		"has_underscore",
 		"hasUpperCase",
 		"allChars_-A0",
+		"StartsUpperCase",
+		"endsUpperCasE",
 	}
 	for _, tc := range validNames {
 		wrns, errs := validateResourceCloudFunctionsFunctionName(tc, "function.name")
@@ -59,7 +61,7 @@ func TestCloudFunctionsFunction_nameValidator(t *testing.T) {
 		"endsWith_",
 		"endsWith-",
 		"bad*Character",
-		"aFunctionsNameThatIsLongerThanFortyEightCharacters",
+		"aCloudFunctionsFunctionNameThatIsSeventyFiveCharactersLongWhichIsMoreThan63",
 	}
 	for _, tc := range invalidNames {
 		_, errs := validateResourceCloudFunctionsFunctionName(tc, "function.name")
@@ -323,6 +325,7 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 
 	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
+	networkName := fmt.Sprintf("tf-test-net-%d", acctest.RandInt())
 	vpcConnectorName := fmt.Sprintf("tf-test-connector-%s",  acctest.RandString(5))
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
@@ -334,7 +337,7 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudFunctionsFunction_vpcConnector(projectNumber, functionName, bucketName, zipFilePath, vpcConnectorName),
+				Config: testAccCloudFunctionsFunction_vpcConnector(projectNumber, networkName, functionName, bucketName, zipFilePath, vpcConnectorName),
 			},
 		},
 	})
@@ -758,14 +761,20 @@ resource "google_cloudfunctions_function" "function" {
 }
 
 <% unless version == 'ga' -%>
-func testAccCloudFunctionsFunction_vpcConnector(projectNumber, functionName, bucketName, zipFilePath, vpcConnectorName string) string {
+func testAccCloudFunctionsFunction_vpcConnector(projectNumber, networkName, functionName, bucketName, zipFilePath, vpcConnectorName string) string {
 	return fmt.Sprintf(`
 provider "google-beta" { }
 
-resource "google_project_iam_member" "project" {
+resource "google_project_iam_member" "gcfadmin" {
   provider = "google-beta"
   role     = "roles/editor"
   member   = "serviceAccount:service-%s@gcf-admin-robot.iam.gserviceaccount.com"
+}
+
+resource "google_compute_network" "vpc" {
+	provider = "google-beta"
+	name = "%s"
+	auto_create_subnetworks = false
 }
 
 resource "google_vpc_access_connector" "connector" {
@@ -774,7 +783,7 @@ resource "google_vpc_access_connector" "connector" {
   name          = "%s"
   region        = "us-central1"
   ip_cidr_range = "10.10.0.0/28"
-  network       = "default"
+  network       = google_compute_network.vpc.name
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -809,7 +818,9 @@ resource "google_cloudfunctions_function" "function" {
   }
   max_instances = 10
   vpc_connector = google_vpc_access_connector.connector.self_link
+
+  depends_on = [google_project_iam_member.gcfadmin]
 }
-`, projectNumber, vpcConnectorName, bucketName, zipFilePath, functionName)
+`, projectNumber, networkName, vpcConnectorName, bucketName, zipFilePath, functionName)
 }
 <% end -%>
