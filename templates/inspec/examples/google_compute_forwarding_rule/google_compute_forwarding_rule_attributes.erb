@@ -1,0 +1,3 @@
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
+gcp_lb_region = attribute(:gcp_lb_region, default: '<%= external_attribute('gcp_lb_region') -%>', description: 'The region used for the forwarding rule.')
+gcp_fr_udp_name = attribute(:gcp_fr_udp_name, default: '<%= external_attribute('gcp_fr_udp_name') -%>', description: 'The forwarding rule name.')
