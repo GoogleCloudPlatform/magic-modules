@@ -87,6 +87,10 @@ func GetStorageBucketApiObject(d TerraformResourceData, config *Config) (map[str
 		sb.Cors = expandCors(v.([]interface{}))
 	}
 
+	if v, ok := d.GetOk("default_event_based_hold"); ok {
+		sb.DefaultEventBasedHold = v.(bool)
+	}
+
 	if v, ok := d.GetOk("logging"); ok {
 		sb.Logging = expandBucketLogging(v.([]interface{}))
 	}
