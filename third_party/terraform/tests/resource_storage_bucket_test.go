@@ -851,10 +851,8 @@ func TestAccStorageBucket_website(t *testing.T) {
 	t.Parallel()
 
 	bucketSuffix := acctest.RandomWithPrefix("tf-website-test")
-
-	websiteKeys := []string{"website.0.main_page_suffix", "website.0.not_found_page"}
-	errMsg := fmt.Sprintf("one of `%s` must be specified", strings.Join(websiteKeys, ","))
-	fullErr := fmt.Sprintf("config is invalid: 2 problems:\n\n- \"%s\": %s\n- \"%s\": %s", websiteKeys[0], errMsg, websiteKeys[1], errMsg)
+	errMsg := fmt.Sprintf("one of `(?:%[1]s,%[2]s)|(?:%[2]s,%[1]s)`must be specified",
+		"website.0.main_page_suffix", "website.0.not_found_page")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -863,7 +861,7 @@ func TestAccStorageBucket_website(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccStorageBucket_websiteNoAttributes(bucketSuffix),
-				ExpectError: regexp.MustCompile(fullErr),
+				ExpectError: regexp.MustCompile(errMsg),
 			},
 			{
 				Config: testAccStorageBucket_websiteOneAttribute(bucketSuffix),
