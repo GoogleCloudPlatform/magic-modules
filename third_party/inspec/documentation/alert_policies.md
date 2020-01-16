@@ -1,7 +1,3 @@
-## Examples
-
-The following examples show how to use this InSpec audit resource.
-
 ### Test that there are no more than a specified number of project alert policies available for the project
 
     describe google_project_alert_policies(project: 'chef-inspec-gcp') do
