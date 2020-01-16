@@ -1061,6 +1061,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           peering_secondary_name: "secondary-peering"
           network_primary_name: "primary-network"
           network_secondary_name: "secondary-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_peering_routes_config_gke"
+        primary_resource_id: "peering_gke_routes"
+        vars:
+          network_name: "container-network"
+          subnetwork_name: "container-subnetwork"
+          gke_cluster_name: "private-cluster"
     properties:
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
