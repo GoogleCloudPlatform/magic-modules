@@ -6,6 +6,7 @@ describe.one do
       it { should exist }
       its('display_name') { should cmp <%= doc_generation ? "'#{alert_policy['display_name']}'" : "alert_policy['display_name']" -%>}
       its('combiner') { should cmp <%= doc_generation ? "'#{alert_policy['combiner']}'" : "alert_policy['combiner']" -%>}
+      it { should be_enabled }
     end
   end
 end
