@@ -15,10 +15,12 @@
 legacy_name: project
 overrides: !ruby/object:Overrides::ResourceOverrides
   AlertPolicy: !ruby/object:Overrides::Inspec::ResourceOverride
+    additional_functions: third_party/inspec/custom_functions/alert_policy.erb
+    singular_extra_examples: third_party/inspec/documentation/alert_policy_examples.md
+    plural_extra_examples: third_party/inspec/documentation/alert_policies.md
     self_link: projects/{{project}}/alertPolicies/{{name}}
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
-        name_from_self_link: true
         override_name: policy_names
       displayName: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: policy_display_names

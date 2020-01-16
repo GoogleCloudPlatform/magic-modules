@@ -32,6 +32,11 @@ A `<%= resource_underscored_name -%>` is used to test a Google <%= object.name -
 <%= compile(object.singular_extra_examples) -%>
 
 <% end -%>
+<% if object.plural_extra_examples && plural -%>
+
+<%= compile(object.plural_extra_examples) -%>
+
+<% end -%>
 
 ## Properties
 Properties that can be accessed from the `<%= resource_underscored_name -%>` resource:
