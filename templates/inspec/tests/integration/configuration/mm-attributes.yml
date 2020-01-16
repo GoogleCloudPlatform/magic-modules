@@ -421,3 +421,9 @@ alert_policy:
   condition_filter: "metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\""
   condition_duration: 60s
   condition_comparison: COMPARISON_GT
+
+dns_managed_zone:
+  # managed zone dns_name must be randomly generated, so it happens in the other script
+  name: example-zone
+  description: example description
+  dnssec_config_state: 'on'
