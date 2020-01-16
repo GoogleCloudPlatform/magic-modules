@@ -1,0 +1,6 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+describe google_projects() do
+  its('count') { should be >= 1 }
+  its('project_ids') { should include <%= gcp_project_id -%> }
+  its('lifecycle_states') { should include 'ACTIVE' }
+end
