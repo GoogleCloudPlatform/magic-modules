@@ -152,6 +152,11 @@ objects:
                 The list of HTTP headers other than the simple response headers
                 to give permission for the user-agent to share across domains.
               item_type: Api::Type::String
+      - !ruby/object:Api::Type::Boolean
+        name: 'defaultEventBasedHold'
+        description: |
+          Whether or not to automatically apply an eventBasedHold to new objects
+          added to the bucket.
       - !ruby/object:Api::Type::Array
         name: 'defaultObjectAcl'
         description: |
