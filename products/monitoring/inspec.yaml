@@ -16,6 +16,14 @@ legacy_name: project
 overrides: !ruby/object:Overrides::ResourceOverrides
   AlertPolicy: !ruby/object:Overrides::Inspec::ResourceOverride
     self_link: projects/{{project}}/alertPolicies/{{name}}
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        name_from_self_link: true
+        override_name: policy_names
+      displayName: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: policy_display_names
+      enabled: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: policy_enabled_state
   Group: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   NotificationChannel: !ruby/object:Overrides::Inspec::ResourceOverride
