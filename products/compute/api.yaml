@@ -7266,7 +7266,8 @@ objects:
     description: |
       Manage a network peering's route settings without managing the peering as
       a whole. This resource is primarily intended for use with GCP-generated
-      peerings that shouldn't otherwise be managed by other tools.
+      peerings that shouldn't otherwise be managed by other tools. Deleting this
+      resource is a no-op and the peering will not be modified.
     create_verb: :PATCH
     create_url: 'projects/{{project}}/global/networks/{{network}}/updatePeering'
     update_verb: :PATCH
