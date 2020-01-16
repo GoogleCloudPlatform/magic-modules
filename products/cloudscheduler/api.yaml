@@ -73,6 +73,19 @@ objects:
         required: false
         input: true
         default_value: 'Etc/UTC'
+      - !ruby/object:Api::Type::String
+        name: attemptDeadline
+        description: |
+          The deadline for job attempts. If the request handler does not respond by this deadline then the request is
+          cancelled and the attempt is marked as a DEADLINE_EXCEEDED failure. The failed attempt can be viewed in
+          execution logs. Cloud Scheduler will retry the job according to the RetryConfig.
+          The allowed duration for this deadline is:
+          * For HTTP targets, between 15 seconds and 30 minutes.
+          * For App Engine HTTP targets, between 15 seconds and 24 hours.
+          A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s"
+        required: false
+        input: true
+        default_value: '180s'
       - !ruby/object:Api::Type::NestedObject
         name: retryConfig
         description: |
