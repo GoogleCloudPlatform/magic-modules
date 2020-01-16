@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/googleapi"
-	computeBeta "google.golang.org/api/compute/v0.beta"
 )
 
 const peerNetworkLinkRegex = "projects/(" + ProjectRegex + ")/global/networks/((?:[a-z](?:[-a-z0-9]*[a-z0-9])?))$"
@@ -47,7 +46,6 @@ func resourceComputeNetworkPeering() *schema.Resource {
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
 			},
 
-			<% unless version == 'ga' -%>
 			"export_custom_routes": {
 				Type:     schema.TypeBool,
 				ForceNew: true,
@@ -61,7 +59,6 @@ func resourceComputeNetworkPeering() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			<% end -%>
 
 			"state": {
 				Type:             schema.TypeString,
@@ -94,7 +91,7 @@ func resourceComputeNetworkPeeringCreate(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	request := &computeBeta.NetworksAddPeeringRequest{}
+	request := &compute.NetworksAddPeeringRequest{}
 	request.NetworkPeering = expandNetworkPeering(d)
 
 	// Only one peering operation at a time can be performed for a given network.
@@ -105,7 +102,7 @@ func resourceComputeNetworkPeeringCreate(d *schema.ResourceData, meta interface{
 		defer mutexKV.Unlock(kn)
 	}
 
-	addOp, err := config.clientComputeBeta.Networks.AddPeering(networkFieldValue.Project, networkFieldValue.Name, request).Do()
+	addOp, err := config.clientCompute.Networks.AddPeering(networkFieldValue.Project, networkFieldValue.Name, request).Do()
 	if err != nil {
 		return fmt.Errorf("Error adding network peering: %s", err)
 	}
@@ -129,7 +126,7 @@ func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	network, err := config.clientComputeBeta.Networks.Get(networkFieldValue.Project, networkFieldValue.Name).Do()
+	network, err := config.clientCompute.Networks.Get(networkFieldValue.Project, networkFieldValue.Name).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Network %q", networkFieldValue.Name))
 	}
@@ -143,10 +140,8 @@ func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{})
 
 	d.Set("peer_network", peering.Network)
 	d.Set("name", peering.Name)
-	<% unless version == 'ga' -%>
 	d.Set("import_custom_routes", peering.ImportCustomRoutes)
 	d.Set("export_custom_routes", peering.ExportCustomRoutes)
-	<% end -%>
 	d.Set("state", peering.State)
 	d.Set("state_details", peering.StateDetails)
 
@@ -196,7 +191,7 @@ func resourceComputeNetworkPeeringDelete(d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func findPeeringFromNetwork(network *computeBeta.Network, peeringName string) *computeBeta.NetworkPeering {
+func findPeeringFromNetwork(network *compute.Network, peeringName string) *compute.NetworkPeering {
 	for _, p := range network.Peerings {
 		if p.Name == peeringName {
 			return p
@@ -204,15 +199,13 @@ func findPeeringFromNetwork(network *computeBeta.Network, peeringName string) *c
 	}
 	return nil
 }
-func expandNetworkPeering(d *schema.ResourceData) *computeBeta.NetworkPeering {
-	return &computeBeta.NetworkPeering{
+func expandNetworkPeering(d *schema.ResourceData) *compute.NetworkPeering {
+	return &compute.NetworkPeering{
 		ExchangeSubnetRoutes: true,
 		Name:	                d.Get("name").(string),
 		Network:              d.Get("peer_network").(string),
-<% unless version == 'ga' -%>
 		ExportCustomRoutes:   d.Get("export_custom_routes").(bool),
 		ImportCustomRoutes:   d.Get("import_custom_routes").(bool),
-<% end -%>
 	}
 }
 
