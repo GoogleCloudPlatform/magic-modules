@@ -1,0 +1,2 @@
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
+alert_policy = attribute('alert_policy', default: <%= JSON.pretty_generate(grab_attributes['alert_policy']) -%>, description: 'Alert Policy description')
