@@ -1,7 +1,3 @@
-## Examples
-
-The following examples show how to use this InSpec audit resource.
-
 ### Test that a GCP alert policy is enabled 
 
     describe google_project_alert_policy(policy: 'spaterson', name: '9271751234503117449') do
