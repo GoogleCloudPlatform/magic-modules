@@ -413,3 +413,11 @@ project_exclusion:
   name: inspec-project-exclusion
   description: My project exclusion description
   filter: resource.type = gce_instance AND severity <= DEBUG
+
+alert_policy:
+  display_name: Display
+  combiner: OR
+  condition_display_name: condition
+  condition_filter: "metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\""
+  condition_duration: 60s
+  condition_comparison: COMPARISON_GT

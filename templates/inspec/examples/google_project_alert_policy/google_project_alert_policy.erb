@@ -1,0 +1,11 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% alert_policy = grab_attributes['alert_policy'] -%>
+describe.one do
+  google_project_alert_policies(project: <%= gcp_project_id -%>).policy_names do |policy_name|
+    describe google_project_alert_policy(project: <%= gcp_project_id -%>, name: policy_name) do
+      it { should exist }
+      its('display_name') { should cmp <%= doc_generation ? "'#{alert_policy['display_name']}'" : "alert_policy['display_name']" -%>}
+      its('combiner') { should cmp <%= doc_generation ? "'#{alert_policy['combiner']}'" : "alert_policy['combiner']" -%>}
+    end
+  end
+end
