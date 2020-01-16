@@ -64,6 +64,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/http_headers.erb'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateHttpHeaders()'
+      attemptDeadline: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'emptyOrDefaultStringSuppress("180s")'
       appEngineHttpTarget.appEngineRouting: !ruby/object:Overrides::Terraform::PropertyOverride
         # `appEngineRouting` in API response is useless, so we want to ignore that and set config
         # values to the state. `ignore_read: true` is the option for that, but it doesn't work for
