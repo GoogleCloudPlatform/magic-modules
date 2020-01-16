@@ -286,6 +286,7 @@ module Provider
 
     def resource_name(object, product)
       return object.resource_name unless object.resource_name.nil?
+
       "google_#{@config.legacy_name || product.name.underscore}_#{object.name.underscore}"
     end
 
