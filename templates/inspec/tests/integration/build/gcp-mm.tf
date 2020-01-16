@@ -1125,3 +1125,25 @@ resource "google_compute_vpn_tunnel" "tunnel1" {
     google_compute_forwarding_rule.inspec-gcp-fr-udp4500,
   ]
 }
+
+variable "alert_policy" {
+  type = any
+}
+
+resource "google_monitoring_alert_policy" "alert_policy" {
+  project      = var.gcp_project_id
+  display_name = var.alert_policy["display_name"]
+  combiner     = var.alert_policy["combiner"]
+  conditions {
+    display_name = var.alert_policy["condition_display_name"]
+    condition_threshold {
+      filter     = var.alert_policy["condition_filter"]
+      duration   = var.alert_policy["condition_duration"]
+      comparison = var.alert_policy["condition_comparison"]
+      aggregations {
+        alignment_period   = "60s"
+        per_series_aligner = "ALIGN_RATE"
+      }
+    }
+  }
+}
