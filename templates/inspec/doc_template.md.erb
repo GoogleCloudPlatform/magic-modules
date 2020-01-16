@@ -38,6 +38,11 @@ This resource has beta fields available. To retrieve these fields, include `beta
 <%= compile(object.singular_extra_examples) -%>
 
 <% end -%>
+<% if object.plural_extra_examples && plural -%>
+
+<%= compile(object.plural_extra_examples) -%>
+
+<% end -%>
 
 ## Properties
 Properties that can be accessed from the `<%= resource_underscored_name -%>` resource:
