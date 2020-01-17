@@ -121,3 +121,17 @@ objects:
         name: 'name'
         description: Name or self link of a backend service.
         required: true
+  # This resource is only used to generate IAM resources. They do not correspond to real
+  # GCP resources, and should not be used to generate anything other than IAM suppport.
+  - !ruby/object:Api::Resource
+    name: 'TunnelInstance'
+    base_url: 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}'
+    self_link: 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}'
+    exclude_resource: true
+    description: |
+      Only used to generate IAM resources
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: Name of the instance.
+        required: true
