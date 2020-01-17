@@ -1399,6 +1399,24 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			d.SetPartial("enable_display")
 		}
 
+		// Retrieve instance again, disks may have changed since we first retrieved it.
+		instance, err := config.clientComputeBeta.Instances.Get(project, zone, d.Get("name").(string)).Do()
+		if err != nil {
+			return handleNotFoundError(err, d, fmt.Sprintf("Instance %s", instance.Name))
+		}
+
+		var encrypted []*computeBeta.AttachedDisk
+		for _, disk := range instance.Disks {
+			if disk.DiskEncryptionKey != nil {
+				log.Printf("[INFO] Found encrypted disk: %v", disk)
+				log.Printf("[INFO] Found encrypted disk key: %v", disk.DiskEncryptionKey)
+				encrypted = append(encrypted, disk)
+			}
+		}
+
+		log.Printf("[INFO] Found encrypted disks: %v", encrypted)
+		log.Printf("[INFO] Found disks: %v", instance.Disks)
+
 		op, err = config.clientCompute.Instances.Start(project, zone, instance.Name).Do()
 		if err != nil {
 			return errwrap.Wrapf("Error starting instance: {{err}}", err)
