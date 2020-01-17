@@ -1,5 +1,5 @@
 resource "google_compute_network_peering_routes_config" "<%= ctx[:primary_resource_id] %>" {
-  name    = google_compute_network_peering.peering_primary.name
+  peering = google_compute_network_peering.peering_primary.name
   network = google_compute_network.network_primary.name
 
   import_custom_routes = true

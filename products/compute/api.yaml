@@ -7273,7 +7273,7 @@ objects:
     update_verb: :PATCH
     update_url: 'projects/{{project}}/global/networks/{{network}}/updatePeering'
     identity:
-      - name
+      - peering
     nested_query: !ruby/object:Api::Resource::NestedQuery
       keys:
         - peerings
@@ -7314,7 +7314,9 @@ objects:
         url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
-        name: 'name'
+        name: 'peering'
+        # renamed to make it clear that this is an existing peering
+        api_name: 'name'
         required: true
         description: |
           Name of the peering.

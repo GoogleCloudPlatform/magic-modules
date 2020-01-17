@@ -1048,8 +1048,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "projects/{{project}}/global/networks/{{network}}/networkPeerings/{{name}}"
-    import_format: ["projects/{{project}}/global/networks/{{network}}/networkPeerings/{{name}}"]
+    id_format: "projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"
+    import_format: ["projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"]
     # format from google_compute_network_peering
     mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
     examples:
