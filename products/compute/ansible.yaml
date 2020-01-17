@@ -319,6 +319,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   NetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  NetworkPeeringRoutesConfig: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   Region: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
