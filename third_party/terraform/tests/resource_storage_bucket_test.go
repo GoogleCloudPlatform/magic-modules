@@ -851,8 +851,7 @@ func TestAccStorageBucket_website(t *testing.T) {
 	t.Parallel()
 
 	bucketSuffix := acctest.RandomWithPrefix("tf-website-test")
-	errMsg := fmt.Sprintf("one of `(?:%[1]s,%[2]s)|(?:%[2]s,%[1]s)`must be specified",
-		"website.0.main_page_suffix", "website.0.not_found_page")
+	errRe := regexp.MustCompile("one of `(?:website.0.main_page_suffix,website.0.not_found_page)|(?:website.0.not_found_page,website.0.main_page_suffix)`must be specified")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -861,7 +860,7 @@ func TestAccStorageBucket_website(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccStorageBucket_websiteNoAttributes(bucketSuffix),
-				ExpectError: regexp.MustCompile(errMsg),
+				ExpectError: errRe,
 			},
 			{
 				Config: testAccStorageBucket_websiteOneAttribute(bucketSuffix),
