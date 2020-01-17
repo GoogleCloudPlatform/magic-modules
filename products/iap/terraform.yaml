@@ -129,6 +129,27 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           backend_service_name: "backend-service"
           http_health_check_name: "health-check"
         primary_resource_name: "fmt.Sprintf(\"backend-service%s\", context[\"random_suffix\"])"
+  TunnelInstance: !ruby/object:Overrides::Terraform::ResourceOverride
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      parent_resource_type: 'google_compute_instance'
+      parent_resource_attribute: 'instance'
+      fetch_iam_policy_verb: :POST
+      allowed_iam_role: 'roles/iap.tunnelResourceAccessor'
+      iam_conditions_request_type: :REQUEST_BODY
+    id_format: "projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}"
+    import_format: [
+      "projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}",
+      "projects/{{project}}/zones/{{zone}}/instances/{{name}}"
+    ]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "instance_basic"
+        primary_resource_id: "tunnelvm"
+        vars:
+          instance_name: "tf-test-tunnel"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-tunnel%s\", context[\"random_suffix\"])"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
