@@ -182,6 +182,7 @@ func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *Config, it 
 		for _, disk := range it.Properties.Disks {
 			if disk.Boot {
 				if disk.Source != "" {
+					// Instances need a URL for the disk, but instance templates only have the name
 					source, err := ParseDiskFieldValue(disk.Source, d, config)
 					if err != nil {
 						return nil, err
