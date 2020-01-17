@@ -183,11 +183,7 @@ func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *Config, it 
 			if disk.Boot {
 				if disk.Source != "" {
 					// Instances need a URL for the disk, but instance templates only have the name
-					source, err := ParseDiskFieldValue(disk.Source, d, config)
-					if err != nil {
-						return nil, err
-					}
-					disk.Source = source.RelativeLink()
+					disk.Source = fmt.Sprintf("projects/%s/zones/%s/disks/%s", project, zone.Name, disk.Source)
 				}
 				if disk.InitializeParams != nil {
 					if dt := disk.InitializeParams.DiskType; dt != "" {
