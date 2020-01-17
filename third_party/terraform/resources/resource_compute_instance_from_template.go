@@ -181,6 +181,13 @@ func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *Config, it 
 		// boot disk was not overridden, so use the one from the instance template
 		for _, disk := range it.Properties.Disks {
 			if disk.Boot {
+				if disk.Source != "" {
+					source, err := ParseDiskFieldValue(disk.Source, d, config)
+					if err != nil {
+						return nil, err
+					}
+					disk.Source = source.RelativeLink()
+				}
 				if disk.InitializeParams != nil {
 					if dt := disk.InitializeParams.DiskType; dt != "" {
 						// Instances need a URL for the disk type, but instance templates
