@@ -1409,27 +1409,20 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		var encrypted []*compute.CustomerEncryptionKeyProtectedDisk
 		for _, disk := range instanceFromConfig.Disks {
 			if disk.DiskEncryptionKey != nil {
-				log.Printf("[DEBUG] Found encrypted disk: %v", disk)
-				log.Printf("[DEBUG] Found encrypted disk key: %v", disk.DiskEncryptionKey)
-				eDisk := compute.CustomerEncryptionKeyProtectedDisk{Source: disk.Source, DiskEncryptionKey: &compute.CustomerEncryptionKey{RawKey: disk.DiskEncryptionKey.RawKey, KmsKeyName: disk.DiskEncryptionKey.KmsKeyName}}
+				key := compute.CustomerEncryptionKey{RawKey: disk.DiskEncryptionKey.RawKey, KmsKeyName: disk.DiskEncryptionKey.KmsKeyName}
+				eDisk := compute.CustomerEncryptionKeyProtectedDisk{Source: disk.Source, DiskEncryptionKey: &key}
 				encrypted = append(encrypted, &eDisk)
 			}
 		}
 
-		log.Printf("[DEBUG] Found encrypted disks: %v", encrypted)
-		log.Printf("[DEBUG] Found disks: %v", instance.Disks)
-
 		if len(encrypted) > 0 {
 			request := compute.InstancesStartWithEncryptionKeyRequest{Disks: encrypted}
 			op, err = config.clientCompute.Instances.StartWithEncryptionKey(project, zone, instance.Name, &request).Do()
-			if err != nil {
-				return errwrap.Wrapf("Error starting instance: {{err}}", err)
-			}
 		} else {
 			op, err = config.clientCompute.Instances.Start(project, zone, instance.Name).Do()
-			if err != nil {
-				return errwrap.Wrapf("Error starting instance: {{err}}", err)
-			}
+		}
+		if err != nil {
+			return errwrap.Wrapf("Error starting instance: {{err}}", err)
 		}
 
 		opErr = computeOperationWaitTime(config, op, project,
