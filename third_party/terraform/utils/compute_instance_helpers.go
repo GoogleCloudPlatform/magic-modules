@@ -352,6 +352,7 @@ func flattenEnableDisplay(displayDevice *computeBeta.DisplayDevice) interface{} 
 }
 
 // Terraform doesn't correctly calculate changes on schema.Set, so we do it manually
+// https://github.com/hashicorp/terraform-plugin-sdk/issues/98
 func schedulingHasChange(d *schema.ResourceData) bool {
 	if !d.HasChange("scheduling") {
 		// This doesn't work correctly, which is why this method exists
