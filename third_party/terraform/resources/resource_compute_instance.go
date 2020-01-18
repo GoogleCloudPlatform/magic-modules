@@ -1056,7 +1056,6 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		if err != nil {
 			return fmt.Errorf("Error creating request data to update scheduling: %s", err)
 		}
-		log.Printf("[DEBUG] Found diff in scheduling %v", scheduling)
 
 		op, err := config.clientComputeBeta.Instances.SetScheduling(
 			project, zone, instance.Name, scheduling).Do()

@@ -102,9 +102,7 @@ func expandScheduling(v interface{}) (*computeBeta.Scheduling, error) {
 	if v, ok := original["node_affinities"]; ok && v != nil {
 		naSet := v.(*schema.Set).List()
 		scheduling.NodeAffinities = make([]*computeBeta.SchedulingNodeAffinity, len(ls))
-		if len(naSet) > 0 {
-			scheduling.ForceSendFields = append(scheduling.ForceSendFields, "NodeAffinities")
-		}
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "NodeAffinities")
 		for _, nodeAffRaw := range naSet {
 			if nodeAffRaw == nil {
 				continue
