@@ -422,6 +422,10 @@ func resourceComputeInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				Elem: &schema.Resource{
+					// !!! IMPORTANT !!!
+					// We have a custom diff function for the scheduling block due to issues with Terraform's
+					// diff on schema.Set. If changes are made to this block, they must be reflected in that
+					// method. See schedulingHasChange in compute_instance_helpers.go
 					Schema: map[string]*schema.Schema{
 						"on_host_maintenance": {
 							Type:         schema.TypeString,
