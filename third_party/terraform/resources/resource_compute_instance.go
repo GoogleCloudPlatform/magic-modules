@@ -1051,11 +1051,12 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		d.SetPartial("labels")
 	}
 
-	if d.HasChange("scheduling") {
+	if schedulingHasChange(d) {
 		scheduling, err := expandScheduling(d.Get("scheduling"))
 		if err != nil {
 			return fmt.Errorf("Error creating request data to update scheduling: %s", err)
 		}
+		log.Printf("[DEBUG] Found diff in scheduling %v", scheduling)
 
 		op, err := config.clientComputeBeta.Instances.SetScheduling(
 			project, zone, instance.Name, scheduling).Do()
@@ -1399,27 +1400,36 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			d.SetPartial("enable_display")
 		}
 
-		// Retrieve instance again, disks may have changed since we first retrieved it.
-		instance, err := config.clientComputeBeta.Instances.Get(project, zone, d.Get("name").(string)).Do()
+		// Retrieve instance from config to pull encryption keys if necessary
+		instanceFromConfig, err := expandComputeInstance(project, d, config)
 		if err != nil {
-			return handleNotFoundError(err, d, fmt.Sprintf("Instance %s", instance.Name))
+			return err
 		}
 
-		var encrypted []*computeBeta.AttachedDisk
-		for _, disk := range instance.Disks {
+		var encrypted []*compute.CustomerEncryptionKeyProtectedDisk
+		for _, disk := range instanceFromConfig.Disks {
 			if disk.DiskEncryptionKey != nil {
-				log.Printf("[INFO] Found encrypted disk: %v", disk)
-				log.Printf("[INFO] Found encrypted disk key: %v", disk.DiskEncryptionKey)
-				encrypted = append(encrypted, disk)
+				log.Printf("[DEBUG] Found encrypted disk: %v", disk)
+				log.Printf("[DEBUG] Found encrypted disk key: %v", disk.DiskEncryptionKey)
+				eDisk := compute.CustomerEncryptionKeyProtectedDisk{Source: disk.Source, DiskEncryptionKey: &compute.CustomerEncryptionKey{RawKey: disk.DiskEncryptionKey.RawKey, KmsKeyName: disk.DiskEncryptionKey.KmsKeyName, KmsKeyServiceAccount: disk.DiskEncryptionKey.KmsKeyServiceAccount, RsaEncryptedKey: disk.DiskEncryptionKey.RsaEncryptedKey}}
+				encrypted = append(encrypted, &eDisk)
 			}
 		}
 
-		log.Printf("[INFO] Found encrypted disks: %v", encrypted)
-		log.Printf("[INFO] Found disks: %v", instance.Disks)
+		log.Printf("[DEBUG] Found encrypted disks: %v", encrypted)
+		log.Printf("[DEBUG] Found disks: %v", instance.Disks)
 
-		op, err = config.clientCompute.Instances.Start(project, zone, instance.Name).Do()
-		if err != nil {
-			return errwrap.Wrapf("Error starting instance: {{err}}", err)
+		if len(encrypted) > 0 {
+			request := compute.InstancesStartWithEncryptionKeyRequest{Disks: encrypted}
+			op, err = config.clientCompute.Instances.StartWithEncryptionKey(project, zone, instance.Name, &request).Do()
+			if err != nil {
+				return errwrap.Wrapf("Error starting instance: {{err}}", err)
+			}
+		} else {
+			op, err = config.clientCompute.Instances.Start(project, zone, instance.Name).Do()
+			if err != nil {
+				return errwrap.Wrapf("Error starting instance: {{err}}", err)
+			}
 		}
 
 		opErr = computeOperationWaitTime(config, op, project,
