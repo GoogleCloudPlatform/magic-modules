@@ -363,6 +363,17 @@ func schedulingHasChange(d *schema.ResourceData) bool {
 	newScheduling := n.([]interface{})[0].(map[string]interface{})
 	originalNa := oScheduling["node_affinities"].(*schema.Set)
 	newNa := newScheduling["node_affinities"].(*schema.Set)
+	if oScheduling["automatic_restart"] != newScheduling["automatic_restart"] {
+		return true
+	}
 
-	return oScheduling["automatic_restart"] == newScheduling["automatic_restart"] && oScheduling["preemptible"] == newScheduling["preemptible"] && oScheduling["on_host_maintenance"] == newScheduling["on_host_maintenance"] && reflect.DeepEqual(newNa, originalNa)
+	if oScheduling["preemptible"] != newScheduling["preemptible"] {
+		return true
+	}
+
+	if oScheduling["on_host_maintenance"] != newScheduling["on_host_maintenance"] {
+		return true
+	}
+
+	return reflect.DeepEqual(newNa, originalNa)
 }

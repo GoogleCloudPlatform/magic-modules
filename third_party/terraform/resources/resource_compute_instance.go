@@ -1411,7 +1411,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if disk.DiskEncryptionKey != nil {
 				log.Printf("[DEBUG] Found encrypted disk: %v", disk)
 				log.Printf("[DEBUG] Found encrypted disk key: %v", disk.DiskEncryptionKey)
-				eDisk := compute.CustomerEncryptionKeyProtectedDisk{Source: disk.Source, DiskEncryptionKey: &compute.CustomerEncryptionKey{RawKey: disk.DiskEncryptionKey.RawKey, KmsKeyName: disk.DiskEncryptionKey.KmsKeyName, KmsKeyServiceAccount: disk.DiskEncryptionKey.KmsKeyServiceAccount, RsaEncryptedKey: disk.DiskEncryptionKey.RsaEncryptedKey}}
+				eDisk := compute.CustomerEncryptionKeyProtectedDisk{Source: disk.Source, DiskEncryptionKey: &compute.CustomerEncryptionKey{RawKey: disk.DiskEncryptionKey.RawKey, KmsKeyName: disk.DiskEncryptionKey.KmsKeyName}}
 				encrypted = append(encrypted, &eDisk)
 			}
 		}
