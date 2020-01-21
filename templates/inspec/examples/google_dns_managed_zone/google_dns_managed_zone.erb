@@ -1,0 +1,15 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_dns_zone_name = "#{external_attribute('gcp_dns_zone_name', doc_generation)}" -%>
+<% dns_managed_zone = grab_attributes['dns_managed_zone'] -%>
+describe google_dns_managed_zone(project: <%= gcp_project_id -%>, zone: <%= doc_generation ? "'#{dns_managed_zone['name']}'" : "dns_managed_zone['name']" -%>) do
+  it { should exist }
+  its('dns_name') { should cmp <%= gcp_dns_zone_name -%> }
+
+  its('description') { should cmp <%= doc_generation ? "'#{dns_managed_zone['description']}'" : "dns_managed_zone['description']" -%> }
+  its('zone_signing_key_algorithm') { should cmp 'rsasha256' }
+  its('key_signing_key_algorithm') { should cmp 'rsasha512' }
+end
+
+describe google_dns_managed_zone(project: <%= gcp_project_id -%>, zone: 'nonexistent') do
+  it { should_not exist }
+end

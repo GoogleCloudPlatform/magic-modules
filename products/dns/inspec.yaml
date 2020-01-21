@@ -15,7 +15,17 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   # Handwritten managed zone resources exist in inspec-gcp already
   ManagedZone: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    additional_functions: third_party/inspec/custom_functions/dns_managed_zone.erb
+    plural_custom_logic: third_party/inspec/custom_functions/dns_managed_zones.erb
+    plural_custom_attr_readers: ['dnssec_config_state']
+    self_link: 'projects/{{project}}/managedZones/{{zone}}'
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: zone_name
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: zone_id
+      dnsName: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: zone_dns_name
   ResourceRecordSet: !ruby/object:Overrides::Inspec::ResourceOverride
     base_url: projects/{{project}}/managedZones/{{managed_zone}}/rrsets
   Project: !ruby/object:Overrides::Inspec::ResourceOverride
