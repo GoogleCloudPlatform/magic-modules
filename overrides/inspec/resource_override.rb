@@ -29,6 +29,7 @@ module Overrides
           plural_extra_examples
           plural_custom_logic
           plural_custom_attr_readers
+          resource_name
         ]
       end
 
@@ -54,6 +55,10 @@ module Overrides
         # Attribute readers to add to plural resource to access fields added via
         # plural_custom_logic
         check :plural_custom_attr_readers, type: ::Array, default: [], item_type: String
+
+        # Overrides the resource name. In some cases we need to match legacy resources which
+        # do not have product namespaces, or other irregularities
+        check :resource_name, type: String
       end
     end
   end
