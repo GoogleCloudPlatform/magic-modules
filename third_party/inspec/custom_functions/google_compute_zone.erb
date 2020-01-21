@@ -1,0 +1,8 @@
+# helper method for retrieving a region name
+def region_name
+  @region&.split('/').last
+end
+
+def up?
+  @status == 'UP'
+end

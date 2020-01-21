@@ -160,4 +160,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: "vpn_tunnel_name"
   Zone: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    additional_functions: third_party/inspec/custom_functions/google_compute_zone.erb
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "zone_name"
+      status: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "zone_status"
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "zone_id"
