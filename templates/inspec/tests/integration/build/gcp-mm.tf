@@ -1147,3 +1147,29 @@ resource "google_monitoring_alert_policy" "alert_policy" {
     }
   }
 }
+
+variable "dns_managed_zone" {
+  type = any
+}
+
+variable "gcp_dns_zone_name" {}
+
+resource "google_dns_managed_zone" "example-zone" {
+  project     = var.gcp_project_id
+  name        = var.dns_managed_zone["name"]
+  dns_name    = "${var.gcp_dns_zone_name}"
+  description = var.dns_managed_zone["description"]
+  dnssec_config {
+    state = var.dns_managed_zone["dnssec_config_state"]
+    default_key_specs {
+      algorithm = "rsasha256"
+      key_type = "zoneSigning"
+      key_length = 2048
+    }
+    default_key_specs {
+      algorithm = "rsasha512"
+      key_type = "keySigning"
+      key_length = 2048
+    }
+  }
+}
