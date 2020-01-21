@@ -17,8 +17,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Lien: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Project: !ruby/object:Overrides::Inspec::ResourceOverride
-    self_link: projects/{{projectId}}
-    exclude_resource: true
+    additional_functions: third_party/inspec/custom_functions/google_project.erb
+    singular_extra_examples: third_party/inspec/documentation/google_project.md
+    plural_extra_examples: third_party/inspec/documentation/google_projects.md
+    resource_name: google_project
+    self_link: projects/{{project}}
+    properties:
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        name: project_id
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: project_name
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ':'
