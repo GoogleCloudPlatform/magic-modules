@@ -920,6 +920,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   InstanceTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   InterconnectAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "interconnect_attachment_basic"
+        primary_resource_id: "on_prem"
+        skip_test: true
+        vars:
+          interconnect_attachment_name: "on-prem-attachment"
+          router_name: "router"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -939,14 +947,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       vlanTag8021q: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-    examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "interconnect_attachment_basic"
-        primary_resource_id: "on_prem"
-        skip_test: true
-        vars:
-          interconnect_attachment_name: "on-prem-attachment"
-          router_name: "router"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/interconnect_attachment.go.erb
+      post_create: templates/terraform/post_create/interconnect_attachment.go.erb
+      pre_delete: templates/terraform/pre_delete/interconnect_attachment.go.erb
   License: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   MachineType: !ruby/object:Overrides::Terraform::ResourceOverride

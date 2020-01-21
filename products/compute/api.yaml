@@ -6602,6 +6602,9 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 10
+          delete_minutes: 10
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
       status: !ruby/object:Api::OpAsync::Status
