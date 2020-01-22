@@ -27,6 +27,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: project_id
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: project_name
+      number: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: project_number
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ':'
