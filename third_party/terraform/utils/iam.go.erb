@@ -16,9 +16,7 @@ import (
 )
 
 const maxBackoffSeconds = 30
-<% unless version == 'ga' -%>
 const iamPolicyVersion = 3
-<% end -%>
 
 // These types are implemented per GCP resource type and specify how to do per-resource IAM operations.
 // They are used in the generic Terraform IAM resource definitions
@@ -276,7 +274,6 @@ func listFromIamBindingMap(bm map[iamBindingKey]map[string]struct{}) []*cloudres
 			Role:    key.Role,
 			Members: stringSliceFromGolangSet(members),
 		}
-<% unless version == 'ga' -%>
 		if !key.Condition.Empty() {
 			b.Condition = &cloudresourcemanager.Expr{
 				Description: key.Condition.Description,
@@ -284,7 +281,6 @@ func listFromIamBindingMap(bm map[iamBindingKey]map[string]struct{}) []*cloudres
 				Title:       key.Condition.Title,
 			}
 		}
-<% end -%>
 		rb = append(rb, b)
 	}
 	return rb
