@@ -1,0 +1,5 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+describe google_compute_zone(project: <%= gcp_project_id -%>, "us-central1-a") do
+  it { should exist }
+  it { should be_up }
+end
