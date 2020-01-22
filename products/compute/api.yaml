@@ -14628,3 +14628,8 @@ objects:
           - :UP
           - :DOWN
         output: true
+      - !ruby/object:Api::Type::Array
+        name: 'availableCpuPlatforms'
+        description: 'The available CPU platforms in this zone'
+        item_type: Api::Type::String
+        output: true
