@@ -67,7 +67,10 @@ if [ "$COMMAND" == "head" ]; then
     BRANCH=auto-pr-$REFERENCE
     COMMIT_MESSAGE="New generated code for MM PR $REFERENCE."
 elif [ "$COMMAND" == "base" ]; then
-    git checkout HEAD^2
+    # In this case, there is guaranteed to be a merge commit,
+    # and the *left* side of it is the old master branch.
+    # the *right* side of it is the code to be merged.
+    git checkout HEAD~
     BRANCH=auto-pr-$REFERENCE-old
     COMMIT_MESSAGE="Old generated code for MM PR $REFERENCE."
 elif [ "$COMMAND" == "downstream" ]; then
