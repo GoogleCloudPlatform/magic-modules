@@ -10,9 +10,6 @@ package google
     asset_name_template = '//' + product_ns.downcase + '.googleapis.com/' + (!object.self_link.nil? && !object.self_link.empty? ? object.self_link : object.base_url + '/{{name}}')
 %>
 
-<%# constants usually contain functions called from inside the setup file. -%>
-<%= lines(compile(object.custom_code.constants)) if object.custom_code.constants -%>
-
 func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) (Asset, error) {
     name, err := assetName(d, config, "<%= asset_name_template -%>")
     if err != nil {
