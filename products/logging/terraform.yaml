@@ -36,6 +36,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
     properties:
+      metricDescriptor.type: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
       metricDescriptor.labels: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       metricDescriptor.labels.valueType: !ruby/object:Overrides::Terraform::PropertyOverride
