@@ -50,12 +50,12 @@ steps:
     - name: 'gcr.io/cloud-builders/git'
       args:
           - checkout
-          - head/$_HEAD_BRANCH
+          - origin/$_BASE_BRANCH
     - name: 'gcr.io/cloud-builders/git'
       id: merged
       args:
           - merge
-          - origin/$_BASE_BRANCH
+          - head/$_HEAD_BRANCH
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
