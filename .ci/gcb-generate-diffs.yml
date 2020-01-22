@@ -55,6 +55,7 @@ steps:
       id: merged
       args:
           - merge
+          - --no-ff
           - head/$_HEAD_BRANCH
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
