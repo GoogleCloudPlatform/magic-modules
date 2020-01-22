@@ -1,0 +1,15 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% logging_metric = grab_attributes['logging_metric'] -%>
+describe google_project_metrics(project: <%= gcp_project_id -%>) do
+  it { should exist }
+  its('metric_filters') { should include <%= doc_generation ? "'#{logging_metric['filter']}'" : "logging_metric['filter']" -%> }
+  its('metric_names') { should include <%= doc_generation ? "'#{logging_metric['name']}'" : "logging_metric['name']" -%> }
+end
+
+describe.one do
+  google_project_metrics(project: <%= gcp_project_id -%>).metric_types.each do |metric_type|
+    describe metric_type do
+      it { should match <%= doc_generation ? "'#{logging_metric['name']}'" : "logging_metric['name']" -%> }
+    end
+  end
+end

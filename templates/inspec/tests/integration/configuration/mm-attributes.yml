@@ -427,3 +427,9 @@ dns_managed_zone:
   name: example-zone
   description: example description
   dnssec_config_state: 'on'
+
+logging_metric:
+  name: some/metric
+  filter: 'resource.type=gae_app AND severity>=ERROR'
+  metric_kind: DELTA
+  value_type: INT64

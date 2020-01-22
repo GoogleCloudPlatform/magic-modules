@@ -1173,3 +1173,17 @@ resource "google_dns_managed_zone" "example-zone" {
     }
   }
 }
+
+variable "logging_metric" {
+  type = any
+}
+
+resource "google_logging_metric" "logging_metric" {
+  project = var.gcp_project_id
+  name    = var.logging_metric["name"]
+  filter  = var.logging_metric["filter"]
+  metric_descriptor {
+    metric_kind = var.logging_metric["metric_kind"]
+    value_type  = var.logging_metric["value_type"]
+  }
+}
