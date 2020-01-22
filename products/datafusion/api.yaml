@@ -150,6 +150,11 @@ objects:
         output: true
         description: |
           Current version of the Data Fusion.
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccount'
+        output: true
+        description: |
+          Service account which will be used to access resources in the customer project.
       - !ruby/object:Api::Type::Boolean
         name: 'privateInstance'
         description: |
