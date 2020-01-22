@@ -14,7 +14,14 @@
 --- !ruby/object:Provider::Inspec::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Metric: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    resource_name: google_project_metric
+    plural_custom_logic: third_party/inspec/custom_functions/google_project_metrics.erb
+    plural_custom_attr_readers: ['metric_type']
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: metric_name
+      filter: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: metric_filter
   OrganizationLogSink: !ruby/object:Overrides::Inspec::ResourceOverride
     # Creating a log sink requires organization level privileges
     privileged: true

@@ -1,0 +1,2 @@
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
+logging_metric = attribute('logging_metric', default: <%= JSON.pretty_generate(grab_attributes['logging_metric']) -%>, description: 'Logging metric definition')
