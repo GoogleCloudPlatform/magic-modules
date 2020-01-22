@@ -443,6 +443,10 @@ objects:
     base_url: b/{{bucket}}/acl
     self_link: b/{{bucket}}/acl/{{entity}}
     collection_url_key: items
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/storage/docs/access-control/lists'
+      api: 'https://cloud.google.com/storage/docs/json_api/v1/bucketAccessControls'
     description: |
       The BucketAccessControls resource represents the Access Control Lists
       (ACLs) for buckets within Google Cloud Storage. ACLs let you specify who
