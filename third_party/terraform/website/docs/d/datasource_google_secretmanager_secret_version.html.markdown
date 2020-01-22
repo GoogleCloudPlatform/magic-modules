@@ -9,28 +9,14 @@ description: |-
 
 # google\_secretmanager\_secret\_version
 
-Get a Secret Manager secret's version. For more information see the [official documentation](https://cloud.google.com/tpu/docs/) and [API](https://cloud.google.com/tpu/docs/reference/rest/v1/projects.locations.tensorflowVersions).
+Get a Secret Manager secret's version. For more information see the [official documentation](https://cloud.google.com/secret-manager/docs/) and [API](https://cloud.google.com/secret-manager/docs/reference/rest/v1beta1/projects.secrets.versions).
 
 ## Example Usage
 
 ```hcl
-data "google_tpu_tensorflow_versions" "available" {
-}
-```
-
-## Example Usage: Configure Basic TPU Node with available version
-
-```hcl
-data "google_tpu_tensorflow_versions" "available" {
-}
-
-resource "google_tpu_node" "tpu" {
-  name = "test-tpu"
-  zone = "us-central1-b"
-
-  accelerator_type   = "v3-8"
-  tensorflow_version = data.google_tpu_tensorflow_versions.available.versions[0]
-  cidr_block         = "10.2.0.0/29"
+data "google_secretmanager_secret_version" "basic" {
+  provider = google-beta
+  secret = "my-secret"
 }
 ```
 
@@ -38,14 +24,26 @@ resource "google_tpu_node" "tpu" {
 
 The following arguments are supported:
 
-* `project` - (Optional) The project to list versions for. If it
+* `project` - (Optional) The project to get the secret version for. If it
     is not provided, the provider project is used.
 
-* `zone` - (Optional) The zone to list versions for. If it
-    is not provided, the provider zone is used.
+* `secret` - (Required) The secret to get the secret version for.
+
+* `version` - (Optional) The version of the secret to get. If it
+    is not provided, the latest version is retrieved.
+
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `versions` - The list of TensorFlow versions available for the given project and zone.
+* `secret_data` - The secret data. No larger than 64KiB. A base64-encoded string.
+
+* `name` - The resource name of the SecretVersion. Format:
+  `projects/{{project}}/secrets/{{secret_id}}/versions/{{version}}`
+
+* `create_time` - The time at which the Secret was created.
+
+* `destroy_time` - The time at which the Secret was destroyed. Only present if state is DESTROYED.
+
+* `state` - The current state of the SecretVersion.
