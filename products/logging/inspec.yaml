@@ -13,7 +13,6 @@
 
 --- !ruby/object:Provider::Inspec::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
-  # Handwritten managed zone resources exist in inspec-gcp already
   Metric: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   OrganizationLogSink: !ruby/object:Overrides::Inspec::ResourceOverride
