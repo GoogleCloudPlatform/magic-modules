@@ -19,7 +19,7 @@ module Api
     # In GCP, different product versions are generally ordered where alpha is
     # a superset of beta, and beta a superset of GA. Each version will have a
     # different version url.
-    class Version < Api::Object
+    class Version < Api::Object::Named
       include Comparable
 
       attr_reader :base_url
