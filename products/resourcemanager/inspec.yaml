@@ -34,7 +34,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       method_name_separator: ':'
       fetch_iam_policy_verb: :POST
   Organization: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    privileged: true
+    # Name should be organizations/123456
+    self_link: '{{name}}'
+    base_url: organizations:search
+    resource_name: google_organization
+    plural_fetch_verb: :POST
   Folder: !ruby/object:Overrides::Inspec::ResourceOverride
     product_url: https://cloudresourcemanager.googleapis.com/v2/
     # Creating and viewing folders requires organization level privileges
