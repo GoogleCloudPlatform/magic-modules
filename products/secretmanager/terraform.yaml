@@ -21,6 +21,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: beta
         vars:
           secret_id: "tf-test-secret-"
+    import_format: ["projects/{{project}}/secrets/{{secret_id}}"]
     properties:
       replication.automatic: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/object_to_bool.go.erb
@@ -31,7 +32,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "secret_version_basic"
         primary_resource_id: "secret-version-basic"
-        primary_resource_name: "fmt.Sprintf(\"test-secret-version-basic%s\", context[\"random_suffix\"])"
         min_version: beta
         vars:
           secret_id: "tf-test-secret-version-"
