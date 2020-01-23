@@ -26,7 +26,19 @@ module Api
         attr_reader :name
       end
 
+      def string_array?(arr)
+        types = arr.map(&:class).uniq
+        types.size == 1 && types[0] == String
+      end
+
       def deep_merge(arr1, arr2)
+        # Scopes is an array of standard strings. In which case return the
+        # version in the overrides. This allows scopes to be removed rather
+        # than allowing for a merge of the two arrays
+        if string_array?(arr1)
+          return arr2.nil? ? arr1 : arr2
+        end
+
         # Merge any elements that exist in both
         result = arr1.map do |el1|
           other = arr2.select { |el2| el1.name == el2.name }.first
