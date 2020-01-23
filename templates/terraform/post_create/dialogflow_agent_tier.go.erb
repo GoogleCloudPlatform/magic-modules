@@ -1,0 +1,31 @@
+
+// The tier field is eventually consistent, we need to test for consistency before moving on.
+// Otherwise, the user will see diffs on the field.
+if d.HasChange("tier") {
+	readUrl, err := replaceVars(d, config, "{{DialogflowBasePath}}projects/{{project}}/agent")
+	if err != nil {
+		return err
+	}
+
+	incorrect_attempts := 0
+	consistent_threshold := 8
+	for correct_in_row := 0; correct_in_row < consistent_threshold; {
+		log.Printf("[INFO] Failed attempts: %d, correct in row: %d out of %d ", incorrect_attempts, correct_in_row, consistent_threshold)
+		res, err := sendRequest(config, "GET", project, readUrl, nil)
+		if err != nil {
+			return handleNotFoundError(err, d, fmt.Sprintf("DialogflowAgent %q", d.Id()))
+		}
+
+		if res["tier"] == d.Get("tier") {
+			correct_in_row++
+		} else {
+			if incorrect_attempts >= 20 {
+				return fmt.Errorf("Timed out waiting for agent tier to return correct value.  Waiting for %s, got %s.",
+				d.Get("tier"), res["tier"])
+			}
+			correct_in_row = 0
+			incorrect_attempts++
+			time.Sleep(2 * time.Minute)
+		}
+	}
+}
