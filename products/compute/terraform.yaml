@@ -356,6 +356,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         Because the API does not return the sensitive key value,
         we cannot confirm or reverse changes to a key outside of Terraform.
   DiskResourcePolicyAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
+    description: |
+      Adds existing resource policies to a disk. You can only add one policy
+      which will be applied to this disk for scheduling snapshot creation.
+
+      ~> **Note:** This resource does not support Region Disks (`google_compute_region_disk`).
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "disk_resource_policy_attachment_basic"
