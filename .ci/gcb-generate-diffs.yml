@@ -118,7 +118,7 @@ steps:
       args:
           - 'head'
           - 'inspec'
-          - 'ga'
+          - 'beta'
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
@@ -127,7 +127,7 @@ steps:
       args:
           - 'base'
           - 'inspec'
-          - 'ga'
+          - 'beta'
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
