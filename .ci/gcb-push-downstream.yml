@@ -164,6 +164,8 @@ steps:
           - -c
           - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:inspec-sync
 
+# set extremely long 1 day timeout, in order to ensure that any jams / backlogs can be cleared.
+timeout: 86400s
 options:
     machineType: 'N1_HIGHCPU_8'
 
