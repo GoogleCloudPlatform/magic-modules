@@ -142,10 +142,8 @@ func resourceGoogleProjectIamPolicyImport(d *schema.ResourceData, meta interface
 }
 
 func setProjectIamPolicy(policy *cloudresourcemanager.Policy, config *Config, pid string) error {
-<% unless version == 'ga' -%>
 	policy.Version = iamPolicyVersion
 
-<% end -%>
 	// Apply the policy
 	pbytes, _ := json.Marshal(policy)
 	log.Printf("[DEBUG] Setting policy %#v for project: %s", string(pbytes), pid)
@@ -171,17 +169,12 @@ func getResourceIamPolicy(d *schema.ResourceData) (*cloudresourcemanager.Policy,
 
 // Retrieve the existing IAM Policy for a Project
 func getProjectIamPolicy(project string, config *Config) (*cloudresourcemanager.Policy, error) {
-<% if version == 'ga' -%>
-	p, err := config.clientResourceManager.Projects.GetIamPolicy(project,
-		&cloudresourcemanager.GetIamPolicyRequest{}).Do()
-<% else -%>
 	p, err := config.clientResourceManager.Projects.GetIamPolicy(project,
 		&cloudresourcemanager.GetIamPolicyRequest{
 			Options: &cloudresourcemanager.GetPolicyOptions{
 				RequestedPolicyVersion: iamPolicyVersion,
 			},
 		}).Do()
-<% end -%>
 
 	if err != nil {
 		return nil, fmt.Errorf("Error retrieving IAM policy for project %q: %s", project, err)
