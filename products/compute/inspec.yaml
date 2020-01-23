@@ -90,6 +90,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  ProjectInfo:  !ruby/object:Overrides::Inspec::ResourceOverride
+    singular_only: true
+    additional_functions: third_party/inspec/custom_functions/google_compute_project_info.erb
   Region: !ruby/object:Overrides::Inspec::ResourceOverride
     additional_functions: third_party/inspec/custom_functions/google_compute_region.erb
     properties:

@@ -1120,6 +1120,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           If it is not provided, the provider region is used.
       serverBinding: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  ProjectInfo: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
   Region: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   RegionAutoscaler: !ruby/object:Overrides::Terraform::ResourceOverride
