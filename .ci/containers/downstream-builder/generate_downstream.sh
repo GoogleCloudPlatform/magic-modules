@@ -96,7 +96,7 @@ git add .
 git checkout -b $BRANCH
 
 COMMITTED=true
-git commit -m "$COMMIT_MESSAGE" || COMMITTED=false
+git commit --signoff -m "$COMMIT_MESSAGE" || COMMITTED=false
 
 if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
     # Add the changelog entry!
@@ -110,7 +110,7 @@ if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
         sed -e '/```release-note/,/```/!d' \
         > .changelog/$PR_NUMBER.txt
     git add .changelog
-    git commit --amend --no-edit
+    git commit --signoff --amend --no-edit
 fi
 
 git push $SCRATCH_PATH $BRANCH -f
