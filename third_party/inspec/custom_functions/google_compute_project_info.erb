@@ -1,0 +1,6 @@
+def has_enabled_oslogin?
+  @common_instance_metadata&.items&.each do |element|
+    return true if element.key=='enable-oslogin' and element.value.casecmp('true').zero?
+  end
+  false
+end
