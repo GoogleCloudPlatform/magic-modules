@@ -54,7 +54,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The static external IP address represented by this resource.
   Image: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    singular_only: true
+    singular_custom_constructor: third_party/inspec/custom_functions/compute_image_custom_constructor.erb
+    properties:
+      selfLink: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: false
+      status: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: false
   Instance: !ruby/object:Overrides::Inspec::ResourceOverride
     additional_functions: third_party/inspec/custom_functions/google_compute_instance.erb
     singular_extra_examples: 'third_party/inspec/documentation/instance_examples.md'

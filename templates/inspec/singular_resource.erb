@@ -38,7 +38,10 @@ class <%= object.__product.name.camelize(:upper) -%><%= object.name -%> < GcpRes
 
 <% end -%>
 
-<% if object.nested_query.nil? -%>
+<% if !object.singular_custom_constructor.nil? -%>
+<%= indent(compile(object.singular_custom_constructor), 2) -%>
+
+<% elsif object.nested_query.nil? -%>
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
     @params = params
