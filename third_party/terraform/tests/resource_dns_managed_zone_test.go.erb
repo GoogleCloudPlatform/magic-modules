@@ -125,7 +125,7 @@ func TestAccDNSManagedZone_privateForwardingUpdate(t *testing.T) {
 		CheckDestroy: testAccCheckDNSManagedZoneDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccDnsManagedZone_privateForwardingUpdate(zoneSuffix, "172.16.1.10", "172.16.1.20"),
+				Config: testAccDnsManagedZone_privateForwardingUpdate(zoneSuffix, "172.16.1.10", "172.16.1.20", "default", "private"),
 			},
 			resource.TestStep{
 				ResourceName:      "google_dns_managed_zone.private",
@@ -133,7 +133,7 @@ func TestAccDNSManagedZone_privateForwardingUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			resource.TestStep{
-				Config: testAccDnsManagedZone_privateForwardingUpdate(zoneSuffix, "172.16.1.10", "192.168.1.1"),
+				Config: testAccDnsManagedZone_privateForwardingUpdate(zoneSuffix, "172.16.1.10", "192.168.1.1", "private", "default"),
 			},
 			resource.TestStep{
 				ResourceName:      "google_dns_managed_zone.private",
@@ -255,7 +255,7 @@ resource "google_compute_network" "network-3" {
 }
 
 <% unless version.nil? || version == 'ga' -%>
-func testAccDnsManagedZone_privateForwardingUpdate(suffix, first_nameserver, second_nameserver string) string {
+func testAccDnsManagedZone_privateForwardingUpdate(suffix, first_nameserver, second_nameserver, first_forwarding_path, second_forwarding_path string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "private" {
   name        = "private-zone-%s"
@@ -271,11 +271,11 @@ resource "google_dns_managed_zone" "private" {
   forwarding_config {
     target_name_servers {
       ipv4_address = "%s"
-      forwarding_path = "default"
+      forwarding_path = "%s"
     }
     target_name_servers {
       ipv4_address = "%s"
-      forwarding_path = "private"
+      forwarding_path = "%s"
     }
   }
 }
@@ -284,7 +284,7 @@ resource "google_compute_network" "network-1" {
   name                    = "network-1-%s"
   auto_create_subnetworks = false
 }
-`, suffix, first_nameserver, second_nameserver, suffix)
+`, suffix, first_nameserver, first_forwarding_path, second_nameserver, second_forwarding_path, suffix)
 }
 <% end -%>
 
@@ -304,7 +304,7 @@ resource "google_compute_network" "network-1" {
   name                    = "network-1-%s"
   auto_create_subnetworks = false
 }
-`, suffix, suffix)
+`, suffix, reverseLookup)
 }
 <% end -%>
 
