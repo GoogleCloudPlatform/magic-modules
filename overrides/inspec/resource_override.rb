@@ -31,6 +31,7 @@ module Overrides
           plural_custom_attr_readers
           resource_name
           singular_custom_constructor
+          plural_fetch_verb
         ]
       end
 
@@ -64,6 +65,8 @@ module Overrides
         # Compute image checks two different endpoints to see if one returns a success.
         # This is strange, but preserves existing functionality
         check :singular_custom_constructor, type: String
+        # Some resources (organizations) use Post instead of Get for fetching their plural version
+        check :plural_fetch_verb, type: Symbol, default: :GET, allowed: %i[POST GET]
       end
     end
   end
