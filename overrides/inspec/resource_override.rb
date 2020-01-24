@@ -30,6 +30,7 @@ module Overrides
           plural_custom_logic
           plural_custom_attr_readers
           resource_name
+          singular_custom_constructor
         ]
       end
 
@@ -59,6 +60,10 @@ module Overrides
         # Overrides the resource name. In some cases we need to match legacy resources which
         # do not have product namespaces, or other irregularities
         check :resource_name, type: String
+
+        # Compute image checks two different endpoints to see if one returns a success.
+        # This is strange, but preserves existing functionality
+        check :singular_custom_constructor, type: String
       end
     end
   end

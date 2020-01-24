@@ -1187,3 +1187,16 @@ resource "google_logging_metric" "logging_metric" {
     value_type  = var.logging_metric["value_type"]
   }
 }
+
+variable "compute_image" {
+  type = any
+}
+
+resource "google_compute_image" "example" {
+  project = var.gcp_project_id
+  name    = var.compute_image["name"]
+
+  raw_disk {
+    source = var.compute_image["source"]
+  }
+}
