@@ -1,0 +1,2 @@
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
+compute_image = attribute('compute_image', default: <%= JSON.pretty_generate(grab_attributes['compute_image']) -%>, description: 'Compute image description')

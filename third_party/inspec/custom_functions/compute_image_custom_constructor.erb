@@ -1,0 +1,9 @@
+def initialize(params)
+  super(params.merge({ use_http_transport: true }))
+  @params = params
+  @fetched = @connection.fetch(product_url(params[:beta]), resource_base_url, params, 'Get')
+  if @fetched.nil?
+    @fetched = @connection.fetch(product_url(params[:beta]), "projects/{{project}}/global/images/family/{{name}}", params, 'Get')
+  end
+  parse unless @fetched.nil?
+end
