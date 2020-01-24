@@ -41,6 +41,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			resourceComputeInstanceTemplateSourceImageCustomizeDiff,
 			resourceComputeInstanceTemplateScratchDiskCustomizeDiff,
+			resourceComputeInstanceTemplateBootDiskCustomizeDiff,
 		),
 		MigrateState: resourceComputeInstanceTemplateMigrateState,
 
@@ -577,6 +578,20 @@ func resourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(diff TerraformR
 	return nil
 }
 
+func resourceComputeInstanceTemplateBootDiskCustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
+	numDisks := diff.Get("disk.#").(int)
+	// No disk except the first can be the boot disk
+	for i := 1; i < numDisks; i++ {
+		key := fmt.Sprintf("disk.%d.boot", i)
+		if v, ok := diff.GetOk(key); ok {
+			if v.(bool) {
+				return fmt.Errorf("Only the first disk specified in instance_template can be the boot disk. %s was true", key)
+			}
+		}
+	}
+	return nil
+}
+
 func buildDisks(d *schema.ResourceData, config *Config) ([]*computeBeta.AttachedDisk, error) {
 	project, err := getProject(d, config)
 	if err != nil {
@@ -598,9 +613,6 @@ func buildDisks(d *schema.ResourceData, config *Config) ([]*computeBeta.Attached
 		disk.AutoDelete = d.Get(prefix + ".auto_delete").(bool)
 
 		if v, ok := d.GetOk(prefix + ".boot"); ok {
-			if v.(bool) && i != 0 {
-				return nil, fmt.Errorf("Only the first disk specified in instance_template can be a boot disk")
-			}
 			disk.Boot = v.(bool)
 		}
 
