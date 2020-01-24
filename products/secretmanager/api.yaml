@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Secretmanager
+name: SecretManager
 display_name: Secret Manager
 versions:
   - !ruby/object:Api::Product::Version
@@ -130,7 +130,7 @@ objects:
         imports: name
         required: true
         description: |
-          Secretmanager secret resource
+          Secret Manager secret resource
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: payload

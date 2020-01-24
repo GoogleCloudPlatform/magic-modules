@@ -1,20 +1,20 @@
 ---
 subcategory: "Cloud Platform"
 layout: "google"
-page_title: "Google: google_secretmanager_secret_version"
-sidebar_current: "docs-google-datasource-secretmanager-secret-version"
+page_title: "Google: google_secret_manager_secret_version"
+sidebar_current: "docs-google-datasource-secret-manager-secret-version"
 description: |-
   Get a Secret Manager secret's version.
 ---
 
-# google\_secretmanager\_secret\_version
+# google\_secret\_manager\_secret\_version
 
 Get a Secret Manager secret's version. For more information see the [official documentation](https://cloud.google.com/secret-manager/docs/) and [API](https://cloud.google.com/secret-manager/docs/reference/rest/v1beta1/projects.secrets.versions).
 
 ## Example Usage
 
 ```hcl
-data "google_secretmanager_secret_version" "basic" {
+data "google_secret_manager_secret_version" "basic" {
   provider = google-beta
   secret = "my-secret"
 }

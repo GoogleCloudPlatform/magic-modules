@@ -198,7 +198,7 @@ func Provider() terraform.ResourceProvider {
 			"google_projects":                                  dataSourceGoogleProjects(),
 			"google_project_organization_policy":               dataSourceGoogleProjectOrganizationPolicy(),
 			<% unless version == 'ga' -%>
-			"google_secretmanager_secret_version":              dataSourceSecretmanagerSecretVersion(),
+			"google_secret_manager_secret_version":              dataSourceSecretManagerSecretVersion(),
 			<% end -%>
 			"google_service_account":                           dataSourceGoogleServiceAccount(),
 			"google_service_account_access_token":              dataSourceGoogleServiceAccountAccessToken(),
