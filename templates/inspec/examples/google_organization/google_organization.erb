@@ -1,0 +1,6 @@
+<% gcp_organization_id = "#{external_attribute('gcp_organization_id', doc_generation)}" -%>
+
+describe google_organization(name: "organizations/<%= doc_generation ? '123456' : "\#{gcp_organization_id}" -%>") do
+  its('name') { should eq "organizations/<%= doc_generation ? '123456' : "\#{gcp_organization_id}" -%>" }
+  its('lifecycle_state') { should cmp 'ACTIVE' }
+end
