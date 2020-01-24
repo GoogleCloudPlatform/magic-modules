@@ -20,6 +20,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "full_agent"
         vars:
           agent_name: "tf-test-full-agent"
+    # Only one agent per project, API does not have an agent ID
     id_format: "{{project}}"
     import_format: ["{{project}}"]
     # Skip sweeper gen due to non-standard urls.

@@ -14,6 +14,7 @@ func TestAccDialogflowAgent_update(t *testing.T) {
 	t.Parallel()
 
 	agentName := acctest.RandomWithPrefix("tf-test")
+	agentNameUpdate := acctest.RandomWithPrefix("tf-test")
 	projectID := acctest.RandomWithPrefix("tf-test")
 	orgID := getTestOrgFromEnv(t)
 
@@ -31,7 +32,7 @@ func TestAccDialogflowAgent_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"avatar_uri"},
 			},
 			{
-				Config: testAccDialogflowAgent_full2(projectID, orgID, agentName),
+				Config: testAccDialogflowAgent_full2(projectID, orgID, agentNameUpdate),
 			},
 			{
 				ResourceName:      "google_dialogflow_agent.foobar",
