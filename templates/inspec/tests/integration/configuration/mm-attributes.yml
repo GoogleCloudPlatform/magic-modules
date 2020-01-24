@@ -433,3 +433,7 @@ logging_metric:
   filter: 'resource.type=gae_app AND severity>=ERROR'
   metric_kind: DELTA
   value_type: INT64
+
+compute_image:
+  name: inspec-image
+  source: https://storage.googleapis.com/bosh-cpi-artifacts/bosh-stemcell-3262.4-google-kvm-ubuntu-trusty-go_agent-raw.tar.gz

@@ -5489,6 +5489,21 @@ objects:
           only value is RAW
         values:
           - :RAW
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        exclude: true
+        description: |
+          The self link of the image
+      - !ruby/object:Api::Type::Enum
+        name: 'status'
+        output: true
+        exclude: true
+        description: |
+          The status of the image. Either `READY` `PENDING` or `FAILED`.
+        values:
+          - :READY
+          - :PENDING
+          - :FAILED
       # State is not applicable for state convergence.
   - !ruby/object:Api::Resource
     name: 'Instance'
