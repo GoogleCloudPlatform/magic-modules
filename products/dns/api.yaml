@@ -224,6 +224,15 @@ objects:
                   name: 'ipv4Address'
                   required: true
                   description: 'IPv4 address of a target name server.'
+                - !ruby/object:Api::Type::Enum
+                  name: 'forwardingPath'
+                  description: |
+                    Forwarding path for this TargetNameServer. If unset or `default` Cloud DNS will make forwarding
+                    decision based on address ranges, i.e. RFC1918 addresses go to the VPC, Non-RFC1918 addresses go
+                    to the Internet. When set to `private`, Cloud DNS will always send queries through VPC for this target
+                  values:
+                  - :default
+                  - :private
         min_version: beta
       - !ruby/object:Api::Type::NestedObject
         min_version: beta
@@ -248,6 +257,14 @@ objects:
                   The fully qualified URL of the VPC network to forward queries to.
                   This should be formatted like
                   `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
+      - !ruby/object:Api::Type::Boolean
+        name: 'reverseLookup'
+        api_name: reverseLookupConfig
+        min_version: beta
+        description: |
+          Specifies if this is a managed reverse lookup zone. If true, Cloud DNS will resolve reverse
+          lookup queries using automatically configured records for VPC resources. This only applies
+          to networks listed under `private_visibility_config`.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Zones':
