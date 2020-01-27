@@ -18,9 +18,6 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://binaryauthorization.googleapis.com/v1/
-  - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://binaryauthorization.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
@@ -53,7 +50,7 @@ objects:
           displayed in chooser dialogs.
       - !ruby/object:Api::Type::NestedObject
         name: attestationAuthorityNote
-        api_name: userOwnedDrydockNote
+        api_name: userOwnedGrafeasNote
         description: |
           A Container Analysis ATTESTATION_AUTHORITY Note, created by the user.
         required: true
