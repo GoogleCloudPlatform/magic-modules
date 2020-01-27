@@ -1,5 +1,5 @@
 <% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
 <% gcp_project_iam_custom_role_id = "#{external_attribute('gcp_project_iam_custom_role_id', doc_generation)}" -%>
-describe google_iam_custom_roles(project: <%= gcp_project_id -%>) do
+describe google_project_iam_custom_roles(project: <%= gcp_project_id -%>) do
   its('names') { should include "projects/<%= doc_generation ? "project-id" : "\#{gcp_project_id}" -%>/roles/<%= doc_generation ? "role-id" : "\#{gcp_project_iam_custom_role_id}" -%>" }
 end
