@@ -1,11 +1,11 @@
 <% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
 <% gcp_project_iam_custom_role_id = "#{external_attribute('gcp_project_iam_custom_role_id', doc_generation)}" -%>
-describe google_iam_custom_role(project: <%= gcp_project_id -%>, name: <%= gcp_project_iam_custom_role_id -%>) do
+describe google_project_iam_custom_role(project: <%= gcp_project_id -%>, name: <%= gcp_project_iam_custom_role_id -%>) do
   it { should exist }
   its('stage') { should eq 'GA' }
   its('included_permissions') { should eq ["iam.roles.list"] }
 end
 
-describe google_iam_custom_role(project: <%= gcp_project_id -%>, name: 'nonexistent') do
+describe google_project_iam_custom_role(project: <%= gcp_project_id -%>, name: 'nonexistent') do
   it { should_not exist }
 end
