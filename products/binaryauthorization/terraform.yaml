@@ -32,10 +32,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         note_name: "test-attestor-note"
         key_name: "test-attestor-key"
         keyring_name: "test-attestor-key-ring"
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      encoder: templates/terraform/encoders/binauth_attestor_note_field_name.go.erb
-      decoder: templates/terraform/decoders/binauth_attestor_note_field_name.go.erb
     properties:
+      userOwnedDrydockNote: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: userOwnedGrafeasNote
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
         custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
