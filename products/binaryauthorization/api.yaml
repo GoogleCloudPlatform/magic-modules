@@ -50,7 +50,7 @@ objects:
           displayed in chooser dialogs.
       - !ruby/object:Api::Type::NestedObject
         name: attestationAuthorityNote
-        api_name: userOwnedDrydockNote
+        api_name: userOwnedGrafeasNote
         description: |
           A Container Analysis ATTESTATION_AUTHORITY Note, created by the user.
         required: true
