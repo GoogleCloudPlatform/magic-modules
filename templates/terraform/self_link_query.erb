@@ -19,7 +19,7 @@
 		<% else -%>
 			this<%= titlelize_property(prop) -%> := d.Get("<%= prop.name.underscore -%>")
 		<% end -%>
-		that<%= titlelize_property(prop) -%> := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name -%>"], d)
+		that<%= titlelize_property(prop) -%> := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name -%>"], d, config)
 		log.Printf("[DEBUG] Checking equality of %#v, %#v", that<%= titlelize_property(prop) -%>, this<%= titlelize_property(prop) -%>)
 		if !reflect.DeepEqual(that<%= titlelize_property(prop) -%>, this<%= titlelize_property(prop) -%>) {
 			continue
