@@ -14,7 +14,7 @@
 -%>
 <%# Not all self links behave like ResourceRef expects, eg they may expect a fully qualified url. In those
  cases, we need to manually define this flattener. %>
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	if v == nil {
 		return v
 	}

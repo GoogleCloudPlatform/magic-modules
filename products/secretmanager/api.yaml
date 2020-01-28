@@ -120,6 +120,7 @@ objects:
     create_url: '{{secret}}:addVersion'
     delete_url: '{{name}}:destroy'
     delete_verb: :POST
+    input: true
     description: |
       A secret version resource.
     parameters:
@@ -156,7 +157,7 @@ objects:
         output: true
         description: |
           The time at which the Secret was destroyed. Only present if state is DESTROYED.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Boolean
         name: state
         output: true
         description: |
