@@ -28,6 +28,7 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 <% unless version == "ga" -%>
 						"peering_config.#":            {},
 						"forwarding_config.#":         {},
+						"reverse_lookup":         {},
 <% end -%>
 					},
 				),
