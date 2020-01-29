@@ -65,7 +65,10 @@ module Provider
 
     # We don't want to generate anything but the resource.
     def generate_resource_tests(data) end
-
     def generate_resource_sweepers(data) end
+    def compile_common_files(output_folder, products, common_compile_file) end
+    def copy_common_files(output_folder) end
+    def generate_iam_policy(data) end
+
   end
 end
