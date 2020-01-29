@@ -62,8 +62,8 @@ module Provider
       # This list corresponds to the `get*FromEnv` methods in provider_test.go.
       attr_reader :test_env_vars
 
-      # Hash to provider custom context for generating test config
-      attr_reader :test_custom_context
+      # Hash to provider custom override values for generating test config
+      attr_reader :test_vars_overrides
 
       # The version name of of the example's version if it's different than the
       # resource version, eg. `beta`
@@ -140,9 +140,16 @@ module Provider
       def config_test_body
         @vars ||= {}
         @test_env_vars ||= {}
+        @test_vars_overrides ||= {}
+
+        # Construct map for vars to inject into config - will have
+        #   - "a-example-var-value%{random_suffix}""
+        #   - "%{my_var}" for overrides that have custom Golang values
+        rand_vars = vars.map { |k, v| [k, "#{v}%{random_suffix}"] }.to_h
+        overrides = test_vars_overrides.map { |k, _| [k, "%{#{k}}"] }.to_h
         body = lines(compile_file(
                        {
-                         vars: vars.map { |k, str| [k, "#{str}%{random_suffix}"] }.to_h,
+                         vars: rand_vars.merge(overrides),
                          test_env_vars: test_env_vars.map { |k, _| [k, "%{#{k}}"] }.to_h,
                          primary_resource_id: primary_resource_id
                        },
@@ -208,7 +215,7 @@ module Provider
         check :min_version, type: String
         check :vars, type: Hash
         check :test_env_vars, type: Hash
-        check :test_config_context, type: Hash
+        check :test_vars_overrides, type: Hash
         check :ignore_read_extra, type: Array, item_type: String, default: []
         check :primary_resource_name, type: String
         check :skip_test, type: TrueClass
