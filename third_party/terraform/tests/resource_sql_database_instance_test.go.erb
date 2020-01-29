@@ -593,7 +593,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork(t *testing.T) {
 
 	databaseName := "tf-test-" + acctest.RandString(10)
 	addressName := "tf-test-" + acctest.RandString(10)
-	networkName := BootstrapSharedServiceNetworkingConsumerNetwork(t, "sql-instance-private")
+	networkName := BootstrapSharedTestNetwork(t, "sql-instance-private")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
