@@ -44,9 +44,9 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 
 	context := map[string]interface{} {
 <%= lines(indent(compile('templates/terraform/env_var_context.go.erb'), 4)) -%>
-	<% unless example.test_custom_context.nil? -%>
-	<% example.test_custom_context.each do |var_name, custom_val| -%>
-			"<%= var_name %>": <%= custom_val %>,
+	<% unless example.test_vars_overrides.nil? -%>
+	<% example.test_vars_overrides.each do |var_name, override| -%>
+			"<%= var_name %>": <%= override %>,
 	<% end -%>
 	<% end -%>
 			"random_suffix": acctest.RandString(10),

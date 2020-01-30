@@ -32,7 +32,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "cache"
         vars:
           instance_name: "ha-memory-cache"
-          network_name: "authorized-network"
+          network_name: "redis-test-network"
+        test_vars_overrides:
+          network_name: 'BootstrapSharedTestNetwork(t, "redis-full")'
     properties:
       alternativeLocationId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
