@@ -46,4 +46,4 @@ The following attributes are exported:
 
 * `destroy_time` - The time at which the Secret was destroyed. Only present if state is DESTROYED.
 
-* `state` - The current state of the SecretVersion.
+* `enabled` - True if the current state of the SecretVersion is enabled.
