@@ -108,6 +108,34 @@ steps:
           - -c
           - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-conv-sync
 
+    # TF-OICS
+    - name: 'gcr.io/graphite-docker-images/downstream-waiter'
+      id: tf-oics-sync
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["checkout"]
+      args:
+          - 'tf-oics-sync'
+          - $BRANCH_NAME
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      id: tf-oics-push
+      waitFor: ["tf-oics-sync"]
+      args:
+          - 'downstream'
+          - 'tf-oics'
+          - 'ga'
+          - $COMMIT_SHA
+
+    - name: 'gcr.io/cloud-builders/git'
+      waitFor: ["tf-oics-push"]
+      secretEnv: ["GITHUB_TOKEN"]
+      entrypoint: 'bash'
+      args:
+          - -c
+          - git push https://modular-magician:$$GITHUB_TOKEN@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-oics-sync
+
     # Ansible
     - name: 'gcr.io/graphite-docker-images/downstream-waiter'
       id: ansible-sync
