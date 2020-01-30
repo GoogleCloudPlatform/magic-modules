@@ -601,3 +601,7 @@ func timestampDiffSuppress(format string) schema.SchemaDiffSuppressFunc {
 	}
 }
 <% end -%>
+
+func migrateStateNoop(v int, is *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
+		return is, nil
+}

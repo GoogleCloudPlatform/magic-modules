@@ -1552,10 +1552,14 @@ objects:
                 A multiplier applied to the group's maximum servicing capacity
                 (based on UTILIZATION, RATE or CONNECTION).
 
-                Default value is 1, which means the group will serve up to 100%
-                of its configured capacity (depending on balancingMode).
+                ~>**NOTE**: This field cannot be set for
+                INTERNAL region backend services (default loadBalancingScheme),
+                but is required for non-INTERNAL backend service. The total
+                capacity_scaler for all backends must be non-zero.
+
                 A setting of 0 means the group is completely drained, offering
                 0% of its available Capacity. Valid range is [0.0,1.0].
+              send_empty_value: true
             - !ruby/object:Api::Type::String
               name: 'description'
               description: |
@@ -1596,6 +1600,7 @@ objects:
               description: |
                 The max number of simultaneous connections for the group. Can
                 be used with either CONNECTION or UTILIZATION balancing modes.
+                Cannot be set for INTERNAL backend services.
 
                 For CONNECTION mode, either maxConnections or one
                 of maxConnectionsPerInstance or maxConnectionsPerEndpoint,
@@ -1604,26 +1609,29 @@ objects:
               name: 'maxConnectionsPerInstance'
               description: |
                 The max number of simultaneous connections that a single
-                backend instance can handle. This is used to calculate the
-                capacity of the group. Can be used in either CONNECTION or
-                UTILIZATION balancing modes.
+                backend instance can handle. Cannot be set for INTERNAL backend
+                services.
 
+                This is used to calculate the capacity of the group.
+                Can be used in either CONNECTION or UTILIZATION balancing modes.
                 For CONNECTION mode, either maxConnections or
                 maxConnectionsPerInstance must be set.
             - !ruby/object:Api::Type::Integer
               name: 'maxConnectionsPerEndpoint'
               description: |
                 The max number of simultaneous connections that a single backend
-                network endpoint can handle. This is used to calculate the
-                capacity of the group. Can be used in either CONNECTION or
-                UTILIZATION balancing modes.
+                network endpoint can handle. Cannot be set
+                for INTERNAL backend services.
 
-                For CONNECTION mode, either
-                maxConnections or maxConnectionsPerEndpoint must be set.
+                This is used to calculate the capacity of the group. Can be
+                used in either CONNECTION or UTILIZATION balancing modes. For
+                CONNECTION mode, either maxConnections or
+                maxConnectionsPerEndpoint must be set.
             - !ruby/object:Api::Type::Integer
               name: 'maxRate'
               description: |
-                The max requests per second (RPS) of the group.
+                The max requests per second (RPS) of the group. Cannot be set
+                for INTERNAL backend services.
 
                 Can be used with either RATE or UTILIZATION balancing modes,
                 but required if RATE mode. Either maxRate or one
@@ -1635,19 +1643,22 @@ objects:
                 The max requests per second (RPS) that a single backend
                 instance can handle. This is used to calculate the capacity of
                 the group. Can be used in either balancing mode. For RATE mode,
-                either maxRate or maxRatePerInstance must be set.
+                either maxRate or maxRatePerInstance must be set. Cannot be set
+                for INTERNAL backend services.
             - !ruby/object:Api::Type::Double
               name: 'maxRatePerEndpoint'
               description: |
                 The max requests per second (RPS) that a single backend network
                 endpoint can handle. This is used to calculate the capacity of
                 the group. Can be used in either balancing mode. For RATE mode,
-                either maxRate or maxRatePerEndpoint must be set.
+                either maxRate or maxRatePerEndpoint must be set. Cannot be set
+                for INTERNAL backend services.
             - !ruby/object:Api::Type::Double
               name: 'maxUtilization'
               description: |
                 Used when balancingMode is UTILIZATION. This ratio defines the
                 CPU utilization target for the group. Valid range is [0.0, 1.0].
+                Cannot be set for INTERNAL backend services.
       - !ruby/object:Api::Type::NestedObject
         name: 'circuitBreakers'
         description: |
