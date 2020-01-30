@@ -1,5 +1,5 @@
 resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
-  name           = "<%= ctx[:vars]["instance_name"] %>"
+  name           = "<%= ctx[:vars]['instance_name'] %>"
   tier           = "STANDARD_HA"
   memory_size_gb = 1
 
@@ -24,8 +24,8 @@ resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
 // network (authorized_network) is deleted, so this prevents issues
 // with tenant network quota.
 // If this network hasn't been created and you are using this example in your
-// config, add an additional `google_compute_network` resource or change
-// this from a data source to a network.
+// config, add an additional network resource or change
+// this from "data"to "resource"
 data "google_compute_network" "redis-network" {
-  name = "<%= ctx[:vars]["network_name"] %>"
+  name = "<%= ctx[:vars]['network_name'] %>"
 }
