@@ -72,7 +72,7 @@ popd
 
 # Temporary guards for OiCS since this container image will be newer than YAML
 # for existing PRs. We need to be backwards-compatible with old GCB runs that
-# don't generate OiCS.
+# don't generate OiCS. This should be safe to remove after Feb 18th or so.
 set +e
 # Use a subshell to run commands serially and fail when one fails
 bash -e <<TRY
