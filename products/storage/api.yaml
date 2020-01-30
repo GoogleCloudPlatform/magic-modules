@@ -711,8 +711,9 @@ objects:
           - :READER
   - !ruby/object:Api::Resource
     name: 'Object'
-    base_url: b/{{bucket}}/o/{{object}}
+    base_url: b/{{bucket}}/o
     self_link: b/{{bucket}}/o/{{object}}
+    collection_url_key: items
     description: |
       Information about an object stored in a GCS bucket
     properties:
