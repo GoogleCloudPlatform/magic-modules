@@ -133,14 +133,11 @@ objects:
         description: |
           Secret Manager secret resource
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: payload
-        description: The secret payload of the SecretVersion.
-        required: true
-        properties:
-          - !ruby/object:Api::Type::String
-            name: data
-            description: The secret data. Must be no larger than 64KiB. A base64-encoded string.
+      - !ruby/object:Api::Type::Boolean
+        name: state
+        output: true
+        description: |
+          The current state of the SecretVersion.
       - !ruby/object:Api::Type::String
         name: name
         output: true
@@ -157,8 +154,11 @@ objects:
         output: true
         description: |
           The time at which the Secret was destroyed. Only present if state is DESTROYED.
-      - !ruby/object:Api::Type::Boolean
-        name: state
-        output: true
-        description: |
-          The current state of the SecretVersion.
+      - !ruby/object:Api::Type::NestedObject
+        name: payload
+        description: The secret payload of the SecretVersion.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: data
+            description: The secret data. Must be no larger than 64KiB. A base64-encoded string.
