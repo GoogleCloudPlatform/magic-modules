@@ -21,6 +21,10 @@ function clone_repo() {
         UPSTREAM_OWNER=GoogleCloudPlatform
         GH_REPO=terraform-google-conversion
         LOCAL_PATH=$GOPATH/src/github.com/GoogleCloudPlatform/terraform-google-conversion
+    elif [ "$REPO" == "tf-oics" ]; then
+        UPSTREAM_OWNER=terraform-google-modules
+        GH_REPO=docs-examples
+        LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/docs-examples
     elif [ "$REPO" == "ansible" ]; then
         UPSTREAM_OWNER=ansible-collections
         GH_REPO=ansible_collections_google
@@ -85,8 +89,11 @@ if [ "$REPO" == "terraform" ]; then
 fi
 
 if [ "$REPO" == "tf-conversion" ]; then
-    # Special case - use terraform generator with validator overrides.
+    # use terraform generator with validator overrides.
     bundle exec compiler -a -e terraform -f validator -o $LOCAL_PATH -v $VERSION
+elif [ "$REPO" == "tf-oics" ]; then
+    # use terraform generator with oics override
+    bundle exec compiler -a -e terraform -f oics -o $LOCAL_PATH -v $VERSION
 else
     bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION
 fi
