@@ -246,7 +246,7 @@ the GitHub UI. The PR template includes some instructions to make sure we
 generate good PR messages for the tools' repo histories.
 
 Once your PR is submitted, one of the Magic Modules maintainers will review it.
-They'll look over the code before running the "Magician", the Magic Modules CI
+They'll look over the code before running the "Magician v2", the Magic Modules CI
 system that generates PRs against each tool. Each review pass, your reviewer
 will run the Magician again to update the PRs against the tools.
 
