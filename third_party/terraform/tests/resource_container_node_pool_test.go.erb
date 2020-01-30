@@ -253,6 +253,29 @@ func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 	})
 }
 
+func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withBootDiskKmsKey(getTestProjectFromEnv(), cluster, np),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_boot_disk_kms_key",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 	t.Parallel()
 
@@ -1252,6 +1275,58 @@ resource "google_container_node_pool" "with_sandbox_config" {
   }
 }
 `, cluster, np)
+}
+
+func testAccContainerNodePool_withBootDiskKmsKey(project, cluster, np string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_project_iam_member" "kms-project-binding" {
+  project = data.google_project.project.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
+}
+
+resource "google_kms_key_ring" "keyring" {
+  name     = "%s-kms-key-ring"
+  location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "example-key" {
+  name            = "%s-kms-key"
+  key_ring        = google_kms_key_ring.keyring.self_link
+  rotation_period = "100000s"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+}
+
+resource "google_container_node_pool" "with_boot_disk_kms_key" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+
+  node_config {
+    image_type = "COS_CONTAINERD"
+    boot_disk_kms_key = google_kms_crypto_key.example-key.self_link
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+`, project, cluster, cluster, cluster, np)
 }
 
 func testAccContainerNodePool_withUpgradeSettings(clusterName string, nodePoolName string, maxSurge int, maxUnavailable int) string {
