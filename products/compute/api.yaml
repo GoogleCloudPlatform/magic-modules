@@ -3329,6 +3329,12 @@ objects:
         send_empty_value: true
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
+      - !ruby/object:Api::Type::Boolean
+        name: 'isMirroringCollector'
+        min_version: beta
+        description: |
+          Indicates whether or not this load balancer can be used as a collector for packet mirroring.
+        send_empty_value: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
@@ -8747,7 +8753,7 @@ objects:
                                   be introduced as part of fault injection. The value must be between 0.0 and
                                   100.0 inclusive.
                       - !ruby/object:Api::Type::NestedObject
-                        name: 'requestMirrorPolicy'
+                        name: ' '
                         description: |
                           Specifies the policy on how requests intended for the route's backends are
                           shadowed to a separate mirrored backend service. Loadbalancer does not wait for
