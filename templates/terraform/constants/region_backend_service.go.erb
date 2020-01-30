@@ -26,17 +26,6 @@ var backendServiceOnlyNonInternalFieldNames = []string{
 	"max_utilization",
 }
 
-var backendServiceOnlyNonInternalApiFieldNames = []string{
-	"capacityScaler",
-	"maxConnections",
-	"maxConnectionsPerInstance",
-	"maxConnectionsPerEndpoint",
-	"maxRate",
-	"maxRatePerInstance",
-	"maxRatePerEndpoint",
-	"maxUtilization",
-}
-
 // validateNonInternalBackendServiceBackends ensures capacity_scaler is set for each backend in an non-INTERNAL
 // backend service. To prevent a permadiff, we decided to override the API behavior and require the
 //// capacity_scaler value in this case.

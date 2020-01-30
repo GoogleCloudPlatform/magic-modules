@@ -16,6 +16,17 @@ if d.Get("load_balancing_scheme").(string) != "INTERNAL" {
 	return obj, nil
 }
 
+backendServiceOnlyNonInternalApiFieldNames := []string{
+	"capacityScaler",
+	"maxConnections",
+	"maxConnectionsPerInstance",
+	"maxConnectionsPerEndpoint",
+	"maxRate",
+	"maxRatePerInstance",
+	"maxRatePerEndpoint",
+	"maxUtilization",
+}
+
 var backends []interface{}
 if lsV := obj["backends"]; lsV != nil {
 	backends = lsV.([]interface{})
