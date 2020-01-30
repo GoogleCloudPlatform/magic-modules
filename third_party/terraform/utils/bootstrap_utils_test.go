@@ -235,8 +235,12 @@ func BootstrapServiceAccount(t *testing.T, project, testRunner string) string {
 const SharedTestNetworkPrefix = "tf-bootstrap-net-"
 
 // BootstrapSharedTestNetwork will return a shared compute network
-// for tests that create tenant network resources. This prevents hitting limits on
-// tenancy projects and resources that we don't control.
+// for a test or set of tests. Often resources create complementing
+// tenant network resources, which we don't control and which don't get cleaned
+// up after our owned resource is deleted in test. These tenant resources
+// have quotas, so creating a shared test network prevents hitting these limits.
+//
+// testId specifies the test/suite for which a shared network is used/initialized.
 // Returns the name of an network, creating it if hasn't been created in the test projcet.
 func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 	if v := os.Getenv("TF_ACC"); v == "" {

@@ -63,6 +63,22 @@ module Provider
       attr_reader :test_env_vars
 
       # Hash to provider custom override values for generating test config
+      # If field my-var is set in this hash, it will replace vars[my-var] in
+      # tests. i.e. if vars["network"] = "my-vpc", without override:
+      #   - doc config will have `network = "my-vpc"`
+      #   - tests config will have `"network = my-vpc%{random_suffix}"`
+      #     with context
+      #       map[string]interface{}{
+      #         "random_suffix": randString()
+      #       }
+      #
+      # If test_vars_overrides["network"] = "nameOfVpc()"
+      #   - doc config will have `network = "my-vpc"`
+      #   - tests will replace with `"network = %{network}"` with context
+      #       map[string]interface{}{
+      #         "network": nameOfVpc
+      #         ...
+      #       }
       attr_reader :test_vars_overrides
 
       # The version name of of the example's version if it's different than the
