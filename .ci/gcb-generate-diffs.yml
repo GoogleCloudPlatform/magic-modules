@@ -148,6 +148,24 @@ steps:
           - 'ga'
           - $_PR_NUMBER
 
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["merged"]
+      args:
+          - 'head'
+          - 'tf-oics'
+          - 'beta'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/downstream-builder'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["merged"]
+      args:
+          - 'base'
+          - 'tf-oics'
+          - 'beta'
+          - $_PR_NUMBER
+
     - name: 'gcr.io/graphite-docker-images/github-differ'
       secretEnv: ["GITHUB_TOKEN"]
       args:
