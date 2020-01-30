@@ -28,7 +28,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           function_name: "my-function"
           bucket_name: "tf-cloudfunctions-function-example-bucket"
-        test_custom_context:
+          zip_path: "path/to/index.zip"
+        test_vars_overrides:
           zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
     properties:
       location: !ruby/object:Overrides::Terraform::PropertyOverride
