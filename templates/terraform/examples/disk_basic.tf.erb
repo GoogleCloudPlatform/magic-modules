@@ -4,7 +4,7 @@ resource "google_compute_disk" "default" {
   zone  = "us-central1-a"
   image = "debian-8-jessie-v20170523"
   labels = {
-    environment = "dev"
+    environment = "prod"
   }
   physical_block_size_bytes = 4096
 }
