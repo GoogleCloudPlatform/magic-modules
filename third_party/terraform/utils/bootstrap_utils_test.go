@@ -8,7 +8,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform/helper/acctest"
 	"google.golang.org/api/cloudkms/v1"
+	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/iam/v1"
 )
 
@@ -290,4 +292,70 @@ func BootstrapSharedServiceNetworkingConsumerNetwork(t *testing.T, testId string
 		t.Fatalf("Error getting shared test network %q: is nil", networkName)
 	}
 	return network.Name
+}
+
+var SharedServicePerimeterProjectPrefix = "tf-bootstrap-sp-"
+
+func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*cloudresourcemanager.Project {
+	if v := os.Getenv("TF_ACC"); v == "" {
+		log.Println("Acceptance tests and bootstrapping skipped unless env 'TF_ACC' set")
+		return nil
+	}
+
+	org := getTestOrgFromEnv(t)
+	config := &Config{
+		Credentials: getTestCredsFromEnv(),
+		Project:     getTestProjectFromEnv(),
+		Region:      getTestRegionFromEnv(),
+		Zone:        getTestZoneFromEnv(),
+	}
+
+	ConfigureBasePaths(config)
+
+	if err := config.LoadAndValidate(context.Background()); err != nil {
+		t.Fatalf("Bootstrapping failed. Unable to load test config: %s", err)
+	}
+
+	// The filter endpoint works differently if you provide both the parent id and parent type, and
+	// doesn't seem to allow for prefix matching. Don't change this to include the parent type unless
+	// that API behavior changes.
+	res, err := config.clientResourceManager.Projects.List().Filter(fmt.Sprintf("id:%s* parent.id:%s", SharedServicePerimeterProjectPrefix, org)).Do()
+	if err != nil {
+		t.Errorf("Error getting shared test projects: %s", err)
+	}
+
+	projects := res.Projects
+	for len(projects) < desiredProjects {
+		pid := SharedServicePerimeterProjectPrefix + acctest.RandString(10)
+		project := &cloudresourcemanager.Project{
+			ProjectId: pid,
+			Name:      "TF Service Perimeter Test",
+			Parent: &cloudresourcemanager.ResourceId{
+				Type: "organization",
+				Id:   org,
+			},
+		}
+		op, err := config.clientResourceManager.Projects.Create(project).Do()
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared test project: %s", err)
+		}
+
+		opAsMap, err := ConvertToMap(op)
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared test project: %s", err)
+		}
+
+		err = resourceManagerOperationWaitTime(config, opAsMap, "creating project", 4)
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared test project: %s", err)
+		}
+
+		p, err := config.clientResourceManager.Projects.Get(pid).Do()
+		if err != nil {
+			t.Fatalf("Error getting shared test project: %s", err)
+		}
+		projects = append(projects, p)
+	}
+
+	return projects
 }

@@ -423,3 +423,52 @@ objects:
               - status.0.access_levels
               - status.0.restricted_services
             item_type: Api::Type::String
+  - !ruby/object:Api::Resource
+    name: 'ServicePerimeterResource'
+    create_url: "{{perimeter_name}}"
+    base_url: ""
+    self_link: "{{perimeter_name}}"
+    create_verb: :PATCH
+    delete_verb: :PATCH
+    input: true
+    update_mask: true
+    identity:
+      - resource
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      modify_by_patch: true
+      is_list_of_ids: true
+      keys:
+        - status
+        - resources
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Service Perimeter Quickstart': 'https://cloud.google.com/vpc-service-controls/docs/quickstart'
+      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters'
+    description: |
+      Allows configuring a single GCP resource that should be inside of a service perimeter.
+      This resource is intended to be used in cases where it is not possible to compile a full list
+      of projects to include in a `google_access_context_manager_service_perimeter` resource,
+      to enable them to be added separately.
+
+      ~> **Note:** If this resource is used alongside a `google_access_context_manager_service_perimeter` resource,
+      the service perimeter resource must have a `lifecycle` block with `ignore_changes = [status[0].resources]` so
+      they don't fight over which resources should be in the policy.
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'perimeterName'
+        resource: 'ServicePerimeter'
+        imports: 'name'
+        description: |
+          The name of the Service Perimeter to add this resource to.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'resource'
+        description: |
+              A GCP resource that is inside of the service perimeter.
+              Currently only projects are allowed.
+              Format: projects/{project_number}
+        required: true
+        input: true

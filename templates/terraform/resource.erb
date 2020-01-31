@@ -178,6 +178,12 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
+<%    if object.update_mask -%>
+    url, err = addQueryParams(url, map[string]string{"updateMask": "<%= object.nested_query.keys.join('.') -%>"})
+    if err != nil {
+        return err
+    }
+<%    end -%>
 <%  end -%>
 <%  if has_project -%>
     project, err := getProject(d, config)
@@ -621,6 +627,12 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     if err != nil {
         return handleNotFoundError(err, d, "<%= object.name -%>")
     }
+<%    if object.update_mask -%>
+    url, err = addQueryParams(url, map[string]string{"updateMask": "<%= object.nested_query.keys.join('.') -%>"})
+    if err != nil {
+        return err
+    }
+<%    end -%>
 <%  end -%>
 <%  if object.supports_indirect_user_project_override -%>
     var project string

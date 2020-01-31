@@ -70,6 +70,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     skip_sweeper: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
+    mutex: "{{name}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "access_context_manager_service_perimeter_basic"
@@ -87,6 +88,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
       custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
+  ServicePerimeterResource: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    exclude_validator: true
+    # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
+    skip_sweeper: true
+    id_format: "{{perimeter_name}}/{{resource}}"
+    import_format: ["{{perimeter_name}}/{{resource}}"]
+    mutex: "{{perimeter_name}}"
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "access_context_manager_service_perimeter_resource_basic"
+        skip_test: true
+        primary_resource_id: "service-perimeter-resource"
+        vars:
+          service_perimeter_name: "restrict_all"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

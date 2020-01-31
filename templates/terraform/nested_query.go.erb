@@ -103,9 +103,21 @@ func resource<%= resource_name -%>PatchCreateEncoder(d *schema.ResourceData, met
   }
 
   // Return list with the resource to create appended
-  return map[string]interface{}{
+  <% if object.nested_query.is_list_of_ids -%>
+  res := map[string]interface{}{
+    "<%= list_key %>": append(currItems, obj["<%= object.identity.first.api_name %>"]),
+  }
+  <% else -%>
+  res := map[string]interface{}{
     "<%= list_key %>": append(currItems, obj),
-  }, nil
+  }
+  <% end -%>
+  <% object.nested_query.keys.reverse[1..-1].each do |k| -%>
+  newRes := map[string]interface{}{}
+  newRes["<%= k %>"] = res
+  res = newRes
+  <% end -%>
+  return res, nil
 }
 
 // PatchUpdateEncoder handles creating request data to PATCH parent resource
@@ -159,9 +171,16 @@ func resource<%= resource_name -%>PatchDeleteEncoder(d *schema.ResourceData, met
   }
 
   updatedItems := append(currItems[:idx], currItems[idx+1:]...)
-  return map[string]interface{}{
+  res := map[string]interface{}{
     "<%= list_key %>": updatedItems,
-  }, nil
+  }
+  <% object.nested_query.keys.reverse[1..-1].each do |k| -%>
+  newRes := map[string]interface{}{}
+  newRes["<%= k %>"] = res
+  res = newRes
+  <% end -%>
+
+  return res, nil
 }
 
 // ListForPatch handles making API request to get parent resource and 
@@ -190,6 +209,8 @@ func resource<%= resource_name -%>ListForPatch(d *schema.ResourceData, meta inte
     return nil, err
   }
 
+  var v interface{}
+  var ok bool
   <% object.nested_query.keys[0...-1].each do |k| -%>
   if v, ok = res["<%=k-%>"]; ok && v != nil {
     res = v.(map[string]interface{})    
@@ -198,7 +219,7 @@ func resource<%= resource_name -%>ListForPatch(d *schema.ResourceData, meta inte
   }
   <% end -%>
   
-  v, ok := res["<%=object.nested_query.keys[-1]-%>"]
+  v, ok = res["<%=object.nested_query.keys[-1]-%>"]
   if ok && v != nil {
     ls, lsOk := v.([]interface{})
     if !lsOk {
