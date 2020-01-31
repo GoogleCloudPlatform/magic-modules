@@ -329,7 +329,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%    if prop.flatten_object -%>
 // Terraform must set the top level schema field, but since this object contains collapsed properties
 // it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
-    if flattenedProp := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d); flattenedProp != nil {
+    if flattenedProp := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config); flattenedProp != nil {
         casted := flattenedProp.([]interface{})[0]
         if casted != nil {
             for k, v := range casted.(map[string]interface{}) {
@@ -338,7 +338,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         }
     }
 <%    else -%>
-    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d)); err != nil {
+    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config)); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
 <%    end -%>

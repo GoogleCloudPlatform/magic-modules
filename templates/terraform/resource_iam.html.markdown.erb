@@ -95,7 +95,7 @@ data "google_iam_policy" "admin" {
 
 resource "<%= resource_ns_iam -%>_policy" "editor" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-  policy_data = "${data.google_iam_policy.admin.policy_data}"
+  policy_data = data.google_iam_policy.admin.policy_data
 }
 ```
 
@@ -120,7 +120,7 @@ data "google_iam_policy" "admin" {
 
 resource "<%= resource_ns_iam -%>_policy" "editor" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
-  policy_data = "${data.google_iam_policy.admin.policy_data}"
+  policy_data = data.google_iam_policy.admin.policy_data
 }
 ```
 <% end -%>
