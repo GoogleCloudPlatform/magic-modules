@@ -5,8 +5,8 @@ resource "google_sql_database" "<%= ctx[:primary_resource_id] %>" {
 
 resource "google_sql_database_instance" "instance" {
   name   = "<%= ctx[:vars]['database_instance_name'] %>"
-  region = "us-central"
+  region = "us-central1"
   settings {
-    tier = "D0"
+    tier = "db-f1-micro"
   }
 }

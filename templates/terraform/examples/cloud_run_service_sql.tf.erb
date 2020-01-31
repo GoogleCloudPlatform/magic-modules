@@ -23,6 +23,6 @@ resource "google_sql_database_instance" "instance" {
   name   = "<%= ctx[:vars]['cloud_run_sql_name'] %>"
   region = "us-east1"
   settings {
-    tier = "D0"
+    tier = "db-f1-micro"
   }
 }
