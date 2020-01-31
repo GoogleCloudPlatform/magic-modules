@@ -17,7 +17,7 @@
 // This method checks to see if the value read from the server looks like
 // the obfuscated version of the state value. If so, it will just use the state
 // value to avoid permadiff.
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	if v == nil {
 		return v
 	}

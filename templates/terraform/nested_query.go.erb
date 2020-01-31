@@ -68,7 +68,7 @@ func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, me
     <% end -%>
 
     <% object.identity.each do |prop| -%>
-    item<%= titlelize_property(prop) -%> := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d)
+    item<%= titlelize_property(prop) -%> := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d, meta.(*Config))
     if !reflect.DeepEqual(item<%= titlelize_property(prop) -%>, expected<%= titlelize_property(prop) -%>) {
       log.Printf("[DEBUG] Skipping item with <%= prop.api_name %>= %#v, looking for %#v)", item<%= titlelize_property(prop) -%>, expected<%= titlelize_property(prop) -%>)
       continue

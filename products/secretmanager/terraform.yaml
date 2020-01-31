@@ -1,0 +1,66 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Secret: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "secret_config_basic"
+        primary_resource_id: "secret-basic"
+        primary_resource_name: "fmt.Sprintf(\"test-secret-basic%s\", context[\"random_suffix\"])"
+        min_version: beta
+        vars:
+          secret_id: "tf-test-secret-"
+    import_format: ["projects/{{project}}/secrets/{{secret_id}}"]
+    properties:
+      replication.automatic: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/object_to_bool.go.erb
+        custom_expand: templates/terraform/custom_expand/bool_to_object.go.erb
+
+  SecretVersion: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "secret_version_basic"
+        primary_resource_id: "secret-version-basic"
+        min_version: beta
+        vars:
+          secret_id: "tf-test-secret-version-"
+          data: "my-tf-test-secret"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      post_create: templates/terraform/post_create/secret_version.go.erb
+      constants: templates/terraform/constants/secret_version.go.erb
+      custom_import: templates/terraform/custom_import/secret_version.go.erb
+      resource_definition: templates/terraform/resource_definition/secret_version.go.erb
+    properties:
+      state: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: "enabled"
+        output: false
+        input: false
+        default_value: true
+        custom_expand: templates/terraform/custom_expand/secret_version_enable.go.erb
+        custom_flatten: templates/terraform/custom_flatten/secret_version_enable.go.erb
+      payload: !ruby/object:Overrides::Terraform::PropertyOverride
+        flatten_object: true
+        custom_flatten: templates/terraform/custom_flatten/secret_version_access.go.erb
+      payload.data: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: secret_data
+        sensitive: true
+        custom_expand: templates/terraform/custom_expand/base64.go.erb
+
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>
