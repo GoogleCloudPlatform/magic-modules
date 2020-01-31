@@ -37,7 +37,7 @@ pushd $TPG_LOCAL_PATH
 git fetch origin $OLD_BRANCH
 if ! git diff --exit-code origin/$NEW_BRANCH origin/$OLD_BRANCH; then
     SUMMARY=`git diff origin/$NEW_BRANCH origin/$OLD_BRANCH --shortstat`
-    DIFFS="${DIFFS}${NEWLINE}Terraform GA: [Diff](https://github.com/modular-magician/terraform-provider-google/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
+    DIFFS="${DIFFS}${NEWLINE}Terraform GA: [Diff](https://github.com/modular-magician/terraform-provider-google/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY )"
 fi
 popd
 
@@ -48,7 +48,7 @@ pushd $TPGB_LOCAL_PATH
 git fetch origin $OLD_BRANCH
 if ! git diff --exit-code origin/$NEW_BRANCH origin/$OLD_BRANCH; then
     SUMMARY=`git diff origin/$NEW_BRANCH origin/$OLD_BRANCH --shortstat`
-    DIFFS="${DIFFS}${NEWLINE}Terraform Beta: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
+    DIFFS="${DIFFS}${NEWLINE}Terraform Beta: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY )"
 fi
 popd
 
@@ -59,7 +59,7 @@ pushd $ANSIBLE_LOCAL_PATH
 git fetch origin $OLD_BRANCH
 if ! git diff --exit-code origin/$NEW_BRANCH origin/$OLD_BRANCH; then
     SUMMARY=`git diff origin/$NEW_BRANCH origin/$OLD_BRANCH --shortstat`
-    DIFFS="${DIFFS}${NEWLINE}Ansible: [Diff](https://github.com/modular-magician/ansible_collections_google/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
+    DIFFS="${DIFFS}${NEWLINE}Ansible: [Diff](https://github.com/modular-magician/ansible_collections_google/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY )"
 fi
 popd
 
@@ -70,7 +70,7 @@ pushd $TFC_LOCAL_PATH
 git fetch origin $OLD_BRANCH
 if ! git diff --exit-code origin/$NEW_BRANCH origin/$OLD_BRANCH; then
     SUMMARY=`git diff origin/$NEW_BRANCH origin/$OLD_BRANCH --shortstat`
-    DIFFS="${DIFFS}${NEWLINE}TF Conversion: [Diff](https://github.com/modular-magician/terraform-google-conversion/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
+    DIFFS="${DIFFS}${NEWLINE}TF Conversion: [Diff](https://github.com/modular-magician/terraform-google-conversion/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY )"
 fi
 popd
 
@@ -87,7 +87,7 @@ OICSDIFFS=$(bash -e <<TRY
     git fetch origin $OLD_BRANCH
     if ! git diff --exit-code --quiet origin/$NEW_BRANCH origin/$OLD_BRANCH; then
         SUMMARY=`git diff origin/$NEW_BRANCH origin/$OLD_BRANCH --shortstat`
-        echo "TF OiCS: [Diff](https://github.com/modular-magician/docs-examples/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
+        echo "TF OiCS: [Diff](https://github.com/modular-magician/docs-examples/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY )"
     fi
     popd > /dev/null
 TRY
@@ -106,7 +106,7 @@ pushd $INSPEC_LOCAL_PATH
 git fetch origin $OLD_BRANCH
 if ! git diff --exit-code origin/$NEW_BRANCH origin/$OLD_BRANCH; then
     SUMMARY=`git diff origin/$NEW_BRANCH origin/$OLD_BRANCH --shortstat`
-    DIFFS="${DIFFS}${NEWLINE}Inspec: [Diff](https://github.com/modular-magician/inspec-gcp/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
+    DIFFS="${DIFFS}${NEWLINE}Inspec: [Diff](https://github.com/modular-magician/inspec-gcp/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY )"
 fi
 popd
 
