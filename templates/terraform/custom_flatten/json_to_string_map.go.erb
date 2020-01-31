@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	if v == nil {
 		return v
 	}

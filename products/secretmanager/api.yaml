@@ -1,0 +1,164 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: SecretManager
+display_name: Secret Manager
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://secretmanager.googleapis.com/v1beta1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Secret Manager API
+    url: https://console.cloud.google.com/apis/library/secretmanager.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: Secret
+    min_version: beta
+    self_link: projects/{{project}}/secrets/{{secret_id}}
+    base_url: projects/{{project}}/secrets
+    create_url: projects/{{project}}/secrets?secretId={{secret_id}}
+    update_verb: :PATCH
+    update_mask: true
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      parent_resource_attribute: secret_id
+      method_name_separator: ':'
+      exclude: false
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      api: 'https://cloud.google.com/secret-manager/docs/reference/rest/v1beta1/projects.secrets'
+    description: |
+      A Secret is a logical secret whose value and versions can be accessed.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: secretId
+        description: |
+          This must be unique within the project.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        output: true
+        description: |
+          The resource name of the Secret. Format:
+          `projects/{{project}}/secrets/{{secret_id}}`
+      - !ruby/object:Api::Type::String
+        name: createTime
+        output: true
+        description: |
+          The time at which the Secret was created.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: labels
+        description: |
+          The labels assigned to this Secret.
+
+          Label keys must be between 1 and 63 characters long, have a UTF-8 encoding of maximum 128 bytes,
+          and must conform to the following PCRE regular expression: [\p{Ll}\p{Lo}][\p{Ll}\p{Lo}\p{N}_-]{0,62}
+
+          Label values must be between 0 and 63 characters long, have a UTF-8 encoding of maximum 128 bytes,
+          and must conform to the following PCRE regular expression: [\p{Ll}\p{Lo}\p{N}_-]{0,63}
+
+          No more than 64 labels can be assigned to a given resource.
+
+          An object containing a list of "key": value pairs. Example:
+          { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+      - !ruby/object:Api::Type::NestedObject
+        name: replication
+        required: true
+        input: true
+        description: |
+          The replication policy of the secret data attached to the Secret. It cannot be changed
+          after the Secret has been created.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: automatic
+            exactly_one_of:
+              - replication.0.automatic
+              - replication.0.user_managed
+            description: |
+              The Secret will automatically be replicated without any restrictions.
+          - !ruby/object:Api::Type::NestedObject
+            name: userManaged
+            exactly_one_of:
+              - replication.0.automatic
+              - replication.0.user_managed
+            description: |
+              The Secret will automatically be replicated without any restrictions.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: replicas
+                required: true
+                min_size: 1
+                description: |
+                  The list of Replicas for this Secret. Cannot be empty.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: location
+                      required: true
+                      description: |
+                        The canonical IDs of the location to replicate data. For example: "us-east1".
+  - !ruby/object:Api::Resource
+    name: SecretVersion
+    min_version: beta
+    base_url: '{{name}}'
+    self_link: '{{name}}'
+    create_url: '{{secret}}:addVersion'
+    delete_url: '{{name}}:destroy'
+    delete_verb: :POST
+    input: true
+    description: |
+      A secret version resource.
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: secret
+        url_param_only: true
+        resource: Secret
+        imports: name
+        required: true
+        description: |
+          Secret Manager secret resource
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: state
+        output: true
+        description: |
+          The current state of the SecretVersion.
+      - !ruby/object:Api::Type::String
+        name: name
+        output: true
+        description: |
+          The resource name of the SecretVersion. Format:
+          `projects/{{project}}/secrets/{{secret_id}}/versions/{{version}}`
+      - !ruby/object:Api::Type::String
+        name: createTime
+        output: true
+        description: |
+          The time at which the Secret was created.
+      - !ruby/object:Api::Type::String
+        name: destroyTime
+        output: true
+        description: |
+          The time at which the Secret was destroyed. Only present if state is DESTROYED.
+      - !ruby/object:Api::Type::NestedObject
+        name: payload
+        description: The secret payload of the SecretVersion.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: data
+            description: The secret data. Must be no larger than 64KiB. A base64-encoded string.

@@ -15,7 +15,7 @@
 // Older Datasets in BigQuery have no Location set in the API response. This may be an issue when importing
 // datasets created before BigQuery was available in multiple zones. We can safely assume that these datasets
 // are in the US, as this was the default at the time.
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	if v == nil {
 		return "US"
 	}

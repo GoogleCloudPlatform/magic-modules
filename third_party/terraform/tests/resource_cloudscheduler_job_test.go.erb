@@ -89,7 +89,7 @@ func TestCloudScheduler_FlattenHttpHeaders(t *testing.T) {
 
 	for _, c := range cases {
 		d := &schema.ResourceData{}
-		output := flattenCloudSchedulerJobAppEngineHttpTargetHeaders(c.Input, d)
+		output := flattenCloudSchedulerJobAppEngineHttpTargetHeaders(c.Input, d, &Config{})
 		if !reflect.DeepEqual(output, c.Output) {
 			t.Fatalf("Error matching output and expected: %#v vs %#v", output, c.Output)
 		}

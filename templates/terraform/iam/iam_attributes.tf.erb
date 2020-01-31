@@ -9,5 +9,5 @@
 <% else -%>
 <% attribute_val = p.underscore -%>
 <% end -%>
-  <%= attribute_val.underscore -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= p.underscore -%>}"
+  <%= attribute_val.underscore -%> = <%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= p.underscore %>
 <% end -%>

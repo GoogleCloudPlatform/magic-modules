@@ -18,7 +18,7 @@
                            property: property)) -%>
 <% else -%>
 <% if tf_types.include?(property.class) -%>
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 <% if property.is_a?(Api::Type::NestedObject) -%>
   if v == nil {
     return nil
@@ -32,7 +32,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
   transformed := make(map[string]interface{})
   <% property.properties.each do |prop| -%>
     <% if prop.flatten_object -%>
-    if <%= prop.api_name -%> := flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d); <%= prop.api_name -%> != nil {
+    if <%= prop.api_name -%> := flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d, config); <%= prop.api_name -%> != nil {
       obj := <%= prop.api_name -%>.([]interface{})[0]
       for k, v := range obj.(map[string]interface{}) {
         transformed[k] = v
@@ -40,7 +40,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     }
     <% else -%>
     transformed["<%= prop.name.underscore -%>"] =
-    flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d)
+    flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d, config)
     <% end -%>
   <% end -%>
   return []interface{}{transformed}
@@ -70,7 +70,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     transformed = append(transformed, map[string]interface{}{
 <%   end -%>
     <% property.item_type.properties.reject(&:ignore_read).each do |prop| -%>
-      "<%= prop.name.underscore -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d),
+      "<%= prop.name.underscore -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d, config),
     <% end -%>
     })
   }
@@ -86,7 +86,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     transformed = append(transformed, map[string]interface{}{
       "<%= property.key_name -%>": k,
     <% property.value_type.properties.each do |prop| -%>
-      "<%= Google::StringUtils.underscore(prop.name) -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d),
+      "<%= Google::StringUtils.underscore(prop.name) -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d, config),
     <% end -%>
     })
   }

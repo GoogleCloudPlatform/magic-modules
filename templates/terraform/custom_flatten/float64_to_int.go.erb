@@ -1,4 +1,4 @@
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
   // Handles int given in float64 format
   if floatVal, ok := v.(float64); ok {
     return int(floatVal)
