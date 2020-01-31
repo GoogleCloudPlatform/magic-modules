@@ -262,32 +262,34 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "region_backend_service_basic"
         primary_resource_id: "default"
         vars:
-          region_backend_service_name: "region-backend-service"
-          health_check_name: "health-check"
+          region_backend_service_name: "tf-test-rbs"
+          health_check_name: "tf-test-hc"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_round_robin"
         min_version: beta
         primary_resource_id: "default"
         vars:
-          region_backend_service_name: "region-backend-service"
-          health_check_name: "health-check"
+          region_backend_service_name: "tf-test-rbs"
+          health_check_name: "tf-test-hc"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_ring_hash"
         min_version: beta
         primary_resource_id: "default"
         vars:
-          region_backend_service_name: "region-backend-service"
-          health_check_name: "health-check"
+          region_backend_service_name: "tf-test-rbs"
+          health_check_name: "tf-test-hc"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_balancing_mode"
         min_version: beta
         primary_resource_id: "default"
         vars:
-          region_backend_service_name: "region-backend-service"
-          region_health_check_name: "health-check"
-          network_name: "net"
+          region_backend_service_name: "tf-test-rbs"
+          rigm_name: "tf-test-rigm"
+          region_health_check_name: "tf-test-hc"
+          network_name: "tf-test-net"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      constants: 'templates/terraform/constants/migrate_state_noop.go.erb'
+      constants: templates/terraform/constants/region_backend_service.go.erb
+      encoder: templates/terraform/encoders/region_backend_service.go.erb
       resource_definition: 'templates/terraform/resource_definition/region_backend_service.go.erb'
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -305,8 +307,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'compareSelfLinkRelativePaths'
         custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
       backends.failover: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      backends.capacityScaler: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       connectionDraining: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
