@@ -1,0 +1,25 @@
+
+// The tier field is eventually consistent, we need to test for consistency before moving on.
+// Otherwise, the user will see diffs on the field.
+if d.HasChange("tier") {
+	old, new := d.GetChange("tier")
+	readUrl, err := replaceVars(d, config, "{{DialogflowBasePath}}projects/{{project}}/agent")
+	stateConf := &resource.StateChangeConf{
+		Pending: []string{old.(string)},
+		Target:  []string{new.(string)},
+		Refresh: func() (interface{}, string, error) {
+			res, err := sendRequest(config, "GET", project, readUrl, nil)
+			if err != nil {
+				return 0, "", err
+			}
+			return res, res["tier"].(string), nil
+		},
+		Timeout:                   40 * time.Minute,
+		MinTimeout:                10 * time.Second,
+		ContinuousTargetOccurence: 10,
+	}
+	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("Timed out waiting for agent tier to return correct value.  Waiting for %s, got %s.", new, old)
+	}
+}
