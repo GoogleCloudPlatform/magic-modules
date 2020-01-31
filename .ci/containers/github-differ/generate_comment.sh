@@ -79,12 +79,12 @@ OICSDIFFS=$(bash -e <<TRY
     # TF OICS
     mkdir -p $TFOICS_LOCAL_PATH
     git clone -b $NEW_BRANCH $TFOICS_SCRATCH_PATH $TFOICS_LOCAL_PATH
-    pushd $TFOICS_LOCAL_PATH
+    pushd $TFOICS_LOCAL_PATH > /dev/null
     git fetch origin $OLD_BRANCH
     if ! git diff --exit-code --quiet origin/$NEW_BRANCH origin/$OLD_BRANCH; then
         echo "TF OiCS: [Diff](https://github.com/modular-magician/docs-examples/compare/$OLD_BRANCH..$NEW_BRANCH)"
     fi
-    popd
+    popd > /dev/null
 TRY
 )
 if [ $? -ne 0 ]; then
