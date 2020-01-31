@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"google.golang.org/api/cloudkms/v1"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/iam/v1"
