@@ -53,6 +53,7 @@ if [ -z "$GITHUB_TOKEN" ]; then
     exit 1
 fi
 
+
 COMMAND=$1
 REPO=$2
 VERSION=$3
@@ -122,7 +123,12 @@ fi
 
 git push $SCRATCH_PATH $BRANCH -f
 
-if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
+CHANGELOG=true
+if ["$REPO" == "ansible"] || ["$REPO" == "inspec"]; then
+  CHANGELOG=false
+fi
+
+if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && ["$CHANGELOG" == "true"]; then
     PR_BODY=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/$PR_NUMBER" | \
         jq -r .body)
