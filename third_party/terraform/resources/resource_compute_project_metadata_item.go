@@ -142,7 +142,7 @@ func resourceComputeProjectMetadataItemDelete(d *schema.ResourceData, meta inter
 	return nil
 }
 
-func updateComputeCommonInstanceMetadata(config *Config, projectID string, key string, afterVal *string, timeout int, failIfPresent bool) error {
+func updateComputeCommonInstanceMetadata(config *Config, projectID string, key string, afterVal *string, timeout int, failIfPresent metadataPresentBehavior) error {
 	updateMD := func() error {
 		log.Printf("[DEBUG] Loading project metadata: %s", projectID)
 		project, err := config.clientCompute.Projects.Get(projectID).Do()
