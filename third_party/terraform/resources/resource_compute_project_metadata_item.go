@@ -9,6 +9,13 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
+type metadataPresentBehavior bool
+
+const (
+	failIfPresent    metadataPresentBehavior = true
+	overwritePresent metadataPresentBehavior = false
+)
+
 func resourceComputeProjectMetadataItem() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeProjectMetadataItemCreate,
@@ -56,7 +63,7 @@ func resourceComputeProjectMetadataItemCreate(d *schema.ResourceData, meta inter
 	key := d.Get("key").(string)
 	val := d.Get("value").(string)
 
-	err = updateComputeCommonInstanceMetadata(config, projectID, key, &val, int(d.Timeout(schema.TimeoutCreate).Minutes()), true)
+	err = updateComputeCommonInstanceMetadata(config, projectID, key, &val, int(d.Timeout(schema.TimeoutCreate).Minutes()), failIfPresent)
 	if err != nil {
 		return err
 	}
@@ -108,7 +115,7 @@ func resourceComputeProjectMetadataItemUpdate(d *schema.ResourceData, meta inter
 		_, n := d.GetChange("value")
 		new := n.(string)
 
-		err = updateComputeCommonInstanceMetadata(config, projectID, key, &new, int(d.Timeout(schema.TimeoutUpdate).Minutes()), false)
+		err = updateComputeCommonInstanceMetadata(config, projectID, key, &new, int(d.Timeout(schema.TimeoutUpdate).Minutes()), overwritePresent)
 		if err != nil {
 			return err
 		}
@@ -126,7 +133,7 @@ func resourceComputeProjectMetadataItemDelete(d *schema.ResourceData, meta inter
 
 	key := d.Get("key").(string)
 
-	err = updateComputeCommonInstanceMetadata(config, projectID, key, nil, int(d.Timeout(schema.TimeoutDelete).Minutes()), false)
+	err = updateComputeCommonInstanceMetadata(config, projectID, key, nil, int(d.Timeout(schema.TimeoutDelete).Minutes()), overwritePresent)
 	if err != nil {
 		return err
 	}
