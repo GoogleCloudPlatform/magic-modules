@@ -319,7 +319,8 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 	// The filter endpoint works differently if you provide both the parent id and parent type, and
 	// doesn't seem to allow for prefix matching. Don't change this to include the parent type unless
 	// that API behavior changes.
-	res, err := config.clientResourceManager.Projects.List().Filter(fmt.Sprintf("id:%s* parent.id:%s", SharedServicePerimeterProjectPrefix, org)).Do()
+	prefixFilter := fmt.Sprintf("id:%s* parent.id:%s", SharedServicePerimeterProjectPrefix, org)
+	res, err := config.clientResourceManager.Projects.List().Filter(prefixFilter).Do()
 	if err != nil {
 		t.Errorf("Error getting shared test projects: %s", err)
 	}

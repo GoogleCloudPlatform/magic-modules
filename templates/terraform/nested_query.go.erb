@@ -112,11 +112,31 @@ func resource<%= resource_name -%>PatchCreateEncoder(d *schema.ResourceData, met
     "<%= list_key %>": append(currItems, obj),
   }
   <% end -%>
-  <% object.nested_query.keys.reverse[1..-1].each do |k| -%>
-  newRes := map[string]interface{}{}
-  newRes["<%= k %>"] = res
-  res = newRes
+  <%#
+  Reconstruct the full nested object. For example, if nested_query.keys is:
+  - nested_item
+  - more_nested_item
+  Then the code above will build:
+  {
+    "more_nested_item": [...]
+  }
+  Add back the other keys so we get:
+  {
+    "nested_item": {
+      "more_nested_item": [...]
+    }
+  }
+  Note that this assumes that we can safely have "more_nested_item" be the only element
+  in the "nested_item" map, which only works if the patch request takes an update mask
+  (or if the rest of the map would have been empty anyway).
+  -%>
+  <% object.nested_query.keys[0..-2].reverse_each do |k| -%>
+  wrapped := map[string]interface{}{
+    "<%= k %>": res,
+  }
+  res = wrapped
   <% end -%>
+
   return res, nil
 }
 
@@ -145,9 +165,18 @@ func resource<%= resource_name -%>PatchUpdateEncoder(d *schema.ResourceData, met
   items[idx] = item
 
   // Return list with new item added
-  return map[string]interface{}{
+  res := map[string]interface{}{
     "<%= list_key %>": items,
-  }, nil
+  }
+  <%# see comments in PatchCreateEncoder for details -%>
+  <% object.nested_query.keys[0..-2].reverse_each do |k| -%>
+  wrapped := map[string]interface{}{
+    "<%= k %>": res,
+  }
+  res = wrapped
+  <% end -%>
+
+  return res, nil
 }
 
 // PatchDeleteEncoder handles creating request data to PATCH parent resource
@@ -174,10 +203,12 @@ func resource<%= resource_name -%>PatchDeleteEncoder(d *schema.ResourceData, met
   res := map[string]interface{}{
     "<%= list_key %>": updatedItems,
   }
-  <% object.nested_query.keys.reverse[1..-1].each do |k| -%>
-  newRes := map[string]interface{}{}
-  newRes["<%= k %>"] = res
-  res = newRes
+  <%# see comments in PatchCreateEncoder for details -%>
+  <% object.nested_query.keys[0..-2].reverse_each do |k| -%>
+  wrapped := map[string]interface{}{
+    "<%= k %>": res,
+  }
+  res = wrapped
   <% end -%>
 
   return res, nil
