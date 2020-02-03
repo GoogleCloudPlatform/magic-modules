@@ -1,0 +1,22 @@
+resource "google_access_context_manager_service_perimeter_resource" "<%= ctx[:primary_resource_id] %>" {
+  perimiter_name = google_access_context_manager_service_perimeter.<%= ctx[:primary_resource_id] %>.name
+  resource = "projects/987654321"
+}
+
+resource "google_access_context_manager_service_perimeter" "<%= ctx[:primary_resource_id] %>" {
+  parent = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}"
+  name   = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}/servicePerimeters/<%= ctx[:vars]['service_perimeter_name'] %>"
+  title  = "<%= ctx[:vars]['service_perimeter_name'] %>"
+  status {
+    restricted_services = ["storage.googleapis.com"]
+  }
+
+  lifecycle {
+    ignore_changes = [status[0].resources]
+  }
+}
+
+resource "google_access_context_manager_access_policy" "access-policy" {
+  parent = "organizations/123456789"
+  title  = "my policy"
+}
