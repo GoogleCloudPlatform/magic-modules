@@ -140,6 +140,7 @@ func resource<%= resource_name -%>PatchCreateEncoder(d *schema.ResourceData, met
   return res, nil
 }
 
+<% if updatable?(object, object.root_properties) -%>
 // PatchUpdateEncoder handles creating request data to PATCH parent resource
 // with list including updated object.
 func resource<%= resource_name -%>PatchUpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
@@ -178,6 +179,7 @@ func resource<%= resource_name -%>PatchUpdateEncoder(d *schema.ResourceData, met
 
   return res, nil
 }
+<% end -%>
 
 // PatchDeleteEncoder handles creating request data to PATCH parent resource
 // with list excluding object to delete.
