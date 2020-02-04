@@ -6,8 +6,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-
-	"google.golang.org/api/storage/v1"
 )
 
 func resourceContainerRegistry() *schema.Resource {
@@ -80,16 +78,16 @@ func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) e
 func resourceContainerRegistryRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	name := ""
 	location := d.Get("location").(string)
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
+	name := ""
 	if location != "" {
 		name = fmt.Sprintf("%s.artifacts.%s.appspot.com", strings.ToLower(location), project)
 	} else {
-		name = fmt.Sprintf("artifacts.%s.appspot.com", project) 
+		name = fmt.Sprintf("artifacts.%s.appspot.com", project)
 	}
 
 	res, err := config.clientStorage.Buckets.Get(name).Do()
@@ -106,6 +104,6 @@ func resourceContainerRegistryRead(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceContainerRegistryDelete(d *schema.ResourceData, meta interface{}) error {
-	// TODO do we want to do this?
+	// Don't delete the backing bucket as this is not a supported GCR action
 	return nil
 }
