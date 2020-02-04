@@ -127,7 +127,9 @@ module Provider
                        ['google/batcher.go',
                         'third_party/terraform/utils/batcher.go'],
                        ['google/retry_utils.go',
-                        'third_party/terraform/utils/retry_utils.go']
+                        'third_party/terraform/utils/retry_utils.go'],
+                       ['google/error_retry_predicates.go',
+                        'third_party/terraform/utils/error_retry_predicates.go']
                      ])
     end
 
