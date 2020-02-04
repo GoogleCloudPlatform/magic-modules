@@ -53,6 +53,7 @@ if [ -z "$GITHUB_TOKEN" ]; then
     exit 1
 fi
 
+
 COMMAND=$1
 REPO=$2
 VERSION=$3
@@ -105,7 +106,12 @@ git checkout -b $BRANCH
 COMMITTED=true
 git commit --signoff -m "$COMMIT_MESSAGE" || COMMITTED=false
 
-if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
+CHANGELOG=false
+if ["$REPO" == "terraform"]; then
+  CHANGELOG=true
+fi
+
+if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && ["$CHANGELOG" == "true"]; then
     # Add the changelog entry!
     PR_NUMBER=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=closed&base=master&sort=updated&direction=desc" | \
