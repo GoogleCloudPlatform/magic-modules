@@ -329,6 +329,17 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 				ForceNew: true,
 			},
 
+            <% unless version == 'ga' -%>
+            "encryption_key_name": {
+                Type:     schema.TypeString,
+                Optional: true,
+                // Property only valid for second-gen.
+                Computed: true,
+                ForceNew: true,
+            },
+            <% end -%>
+
+
 			<% unless version == 'ga' -%>
 			"root_password": {
 				Type:      schema.TypeString,
@@ -586,6 +597,13 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		mutexKV.Lock(instanceMutexKey(project, instance.MasterInstanceName))
 		defer mutexKV.Unlock(instanceMutexKey(project, instance.MasterInstanceName))
 	}
+    <% unless version == 'ga' -%>
+    if k, ok := d.GetOk("encryption_key_name"); ok {
+        instance.DiskEncryptionConfiguration = &sqladmin.DiskEncryptionConfiguration{
+            KmsKeyName: k.(string),
+        }
+    }
+    <% end -%>
 
 	var op *sqladmin.Operation
 	err = retryTimeDuration(func() (operr error) {
@@ -821,6 +839,11 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("settings", flattenSettings(instance.Settings)); err != nil {
 		log.Printf("[WARN] Failed to set SQL Database Instance Settings")
 	}
+    <% unless version == 'ga' -%>
+    if instance.DiskEncryptionConfiguration != nil {
+        d.Set("encryption_key_name", instance.DiskEncryptionConfiguration.KmsKeyName)
+    }
+    <% end -%>
 
 	if err := d.Set("replica_configuration", flattenReplicaConfiguration(instance.ReplicaConfiguration, d)); err != nil {
 		log.Printf("[WARN] Failed to set SQL Database Instance Replica Configuration")
