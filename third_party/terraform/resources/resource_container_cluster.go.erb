@@ -355,10 +355,9 @@ func resourceContainerCluster() *schema.Resource {
 						<% unless version == 'ga' -%>
 						"autoscaling_profile": {
 							Type:             schema.TypeString,
-							Default:          "PROFILE_UNSPECIFIED",
+							Default:          "BALANCED",
 							Optional:         true,
-							ValidateFunc:     validation.StringInSlice([]string{"PROFILE_UNSPECIFIED", "OPTIMIZE_UTILIZATION", "BALANCED"}, false),
-							DiffSuppressFunc: emptyOrDefaultStringSuppress("PROFILE_UNSPECIFIED"),
+							ValidateFunc:     validation.StringInSlice([]string{"BALANCED", "OPTIMIZE_UTILIZATION"}, false),
 						},
 						<% end -%>
 					},
@@ -2822,11 +2821,12 @@ func flattenClusterAutoscaling(a *containerBeta.ClusterAutoscaling) []map[string
 		}
 		r["resource_limits"] = resourceLimits
 		r["enabled"] = true
-		<% unless version == 'ga' -%>
-		r["autoscaling_profile"] = a.AutoscalingProfile
-		<% end -%>
 		r["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(a.AutoprovisioningNodePoolDefaults)
 	}
+	<% unless version == 'ga' -%>
+	r["autoscaling_profile"] = a.AutoscalingProfile
+	<% end -%>
+
 	return []map[string]interface{}{r}
 }
 

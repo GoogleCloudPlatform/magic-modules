@@ -1390,15 +1390,6 @@ func TestAccContainerCluster_withAutoscalingProfile(t *testing.T) {
 				ImportState:         true,
 				ImportStateVerify:   true,
 			},
-			{
-				Config: testAccContainerCluster_withAutoscalingProfile(clusterName, "PROFILE_UNSPECIFIED"),
-			},
-			{
-				ResourceName:        "google_container_cluster.autoscaling_with_profile",
-				ImportStateIdPrefix: "us-central1-a/",
-				ImportState:         true,
-				ImportStateVerify:   true,
-			},
 		},
 	})
 }
@@ -1413,7 +1404,7 @@ func TestAccContainerCluster_withInvalidAutoscalingProfile(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withAutoscalingProfile(clusterName, "AS_CHEAP_AS_POSSIBLE"),
-				ExpectError: regexp.MustCompile(`config is invalid: expected cluster_autoscaling\.0\.autoscaling_profile to be one of \[PROFILE_UNSPECIFIED OPTIMIZE_UTILIZATION BALANCED\], got CANARY`),
+				ExpectError: regexp.MustCompile(`config is invalid: expected cluster_autoscaling\.0\.autoscaling_profile to be one of \[BALANCED OPTIMIZE_UTILIZATION\], got AS_CHEAP_AS_POSSIBLE`),
 			},
 		},
 	})
@@ -2877,17 +2868,10 @@ resource "google_container_cluster" "with_node_pool" {
 <% unless version == 'ga' -%>
 func testAccContainerCluster_withAutoscalingProfile(cluster string, autoscalingProfile string) string {
 	config := fmt.Sprintf(`
-data "google_container_engine_versions" "central1a" {
-  location = "us-central1-a"
-}
-
-resource "google_container_cluster" "with_autoscaling_profile" {
+resource "google_container_cluster" "autoscaling_with_profile" {
   name               = "%s"
   location           = "us-central1-a"
-  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
-
-	remove_default_node_pool = true
-  initial_node_count       = 1
+  initial_node_count = 1
 
 	cluster_autoscaling {
     enabled             = false
