@@ -362,22 +362,6 @@ func testAccBigQueryTableRangePartitioning(datasetID, tableID string) string {
 	{
 		"name": "id",
 		"type": "INTEGER"
-	},
-	{
-		"name": "city",
-		"type": "RECORD",
-		"fields": [
-	{
-		"name": "coord",
-		"type": "RECORD",
-		"fields": [
-		{
-		"name": "lon",
-		"type": "FLOAT"
-		}
-		]
-	}
-		]
 	}
 ]
 EOH
