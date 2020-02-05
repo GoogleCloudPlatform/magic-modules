@@ -232,6 +232,23 @@ compute_instance: Fixed permadiff on description for `google_compute_instance`
 
 This uses the resource instead of the service as a prefix. 
 
+Better:
+
+~~~
+```release-note:bug
+compute: Fixed permadiff on description for `google_compute_instance`
+```
+~~~
+
+Choosing the right service name is a bit of an art. A good rule of thumb is if there's something
+besides the resource name after `google_`, use that. For example, `compute` is a good choice from
+`google_compute_instance`. Not every resource has that, however; for `google_project`, the service
+is not part of the resource address. In these cases, falling back on the name of the package the
+resource's APIs is implemented in (`resourcemanager`, for `google_project`) is a good call.
+
+Not every change applies only to one resource. Judgment is best here. When in doubt, `provider` is
+a good way to indicate sweeping changes that are likely to impact most users.
+
 ### Unticked Resource Names
 
 ~~~
@@ -250,12 +267,3 @@ Better:
 compute: Fixed permadiff on description for `google_compute_instance`
 ```
 ~~~
-
-Choosing the right service name is a bit of an art. A good rule of thumb is if there's something
-besides the resource name after `google_`, use that. For example, `compute` is a good choice from
-`google_compute_instance`. Not every resource has that, however; for `google_project`, the service
-is not part of the resource address. In these cases, falling back on the name of the package the
-resource's APIs is implemented in (`resourcemanager`, for `google_project`) is a good call.
-
-Not every change applies only to one resource. Judgment is best here. When in doubt, `provider` is
-a good way to indicate sweeping changes that are likely to impact most users.
