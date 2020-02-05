@@ -22,7 +22,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "dataproc_autoscaling_policy"
         primary_resource_id: "asp"
         vars:
-          name: "tf-dataproc-test-"
+          name: "dataproc-policy"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: policy_id
