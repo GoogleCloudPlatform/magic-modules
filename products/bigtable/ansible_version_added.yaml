@@ -13,3 +13,13 @@
       :version_added: '2.10'
     :labels:
       :version_added: '2.10'
+    :clusters:
+      :version_added: '2.10'
+      :name:
+        :version_added: '2.10'
+      :serveNodes:
+        :version_added: '2.10'
+      :defaultStorageType:
+        :version_added: '2.10'
+      :location:
+        :version_added: '2.10'

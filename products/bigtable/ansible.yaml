@@ -23,6 +23,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: decode_response
     custom_code: !ruby/object:Provider::Ansible::CustomCode
       custom_create_resource: true
+      custom_async_function: bigtable_async_url
     provider_helpers:
       - 'products/bigtable/helpers/ansible/instance.py'
   AppProfile: !ruby/object:Overrides::Ansible::ResourceOverride

@@ -97,6 +97,26 @@ objects:
     description: |
       A collection of Bigtable Tables and the resources that serve them.  All
       tables in an instance are served from all Clusters in the instance.
+    async: !ruby/object:Api::OpAsync
+      actions: ['create']
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        # TODO: change this to be less Pythonic.
+        # Only Ansible uses this, so it's alright for now.
+        base_url: "operations/{module.params['clusters'][0]['location']}/{{op_id}}"
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
     properties:
     - !ruby/object:Api::Type::Enum
       name: state
@@ -129,3 +149,42 @@ objects:
         resources into groups that reflect a customer's organizational needs and
         deployment strategies. They can be used to filter resources and aggregate
         metrics.
+    - !ruby/object:Api::Type::Array
+      name: clusters
+      description: An array of clusters. Maximum 4.
+      item_type: !ruby/object:Api::Type::NestedObject
+        properties:
+        - !ruby/object:Api::Type::String
+          name: name
+          description: The unique name of the cluster.
+        - !ruby/object:Api::Type::Integer
+          name: serveNodes
+          description: |
+            The number of nodes allocated to this cluster. More nodes enable higher
+            throughput and more consistent performance.
+        - !ruby/object:Api::Type::Enum
+          name: defaultStorageType
+          description: |
+            The type of storage used by this cluster to serve its
+            parent instance's tables, unless explicitly overridden.
+          values:
+          - :STORAGE_TYPE_UNSPECIFIED
+          - :SSD
+          - :HDD
+        - !ruby/object:Api::Type::String
+          name: location
+          description: |
+            The location where this cluster's nodes and storage reside. For best
+            performance, clients should be located as close as possible to this
+            cluster. Currently only zones are supported, so values should be of the
+            form `projects/<project>/locations/<zone>`.
+        - !ruby/object:Api::Type::Enum
+          name: state
+          description: The current state of the cluster.
+          values:
+          - :STATE_NOT_KNOWN
+          - :READY
+          - :CREATING
+          - :RESIZING
+          - :DISABLED
+          output: true

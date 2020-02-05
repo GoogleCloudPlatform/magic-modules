@@ -16,6 +16,10 @@ task: !ruby/object:Provider::Ansible::Task
   code:
     name: 'my-instance'
     display_name: My Test Cluster
+    clusters:
+      - name: mycluster
+        location: "projects/<%= ctx[:project] -%>/locations/us-central1-a"
+        serve_nodes: 1
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>
