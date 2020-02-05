@@ -17,7 +17,6 @@ func resourceContainerRegistry() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"location": {
 				Type:     schema.TypeString,
-				Default:  "US",
 				Optional: true,
 				ForceNew: true,
 				StateFunc: func(s interface{}) string {
@@ -32,12 +31,7 @@ func resourceContainerRegistry() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"self_link": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"url": {
+			"bucket_self_link": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -96,8 +90,8 @@ func resourceContainerRegistryRead(d *schema.ResourceData, meta interface{}) err
 	}
 	log.Printf("[DEBUG] Read bucket %v at location %v\n\n", res.Name, res.SelfLink)
 
-	// Update the bucket ID according to the resource ID
-	d.Set("self_link", res.SelfLink)
+	// Update the ID according to the bucket ID
+	d.Set("bucket_self_link", res.SelfLink)
 
 	d.SetId(res.Id)
 	return nil

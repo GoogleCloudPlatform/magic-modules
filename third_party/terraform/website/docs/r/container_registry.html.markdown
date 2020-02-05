@@ -52,6 +52,6 @@ The following arguments are supported:
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
-* `self_link` - The URI of the created resource.
+* `bucket_self_link` - The URI of the created resource.
 
-* `id` - The name of the bucket that supports the Container Registry.
+* `id` - The name of the bucket that supports the Container Registry. In the form of `artifacts.{project}.appspot.com` or `{location}.artifacts.{project}.appspot.com` if location is specified.
