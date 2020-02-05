@@ -23,16 +23,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "bigtable_app_profile_multicluster"
         primary_resource_id: "ap"
         vars:
-          instance_name: "tf-test-instance-"
-          app_profile_name: "tf-test-profile-"
+          instance_name: "bt-instance"
+          app_profile_name: "bt-profile"
         ignore_read_extra:
           - "ignore_warnings"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigtable_app_profile_singlecluster"
         primary_resource_id: "ap"
         vars:
-          instance_name: "tf-test-instance-"
-          app_profile_name: "tf-test-profile-"
+          instance_name: "bt-instance"
+          app_profile_name: "bt-profile"
         ignore_read_extra:
           - "ignore_warnings"
     properties:

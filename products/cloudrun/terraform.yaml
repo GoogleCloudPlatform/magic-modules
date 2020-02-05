@@ -21,7 +21,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "cloud_run_domain_mapping_basic"
         primary_resource_id: "default"
         vars:
-          cloud_run_service_name: "tftest-cloudrun"
+          cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
           namespace: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -56,7 +56,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         primary_resource_name: "fmt.Sprintf(\"tftest-cloudrun%s\", context[\"random_suffix\"])"
         vars:
-          cloud_run_service_name: "tftest-cloudrun"
+          cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
           project: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
@@ -64,7 +64,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         primary_resource_name: "fmt.Sprintf(\"tftest-cloudrun%s\", context[\"random_suffix\"])"
         vars:
-          cloud_run_service_name: "tftest-cloudrun"
+          cloud_run_service_name: "cloudrun-srv"
           cloud_run_sql_name: "cloudrun-sql"
         test_env_vars:
           project: :PROJECT_NAME
@@ -73,7 +73,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         primary_resource_name: "fmt.Sprintf(\"tftest-cloudrun%s\", context[\"random_suffix\"])"
         vars:
-          cloud_run_service_name: "tftest-cloudrun"
+          cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
           project: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
@@ -81,7 +81,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         primary_resource_name: "fmt.Sprintf(\"tftest-cloudrun%s\", context[\"random_suffix\"])"
         vars:
-          cloud_run_service_name: "tftest-cloudrun"
+          cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
           project: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
