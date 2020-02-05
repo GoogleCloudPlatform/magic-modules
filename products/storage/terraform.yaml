@@ -102,6 +102,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
   Object: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
+  HmacKey: !ruby/object:Overrides::Terraform::ResourceOverride
+    create_url: projects/{{project}}/hmacKeys?serviceAccountEmail={{service_account_email}}
+    properties:
+      serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'service_account_email'
+        ignore_read: true
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

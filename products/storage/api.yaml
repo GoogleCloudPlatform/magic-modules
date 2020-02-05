@@ -780,4 +780,60 @@ objects:
         name: timeUpdated
         api_name: updated
         description: The modification time of the object metadata.
+  - !ruby/object:Api::Resource
+    name: 'HmacKey'
+    kind: 'storage#hmacKey'
+    base_url: projects/{{project}}/hmacKeys
+    create_url: projects/{{project}}/hmacKeys?serviceAccountEmail={{serviceAccountEmail}}
+    self_link: projects/{{project}}/hmacKeys/{{accessId}}
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'hhttps://cloud.google.com/storage/docs/authentication/managing-hmackeys'
+      api: 'https://cloud.google.com/storage/docs/json_api/v1/projects/hmacKeys'
+    description: |
+      The hmacKeys resource represents an HMAC key within Cloud Storage. The resource 
+      consists of a secret and HMAC key metadata. HMAC keys can be used as credentials 
+      for service accounts. For more information, see HMAC Keys.
 
+      Note that the hmacKeys resource is only returned when you use hCREATE. Other methods, 
+      such as GET, return the metadata portion of the HMAC key resource.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccountEmail'
+        description: The email address of the key's associated service account.
+        input: true
+        required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'secret'
+        output: true
+        description: 'HMAC secret key material.'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'metadata'
+        description: |
+          HMAC key metadata.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'access_id'
+            output: true 
+            description: 'The access ID of the HMAC Key.'
+          - !ruby/object:Api::Type::String
+            name: 'etag'
+            description: 'HTTP 1.1 Entity tag for the HMAC key.'
+          - !ruby/object:Api::Type::String
+            name: 'id'
+            output: true
+            description: 'The ID of the HMAC key, including the Project ID and the Access ID.'
+          - !ruby/object:Api::Type::Enum
+            name: 'state'
+            description: 'The state of the key. Can be one of ACTIVE, INACTIVE, or DELETED.'
+            values:
+              - 'ACTIVE'
+              - 'INACTIVE'
+              - 'DELETED'
+          - !ruby/object:Api::Type::Time
+            name: 'timeCreated'
+            description: 'The creation time of the HMAC key in RFC 3339 format. '
+          - !ruby/object:Api::Type::Time
+            name: 'updated'
+            description: 'The last modification time of the HMAC key metadata in RFC 3339 format.'
