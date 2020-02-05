@@ -39,8 +39,8 @@ def convert_clusters_to_map(clusters):
 
 def convert_map_to_clusters(clusters):
     carray = []
-    for cluster in clusters:
-        cluster['name'] = cluster['name'].split('/')[-1]
+    for key, cluster in clusters.items():
+        cluster['name'] = key.split('/')[-1]
         carray.append(cluster)
     return carray
 
