@@ -262,31 +262,31 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "region_backend_service_basic"
         primary_resource_id: "default"
         vars:
-          region_backend_service_name: "tf-test-rbs"
-          health_check_name: "tf-test-hc"
+          region_backend_service_name: "region-service"
+          health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_round_robin"
         min_version: beta
         primary_resource_id: "default"
         vars:
-          region_backend_service_name: "tf-test-rbs"
-          health_check_name: "tf-test-hc"
+          region_backend_service_name: "region-service"
+          health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_ring_hash"
         min_version: beta
         primary_resource_id: "default"
         vars:
-          region_backend_service_name: "tf-test-rbs"
-          health_check_name: "tf-test-hc"
+          region_backend_service_name: "region-service"
+          health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_balancing_mode"
         min_version: beta
         primary_resource_id: "default"
         vars:
-          region_backend_service_name: "tf-test-rbs"
-          rigm_name: "tf-test-rigm"
-          region_health_check_name: "tf-test-hc"
-          network_name: "tf-test-net"
+          region_backend_service_name: "region-service"
+          rigm_name: "rbs-rigm"
+          region_health_check_name: "rbs-health-check"
+          network_name: "rbs-net"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/region_backend_service.go.erb
       encoder: templates/terraform/encoders/region_backend_service.go.erb
