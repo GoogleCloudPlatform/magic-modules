@@ -171,7 +171,7 @@ compute: Fix permadiff on description for `google_compute_instance`
 ```
 ~~~
 
-This doesn't use the past tense. Readers of teh changelog will be reading what _happened_ in a release,
+This doesn't use the past tense. Readers of the changelog will be reading what _happened_ in a release,
 so the language should be that of describing what happened. Imagine you're answering the question
 "what changed since the last version?"
 
