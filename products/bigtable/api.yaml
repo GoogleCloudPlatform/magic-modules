@@ -91,3 +91,41 @@ objects:
               description: |
                 If true, CheckAndMutateRow and ReadModifyWriteRow requests are allowed by this app profile.
                 It is unsafe to send these requests to the same table/row/column in multiple clusters.
+  - !ruby/object:Api::Resource
+    name: Instance
+    base_url:
+    description: |
+      A collection of Bigtable Tables and the resources that serve them.  All
+      tables in an instance are served from all Clusters in the instance.
+    properties:
+    - !ruby/object:Api::Type::Enum
+      name: state
+      description: The current state of the instance.
+      values:
+      - :STATE_NOT_KNOWN
+      - :READY
+      - :CREATING
+      output: true
+    - !ruby/object:Api::Type::String
+      name: name
+      description: The unique name of the instance.
+    - !ruby/object:Api::Type::String
+      name: displayName
+      description: |
+        The descriptive name for this instance as it appears in UIs.
+        Can be changed at any time, but should be kept globally unique
+        to avoid confusion.
+    - !ruby/object:Api::Type::Enum
+      name: type
+      description: The type of the instance. Defaults to `PRODUCTION`.
+      values:
+      - :TYPE_UNSPECIFIED
+      - :PRODUCTION
+      - :DEVELOPMENT
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: labels
+      description: |
+        Labels are a flexible and lightweight mechanism for organizing cloud
+        resources into groups that reflect a customer's organizational needs and
+        deployment strategies. They can be used to filter resources and aggregate
+        metrics.
