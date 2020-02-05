@@ -1,0 +1,15 @@
+---
+:facts:
+  :Instance:
+    :version_added: '2.10'
+:regular:
+  :Instance:
+    :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :displayName:
+      :version_added: '2.10'
+    :type:
+      :version_added: '2.10'
+    :labels:
+      :version_added: '2.10'

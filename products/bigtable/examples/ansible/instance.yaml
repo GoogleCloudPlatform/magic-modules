@@ -14,7 +14,7 @@
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_bigtable_instance
   code:
-    name: <%= ctx[:name] %>
+    name: 'my-instance'
     display_name: My Test Cluster
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
