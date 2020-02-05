@@ -199,7 +199,7 @@ Better:
 
 ~~~
 ```release-note:bug
-compute: Fixed permadiff for `google_compute_instance`
+compute: Fixed permadiff on description for `google_compute_instance`
 ```
 ~~~
 
