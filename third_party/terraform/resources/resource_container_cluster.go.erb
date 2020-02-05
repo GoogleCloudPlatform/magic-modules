@@ -357,7 +357,6 @@ func resourceContainerCluster() *schema.Resource {
 							Type:             schema.TypeString,
 							Default:          "PROFILE_UNSPECIFIED",
 							Optional:         true,
-							Computed:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"PROFILE_UNSPECIFIED", "OPTIMIZE_UTILIZATION", "BALANCED"}, false),
 							DiffSuppressFunc: emptyOrDefaultStringSuppress("PROFILE_UNSPECIFIED"),
 						},

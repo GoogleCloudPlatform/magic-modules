@@ -2885,9 +2885,12 @@ resource "google_container_cluster" "with_autoscaling_profile" {
   name               = "%s"
   location           = "us-central1-a"
   min_master_version = data.google_container_engine_versions.central1a.latest_master_version
-  initial_node_count = 1
+
+	remove_default_node_pool = true
+  initial_node_count       = 1
+
 	cluster_autoscaling {
-    enabled             = true
+    enabled             = false
     autoscaling_profile = "%s"
   }
 }
