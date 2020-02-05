@@ -93,7 +93,7 @@ objects:
                 It is unsafe to send these requests to the same table/row/column in multiple clusters.
   - !ruby/object:Api::Resource
     name: Instance
-    base_url:
+    base_url: projects/{{project}}/instances
     description: |
       A collection of Bigtable Tables and the resources that serve them.  All
       tables in an instance are served from all Clusters in the instance.
