@@ -22,7 +22,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "dialogflow_agent_full"
         primary_resource_id: "full_agent"
         vars:
-          agent_name: "tf-test-full-agent"
+          agent_name: "dialogflow-agent"
     # Only one agent per project, API does not have an agent ID
     id_format: "{{project}}"
     import_format: ["{{project}}"]
