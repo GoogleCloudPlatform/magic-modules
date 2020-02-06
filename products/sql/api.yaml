@@ -17,7 +17,7 @@ display_name: Cloud SQL
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://www.googleapis.com/sql/v1beta4/
+    base_url: https://sqladmin.googleapis.com/
 scopes:
   - https://www.googleapis.com/auth/sqlservice.admin
 apis_required:
@@ -361,7 +361,7 @@ objects:
           - !ruby/object:Api::Type::Enum
             name: 'availabilityType'
             description: |
-              The availabilityType define if your postgres instance is run zonal 
+              The availabilityType define if your postgres instance is run zonal
               or regional.
             values:
             - :ZONAL
@@ -381,7 +381,7 @@ objects:
               - !ruby/object:Api::Type::Boolean
                 name: 'binaryLogEnabled'
                 description: |
-                  Whether binary log is enabled. If backup configuration 
+                  Whether binary log is enabled. If backup configuration
                   is disabled, binary log must be disabled as well. MySQL only.
               - !ruby/object:Api::Type::String
                 name: 'startTime'
@@ -391,9 +391,9 @@ objects:
             name: 'settingsVersion'
             output: true
             description: |
-              The version of instance settings. This is a required field for 
-              update method to make sure concurrent updates are handled properly. 
-              During update, use the most recent settingsVersion value for this 
+              The version of instance settings. This is a required field for
+              update method to make sure concurrent updates are handled properly.
+              During update, use the most recent settingsVersion value for this
               instance and do not try to update this value.
       - !ruby/object:Api::Type::String
         name: 'gceZone'

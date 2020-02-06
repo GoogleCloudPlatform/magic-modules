@@ -277,7 +277,7 @@ be used for configuration are below:
 * `service_usage_custom_endpoint` (`GOOGLE_SERVICE_USAGE_CUSTOM_ENDPOINT`) - `https://serviceusage.googleapis.com/v1/`
 * `source_repo_custom_endpoint` (`GOOGLE_SOURCE_REPO_CUSTOM_ENDPOINT`) - `https://sourcerepo.googleapis.com/v1/`
 * `spanner_custom_endpoint` (`GOOGLE_SPANNER_CUSTOM_ENDPOINT`) - `https://spanner.googleapis.com/v1/`
-* `sql_custom_endpoint` (`GOOGLE_SQL_CUSTOM_ENDPOINT`) - `https://www.googleapis.com/sql/v1beta4/`
+* `sql_custom_endpoint` (`GOOGLE_SQL_CUSTOM_ENDPOINT`) - `https://sqladmin.googleapis.com/`
 * `storage_custom_endpoint` (`GOOGLE_STORAGE_CUSTOM_ENDPOINT`) - `https://www.googleapis.com/storage/v1/`
 * `storage_transfer_custom_endpoint` (`GOOGLE_STORAGE_TRANSFER_CUSTOM_ENDPOINT`) - `https://storagetransfer.googleapis.com/v1/`
 * `tpu_custom_endpoint` (`GOOGLE_TPU_CUSTOM_ENDPOINT`) - `https://tpu.googleapis.com/v1/`
@@ -308,12 +308,12 @@ as their versioned counterpart but that won't necessarily always be the case.
 
 * `batching` - (Optional) Controls batching for specific GCP request types
   where users have encountered quota or speed issues using `count` with
-  resources that affect the same GCP resource (e.g. `google_project_service`). 
+  resources that affect the same GCP resource (e.g. `google_project_service`).
   It is not used for every resource/request type and can only group parallel
   similar calls for nodes at a similar traversal time in the graph during
   `terraform apply` (e.g. resources created using `count` that affect a single
-  `project`). Thus, it is also bounded by the `terraform` 
-  [`-parallelism`](https://www.terraform.io/docs/commands/apply.html#parallelism-n) 
+  `project`). Thus, it is also bounded by the `terraform`
+  [`-parallelism`](https://www.terraform.io/docs/commands/apply.html#parallelism-n)
   flag, as reducing the number of parallel calls will reduce the number of
   simultaneous requests being added to a batcher.
 
