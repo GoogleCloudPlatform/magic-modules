@@ -26,7 +26,7 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
   return sendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 }
 
-func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op map[string]interface{},<% if has_project -%> project,<% end -%> activity string, timeoutMinutes int) error {
+func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op map[string]interface{},<% if async.result.resource_inside_response -%> response *map[string]interface{},<% end -%> <% if has_project -%> project,<% end -%> activity string, timeoutMinutes int) error {
   if val, ok := op["name"]; !ok || val == "" {
     // This was a synchronous call - there is no operation to wait for.
     return nil
@@ -40,5 +40,12 @@ func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op m
   if err := w.CommonOperationWaiter.SetOp(op); err != nil {
     return err
   }
+  <% if async.result.resource_inside_response -%> 
+  if err := OperationWait(w, activity, timeoutMinutes); err != nil {
+      return err
+  }
+  return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
+  <% else -%>
   return OperationWait(w, activity, timeoutMinutes)
+  <% end -%>
 }

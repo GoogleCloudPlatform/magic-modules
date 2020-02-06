@@ -234,8 +234,11 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 <%    end -%>
 <%    if object.async.is_a? Api::OpAsync -%>
+    <% if object.async.result.resource_inside_response -%>
+    var response map[string]interface{}
+    <% end -%>
     err = <%= client_name_camel -%>OperationWaitTime(
-    config, res,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
+    config, res,<% if object.async.result.resource_inside_response -%> &response,<% end -%> <% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutCreate).Minutes()))
 
     if err != nil {
@@ -246,6 +249,18 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         d.SetId("")
         return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
     }
+    <% if object.async.result.resource_inside_response -%>
+    <% object.gettable_properties.each do |prop| -%>
+    <% if object.identity.include?(prop) -%>
+    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(response["<%= prop.api_name -%>"], d, config)); err != nil {
+        return err
+    }
+
+    <% end -%>
+    <% end -%>
+    <% end -%>
+
+
 <%    end -%>
 <%  end -%>
 
@@ -477,8 +492,11 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         }
 <%        end -%>
 <%        if object.async.is_a? Api::OpAsync -%>
+    <% if object.async.result.resource_inside_response -%>
+    var response map[string]interface{}
+    <% end -%>
         err = <%= client_name_camel -%>OperationWaitTime(
-            config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
+            config, res,<% if object.async.result.resource_inside_response -%> &response,<% end -%> <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
             int(d.Timeout(schema.TimeoutUpdate).Minutes()))
         if err != nil {
             return err
@@ -579,8 +597,11 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     }
 <%    end -%>
 <%    if object.async.is_a? Api::OpAsync -%>
+    <% if object.async.result.resource_inside_response -%>
+    var response map[string]interface{}
+    <% end -%>
     err = <%= client_name_camel -%>OperationWaitTime(
-        config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
+        config, res,<% if object.async.result.resource_inside_response -%> &response,<% end -%> <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 
     if err != nil {
@@ -652,14 +673,17 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     }
 
 <%  if !object.async.nil? && object.async.allow?('delete') -%>
-
+    <% if object.async.result.resource_inside_response -%>
+    var response map[string]interface{}
+    <% end -%>
     err = <%= client_name_camel -%>OperationWaitTime(
-        config, res, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
+        config, res,<% if object.async.result.resource_inside_response -%> &response,<% end -%> <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
         int(d.Timeout(schema.TimeoutDelete).Minutes()))
 
     if err != nil {
         return err
     }
+
 <%  end -%>
 
     log.Printf("[DEBUG] Finished deleting <%= object.name -%> %q: %#v", d.Id(), res)

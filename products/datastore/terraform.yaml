@@ -1,0 +1,9 @@
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Index: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "projects/{{project}}/indexes/{{index_id}}"
+    self_link: "projects/{{project}}/indexes/{{index_id}}"
+    import_format: ["projects/{{project}}/indexes/{{index_id}}"]
+    autogen_async: true
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 15
