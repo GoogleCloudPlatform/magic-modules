@@ -39,14 +39,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "deployment_manager_deployment_basic"
         primary_resource_id: "deployment"
-        primary_resource_name: "fmt.Sprintf(\"my-deployment-%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-deployment-%s\", context[\"random_suffix\"])"
         vars:
           deployment_name: "my-deployment"
         skip_test: true
       - !ruby/object:Provider::Terraform::Examples
         name: "deployment_manager_deployment_imports"
         primary_resource_id: "deployment"
-        primary_resource_name: "fmt.Sprintf(\"my-deployment-%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-deployment-%s\", context[\"random_suffix\"])"
         vars:
           deployment_name: "my-deployment"
         skip_test: true
