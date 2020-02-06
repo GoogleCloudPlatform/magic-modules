@@ -17,7 +17,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "secret_config_basic"
         primary_resource_id: "secret-basic"
-        primary_resource_name: "fmt.Sprintf(\"test-secret-basic%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-test-secret-basic%s\", context[\"random_suffix\"])"
         min_version: beta
         vars:
           secret_id: "secret"

@@ -917,7 +917,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           instance_name: "my-instance"
-        primary_resource_name: "fmt.Sprintf(\"my-instance%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\", context[\"random_suffix\"])"
   InstanceGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   InstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -1879,7 +1879,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           subnetwork_name: "test-subnetwork"
           network_name: "test-network"
-        primary_resource_name: "fmt.Sprintf(\"test-subnetwork%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-test-subnetwork%s\", context[\"random_suffix\"])"
       - !ruby/object:Provider::Terraform::Examples
         name: "subnetwork_logging_config"
         primary_resource_id: "subnet-with-logging"
