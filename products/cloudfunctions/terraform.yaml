@@ -24,7 +24,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudfunctions_cloud_function"
         primary_resource_id: "function"
-        primary_resource_name: "fmt.Sprintf(\"my-function%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-function%s\", context[\"random_suffix\"])"
         vars:
           function_name: "my-function"
           bucket_name: "cloudfunctions-function-example-bucket"

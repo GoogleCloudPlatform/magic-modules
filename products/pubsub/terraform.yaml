@@ -22,7 +22,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "pubsub_topic_basic"
         primary_resource_id: "example"
-        primary_resource_name: "fmt.Sprintf(\"example-topic%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-example-topic%s\", context[\"random_suffix\"])"
         vars:
           topic_name: "example-topic"
       - !ruby/object:Provider::Terraform::Examples

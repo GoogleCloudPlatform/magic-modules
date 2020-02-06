@@ -28,7 +28,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "iap_project"
         primary_resource_id: "project_service"
-        primary_resource_name: "fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-tf-test%s\", context[\"random_suffix\"])"
         test_env_vars:
           org_id: :ORG_ID
   WebTypeCompute: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -46,7 +46,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "iap_project"
         primary_resource_id: "project_service"
-        primary_resource_name: "fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-tf-test%s\", context[\"random_suffix\"])"
         test_env_vars:
           org_id: :ORG_ID
   WebTypeAppEngine: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -128,7 +128,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_service_name: "backend-service"
           http_health_check_name: "health-check"
-        primary_resource_name: "fmt.Sprintf(\"backend-service%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-backend-service%s\", context[\"random_suffix\"])"
   TunnelInstance: !ruby/object:Overrides::Terraform::ResourceOverride
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
@@ -149,7 +149,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "tunnelvm"
         vars:
           instance_name: "tunnel-vm"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-tunnel%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-tf-test-tunnel%s\", context[\"random_suffix\"])"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

@@ -25,7 +25,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "sourcerepo_repository_basic"
         primary_resource_id: "my-repo"
-        primary_resource_name: "fmt.Sprintf(\"my/repository%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my/repository%s\", context[\"random_suffix\"])"
         vars:
           repository_name: "my/repository"
       - !ruby/object:Provider::Terraform::Examples

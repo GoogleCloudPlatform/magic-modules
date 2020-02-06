@@ -22,7 +22,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           name: "my-bucket"
-        primary_resource_name: "fmt.Sprintf(\"my-bucket%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-bucket%s\", context[\"random_suffix\"])"
   BucketAccessControl: !ruby/object:Overrides::Terraform::ResourceOverride
     description: |
       Bucket ACLs can be managed authoritatively using the
