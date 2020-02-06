@@ -107,11 +107,11 @@ COMMITTED=true
 git commit --signoff -m "$COMMIT_MESSAGE" || COMMITTED=false
 
 CHANGELOG=false
-if ["$REPO" == "terraform"]; then
+if [ "$REPO" == "terraform" ]; then
   CHANGELOG=true
 fi
 
-if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && ["$CHANGELOG" == "true"]; then
+if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && [ "$CHANGELOG" == "true" ]; then
     # Add the changelog entry!
     PR_NUMBER=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=closed&base=master&sort=updated&direction=desc" | \
