@@ -21,7 +21,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "runtimeconfig_config_basic"
         primary_resource_id: "config"
-        primary_resource_name: "fmt.Sprintf(\"my-config%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-config%s\", context[\"random_suffix\"])"
         vars:
           config_name: "my-config"
   Variable: !ruby/object:Overrides::Terraform::ResourceOverride
