@@ -149,7 +149,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "tunnelvm"
         vars:
           instance_name: "tunnel-vm"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-tunnel%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-tunnel-vm%s\", context[\"random_suffix\"])"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
