@@ -54,7 +54,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_basic"
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-tftest-cloudrun%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:
           cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
@@ -62,7 +62,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_sql"
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-tftest-cloudrun%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:
           cloud_run_service_name: "cloudrun-srv"
           cloud_run_sql_name: "cloudrun-sql"
@@ -71,7 +71,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_noauth"
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-tftest-cloudrun%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:
           cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
@@ -79,7 +79,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_multiple_environment_variables"
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-tftest-cloudrun%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:
           cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
