@@ -74,9 +74,9 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 
 <% resource_params.each do |param| -%>
 <% if provider_default_values.include?(param) -%>
-	<%= param -%>, err := get<%= param.capitalize -%>(d, config)
-	if err != nil {
-		return nil, err
+	<%= param -%>, _ := get<%= param.capitalize -%>(d, config)
+	if <%= param -%> != "" {
+		values["<%= param -%>"] = <%= param -%>
 	}
 	values["<%= param -%>"] = <%= param -%>
 
@@ -129,11 +129,10 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 
 <% resource_params.each do |param| -%>
 <% if provider_default_values.include?(param) -%>
-	<%= param -%>, err := get<%= param.capitalize -%>(d, config)
-	if err != nil {
-		return err
+	<%= param -%>, _ := get<%= param.capitalize -%>(d, config)
+	if <%= param -%> != "" {
+		values["<%= param -%>"] = <%= param -%>
 	}
-	values["<%= param -%>"] = <%= param -%>
 
 <% end # if provider_default_values.include? -%>
 <% end # resource_params.each -%>
