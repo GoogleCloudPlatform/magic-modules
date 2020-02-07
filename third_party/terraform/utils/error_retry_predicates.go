@@ -1,23 +1,82 @@
 package google
 
 import (
-	"google.golang.org/api/googleapi"
+	"fmt"
 	"log"
+	"net/url"
 	"strings"
+
+	"google.golang.org/api/googleapi"
 )
+
+type RetryErrorPredicateFunc func(error) (bool, string)
+
+var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
+	isUrlTimeoutError,
+	isOperationInProgressError,
+	isCommonRetryableErrorCode,
+}
+
+func isUrlTimeoutError(err error) (bool, string) {
+	if urlerr, ok := err.(*url.Error); ok && urlerr.Timeout() {
+		log.Printf("[DEBUG] Dismissed an error as retryable based on googleapis.com target: %s", err)
+		return true, "Got URL timeout error"
+	}
+	return false, ""
+}
+
+func isOperationInProgressError(err error) (bool, string) {
+	gerr, ok := err.(*googleapi.Error)
+	if !ok {
+		return false, ""
+	}
+
+	if gerr.Code == 409 && strings.Contains(gerr.Body, "operationInProgress") {
+		// 409's are retried because some APIs (cloud sql) throws a 409 when concurrent
+		// calls are made. The only way right now to determine it is a retryable 409 due to
+		// concurrent calls is to look at the contents of the error message.
+		// See https://github.com/terraform-providers/terraform-provider-google/issues/3279
+		log.Printf("[DEBUG] Dismissed an error as retryable based on error code 409 and error reason 'operationInProgress': %s", err)
+		return true, "Operation still in progress"
+	}
+	return false, ""
+}
+
+// TODO(#5609): Figure out what retryable error codes apply to which API.
+func isCommonRetryableErrorCode(err error) (bool, string) {
+	gerr, ok := err.(*googleapi.Error)
+	if !ok {
+		return false, ""
+	}
+
+	if gerr.Code == 429 || gerr.Code == 500 || gerr.Code == 502 || gerr.Code == 503 {
+		log.Printf("[DEBUG] Dismissed an error as retryable based on error code: %s", err)
+		return true, fmt.Sprintf("Retryable error code %d", gerr.Code)
+	}
+	return false, ""
+}
 
 var FINGERPRINT_FAIL_ERRORS = []string{"Invalid fingerprint.", "Supplied fingerprint does not match current metadata fingerprint."}
 
 // We've encountered a few common fingerprint-related strings; if this is one of
 // them, we're confident this is an error due to fingerprints.
-func isFingerprintError(err error) bool {
+func isFingerprintError(err error) (bool, string) {
+	gerr, ok := err.(*googleapi.Error)
+	if !ok {
+		return false, ""
+	}
+
+	if gerr.Code != 412 {
+		return false, ""
+	}
+
 	for _, msg := range FINGERPRINT_FAIL_ERRORS {
 		if strings.Contains(err.Error(), msg) {
-			return true
+			return true, "fingerprint mismatch"
 		}
 	}
 
-	return false
+	return false, ""
 }
 
 // If a permission necessary to provision a resource is created in the same config
@@ -72,4 +131,13 @@ func isAppEngineRetryableError(err error) (bool, string) {
 		}
 	}
 	return false, ""
+}
+
+func isNotFoundRetryableError(opType string) RetryErrorPredicateFunc {
+	return func(err error) (bool, string) {
+		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
+			return true, fmt.Sprintf("Retry 404s for %s", opType)
+		}
+		return false, ""
+	}
 }
