@@ -814,8 +814,8 @@ objects:
           HMAC key metadata.
         properties:
           - !ruby/object:Api::Type::String
-            name: 'access_id'
-            output: true 
+            name: 'accessId'
+            output: true
             description: 'The access ID of the HMAC Key.'
           - !ruby/object:Api::Type::String
             name: 'etag'
@@ -833,7 +833,9 @@ objects:
               - 'DELETED'
           - !ruby/object:Api::Type::Time
             name: 'timeCreated'
+            output: true
             description: 'The creation time of the HMAC key in RFC 3339 format. '
           - !ruby/object:Api::Type::Time
             name: 'updated'
+            output: true
             description: 'The last modification time of the HMAC key metadata in RFC 3339 format.'
