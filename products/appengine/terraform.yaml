@@ -70,6 +70,62 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           service_name: "ae-service"
         test_env_vars:
           org_id: :ORG_ID
+  FlexibleAppVersion: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
+    mutex: "apps/{{project}}"
+    error_retry_predicates: ["isAppEngineRetryableError"]
+    parameters:
+      service: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        required: false
+    virtual_fields:
+      - !ruby/object:Provider::Terraform::VirtualFields
+        name: 'noop_on_destroy'
+        description: |
+          If set to `true`, the application version will not be deleted.
+      - !ruby/object:Provider::Terraform::VirtualFields
+        name: 'delete_service_on_destroy'
+        description: |
+          If set to `true`, the service will be deleted if it is the last version.    
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_delete: templates/terraform/custom_delete/appversion_delete.go.erb
+      test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.erb
+      encoder: templates/terraform/encoders/flex_app_version.go.erb
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'version_id'
+      deployment: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      entrypoint: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      envVariables: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      threadsafe: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      instanceClass: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true   
+      runtimeApiVersion: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      automaticScaling.maxConcurrentRequests: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      betaSettings: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      livenessCheck: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      readinessCheck: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "app_engine_flexible_app_version"
+        primary_resource_id: "myapp_v1"
+        ignore_read_extra:
+          - "delete_service_on_destroy"
+        vars:
+          project_id: "tf-test-project"
+          bucket_name: "appengine-static-content"
+          service_name: "tf-test-service"
+        test_env_vars:
+          org_id: :ORG_ID
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
