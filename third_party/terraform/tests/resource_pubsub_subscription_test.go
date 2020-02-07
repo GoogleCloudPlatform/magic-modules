@@ -117,6 +117,34 @@ func TestAccPubsubSubscription_push(t *testing.T) {
 	})
 }
 
+func TestAccPubsubSubscription_pollOnCreate(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-foo-%s", acctest.RandString(10))
+	subscription := fmt.Sprintf("tf-test-topic-foo-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPubsubSubscriptionDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubSubscription_topicOnly(topic),
+				Check:  testAccCheckPubsubSubscriptionCache404(subscription),
+			},
+			{
+				Config: testAccPubsubSubscription_pollOnCreate(topic, subscription),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscription,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccPubsubSubscription_emptyTTL(topic, subscription string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
@@ -191,6 +219,27 @@ resource "google_pubsub_subscription" "foo" {
 `, topic, subscription, label, deadline)
 }
 
+func testAccPubsubSubscription_topicOnly(topic string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+}
+`, topic)
+}
+
+func testAccPubsubSubscription_pollOnCreate(topic, subscription string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name  = "%s"
+  topic = google_pubsub_topic.foo.id
+}
+`, topic, subscription)
+}
+
 func TestGetComputedTopicName(t *testing.T) {
 	type testData struct {
 		project  string
@@ -216,5 +265,20 @@ func TestGetComputedTopicName(t *testing.T) {
 		if computedTopicName != testCase.expected {
 			t.Fatalf("bad computed topic name: %s' => expected %s", computedTopicName, testCase.expected)
 		}
+	}
+}
+
+func testAccCheckPubsubSubscriptionCache404(subName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
+		url := fmt.Sprintf("%sprojects/%s/subscriptions/%s", config.PubsubBasePath, getTestProjectFromEnv(), subName)
+		resp, err := sendRequest(config, "GET", "", url, nil)
+		if err == nil {
+			return fmt.Errorf("Expected Pubsub Subscription %q not to exist, was found", resp["name"])
+		}
+		if !isGoogleApiErrorWithCode(err, 404) {
+			return fmt.Errorf("Got non-404 error while trying to read Pubsub Subscription %q: %v", subName, err)
+		}
+		return nil
 	}
 }

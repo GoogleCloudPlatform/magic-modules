@@ -15,6 +15,7 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Topic: !ruby/object:Overrides::Terraform::ResourceOverride
     error_retry_predicates: ["pubsubTopicProjectNotReady"]
+    poll_for_existence: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       parent_resource_attribute: 'topic'
       method_name_separator: ':'
@@ -49,6 +50,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/no_send_name.go.erb
       update_encoder: templates/terraform/update_encoder/pubsub_topic.erb
   Subscription: !ruby/object:Overrides::Terraform::ResourceOverride
+    poll_for_existence: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "pubsub_subscription_push"
