@@ -1,6 +1,7 @@
 package google
 
 import (
+	"fmt"
 	"log"
 	"net/url"
 	"strings"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"google.golang.org/api/googleapi"
 )
 
@@ -82,4 +84,29 @@ func isRetryableError(err error, retryPredicates []func(e error) (bool, string))
 	}
 
 	return false
+}
+
+type ExistenceCheckFunc func(*schema.ResourceData, interface{}) (bool, error)
+
+// tryPollForResourceExistence attempts to make sure a resource exists right after creation, before
+// the final Read() after resource has been created.
+// It is meant for use with resources/APIs that are eventually consistent
+// or implement caching of read results.
+//
+// existenceCheckF should handle retries as needed for base resource/API (i.e. retry predicates, common retry)
+func tryPollForResourceExistence(d *schema.ResourceData, meta interface{}, existenceCheckF ExistenceCheckFunc) {
+	log.Printf("[DEBUG] Confirming successful read of resource post-create")
+	err := resource.Retry(time.Second*10, func() *resource.RetryError {
+		found, err := existenceCheckF(d, meta)
+		if err != nil {
+			return resource.NonRetryableError(err)
+		}
+		if !found {
+			return resource.RetryableError(fmt.Errorf("resource %q not found", d.Id()))
+		}
+		return nil
+	})
+	if err != nil {
+		log.Printf("[ERROR] Unable to confirm existence of resource during create, deferring to read: %v", err)
+	}
 }

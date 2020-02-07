@@ -70,7 +70,10 @@ module Overrides
 
           # This enables resources that get their project via a reference to a different resource
           # instead of a project field to use User Project Overrides
-          :supports_indirect_user_project_override
+          :supports_indirect_user_project_override,
+
+          # If true, adds code post-create to poll for resource existence
+          :poll_for_existence
         ]
       end
 
@@ -102,6 +105,7 @@ module Overrides
         check :schema_version, type: Integer
         check :skip_sweeper, type: :boolean, default: false
         check :supports_indirect_user_project_override, type: :boolean, default: false
+        check :poll_for_existence, type: :boolean, default: false
       end
 
       def apply(resource)

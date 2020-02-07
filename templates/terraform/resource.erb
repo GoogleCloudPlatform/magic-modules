@@ -251,11 +251,52 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
     log.Printf("[DEBUG] Finished creating <%= object.name -%> %q: %#v", d.Id(), res)
 
+<% if object.poll_for_existence -%>
+    log.Printf("[DEBUG] Making sure eventually consistent <%= object.name -%> %q is ready", d.Id())
+    tryPollForResourceExistence(d, meta, resource<%= resource_name -%>ExistenceCheck)
+<% end -%>
 <%= lines(compile(object.custom_code.post_create)) if object.custom_code.post_create -%>
 
     return resource<%= resource_name -%>Read(d, meta)
 <%  end # if custom_create  -%>
 }
+
+<% if object.poll_for_existence -%>
+// Checks if a resource exists. If the response is successful (200s),
+// this function returns true with no error. If response is 404, returns false
+// with no error. All other error responses are returned as is.
+func resource<%= resource_name -%>ExistenceCheck(d *schema.ResourceData, meta interface{}) (bool, error) {
+    log.Printf("[DEBUG] Check for existence of <%= object.name -%> %q", d.Id())
+
+    config := meta.(*Config)
+
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+    if err != nil {
+        return false, err
+    }
+
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return false, err
+    }
+<%  end -%>
+<%  if object.supports_indirect_user_project_override -%>
+    var project string
+    if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+        project = parts[1]
+    }
+<%  end -%>
+    _, err = sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    if err != nil {
+        if isGoogleApiErrorWithCode(err, 404) {
+            return false, nil
+        }
+        return false, err
+    }
+    return true, nil
+}
+<% end -%>
 
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
@@ -666,7 +707,6 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     return nil
 <% end -%>
 }
-
 <% unless object.exclude_import -%>
 func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 <% if object.custom_code.custom_import -%>
