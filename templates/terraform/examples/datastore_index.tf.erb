@@ -1,0 +1,11 @@
+resource "google_datastore_index" "<%= ctx[:primary_resource_id] %>" {
+  kind = "foo"
+  properties {
+    name = "<%= ctx[:vars]['property_name_1'] %>"
+    direction = "ASCENDING"
+  }
+  properties {
+    name = "<%= ctx[:vars]['property_name_2'] %>"
+    direction = "ASCENDING"
+  }
+}

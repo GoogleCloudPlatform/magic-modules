@@ -19,4 +19,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["projects/{{project}}/indexes/{{index_id}}"]
     autogen_async: true
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 15
+      insert_minutes: 10
+      delete_minutes: 10
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "datastore_index"
+        primary_resource_id: "default"
+        vars:
+          property_name_1: "property_a"
+          property_name_2: "property_b"
