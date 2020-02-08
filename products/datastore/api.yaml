@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2020 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,7 +22,7 @@ scopes:
   - https://www.googleapis.com/auth/datastore
 apis_required:
   - !ruby/object:Api::Product::ApiReference
-    name: Cloud Datastore APU
+    name: Cloud Datastore API
     url: https://console.cloud.google.com/apis/library/datastore.googleapis.com
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -40,14 +40,18 @@ async: !ruby/object:Api::OpAsync
       - false
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
-    message: 'message'
-
+    message: 'message' 
 objects:
   - !ruby/object:Api::Resource
     name: 'Index'
     base_url: "projects/{{project}}/indexes"
     self_link: "projects/{{project}}/indexes/{{indexId}}"
     input: true
+    collection_url_key: indexes
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/datastore/docs/concepts/indexes'
+      api: 'https://cloud.google.com/datastore/docs/reference/admin/rest/v1/projects.indexes'
     identity:
       - indexId
     description: |
@@ -57,7 +61,7 @@ objects:
         name: 'indexId'
         output: true
         description: |
-          The index id. Output only.
+          The index id.
       - !ruby/object:Api::Type::String
         name: 'kind'
         required: true
@@ -70,8 +74,8 @@ objects:
           - :NONE
           - :ALL_ANCESTORS
         description: |
-            Policy for including ancestors in the index.  Either all ancestors or none will
-            be included, the default is none.
+            Policy for including ancestors in the index.  Either `ALL_ANCESTORS` or `NONE`,
+            the default is `NONE`.
       - !ruby/object:Api::Type::Array
         name: 'properties'
         description: |
@@ -91,4 +95,4 @@ objects:
                 - :ASCENDING
                 - :DESCENDING
               description: |
-                 Which direction should the index optimize for sorting?
+                 The direction the index should optimize for sorting. Possible values are ASCENDING and DESCENDING.

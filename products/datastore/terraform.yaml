@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2020 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,6 +18,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     self_link: "projects/{{project}}/indexes/{{index_id}}"
     import_format: ["projects/{{project}}/indexes/{{index_id}}"]
     autogen_async: true
+    # TODO(ndmckinley): This resource doesn't have a name, so the current
+    # sweeper won't ever sweep it - might as well not have one for now,
+    # but we'll add it in when we change the sweeper to account for
+    # identity.
+    skip_sweeper: true
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 10
       delete_minutes: 10
