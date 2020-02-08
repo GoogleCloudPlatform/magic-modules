@@ -3132,7 +3132,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules'
-      api: 'https://cloud.google.com/compute/docs/reference/v1/forwardingRule'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/forwardingRules'
     input: true
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
