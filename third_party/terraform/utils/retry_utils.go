@@ -43,7 +43,10 @@ func getAllTypes(err error, args ...interface{}) []error {
 }
 
 func isRetryableError(topErr error, customPredicates ...RetryErrorPredicateFunc) bool {
-	retryPredicates := append(defaultErrorRetryPredicates, customPredicates...)
+	retryPredicates := append(
+		// Global error retry predicates are registered in this default list.
+		defaultErrorRetryPredicates,
+		customPredicates...)
 
 	// Check all wrapped errors for a retryable error status.
 	for _, err := range getAllTypes(topErr, &googleapi.Error{}, &url.Error{}) {
