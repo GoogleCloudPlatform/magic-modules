@@ -106,7 +106,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     create_url: projects/{{project}}/hmacKeys?serviceAccountEmail={{service_account_email}}
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/hmac_secret.go.erb
-    id_format: '{{project}}/{{metadata.accessId}}'
+    id_format: 'projects/{{project}}/accessId/{{access_id}}'
     properties:
       metadata.id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
