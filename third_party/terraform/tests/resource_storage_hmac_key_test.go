@@ -5,12 +5,13 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 )
 
 func TestAccStorageHmacKey_update(t *testing.T) {
 	t.Parallel()
 
-	saName := saName()
+	saName :=  fmt.Sprintf("%v%v", "service-account", acctest.RandString(10))
 	bucketName := testBucketName()
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -38,10 +39,6 @@ func TestAccStorageHmacKey_update(t *testing.T) {
 	})
 }
 
-func saName() string {
-	return fmt.Sprintf("", "tf-test-bucket", acctest.RandInt())
-}
-
 func testAccStorageHmacKeyDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
@@ -60,10 +57,10 @@ func testAccStorageHmacKeyDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccGoogleStorageHmacKeyBasic(saName, bucketName, state) string {
+func testAccGoogleStorageHmacKeyBasic(saName, bucketName, state string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "service_account" {
-  name = "%s"
+  account_id = "%s"
 }
 
 resource "google_storage_bucket" "bucket" {

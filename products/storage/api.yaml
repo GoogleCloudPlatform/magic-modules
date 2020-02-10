@@ -832,9 +832,9 @@ objects:
             description: |
               'The state of the key. Can be one of ACTIVE, INACTIVE, or DELETED.'
             values:
-              - 'ACTIVE'
-              - 'INACTIVE'
-              - 'DELETED'
+              - :ACTIVE
+              - :INACTIVE
+              - :DELETED
           - !ruby/object:Api::Type::Time
             name: 'timeCreated'
             output: true
