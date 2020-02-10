@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccStorageHmacKey_update(t *testing.T) {
@@ -22,7 +22,7 @@ func TestAccStorageHmacKey_update(t *testing.T) {
 				Config: testAccGoogleStorageHmacKeyBasic(saName, bucketName, "ACTIVE"),
 			},
 			{
-				ResourceName:      "google_storage_hmac_key.default",
+				ResourceName:      "google_storage_hmac_key.key",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -30,30 +30,12 @@ func TestAccStorageHmacKey_update(t *testing.T) {
 				Config: testAccGoogleStorageHmacKeyBasic(saName, bucketName, "INACTIVE"),
 			},
 			{
-				ResourceName:      "google_storage_hmac_key.default",
+				ResourceName:      "google_storage_hmac_key.key",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 		},
 	})
-}
-
-func testAccStorageHmacKeyDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_storage_hmac_key" {
-			continue
-		}
-		accessId := rs.Primary.Attributes["accessId"]
-
-		_, err := config.clientStorage.HmacKeys.Get(accessId).Do()
-		if err == nil {
-			return fmt.Errorf("Hmac key still exists.")
-		}
-	}
-
-	return nil
 }
 
 func testAccGoogleStorageHmacKeyBasic(saName, bucketName, state string) string {
