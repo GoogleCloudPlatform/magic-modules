@@ -189,7 +189,7 @@ steps:
           - $_PR_NUMBER
 
 options:
-    machineType: 'N1_HIGHCPU_8'
+    machineType: 'N1_HIGHCPU_32'
 
 secrets:
     - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/github-token
