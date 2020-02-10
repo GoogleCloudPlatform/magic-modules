@@ -110,8 +110,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           bucket_name: "appengine-test-bucket"
   ServiceSplitTraffic: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{service_id}}"
-    import_format: ["apps/{{project}}/services/{{service_id}}"]
     mutex: "apps/{{project}}"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
