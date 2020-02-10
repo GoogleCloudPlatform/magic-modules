@@ -169,20 +169,21 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/github-differ'
+      id: diff
       secretEnv: ["GITHUB_TOKEN"]
       args:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tpgb-head"]
+      waitFor: ["diff"]
       args:
           - 'beta'
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tpg-head"]
+      waitFor: ["diff"]
       args:
           - 'ga'
           - $_PR_NUMBER
