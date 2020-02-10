@@ -825,6 +825,7 @@ objects:
           - !ruby/object:Api::Type::Enum
             name: 'state'
             description: 'The state of the key. Can be one of ACTIVE, INACTIVE, or DELETED.'
+            default_value: 'ACTIVE'
             values:
               - 'ACTIVE'
               - 'INACTIVE'
