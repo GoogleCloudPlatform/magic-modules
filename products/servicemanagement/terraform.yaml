@@ -14,6 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
+    legacy_name: google_endpoints_service
     id_format: 'services/{{serviceName}}'
     import_format: ["services/{{serviceName}}"]
     exclude_resource: true

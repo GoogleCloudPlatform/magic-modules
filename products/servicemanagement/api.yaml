@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Endpoints
-display_name: Endpoints Service
+name: ServiceManagement
+display_name: Service Management
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
