@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-func TestStorageHmacKey_update(t *testing.T) {
+func TestAccStorageHmacKey_update(t *testing.T) {
 	t.Parallel()
 
 	saName := saName()
