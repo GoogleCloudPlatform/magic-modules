@@ -106,6 +106,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     create_url: projects/{{project}}/hmacKeys?serviceAccountEmail={{service_account_email}}
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/hmac_secret.go.erb
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        All arguments including the secret value will be stored in the raw
+        state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_hmac_key"
@@ -124,10 +128,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'service_account_email'
         ignore_read: true
-    docs: !ruby/object:Provider::Terraform::Docs
-      warning: |
-        All arguments including the secret value will be stored in the raw
-        state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+    # This resource does not have a name field
+    skip_sweeper: true 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

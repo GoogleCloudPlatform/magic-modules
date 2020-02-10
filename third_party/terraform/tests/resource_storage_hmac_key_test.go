@@ -30,9 +30,10 @@ func TestAccStorageHmacKey_update(t *testing.T) {
 				Config: testAccGoogleStorageHmacKeyBasic(saName, bucketName, "INACTIVE"),
 			},
 			{
-				ResourceName:      "google_storage_hmac_key.key",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_storage_hmac_key.key",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"secret"},
 			},
 		},
 	})
