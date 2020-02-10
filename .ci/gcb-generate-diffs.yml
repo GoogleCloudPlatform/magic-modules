@@ -60,6 +60,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
+      id: tpg-head
       waitFor: ["merged"]
       args:
           - 'head'
@@ -78,6 +79,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/downstream-builder'
       secretEnv: ["GITHUB_TOKEN"]
+      id: tpgb-head
       waitFor: ["merged"]
       args:
           - 'head'
@@ -169,6 +171,20 @@ steps:
     - name: 'gcr.io/graphite-docker-images/github-differ'
       secretEnv: ["GITHUB_TOKEN"]
       args:
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/terraform-tester'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["tpgb-head"]
+      args:
+          - 'beta'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/terraform-tester'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["tpg-head"]
+      args:
+          - 'ga'
           - $_PR_NUMBER
 
 options:
