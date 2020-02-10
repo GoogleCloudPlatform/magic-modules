@@ -23,7 +23,7 @@ func TestStorageHmacKey_update(t *testing.T) {
 			{
 				ResourceName:      "google_storage_hmac_key.default",
 				ImportState:       true,
-				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"secret"},
 			},
 		},
 	})
