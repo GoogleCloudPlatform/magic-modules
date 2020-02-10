@@ -1,0 +1,3 @@
+resource "google_storage_hmac_key" "<%= ctx[:primary_resource_id] %>" {
+  service_account_email = "<%= ctx[:vars]['name'] %>"
+}

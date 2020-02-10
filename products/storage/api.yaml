@@ -788,15 +788,12 @@ objects:
     self_link: projects/{{project}}/hmacKeys/{{accessId}}
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
-        'Official Documentation': 'https://cloud.google.com/storage/docs/authentication/managing-hmackeys'
+        'Official Documentation': 'hhttps://cloud.google.com/storage/docs/authentication/managing-hmackeys'
       api: 'https://cloud.google.com/storage/docs/json_api/v1/projects/hmacKeys'
     description: |
-      The hmacKeys resource represents an HMAC key within Cloud Storage. The resource 
-      consists of a secret and HMAC key metadata. HMAC keys can be used as credentials 
-      for service accounts. For more information, see HMAC Keys.
-
-      Note that the hmacKeys resource is only returned when you use hCREATE. Other methods, 
-      such as GET, return the metadata portion of the HMAC key resource.
+      The hmacKeys resource represents an HMAC key within Cloud Storage. The resource
+      consists of a secret and HMAC key metadata. HMAC keys can be used as credentials
+      for service accounts.
     parameters:
       - !ruby/object:Api::Type::String
         name: 'serviceAccountEmail'

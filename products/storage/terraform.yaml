@@ -106,6 +106,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     create_url: projects/{{project}}/hmacKeys?serviceAccountEmail={{service_account_email}}
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/hmac_secret.go.erb
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "storage_hmac_key"
+        primary_resource_id: "special_key"
+        vars:
+          service_account_email: "my-special-sea@my-project.iam.gserviceaccount.com"
     id_format: 'projects/{{project}}/accessId/{{access_id}}'
     properties:
       metadata.id: !ruby/object:Overrides::Terraform::PropertyOverride
