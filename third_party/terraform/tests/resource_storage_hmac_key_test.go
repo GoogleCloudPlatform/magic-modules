@@ -11,7 +11,7 @@ import (
 func TestAccStorageHmacKey_update(t *testing.T) {
 	t.Parallel()
 
-	saName :=  fmt.Sprintf("%v%v", "service-account", acctest.RandString(10))
+	saName := fmt.Sprintf("%v%v", "service-account", acctest.RandString(10))
 	bucketName := testBucketName()
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -34,7 +34,6 @@ func TestAccStorageHmacKey_update(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-
 		},
 	})
 }
