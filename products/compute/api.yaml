@@ -10387,6 +10387,8 @@ objects:
           which cannot be a dash.
       - !ruby/object:Api::Type::NestedObject
         name: 'snapshotSchedulePolicy'
+        conflicts:
+          - 'groupPlacementPolicy'
         description: |
           Policy for creating snapshots of persistent disks.
         properties:
@@ -10528,6 +10530,36 @@ objects:
                   - snapshot_schedule_policy.0.snapshot_properties.0.guest_flush
                 description: |
                   Whether to perform a 'guest aware' snapshot.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'groupPlacementPolicy'
+        conflicts:
+          - 'snapshotSchedulePolicy'
+        description: |
+          Policy for creating snapshots of persistent disks.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'vmCount'
+            at_least_one_of:
+              - group_placement_policy.0.vm_count
+              - group_placement_policy.0.availability_domain_count
+            description: |
+              Number of vms in this placement group
+          - !ruby/object:Api::Type::Integer
+            name: 'availabilityDomainCount'
+            at_least_one_of:
+              - group_placement_policy.0.vm_count
+              - group_placement_policy.0.availability_domain_count
+            description: |
+              The number of availability domains instances will be spread across. If two instances are in different
+              availability domain, they will not be put in the same low latency network
+          - !ruby/object:Api::Type::Enum
+            name: 'collocation'
+            description: |
+              Collocation specifies whether to place VMs inside the same availability domain on the same low-latency network.
+              Specify `COLLOCATED` to enable collocation. Can only be specified with `vm_count`.
+            values:
+              - :UNSPECIFIED_COLLOCATION
+              - :COLLOCATED
   - !ruby/object:Api::Resource
     name: 'Route'
     kind: 'compute#route'

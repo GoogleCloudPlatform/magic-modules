@@ -173,6 +173,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 			Name:     name,
 			Instance: instance,
 			Password: password,
+			Host:     host,
 		}
 
 		mutexKV.Lock(instanceMutexKey(project, instance))
