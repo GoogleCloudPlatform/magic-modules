@@ -17,7 +17,7 @@ display_name: Cloud SQL
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://www.googleapis.com/sql/v1beta4/
+    base_url: https://www.googleapis.com/
 scopes:
   - https://www.googleapis.com/auth/sqlservice.admin
 apis_required:
