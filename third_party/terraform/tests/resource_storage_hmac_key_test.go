@@ -18,13 +18,22 @@ func TestAccStorageHmacKey_update(t *testing.T) {
 		CheckDestroy: testAccCheckStorageHmacKeyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleStorageHmacKeyBasic(saName, bucketName),
+				Config: testAccGoogleStorageHmacKeyBasic(saName, bucketName, "ACTIVE"),
 			},
 			{
 				ResourceName:      "google_storage_hmac_key.default",
 				ImportState:       true,
-				ImportStateVerifyIgnore: []string{"secret"},
+				ImportStateVerify: true,
 			},
+			{
+				Config: testAccGoogleStorageHmacKeyBasic(saName, bucketName, "INACTIVE"),
+			},
+			{
+				ResourceName:      "google_storage_hmac_key.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+
 		},
 	})
 }
@@ -51,7 +60,7 @@ func testAccStorageHmacKeyDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testGoogleStorageHmacKeyBasic(saName, bucketName) string {
+func testAccGoogleStorageHmacKeyBasic(saName, bucketName, state) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "service_account" {
   name = "%s"
@@ -63,6 +72,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_hmac_key" "key" {
 	service_account_email = google_service_account.service_account.email
+	state = "%s"
 }
-`, saName, bucketName)
+`, saName, bucketName, state)
 }
