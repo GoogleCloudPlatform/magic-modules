@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
+	"google.golang.org/api/googleapi"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
@@ -644,11 +645,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		for _, u := range users.Items {
 			if u.Name == "root" && u.Host == "%" {
 				err = retry(func() error {
-<<<<<<< HEAD
 					op, err = config.clientSqlAdmin.Users.Delete(project, instance.Name).Do()
-=======
-					op, err = config.clientSqlAdmin.Users.Delete(project, instance.Name).Host(u.Host).Name(u.Name).Do()
->>>>>>> fix sqladmin api usage
 					if err == nil {
 						err = sqlAdminOperationWaitTime(config, op, project, "Delete default root User", int(d.Timeout(schema.TimeoutCreate).Minutes()))
 					}
@@ -983,7 +980,6 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 		"authorized_gae_applications": settings.AuthorizedGaeApplications,
 		"availability_type":           settings.AvailabilityType,
 		"crash_safe_replication":      settings.CrashSafeReplicationEnabled,
-		"disk_autoresize":             settings.StorageAutoResize,
 		"disk_type":                   settings.DataDiskType,
 		"disk_size":                   settings.DataDiskSizeGb,
 		"pricing_plan":                settings.PricingPlan,
@@ -1011,11 +1007,8 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 		data["maintenance_window"] = flattenMaintenanceWindow(settings.MaintenanceWindow)
 	}
 
-<<<<<<< HEAD
 	data["disk_autoresize"] = settings.StorageAutoResize
 
-=======
->>>>>>> fix sqladmin api usage
 	if settings.UserLabels != nil {
 		data["user_labels"] = settings.UserLabels
 	}
