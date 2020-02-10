@@ -816,6 +816,7 @@ objects:
             description: 'The access ID of the HMAC Key.'
           - !ruby/object:Api::Type::String
             name: 'etag'
+            output: true
             description: 'HTTP 1.1 Entity tag for the HMAC key.'
           - !ruby/object:Api::Type::String
             name: 'id'

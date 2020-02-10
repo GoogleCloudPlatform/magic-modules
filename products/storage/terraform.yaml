@@ -109,15 +109,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_hmac_key"
-        primary_resource_id: "special_key"
+        primary_resource_id: "key"
         vars:
-          service_account_email: "my-special-sea@my-project.iam.gserviceaccount.com"
-    id_format: 'projects/{{project}}/accessId/{{access_id}}'
+          service_account_email: "my-service-account@my-project.iam.gserviceaccount.com"
+    id_format: "projects/{{project}}/accessId/{{access_id}}"
     properties:
-      metadata.id: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
       metadata: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
+      metadata.id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
       secret: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
         sensitive: true
