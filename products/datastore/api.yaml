@@ -40,7 +40,7 @@ async: !ruby/object:Api::OpAsync
       - false
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
-    message: 'message' 
+    message: 'message'
 objects:
   - !ruby/object:Api::Resource
     name: 'Index'

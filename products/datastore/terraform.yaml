@@ -16,7 +16,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Index: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/indexes/{{index_id}}"
     self_link: "projects/{{project}}/indexes/{{index_id}}"
-    import_format: ["projects/{{project}}/indexes/{{index_id}}"]
     autogen_async: true
     # TODO(ndmckinley): This resource doesn't have a name, so the current
     # sweeper won't ever sweep it - might as well not have one for now,
