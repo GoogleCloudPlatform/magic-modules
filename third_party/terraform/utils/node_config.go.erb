@@ -244,6 +244,14 @@ var schemaNodeConfig = &schema.Schema{
 					},
 				},
 			},
+
+<% unless version == 'ga' -%>
+			"boot_disk_kms_key": {
+				Type:       schema.TypeString,
+				Optional:   true,
+				ForceNew:   true,
+			},
+<% end -%>
 		},
 	},
 }
@@ -381,6 +389,10 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 			SandboxType: conf["sandbox_type"].(string),
 		}
 	}
+
+	if v, ok := nodeConfig["boot_disk_kms_key"]; ok {
+		nc.BootDiskKmsKey = v.(string)
+	}
 <% end -%>
 
 	return nc
@@ -411,6 +423,7 @@ func flattenNodeConfig(c *containerBeta.NodeConfig) []map[string]interface{} {
 <% unless version == 'ga' -%>
 		"workload_metadata_config": flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
 		"sandbox_config": 			flattenSandboxConfig(c.SandboxConfig),
+		"boot_disk_kms_key": 		c.BootDiskKmsKey,
 <% end -%>
 	})
 

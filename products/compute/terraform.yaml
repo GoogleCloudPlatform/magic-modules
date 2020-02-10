@@ -262,31 +262,31 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "region_backend_service_basic"
         primary_resource_id: "default"
         vars:
-          region_backend_service_name: "tf-test-rbs"
-          health_check_name: "tf-test-hc"
+          region_backend_service_name: "region-service"
+          health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_round_robin"
         min_version: beta
         primary_resource_id: "default"
         vars:
-          region_backend_service_name: "tf-test-rbs"
-          health_check_name: "tf-test-hc"
+          region_backend_service_name: "region-service"
+          health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_ring_hash"
         min_version: beta
         primary_resource_id: "default"
         vars:
-          region_backend_service_name: "tf-test-rbs"
-          health_check_name: "tf-test-hc"
+          region_backend_service_name: "region-service"
+          health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_balancing_mode"
         min_version: beta
         primary_resource_id: "default"
         vars:
-          region_backend_service_name: "tf-test-rbs"
-          rigm_name: "tf-test-rigm"
-          region_health_check_name: "tf-test-hc"
-          network_name: "tf-test-net"
+          region_backend_service_name: "region-service"
+          rigm_name: "rbs-rigm"
+          region_health_check_name: "rbs-health-check"
+          network_name: "rbs-net"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/region_backend_service.go.erb
       encoder: templates/terraform/encoders/region_backend_service.go.erb
@@ -917,7 +917,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         vars:
           instance_name: "my-instance"
-        primary_resource_name: "fmt.Sprintf(\"my-instance%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\", context[\"random_suffix\"])"
   InstanceGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   InstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -1843,9 +1843,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         schema_config_mode_attr: true
         send_empty_value: true
         description: |
-          {{description}}This field uses attr-as-block mode to avoid breaking
-          users during the 0.12 upgrade. See [the Attr-as-Block page](https://www.terraform.io/docs/configuration/attr-as-blocks.html)
-          for more details.
+          {{description}}
+          **Note**: This field uses [attr-as-block mode](https://www.terraform.io/docs/configuration/attr-as-blocks.html) to avoid
+          breaking users during the 0.12 upgrade. To explicitly send a list
+          of zero objects you must use the following syntax:
+          `example=[]`
+          For more details about this behavior, see [this section](https://www.terraform.io/docs/configuration/attr-as-blocks.html#defining-a-fixed-object-collection-value).
       secondaryIpRanges.rangeName: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
@@ -1879,7 +1882,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           subnetwork_name: "test-subnetwork"
           network_name: "test-network"
-        primary_resource_name: "fmt.Sprintf(\"test-subnetwork%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-test-subnetwork%s\", context[\"random_suffix\"])"
       - !ruby/object:Provider::Terraform::Examples
         name: "subnetwork_logging_config"
         primary_resource_id: "subnet-with-logging"

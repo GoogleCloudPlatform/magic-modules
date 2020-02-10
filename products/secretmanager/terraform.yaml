@@ -17,10 +17,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "secret_config_basic"
         primary_resource_id: "secret-basic"
-        primary_resource_name: "fmt.Sprintf(\"test-secret-basic%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-test-secret-basic%s\", context[\"random_suffix\"])"
         min_version: beta
         vars:
-          secret_id: "tf-test-secret-"
+          secret_id: "secret"
     import_format: ["projects/{{project}}/secrets/{{secret_id}}"]
     properties:
       replication.automatic: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -34,8 +34,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "secret-version-basic"
         min_version: beta
         vars:
-          secret_id: "tf-test-secret-version-"
-          data: "my-tf-test-secret"
+          secret_id: "secret-version"
+          data: "secret-data"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/secret_version.go.erb

@@ -25,7 +25,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: beta
         primary_resource_id: "connector"
         vars:
-          name: "my-connector"
+          # The VPC connector has a name limit of 25 characters
+          # and we add "tf-test" (len 7) prefix and random suffix (len = 10)
+          name: "vpcconn"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/no_send_name.go.erb
       post_create: templates/terraform/post_create/sleep.go.erb

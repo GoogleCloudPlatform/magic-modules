@@ -21,7 +21,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "cloud_run_domain_mapping_basic"
         primary_resource_id: "default"
         vars:
-          cloud_run_service_name: "tftest-cloudrun"
+          cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
           namespace: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -54,34 +54,34 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_basic"
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tftest-cloudrun%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:
-          cloud_run_service_name: "tftest-cloudrun"
+          cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
           project: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_sql"
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tftest-cloudrun%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:
-          cloud_run_service_name: "tftest-cloudrun"
+          cloud_run_service_name: "cloudrun-srv"
           cloud_run_sql_name: "cloudrun-sql"
         test_env_vars:
           project: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_noauth"
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tftest-cloudrun%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:
-          cloud_run_service_name: "tftest-cloudrun"
+          cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
           project: :PROJECT_NAME
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_multiple_environment_variables"
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tftest-cloudrun%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:
-          cloud_run_service_name: "tftest-cloudrun"
+          cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
           project: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -99,11 +99,25 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       spec: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
+      spec.template.metadata: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       spec.template.metadata.name: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      spec.template.metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       spec.template.metadata.namespace: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         custom_expand: "templates/terraform/custom_expand/default_to_project.go.erb"
+      spec.template.spec: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      spec.template.spec.containerConcurrency: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      spec.template.spec.containers: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      spec.template.spec.containers.resources: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      spec.template.spec.containers.resources.limits: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       # Terraform autofills the only required field in metadata
       metadata: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true

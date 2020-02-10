@@ -329,6 +329,17 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 				ForceNew: true,
 			},
 
+            <% unless version == 'ga' -%>
+            "encryption_key_name": {
+                Type:     schema.TypeString,
+                Optional: true,
+                // Property only valid for second-gen.
+                Computed: true,
+                ForceNew: true,
+            },
+            <% end -%>
+
+
 			<% unless version == 'ga' -%>
 			"root_password": {
 				Type:      schema.TypeString,
@@ -586,6 +597,13 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		mutexKV.Lock(instanceMutexKey(project, instance.MasterInstanceName))
 		defer mutexKV.Unlock(instanceMutexKey(project, instance.MasterInstanceName))
 	}
+    <% unless version == 'ga' -%>
+    if k, ok := d.GetOk("encryption_key_name"); ok {
+        instance.DiskEncryptionConfiguration = &sqladmin.DiskEncryptionConfiguration{
+            KmsKeyName: k.(string),
+        }
+    }
+    <% end -%>
 
 	var op *sqladmin.Operation
 	err = retryTimeDuration(func() (operr error) {
@@ -627,7 +645,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		for _, u := range users.Items {
 			if u.Name == "root" && u.Host == "%" {
 				err = retry(func() error {
-					op, err = config.clientSqlAdmin.Users.Delete(project, instance.Name, u.Host, u.Name).Do()
+					op, err = config.clientSqlAdmin.Users.Delete(project, instance.Name).Do()
 					if err == nil {
 						err = sqlAdminOperationWaitTime(config, op, project, "Delete default root User", int(d.Timeout(schema.TimeoutCreate).Minutes()))
 					}
@@ -673,7 +691,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, secondGen bool)
 	// 1st Generation instances don't support the disk_autoresize parameter
 	// and it defaults to true - so we shouldn't set it if this is first gen
 	if secondGen {
-		settings.StorageAutoResize = googleapi.Bool(_settings["disk_autoresize"].(bool))
+		settings.StorageAutoResize = _settings["disk_autoresize"].(bool)
 	}
 
 	return settings
@@ -821,6 +839,11 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("settings", flattenSettings(instance.Settings)); err != nil {
 		log.Printf("[WARN] Failed to set SQL Database Instance Settings")
 	}
+    <% unless version == 'ga' -%>
+    if instance.DiskEncryptionConfiguration != nil {
+        d.Set("encryption_key_name", instance.DiskEncryptionConfiguration.KmsKeyName)
+    }
+    <% end -%>
 
 	if err := d.Set("replica_configuration", flattenReplicaConfiguration(instance.ReplicaConfiguration, d)); err != nil {
 		log.Printf("[WARN] Failed to set SQL Database Instance Replica Configuration")
@@ -984,9 +1007,7 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 		data["maintenance_window"] = flattenMaintenanceWindow(settings.MaintenanceWindow)
 	}
 
-	if settings.StorageAutoResize != nil {
-		data["disk_autoresize"] = *settings.StorageAutoResize
-	}
+	data["disk_autoresize"] = settings.StorageAutoResize
 
 	if settings.UserLabels != nil {
 		data["user_labels"] = settings.UserLabels
