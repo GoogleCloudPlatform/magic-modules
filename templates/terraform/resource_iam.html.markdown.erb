@@ -37,6 +37,7 @@
 -%>
 <%
   tf_product = (@config.legacy_name || product_ns).underscore
+  product_ns_display = (@config.legacy_name || product_ns)
   tf_subcategory = (object.__product.display_name)
   resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   resource_ns_iam = "#{resource_ns}_iam"
@@ -55,11 +56,11 @@ layout: "google"
 page_title: "Google: <%= resource_ns_iam -%>"
 sidebar_current: "docs-<%= resource_ns_iam.gsub("_", "-") -%>"
 description: |-
-  Collection of resources to manage IAM policy for <%= "#{product_ns}#{object.name}" %>
+  Collection of resources to manage IAM policy for <%= "#{product_ns_display}#{object.name}" %>
 ---
 
-# IAM policy for <%= "#{product_ns}#{object.name}" %>
-Three different resources help you manage your IAM policy for <%= product_ns -%> <%= object.name -%>. Each of these resources serves a different use case:
+# IAM policy for <%= "#{product_ns_display}#{object.name}" %>
+Three different resources help you manage your IAM policy for <%= product_ns_display -%> <%= object.name -%>. Each of these resources serves a different use case:
 
 * `<%= resource_ns_iam -%>_policy`: Authoritative. Sets the IAM policy for the <%= object.name.downcase -%> and replaces any existing policy already attached.
 * `<%= resource_ns_iam -%>_binding`: Authoritative for a given role. Updates the IAM policy to grant a role to a list of members. Other roles within the IAM policy for the <%= object.name.downcase -%> are preserved.
@@ -257,7 +258,7 @@ For all import syntaxes, the "resource in question" can take any of the followin
 
 Any variables not passed in the import command will be taken from the provider configuration.
 
-<%= product_ns -%> <%= object.name.downcase -%> IAM resources can be imported using the resource identifiers, role, and member.
+<%= product_ns_display -%> <%= object.name.downcase -%> IAM resources can be imported using the resource identifiers, role, and member.
 
 IAM member imports use space-delimited identifiers: the resource in question, the role, and the member identity, e.g.
 ```
