@@ -314,7 +314,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	c.clientStorage.UserAgent = userAgent
 	c.clientStorage.BasePath = storageClientBasePath
 
-	sqlClientBasePath := c.SQLBasePath
+	sqlClientBasePath := removeBasePathVersion(c.SQLBasePath)
 	log.Printf("[INFO] Instantiating Google SqlAdmin client for path %s", sqlClientBasePath)
 	c.clientSqlAdmin, err = sqladmin.NewService(ctx, option.WithHTTPClient(client))
 	if err != nil {
