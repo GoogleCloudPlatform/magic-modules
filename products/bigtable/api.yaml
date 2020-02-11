@@ -19,7 +19,7 @@ versions:
     name: ga
     base_url: https://bigtableadmin.googleapis.com/v2/
 scopes:
-  - https://www.googleapis.com/auth/bigtable.admin
+  - https://www.googleapis.com/auth/bigtable
 apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Bigtable API
