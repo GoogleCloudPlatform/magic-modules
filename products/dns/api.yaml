@@ -126,7 +126,7 @@ objects:
                     Point flag set and, when active, will only be used to sign
                     resource record sets of type DNSKEY. Zone signing keys do
                     not have the Secure Entry Point flag set and will be used
-                    to sign all other types of resource record sets. 
+                    to sign all other types of resource record sets.
                   values:
                     - "keySigning"
                     - "zoneSigning"
@@ -412,6 +412,114 @@ objects:
             Maximum allowed size for total rrdata in one ChangesCreateRequest
             in bytes.
           output: true
+  - !ruby/object:Api::Resource
+    name: 'DnsKeys'
+    kind: 'dns#dnsKey'
+    description: |
+      A single record that exists on a DNSSEC-enabled zone. This record defines
+      the information about a DNSSEC key pair.
+    base_url: 'projects/{{project}}/managedZones/{{managed_zone}}/dnsKeys'
+    self_link: 'projects/{{project}}/managedZones/{{managed_zone}}/dnsKeys/{{id}}'
+    readonly: true
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      kind: 'dns#dnsKeysListResponse'
+      keys: ['dnsKeys']
+    collection_url_key: 'dnsKeys'
+    identity:
+      - id
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'algorithm'
+        description: |
+          String mnemonic specifying the DNSSEC algorithm of this key. Immutable
+          after creation time.
+        output: true
+        values:
+          - "ecdsap256sha256"
+          - "ecdsap384sha384"
+          - "rsasha1"
+          - "rsasha256"
+          - "rsasha512"
+      - !ruby/object:Api::Type::String
+        name: 'creationTime'
+        description: |
+          The time that this resource was created in the control plane. This is
+          in RFC3339 text format.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          A mutable string of at most 1024 characters associated with this
+          resource for the user's convenience. Has no effect on the resource's
+          function.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        description: |
+          Unique identifier for the resource; defined by the server.
+        output: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'isActive'
+        description: |
+          Active keys will be used to sign subsequent changes to the
+          ManagedZone. Inactive keys will still be present as DNSKEY Resource
+          Records for the use of resolvers validating existing signatures.
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'keyLength'
+        description: |
+          Length of the key in bits. Specified at creation time then immutable.
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'keyTag'
+        description: |
+          The key tag is a non-cryptographic hash of the a DNSKEY resource
+          record associated with this DnsKey. The key tag can be used to
+          identify a DNSKEY more quickly (but it is not a unique identifier).
+          In particular, the key tag is used in a parent zone's DS record to
+          point at the DNSKEY in this child ManagedZone. The key tag is a number
+          in the range [0, 65535] and the algorithm to calculate it is specified
+          in RFC4034 Appendix B.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'publicKey'
+        description: |
+          Base64 encoded public half of this key.
+        output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'algorithm'
+        description: |
+          One of "KEY_SIGNING" or "ZONE_SIGNING". Keys of type KEY_SIGNING have
+          the Secure Entry Point flag set and, when active, will be used to sign
+          only resource record sets of type DNSKEY. Otherwise, the Secure Entry
+          Point flag will be cleared and this key will be used to sign only
+          resource record sets of other types. Immutable after creation time.
+        output: true
+        values:
+          - "keySigning"
+          - "zoneSigning"
+      - !ruby/object:Api::Type::Array
+        name: 'digests'
+        description: |
+          Cryptographic hashes of the DNSKEY resource record associated with
+          this DnsKey. These digests are needed to construct a DS record that
+          points at this DNS key.
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: 'type'
+              description: |
+                Specifies the algorithm used to calculate this digest.
+              values:
+                - "sha1"
+                - "sha256"
+                - "sha384"
+            - !ruby/object:Api::Type::String
+              name: 'digest'
+              description: |
+                The base-16 encoded bytes of this digest. Suitable for use in a
+                DS resource record.
   - !ruby/object:Api::Resource
     name: 'ResourceRecordSet'
     kind: 'dns#resourceRecordSet'
