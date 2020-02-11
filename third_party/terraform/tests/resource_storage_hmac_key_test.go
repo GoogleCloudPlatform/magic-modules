@@ -12,14 +12,13 @@ func TestAccStorageHmacKey_update(t *testing.T) {
 	t.Parallel()
 
 	saName := fmt.Sprintf("%v%v", "service-account", acctest.RandString(10))
-	bucketName := testBucketName()
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckStorageHmacKeyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccGoogleStorageHmacKeyBasic(saName, bucketName, "ACTIVE"),
+				Config: testAccGoogleStorageHmacKeyBasic(saName, "ACTIVE"),
 			},
 			{
 				ResourceName:            "google_storage_hmac_key.key",
@@ -28,7 +27,7 @@ func TestAccStorageHmacKey_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"secret"},
 			},
 			{
-				Config: testAccGoogleStorageHmacKeyBasic(saName, bucketName, "INACTIVE"),
+				Config: testAccGoogleStorageHmacKeyBasic(saName, "INACTIVE"),
 			},
 			{
 				ResourceName:            "google_storage_hmac_key.key",
