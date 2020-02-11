@@ -33,6 +33,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   StandardAppVersion: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  FlexibleAppVersion: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   DomainMapping: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
