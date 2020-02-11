@@ -16,6 +16,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Inspec::ResourceOverride
     name: DatabaseInstance
     self_link: projects/{{project}}/instances/{{database}}
+    product_url: https://www.googleapis.com/sql/v1beta4/
     additional_functions: third_party/inspec/custom_functions/google_sql_database_instance.erb
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
@@ -31,6 +32,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   User: !ruby/object:Overrides::Inspec::ResourceOverride
     base_url: projects/{{project}}/instances/{{database}}/users
     self_link: projects/{{project}}/instances/{{database}}/users
+    product_url: https://www.googleapis.com/sql/v1beta4/
     properties:
       instance: !ruby/object:Overrides::Inspec::PropertyOverride
         resource: DatabaseInstance
