@@ -13,6 +13,9 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Instance: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude_resource: true
+    exclude: true
   AppProfile: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}"
     import_format: ["projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}"]

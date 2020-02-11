@@ -43,6 +43,9 @@ module Provider
       # Says if different resource_to_request body sent for update calls.
       attr_reader :custom_update_resource
 
+      # Custom function to get async url.
+      attr_reader :custom_async_function
+
       def validate
         check :create, type: String
         check :custom_create_resource, type: :boolean
@@ -54,6 +57,7 @@ module Provider
         check :return_if_object, type: String
         check :update, type: String
         check :unwrap_resource, type: :boolean
+        check :custom_async_function, type: String
       end
     end
   end
