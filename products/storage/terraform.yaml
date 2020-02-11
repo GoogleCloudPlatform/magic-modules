@@ -115,8 +115,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "storage_hmac_key"
         primary_resource_id: "key"
         vars:
-          service_account_email: "my-service-account@my-project.iam.gserviceaccount.com"
+          service_account: "my-service-account"
     id_format: "projects/{{project}}/accessId/{{access_id}}"
+    import_format: ['projects/{{project}}/hmacKeys/{{access_id}}']
     properties:
       metadata: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
@@ -129,7 +130,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'service_account_email'
         ignore_read: true
     # This resource does not have a name field
-    skip_sweeper: true 
+    skip_sweeper: true
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

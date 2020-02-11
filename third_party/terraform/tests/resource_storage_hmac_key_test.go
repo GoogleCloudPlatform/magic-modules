@@ -22,9 +22,10 @@ func TestAccStorageHmacKey_update(t *testing.T) {
 				Config: testAccGoogleStorageHmacKeyBasic(saName, bucketName, "ACTIVE"),
 			},
 			{
-				ResourceName:      "google_storage_hmac_key.key",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_storage_hmac_key.key",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"secret"},
 			},
 			{
 				Config: testAccGoogleStorageHmacKeyBasic(saName, bucketName, "INACTIVE"),
@@ -45,13 +46,9 @@ resource "google_service_account" "service_account" {
   account_id = "%s"
 }
 
-resource "google_storage_bucket" "bucket" {
-  name = "%s"
-}
-
 resource "google_storage_hmac_key" "key" {
 	service_account_email = google_service_account.service_account.email
 	state = "%s"
 }
-`, saName, bucketName, state)
+`, saName, state)
 }

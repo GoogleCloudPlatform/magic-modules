@@ -794,8 +794,6 @@ objects:
       The hmacKeys resource represents an HMAC key within Cloud Storage. The resource
       consists of a secret and HMAC key metadata. HMAC keys can be used as credentials
       for service accounts.
-    identity:
-      - accessId
     parameters:
       - !ruby/object:Api::Type::String
         name: 'serviceAccountEmail'
