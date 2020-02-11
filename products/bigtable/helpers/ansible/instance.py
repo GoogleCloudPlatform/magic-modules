@@ -49,8 +49,8 @@ def bigtable_async_url(module, extra_data=None):
         extra_data = {}
     location_name = module.params['clusters'][0]['location'].split('/')[-1]
 
-    url = "https://bigtableadmin.googleapis.com/v2/operations/projects/" + \
-            module.params['project'] + '/instances/' + module.params['name'] + \
-            '/locations/' + location_name + '/operations/{op_id}'
+    url = ('https://bigtableadmin.googleapis.com/v2/operations/projects/%s'
+       '/instances/%s/locations/%s/operations/{op_id}' %
+       (module.params['project'], module.params['name'], location_name))
 
     return url.format(**extra_data)
