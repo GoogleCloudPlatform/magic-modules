@@ -708,7 +708,6 @@ objects:
             # TODO (mbang): Exactly one of script, staticFiles, or apiEndpoint must be set
             description: |
               Executes a script to handle the requests that match this URL pattern. 
-              Only the auto value is supported for Node.js in the App Engine standard environment, for example "script:" "auto".
             properties:
               - !ruby/object:Api::Type::String
                 name: 'scriptPath'
@@ -1016,8 +1015,6 @@ objects:
                 name: 'appYamlPath'
                 description: |
                   Path to the yaml file used in deployment, used to determine runtime configuration details.
-
-                  See https://cloud.google.com/appengine/docs/standard/python/config/appref for more details.
                 required: true
               - !ruby/object:Api::Type::String
                 name: 'cloudBuildTimeout'
@@ -1243,47 +1240,6 @@ objects:
                   - automatic_scaling.0.network_utilization.0.target_sent_packets_per_second
                   - automatic_scaling.0.network_utilization.0.target_received_bytes_per_second
                   - automatic_scaling.0.network_utilization.0.target_received_packets_per_second
-          - !ruby/object:Api::Type::NestedObject
-            name: 'standardSchedulerSettings'
-            description: |
-              Scheduler settings for standard environment.
-            properties:
-              - !ruby/object:Api::Type::Double
-                name: 'targetCpuUtilization'
-                description: |
-                  Target CPU utilization ratio to maintain when scaling.
-                at_least_one_of:
-                  - automatic_scaling.0.standard_scheduler_settings.0.target_cpu_utilization
-                  - automatic_scaling.0.standard_scheduler_settings.0.target_throughput_utilization
-                  - automatic_scaling.0.standard_scheduler_settings.0.min_instances
-                  - automatic_scaling.0.standard_scheduler_settings.0.max_instances
-              - !ruby/object:Api::Type::Double
-                name: 'targetThroughputUtilization'
-                description: |
-                  Target throughput utilization ratio to maintain when scaling.
-                at_least_one_of:
-                  - automatic_scaling.0.standard_scheduler_settings.0.target_cpu_utilization
-                  - automatic_scaling.0.standard_scheduler_settings.0.target_throughput_utilization
-                  - automatic_scaling.0.standard_scheduler_settings.0.min_instances
-                  - automatic_scaling.0.standard_scheduler_settings.0.max_instances
-              - !ruby/object:Api::Type::Integer
-                name: 'minInstances'
-                description: |
-                  Minimum number of instances to run for this version. Set to zero to disable minInstances configuration.
-                at_least_one_of:
-                  - automatic_scaling.0.standard_scheduler_settings.0.target_cpu_utilization
-                  - automatic_scaling.0.standard_scheduler_settings.0.target_throughput_utilization
-                  - automatic_scaling.0.standard_scheduler_settings.0.min_instances
-                  - automatic_scaling.0.standard_scheduler_settings.0.max_instances
-              - !ruby/object:Api::Type::Integer
-                name: 'maxInstances'
-                description: |
-                  Maximum number of instances to run for this version. Set to zero to disable maxInstances configuration.
-                at_least_one_of:
-                  - automatic_scaling.0.standard_scheduler_settings.0.target_cpu_utilization
-                  - automatic_scaling.0.standard_scheduler_settings.0.target_throughput_utilization
-                  - automatic_scaling.0.standard_scheduler_settings.0.min_instances
-                  - automatic_scaling.0.standard_scheduler_settings.0.max_instances
       - !ruby/object:Api::Type::NestedObject
         name: 'manualScaling'
         description: |
