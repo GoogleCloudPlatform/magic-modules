@@ -2873,7 +2873,7 @@ resource "google_container_cluster" "autoscaling_with_profile" {
   location           = "us-central1-a"
   initial_node_count = 1
 
-	cluster_autoscaling {
+  cluster_autoscaling {
     enabled             = false
     autoscaling_profile = "%s"
   }
