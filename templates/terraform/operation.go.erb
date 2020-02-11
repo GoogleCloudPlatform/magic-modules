@@ -44,6 +44,11 @@ func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, 
 }
 
 <% if async.result.resource_inside_response -%>
+<%# Not all APIs will need a WithResponse operation, but it's hard to check whether
+    they will or not since it involves iterating over all resources.
+    Might as well just nolint it so we can pass the linter checks.
+-%>
+// nolint: deadcode,unused
 func <%= product_name.camelize(:lower) -%>OperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{},<% if has_project -%> project,<% end -%> activity string, timeoutMinutes int) error {
   w, err := create<%= product_name %>Waiter(config, op, <% if has_project -%> project, <%end-%> activity)
   if err != nil || w == nil {
