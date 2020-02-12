@@ -105,34 +105,32 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   HmacKey: !ruby/object:Overrides::Terraform::ResourceOverride
     create_url: projects/{{project}}/hmacKeys?serviceAccountEmail={{service_account_email}}
     self_link: projects/{{project}}/hmacKeys/{{access_id}}
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      post_create: templates/terraform/post_create/storage_hmac_key.go.erb
-      pre_delete: templates/terraform/pre_delete/storage_hmac_key.go.erb
-    docs: !ruby/object:Provider::Terraform::Docs
-      warning: |
-        All arguments including the secret value will be stored in the raw
-        state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+    id_format: "projects/{{project}}/hmacKeys/{{access_id}}"
+    import_format: ['projects/{{project}}/hmacKeys/{{access_id}}']
+    # This resource does not have a name field
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "storage_hmac_key"
         primary_resource_id: "key"
         vars:
           service_account: "my-service-account"
-    id_format: "projects/{{project}}/hmacKeys/{{access_id}}"
-    import_format: ['projects/{{project}}/hmacKeys/{{access_id}}']
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        All arguments including the secret value will be stored in the raw
+        state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
     properties:
-      metadata: !ruby/object:Overrides::Terraform::PropertyOverride
-        flatten_object: true
-      metadata.id: !ruby/object:Overrides::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       secret: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
         sensitive: true
       serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: 'service_account_email'
         ignore_read: true
-    # This resource does not have a name field
-    skip_sweeper: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/storage_hmac_key.go.erb
+      pre_delete: templates/terraform/pre_delete/storage_hmac_key.go.erb
+      update_encoder: templates/terraform/update_encoders/storage_hmac_key.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

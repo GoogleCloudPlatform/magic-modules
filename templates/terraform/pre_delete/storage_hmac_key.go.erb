@@ -1,24 +1,23 @@
-metadataProp, err := expandStorageHmacKeyMetadata(nil, d, config)
-if err != nil {
-	return err
-} else if v, ok := d.GetOkExists("metadata"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, metadataProp)) {
-	obj["metadata"] = metadataProp
-}
-
-state, err := expandStorageHmacKeyMetadataState(d.Get("state"), d, config)
-if err != nil {
-	return nil, err
-} else if v, ok := d.GetOkExists("state"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, state)) {
-	obj["metadata"]["state"] = "INACTIVE"
-}
-
-url, err := replaceVars(d, config, "{{StorageBasePath}}projects/{{project}}/hmacKeys/{{accessId}}")
+getUrl, err := replaceVars(d, config, "{{StorageBasePath}}projects/{{project}}/hmacKeys/{{access_id}}")
 if err != nil {
 	return err
 }
 
-log.Printf("[DEBUG] Deactivating HmacKey %q: %#v", d.Id(), obj)
-_, err = sendRequestWithTimeout(config, "PUT", project, url, obj, d.Timeout(schema.TimeoutUpdate))
+getRes, err := sendRequest(config, "GET", project, getUrl, nil)
+if err != nil {
+	return handleNotFoundError(err, d, fmt.Sprintf("StorageHmacKey %q", d.Id()))
+}
+
+getRes["metadata"].(map[string]interface{})["state"] = "INACTIVE"
+
+
+updateUrl, err := replaceVars(d, config, "{{StorageBasePath}}projects/{{project}}/hmacKeys/{{accessId}}")
+if err != nil {
+	return err
+}
+
+log.Printf("[DEBUG] Deactivating HmacKey %q: %#v", d.Id(), getRes)
+_, err = sendRequestWithTimeout(config, "PUT", project, updateUrl, getRes, d.Timeout(schema.TimeoutUpdate))
 if err != nil {
 		return fmt.Errorf("Error deactivating HmacKey %q: %s", d.Id(), err)
 }
