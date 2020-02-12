@@ -234,8 +234,10 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 <%    end -%>
 <%    if object.async.is_a? Api::OpAsync -%>
-    err = <%= client_name_camel -%>OperationWaitTime(
-    config, res,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
+    <% if object.async.result.resource_inside_response and not object.identity.empty? -%>
+    var response map[string]interface{}
+    err = <%= client_name_camel -%>OperationWaitTimeWithResponse(
+    config, res, &response, <% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutCreate).Minutes()))
 
     if err != nil {
@@ -246,7 +248,38 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         d.SetId("")
         return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
     }
+    <% object.gettable_properties.each do |prop| -%>
+    <% if object.identity.include?(prop) -%>
+    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(response["<%= prop.api_name -%>"], d, config)); err != nil {
+        return err
+    }
+
+    <% end -%>
+    <% end -%>
+
+    // This may have caused the ID to update - update it if so.
+    id, err = replaceVars(d, config, "<%= id_format(object) -%>")
+    if err != nil {
+        return fmt.Errorf("Error constructing id: %s", err)
+    }
+    d.SetId(id)
+
+    <% else -%>
+    err = <%= client_name_camel -%>OperationWaitTime(
+    config, res, <% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
+        int(d.Timeout(schema.TimeoutCreate).Minutes()))
+
+    if err != nil {
+<%      if object.custom_code.post_create_failure -%>
+        resource<%= resource_name -%>PostCreateFailure(d, meta)
+<%      end -%>
+        // The resource didn't actually create
+        d.SetId("")
+        return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
+    }
+
 <%    end -%>
+<%  end -%>
 <%  end -%>
 
     log.Printf("[DEBUG] Finished creating <%= object.name -%> %q: %#v", d.Id(), res)
@@ -652,7 +685,6 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     }
 
 <%  if !object.async.nil? && object.async.allow?('delete') -%>
-
     err = <%= client_name_camel -%>OperationWaitTime(
         config, res, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
         int(d.Timeout(schema.TimeoutDelete).Minutes()))
@@ -660,6 +692,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
+
 <%  end -%>
 
     log.Printf("[DEBUG] Finished deleting <%= object.name -%> %q: %#v", d.Id(), res)

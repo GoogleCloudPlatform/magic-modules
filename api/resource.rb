@@ -314,6 +314,8 @@ module Api
       if @self_link.nil?
         [@base_url, '{{name}}'].join('/')
       else
+        # If the terms in this are not snake-cased, this will require
+        # an override in Terraform.
         @self_link
       end
     end

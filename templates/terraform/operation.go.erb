@@ -26,10 +26,10 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
   return sendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 }
 
-func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op map[string]interface{},<% if has_project -%> project,<% end -%> activity string, timeoutMinutes int) error {
+func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, <% if has_project -%> project, <% end -%> activity string) (*<%=product_name%>OperationWaiter, error) {
   if val, ok := op["name"]; !ok || val == "" {
     // This was a synchronous call - there is no operation to wait for.
-    return nil
+    return nil, nil
   }
   w := &<%= product_name -%>OperationWaiter{
     Config: config,
@@ -38,7 +38,35 @@ func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op m
 <% end -%>
   }
   if err := w.CommonOperationWaiter.SetOp(op); err != nil {
-    return err
+    return nil, err
+  }
+  return w, nil
+}
+
+<% if async.result.resource_inside_response -%>
+<%# Not all APIs will need a WithResponse operation, but it's hard to check whether
+    they will or not since it involves iterating over all resources.
+    Might as well just nolint it so we can pass the linter checks.
+-%>
+// nolint: deadcode,unused
+func <%= product_name.camelize(:lower) -%>OperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{},<% if has_project -%> project,<% end -%> activity string, timeoutMinutes int) error {
+  w, err := create<%= product_name %>Waiter(config, op, <% if has_project -%> project, <%end-%> activity)
+  if err != nil || w == nil {
+      // If w is nil, the op was synchronous.
+      return err
+  }
+  if err := OperationWait(w, activity, timeoutMinutes); err != nil {
+      return err
+  }
+  return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
+}
+<% end -%>
+
+func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op map[string]interface{}, <% if has_project -%> project,<% end -%> activity string, timeoutMinutes int) error {
+  w, err := create<%= product_name %>Waiter(config, op, <% if has_project -%> project, <%end-%> activity)
+  if err != nil || w == nil {
+      // If w is nil, the op was synchronous.
+      return err
   }
   return OperationWait(w, activity, timeoutMinutes)
 }
