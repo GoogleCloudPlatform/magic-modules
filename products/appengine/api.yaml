@@ -458,7 +458,138 @@ objects:
         description: |
           Instance class that is used to run this version. Valid values are
           AutomaticScaling F1, F2, F4, F4_1G
-          (Only AutomaticScaling is supported at the moment)
+          (Only AutomaticScaling is supported at the moment)      
+      - !ruby/object:Api::Type::NestedObject
+        name: 'automaticScaling'
+        description: |
+          Automatic scaling is based on request rate, response latencies, and other application metrics.
+        required: false
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'minPendingLatency'
+            description: |
+              Minimum amount of time a request should wait in the pending queue before starting a new instance to handle it.
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+          - !ruby/object:Api::Type::NestedObject
+            name: 'standardSchedulerSettings'
+            description: |
+              Scheduler settings for standard environment.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'maxInstances'
+                description: |
+                  Maximum number of instances to run for this version. Set to zero to disable max_instances configuration.
+              - !ruby/object:Api::Type::Integer
+                name: 'minInstances'
+                description: |
+                  Minimum number of instances to run for this version. Set to zero to disable min_instances configuration.
+              - !ruby/object:Api::Type::Double
+                name: 'targetCpuUtilization'
+                description: |
+                  Target CPU utilization ratio to maintain when scaling.
+              - !ruby/object:Api::Type::Double
+                name: 'targetThroughputUtilization'
+                description: |
+                  Target throughput utilization ratio to maintain when scaling.
+          - !ruby/object:Api::Type::Integer
+            name: 'maxIdleInstances'
+            description: |
+              Maximum number of idle instances that should be maintained for this version.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'requestUtilization'
+            description: |
+              Target scaling by request utilization.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'targetRequestCountPerSecond'
+                description: |
+                  Target requests per second.
+              - !ruby/object:Api::Type::Integer
+                name: 'targetConcurrentRequests'
+                description: |
+                  Target number of concurrent requests.
+          - !ruby/object:Api::Type::Integer
+            name: 'minIdleInstances'
+            description: |
+              Minimum number of idle instances that should be maintained for this version. Only applicable for the default version of a service.
+          - !ruby/object:Api::Type::Integer
+            name: 'maxTotalInstances'
+            description: |
+              Maximum number of instances that should be started to handle requests for this version.
+          - !ruby/object:Api::Type::Integer
+            name: 'minTotalInstances'
+            description: |
+              Minimum number of running instances that should be maintained for this version.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'networkUtilization'
+            description: |
+              Target scaling by network usage.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'targetSentBytesPerSecond'
+                description: |
+                  Target bytes sent per second.
+              - !ruby/object:Api::Type::Integer
+                name: 'targetSentPacketsPerSecond'
+                description: |
+                  Target packets sent per second.
+              - !ruby/object:Api::Type::Integer
+                name: 'targetReceivedBytesPerSecond'
+                description: |
+                  Target bytes received per second.
+              - !ruby/object:Api::Type::Integer
+                name: 'targetReceivedPacketsPerSecond'
+                description: |
+                  Target packets received per second.
+          - !ruby/object:Api::Type::String
+            name: 'coolDownPeriod'
+            description: |
+              The time period that the Autoscaler (https://cloud.google.com/compute/docs/autoscaler/) should wait before it starts collecting information from a new instance. This prevents the autoscaler from collecting information when the instance is initializing, during which the collected usage would not be reliable. Only applicable in the App Engine flexible environment.
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+          - !ruby/object:Api::Type::Integer
+            name: 'maxConcurrentRequests'
+            description: |
+              Number of concurrent requests an automatic scaling instance can accept before the scheduler spawns a new instance.Defaults to a runtime-specific value.
+          - !ruby/object:Api::Type::String
+            name: 'maxPendingLatency'
+            description: |
+              Maximum amount of time that a request should wait in the pending queue before starting a new instance to handle it.
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+          - !ruby/object:Api::Type::NestedObject
+            name: 'cpuUtilization'
+            description: |
+              Target scaling by CPU usage.
+            properties:
+              - !ruby/object:Api::Type::Double
+                name: 'targetUtilization'
+                description: |
+                  Target CPU utilization ratio to maintain when scaling. Must be between 0 and 1.
+              - !ruby/object:Api::Type::String
+                name: 'aggregationWindowLength'
+                description: |
+                  Period of time over which CPU utilization is calculated.
+                  A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+          - !ruby/object:Api::Type::NestedObject
+            name: 'diskUtilization'
+            description: |
+              Target scaling by disk usage.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'targetWriteBytesPerSecond'
+                description: |
+                  Target bytes written per second.
+              - !ruby/object:Api::Type::Integer
+                name: 'targetReadBytesPerSecond'
+                description: |
+                  Target bytes read per second.
+              - !ruby/object:Api::Type::Integer
+                name: 'targetReadOpsPerSecond'
+                description: |
+                  Target ops read per seconds.
+              - !ruby/object:Api::Type::Integer
+                name: 'targetWriteOpsPerSecond'
+                description: |
+                  Target ops written per second.
   - !ruby/object:Api::Resource
     name: 'ApplicationUrlDispatchRules'
     description: |
