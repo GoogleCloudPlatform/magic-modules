@@ -56,10 +56,10 @@ layout: "google"
 page_title: "Google: <%= resource_ns_iam -%>"
 sidebar_current: "docs-<%= resource_ns_iam.gsub("_", "-") -%>"
 description: |-
-  Collection of resources to manage IAM policy for <%= product.display_name -%> <%= object.name -%>
+  Collection of resources to manage IAM policy for <%= product.display_name -%> <%= object.name %>
 ---
 
-# IAM policy for <%= product.display_name -%> <%= object.name -%>
+# IAM policy for <%= product.display_name -%> <%= object.name %>
 Three different resources help you manage your IAM policy for <%= product.display_name -%> <%= object.name -%>. Each of these resources serves a different use case:
 
 * `<%= resource_ns_iam -%>_policy`: Authoritative. Sets the IAM policy for the <%= object.name.downcase -%> and replaces any existing policy already attached.
