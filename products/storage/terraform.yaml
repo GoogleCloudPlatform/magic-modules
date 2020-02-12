@@ -104,8 +104,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   HmacKey: !ruby/object:Overrides::Terraform::ResourceOverride
     create_url: projects/{{project}}/hmacKeys?serviceAccountEmail={{service_account_email}}
+    self_link: projects/{{project}}/hmacKeys/{{access_id}}
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      post_create: templates/terraform/post_create/hmac_secret.go.erb
+      post_create: templates/terraform/post_create/storage_hmac_key.go.erb
+      pre_delete: templates/terraform/pre_delete/storage_hmac_key.go.erb
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         All arguments including the secret value will be stored in the raw
@@ -116,7 +118,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "key"
         vars:
           service_account: "my-service-account"
-    id_format: "projects/{{project}}/accessId/{{access_id}}"
+    id_format: "projects/{{project}}/hmacKeys/{{access_id}}"
     import_format: ['projects/{{project}}/hmacKeys/{{access_id}}']
     properties:
       metadata: !ruby/object:Overrides::Terraform::PropertyOverride

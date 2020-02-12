@@ -39,7 +39,7 @@ func TestAccStorageHmacKey_update(t *testing.T) {
 	})
 }
 
-func testAccGoogleStorageHmacKeyBasic(saName, bucketName, state string) string {
+func testAccGoogleStorageHmacKeyBasic(saName, state string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "service_account" {
   account_id = "%s"
