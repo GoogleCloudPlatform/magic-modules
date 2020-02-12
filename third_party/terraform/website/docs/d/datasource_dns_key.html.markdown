@@ -4,12 +4,12 @@ layout: "google"
 page_title: "Google: google_dns_key"
 sidebar_current: "docs-google-datasource-dns-key"
 description: |-
-  Get DNSKEY records of DNSSEC-enabled managed zones.
+  Get DNSKEY and DS records of DNSSEC-signed managed zones.
 ---
 
 # google\_dns\_key
 
-Get the DNSKEY records of DNSSEC-signed managed zones. For more information see the
+Get the DNSKEY and DS records of DNSSEC-signed managed zones. For more information see the
 [official documentation](https://cloud.google.com/dns/docs/dnskeys/)
 and [API](https://cloud.google.com/dns/docs/reference/v1/dnsKeys).
 
