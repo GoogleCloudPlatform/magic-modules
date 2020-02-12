@@ -3,12 +3,13 @@ package google
 <% unless version == 'ga' -%>
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"path"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccHealthcareHl7V2StoreIdParsing(t *testing.T) {
@@ -96,6 +97,17 @@ func TestAccHealthcareHl7V2Store_basic(t *testing.T) {
 				Config: testGoogleHealthcareHl7V2Store_update(hl7_v2StoreName, datasetName, pubsubTopic),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleHealthcareHl7V2StoreUpdate(pubsubTopic),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testGoogleHealthcareHl7V2Store_basic(hl7_v2StoreName, datasetName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleHealthcareHl7V2StoreRemoveTopic(),
 				),
 			},
 			{
@@ -217,6 +229,40 @@ func testAccCheckGoogleHealthcareHl7V2StoreUpdate(pubsubTopic string) resource.T
 			topicName := path.Base(response.NotificationConfig.PubsubTopic)
 			if topicName != pubsubTopic {
 				return fmt.Errorf("hl7_v2_store 'NotificationConfig' not updated ('%s' != '%s'): %s", topicName, pubsubTopic, gcpResourceUri)
+			}
+		}
+
+		if !foundResource {
+			return fmt.Errorf("google_healthcare_hl7_v2_store resource was missing")
+		}
+		return nil
+	}
+}
+
+func testAccCheckGoogleHealthcareHl7V2StoreRemoveTopic() resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		var foundResource = false
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_healthcare_hl7_v2_store" {
+				continue
+			}
+			foundResource = true
+
+			config := testAccProvider.Meta().(*Config)
+
+			gcpResourceUri, err := replaceVarsForTest(config, rs, "{{dataset}}/hl7V2Stores/{{name}}")
+			if err != nil {
+				return err
+			}
+
+			response, err := config.clientHealthcare.Projects.Locations.Datasets.Hl7V2Stores.Get(gcpResourceUri).Do()
+			if err != nil {
+				return fmt.Errorf("Unexpected failure while verifying 'updated' dataset: %s", err)
+			}
+
+			notificationConfig := response.NotificationConfig
+			if notificationConfig != nil {
+				return fmt.Errorf("hl7_v2_store 'NotificationConfig' not removed (%v): %s", notificationConfig, gcpResourceUri)
 			}
 		}
 
