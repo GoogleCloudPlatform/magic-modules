@@ -32,6 +32,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^[a-z][a-z0-9_\-]*[a-z0-9]$'
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       extraStatements: !ruby/object:Overrides::Terraform::PropertyOverride
         name: ddl
         ignore_read: true
@@ -66,6 +67,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # system, which is done in the encoder.  Consequently we have
         # to interpret "not set" as "use the name in state".
         default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       nodeCount: !ruby/object:Overrides::Terraform::PropertyOverride
         name: num_nodes
       config: !ruby/object:Overrides::Terraform::PropertyOverride
