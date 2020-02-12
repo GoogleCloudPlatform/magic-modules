@@ -144,19 +144,22 @@ func dataSourceDNSKeyRead(d *schema.ResourceData, meta interface{}) error {
 	project := fv.Project
 	managedZone := fv.Name
 
+	d.Set("project", project)
+	d.SetId(fmt.Sprintf("projects/%s/managedZones/%s", project, managedZone))
+
 	log.Printf("[DEBUG] Fetching DNS keys from managed zone %s", managedZone)
 
 	response, err := config.clientDns.DnsKeys.List(project, managedZone).Do()
 	if err != nil && !isGoogleApiErrorWithCode(err, 404) {
 		return fmt.Errorf("error retrieving DNS keys: %s", err)
+	} else if isGoogleApiErrorWithCode(err, 404) {
+		return nil
 	}
 
 	log.Printf("[DEBUG] Fetched DNS keys from managed zone %s", managedZone)
 
-	d.Set("project", project)
 	d.Set("key_signing_keys", flattenSigningKeys(response.DnsKeys, "keySigning"))
 	d.Set("zone_signing_keys", flattenSigningKeys(response.DnsKeys, "zoneSigning"))
-	d.SetId(fmt.Sprintf("projects/%s/managedZones/%s", project, managedZone))
 
 	return nil
 }
