@@ -39,7 +39,7 @@ func dataSourceDNSKey() *schema.Resource {
 }
 
 func dnsKeySchema() *schema.Resource {
-  return &schema.Resource{
+	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"algorithm": {
 				Type:     schema.TypeString,
