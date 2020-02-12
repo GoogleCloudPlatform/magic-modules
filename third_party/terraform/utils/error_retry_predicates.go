@@ -2,19 +2,24 @@ package google
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"net"
 	"net/url"
 	"strings"
 
 	"google.golang.org/api/googleapi"
 )
 
+const connectionResetByPeerErr = "connection reset by peer"
+
 type RetryErrorPredicateFunc func(error) (bool, string)
 
 /** ADD GLOBAL ERROR RETRY PREDICATES HERE **/
 // Retry predicates that shoud apply to all requests should be added here.
 var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
-	isUrlTimeoutError,
+	isTemporaryError,
+	isRetryableUrlError,
 	isCommonRetryableErrorCode,
 
 	//While this might apply only to Cloud SQL, historically,
@@ -25,10 +30,29 @@ var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 
 /** END GLOBAL ERROR RETRY PREDICATES HERE **/
 
-func isUrlTimeoutError(err error) (bool, string) {
-	if urlerr, ok := err.(*url.Error); ok && urlerr.Timeout() {
-		log.Printf("[DEBUG] Dismissed an error as retryable based on googleapis.com target: %s", err)
+func isTemporaryError(err error) (bool, string) {
+	if _, ok := err.(interface{ Temporary() bool }); ok {
+		return true, "Got temporary error %v"
+	}
+	return false, ""
+}
+
+func isRetryableUrlError(err error) (bool, string) {
+	urlerr, ok := err.(*url.Error)
+	if !ok {
+		return false, ""
+	}
+
+	if urlerr.Timeout() {
 		return true, "Got URL timeout error"
+	}
+
+	wrappedErr := urlerr.Unwrap()
+	if wrappedErr == io.ErrUnexpectedEOF {
+		return true, "Got unexpected EOF"
+	}
+	if neterr, ok := wrappedErr.(*net.OpError); ok && neterr.Err.Error() == connectionResetByPeerErr {
+		return true, fmt.Sprintf("Got network error: %v", neterr.Err.Error())
 	}
 	return false, ""
 }
