@@ -1,4 +1,3 @@
-obj := make(map[string]interface{})
 metadataProp, err := expandStorageHmacKeyMetadata(nil, d, config)
 if err != nil {
 	return err
@@ -6,7 +5,12 @@ if err != nil {
 	obj["metadata"] = metadataProp
 }
 
-obj["metadata"]["state"] = "INACTIVE"
+state, err := expandStorageHmacKeyMetadataState(d.Get("state"), d, config)
+if err != nil {
+	return nil, err
+} else if v, ok := d.GetOkExists("state"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, state)) {
+	obj["metadata"]["state"] = "INACTIVE"
+}
 
 url, err := replaceVars(d, config, "{{StorageBasePath}}projects/{{project}}/hmacKeys/{{accessId}}")
 if err != nil {
