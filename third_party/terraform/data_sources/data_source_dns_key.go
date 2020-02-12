@@ -136,7 +136,7 @@ func flattenSigningKeys(signingKeys []*dns.DnsKey, keyType string) []map[string]
 			}
 
 			if signingKey.Type == "keySigning" && len(signingKey.Digests) > 0 {
-				data["ds_record"] = fmt.Sprintf("%s %d %d %s",
+				data["ds_record"] = fmt.Sprintf("%d %d %d %s",
 					signingKey.KeyTag,
 					dnssecAlgoNums[signingKey.Algorithm],
 					dnssecDigestType[signingKey.Digests[0].Type],
