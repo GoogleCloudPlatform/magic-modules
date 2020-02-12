@@ -42,6 +42,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       service: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true    
   FlexibleAppVersion: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   Service: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true  
   ServiceSplitTraffic: !ruby/object:Overrides::Inspec::ResourceOverride
