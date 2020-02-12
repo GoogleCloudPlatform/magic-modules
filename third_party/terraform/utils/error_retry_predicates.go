@@ -30,8 +30,12 @@ var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 
 /** END GLOBAL ERROR RETRY PREDICATES HERE **/
 
+type temporary interface {
+	Temporary() bool
+}
+
 func isTemporaryError(err error) (bool, string) {
-	if _, ok := err.(interface{ Temporary() bool }); ok {
+	if _, ok := err.(temporary); ok {
 		return true, "Got temporary error %v"
 	}
 	return false, ""
