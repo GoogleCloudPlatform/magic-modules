@@ -43,8 +43,6 @@ The following arguments are supported:
 
 * `managed_zone` - (Required) The name or id of the Cloud DNS managed zone.
 
----
-
 * `project` - (Optional) The ID of the project in which the resource belongs. If `project` is not provided, the provider project is used.
 
 ## Attributes Reference

@@ -8,6 +8,20 @@ import (
 	"google.golang.org/api/dns/v1"
 )
 
+var dnssecAlgoNums = map[string]int{
+	"rsasha1":         5,
+	"rsasha256":       8,
+	"rsasha512":       10,
+	"ecdsap256sha256": 13,
+	"ecdsap384sha384": 14,
+}
+
+var dnssecDigestType = map[string]int{
+	"sha1":   1,
+	"sha256": 2,
+	"sha384": 4,
+}
+
 func dataSourceDNSKey() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceDNSKeyRead,
@@ -27,18 +41,18 @@ func dataSourceDNSKey() *schema.Resource {
 			"key_signing_keys": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     dnsKeySchema(),
+				Elem:     kskResource(),
 			},
 			"zone_signing_keys": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     dnsKeySchema(),
+				Elem:     dnsKeyResource(),
 			},
 		},
 	}
 }
 
-func dnsKeySchema() *schema.Resource {
+func dnsKeyResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"algorithm": {
@@ -93,6 +107,17 @@ func dnsKeySchema() *schema.Resource {
 	}
 }
 
+func kskResource() *schema.Resource {
+	resource := dnsKeyResource()
+
+	resource.Schema["ds_record"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Computed: true,
+	}
+
+	return resource
+}
+
 func flattenSigningKeys(signingKeys []*dns.DnsKey, keyType string) []map[string]interface{} {
 	var keys []map[string]interface{}
 
@@ -108,6 +133,14 @@ func flattenSigningKeys(signingKeys []*dns.DnsKey, keyType string) []map[string]
 				"key_length":    signingKey.KeyLength,
 				"key_tag":       signingKey.KeyTag,
 				"public_key":    signingKey.PublicKey,
+			}
+
+			if signingKey.Type == "keySigning" && len(signingKey.Digests) > 0 {
+				data["ds_record"] = fmt.Sprintf("%s %d %d %s",
+					signingKey.KeyTag,
+					dnssecAlgoNums[signingKey.Algorithm],
+					dnssecDigestType[signingKey.Digests[0].Type],
+					signingKey.Digests[0].Digest)
 			}
 
 			keys = append(keys, data)
