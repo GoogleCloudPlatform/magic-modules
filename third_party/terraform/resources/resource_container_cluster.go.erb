@@ -344,6 +344,14 @@ func resourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						<% unless version == 'ga' -%>
+						"autoscaling_profile": {
+							Type:             schema.TypeString,
+							Default:          "BALANCED",
+							Optional:         true,
+							ValidateFunc:     validation.StringInSlice([]string{"BALANCED", "OPTIMIZE_UTILIZATION"}, false),
+						},
+						<% end -%>
 					},
 				},
 			},
@@ -1471,7 +1479,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		d.SetPartial("cluster_autoscaling")
 	}
-			
+
 	if d.HasChange("enable_binary_authorization") {
 		enabled := d.Get("enable_binary_authorization").(bool)
 		req := &containerBeta.UpdateClusterRequest{
@@ -2348,6 +2356,9 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *c
 	return &containerBeta.ClusterAutoscaling{
 		EnableNodeAutoprovisioning: config["enabled"].(bool),
 		ResourceLimits:             resourceLimits,
+		<% unless version == 'ga' -%>
+		AutoscalingProfile:         config["autoscaling_profile"].(string),
+		<% end -%>
 		AutoprovisioningNodePoolDefaults:   expandAutoProvisioningDefaults(config["auto_provisioning_defaults"], d),
 	}
 }
@@ -2804,6 +2815,10 @@ func flattenClusterAutoscaling(a *containerBeta.ClusterAutoscaling) []map[string
 		r["enabled"] = true
 		r["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(a.AutoprovisioningNodePoolDefaults)
 	}
+	<% unless version == 'ga' -%>
+	r["autoscaling_profile"] = a.AutoscalingProfile
+	<% end -%>
+
 	return []map[string]interface{}{r}
 }
 
