@@ -45,7 +45,8 @@ module Overrides
           # corresponding OiCS walkthroughs.
           :examples,
 
-          # Virtual fields on the Terraform resource.
+          # Virtual fields on the Terraform resource. Usage and differences from url_param_only
+          # are documented in provider/terraform/virtual_fields.rb
           :virtual_fields,
 
           # TODO(alexstephen): Deprecate once all resources using autogen async.

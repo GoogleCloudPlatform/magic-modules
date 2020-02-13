@@ -23,6 +23,16 @@ module Provider
     # behaviour. They often don't map to underlying API fields (although they
     # may map to parameters), and will require custom code to be added to
     # control them.
+    #
+    # Virtual fields only support top level, boolean Terraform fields
+    #
+    # Virtual fields are similar to url_param_only fields in that they create
+    # a schema entry which is not read from or submitted to the API. However
+    # virtual fields are boolean only whereas url_param_only fields do not have
+    # type restrictions. Functionally virtual fields are largely behavioral
+    # flags for determining resource behavior, such as
+    # `delete_contents_on_destroy` whereas url_param_only fields _should_ be
+    # for constructing url strings
     class VirtualFields < Api::Object
       include Compile::Core
       include Google::GolangUtils
