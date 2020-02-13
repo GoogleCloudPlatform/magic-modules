@@ -20,9 +20,19 @@ require 'provider/abstract_core'
 module Provider
   class Terraform < Provider::AbstractCore
     # Virtual fields are Terraform-only fields that control Terraform's
-    # behaviour. They often don't map to underlying API fields (although they
+    # behaviour. They don't map to underlying API fields (although they
     # may map to parameters), and will require custom code to be added to
     # control them.
+    #
+    # Virtual fields are similar to url_param_only fields in that they create
+    # a schema entry which is not read from or submitted to the API. However
+    # virtual fields are meant to provide toggles for Terraform-specific behavior in a resource
+    # (eg: delete_contents_on_destroy) whereas url_param_only fields _should_
+    # be used for url construction.
+    #
+    # Both are resource level fields and do not make sense, and are also not
+    # supported, for nested fields. Nested fields that shouldn't be included
+    # in API payloads are better handled with custom expand/encoder logic.
     class VirtualFields < Api::Object
       include Compile::Core
       include Google::GolangUtils
