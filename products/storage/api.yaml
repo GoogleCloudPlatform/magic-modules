@@ -786,6 +786,8 @@ objects:
     base_url: projects/{{project}}/hmacKeys
     create_url: projects/{{project}}/hmacKeys?serviceAccountEmail={{serviceAccountEmail}}
     self_link: projects/{{project}}/hmacKeys/{{accessId}}
+    # technically updatable, but implemented as custom update for new fingerprint support
+    input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/storage/docs/authentication/managing-hmackeys'
@@ -794,22 +796,25 @@ objects:
       The hmacKeys resource represents an HMAC key within Cloud Storage. The resource
       consists of a secret and HMAC key metadata. HMAC keys can be used as credentials
       for service accounts.
-    parameters:
+    properties:
       - !ruby/object:Api::Type::String
         name: 'serviceAccountEmail'
         description: |
           The email address of the key's associated service account.
-        input: true
         required: true
-    properties:
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: |
           The state of the key. Can be set to one of ACTIVE, INACTIVE.
+        default_value: :ACTIVE
         values:
           - :ACTIVE
           - :INACTIVE
           # - :DELETED (not directly settable)
+        update_verb: :PUT
+        update_url: projects/{{project}}/hmacKeys/{{accessId}}
+        update_id: 'state'
+        fingerprint_name: 'etag'
       - !ruby/object:Api::Type::String
         name: 'secret'
         output: true
@@ -820,11 +825,6 @@ objects:
         output: true
         description: |
           The access ID of the HMAC Key.
-      - !ruby/object:Api::Type::String
-        name: 'etag'
-        output: true
-        description: |
-          HTTP 1.1 Entity tag for the HMAC key.
       - !ruby/object:Api::Type::String
         name: 'id'
         output: true

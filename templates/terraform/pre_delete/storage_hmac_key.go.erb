@@ -8,16 +8,19 @@ if err != nil {
 	return handleNotFoundError(err, d, fmt.Sprintf("StorageHmacKey %q", d.Id()))
 }
 
-getRes["metadata"].(map[string]interface{})["state"] = "INACTIVE"
+// HmacKeys need to be INACTIVE to be deleted and the API doesn't accept noop
+// updates
+if v := getRes["state"]; v == "ACTIVE" {
+	getRes["state"] = "INACTIVE"
+	updateUrl, err := replaceVars(d, config, "{{StorageBasePath}}projects/{{project}}/hmacKeys/{{access_id}}")
+	if err != nil {
+		return err
+	}
 
-
-updateUrl, err := replaceVars(d, config, "{{StorageBasePath}}projects/{{project}}/hmacKeys/{{accessId}}")
-if err != nil {
-	return err
+	log.Printf("[DEBUG] Deactivating HmacKey %q: %#v", d.Id(), getRes)
+	_, err = sendRequestWithTimeout(config, "PUT", project, updateUrl, getRes, d.Timeout(schema.TimeoutUpdate))
+	if err != nil {
+			return fmt.Errorf("Error deactivating HmacKey %q: %s", d.Id(), err)
+	}
 }
 
-log.Printf("[DEBUG] Deactivating HmacKey %q: %#v", d.Id(), getRes)
-_, err = sendRequestWithTimeout(config, "PUT", project, updateUrl, getRes, d.Timeout(schema.TimeoutUpdate))
-if err != nil {
-		return fmt.Errorf("Error deactivating HmacKey %q: %s", d.Id(), err)
-}
