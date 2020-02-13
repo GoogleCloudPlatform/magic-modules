@@ -21,7 +21,6 @@ var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 	isNetworkTimeoutError,
 	isIoEOFError,
 	isConnectionResetNetworkError,
-	isTemporaryNetOpError,
 
 	// Common GCP error codes
 	isCommonRetryableErrorCode,
