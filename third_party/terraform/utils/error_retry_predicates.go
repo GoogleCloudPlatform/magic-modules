@@ -19,7 +19,9 @@ type RetryErrorPredicateFunc func(error) (bool, string)
 // Retry predicates that shoud apply to all requests should be added here.
 var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 	isTemporaryError,
-	isRetryableUrlError,
+	isUrlTimeoutError,
+	isIoEOFError,
+	isTemporaryNetOpError,
 	isCommonRetryableErrorCode,
 
 	//While this might apply only to Cloud SQL, historically,
@@ -30,33 +32,45 @@ var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 
 /** END GLOBAL ERROR RETRY PREDICATES HERE **/
 
-type temporary interface {
-	Temporary() bool
-}
-
 func isTemporaryError(err error) (bool, string) {
-	if _, ok := err.(temporary); ok {
-		return true, "Got temporary error %v"
+	if tempErr, ok := err.(interface{ Temporary() bool }); ok && tempErr.Temporary() {
+		return true, fmt.Sprintf("Got temporary error %v", err)
 	}
 	return false, ""
 }
 
-func isRetryableUrlError(err error) (bool, string) {
-	urlerr, ok := err.(*url.Error)
-	if !ok {
-		return false, ""
-	}
-
-	if urlerr.Timeout() {
+func isUrlTimeoutError(err error) (bool, string) {
+	if urlerr, ok := err.(*url.Error); ok && urlerr.Timeout() {
 		return true, "Got URL timeout error"
 	}
+	return false, ""
+}
 
-	wrappedErr := urlerr.Unwrap()
-	if wrappedErr == io.ErrUnexpectedEOF {
+func isIoEOFError(err error) (bool, string) {
+	if err == io.ErrUnexpectedEOF {
 		return true, "Got unexpected EOF"
 	}
-	if neterr, ok := wrappedErr.(*net.OpError); ok && neterr.Err.Error() == connectionResetByPeerErr {
-		return true, fmt.Sprintf("Got network error: %v", neterr.Err.Error())
+
+	if urlerr, ok := err.(*url.Error); ok {
+		wrappedErr := urlerr.Unwrap()
+		if wrappedErr == io.ErrUnexpectedEOF {
+			return true, "Got unexpected EOF"
+		}
+	}
+	return false, ""
+}
+
+func isTemporaryNetOpError(err error) (bool, string) {
+	neterr, ok := err.(*net.OpError)
+	if !ok {
+		if urlerr, ok := err.(*url.Error); ok {
+			wrappedErr := urlerr.Unwrap()
+			neterr, ok = wrappedErr.(*net.OpError)
+		}
+	}
+
+	if ok && neterr.Err.Error() == connectionResetByPeerErr {
+		return true, fmt.Sprintf("Connection reset by peer: %v", neterr.Err.Error())
 	}
 	return false, ""
 }
