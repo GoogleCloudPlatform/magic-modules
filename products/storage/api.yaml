@@ -780,4 +780,63 @@ objects:
         name: timeUpdated
         api_name: updated
         description: The modification time of the object metadata.
-
+  - !ruby/object:Api::Resource
+    name: 'HmacKey'
+    kind: 'storage#hmacKey'
+    base_url: projects/{{project}}/hmacKeys
+    create_url: projects/{{project}}/hmacKeys?serviceAccountEmail={{serviceAccountEmail}}
+    self_link: projects/{{project}}/hmacKeys/{{accessId}}
+    # technically updatable, but implemented as custom update for new fingerprint support
+    input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/storage/docs/authentication/managing-hmackeys'
+      api: 'https://cloud.google.com/storage/docs/json_api/v1/projects/hmacKeys'
+    description: |
+      The hmacKeys resource represents an HMAC key within Cloud Storage. The resource
+      consists of a secret and HMAC key metadata. HMAC keys can be used as credentials
+      for service accounts.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccountEmail'
+        description: |
+          The email address of the key's associated service account.
+        required: true
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        description: |
+          The state of the key. Can be set to one of ACTIVE, INACTIVE.
+        default_value: :ACTIVE
+        values:
+          - :ACTIVE
+          - :INACTIVE
+          # - :DELETED (not directly settable)
+        update_verb: :PUT
+        update_url: projects/{{project}}/hmacKeys/{{accessId}}
+        update_id: 'state'
+        fingerprint_name: 'etag'
+      - !ruby/object:Api::Type::String
+        name: 'secret'
+        output: true
+        description: |
+          HMAC secret key material.
+      - !ruby/object:Api::Type::String
+        name: 'accessId'
+        output: true
+        description: |
+          The access ID of the HMAC Key.
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        output: true
+        description: |
+          The ID of the HMAC key, including the Project ID and the Access ID.
+      - !ruby/object:Api::Type::Time
+        name: 'timeCreated'
+        output: true
+        description: |
+          'The creation time of the HMAC key in RFC 3339 format. '
+      - !ruby/object:Api::Type::Time
+        name: 'updated'
+        output: true
+        description: |
+          'The last modification time of the HMAC key metadata in RFC 3339 format.'

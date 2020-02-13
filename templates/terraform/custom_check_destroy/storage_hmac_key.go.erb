@@ -1,0 +1,17 @@
+config := testAccProvider.Meta().(*Config)
+
+url, err := replaceVarsForTest(config, rs, "{{StorageBasePath}}projects/{{project}}/hmacKeys/{{access_id}}")
+if err != nil {
+  return err
+}
+
+res, err := sendRequest(config, "GET", "", url, nil)
+if err != nil {
+  return nil
+}
+
+if v := res["state"]; v == "DELETED" {
+	return nil
+}
+
+return fmt.Errorf("StorageHmacKey still exists at %s", url)
