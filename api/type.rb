@@ -36,7 +36,7 @@ module Api
 
       # url_param_only will not send the field in the resource body and will
       # not attempt to read the field from the API response.
-      # NOTE - this doesn't work for nested Terraform fields
+      # NOTE - this doesn't work for nested fields
       attr_reader :url_param_only
       attr_reader :required
 
