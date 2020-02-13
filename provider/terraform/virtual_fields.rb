@@ -24,15 +24,15 @@ module Provider
     # may map to parameters), and will require custom code to be added to
     # control them.
     #
-    # Virtual fields only support top level, boolean Terraform fields
-    #
     # Virtual fields are similar to url_param_only fields in that they create
     # a schema entry which is not read from or submitted to the API. However
-    # virtual fields are boolean only whereas url_param_only fields do not have
-    # type restrictions. Functionally virtual fields are largely behavioral
-    # flags for determining resource behavior, such as
-    # `delete_contents_on_destroy` whereas url_param_only fields _should_ be
-    # for constructing url strings
+    # virtual fields are meant to provider toggles for resource behavior
+    # (eg: delete_contents_on_destroy) whereas url_param_only fields _should_
+    # be used for url construction.
+    #
+    # Both are resource level fields and do not make sense, and are also not
+    # supported, for nested fields. Nested fields that shouldn't be included
+    # in API payloads are better handled with custom expand/encoder logic.
     class VirtualFields < Api::Object
       include Compile::Core
       include Google::GolangUtils
