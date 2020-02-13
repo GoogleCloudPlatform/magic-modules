@@ -61,3 +61,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         override_name: object_created_times
       bucket: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: object_bucket
+  HmacKey: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true

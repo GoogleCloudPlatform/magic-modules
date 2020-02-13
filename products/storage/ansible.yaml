@@ -31,6 +31,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Object: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  HmacKey: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>
