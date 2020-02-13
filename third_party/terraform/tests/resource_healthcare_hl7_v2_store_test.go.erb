@@ -3,12 +3,13 @@ package google
 <% unless version == 'ga' -%>
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"path"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccHealthcareHl7V2StoreIdParsing(t *testing.T) {
@@ -97,6 +98,14 @@ func TestAccHealthcareHl7V2Store_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleHealthcareHl7V2StoreUpdate(pubsubTopic),
 				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testGoogleHealthcareHl7V2Store_basic(hl7_v2StoreName, datasetName),
 			},
 			{
 				ResourceName:      resourceName,
