@@ -118,6 +118,24 @@ func kskResource() *schema.Resource {
 	return resource
 }
 
+func generateDSRecord(signingKey *dns.DnsKey) (string, error) {
+	algoNum, found := dnssecAlgoNums[signingKey.Algorithm]
+	if !found {
+		return "", fmt.Errorf("DNSSEC Algorithm number for %s not found", signingKey.Algorithm)
+	}
+
+	digestType, found := dnssecDigestType[signingKey.Digests[0].Type]
+	if !found {
+		return "", fmt.Errorf("DNSSEC Digest type for %s not found", signingKey.Digests[0].Type)
+	}
+
+	return fmt.Sprintf("%d %d %d %s",
+		signingKey.KeyTag,
+		algoNum,
+		digestType,
+		signingKey.Digests[0].Digest), nil
+}
+
 func flattenSigningKeys(signingKeys []*dns.DnsKey, keyType string) []map[string]interface{} {
 	var keys []map[string]interface{}
 
@@ -136,11 +154,10 @@ func flattenSigningKeys(signingKeys []*dns.DnsKey, keyType string) []map[string]
 			}
 
 			if signingKey.Type == "keySigning" && len(signingKey.Digests) > 0 {
-				data["ds_record"] = fmt.Sprintf("%d %d %d %s",
-					signingKey.KeyTag,
-					dnssecAlgoNums[signingKey.Algorithm],
-					dnssecDigestType[signingKey.Digests[0].Type],
-					signingKey.Digests[0].Digest)
+				dsRecord, err := generateDSRecord(signingKey)
+				if err == nil {
+					data["ds_record"] = dsRecord
+				}
 			}
 
 			keys = append(keys, data)
