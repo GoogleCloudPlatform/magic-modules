@@ -102,6 +102,37 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
   Object: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
+  HmacKey: !ruby/object:Overrides::Terraform::ResourceOverride
+    create_url: projects/{{project}}/hmacKeys?serviceAccountEmail={{service_account_email}}
+    self_link: projects/{{project}}/hmacKeys/{{access_id}}
+    id_format: "projects/{{project}}/hmacKeys/{{access_id}}"
+    import_format: ['projects/{{project}}/hmacKeys/{{access_id}}']
+    # This resource does not have a name field
+    skip_sweeper: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "storage_hmac_key"
+        primary_resource_id: "key"
+        vars:
+          account_id: "my-svc-acc"
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        All arguments including the `secret` value will be stored in the raw
+        state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+        On import, the `secret` value will not be retrieved.
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      secret: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+        sensitive: true
+      state: !ruby/object:Overrides::Terraform::PropertyOverride
+        update_url: projects/{{project}}/hmacKeys/{{access_id}}
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/storage_hmac_key.go.erb
+      pre_delete: templates/terraform/pre_delete/storage_hmac_key.go.erb
+      post_create: templates/terraform/post_create/storage_hmac_key.go.erb
+      test_check_destroy: templates/terraform/custom_check_destroy/storage_hmac_key.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
