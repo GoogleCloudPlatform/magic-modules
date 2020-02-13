@@ -133,7 +133,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pre_delete: templates/terraform/pre_delete/storage_hmac_key.go.erb
       post_create: templates/terraform/post_create/storage_hmac_key.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/storage_hmac_key.go.erb
-      update_encoder: templates/terraform/update_encoder/storage_hmac_key.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
