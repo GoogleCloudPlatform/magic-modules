@@ -153,7 +153,6 @@ type Config struct {
 	clientIAP   *iap.Service
 	<% end -%>
 
-	ServiceManagementBasePath string
 	clientServiceMan          *servicemanagement.APIService
 
 	ServiceUsageBasePath       string
@@ -681,7 +680,6 @@ func ConfigureBasePaths(c *Config) {
 	c.IamCredentialsBasePath = IamCredentialsDefaultBasePath
 	c.ResourceManagerV2Beta1BasePath = ResourceManagerV2Beta1DefaultBasePath
 	c.IAMBasePath = IAMDefaultBasePath
-	c.ServiceManagementBasePath = ServiceManagementDefaultBasePath
 	c.ServiceNetworkingBasePath = ServiceNetworkingDefaultBasePath
 	c.ServiceUsageBasePath = ServiceUsageDefaultBasePath
 	c.BigQueryBasePath = BigQueryDefaultBasePath

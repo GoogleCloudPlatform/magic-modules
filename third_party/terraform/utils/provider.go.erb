@@ -138,7 +138,6 @@ func Provider() terraform.ResourceProvider {
 			ResourceManagerV2Beta1CustomEndpointEntryKey: ResourceManagerV2Beta1CustomEndpointEntry,
 			RuntimeConfigCustomEndpointEntryKey:          RuntimeConfigCustomEndpointEntry,
 			IAMCustomEndpointEntryKey:                    IAMCustomEndpointEntry,
-			ServiceManagementCustomEndpointEntryKey:      ServiceManagementCustomEndpointEntry,
 			ServiceNetworkingCustomEndpointEntryKey:      ServiceNetworkingCustomEndpointEntry,
 			ServiceUsageCustomEndpointEntryKey:           ServiceUsageCustomEndpointEntry,
 			CloudIoTCustomEndpointEntryKey:               CloudIoTCustomEndpointEntry,
@@ -461,7 +460,6 @@ func providerConfigure(d *schema.ResourceData, p *schema.Provider, terraformVers
 	config.ResourceManagerV2Beta1BasePath = d.Get(ResourceManagerV2Beta1CustomEndpointEntryKey).(string)
 	config.RuntimeConfigBasePath = d.Get(RuntimeConfigCustomEndpointEntryKey).(string)
 	config.IAMBasePath = d.Get(IAMCustomEndpointEntryKey).(string)
-	config.ServiceManagementBasePath = d.Get(ServiceManagementCustomEndpointEntryKey).(string)
 	config.ServiceNetworkingBasePath = d.Get(ServiceNetworkingCustomEndpointEntryKey).(string)
 	config.ServiceUsageBasePath = d.Get(ServiceUsageCustomEndpointEntryKey).(string)
 	config.CloudIoTBasePath = d.Get(CloudIoTCustomEndpointEntryKey).(string)
