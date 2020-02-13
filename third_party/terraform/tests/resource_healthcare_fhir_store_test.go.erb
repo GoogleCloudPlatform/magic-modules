@@ -106,9 +106,6 @@ func TestAccHealthcareFhirStore_basic(t *testing.T) {
 			},
 			{
 				Config: testGoogleHealthcareFhirStore_basic(fhirStoreName, datasetName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleHealthcareFhirStoreRemoveTopic(),
-				),
 			},
 			{
 				ResourceName:      resourceName,
@@ -230,40 +227,6 @@ func testAccCheckGoogleHealthcareFhirStoreUpdate(pubsubTopic string) resource.Te
 			topicName := path.Base(response.NotificationConfig.PubsubTopic)
 			if topicName != pubsubTopic {
 				return fmt.Errorf("fhirStore 'NotificationConfig' not updated ('%s' != '%s'): %s", topicName, pubsubTopic, gcpResourceUri)
-			}
-		}
-
-		if !foundResource {
-			return fmt.Errorf("google_healthcare_fhir_store resource was missing")
-		}
-		return nil
-	}
-}
-
-func testAccCheckGoogleHealthcareFhirStoreRemoveTopic() resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		var foundResource = false
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_healthcare_fhir_store" {
-				continue
-			}
-			foundResource = true
-
-			config := testAccProvider.Meta().(*Config)
-
-			gcpResourceUri, err := replaceVarsForTest(config, rs, "{{dataset}}/fhirStores/{{name}}")
-			if err != nil {
-				return err
-			}
-
-			response, err := config.clientHealthcare.Projects.Locations.Datasets.FhirStores.Get(gcpResourceUri).Do()
-			if err != nil {
-				return fmt.Errorf("Unexpected failure while verifying 'updated' dataset: %s", err)
-			}
-
-			notificationConfig := response.NotificationConfig
-			if notificationConfig != nil {
-				return fmt.Errorf("fhirStore 'NotificationConfig' not removed (%v): %s", notificationConfig, gcpResourceUri)
 			}
 		}
 
