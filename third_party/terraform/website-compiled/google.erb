@@ -181,6 +181,11 @@
       <li<%%= sidebar_current("docs-google-datasource-project-organization-policy") %>>
         <a href="/docs/providers/google/d/datasource_google_project_organization_policy.html">google_project_organization_policy</a>
       </li>
+<% unless version == 'ga' -%>
+      <li<%%= sidebar_current("docs-google-datasource-secret-manager-secret-version") %>>
+          <a href="/docs/providers/google/d/datasource_google_secret_manager_secret_version.html">google_secret_manager_secret_version</a>
+      </li>
+<% end  -%>
       <li<%%= sidebar_current("docs-google-datasource-service-account") %>>
       <a href="/docs/providers/google/d/datasource_google_service_account.html">google_service_account</a>
       </li>
@@ -1270,6 +1275,29 @@
       </li>
     </ul>
     </li>
+
+<% unless version == 'ga' %>
+    <li<%%= sidebar_current("docs-google-secret-manager") %>>
+    <a href="#">Google Secret Manager Resources</a>
+    <ul class="nav nav-visible">
+      <li<%%= sidebar_current("docs-google-secret-manager-secret-x") %>>
+      <a href="/docs/providers/google/r/secret_manager_secret.html">google_secret_manager_secret</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-secret-manager-secret-iam") %>>
+      <a href="/docs/providers/google/r/secret_manager_secret_iam.html">google_secret_manager_secret_iam_member</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-secret-manager-secret-iam") %>>
+      <a href="/docs/providers/google/r/secret_manager_secret_iam.html">google_secret_manager_secret_iam_binding</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-secret-manager-secret-iam") %>>
+      <a href="/docs/providers/google/r/secret_manager_secret_iam.html">google_secret_manager_secret_iam_policy</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-secret-manager-secret-version") %>>
+      <a href="/docs/providers/google/r/secret_manager_secret_version.html">google_secret_manager_secret_version</a>
+      </li>
+    </ul>
+    </li>
+<% end -%>
 
     <li<%%= sidebar_current("docs-google-service-networking") %>>
     <a href="#">Google Service Networking Resources</a>
