@@ -8,16 +8,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
+// This will sweep both Standard and Flexible App Engine App Versions
 func init() {
-	resource.AddTestSweepers("AppEngineFlexibleAppVersion", &resource.Sweeper{
-		Name: "AppEngineFlexibleAppVersion",
-		F:    testSweepAppEngineFlexibleAppVersion,
+	resource.AddTestSweepers("AppEngineAppVersion", &resource.Sweeper{
+		Name: "AppEngineAppVersion",
+		F:    testSweepAppEngineAppVersion,
 	})
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
-func testSweepAppEngineFlexibleAppVersion(region string) error {
-	resourceName := "AppEngineFlexibleAppVersion"
+func testSweepAppEngineAppVersion(region string) error {
+	resourceName := "AppEngineAppVersion"
 	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
 
 	config, err := sharedConfigForRegion(region)
@@ -32,26 +33,10 @@ func testSweepAppEngineFlexibleAppVersion(region string) error {
 		return err
 	}
 
-	// Setup variables to replace in list template
-	d := &ResourceDataMock{
-		FieldsInSchema: map[string]interface{}{
-			"project":  config.Project,
-			"region":   region,
-			"location": region,
-			"zone":     "-",
-		},
-	}
-
-	listTemplate := strings.Split("https://appengine.googleapis.com/v1/apps/{{project}}/services", "?")[0]
-	listUrl, err := replaceVars(d, config, listTemplate)
+	servicesUrl := "https://appengine.googleapis.com/v1/apps/" + config.Project + "/services"
+	res, err := sendRequest(config, "GET", config.Project, servicesUrl, nil)
 	if err != nil {
-		log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
-		return nil
-	}
-
-	res, err := sendRequest(config, "GET", config.Project, listUrl, nil)
-	if err != nil {
-		log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", listUrl, err)
+		log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", servicesUrl, err)
 		return nil
 	}
 
@@ -69,31 +54,24 @@ func testSweepAppEngineFlexibleAppVersion(region string) error {
 	for _, ri := range rl {
 		obj := ri.(map[string]interface{})
 		if obj["id"] == nil {
-			log.Printf("[INFO][SWEEPER_LOG] %s resource name was nil", resourceName)
+			log.Printf("[INFO][SWEEPER_LOG] %s resource id was nil", resourceName)
 			return nil
 		}
 
-		name := GetResourceNameFromSelfLink(obj["id"].(string))
+		id := obj["id"].(string)
 		// Only sweep resources with the test prefix
-		if !strings.HasPrefix(name, "tf-test") {
+		if !strings.HasPrefix(id, "tf-test") {
 			nonPrefixCount++
 			continue
 		}
 
-		deleteTemplate := "https://appengine.googleapis.com/v1/apps/{{project}}/services/{{service}}"
-		deleteUrl, err := replaceVars(d, config, deleteTemplate)
-		if err != nil {
-			log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
-			return nil
-		}
-		deleteUrl = deleteUrl + name
-
+		deleteUrl := servicesUrl + "/" + id
 		// Don't wait on operations as we may have a lot to delete
 		_, err = sendRequest(config, "DELETE", config.Project, deleteUrl, nil)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] Error deleting for url %s : %s", deleteUrl, err)
 		} else {
-			log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s resource: %s", resourceName, d.Get("service"))
+			log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s resource: %s", resourceName, id)
 		}
 	}
 
