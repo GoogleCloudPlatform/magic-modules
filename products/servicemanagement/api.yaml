@@ -1,0 +1,38 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: ServiceManagement
+display_name: Service Management
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://servicemanagement.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloudplatform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Service Management API
+    url: https://console.cloud.google.com/apis/library/servicemanagement.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Service'
+    base_url: services
+    self_link: services/{{serviceName}}
+    description: |
+      A service that is managed by Google Service Management
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'serviceName'
+        description: The name of the service.
+        required: true
