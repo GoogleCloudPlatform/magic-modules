@@ -120,7 +120,10 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 	}
 
 	srv := d.Get("service").(string)
-	err = BatchRequestEnableService(srv, project, d, config)
+	err = retryTimeDuration(func() (getErr error) {
+		getErr = BatchRequestEnableService(srv, project, d, config)
+		return getErr
+	}, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}
@@ -142,7 +145,12 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	}
 	srv := d.Get("service").(string)
 
-	servicesRaw, err := BatchRequestReadServices(project, d, config)
+	var servicesRaw interface{}
+	err = retryTimeDuration(func() (getErr error) {
+		servicesRaw, getErr = BatchRequestReadServices(project, d, config)
+		return getErr
+	}, d.Timeout(schema.TimeoutRead))
+
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
 	}
