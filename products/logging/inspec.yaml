@@ -17,6 +17,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     resource_name: google_project_metric
     plural_custom_logic: third_party/inspec/custom_functions/google_project_metrics.erb
     plural_custom_attr_readers: ['metric_type']
+    singular_extra_examples: third_party/inspec/documentation/google_project_metric.md
+    plural_extra_examples: third_party/inspec/documentation/google_project_metrics.md
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: metric_name
@@ -29,10 +31,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # Creating a log sink requires organization level privileges
     name: ProjectSink
     privileged: true
+    singular_extra_examples: third_party/inspec/documentation/google_logging_project_sink.md
+    plural_extra_examples: third_party/inspec/documentation/google_logging_project_sinks.md
   FolderExclusion: !ruby/object:Overrides::Inspec::ResourceOverride
     # Creating a folder requires organization level privileges
     privileged: true
   ProjectExclusion: !ruby/object:Overrides::Inspec::ResourceOverride
+    singular_extra_examples: third_party/inspec/documentation/google_logging_project_exclusion.md
     privileged: true
   FolderLogSink: !ruby/object:Overrides::Inspec::ResourceOverride
     # Creating a folder requires organization level privileges
