@@ -110,16 +110,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           bucket_name: "appengine-test-bucket"
   ServiceSplitTraffic: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "apps/{{project}}/services/{{service_id}}"
-    import_format: ["apps/{{project}}/services/{{service_id}}"]
+    id_format: "apps/{{project}}/services/{{service}}"
+    import_format: ["apps/{{project}}/services/{{service}}"]
     mutex: "apps/{{project}}"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
     properties:
-      id: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: 'service_id'
-        ignore_read: true  
       split: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true    
       split.allocations: !ruby/object:Overrides::Terraform::PropertyOverride

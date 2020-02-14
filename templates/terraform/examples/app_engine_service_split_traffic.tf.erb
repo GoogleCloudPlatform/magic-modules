@@ -46,7 +46,7 @@ resource "google_app_engine_standard_app_version" "myapp_v2" {
 }
 
 resource "google_app_engine_service_split_traffic" "myapp" {
-  service_id = "${google_app_engine_standard_app_version.myapp_v2.service}"
+  service = "${google_app_engine_standard_app_version.myapp_v2.service}"
   migrate_traffic = false
   split {
     shard_by = "IP"
@@ -60,7 +60,7 @@ resource "google_app_engine_service_split_traffic" "myapp" {
 
 
 resource "google_app_engine_service_split_traffic" "myapp2" {
-  service_id = "${google_app_engine_standard_app_version.myapp_v2.service}"
+  service = "${google_app_engine_standard_app_version.myapp_v2.service}"
   migrate_traffic = false
   split {
     allocations = {

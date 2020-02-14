@@ -520,9 +520,10 @@ objects:
     description: |
       Traffic routing configuration for versions within a single service. Traffic splits define how traffic directed to the service is assigned to versions.
     base_url: 'apps/{{project}}/services'
-    create_url: 'apps/{{project}}/services/{{service_id}}?migrateTraffic={{migrate_traffic}}&updateMask=split'
+    self_link: 'apps/{{project}}/services/{{service}}'
+    create_url: 'apps/{{project}}/services/{{service}}?migrateTraffic={{migrate_traffic}}&updateMask=split'
     create_verb: :PATCH
-    update_url: 'apps/{{project}}/services/{{service_id}}?migrateTraffic={{migrate_traffic}}'
+    update_url: 'apps/{{project}}/services/{{service}}?migrateTraffic={{migrate_traffic}}'
     update_verb: :PATCH
     update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -554,12 +555,10 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'service'
+        url_params_only: true
+        required: true
         description: |
           The name of the service these settings apply to.
-      - !ruby/object:Api::Type::String
-        name: 'id'
-        description: |
-           Relative name of the service within the application. Example default.
       - !ruby/object:Api::Type::NestedObject
         name: 'split'
         description: |
