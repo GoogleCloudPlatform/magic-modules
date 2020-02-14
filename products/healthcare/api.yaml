@@ -185,15 +185,15 @@ objects:
         required: true
         input: true
       - !ruby/object:Api::Type::Enum
-          name: version
-          description: |
-            The FHIR specification version.
-          required: false # TODO: Make this field required in GA.
-          default_value: :STU3
-          values:
-            - :DSTU2
-            - :STU3
-            - :R4
+        name: version
+        description: |
+          The FHIR specification version.
+        required: false # TODO: Make this field required in GA.
+        default_value: :STU3
+        values:
+          - :DSTU2
+          - :STU3
+          - :R4
       - !ruby/object:Api::Type::Boolean
         name: 'enableUpdateCreate'
         description: |
