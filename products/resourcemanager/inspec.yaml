@@ -39,6 +39,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     self_link: '{{name}}'
     base_url: organizations:search
     resource_name: google_organization
+    singular_extra_examples: third_party/inspec/documentation/google_organization.md
+    plural_extra_examples: third_party/inspec/documentation/google_organizations.md
     plural_fetch_verb: :POST
   Folder: !ruby/object:Overrides::Inspec::ResourceOverride
     product_url: https://cloudresourcemanager.googleapis.com/v2/

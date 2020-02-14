@@ -18,10 +18,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     name: CustomRole
     base_url: projects/{{project}}/roles?view=FULL
     self_link: projects/{{project}}/roles/{{name}}
+    singular_extra_examples: third_party/inspec/documentation/google_project_iam_custom_role.md
     privileged: true
   ServiceAccount: !ruby/object:Overrides::Inspec::ResourceOverride
     resource_name: google_service_account
     privileged: true
+    singular_extra_examples: third_party/inspec/documentation/google_service_account.md
+    plural_extra_examples: third_party/inspec/documentation/google_service_accounts.md
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: service_account_name
@@ -33,6 +36,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         override_name: service_account_email
   ServiceAccountKey: !ruby/object:Overrides::Inspec::ResourceOverride
     resource_name: google_service_account_key
+    singular_extra_examples: third_party/inspec/documentation/google_service_account_key.md
+    plural_extra_examples: third_party/inspec/documentation/google_service_account_keys.md
     privileged: true
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
