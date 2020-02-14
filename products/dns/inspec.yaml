@@ -15,6 +15,8 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   # Handwritten managed zone resources exist in inspec-gcp already
   ManagedZone: !ruby/object:Overrides::Inspec::ResourceOverride
+    singular_extra_examples: 'third_party/inspec/documentation/google_dns_managed_zone.md'
+    plural_extra_examples: 'third_party/inspec/documentation/google_dns_managed_zones.md'
     additional_functions: third_party/inspec/custom_functions/dns_managed_zone.erb
     plural_custom_logic: third_party/inspec/custom_functions/dns_managed_zones.erb
     plural_custom_attr_readers: ['dnssec_config_state']

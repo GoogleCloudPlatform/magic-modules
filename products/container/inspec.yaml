@@ -15,6 +15,8 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Inspec::ResourceOverride
     additional_functions: third_party/inspec/custom_functions/google_container_cluster.erb
+    singular_extra_examples: 'third_party/inspec/documentation/google_container_cluster.md'
+    plural_extra_examples: 'third_party/inspec/documentation/google_container_clusters.md'
     properties:
       kubectlPath: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
@@ -27,6 +29,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       network: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: cluster_network
   NodePool: !ruby/object:Overrides::Inspec::ResourceOverride
+    singular_extra_examples: 'third_party/inspec/documentation/google_container_node_pool.md'
+    plural_extra_examples: 'third_party/inspec/documentation/google_container_node_pools.md'
     base_url: projects/{{project}}/locations/{{location}}/clusters/{{cluster_name}}/nodePools
     self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_name}}/nodePools/{{nodepool_name}}'
     properties:

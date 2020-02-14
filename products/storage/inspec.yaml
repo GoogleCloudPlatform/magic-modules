@@ -18,6 +18,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       base_url: 'b/{{bucket}}'
       fetch_iam_policy_method: 'iam'
     base_url: b?project={{project}}&projection=full
+    singular_extra_examples: third_party/inspec/documentation/google_storage_bucket.md
+    plural_extra_examples: third_party/inspec/documentation/google_storage_buckets.md
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: bucket_name
@@ -31,6 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     name: ObjectACL
     singular_only: true
     privileged: true
+    singular_extra_examples: third_party/inspec/documentation/google_storage_object_acl.md
     additional_functions: third_party/inspec/custom_functions/bucket_name_from_params.erb
     properties:
       bucket: !ruby/object:Overrides::Inspec::PropertyOverride
@@ -38,12 +41,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   DefaultObjectACL: !ruby/object:Overrides::Inspec::ResourceOverride
     singular_only: true
     privileged: true
+    singular_extra_examples: third_party/inspec/documentation/google_storage_default_object_acl.md
     additional_functions: third_party/inspec/custom_functions/bucket_name_from_params.erb
     properties:
       bucket: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
   BucketAccessControl: !ruby/object:Overrides::Inspec::ResourceOverride
     name: BucketACL
+    singular_extra_examples: third_party/inspec/documentation/google_storage_bucket_acl.md
     singular_only: true
     privileged: true
     additional_functions: third_party/inspec/custom_functions/bucket_name_from_params.erb
@@ -54,6 +59,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     name: BucketObject
     privileged: true
     additional_functions: third_party/inspec/custom_functions/bucket_object.erb
+    singular_extra_examples: third_party/inspec/documentation/google_storage_bucket_object.md
+    plural_extra_examples: third_party/inspec/documentation/google_storage_bucket_objects.md
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: object_name
