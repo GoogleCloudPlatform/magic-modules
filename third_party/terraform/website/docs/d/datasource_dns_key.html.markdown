@@ -60,7 +60,7 @@ The `key_signing_keys` and `zone_signing_keys` block supports:
   * `algorithm` - String mnemonic specifying the DNSSEC algorithm of this key. Immutable after creation time. Possible values are `ecdsap256sha256`, `ecdsap384sha384`, `rsasha1`, `rsasha256`, and `rsasha512`.
   * `creation_time` - The time that this resource was created in the control plane. This is in RFC3339 text format.
   * `description` - A mutable string of at most 1024 characters associated with this resource for the user's convenience.
-  * `digest` - A list of cryptographic hashes of the DNSKEY resource record associated with this DnsKey. These digests are needed to construct a DS record that points at this DNS key. Each contains:
+  * `digests` - A list of cryptographic hashes of the DNSKEY resource record associated with this DnsKey. These digests are needed to construct a DS record that points at this DNS key. Each contains:
     - `digest` - The base-16 encoded bytes of this digest. Suitable for use in a DS resource record.
     - `type` - Specifies the algorithm used to calculate this digest. Possible values are `sha1`, `sha256` and `sha384`
   * `id` - Unique identifier for the resource; defined by the server.
