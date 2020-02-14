@@ -8,6 +8,8 @@ import (
 	"google.golang.org/api/dns/v1"
 )
 
+// DNSSEC Algorithm Numbers: https://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xhtml
+// The following are algorithms that are supported by Cloud DNS
 var dnssecAlgoNums = map[string]int{
 	"rsasha1":         5,
 	"rsasha256":       8,
@@ -16,6 +18,8 @@ var dnssecAlgoNums = map[string]int{
 	"ecdsap384sha384": 14,
 }
 
+// DS RR Digest Types: https://www.iana.org/assignments/ds-rr-types/ds-rr-types.xhtml
+// The following are digests that are supported by Cloud DNS
 var dnssecDigestType = map[string]int{
 	"sha1":   1,
 	"sha256": 2,
