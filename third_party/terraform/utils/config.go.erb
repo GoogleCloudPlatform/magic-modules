@@ -211,7 +211,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	c.tokenSource = tokenSource
 
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, &http.Client{
-		Transport: cleanhttp.DefaultPooledTransport()
+		Transport: cleanhttp.DefaultPooledTransport(),
 	})
 	client := oauth2.NewClient(ctx, tokenSource)
 	client.Transport = logging.NewTransport("Google", client.Transport)
