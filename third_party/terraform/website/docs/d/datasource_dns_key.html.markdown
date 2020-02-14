@@ -1,7 +1,7 @@
 ---
 subcategory: "Cloud DNS"
 layout: "google"
-page_title: "Google: google_dns_key"
+page_title: "Google: google_dns_keys"
 sidebar_current: "docs-google-datasource-dns-key"
 description: |-
   Get DNSKEY and DS records of DNSSEC-signed managed zones.
@@ -27,13 +27,13 @@ resource "google_dns_managed_zone" "foo" {
   }
 }
 
-data "google_dns_key" "foo_dns_key" {
+data "google_dns_keys" "foo_dns_key" {
   managed_zone = google_dns_managed_zone.foo.id
 }
 
 output "foo_dns_ds_record" {
   description = "DS record of the foo subdomain."
-  value       = data.google_dns_key.foo_dns_key.key_signing_keys[0].ds_record
+  value       = data.google_dns_keys.foo_dns_key.key_signing_keys[0].ds_record
 }
 ```
 

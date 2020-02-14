@@ -22,9 +22,9 @@ var dnssecDigestType = map[string]int{
 	"sha384": 4,
 }
 
-func dataSourceDNSKey() *schema.Resource {
+func dataSourceDNSKeys() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDNSKeyRead,
+		Read: dataSourceDNSKeysRead,
 
 		Schema: map[string]*schema.Schema{
 			"managed_zone": {
@@ -184,7 +184,7 @@ func flattenDigests(dnsKeyDigests []*dns.DnsKeyDigest) []map[string]interface{} 
 	return digests
 }
 
-func dataSourceDNSKeyRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceDNSKeysRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
 	fv, err := parseProjectFieldValue("managedZones", d.Get("managed_zone").(string), "project", d, config, false)
