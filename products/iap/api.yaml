@@ -135,3 +135,66 @@ objects:
         name: 'name'
         description: Name of the instance.
         required: true
+  - !ruby/object:Api::Resource
+    name: 'Brand'
+    base_url: 'projects/{{project}}/brands'
+    self_link: '{{name}}'
+    input: true
+    description: |
+      OAuth brand data.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Output only. Identifier of the brand. NOTE: GCP project number achieves
+          the same brand identification purpose as only one brand per project can be created.
+        output: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'supportEmail'
+        description: |
+          Support email displayed on the OAuth consent screen. When called using a service account,
+          the support email should refer to a group to which the service account is an owner of.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'applicationTitle'
+        description: |
+          Application name displayed on OAuth consent screen.
+        required: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'orgInternalOnly'
+        description: |
+          Whether the brand is only intended for usage inside the GSuite organization only.
+        output: true
+  - !ruby/object:Api::Resource
+    name: 'IdentityAwareProxyClient'
+    base_url: '{{brand}}/identityAwareProxyClients'
+    self_link: '{{name}}'
+    input: true
+    description: |
+      Contains the data that describes an Identity Aware Proxy owned client.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Output only. Unique identifier of the OAuth client.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'brand'
+        description: |
+          Identifier of the brand to which this `IdentityAwareProxyClients``
+          is attached to.
+        input: true
+        required: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'secret'
+        description: |
+          Output only. Client secret of the OAuth client.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          Human-friendly name given to the OAuth client.
+        required: true

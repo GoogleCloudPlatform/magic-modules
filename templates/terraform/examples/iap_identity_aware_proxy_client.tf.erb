@@ -1,0 +1,21 @@
+resource "google_project" "project" {
+  project_id = "tf-test%{random_suffix}"
+  name       = "tf-test%{random_suffix}"
+  org_id     = "%{org_id}"
+}
+
+resource "google_project_service" "project_service" {
+  project = google_project.project.project_id
+  service = "iap.googleapis.com"
+}
+
+resource "google_iap_brand" "project_brand" {
+  support_email     = "support@example.com"
+  application_title = "Cloud IAP protected Application"
+  project           = google_project_service.project_service.project
+}
+
+resource "google_iap_identity_aware_proxy_client" "project_client" {
+  display_name = "Test Client"
+  brand        =  google_iap_brand.project_brand.name
+}
