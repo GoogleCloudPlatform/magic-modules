@@ -340,7 +340,6 @@ func testAccBigQueryTableRangePartitioning(datasetID, tableID string) string {
 	}
 
 	resource "google_bigquery_table" "test" {
-		provider   = google-beta
 		table_id   = "%s"
 		dataset_id = google_bigquery_dataset.test.dataset_id
 

@@ -913,18 +913,17 @@ func expandRangePartitioning(configured interface{}) (*bigquery.RangePartitionin
 		return nil, nil
 	}
 
-	rpJson := configured.([]interface{})
-	if len(rpJson) == 0 || rpJson[0] == nil {
+	rpList := configured.([]interface{})
+	if len(rpList) == 0 || rpList[0] == nil {
 		return nil, errors.New("Error casting range partitioning interface to expected structure")
 	}
 
-	rpRaw := rpJson[0].([]map[string]interface{})
-	rprRaw := rpRaw["range"].(map[string]interface{})
+	rangePartJson := rpList[0].(map[string]interface{})
 	rp := &bigquery.RangePartitioning{
-		Field: rpRaw["field"].(string),
+		Field: rangePartJson["field"].(string),
 	}
 
-	if v, ok := rpRaw["range"]; ok && v != nil {
+	if v, ok := rangePartJson["range"]; ok && v != nil {
 		rangeLs := v.([]interface{})
 		if len(rangeLs) != 1 || rangeLs[0] == nil {
 			return nil, errors.New("Non-empty range must be given for range partitioning")
