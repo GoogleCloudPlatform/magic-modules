@@ -1,6 +1,7 @@
 resource "google_healthcare_fhir_store" "default" {
   name    = "<%= ctx[:vars]['fhir_store_name'] %>"
   dataset = google_healthcare_dataset.dataset.id
+  version = "R4"
 
   enable_update_create          = false
   disable_referential_integrity = false
