@@ -68,6 +68,7 @@ func isIoEOFError(err error) (bool, string) {
 }
 
 const connectionResetByPeerErr = ": connection reset by peer"
+
 func isConnectionResetNetworkError(err error) (bool, string) {
 	if strings.HasSuffix(err.Error(), connectionResetByPeerErr) {
 		//TODO(emilymye, TPG#3957): Remove these debug logs
