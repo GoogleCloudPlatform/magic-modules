@@ -1,4 +1,4 @@
-FROM gcr.io/magic-modules/go-ruby:1.3-2.6.0
+FROM gcr.io/magic-modules/go-ruby:1.13.8-2.6.0
 
 # Install python & python libraries.
 RUN apt-get update
