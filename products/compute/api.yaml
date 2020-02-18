@@ -317,9 +317,7 @@ objects:
           - !ruby/object:Api::Type::Array
             name: 'customMetricUtilizations'
             description: |
-              Defines the CPU utilization policy that allows the autoscaler to
-              scale based on the average CPU utilization of a managed instance
-              group.
+              Configuration parameters of autoscaling based on a custom metric.
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
               - !ruby/object:Api::Type::String
@@ -7779,9 +7777,7 @@ objects:
           - !ruby/object:Api::Type::Array
             name: 'customMetricUtilizations'
             description: |
-              Defines the CPU utilization policy that allows the autoscaler to
-              scale based on the average CPU utilization of a managed instance
-              group.
+              Configuration parameters of autoscaling based on a custom metric.
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
               - !ruby/object:Api::Type::String
