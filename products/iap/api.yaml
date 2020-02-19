@@ -141,20 +141,27 @@ objects:
     self_link: '{{name}}'
     input: true
     description: |
-      OAuth brand data.
+      OAuth brand data. Only "Organization Internal" brands can be created
+      programatically via API. To convert it into an external brands
+      please use the GCP Console.
     parameters:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
-          Output only. Identifier of the brand. NOTE: GCP project number achieves
-          the same brand identification purpose as only one brand per project can be created.
+          Output only. Identifier of the brand, in the format
+          `projects/{project_number}/brands/{brand_id}`. NOTE: The brand
+          identification corresponds to the project number as only one
+          brand per project can be created.
         output: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'supportEmail'
         description: |
-          Support email displayed on the OAuth consent screen. When called using a service account,
-          the support email should refer to a group to which the service account is an owner of.
+          Support email displayed on the OAuth consent screen. Can be either a
+          user or group email. When a user email is specified, the caller must
+          be the user with the associated email address. When a group email is
+          specified, the caller can be either a user or a service account which
+          is an owner of the specified group in Cloud Identity.
         required: true
       - !ruby/object:Api::Type::String
         name: 'applicationTitle'
@@ -167,7 +174,7 @@ objects:
           Whether the brand is only intended for usage inside the GSuite organization only.
         output: true
   - !ruby/object:Api::Resource
-    name: 'IdentityAwareProxyClient'
+    name: 'Client'
     base_url: '{{brand}}/identityAwareProxyClients'
     self_link: '{{name}}'
     input: true
@@ -182,8 +189,9 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'brand'
         description: |
-          Identifier of the brand to which this `IdentityAwareProxyClients``
-          is attached to.
+          Identifier of the brand to which this client
+          is attached to. The format is
+          `projects/{project_number}/brands/{brand_id}/identityAwareProxyClients/{client_id}`.
         input: true
         required: true
         url_param_only: true

@@ -172,13 +172,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
       custom_import: templates/terraform/custom_import/iap_brand.go.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
-  IdentityAwareProxyClient: !ruby/object:Overrides::Terraform::ResourceOverride
+  Client: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: '{{brand}}/identityAwareProxyClients/{{client_id}}'
     self_link: '{{brand}}/identityAwareProxyClients/{{client_id}}'
     import_format: ['{{brand}}/identityAwareProxyClients/{{client_id}}']
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "iap_identity_aware_proxy_client"
+        name: "iap_client"
         primary_resource_id: "project_client"
         vars:
           project_id: 'brand-proj-'
@@ -190,10 +190,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      secret: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      post_create: templates/terraform/post_create/iap_identity_aware_proxy_client.go.erb
-      custom_import: templates/terraform/custom_import/iap_identity_aware_proxy_client.go.erb
-      extra_schema_entry: templates/terraform/extra_schema_entry/iap_identity_aware_proxy_client.erb
+      post_create: templates/terraform/post_create/iap_client.go.erb
+      custom_import: templates/terraform/custom_import/iap_client.go.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/iap_client.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

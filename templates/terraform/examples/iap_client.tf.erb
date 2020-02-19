@@ -15,7 +15,7 @@ resource "google_iap_brand" "project_brand" {
   project           = google_project_service.project_service.project
 }
 
-resource "google_iap_identity_aware_proxy_client" "project_client" {
+resource "google_iap_client" "project_client" {
   display_name = "Test Client"
   brand        =  google_iap_brand.project_brand.name
 }
