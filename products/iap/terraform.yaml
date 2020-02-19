@@ -188,14 +188,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       attributes: |
         * `client_id`: The OAuth2 ID of the client.
     properties:
-      name: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
+      clientId: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       secret: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/iap_client.go.erb
       custom_import: templates/terraform/custom_import/iap_client.go.erb
-      extra_schema_entry: templates/terraform/extra_schema_entry/iap_client.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

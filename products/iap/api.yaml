@@ -176,13 +176,14 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Client'
     base_url: '{{brand}}/identityAwareProxyClients'
-    self_link: '{{name}}'
+    self_link: '{{client_id}}'
     input: true
     description: |
       Contains the data that describes an Identity Aware Proxy owned client.
     parameters:
       - !ruby/object:Api::Type::String
-        name: 'name'
+        name: 'clientId'
+        api_name: name
         description: |
           Output only. Unique identifier of the OAuth client.
         output: true

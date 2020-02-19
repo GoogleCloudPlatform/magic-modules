@@ -9,8 +9,8 @@ nameParts := strings.Split(d.Get("brand").(string), "/")
 if len(nameParts) != 6 {
 	return nil, fmt.Errorf(
 			"Saw %s when the name is expected to have shape %s",
-			d.Get("name"),
-			"{{brand}}/identityAwareProxyClients/{{client_id}}",
+			d.Get("brand").(string),
+			"projects/{{project_number}}/brands/{{brand_id}}/identityAwareProxyClients/{{client_id}}",
 		)
 }
 
