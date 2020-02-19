@@ -37,6 +37,8 @@ module Provider
               (choices_description(prop) \
                if prop.is_a?(Api::Type::Enum) && prop.contain_extra_docs)
             ].flatten.compact,
+            'elements' => (python_type(prop.item_type) \
+              if prop.is_a?(Api::Type::Array) && python_type(prop.item_type)),
             'required' => required,
             'default' => (
               if prop.default_value&.is_a?(::Hash)
