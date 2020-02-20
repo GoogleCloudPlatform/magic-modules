@@ -1132,15 +1132,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RegionAutoscaler: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "region_autoscaler_beta"
-        primary_resource_id: "foobar"
-        min_version: 'beta'
-        vars:
-          region_autoscaler_name: "my-region-autoscaler"
-          instance_template_name: "my-instance-template"
-          target_pool_name: "my-target-pool"
-          rigm_name: "my-region-igm"
-      - !ruby/object:Provider::Terraform::Examples
         name: "region_autoscaler_basic"
         primary_resource_id: "foobar"
         vars:
