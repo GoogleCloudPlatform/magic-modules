@@ -822,6 +822,43 @@ objects:
       description: Configuration fields that define the channel and its behavior. The
         permissible and required labels are specified in the NotificationChannelDescriptor.labels
         of the NotificationChannelDescriptor corresponding to the type field.
+    - !ruby/object:Api::Type::NestedObject
+      name: sensitiveLabels
+      # This is a helper object for Terraform only
+      exclude: true
+      url_param_only: true
+      description: |
+        Different notification type behaviors are configured primarily using the the `labels` field on this
+        resource. This block contains the labels which contain secrets or passwords so that they can be marked
+        sensitive and hidden from plan output.
+
+        Credentials may not be specified in both locations and will cause an error. Changing from one location
+        to a different credential configuration in the config will require an apply to update state.
+      properties:
+        - !ruby/object:Api::Type::String
+          name: authToken
+          exactly_one_of:
+            - sensitive_labels.0.auth_token
+            - sensitive_labels.0.password
+            - sensitive_labels.0.service_key
+          description: |
+            An authorization token for a notification channel. Channel types that support this field include: slack
+        - !ruby/object:Api::Type::String
+          name: password
+          exactly_one_of:
+            - sensitive_labels.0.auth_token
+            - sensitive_labels.0.password
+            - sensitive_labels.0.service_key
+          description: |
+            An password for a notification channel. Channel types that support this field include: webhook_basicauth
+        - !ruby/object:Api::Type::String
+          name: serviceKey
+          exactly_one_of:
+            - sensitive_labels.0.auth_token
+            - sensitive_labels.0.password
+            - sensitive_labels.0.service_key
+          description: |
+            An servicekey token for a notification channel. Channel types that support this field include: pagerduty
     - !ruby/object:Api::Type::String
       name: name
       description: |

@@ -1,0 +1,13 @@
+
+var sensitiveLabels = []string{"auth_token", "service_key", "password"}
+
+func sensitiveLabelCustomizeDiff(diff *schema.ResourceDiff, v interface{}) error {
+	for _, sl := range sensitiveLabels {
+		mapLabel := diff.Get("labels." + sl).(string)
+		authLabel := diff.Get("sensitive_labels.0." + sl).(string)
+		if mapLabel != "" && authLabel != "" {
+			return fmt.Errorf("Sensitive label [%s] cannot be set in both `labels` and the `sensitive_labels` block.", sl)
+		}
+	}
+	return nil
+}
