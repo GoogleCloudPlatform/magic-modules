@@ -515,4 +515,69 @@ objects:
                 Pathname within the host. Must start with a "/". A single "*" can be included at the end of the path.
                 The sum of the lengths of the domain and path may not exceed 100 characters.
               required: true
+  - !ruby/object:Api::Resource
+    name: 'ServiceSplitTraffic'
+    description: |
+      Traffic routing configuration for versions within a single service. Traffic splits define how traffic directed to the service is assigned to versions.
+    base_url: 'apps/{{project}}/services'
+    self_link: 'apps/{{project}}/services/{{service}}'
+    create_url: 'apps/{{project}}/services/{{service}}?migrateTraffic={{migrate_traffic}}&updateMask=split'
+    create_verb: :PATCH
+    update_url: 'apps/{{project}}/services/{{service}}?migrateTraffic={{migrate_traffic}}'
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'appengine#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::Boolean
+        name: 'migrate_traffic'
+        url_param_only: true
+        description: |
+          If set to true traffic will be migrated to this version.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'service'
+        api_name: 'id'
+        required: true
+        description: |
+          The name of the service these settings apply to.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'split'
+        description: |
+           Mapping that defines fractional HTTP traffic diversion to different versions within the service.
+        required: true
+        properties:      
+          - !ruby/object:Api::Type::Enum
+            name: 'shardBy'
+            description: |
+              Mechanism used to determine which version a request is sent to. The traffic selection algorithm will be stable for either type until allocations are changed.
+            values:
+              - :UNSPECIFIED
+              - :COOKIE
+              - :IP
+              - :RANDOM
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'allocations'
+            required: true
+            description: |
+              Mapping from version IDs within the service to fractional (0.000, 1] allocations of traffic for that version. Each version can be specified only once, but some versions in the service may not have any traffic allocation. Services that have traffic allocated cannot be deleted until either the service is deleted or their traffic allocation is removed. Allocations must sum to 1. Up to two decimal place precision is supported for IP-based splits and up to three decimal places is supported for cookie-based splits.           
+              
               
