@@ -555,7 +555,7 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'service'
-        url_param_only: true
+        api_name: 'id'
         required: true
         description: |
           The name of the service these settings apply to.
