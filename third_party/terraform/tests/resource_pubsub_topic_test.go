@@ -21,7 +21,7 @@ func TestAccPubsubTopic_update(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    providers,
-		CheckDestroy: testAccCheckPubsubTopicDestroy,
+		CheckDestroy: testAccCheckPubsubTopicDestroyProducer(providers["google"].(*schema.Provider)),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPubsubTopic_update(topic, "foo", "bar"),

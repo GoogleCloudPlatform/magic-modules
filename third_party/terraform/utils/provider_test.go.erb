@@ -174,7 +174,7 @@ func getTestAccProviders(testName string) map[string]terraform.ResourceProvider 
 	provRand := random.Provider().(*schema.Provider)
 	if v := os.Getenv("VCR_ENABLED"); v != "" {
 		old := prov.ConfigureFunc
-		ap.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+		prov.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
 			r, err := getCachedConfig(d, old, testName)
 			return r, err
 		}
