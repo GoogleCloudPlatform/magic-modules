@@ -100,19 +100,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       envVariables: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
-      threadsafe: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
-      instanceClass: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true   
-      runtimeApiVersion: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      automaticScaling.maxConcurrentRequests: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
+      network.subnetworkName: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'subnetwork'
       betaSettings: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      livenessCheck: !ruby/object:Overrides::Terraform::PropertyOverride
+      # maxConcurrentRequests defaults to a runtime-specific value
+      automaticScaling.maxConcurrentRequests: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      readinessCheck: !ruby/object:Overrides::Terraform::PropertyOverride
+      # runtimeApiVersion defaults to a runtime-specific value
+      runtimeApiVersion: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -123,7 +119,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           project_id: "tf-test-project"
           bucket_name: "appengine-static-content"
-          service_name: "tf-test-service"
+          service_name: "service-"
         test_env_vars:
           org_id: :ORG_ID
   Service: !ruby/object:Overrides::Terraform::ResourceOverride

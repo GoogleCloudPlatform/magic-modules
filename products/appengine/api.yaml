@@ -207,6 +207,10 @@ objects:
         output: true
         description: |
            Relative name of the service within the application. Example default.
+  # StandardAppVersion and FlexibleAppVersion use the same API endpoint (apps.services.versions)
+  # They are split apart as some of the fields will are necessary for one and not the other, and
+  # other fields may have different defaults.  However, some fields are the same.  If fixing a bug
+  # in one, please check the other for the same fix.
   - !ruby/object:Api::Resource
     name: 'StandardAppVersion'
     description: |
@@ -224,7 +228,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
-          'https://cloud.google.com/appengine/docs/admin-api/deploying-overview'
+          'https://cloud.google.com/appengine/docs/standard'
       api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services.versions'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
@@ -295,7 +299,6 @@ objects:
             description: |
               Security (HTTPS) enforcement for this URL.
             values:
-              - :SECURE_UNSPECIFIED
               - :SECURE_DEFAULT
               - :SECURE_NEVER
               - :SECURE_OPTIONAL
@@ -306,7 +309,6 @@ objects:
               Methods to restrict access to a URL based on login status.
             required: false
             values:
-              - :LOGIN_UNSPECIFIED
               - :LOGIN_OPTIONAL
               - :LOGIN_ADMIN
               - :LOGIN_REQUIRED
@@ -316,16 +318,14 @@ objects:
               Actions to take when the user is not logged in.
             required: false
             values:
-              - :AUTH_FAIL_ACTION_UNSPECIFIED
               - :AUTH_FAIL_ACTION_REDIRECT
               - :AUTH_FAIL_ACTION_UNAUTHORIZED
           - !ruby/object:Api::Type::Enum
             name: 'redirectHttpResponseCode'
             description: |
-              Redirect codes.
+              30x code to use when performing redirects for the secure field.
             required: false
             values:
-              - :REDIRECT_HTTP_RESPONSE_CODE_UNSPECIFIED
               - :REDIRECT_HTTP_RESPONSE_CODE_301
               - :REDIRECT_HTTP_RESPONSE_CODE_302
               - :REDIRECT_HTTP_RESPONSE_CODE_303
@@ -459,14 +459,20 @@ objects:
           Instance class that is used to run this version. Valid values are
           AutomaticScaling F1, F2, F4, F4_1G
           (Only AutomaticScaling is supported at the moment)
+  # StandardAppVersion and FlexibleAppVersion use the same API endpoint (apps.services.versions)
+  # They are split apart as some of the fields will are necessary for one and not the other, and
+  # other fields may have different defaults.  However, some fields are the same.  If fixing a bug
+  # in one, please check the other for the same fix.
   - !ruby/object:Api::Resource
     name: 'FlexibleAppVersion'
     description: |
-      Flexible App Version resource to create a new version of flexible GAE Application.
+      Flexible App Version resource to create a new version of flexible GAE Application. Based on Google Compute Engine,
+      the App Engine flexible environment automatically scales your app up and down while also balancing the load.
+      Learn about the differences between the standard environment and the flexible environment
+      at https://cloud.google.com/appengine/docs/the-appengine-environments.
     collection_url_key: 'versions'
     base_url: 'apps/{{project}}/services/{{service}}/versions'
     delete_url: 'apps/{{project}}/services/{{service}}/versions/{{version_id}}'
-    delete_verb: :DELETE
     update_url: 'apps/{{project}}/services/{{service}}/versions'
     update_verb: :POST
     update_mask: false
@@ -474,7 +480,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
-          'https://cloud.google.com/appengine/docs/admin-api/deploying-overview'
+          'https://cloud.google.com/appengine/docs/flexible'
       api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services.versions'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
@@ -627,10 +633,6 @@ objects:
         name: 'runtimeChannel'
         description: |
           The channel of the runtime to use. Only available for some runtimes.
-      - !ruby/object:Api::Type::Boolean
-        name: 'threadsafe'
-        description: |
-          Whether multiple requests can be dispatched to this version at once.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'betaSettings'
         description: |
@@ -653,159 +655,6 @@ objects:
         name: 'runtimeMainExecutablePath'
         description: |
           The path or name of the app's main executable.
-      - !ruby/object:Api::Type::Array
-        name: 'handlers'
-        description: |
-          An ordered list of URL-matching patterns that should be applied to incoming requests. 
-          The first matching URL handles the request and other request handlers are not attempted.
-        item_type: !ruby/object:Api::Type::NestedObject
-          properties:
-          - !ruby/object:Api::Type::String
-            name: 'urlRegex'
-            required: true
-            description: |
-              URL prefix. Uses regular expression syntax, which means regexp special characters must be escaped, but should not contain groupings. 
-              All URLs that begin with this prefix are handled by this handler, using the portion of the URL after the prefix as part of the file path.
-          - !ruby/object:Api::Type::Enum
-            name: 'securityLevel'
-            description: |
-              Security (HTTPS) enforcement for this URL.
-            values:
-              - :SECURE_UNSPECIFIED
-              - :SECURE_DEFAULT
-              - :SECURE_NEVER
-              - :SECURE_OPTIONAL
-              - :SECURE_ALWAYS
-          - !ruby/object:Api::Type::Enum
-            name: 'login'
-            description: |
-              Methods to restrict access to a URL based on login status.
-            values:
-              - :LOGIN_UNSPECIFIED
-              - :LOGIN_OPTIONAL
-              - :LOGIN_ADMIN
-              - :LOGIN_REQUIRED
-          - !ruby/object:Api::Type::Enum
-            name: 'authFailAction'
-            description: |
-              Actions to take when the user is not logged in.
-            values:
-              - :AUTH_FAIL_ACTION_UNSPECIFIED
-              - :AUTH_FAIL_ACTION_REDIRECT
-              - :AUTH_FAIL_ACTION_UNAUTHORIZED
-          - !ruby/object:Api::Type::Enum
-            name: 'redirectHttpResponseCode'
-            description: |
-              Redirect codes.
-            values:
-              - :REDIRECT_HTTP_RESPONSE_CODE_UNSPECIFIED
-              - :REDIRECT_HTTP_RESPONSE_CODE_301
-              - :REDIRECT_HTTP_RESPONSE_CODE_302
-              - :REDIRECT_HTTP_RESPONSE_CODE_303
-              - :REDIRECT_HTTP_RESPONSE_CODE_307
-          - !ruby/object:Api::Type::NestedObject
-            name: 'script'
-            # TODO (mbang): Exactly one of script, staticFiles, or apiEndpoint must be set
-            description: |
-              Executes a script to handle the requests that match this URL pattern. 
-            properties:
-              - !ruby/object:Api::Type::String
-                name: 'scriptPath'
-                required: true
-                description: |
-                  Path to the script from the application root directory.
-          - !ruby/object:Api::Type::NestedObject
-            name: 'staticFiles'
-            # TODO (mbang): Exactly one of script, staticFiles, or apiEndpoint must be set
-            description: |
-              Files served directly to the user for a given URL, such as images, CSS stylesheets, or JavaScript source files.
-              Static file handlers describe which files in the application directory are static files, and which URLs serve them.
-            properties:
-              - !ruby/object:Api::Type::String
-                name: 'path'
-                description: |
-                  Path to the static files matched by the URL pattern, from the application root directory. The path can refer to text matched in groupings in the URL pattern.
-                required: true
-              - !ruby/object:Api::Type::String
-                name: 'uploadPathRegex'
-                description: |
-                  Regular expression that matches the file paths for all files that should be referenced by this handler.
-                required: true
-              - !ruby/object:Api::Type::KeyValuePairs
-                name: 'httpHeaders'
-                description: |
-                  HTTP headers to use for all responses from these URLs.
-                  An object containing a list of "key:value" value pairs.".
-              - !ruby/object:Api::Type::String
-                name: 'mimeType'
-                description: |
-                  MIME type used to serve all files served by this handler.
-                  Defaults to file-specific MIME types, which are derived from each file's filename extension.
-              - !ruby/object:Api::Type::String
-                name: 'expiration'
-                description: |
-                  Time a static file served by this handler should be cached by web proxies and browsers.
-                  A duration in seconds with up to nine fractional digits, terminated by 's'. Example "3.5s".
-              - !ruby/object:Api::Type::Boolean
-                name: 'requireMatchingFile'
-                description: |
-                  Whether this handler should match the request if the file referenced by the handler does not exist.
-              - !ruby/object:Api::Type::Boolean
-                name: 'applicationReadable'
-                description: |
-                  Whether files should also be uploaded as code data. By default, files declared in static file handlers are uploaded as static data and are only served to end users; they cannot be read by the application. If enabled, uploads are charged against both your code and static data storage resource quotas.        
-          - !ruby/object:Api::Type::NestedObject
-            name: 'apiEndpoint'
-            # TODO (mbang): Exactly one of script, staticFiles, or apiEndpoint must be set
-            description: |
-              Uses API Endpoints to handle requests.
-            properties:
-              - !ruby/object:Api::Type::String
-                name: 'scriptPath'
-                required: true
-                description: |
-                  Path to the script from the application root directory.
-      - !ruby/object:Api::Type::Array
-        name: 'errorHandlers'
-        description: |
-          Custom static error pages. Limited to 10KB per page.
-        item_type: !ruby/object:Api::Type::NestedObject
-          properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'errorCode'
-            required: true
-            description: |
-              Error condition this handler applies to.
-            values:
-              - :ERROR_CODE_DEFAULT
-              - :ERROR_CODE_OVER_QUOTA
-              - :ERROR_CODE_DOS_API_DENIAL
-              - :ERROR_CODE_TIMEOUT
-          - !ruby/object:Api::Type::String
-            name: 'staticFile'
-            required: true
-            description: |
-              Static file content to be served for this error.
-          - !ruby/object:Api::Type::String
-            name: 'mimeType'
-            description: |
-              MIME type of file. Defaults to text/html.
-            default_value: "text/html"
-      - !ruby/object:Api::Type::Array
-        name: 'libraries'
-        description: |
-          Configuration for third-party Python runtime libraries that are required by the application.
-        item_type: !ruby/object:Api::Type::NestedObject
-          properties:
-          - !ruby/object:Api::Type::String
-            name: 'name'
-            required: true
-            description: |
-              Name of the library. Example "django".
-          - !ruby/object:Api::Type::String
-            name: 'version'
-            description: |
-              Version of the library to select, or "latest".
       - !ruby/object:Api::Type::NestedObject
         name: 'apiConfig'
         description: |
@@ -859,9 +708,7 @@ objects:
         name: 'readinessCheck'
         description: |
           Configures readiness health checking for instances. Unhealthy instances are not put into the backend traffic rotation.
-        at_least_one_of:
-          - readiness_check
-          - liveness_check
+        required: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'path'
@@ -902,9 +749,7 @@ objects:
         name: 'livenessCheck'
         description: |
           Health checking configuration for VM instances. Unhealthy instances are killed and replaced with new instances.
-        at_least_one_of:
-          - readiness_check
-          - liveness_check
+        required: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'path'
@@ -1070,7 +915,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'vpcAccessConnector'
         description: |
-          The entrypoint for the application.
+          Enables VPC connectivity for standard apps.
         properties:
           - !ruby/object:Api::Type::String
             name: 'name'
