@@ -182,7 +182,7 @@ resource "google_compute_forwarding_rule" "foobar" {
 }
 `, poolName, ruleName)
 }
-
+<% unless version == 'ga' -%>
 func TestAccComputeForwardingRule_mirror(t *testing.T) {
 	t.Parallel()
 
@@ -196,7 +196,8 @@ func TestAccComputeForwardingRule_mirror(t *testing.T) {
 		CheckDestroy: testAccCheckComputeForwardingRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeForwardingRule_mirror(backendName, healthchechName, ruleName),
+				Config: testAccComputeForwardingRule_mirror(backendName, healthcheck
+				Name, ruleName),
 			},
 
 			{
@@ -208,18 +209,17 @@ func TestAccComputeForwardingRule_mirror(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
-func testAccComputeForwardingRule_mirror(backendName, healthchechName, ruleName string) string {
+func testAccComputeForwardingRule_mirror(backendName, healthcheckName, ruleName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar-be" {
-  name        	    = "%s"
-  health_checks 	= [google_compute_health_check.foobar-hc.self_link]
+  name        	         = "%s"
+  health_checks 	     = [google_compute_health_check.foobar-hc.self_link]
 }
 	
 resource "google_compute_health_check" "foobar-hc" {
-  name          		= "%s"
-  check_interval_sec 	= 1
-  timeout_sec        	= 1
+  name          	     = "%s"
+  check_interval_sec     = 1
+  timeout_sec            = 1
 	
   tcp_health_check {
     port = "80"
@@ -227,14 +227,14 @@ resource "google_compute_health_check" "foobar-hc" {
 }
 
 resource "google_compute_forwarding_rule" "foobar" {
-  description 			   = "Resource created for Terraform acceptance testing"
-  ip_protocol 			   = "TCP"
-  name        			   = "%s"
-  all_ports  			   = true
-  is_mirroring_collector   = true
-  backend_service          = google_compute_region_backend_service.foobar-be.self_link
-  load_balancing_scheme    = "INTERNAL"
+  description 		     = "Resource created for Terraform acceptance testing"
+  ip_protocol 			 = "TCP"
+  name        			 = "%s"
+  all_ports  			 = true
+  is_mirroring_collector = true
+  backend_service        = google_compute_region_backend_service.foobar-be.self_link
+  load_balancing_scheme  = "INTERNAL"
 }
-`, backendName, healthchechName, ruleName)
+`, backendName, healthcheckName, ruleName)
 }
 <% end -%>
