@@ -132,7 +132,7 @@ func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.Resour
 
 		envPath := os.Getenv("VCR_PATH")
 		if envPath == "" {
-			log.Printf("[DEBUG] No environment var set for VCR_PATH, skipping VCR for test: %s", testName)
+			log.Print("[DEBUG] No environment var set for VCR_PATH, skipping VCR")
 			return c, nil
 		}
 		path := filepath.Join(envPath, testName)
