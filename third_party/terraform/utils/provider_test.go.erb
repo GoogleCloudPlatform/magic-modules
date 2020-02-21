@@ -93,19 +93,32 @@ func init() {
 		"random": testAccRandomProvider,
 	}
 
+	// The OiCS provider map is used to ensure that OiCS examples use `google-beta`
+	// if the example is versioned as beta; normal beta tests should continue to
+	// use the standard provider map.
+	testAccProvidersOiCS = map[string]terraform.ResourceProvider{
+<%# Add a google-#{version} provider for each version that is supported by this version. This allows us to run google-beta tests within a google-alpha provider.  -%>
+<% Api::Product::Version::ORDER[1..Api::Product::Version::ORDER.index(version)].each do |aliased_version| -%>
+		"google-<%= aliased_version -%>": testAccProvider,
+<% end -%>
+		"random": testAccRandomProvider,
+	}
+	<% end -%>
+}
+
 var lock = &sync.Mutex{}
 
-func get(d *schema.ResourceData, old func(d *schema.ResourceData) (interface{}, error), testName string) (interface{}, error) {
+// Returns a cached config if VCR testing is enabled. This enables us to use a single HTTP transport
+// for a given test, allowing for recording of HTTP interactions.
+func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.ResourceData) (interface{}, error), testName string) (interface{}, error) {
 	lock.Lock()
 	defer lock.Unlock()
-	if _, ok := singles[testName]; !ok {
-		// No existing client found, create one.
-		single, err := old(d)
+	if _, ok := configs[testName]; !ok {
+		c, err := configureFunc(d)
 		if err != nil {
 			return nil, err
 		}
-		config := single.(*Config)
-		path := fmt.Sprintf("/Users/slevenick/go-workspace/src/github.com/terraform-providers/terraform-provider-google-beta/fixtures/%s", testName)
+		config := c.(*Config)
 		vcrMode := recorder.ModeDisabled
 		switch vcrEnv := os.Getenv("VCR_MODE"); vcrEnv {
 		case "RECORDING":
@@ -113,8 +126,16 @@ func get(d *schema.ResourceData, old func(d *schema.ResourceData) (interface{}, 
 		case "REPLAYING":
 			vcrMode = recorder.ModeReplaying
 		default:
-			return single, nil
+			log.Printf("[DEBUG] No valid environment var set for VCR_MODE, skipping VCR. VCR_MODE: %s", vcrEnv)
+			return c, nil
 		}
+
+		envPath := os.Getenv("VCR_PATH")
+		if envPath == "" {
+			log.Printf("[DEBUG] No environment var set for VCR_PATH, skipping VCR for test: %s", testName)
+			return c, nil
+		}
+		path := filepath.Join(envPath, testName)
 
 		rec, err := recorder.NewAsMode(path, vcrMode, config.client.Transport)
 		if err != nil {
@@ -132,32 +153,39 @@ func get(d *schema.ResourceData, old func(d *schema.ResourceData) (interface{}, 
 			return cassette.DefaultMatcher(r, i) && (b.String() == "" || b.String() == i.Body)
 		})
 		config.client.Transport = rec
-		singles[testName] = single
-		return single, err
+		configs[testName] = c
+		return c, err
 	}
-	return singles[testName], nil
+	return configs[testName], nil
 }
 
 // We need to explicitly close the VCR recorder to save the cassette
 func closeRecorder(testName string) {
-	if config, ok := singles[testName]; ok {
+	if config, ok := configs[testName]; ok {
+		// We did not cache the config if it does not use VCR
 		config.(*Config).client.Transport.(*recorder.Recorder).Stop()
-		// Clean up test provider
-		delete(singles, testName)
+		// Clean up test config
+		delete(configs, testName)
 	}
 }
 
-	// The OiCS provider map is used to ensure that OiCS examples use `google-beta`
-	// if the example is versioned as beta; normal beta tests should continue to
-	// use the standard provider map.
-	testAccProvidersOiCS = map[string]terraform.ResourceProvider{
-<%# Add a google-#{version} provider for each version that is supported by this version. This allows us to run google-beta tests within a google-alpha provider.  -%>
-<% Api::Product::Version::ORDER[1..Api::Product::Version::ORDER.index(version)].each do |aliased_version| -%>
-		"google-<%= aliased_version -%>": testAccProvider,
-<% end -%>
-		"random": testAccRandomProvider,
+func getTestAccProviders(testName string) map[string]terraform.ResourceProvider {
+	prov := Provider().(*schema.Provider)
+	provRand := random.Provider().(*schema.Provider)
+	if v := os.Getenv("VCR_ENABLED"); v != "" {
+		old := prov.ConfigureFunc
+		ap.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+			r, err := getCachedConfig(d, old, testName)
+			return r, err
+		}
+	} else {
+		log.Print("[DEBUG] No environment var set for VCR_ENABLED, skipping VCR")
 	}
-	<% end -%>
+	// TODO(slevenick): Add OICS provider
+	return map[string]terraform.ResourceProvider{
+		"google": prov,
+		"random": provRand,
+	}
 }
 
 // Returns a cached config if VCR testing is enabled. This enables us to use a single HTTP transport
