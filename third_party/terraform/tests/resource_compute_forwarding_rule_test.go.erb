@@ -196,8 +196,7 @@ func TestAccComputeForwardingRule_mirror(t *testing.T) {
 		CheckDestroy: testAccCheckComputeForwardingRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeForwardingRule_mirror(backendName, healthcheck
-				Name, ruleName),
+				Config: testAccComputeForwardingRule_mirror(backendName, healthcheck, ruleName),
 			},
 
 			{
