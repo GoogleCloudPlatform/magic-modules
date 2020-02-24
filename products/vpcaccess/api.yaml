@@ -16,8 +16,8 @@ name: VPCAccess
 display_name: Serverless VPC Access
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://vpcaccess.googleapis.com/v1beta1/
+    name: ga
+    base_url: https://vpcaccess.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
