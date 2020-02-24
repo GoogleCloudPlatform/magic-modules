@@ -76,10 +76,10 @@ var billingAccountEnvVars = []string{
 	"GOOGLE_BILLING_ACCOUNT",
 }
 
-var configs map[string]interface{}
+var configs map[string]*Config
 
 func init() {
-	configs = make(map[string]interface{})
+	configs = make(map[string]*Config)
 	testAccProvider = Provider().(*schema.Provider)
 	testAccRandomProvider = random.Provider().(*schema.Provider)
 	<% if version == 'ga' -%>
@@ -110,60 +110,64 @@ var lock = &sync.Mutex{}
 
 // Returns a cached config if VCR testing is enabled. This enables us to use a single HTTP transport
 // for a given test, allowing for recording of HTTP interactions.
-func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.ResourceData) (interface{}, error), testName string) (interface{}, error) {
+func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.ResourceData) (interface{}, error), testName string) (*Config, error) {
 	lock.Lock()
 	defer lock.Unlock()
-	if _, ok := configs[testName]; !ok {
-		c, err := configureFunc(d)
-		if err != nil {
-			return nil, err
-		}
-		config := c.(*Config)
-		vcrMode := recorder.ModeDisabled
-		switch vcrEnv := os.Getenv("VCR_MODE"); vcrEnv {
-		case "RECORDING":
-			vcrMode = recorder.ModeRecording
-		case "REPLAYING":
-			vcrMode = recorder.ModeReplaying
-		default:
-			log.Printf("[DEBUG] No valid environment var set for VCR_MODE, skipping VCR. VCR_MODE: %s", vcrEnv)
-			return c, nil
-		}
-
-		envPath := os.Getenv("VCR_PATH")
-		if envPath == "" {
-			log.Print("[DEBUG] No environment var set for VCR_PATH, skipping VCR")
-			return c, nil
-		}
-		path := filepath.Join(envPath, testName)
-
-		rec, err := recorder.NewAsMode(path, vcrMode, config.client.Transport)
-		if err != nil {
-			return nil, err
-		}
-		rec.SetMatcher(func(r *http.Request, i cassette.Request) bool {
-			if r.Body == nil {
-				return cassette.DefaultMatcher(r, i)
-			}
-			var b bytes.Buffer
-			if _, err := b.ReadFrom(r.Body); err != nil {
-				return false
-			}
-			r.Body = ioutil.NopCloser(&b)
-			return cassette.DefaultMatcher(r, i) && (b.String() == "" || b.String() == i.Body)
-		})
-		config.client.Transport = rec
-		configs[testName] = c
-		return c, err
+	if v, ok := configs[testName]; ok {
+		return v, nil
 	}
-	return configs[testName], nil
+	c, err := configureFunc(d)
+	if err != nil {
+		return nil, err
+	}
+	config := c.(*Config)
+	vcrMode := recorder.ModeDisabled
+	switch vcrEnv := os.Getenv("VCR_MODE"); vcrEnv {
+	case "RECORDING":
+		vcrMode = recorder.ModeRecording
+	case "REPLAYING":
+		vcrMode = recorder.ModeReplaying
+	default:
+		log.Printf("[DEBUG] No valid environment var set for VCR_MODE, expected RECORDING or REPLAYING, skipping VCR. VCR_MODE: %s", vcrEnv)
+		return config, nil
+	}
+
+	envPath := os.Getenv("VCR_PATH")
+	if envPath == "" {
+		log.Print("[DEBUG] No environment var set for VCR_PATH, skipping VCR")
+		return config, nil
+	}
+	path := filepath.Join(envPath, testName)
+
+	rec, err := recorder.NewAsMode(path, vcrMode, config.client.Transport)
+	if err != nil {
+		return nil, err
+	}
+	// Defines how VCR will match requests to responses.
+	rec.SetMatcher(func(r *http.Request, i cassette.Request) bool {
+		// Default matcher compares method and URL only
+		defaultMatch := cassette.DefaultMatcher(r, i)
+		if r.Body == nil {
+			return defaultMatch
+		}
+		var b bytes.Buffer
+		if _, err := b.ReadFrom(r.Body); err != nil {
+			return false
+		}
+		r.Body = ioutil.NopCloser(&b)
+		// body must match recorded body if it exists
+		return defaultMatch && ((b.String() == "" && i.Body == "") || b.String() == i.Body)
+	})
+	config.client.Transport = rec
+	configs[testName] = config
+	return config, err
 }
 
 // We need to explicitly close the VCR recorder to save the cassette
 func closeRecorder(testName string) {
 	if config, ok := configs[testName]; ok {
 		// We did not cache the config if it does not use VCR
-		config.(*Config).client.Transport.(*recorder.Recorder).Stop()
+		config.client.Transport.(*recorder.Recorder).Stop()
 		// Clean up test config
 		delete(configs, testName)
 	}
@@ -172,14 +176,15 @@ func closeRecorder(testName string) {
 func getTestAccProviders(testName string) map[string]terraform.ResourceProvider {
 	prov := Provider().(*schema.Provider)
 	provRand := random.Provider().(*schema.Provider)
-	if v := os.Getenv("VCR_ENABLED"); v != "" {
+	envPath := os.Getenv("VCR_PATH")
+	recordingMode := os.Getenv("VCR_MODE")
+	if envPath != "" && recordingMode != "" {
 		old := prov.ConfigureFunc
 		prov.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
-			r, err := getCachedConfig(d, old, testName)
-			return r, err
+			return getCachedConfig(d, old, testName)
 		}
 	} else {
-		log.Print("[DEBUG] No environment var set for VCR_ENABLED, skipping VCR")
+		log.Print("[DEBUG] VCR_PATH or VCR_MODE not set, skipping VCR")
 	}
 	// TODO(slevenick): Add OICS provider
 	return map[string]terraform.ResourceProvider{
