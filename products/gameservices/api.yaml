@@ -1,0 +1,489 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: GameServices
+display_name: Google Game Services
+scopes:
+- https://www.googleapis.com/auth/compute
+versions:
+- !ruby/object:Api::Product::Version
+  name: beta
+  base_url: https://gameservices.googleapis.com/v1beta/
+
+objects:
+### Realm ###
+- !ruby/object:Api::Resource
+  name: Realm
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation': 'https://cloud.google.com/game-servers/docs'
+    api: 'https://cloud.google.com/game-servers/docs/reference/rest/v1beta/projects.locations.realms'
+  create_url: projects/{{project}}/locations/{{location}}/realms?realmId={{realm_id}}
+  base_url: projects/{{project}}/locations/{{location}}/realms/
+  self_link: projects/{{project}}/locations/{{location}}/realms/{{realm_id}}
+  update_verb: :PATCH
+  update_mask: true
+  description: A Realm resource.
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      path: 'name'
+      base_url: '{{op_id}}'
+      wait_ms: 1000
+    result: !ruby/object:Api::OpAsync::Result
+      path: 'response'
+      resource_inside_response: true
+    status: !ruby/object:Api::OpAsync::Status
+      path: 'done'
+      complete: true
+      allowed:
+        - true
+        - false
+    error: !ruby/object:Api::OpAsync::Error
+      path: 'error/errors'
+      message: 'message'
+  parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    url_param_only: true
+    default_value: global
+    description: Location of the Realm.
+  - !ruby/object:Api::Type::String
+    name: realmId
+    input: true
+    url_param_only: true
+    required: true
+    description: GCP region of the Realm.
+  properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    output: true
+    description: |-
+      The resource id of the realm, of the form:
+      `projects/{project_id}/locations/{location}/realms/{realm_id}`. For
+      example, `projects/my-project/locations/{location}/realms/my-realm`.
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: labels
+    description: The labels associated with this realm. Each label is a key-value
+      pair.
+  - !ruby/object:Api::Type::String
+    name: timeZone
+    required: true
+    description: |-
+      Required. Time zone where all realm-specific policies are evaluated. The value of
+      this field must be from the IANA time zone database:
+      https://www.iana.org/time-zones.
+  - !ruby/object:Api::Type::String
+    name: etag
+    output: true
+    description: ETag of the resource.
+  - !ruby/object:Api::Type::String
+    name: description
+    description: Human readable description of the realm.
+
+### GameServerCluster ###
+- !ruby/object:Api::Resource
+  name: GameServerCluster
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation': 'https://cloud.google.com/game-servers/docs'
+    api: 'https://cloud.google.com/game-servers/docs/reference/rest/v1beta/projects.locations.realms.gameServerClusters'
+  update_verb: :PATCH
+  update_mask: true
+  base_url: projects/{{project}}/locations/{{location}}/realms/{{realm_id}}/gameServerClusters
+  create_url: projects/{{project}}/locations/{{location}}/realms/{{realm_id}}/gameServerClusters?gameServerClusterId={{cluster_id}}
+  self_link: projects/{{project}}/locations/{{location}}/realms/{{realm_id}}/gameServerClusters/{{cluster_id}}
+  description: A game server cluster resource.
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      path: 'name'
+      base_url: '{{op_id}}'
+      wait_ms: 1000
+    result: !ruby/object:Api::OpAsync::Result
+      path: 'response'
+      resource_inside_response: true
+    status: !ruby/object:Api::OpAsync::Status
+      path: 'done'
+      complete: true
+      allowed:
+        - true
+        - false
+    error: !ruby/object:Api::OpAsync::Error
+      path: 'error/errors'
+      message: 'message'
+  properties:
+  - !ruby/object:Api::Type::String
+    input: true
+    name: clusterId
+    required: true
+    url_param_only: true
+    description: |-
+      Required. The resource name of the game server cluster
+  - !ruby/object:Api::Type::String
+    name: name
+    output: true
+    description: |-
+      The resource id of the game server cluster, eg:
+
+      `projects/{project_id}/locations/{location}/realms/{realm_id}/gameServerClusters/{cluster_id}`.
+      For example,
+
+      `projects/my-project/locations/{location}/realms/zanzibar/gameServerClusters/my-onprem-cluster`.
+  - !ruby/object:Api::Type::ResourceRef
+    name: realmId
+    url_param_only: true
+    resource: Realm
+    imports: name
+    required: true
+    description: |-
+      The realm id of the game server realm.
+  - !ruby/object:Api::Type::String
+    name: location
+    url_param_only: true
+    default_value: global
+    description: Location of the Cluster.
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: labels
+    description: |-
+      The labels associated with this game server cluster. Each label is a
+      key-value pair.
+  - !ruby/object:Api::Type::NestedObject
+    name: connectionInfo
+    required: true
+    input: true
+    description: |-
+      Game server cluster connection information. This information is used to
+      manage game server clusters.
+    properties:
+    - !ruby/object:Api::Type::NestedObject
+      name: gkeClusterReference
+      required: true
+      input: true
+      description: Reference of the GKE cluster where the game servers are installed.
+      properties:
+      - !ruby/object:Api::Type::String
+        name: cluster
+        required: true
+        input: true
+        description: |-
+          The full or partial name of a GKE cluster, using one of the following
+          forms:
+
+          * `projects/{project_id}/locations/{location}/clusters/{cluster_id}`
+          * `locations/{location}/clusters/{cluster_id}`
+          * `{cluster_id}`
+
+          If project and location are not specified, the project and location of the
+          GameServerCluster resource are used to generate the full name of the
+          GKE cluster.
+    - !ruby/object:Api::Type::String
+      name: namespace
+      required: true
+      description: |-
+        Namespace designated on the game server cluster where the game server
+        instances will be created. The namespace existence will be validated
+        during creation.
+  - !ruby/object:Api::Type::String
+    name: description
+    description: Human readable description of the cluster.
+
+### GameServerDeployment ###
+- !ruby/object:Api::Resource
+  name: GameServerDeployment
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation': 'https://cloud.google.com/game-servers/docs'
+    api: 'https://cloud.google.com/game-servers/docs/reference/rest/v1beta/projects.locations.gameServerDeployments'
+  base_url: projects/{{project}}/locations/{{location}}/gameServerDeployments
+  create_url: projects/{{project}}/locations/{{location}}/gameServerDeployments?deploymentId={{deployment_id}}
+  self_link: projects/{{project}}/locations/{{location}}/gameServerDeployments/{{deployment_id}}
+  update_mask: true
+  update_verb: :PATCH
+  description: A game server deployment resource.
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      path: 'name'
+      base_url: '{{op_id}}'
+      wait_ms: 1000
+    result: !ruby/object:Api::OpAsync::Result
+      path: 'response'
+      resource_inside_response: true
+    status: !ruby/object:Api::OpAsync::Status
+      path: 'done'
+      complete: true
+      allowed:
+        - true
+        - false
+    error: !ruby/object:Api::OpAsync::Error
+      path: 'error/errors'
+      message: 'message'
+  properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    output: true
+    description: |-
+      The resource id of the game server deployment, eg:
+
+      `projects/{project_id}/locations/{location}/gameServerDeployments/{deployment_id}`.
+      For example,
+
+      `projects/my-project/locations/{location}/gameServerDeployments/my-deployment`.
+  - !ruby/object:Api::Type::String
+    name: description
+    description: Human readable description of the game server deployment.
+  - !ruby/object:Api::Type::String
+    name: deploymentId
+    input: true
+    required: true
+    url_param_only: true
+    description: |
+      A unique id for the deployment.
+  - !ruby/object:Api::Type::String
+    name: location
+    # The only acceptable location currently is 'global'
+    # TODO - either hard code or set as computed
+    url_param_only: true
+    default_value: global
+    description: Location of the Deployment.
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: labels
+    description: |-
+      The labels associated with this game server deployment. Each label is a
+      key-value pair.
+
+### GameServerConfig  ###
+- !ruby/object:Api::Resource
+  name: GameServerConfig
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation': 'https://cloud.google.com/game-servers/docs'
+    api: 'https://cloud.google.com/game-servers/docs/reference/rest/v1beta/projects.locations.gameServerDeployments.configs'
+  create_url: projects/{{project}}/locations/{{location}}/gameServerDeployments/{{deployment_id}}/configs?configId={{config_id}}
+  base_url: projects/{{project}}/locations/{{location}}/gameServerDeployments/{{deployment_id}}/configs
+  self_link: projects/{{project}}/locations/{{location}}/gameServerDeployments/{{deployment_id}}/configs/{{config_id}}
+  input: true
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      path: 'name'
+      base_url: '{{op_id}}'
+      wait_ms: 1000
+    result: !ruby/object:Api::OpAsync::Result
+      path: 'response'
+      resource_inside_response: true
+    status: !ruby/object:Api::OpAsync::Status
+      path: 'done'
+      complete: true
+      allowed:
+        - true
+        - false
+    error: !ruby/object:Api::OpAsync::Error
+      path: 'error/errors'
+      message: 'message'
+  description: A game server config resource. Configs are global and immutable.
+  properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    output: true
+    description: |-
+      The resource name of the game server config, in the form:
+
+      `projects/{project_id}/locations/{location}/gameServerDeployments/{deployment_id}/configs/{config_id}`.
+  - !ruby/object:Api::Type::String
+    name: configId
+    input: true
+    required: true
+    url_param_only: true
+    description: |
+      A unique id for the deployment config.
+  - !ruby/object:Api::Type::String
+    name: location
+    # The only acceptable location currently is 'global'
+    # TODO - either hard code or set as computed
+    url_param_only: true
+    default_value: global
+    description: Location of the Deployment.
+  - !ruby/object:Api::Type::ResourceRef
+    name: deploymentId
+    resource: 'GameServerDeployment'
+    imports: 'deploymentId'
+    input: true
+    required: true
+    url_param_only: true
+    description: |
+      A unique id for the deployment.
+  - !ruby/object:Api::Type::String
+    name: description
+    description: The description of the game server config.
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: labels
+    description: |-
+      The labels associated with this game server config. Each label is a
+      key-value pair.
+  - !ruby/object:Api::Type::Array
+    name: fleetConfigs
+    required: true
+    description: |-
+      The fleet config contains list of fleet specs. In the Single Cloud, there
+      will be only one.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+      - !ruby/object:Api::Type::String
+        required: true
+        name: fleetSpec
+        description: |-
+          The fleet spec, which is sent to Agones to configure fleet. This must be a valid json payload.
+
+          The format of the spec can be found :
+          `https://agones.dev/site/docs/reference/fleet/`.
+      - !ruby/object:Api::Type::String
+        name: name
+        required: true
+        description: The name of the FleetConfig.
+  - !ruby/object:Api::Type::Array
+    name: scalingConfigs
+    description: Optional. This contains the autoscaling settings.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        required: true
+        description: The name of the ScalingConfig
+      - !ruby/object:Api::Type::String
+        required: true
+        name: fleetAutoscalerSpec
+        description: |-
+          Fleet autoscaler spec, which is sent to Agones.
+          Example spec can be found :
+          https://agones.dev/site/docs/reference/fleetautoscaler/
+      - !ruby/object:Api::Type::Array
+        name: selectors
+        description: |-
+          Labels used to identify the clusters to which this scaling config
+          applies. A cluster is subject to this scaling config if its labels match
+          any of the selector entries.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: labels
+            description: Set of labels to group by.
+      - !ruby/object:Api::Type::Array
+        name: schedules
+        description: The schedules to which this scaling config applies.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+          - !ruby/object:Api::Type::String
+            name: startTime
+            description: |-
+              The start time of the event.
+
+              A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
+          - !ruby/object:Api::Type::String
+            name: endTime
+            description: |-
+              The end time of the event.
+
+              A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
+          - !ruby/object:Api::Type::String
+            name: cronJobDuration
+            description: |-
+              The duration for the cron job event. The duration of the event is effective
+              after the cron job's start time.
+
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+          - !ruby/object:Api::Type::String
+            name: cronSpec
+            description: |-
+              The cron definition of the scheduled event. See
+              https://en.wikipedia.org/wiki/Cron. Cron spec specifies the local time as
+              defined by the realm.
+
+### GameServerDeploymentRollout ###
+- !ruby/object:Api::Resource
+  name: GameServerDeploymentRollout
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      'Official Documentation': 'https://cloud.google.com/game-servers/docs'
+    api: 'https://cloud.google.com/game-servers/docs/reference/rest/v1beta/GameServerDeploymentRollout'
+  create_url: projects/{{project}}/locations/global/gameServerDeployments/{{deployment_id}}/rollout
+  base_url: projects/{{project}}/locations/global/gameServerDeployments/{{deployment_id}}/rollout
+  update_url: projects/{{project}}/locations/global/gameServerDeployments/{{deployment_id}}/rollout
+  # Deleting a rollout is synonymous with removing the default game server config
+  delete_url: projects/{{project}}/locations/global/gameServerDeployments/{{deployment_id}}/rollout?updateMask=defaultGameServerConfig
+  update_verb: :PATCH
+  delete_verb: :PATCH
+  update_mask: true
+  self_link: projects/{{project}}/locations/global/gameServerDeployments/{{deployment_id}}/rollout
+  async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      path: 'name'
+      base_url: '{{op_id}}'
+      wait_ms: 1000
+    result: !ruby/object:Api::OpAsync::Result
+      path: 'response'
+      resource_inside_response: true
+    status: !ruby/object:Api::OpAsync::Status
+      path: 'done'
+      complete: true
+      allowed:
+        - true
+        - false
+    error: !ruby/object:Api::OpAsync::Error
+      path: 'error/errors'
+      message: 'message'
+  description: |-
+    This represents the rollout state. This is part of the game server
+    deployment.
+  properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    output: true
+    description: |-
+      The resource id of the game server deployment
+
+      eg: `projects/my-project/locations/global/gameServerDeployments/my-deployment/rollout`.
+  - !ruby/object:Api::Type::ResourceRef
+    name: deploymentId
+    resource: GameServerDeployment
+    url_param_only: true
+    required: true
+    imports: name
+    description: |
+      The deployment to rollout the new config to. Only 1 rollout must be associated with each deployment.
+  - !ruby/object:Api::Type::String
+    name: defaultGameServerConfig
+    required: true
+    description: |-
+      This field points to the game server config that is
+      applied by default to all realms and clusters. For example,
+
+      `projects/my-project/locations/global/gameServerDeployments/my-game/configs/my-config`.
+  - !ruby/object:Api::Type::Array
+    name: gameServerConfigOverrides
+    description: |-
+      The game_server_config_overrides contains the per game server config
+      overrides. The overrides are processed in the order they are listed. As
+      soon as a match is found for a cluster, the rest of the list is not
+      processed.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: realmsSelector
+        description: Selection by realms.
+        properties:
+        - !ruby/object:Api::Type::Array
+          name: realms
+          description: List of realms to match against.
+          item_type: Api::Type::String
+      - !ruby/object:Api::Type::String
+        name: configVersion
+        description: Version of the configuration.
