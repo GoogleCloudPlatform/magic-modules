@@ -1,6 +1,3 @@
-provider "google-beta" {
-}
-
 resource "google_vpc_access_connector" "connector" {
   name          = "<%= ctx[:vars]['name'] %>"
   region        = "us-central1"
