@@ -16,9 +16,6 @@ name: VPCAccess
 display_name: Serverless VPC Access
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://vpcaccess.googleapis.com/v1beta1/
-  - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://vpcaccess.googleapis.com/v1/
 scopes:
@@ -32,14 +29,13 @@ objects:
     name: 'Connector'
     kind: 'vpcaccess#Connector'
     description: 'Serverless VPC Access connector resource.'
-    min_version: beta
     input: true
     base_url: projects/{{project}}/locations/{{region}}/connectors
     create_url: projects/{{project}}/locations/{{region}}/connectors?connectorId={{name}}
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Configuring Serverless VPC Access': 'https://cloud.google.com/vpc/docs/configure-serverless-vpc-access'
-      api: 'https://cloud.google.com/vpc/docs/reference/vpcaccess/rest/v1beta1/projects.locations.connectors'
+      api: 'https://cloud.google.com/vpc/docs/reference/vpcaccess/rest/v1/projects.locations.connectors'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
