@@ -1,0 +1,79 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Realm: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
+        name: "game_service_realm_basic"
+        primary_resource_id: "default"
+        vars:
+          realm_id: "tf-test-realm"
+    properties:
+  GameServerCluster: !ruby/object:Overrides::Terraform::ResourceOverride
+    properties:
+      # clusters can be specified as {name}, locations/{location}/cluster/{name} or as the full
+      # /projects/... style link. So using a substring check instead of normal self link functions
+      connectionInfo.gkeClusterReference.cluster: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: suppressSuffixDiff
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: "templates/terraform/constants/gameserver_cluster_custom_diff.go"
+  GameServerDeployment: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
+        name: "game_service_deployment_basic"
+        primary_resource_id: "default"
+        vars:
+          deployment_id: "tf-test-deployment"
+    properties:
+  GameServerConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
+        name: "game_service_config_basic"
+        primary_resource_id: "default"
+        vars:
+          deployment_id: "tf-test-deployment"
+          config_id: "tf-test-config"
+    properties:
+      fleetConfigs.name: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      fleetConfigs.fleetSpec: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          The fleet spec, which is sent to Agones to configure fleet.
+          The spec can be passed as inline json but it is recommended to use a file reference
+          instead. File references can contain the json or yaml format of the fleet spec. Eg:
+
+          * fleet_spec = jsonencode(yamldecode(file("fleet_configs.yaml")))
+          * fleet_spec = file("fleet_configs.json")
+
+          The format of the spec can be found :
+          `https://agones.dev/site/docs/reference/fleet/`.
+  GameServerDeploymentRollout: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
+        name: "game_service_deployment_rollout_basic"
+        primary_resource_id: "default"
+        vars:
+          deployment_id: "tf-test-deployment"
+          config_id: "tf-test-config"
+    properties:
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_create: 'templates/terraform/custom_create/gameservice_rollout_create.go'
