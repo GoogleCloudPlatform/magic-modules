@@ -10350,7 +10350,8 @@ objects:
                   - snapshot_schedule_policy.0.snapshot_properties.0.guest_flush
                 max_size: 1
                 description: |
-                  GCS bucket location in which to store the snapshot (regional or multi-regional).
+                  Cloud Storage bucket location to store the auto snapshot
+                  (regional or multi-regional)
                 item_type: Api::Type::String
               - !ruby/object:Api::Type::Boolean
                 name: 'guestFlush'
