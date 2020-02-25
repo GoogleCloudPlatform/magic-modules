@@ -7539,9 +7539,11 @@ objects:
             will be mirrored. All mirrored VMs should have a NIC in the given
             network. All mirrored subnetworks should belong to the given network.
         properties:
-          - !ruby/object:Api::Type::String
+          - !ruby/object:Api::Type::ResourceRef
             name: url
             description: The full self_link URL of the network where this rule is active.
+            resource: 'Network'
+            imports: 'selfLink'
             required: true
         required: true
       - !ruby/object:Api::Type::Integer
@@ -7560,9 +7562,11 @@ objects:
             set to true.
         required: true
         properties:
-          - !ruby/object:Api::Type::String
+          - !ruby/object:Api::Type::ResourceRef
             name: url
             required: true
+            resource: 'ForwardingRule'
+            imports: 'selfLink'
             description: The URL of the forwarding rule.
       - !ruby/object:Api::Type::NestedObject
         name: filter 
@@ -7605,8 +7609,10 @@ objects:
               name: subnetworks
               description: The subnetworks that should be mirrored.  Specify at most 5.
               properties:
-                - !ruby/object:Api::Type::String
+                - !ruby/object:Api::Type::ResourceRef
                   name: url
+                  resource: 'Subnetwork'
+                  imports: 'selfLink'
                   description: The URL of the subnetwork where this rule should be active.
                   required: true
           - !ruby/object:Api::Type::Array
@@ -7621,8 +7627,10 @@ objects:
               name: instances
               description: The instances that should be mirrored.
               properties:
-                - !ruby/object:Api::Type::String
+                - !ruby/object:Api::Type::ResourceRef
                   name: url
+                  resource: 'Instance'
+                  imports: 'selfLink'
                   description: The URL of the instances where this rule should be active.
                   required: true
           - !ruby/object:Api::Type::Array

@@ -1137,6 +1137,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           service_name: "my-service"
           hc_name: "my-healthcheck"
           mirroring_name: "my-mirroring"
+          ilb_rule_name: "my-ilb"
           network_name: "my-network"
 
     properties:
