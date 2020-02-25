@@ -7592,13 +7592,13 @@ objects:
         required: true
         description: |
             A means of specifying which resources to mirror.
-        at_least_one_of:
-            - mirrored_resources.0.subnetworks
-            - mirrored_resources.0.instances
-            - mirrored_resources.0.tags
         properties:
           - !ruby/object:Api::Type::Array
             name: subnetworks
+            at_least_one_of:
+                - mirrored_resources.0.subnetworks
+                - mirrored_resources.0.instances
+                - mirrored_resources.0.tags
             description: |
                 All instances in one of these subnetworks will be mirrored.
             item_type: !ruby/object:Api::Type::NestedObject
@@ -7613,6 +7613,10 @@ objects:
             name: instances
             description: |
                 All the listed instances will be mirrored.  Specify at most 50.
+            at_least_one_of:
+                - mirrored_resources.0.subnetworks
+                - mirrored_resources.0.instances
+                - mirrored_resources.0.tags
             item_type: !ruby/object:Api::Type::NestedObject
               name: instances
               description: The instances that should be mirrored.
@@ -7623,6 +7627,10 @@ objects:
                   required: true
           - !ruby/object:Api::Type::Array
             name: tags
+            at_least_one_of:
+                - mirrored_resources.0.subnetworks
+                - mirrored_resources.0.instances
+                - mirrored_resources.0.tags
             description: |
                 All instances with these tags will be mirrored.
             item_type: Api::Type::String
