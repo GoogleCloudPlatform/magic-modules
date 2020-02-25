@@ -778,8 +778,6 @@ resource "google_compute_network" "vpc" {
 }
 
 resource "google_vpc_access_connector" "connector" {
-  provider      = "google-beta"
-
   name          = "%s"
   region        = "us-central1"
   ip_cidr_range = "10.10.0.0/28"
