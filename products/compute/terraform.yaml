@@ -1130,6 +1130,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "compute_packet_mirroring_full"
         primary_resource_id: "foobar"
+        min_version: 'beta'
         vars:
           instance_name: "my-instance"
           subnetwork_name: "my-subnetwork"
