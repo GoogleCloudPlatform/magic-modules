@@ -1138,7 +1138,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           hc_name: "my-healthcheck"
           mirroring_name: "my-mirroring"
           network_name: "my-network"
-
+          ilb_rule_name: "my-rule"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
