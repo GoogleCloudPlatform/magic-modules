@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -106,13 +105,13 @@ func init() {
 	<% end -%>
 }
 
-var lock = &sync.Mutex{}
-
 // Returns a cached config if VCR testing is enabled. This enables us to use a single HTTP transport
 // for a given test, allowing for recording of HTTP interactions.
+// Why this exists: schema.Provider.ConfigureFunc is called multiple times for a given test
+// ConfigureFunc on our provider creates a new HTTP client and sets base paths (config.go LoadAndValidate)
+// VCR requires a single HTTP client to handle all interactions so it can record and replay responses so
+// this caches HTTP clients per test by replacing ConfigureFunc
 func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.ResourceData) (interface{}, error), testName string) (*Config, error) {
-	lock.Lock()
-	defer lock.Unlock()
 	if v, ok := configs[testName]; ok {
 		return v, nil
 	}
@@ -152,11 +151,12 @@ func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.Resour
 		}
 		var b bytes.Buffer
 		if _, err := b.ReadFrom(r.Body); err != nil {
+			log.Printf("[DEBUG] Failed to read request body from cassette: %v", err)
 			return false
 		}
 		r.Body = ioutil.NopCloser(&b)
-		// body must match recorded body if it exists
-		return defaultMatch && ((b.String() == "" && i.Body == "") || b.String() == i.Body)
+		// body must match recorded body
+		return defaultMatch && b.String() == i.Body
 	})
 	config.client.Transport = rec
 	configs[testName] = config
