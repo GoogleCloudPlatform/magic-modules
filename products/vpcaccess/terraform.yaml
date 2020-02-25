@@ -22,7 +22,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vpc_access_connector"
-        min_version: beta
         primary_resource_id: "connector"
         vars:
           # The VPC connector has a name limit of 25 characters
