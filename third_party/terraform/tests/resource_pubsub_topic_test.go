@@ -18,7 +18,7 @@ func TestAccPubsubTopic_update(t *testing.T) {
 	providers := getTestAccProviders(t.Name())
 	defer closeRecorder(t)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    providers,
 		CheckDestroy: testAccCheckPubsubTopicDestroyProducer(providers["google"].(*schema.Provider)),

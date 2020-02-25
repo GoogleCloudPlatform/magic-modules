@@ -23,6 +23,13 @@ import (
 	"github.com/terraform-providers/terraform-provider-random/random"
 )
 
+func vcrTest(t *testing.T, c resource.TestCase) {
+	providers := getTestAccProviders(t.Name())
+	defer closeRecorder(t.Name())
+	c.Providers = providers
+	resource.Test(t, c)
+}
+
 var testAccProviders map[string]terraform.ResourceProvider
 <% unless version == 'ga' -%>
 var testAccProvidersOiCS map[string]terraform.ResourceProvider
@@ -121,11 +128,13 @@ func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.Resour
 	}
 	config := c.(*Config)
 	vcrMode := recorder.ModeDisabled
+	realTransport := config.client.Transport
 	switch vcrEnv := os.Getenv("VCR_MODE"); vcrEnv {
 	case "RECORDING":
 		vcrMode = recorder.ModeRecording
 	case "REPLAYING":
 		vcrMode = recorder.ModeReplaying
+		realTransport = nil
 	default:
 		log.Printf("[DEBUG] No valid environment var set for VCR_MODE, expected RECORDING or REPLAYING, skipping VCR. VCR_MODE: %s", vcrEnv)
 		return config, nil
@@ -138,7 +147,7 @@ func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.Resour
 	}
 	path := filepath.Join(envPath, testName)
 
-	rec, err := recorder.NewAsMode(path, vcrMode, config.client.Transport)
+	rec, err := recorder.NewAsMode(path, vcrMode, realTransport)
 	if err != nil {
 		return nil, err
 	}
