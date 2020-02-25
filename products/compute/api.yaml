@@ -7593,9 +7593,9 @@ objects:
         description: |
             A means of specifying which resources to mirror.
         at_least_one_of:
-            - subnetworks
-            - instances
-            - tags
+            - mirrored_resources.0.subnetworks
+            - mirrored_resources.0.instances
+            - mirrored_resources.0.tags
         properties:
           - !ruby/object:Api::Type::Array
             name: subnetworks
