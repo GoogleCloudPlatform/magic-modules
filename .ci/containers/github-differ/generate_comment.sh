@@ -86,7 +86,7 @@ OICSDIFFS=$(bash -e <<TRY
     pushd $TFOICS_LOCAL_PATH > /dev/null
     git fetch origin $OLD_BRANCH
     if ! git diff --exit-code --quiet origin/$OLD_BRANCH origin/$NEW_BRANCH; then
-        SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
+        SUMMARY="$(git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat)"
         echo "TF OiCS: [Diff](https://github.com/modular-magician/docs-examples/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
     fi
     popd > /dev/null
