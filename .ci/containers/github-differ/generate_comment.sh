@@ -74,30 +74,16 @@ if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
 fi
 popd
 
-# Temporary guards for OiCS since this container image will be newer than YAML
-# for existing PRs. We need to be backwards-compatible with old GCB runs that
-# don't generate OiCS. This should be safe to remove after Feb 18th or so.
-set +e
-# Use a subshell to run commands serially and fail when one fails
-OICSDIFFS=$(bash -e <<TRY
-    # TF OICS
-    mkdir -p $TFOICS_LOCAL_PATH
-    git clone -b $NEW_BRANCH $TFOICS_SCRATCH_PATH $TFOICS_LOCAL_PATH
-    pushd $TFOICS_LOCAL_PATH > /dev/null
-    git fetch origin $OLD_BRANCH
-    if ! git diff --exit-code --quiet origin/$OLD_BRANCH origin/$NEW_BRANCH; then
-        SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
-        echo "TF OiCS: [Diff](https://github.com/modular-magician/docs-examples/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
-    fi
-    popd > /dev/null
-TRY
-)
-if [ $? -ne 0 ]; then
-  echo failed to generate OiCS
-else
-  DIFFS="${DIFFS}${NEWLINE}${OICSDIFFS}"
+# TF OICS
+mkdir -p $TFOICS_LOCAL_PATH
+git clone -b $NEW_BRANCH $TFOICS_SCRATCH_PATH $TFOICS_LOCAL_PATH
+pushd $TFOICS_LOCAL_PATH
+git fetch origin $OLD_BRANCH
+if ! git diff --exit-code --quiet origin/$OLD_BRANCH origin/$NEW_BRANCH; then
+    SUMMARY="$(git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat)"
+    DIFFS="${DIFFS}${NEWLINE}TF OiCS: [Diff](https://github.com/modular-magician/docs-examples/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
 fi
-set -e
+popd
 
 # Inspec
 mkdir -p $INSPEC_LOCAL_PATH
