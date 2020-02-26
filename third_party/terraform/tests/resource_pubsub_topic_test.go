@@ -16,7 +16,7 @@ func TestAccPubsubTopic_update(t *testing.T) {
 
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(10))
 	providers := getTestAccProviders(t.Name())
-	defer closeRecorder(t.Name())
+	defer closeRecorder(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },

@@ -120,7 +120,7 @@ func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.Resour
 		return nil, err
 	}
 	config := c.(*Config)
-	vcrMode := recorder.ModeDisabled
+	var vcrMode recorder.Mode
 	switch vcrEnv := os.Getenv("VCR_MODE"); vcrEnv {
 	case "RECORDING":
 		vcrMode = recorder.ModeRecording
@@ -164,12 +164,15 @@ func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.Resour
 }
 
 // We need to explicitly close the VCR recorder to save the cassette
-func closeRecorder(testName string) {
-	if config, ok := configs[testName]; ok {
+func closeRecorder(t *testing.T) {
+	if config, ok := configs[t.Name()]; ok {
 		// We did not cache the config if it does not use VCR
-		config.client.Transport.(*recorder.Recorder).Stop()
+		err := config.client.Transport.(*recorder.Recorder).Stop()
+		if err != nil {
+			t.Error(err)
+		}
 		// Clean up test config
-		delete(configs, testName)
+		delete(configs, t.Name())
 	}
 }
 
