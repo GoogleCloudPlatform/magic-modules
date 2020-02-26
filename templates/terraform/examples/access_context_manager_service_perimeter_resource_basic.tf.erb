@@ -1,5 +1,5 @@
 resource "google_access_context_manager_service_perimeter_resource" "<%= ctx[:primary_resource_id] %>" {
-  perimiter_name = google_access_context_manager_service_perimeter.<%= ctx[:primary_resource_id] %>.name
+  perimeter_name = google_access_context_manager_service_perimeter.<%= ctx[:primary_resource_id] %>.name
   resource = "projects/987654321"
 }
 
