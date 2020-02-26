@@ -1,5 +1,5 @@
 resource "google_game_services_realm" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-private
+  provider = google-beta
 
   realm_id  = "<%= ctx[:vars]["realm_id"] %>"
   time_zone = "EST"
