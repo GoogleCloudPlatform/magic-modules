@@ -27,8 +27,8 @@ determined which will require enabling the compute api.
 
 ```hcl
 resource "google_storage_bucket" "static-site" {
-  name     = "image-store.com"
-  location = "EU"
+  name          = "image-store.com"
+  location      = "EU"
   force_destroy = true
 
   bucket_policy_only = true
@@ -38,25 +38,25 @@ resource "google_storage_bucket" "static-site" {
     not_found_page   = "404.html"
   }
   cors {
-    origin = ["http://image-store.com"]
-    method = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    origin          = ["http://image-store.com"]
+    method          = ["GET", "HEAD", "PUT", "POST", "DELETE"]
     response_header = ["*"]
     max_age_seconds = 3600
   }
- }
+}
 ```
 
 ## Example Usage - Life cycle settings for storage bucket objects
 
 ```hcl
 resource "google_storage_bucket" "auto-expire" {
-  name     = "auto-expiring-bucket"
-  location = "US"
+  name          = "auto-expiring-bucket"
+  location      = "US"
   force_destroy = true
 
   lifecycle_rule {
     condition {
-    age = "3"
+      age = "3"
     }
     action {
       type = "Delete"
