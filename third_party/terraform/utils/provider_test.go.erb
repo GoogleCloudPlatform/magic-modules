@@ -23,10 +23,11 @@ import (
 	"github.com/terraform-providers/terraform-provider-random/random"
 )
 
-func vcrTest(t *testing.T, c resource.TestCase) {
+func vcrTest(t *testing.T, c resource.TestCase, destroyFuncProducer func(provider *schema.Provider) (func(s *terraform.State) error)) {
 	providers := getTestAccProviders(t.Name())
-	defer closeRecorder(t.Name())
 	c.Providers = providers
+	defer closeRecorder(t.Name())
+	c.CheckDestroy = destroyFuncProducer(providers["google"].(*schema.Provider))
 	resource.Test(t, c)
 }
 
