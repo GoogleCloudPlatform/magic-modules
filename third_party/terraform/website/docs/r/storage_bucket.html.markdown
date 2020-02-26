@@ -23,26 +23,12 @@ and
 determined which will require enabling the compute api.
 
 
-## Example Usage
-
-Example creating a private bucket in standard storage, in the EU region.
+## Example Usage - creating a private bucket in standard storage, in the EU region. Bucket configured as static website and CORS configurations
 
 ```hcl
-resource "google_storage_bucket" "image-store" {
-  name     = "image-store-bucket"
-  location = "EU"
-
-  website {
-    main_page_suffix = "index.html"
-    not_found_page   = "404.html"
-  }
-}
-```
-
-```hcl
-resource "google_storage_bucket" "image-store" {
+resource "google_storage_bucket" "static-site" {
   name     = "image-store.com"
-  location = "US"
+  location = "EU"
   force_destroy = true
 
   bucket_policy_only = true
@@ -60,18 +46,20 @@ resource "google_storage_bucket" "image-store" {
  }
 ```
 
+## Example Usage - Life cycle settings for storage bucket objects
+
 ```hcl
-resource "google_storage_bucket" "image-store" {
-  name     = "image-store-bucket"
+resource "google_storage_bucket" "auto-expire" {
+  name     = "auto-expiring-bucket"
   location = "US"
   force_destroy = true
 
   lifecycle_rule {
     condition {
-     age = "3"
+    age = "3"
     }
     action {
-       type = "Delete"
+      type = "Delete"
     }
   }
 }
