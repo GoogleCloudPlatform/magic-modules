@@ -1,5 +1,5 @@
 resource "google_game_services_game_server_deployment" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-private
+  provider = google-beta
 
   deployment_id  = "<%= ctx[:vars]["deployment_id"] %>"
   description = "a deployment description"
