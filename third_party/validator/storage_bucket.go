@@ -72,15 +72,7 @@ func GetStorageBucketApiObject(d TerraformResourceData, config *Config) (map[str
 	}
 
 	if v, ok := d.GetOk("retention_policy"); ok {
-		retention_policies := v.([]interface{})
-
-		sb.RetentionPolicy = &storage.BucketRetentionPolicy{}
-
-		retentionPolicy := retention_policies[0].(map[string]interface{})
-
-		if v, ok := retentionPolicy["retention_period"]; ok {
-			sb.RetentionPolicy.RetentionPeriod = int64(v.(int))
-		}
+		sb.RetentionPolicy = expandBucketRetentionPolicy(v.([]interface{}))
 	}
 
 	if v, ok := d.GetOk("cors"); ok {
@@ -200,6 +192,21 @@ func expandBucketWebsite(v interface{}) *storage.BucketWebsite {
 	}
 
 	return w
+}
+
+func expandBucketRetentionPolicy(configured interface{}) *storage.BucketRetentionPolicy {
+	retentionPolicies := configured.([]interface{})
+	if len(retentionPolicies) == 0 {
+		return nil
+	}
+	retentionPolicy := retentionPolicies[0].(map[string]interface{})
+
+	bucketRetentionPolicy := &storage.BucketRetentionPolicy{
+		IsLocked:        retentionPolicy["is_locked"].(bool),
+		RetentionPeriod: int64(retentionPolicy["retention_period"].(int)),
+	}
+
+	return bucketRetentionPolicy
 }
 
 func resourceGCSBucketLifecycleCreateOrUpdate(d TerraformResourceData, sb *storage.Bucket) error {
