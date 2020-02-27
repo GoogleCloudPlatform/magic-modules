@@ -14,7 +14,7 @@ import (
 func TestAccPubsubTopic_update(t *testing.T) {
 	t.Parallel()
 
-	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(10))
+	topic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },

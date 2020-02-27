@@ -23,14 +23,6 @@ import (
 	"github.com/terraform-providers/terraform-provider-random/random"
 )
 
-func vcrTest(t *testing.T, c resource.TestCase, destroyFuncProducer func(provider *schema.Provider) (func(s *terraform.State) error)) {
-	providers := getTestAccProviders(t.Name())
-	c.Providers = providers
-	defer closeRecorder(t.Name())
-	c.CheckDestroy = destroyFuncProducer(providers["google"].(*schema.Provider))
-	resource.Test(t, c)
-}
-
 var testAccProviders map[string]terraform.ResourceProvider
 <% unless version == 'ga' -%>
 var testAccProvidersOiCS map[string]terraform.ResourceProvider
@@ -84,9 +76,11 @@ var billingAccountEnvVars = []string{
 }
 
 var configs map[string]*Config
+var sources map[string]rand.Source
 
 func init() {
 	configs = make(map[string]*Config)
+	sources = make(map[string]rand.Source)
 	testAccProvider = Provider().(*schema.Provider)
 	testAccRandomProvider = random.Provider().(*schema.Provider)
 	<% if version == 'ga' -%>
@@ -111,96 +105,6 @@ func init() {
 		"random": testAccRandomProvider,
 	}
 	<% end -%>
-}
-
-// Returns a cached config if VCR testing is enabled. This enables us to use a single HTTP transport
-// for a given test, allowing for recording of HTTP interactions.
-// Why this exists: schema.Provider.ConfigureFunc is called multiple times for a given test
-// ConfigureFunc on our provider creates a new HTTP client and sets base paths (config.go LoadAndValidate)
-// VCR requires a single HTTP client to handle all interactions so it can record and replay responses so
-// this caches HTTP clients per test by replacing ConfigureFunc
-func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.ResourceData) (interface{}, error), testName string) (*Config, error) {
-	if v, ok := configs[testName]; ok {
-		return v, nil
-	}
-	c, err := configureFunc(d)
-	if err != nil {
-		return nil, err
-	}
-	config := c.(*Config)
-	vcrMode := recorder.ModeDisabled
-	realTransport := config.client.Transport
-	switch vcrEnv := os.Getenv("VCR_MODE"); vcrEnv {
-	case "RECORDING":
-		vcrMode = recorder.ModeRecording
-	case "REPLAYING":
-		vcrMode = recorder.ModeReplaying
-		realTransport = nil
-	default:
-		log.Printf("[DEBUG] No valid environment var set for VCR_MODE, expected RECORDING or REPLAYING, skipping VCR. VCR_MODE: %s", vcrEnv)
-		return config, nil
-	}
-
-	envPath := os.Getenv("VCR_PATH")
-	if envPath == "" {
-		log.Print("[DEBUG] No environment var set for VCR_PATH, skipping VCR")
-		return config, nil
-	}
-	path := filepath.Join(envPath, testName)
-
-	rec, err := recorder.NewAsMode(path, vcrMode, realTransport)
-	if err != nil {
-		return nil, err
-	}
-	// Defines how VCR will match requests to responses.
-	rec.SetMatcher(func(r *http.Request, i cassette.Request) bool {
-		// Default matcher compares method and URL only
-		defaultMatch := cassette.DefaultMatcher(r, i)
-		if r.Body == nil {
-			return defaultMatch
-		}
-		var b bytes.Buffer
-		if _, err := b.ReadFrom(r.Body); err != nil {
-			log.Printf("[DEBUG] Failed to read request body from cassette: %v", err)
-			return false
-		}
-		r.Body = ioutil.NopCloser(&b)
-		// body must match recorded body
-		return defaultMatch && b.String() == i.Body
-	})
-	config.client.Transport = rec
-	configs[testName] = config
-	return config, err
-}
-
-// We need to explicitly close the VCR recorder to save the cassette
-func closeRecorder(testName string) {
-	if config, ok := configs[testName]; ok {
-		// We did not cache the config if it does not use VCR
-		config.client.Transport.(*recorder.Recorder).Stop()
-		// Clean up test config
-		delete(configs, testName)
-	}
-}
-
-func getTestAccProviders(testName string) map[string]terraform.ResourceProvider {
-	prov := Provider().(*schema.Provider)
-	provRand := random.Provider().(*schema.Provider)
-	envPath := os.Getenv("VCR_PATH")
-	recordingMode := os.Getenv("VCR_MODE")
-	if envPath != "" && recordingMode != "" {
-		old := prov.ConfigureFunc
-		prov.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
-			return getCachedConfig(d, old, testName)
-		}
-	} else {
-		log.Print("[DEBUG] VCR_PATH or VCR_MODE not set, skipping VCR")
-	}
-	// TODO(slevenick): Add OICS provider
-	return map[string]terraform.ResourceProvider{
-		"google": prov,
-		"random": provRand,
-	}
 }
 
 // Returns a cached config if VCR testing is enabled. This enables us to use a single HTTP transport
@@ -292,6 +196,81 @@ func getTestAccProviders(testName string) map[string]terraform.ResourceProvider 
 		"google": prov,
 		"random": provRand,
 	}
+}
+
+// Wrapper for resource.Test to swap out providers for VCR providers and handle VCR specific things
+// Can be called when VCR is not enabled, and it will behave as normal
+func vcrTest(t *testing.T, c resource.TestCase, destroyFuncProducer func(provider *schema.Provider) func(s *terraform.State) error) {
+	providers := getTestAccProviders(t.Name())
+	c.Providers = providers
+	defer closeRecorder(t)
+	c.CheckDestroy = destroyFuncProducer(providers["google"].(*schema.Provider))
+	resource.Test(t, c)
+}
+
+// Produces a rand.Source for VCR testing based on the given mode.
+// In RECORDING mode, generates a new seed and saves it to a file, using the seed for the source
+// In REPLAYING mode, reads a seed from a file and creates a source from it
+func vcrSource(t *testing.T, path, mode string) (rand.Source, error) {
+	if s, ok := sources[t.Name()]; ok {
+		return s, nil
+	}
+	fileName := filepath.Join(path, fmt.Sprintf("%s.seed", t.Name()))
+	switch mode {
+	case "RECORDING":
+		seed := rand.Int63()
+		s := rand.NewSource(seed)
+		f, err := os.Create(fileName)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+		_, err = f.WriteString(strconv.FormatInt(seed, 10))
+		sources[t.Name()] = s
+		return s, nil
+	case "REPLAYING":
+		data := make([]byte, 19)
+		f, err := os.Open(fileName)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+		_, err = f.Read(data)
+		if err != nil {
+			return nil, err
+		}
+		seed := string(data)
+		seedInt, err := strconv.ParseInt(seed, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		s := rand.NewSource(seedInt)
+		sources[t.Name()] = s
+		return s, nil
+	default:
+		log.Printf("[DEBUG] No valid environment var set for VCR_MODE, expected RECORDING or REPLAYING, skipping VCR. VCR_MODE: %s", mode)
+		return nil, errors.New("No valid VCR_MODE set")
+	}
+}
+
+func randString(t *testing.T, length int) string {
+	envPath := os.Getenv("VCR_PATH")
+	vcrMode := os.Getenv("VCR_MODE")
+	if envPath == "" || vcrMode == "" {
+		return acctest.RandString(10)
+	}
+	s, err := vcrSource(t, envPath, vcrMode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	r := rand.New(s)
+	result := make([]byte, length)
+	set := "abcdefghijklmnopqrstuvwxyz012346789"
+	for i := 0; i < length; i++ {
+		result[i] = set[r.Intn(len(set))]
+	}
+	return string(result)
 }
 
 func TestProvider(t *testing.T) {
