@@ -27,10 +27,18 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'Topic'
-    base_url: projects/{{project}}/topics
-    create_verb: :PUT
     description: |
       A named resource to which messages are sent by publishers.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Managing Topics':
+          'https://cloud.google.com/pubsub/docs/admin#managing_topics'
+      api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.topics'
+    base_url: projects/{{project}}/topics
+    create_verb: :PUT
+    update_verb: :PATCH
+    update_mask: true
+    update_url: projects/{{project}}/topics/{{name}}
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ':'
@@ -48,7 +56,6 @@ objects:
           to messages published on this topic. Your project's PubSub service account
           (`service-{{PROJECT_NUMBER}}@gcp-sa-pubsub.iam.gserviceaccount.com`) must have
           `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
-          
           The expected format is `projects/*/locations/*/keyRings/*/cryptoKeys/*`
         input: true
       - !ruby/object:Api::Type::KeyValuePairs
@@ -73,29 +80,21 @@ objects:
               and is not a valid configuration.
             item_type: Api::Type::String
             required: true
-    update_verb: :PATCH
-    update_mask: true
-    update_url: projects/{{project}}/topics/{{name}}
-    references: !ruby/object:Api::Resource::ReferenceLinks
-      guides:
-        'Managing Topics':
-          'https://cloud.google.com/pubsub/docs/admin#managing_topics'
-      api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.topics'
   - !ruby/object:Api::Resource
     name: 'Subscription'
-    base_url: projects/{{project}}/subscriptions
-    create_verb: :PUT
     description: |
       A named resource representing the stream of messages from a single,
       specific topic, to be delivered to the subscribing application.
-    update_verb: :PATCH
-    update_mask: true
-    update_url: projects/{{project}}/subscriptions/{{name}}
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Subscriptions':
           'https://cloud.google.com/pubsub/docs/admin#managing_subscriptions'
       api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.subscriptions'
+    base_url: projects/{{project}}/subscriptions
+    create_verb: :PUT
+    update_verb: :PATCH
+    update_mask: true
+    update_url: projects/{{project}}/subscriptions/{{name}}
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: true
       method_name_separator: ':'

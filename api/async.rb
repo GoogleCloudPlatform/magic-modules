@@ -17,6 +17,47 @@ require 'api/timeout'
 module Api
   # Base class from which other Async classes can inherit.
   class Async < Api::Object
+    # Describes an operation
+    attr_reader :operation
+
+    # The list of methods where operations are used.
+    attr_reader :actions
+
+    def validate
+      super
+
+      check :operation, type: Operation, required: true
+      check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
+    end
+
+    def allow?(method)
+      @actions.include?(method.downcase)
+    end
+
+    # Base async operation type
+    class Operation < Api::Object
+      # Contains information about an long-running operation, to make
+      # requests for the state of an operation.
+      attr_reader :timeouts
+      attr_reader :result
+
+      def validate
+        check :result, type: Result
+        check :timeouts, type: Api::Timeouts
+      end
+    end
+
+    # Base result class
+    class Result < Api::Object
+      # Contains information about the result of an Operation
+
+      attr_reader :resource_inside_response
+
+      def validate
+        super
+        check :resource_inside_response, type: :boolean, default: false
+      end
+    end
   end
 
   # Represents an asynchronous operation definition
@@ -39,12 +80,9 @@ module Api
       check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
     end
 
-    def allow?(method)
-      @actions.include?(method.downcase)
-    end
-
-    # Represents the operations (requests) issues to watch for completion
-    class Operation < Api::Object
+    # The main implementation of Operation,
+    # corresponding to common GCP Operation resources.
+    class Operation < Async::Operation
       attr_reader :kind
       attr_reader :path
       attr_reader :base_url
@@ -61,7 +99,6 @@ module Api
         check :path, type: String, required: true
         check :base_url, type: String
         check :wait_ms, type: Integer, required: true
-        check :timeouts, type: Api::Timeouts
 
         check :full_url, type: String
 
@@ -70,13 +107,12 @@ module Api
     end
 
     # Represents the results of an Operation request
-    class Result < Api::Object
+    class Result < Async::Result
       attr_reader :path
-      attr_reader :resource_inside_response
 
       def validate
         super
-        check :resource_inside_response, type: :boolean, default: false
+
         check :path, type: String
       end
     end
@@ -104,41 +140,6 @@ module Api
         super
         check :path, type: String, required: true
         check :message, type: String, required: true
-      end
-    end
-  end
-
-  # Many resources are async but do not provide a long running Operation that can be
-  # polled against. This class is meant to poll the resource itself until it can be
-  # determined that the resource is in a ready state.
-
-  # NOTE - this class is not fully generated and requires the polling implementation to
-  # be written by hand per product
-  class PollAsync < Async
-    attr_reader :operation
-    # The list of methods where operations are used.
-    attr_reader :actions
-
-    def validate
-      super
-
-      check :operation, type: PollAsync::Operation, required: true
-      check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
-    end
-
-    def allow?(method)
-      @actions.include?(method.downcase)
-    end
-
-    # Operation class is just a light wrapper to call the resource itself in order to
-    # share a similar structure with AsycOp
-    class Operation < Api::Object
-      attr_reader :timeouts
-
-      def validate
-        super
-
-        check :timeouts, type: Api::Timeouts
       end
     end
   end
