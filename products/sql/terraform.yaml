@@ -52,6 +52,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       onPremisesConfiguration.host: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpAddress'
+      onPremisesConfiguration.port: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0, 65535)'
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
