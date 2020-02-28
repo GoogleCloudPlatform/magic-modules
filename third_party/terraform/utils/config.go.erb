@@ -210,7 +210,9 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	client.Timeout = c.synchronousTimeout()
 
 	tfUserAgent := httpclient.TerraformUserAgent(c.terraformVersion)
-	<% if version.nil? || version == 'ga' -%>
+	<% if conversion? -%>
+	providerVersion := "terraform-google-conversion"
+	<% elsif version.nil? || version == 'ga' -%>
 	providerVersion := fmt.Sprintf("terraform-provider-google/%s", version.ProviderVersion)
 	<% else -%>
 	providerVersion := fmt.Sprintf("terraform-provider-google-<%= version -%>/%s", version.ProviderVersion)

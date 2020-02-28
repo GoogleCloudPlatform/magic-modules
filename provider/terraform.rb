@@ -293,5 +293,9 @@ module Provider
     def id_format(object)
       object.id_format || object.self_link_uri
     end
+
+    def conversion?
+      false
+    end
   end
 end

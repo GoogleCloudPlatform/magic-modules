@@ -138,5 +138,9 @@ module Provider
     def generate_iam_policy(data) end
 
     def generate_resource_sweepers(data) end
+
+    def conversion?
+      true
+    end
   end
 end
