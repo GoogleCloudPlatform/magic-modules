@@ -828,12 +828,7 @@ objects:
       exclude: true
       url_param_only: true
       description: |
-        Different notification type behaviors are configured primarily using the the `labels` field on this
-        resource. This block contains the labels which contain secrets or passwords so that they can be marked
-        sensitive and hidden from plan output.
-
-        Credentials may not be specified in both locations and will cause an error. Changing from one location
-        to a different credential configuration in the config will require an apply to update state.
+        Terraform only field
       properties:
         - !ruby/object:Api::Type::String
           name: authToken

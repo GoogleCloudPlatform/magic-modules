@@ -76,6 +76,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       sensitiveLabels: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: false
+        description: |
+          Different notification type behaviors are configured primarily using the the `labels` field on this
+          resource. This block contains the labels which contain secrets or passwords so that they can be marked
+          sensitive and hidden from plan output. The name of the field, eg: password, will be the key
+          in the `labels` map in the api request.
+
+          Credentials may not be specified in both locations and will cause an error. Changing from one location
+          to a different credential configuration in the config will require an apply to update state.
       sensitiveLabels.authToken: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
       sensitiveLabels.password: !ruby/object:Overrides::Terraform::PropertyOverride
