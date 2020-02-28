@@ -349,7 +349,18 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if v, ok := d.GetOk("retention_policy"); ok {
-		sb.RetentionPolicy = expandBucketRetentionPolicy(v.([]interface{}))
+		// Not using expandBucketRetentionPolicy() here because `is_locked` cannot be set on creation.
+		retention_policies := v.([]interface{})
+
+		if len(retention_policies) > 0 {
+			sb.RetentionPolicy = &storage.BucketRetentionPolicy{}
+
+			retentionPolicy := retention_policies[0].(map[string]interface{})
+
+			if v, ok := retentionPolicy["retention_period"]; ok {
+				sb.RetentionPolicy.RetentionPeriod = int64(v.(int))
+			}
+		}
 	}
 
 	if v, ok := d.GetOk("default_event_based_hold"); ok {
