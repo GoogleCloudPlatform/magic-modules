@@ -175,6 +175,7 @@ func closeRecorder(t *testing.T) {
 		}
 		// Clean up test config
 		delete(configs, t.Name())
+		delete(sources, t.Name())
 	}
 }
 
@@ -229,6 +230,7 @@ func vcrSource(t *testing.T, path, mode string) (rand.Source, error) {
 		sources[t.Name()] = s
 		return s, nil
 	case "REPLAYING":
+		// Max number of digits for int64 is 19
 		data := make([]byte, 19)
 		f, err := os.Open(fileName)
 		if err != nil {
@@ -261,6 +263,7 @@ func randString(t *testing.T, length int) string {
 	}
 	s, err := vcrSource(t, envPath, vcrMode)
 	if err != nil {
+		// At this point we haven't created any resources, so fail fast
 		t.Fatal(err)
 	}
 
