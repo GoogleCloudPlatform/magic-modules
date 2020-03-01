@@ -70,6 +70,7 @@ type Config struct {
 	BatchingConfig		*batchingConfig
 	UserProjectOverride bool
 	RequestTimeout  time.Duration
+	// This is only set during VCR tests. Otherwise use the default value
 	PollInterval time.Duration
 
 	client           *http.Client

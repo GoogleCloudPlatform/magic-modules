@@ -70,5 +70,5 @@ func appEngineOperationWaitTime(config *Config, res interface{}, appId, activity
 	if err := w.SetOp(op); err != nil {
 		return err
 	}
-	return OperationWait(w, activity, timeoutMinutes, 0*time.Second)
+	return OperationWait(w, activity, timeoutMinutes, config.PollInterval)
 }

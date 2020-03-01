@@ -126,7 +126,7 @@ func CommonRefreshFunc(w Waiter) resource.StateRefreshFunc {
 	}
 }
 
-func OperationWait(w Waiter, activity string, timeoutMinutes int, pollingInterval time.Duration) error {
+func OperationWait(w Waiter, activity string, timeoutMinutes int, pollInterval time.Duration) error {
 	if OperationDone(w) {
 		if w.Error() != nil {
 			return w.Error()
@@ -140,7 +140,7 @@ func OperationWait(w Waiter, activity string, timeoutMinutes int, pollingInterva
 		Refresh:      CommonRefreshFunc(w),
 		Timeout:      time.Duration(timeoutMinutes) * time.Minute,
 		MinTimeout:   2 * time.Second,
-		PollInterval: pollingInterval,
+		PollInterval: pollInterval,
 	}
 	opRaw, err := c.WaitForState()
 	if err != nil {
