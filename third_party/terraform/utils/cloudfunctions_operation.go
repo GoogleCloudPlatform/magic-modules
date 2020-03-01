@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"time"
 
 	"google.golang.org/api/cloudfunctions/v1"
 )
@@ -25,5 +26,5 @@ func cloudFunctionsOperationWait(service *cloudfunctions.Service, op *cloudfunct
 	if err := w.SetOp(op); err != nil {
 		return err
 	}
-	return OperationWait(w, activity, timeoutMin)
+	return OperationWait(w, activity, timeoutMin, 0*time.Second)
 }

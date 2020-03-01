@@ -70,6 +70,7 @@ type Config struct {
 	BatchingConfig		*batchingConfig
 	UserProjectOverride bool
 	RequestTimeout  time.Duration
+	PollInterval time.Duration
 
 	client           *http.Client
 	context          context.Context

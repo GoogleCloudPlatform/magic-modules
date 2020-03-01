@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"time"
 
 	"google.golang.org/api/appengine/v1"
 )
@@ -48,7 +49,7 @@ func appEngineOperationWaitTimeWithResponse(config *Config, res interface{}, res
 	if err := w.SetOp(op); err != nil {
 		return err
 	}
-	if err := OperationWait(w, activity, timeoutMinutes); err != nil {
+	if err := OperationWait(w, activity, timeoutMinutes, config.PollInterval); err != nil {
 		return err
 	}
 	return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
@@ -69,5 +70,5 @@ func appEngineOperationWaitTime(config *Config, res interface{}, appId, activity
 	if err := w.SetOp(op); err != nil {
 		return err
 	}
-	return OperationWait(w, activity, timeoutMinutes)
+	return OperationWait(w, activity, timeoutMinutes, 0*time.Second)
 }

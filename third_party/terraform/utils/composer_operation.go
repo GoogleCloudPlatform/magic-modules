@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"time"
 
 	composer "google.golang.org/api/composer/v1beta1"
 )
@@ -25,5 +26,6 @@ func composerOperationWaitTime(service *composer.Service, op *composer.Operation
 	if err := w.SetOp(op); err != nil {
 		return err
 	}
-	return OperationWait(w, activity, timeoutMinutes)
+	// TODO(slevenick): fix
+	return OperationWait(w, activity, timeoutMinutes, 0*time.Second)
 }

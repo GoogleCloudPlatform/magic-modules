@@ -128,6 +128,8 @@ func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.Resour
 		vcrMode = recorder.ModeRecording
 	case "REPLAYING":
 		vcrMode = recorder.ModeReplaying
+		// When replaying, set the poll interval low to speed up tests
+		config.PollInterval = 10 * time.Millisecond
 	default:
 		log.Printf("[DEBUG] No valid environment var set for VCR_MODE, expected RECORDING or REPLAYING, skipping VCR. VCR_MODE: %s", vcrEnv)
 		return config, nil
