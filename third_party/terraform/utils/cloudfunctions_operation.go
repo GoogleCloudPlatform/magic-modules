@@ -2,7 +2,6 @@ package google
 
 import (
 	"fmt"
-	"time"
 
 	"google.golang.org/api/cloudfunctions/v1"
 )

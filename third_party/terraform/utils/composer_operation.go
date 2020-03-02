@@ -2,7 +2,6 @@ package google
 
 import (
 	"fmt"
-	"time"
 
 	composer "google.golang.org/api/composer/v1beta1"
 )
