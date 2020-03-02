@@ -229,6 +229,9 @@ func vcrSource(t *testing.T, path, mode string) (rand.Source, error) {
 		}
 		defer f.Close()
 		_, err = f.WriteString(strconv.FormatInt(seed, 10))
+		if err != nil {
+			return nil, err
+		}
 		sources[t.Name()] = s
 		return s, nil
 	case "REPLAYING":
