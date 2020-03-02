@@ -59,7 +59,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
         description: |
-          The Region in which the created address should reside.
+          The Region in which the created instance should reside.
           If it is not provided, the provider region is used.
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: 'templates/terraform/encoders/sql_source_representation_instance.go.erb'
