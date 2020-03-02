@@ -1,0 +1,11 @@
+<% gcp_organization_id = "#{external_attribute('gcp_organization_id', doc_generation)}" -%>
+<% gcp_organization_iam_custom_role_id = "#{external_attribute('gcp_organization_iam_custom_role_id', doc_generation)}" -%>
+describe google_iam_organization_custom_role(org_id: <%= doc_generation ? "'12345'" : "gcp_organization_id" -%>, name: <%= gcp_organization_iam_custom_role_id -%>) do
+  it { should exist }
+  its('stage') { should eq 'GA' }
+  its('included_permissions') { should eq ["iam.roles.list"] }
+end
+
+describe google_iam_organization_custom_role(org_id: <%= doc_generation ? "'12345'" : "gcp_organization_id" -%>, name: <%= gcp_organization_iam_custom_role_id -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

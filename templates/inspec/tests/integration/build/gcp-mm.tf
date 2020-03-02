@@ -1200,3 +1200,14 @@ resource "google_compute_image" "example" {
     source = var.compute_image["source"]
   }
 }
+
+variable "gcp_organization_iam_custom_role_id" {}
+
+resource "google_organization_iam_custom_role" "generic_org_iam_custom_role" {
+  count = var.gcp_enable_privileged_resources
+  org_id      = var.gcp_organization_id
+  role_id     = var.gcp_organization_iam_custom_role_id
+  title       = "GCP Inspec Generic Organization IAM Custom Role"
+  description = "Custom role allowing to list IAM roles only"
+  permissions = ["iam.roles.list"]
+}
