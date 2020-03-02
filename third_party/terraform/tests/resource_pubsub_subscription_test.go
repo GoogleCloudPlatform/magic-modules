@@ -96,8 +96,9 @@ func TestAccPubsubSubscription_update(t *testing.T) {
 func TestAccPubsubSubscription_push(t *testing.T) {
 	t.Parallel()
 
-	topicFoo := fmt.Sprintf("tf-test-topic-foo-%s", acctest.RandString(10))
-	subscription := fmt.Sprintf("tf-test-topic-foo-%s", acctest.RandString(10))
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(10))
+	account := fmt.Sprintf("tf-test-account-%s", acctest.RandString(10))
+	subscription := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -105,7 +106,7 @@ func TestAccPubsubSubscription_push(t *testing.T) {
 		CheckDestroy: testAccCheckPubsubSubscriptionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPubsubSubscription_push(topicFoo, subscription),
+				Config: testAccPubsubSubscription_push(topic, subscription, account),
 			},
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
@@ -137,13 +138,13 @@ resource "google_pubsub_subscription" "foo" {
 `, topic, subscription)
 }
 
-func testAccPubsubSubscription_push(topicFoo string, subscription string) string {
+func testAccPubsubSubscription_push(topic, subscription, serviceAccount string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
 }
 
 resource "google_service_account" "pub_sub_service_account" {
-  account_id = "my-super-service"
+  account_id = "%s"
 }
 
 data "google_iam_policy" "admin" {
@@ -171,7 +172,7 @@ resource "google_pubsub_subscription" "foo" {
     }
   }
 }
-`, topicFoo, subscription)
+`, serviceAccount, topic, subscription)
 }
 
 func testAccPubsubSubscription_basic(topic, subscription, label string, deadline int) string {
