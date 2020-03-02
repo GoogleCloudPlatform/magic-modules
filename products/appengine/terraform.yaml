@@ -124,7 +124,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_service_split_traffic"
-        primary_resource_id: 'myapp'
+        primary_resource_id: 'liveapp'
         vars:
           service_id: "default"
           split.allocations.v1: "1"
