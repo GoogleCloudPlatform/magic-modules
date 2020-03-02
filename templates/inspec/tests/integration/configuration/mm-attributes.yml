@@ -437,3 +437,4 @@ logging_metric:
 compute_image:
   name: inspec-image
   source: https://storage.googleapis.com/bosh-cpi-artifacts/bosh-stemcell-3262.4-google-kvm-ubuntu-trusty-go_agent-raw.tar.gz
+ 

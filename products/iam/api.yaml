@@ -158,3 +158,40 @@ objects:
           - :KEY_TYPE_UNSPECIFIED
           - :USER_MANAGED
           - :SYSTEM_MANAGED
+  - !ruby/object:Api::Resource
+    name: 'OrganizationCustomRole'
+    base_url: organizations/{{org_id}}/roles
+    description: |
+      A role in the Identity and Access Management API
+    update_mask: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The name of the role.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'title'
+        description: |
+          A human-readable title for the role. Typically this is limited to 100
+          UTF-8 bytes.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: "Human-readable description for the role"
+      - !ruby/object:Api::Type::Array
+        name: 'includedPermissions'
+        description: Names of permissions this role grants when bound in an IAM policy.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Enum
+        name: 'stage'
+        description: The current launch stage of the role.
+        values:
+          - :ALPHA
+          - :BETA
+          - :GA
+          - :DEPRECATED
+          - :DISABLED
+          - :EAP
+      - !ruby/object:Api::Type::Boolean
+        name: 'deleted'
+        description: The current deleted state of the role
+        output: true
