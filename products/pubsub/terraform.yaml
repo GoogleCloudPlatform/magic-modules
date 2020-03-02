@@ -14,6 +14,21 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Topic: !ruby/object:Overrides::Terraform::ResourceOverride
+    # PubSub resources don't have operations but are negatively cached
+    # and eventually consistent.
+    # Because some users check whether the PubSub resource exists prior
+    # to applying a new resource, we need to add this PollAsync to GET the
+    # resource until it exists and the negative cached result goes away.
+    # Context: terraform-providers/terraform-provider-google#4993
+    async: !ruby/object:Provider::Terraform::PollAsync
+      check_response_func: PollCheckForExistence
+      actions: ['create']
+      operation: !ruby/object:Api::Async::Operation
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 6
+          update_minutes: 6
+          delete_minutes: 4
+      suppress_error: true
     error_retry_predicates: ["pubsubTopicProjectNotReady"]
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       parent_resource_attribute: 'topic'
@@ -49,6 +64,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/no_send_name.go.erb
       update_encoder: templates/terraform/update_encoder/pubsub_topic.erb
   Subscription: !ruby/object:Overrides::Terraform::ResourceOverride
+    # PubSub resources don't have operations but are negatively cached
+    # and eventually consistent.
+    # Because some users check whether the PubSub resource exists prior
+    # to applying a new resource, we need to add this PollAsync to GET the
+    # resource until it exists and the negative cached result goes away.
+    # Context: terraform-providers/terraform-provider-google#4993
+    async: !ruby/object:Provider::Terraform::PollAsync
+      check_response_func: PollCheckForExistence
+      actions: ['create']
+      operation: !ruby/object:Api::Async::Operation
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 6
+          update_minutes: 6
+          delete_minutes: 4
+      suppress_error: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "pubsub_subscription_push"

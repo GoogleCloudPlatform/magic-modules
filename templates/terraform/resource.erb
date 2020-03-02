@@ -215,23 +215,20 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
     d.SetId(id)
 
-<%  if !object.async.nil? && object.async.allow?('create') -%>
-<%    if object.async.is_a? Api::PollAsync -%>
-    waitURL, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+<%  if object.async&.allow?('create') -%>
+<%    if object.async.is_a? Provider::Terraform::PollAsync -%>
+    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func -%>, "Creating <%= object.name -%>", d.Timeout(schema.TimeoutCreate))
     if err != nil {
-        return err
-    }
-
-    err = <%= client_name_camel -%>PollingWaitTime(
-    config, res,<% if has_project -%> project, <% end -%> waitURL, "Creating <%= object.name -%>",
-        int(d.Timeout(schema.TimeoutCreate).Minutes()))
-
-    if err != nil {
-<%      if object.custom_code.post_create_failure -%>
+<%      if object.async.suppress_error -%>
+        log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
+<%      else -%>
+<%        if object.custom_code.post_create_failure -%>
         resource<%= resource_name -%>PostCreateFailure(d, meta)
-<%      end -%>
+<%        end -%>
         return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
+<%      end -%>
     }
+
 <%    end -%>
 <%    if object.async.is_a? Api::OpAsync -%>
 <%      if object.async.result.resource_inside_response and not object.identity.empty? -%>
@@ -309,6 +306,70 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     return resource<%= resource_name -%>Read(d, meta)
 <%  end # if custom_create  -%>
 }
+
+<%  if object.async&.is_a? Provider::Terraform::PollAsync -%>
+func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interface{}) PollReadFunc {
+    return func() (map[string]interface{}, error) {
+<%    if object.async.custom_poll_read -%>
+<%= lines(compile(object.async.custom_poll_read)) -%>
+<%    else -%>
+        config := meta.(*Config)
+
+        url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+        if err != nil {
+            return nil, err
+        }
+
+    <%  if has_project -%>
+        project, err := getProject(d, config)
+        if err != nil {
+            return nil, err
+        }
+    <%  end -%>
+    <%  if object.supports_indirect_user_project_override -%>
+        var project string
+        if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+            project = parts[1]
+        }
+    <%  end -%>
+        res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+        if err != nil {
+            return res, err
+        }
+    <%  if object.nested_query -%>
+        res, err = flattenNested<%= resource_name -%>(d, meta, res)
+        if err != nil {
+            return nil, err
+        }
+
+        if res == nil {
+            // Nested object not found, spoof a 404 error for poll
+            return nil, &googleapi.Error{
+                Code: 404,
+                Message: "nested object <%= resource_name%> not found",
+            }
+        }
+
+    <%  end -%>
+    <%  if object.custom_code.decoder -%>
+        res, err = resource<%= resource_name -%>Decoder(d, meta, res)
+        if err != nil {
+            return nil, err
+        }
+        if res == nil {
+            // Decoded object not found, spoof a 404 error for poll
+            return nil, &googleapi.Error{
+                Code: 404,
+                Message: "could not find object <%= resource_name%>",
+            }
+        }
+
+    <%  end -%>
+        return res, nil
+<%    end # ifelse object.async.custom_poll_read -%>
+    }
+}
+<%  end -%>
 
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
@@ -506,37 +567,33 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             project = parts[1]
         }
 <%      end -%>
-<%      if object.async.nil? -%>
-        _, err = sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
-<%      else -%>
+<%      if object.async.is_a? Api::OpAsync-%>
         res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+<%      else -%>
+        _, err = sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 <%      end -%>
         if err != nil {
             return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
         }
 
-<%      if !object.async.nil? && object.async.allow?('update') -%>
-<%        if object.async.is_a? Api::PollAsync -%>
-        waitURL, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
-        if err != nil {
-            return err
-        }
-
-        err = <%= client_name_camel -%>PollingWaitTime(
-            config, res, <% if has_project -%> project, <% end -%> waitURL, "Updating <%= object.name -%>",
-            int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-        if err != nil {
-            return err
-        }
-<%        end -%>
-<%        if object.async.is_a? Api::OpAsync -%>
+<%      if object.async&.allow?('update') -%>
+<%          if object.async.is_a? Api::OpAsync-%>
         err = <%= client_name_camel -%>OperationWaitTime(
             config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
             int(d.Timeout(schema.TimeoutUpdate).Minutes()))
         if err != nil {
             return err
         }
-<%        end -%>
+<%          elsif object.async.is_a? Provider::Terraform::PollAsync -%>
+        err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate))
+        if err != nil {
+<%              if object.async.suppress_error-%>
+        log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
+<%              else -%>
+        return err
+<%              end -%>
+        }
+<%          end -%>
 <%      end -%>
 
 <%      props.each do |prop|    -%>
@@ -606,31 +663,17 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         project = parts[1]
     }
 <%  end -%>
-<%  if object.async.nil? -%>
-    _, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
-<%  else -%>
+<%  if object.async.is_a? Api::OpAsync-%>
     res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
-<% end -%>
+<%  else -%>
+    _, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+<%  end -%>
 
     if err != nil {
-    return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
+        return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
     }
 
-<%  if !object.async.nil? && object.async.allow?('update') -%>
-<%    if object.async.is_a? Api::PollAsync -%>
-    waitURL, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
-    if err != nil {
-        return err
-    }
-
-    err = <%= client_name_camel -%>PollingWaitTime(
-        config, res, <% if has_project -%> project, <% end -%> waitURL, "Updating <%= object.name -%>",
-        int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-
-    if err != nil {
-        return err
-    }
-<%    end -%>
+<%  if object.async&.allow?('update') -%>
 <%    if object.async.is_a? Api::OpAsync -%>
     err = <%= client_name_camel -%>OperationWaitTime(
         config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
@@ -638,6 +681,15 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 
     if err != nil {
         return err
+    }
+<%    elsif object.async.is_a? Provider::Terraform::PollAsync -%>
+    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate))
+    if err != nil {
+<%      if object.async.suppress_error-%>
+        log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
+<%      else -%>
+        return err
+<%      end -%>
     }
 <%    end -%>
 <%  end -%>
@@ -704,7 +756,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
         return handleNotFoundError(err, d, "<%= object.name -%>")
     }
 
-<%  if !object.async.nil? && object.async.allow?('delete') -%>
+<%  if object.async&.allow?('delete') -%>
     err = <%= client_name_camel -%>OperationWaitTime(
         config, res, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
         int(d.Timeout(schema.TimeoutDelete).Minutes()))
