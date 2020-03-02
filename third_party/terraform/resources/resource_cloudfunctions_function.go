@@ -28,6 +28,14 @@ var functionAllowedMemory = map[int]bool{
 
 const functionDefaultAllowedMemoryMb = 256
 
+var functionAllowedIngressSettings = map[string]bool{
+	"INGRESS_SETTINGS_UNSPECIFIED": true,
+	"ALLOW_ALL":                    true,
+	"ALLOW_INTERNAL_ONLY":          true,
+}
+
+const functionDefaultIngressSettings = "ALLOW_ALL"
+
 type cloudFunctionId struct {
 	Project string
 	Region  string
@@ -61,6 +69,14 @@ func joinMapKeys(mapToJoin *map[int]bool) string {
 	var keys []string
 	for key := range *mapToJoin {
 		keys = append(keys, strconv.Itoa(key))
+	}
+	return strings.Join(keys, ",")
+}
+
+func joinMapKeysString(mapToJoin *map[string]bool) string {
+	var keys []string
+	for key := range *mapToJoin {
+		keys = append(keys, key)
 	}
 	return strings.Join(keys, ",")
 }
@@ -164,6 +180,22 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+			},
+
+			"ingress_settings": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  functionDefaultIngressSettings,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					ingressSettingValue := v.(string)
+
+					if !functionAllowedIngressSettings[ingressSettingValue] {
+						errors = append(errors, fmt.Errorf("Allowed values for ingress settings are: %s . Got %s",
+							joinMapKeysString(&functionAllowedIngressSettings), ingressSettingValue))
+					}
+					return
+				},
 			},
 
 			"labels": {
@@ -330,6 +362,10 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 			"You must specify a trigger when deploying a new function.")
 	}
 
+	if v, ok := d.GetOk("ingress_settings"); ok {
+		function.IngressSettings = v.(string)
+	}
+
 	if _, ok := d.GetOk("labels"); ok {
 		function.Labels = expandLabels(d)
 	}
@@ -388,6 +424,7 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 	d.Set("timeout", timeout)
+	d.Set("ingress_settings", function.IngressSettings)
 	d.Set("labels", function.Labels)
 	d.Set("runtime", function.Runtime)
 	d.Set("service_account_email", function.ServiceAccountEmail)
@@ -467,6 +504,11 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	if d.HasChange("timeout") {
 		function.Timeout = fmt.Sprintf("%vs", d.Get("timeout").(int))
 		updateMaskArr = append(updateMaskArr, "timeout")
+	}
+
+	if d.HasChange("ingress_settings") {
+		function.IngressSettings = d.Get("ingress_settings").(string)
+		updateMaskArr = append(updateMaskArr, "ingress_settings")
 	}
 
 	if d.HasChange("labels") {
