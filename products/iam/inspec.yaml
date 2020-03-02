@@ -42,3 +42,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: key_name
+  OrganizationCustomRole: !ruby/object:Overrides::Inspec::ResourceOverride
+    base_url: organizations/{{org_id}}/roles?view=FULL
+    self_link: organizations/{{org_id}}/roles/{{name}}
+    collection_url_key: roles
+    privileged: true
