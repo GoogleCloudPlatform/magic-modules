@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'provider/abstract_core'
+require 'provider/terraform/async'
 require 'provider/terraform/config'
 require 'provider/terraform/import'
 require 'provider/terraform/custom_code'
