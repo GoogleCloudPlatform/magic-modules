@@ -226,7 +226,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         resource<%= resource_name -%>PostCreateFailure(d, meta)
 <%        end -%>
         return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
-<%        end -%>
+<%      end -%>
     }
 
 <%    end -%>
