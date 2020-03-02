@@ -576,7 +576,6 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
         }
 
-
 <%      if object.async&.allow?('update') -%>
 <%          if object.async.is_a? Api::OpAsync-%>
         err = <%= client_name_camel -%>OperationWaitTime(
@@ -664,26 +663,17 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         project = parts[1]
     }
 <%  end -%>
-<%  if object.async&.allow?('update') && object.async.operation&.result&.resource_inside_response -%>
-    res, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+<%  if object.async.is_a? Api::OpAsync-%>
+    res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 <%  else -%>
     _, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
-<% end -%>
+<%  end -%>
+
     if err != nil {
         return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
     }
 
 <%  if object.async&.allow?('update') -%>
-<%    if object.async.is_a? Provider::Terraform::PollAsync -%>
-    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate))
-    if err != nil {
-<%      if object.async.suppress_error-%>
-        log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
-<%      else -%>
-        return err
-<%      end -%>
-    }
-<%    end -%>
 <%    if object.async.is_a? Api::OpAsync -%>
     err = <%= client_name_camel -%>OperationWaitTime(
         config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
@@ -691,6 +681,15 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 
     if err != nil {
         return err
+    }
+<%    elsif object.async.is_a? Provider::Terraform::PollAsync -%>
+    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate))
+    if err != nil {
+<%      if object.async.suppress_error-%>
+        log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
+<%      else -%>
+        return err
+<%      end -%>
     }
 <%    end -%>
 <%  end -%>
