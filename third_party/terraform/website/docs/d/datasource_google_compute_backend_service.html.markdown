@@ -40,6 +40,8 @@ The following arguments are supported:
 
 In addition to the arguments listed above, the following attributes are exported:
 
+* `id` - an identifier for the resource with format `projects/{{project}}/global/backendServices/{{name}}`
+
 * `connection_draining_timeout_sec` - Time for which instance will be drained (not accept new connections, but still work to finish started ones).
 
 * `description` - Textual description for the Backend Service.
