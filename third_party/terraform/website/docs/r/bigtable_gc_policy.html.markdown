@@ -29,7 +29,7 @@ resource "google_bigtable_instance" "instance" {
 
 resource "google_bigtable_table" "table" {
   name          = "tf-table"
-  instance_name = google_bigtable_instance.instance.name
+  instance_name = google_bigtable_instance.instance.id
 
   column_family {
     family = "name"
@@ -37,8 +37,8 @@ resource "google_bigtable_table" "table" {
 }
 
 resource "google_bigtable_gc_policy" "policy" {
-  instance_name = google_bigtable_instance.instance.name
-  table         = google_bigtable_table.table.name
+  instance_name = google_bigtable_instance.instance.id
+  table         = google_bigtable_table.table.id
   column_family = "name"
 
   max_age {
@@ -51,8 +51,8 @@ Multiple conditions is also supported. `UNION` when any of its sub-policies appl
 
 ```hcl
 resource "google_bigtable_gc_policy" "policy" {
-  instance_name = google_bigtable_instance.instance.name
-  table         = google_bigtable_table.table.name
+  instance_name = google_bigtable_instance.instance.id
+  table         = google_bigtable_table.table.id
   column_family = "name"
 
   mode = "UNION"
