@@ -23,6 +23,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "dataset"
         vars:
           dataset_id: "example_dataset"
+          account_name: "bqowner"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_dataset_cmek"
         skip_test: true
