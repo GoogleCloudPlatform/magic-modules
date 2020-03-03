@@ -60,8 +60,6 @@ The following arguments are supported:
 
 * id - an identifier for the resource with format projects/{{project}}/instances/{{instance}}/tables/{{name}}
 
-* name - an identifier for the resource with format projects/{{project}}/instances/{{instance}}/tables/{{tableId}}
-
 Only the arguments listed above are exposed as attributes.
 
 ## Import

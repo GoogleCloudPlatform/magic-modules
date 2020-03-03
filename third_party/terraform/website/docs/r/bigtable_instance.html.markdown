@@ -88,8 +88,6 @@ for a `DEVELOPMENT` instance.
 
 * id - an identifier for the resource with format projects/{{project}}/instances/{{name}}
 
-* name - The unique name of the requested big table instance. Values are of the form projects/<project>/instances/<instanceId>.
-
 ## Import
 
 Bigtable Instances can be imported using any of these accepted formats:
