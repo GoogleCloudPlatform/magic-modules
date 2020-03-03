@@ -11660,7 +11660,6 @@ objects:
         output: true
   - !ruby/object:Api::Resource
     name: 'RegionSslCertificate'
-    min_version: beta
     kind: 'compute#sslCertificate'
     base_url: projects/{{project}}/regions/{{region}}/sslCertificates
     collection_url_key: 'items'
