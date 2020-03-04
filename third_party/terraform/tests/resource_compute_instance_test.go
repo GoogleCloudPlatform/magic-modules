@@ -4580,7 +4580,7 @@ resource "google_compute_instance" "foobar" {
     my_other_key = "my_other_value"
   }
 
-  resource_policies = [google_compute_resource_policy.foo.id]
+  resource_policies = [google_compute_resource_policy.foo.self_link]
 }
 
 resource "google_compute_resource_policy" "foo" {
@@ -4625,7 +4625,7 @@ resource "google_compute_instance" "foobar" {
     on_host_maintenance = "TERMINATE"
   }
 
-  resource_policies = [google_compute_resource_policy.foo.id]
+  resource_policies = [google_compute_resource_policy.foo.self_link]
 }
 
 resource "google_compute_resource_policy" "foo" {
