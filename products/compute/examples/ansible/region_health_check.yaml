@@ -1,0 +1,29 @@
+# Copyright 2018 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+--- !ruby/object:Provider::Ansible::Example
+task: !ruby/object:Provider::Ansible::Task
+  name: gcp_compute_region_health_check
+  code:
+      name: <%= ctx[:name] %>
+      type: TCP
+      tcp_health_check:
+        port_name: service-health
+        request: ping
+        response: pong
+      healthy_threshold: 10
+      timeout_sec: 2
+      unhealthy_threshold: 5
+      region: 'us-central1'
+      project: <%= ctx[:project] %>
+      auth_kind: <%= ctx[:auth_kind] %>
+      service_account_file: <%= ctx[:service_account_file] %>

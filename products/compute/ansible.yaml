@@ -41,8 +41,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  RegionHealthCheck: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   RegionInstanceGroupManager: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -332,8 +330,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Region: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  RegionHealthCheck: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionInstanceGroupManager: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true

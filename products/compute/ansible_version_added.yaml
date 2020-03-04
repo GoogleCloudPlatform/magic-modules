@@ -50,6 +50,8 @@
     :version_added: '2.10'
   :RegionDisk:
     :version_added: '2.8'
+  :RegionHealthCheck:
+    :version_added: '2.10'
   :Route:
     :version_added: '2.7'
   :Router:
@@ -1019,6 +1021,100 @@
         :version_added: '2.8'
       :kmsKeyName:
         :version_added: '2.8'
+  :RegionHealthCheck:
+    :version_added: '2.10'
+    :checkIntervalSec:
+      :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :healthyThreshold:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :unhealthyThreshold:
+      :version_added: '2.10'
+    :timeoutSec:
+      :version_added: '2.10'
+    :type:
+      :version_added: '2.10'
+    :httpHealthCheck:
+      :version_added: '2.10'
+      :host:
+        :version_added: '2.10'
+      :requestPath:
+        :version_added: '2.10'
+      :response:
+        :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+      :portName:
+        :version_added: '2.10'
+      :proxyHeader:
+        :version_added: '2.10'
+      :portSpecification:
+        :version_added: '2.10'
+    :httpsHealthCheck:
+      :version_added: '2.10'
+      :host:
+        :version_added: '2.10'
+      :requestPath:
+        :version_added: '2.10'
+      :response:
+        :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+      :portName:
+        :version_added: '2.10'
+      :proxyHeader:
+        :version_added: '2.10'
+      :portSpecification:
+        :version_added: '2.10'
+    :tcpHealthCheck:
+      :version_added: '2.10'
+      :request:
+        :version_added: '2.10'
+      :response:
+        :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+      :portName:
+        :version_added: '2.10'
+      :proxyHeader:
+        :version_added: '2.10'
+      :portSpecification:
+        :version_added: '2.10'
+    :sslHealthCheck:
+      :version_added: '2.10'
+      :request:
+        :version_added: '2.10'
+      :response:
+        :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+      :portName:
+        :version_added: '2.10'
+      :proxyHeader:
+        :version_added: '2.10'
+      :portSpecification:
+        :version_added: '2.10'
+    :http2HealthCheck:
+      :version_added: '2.10'
+      :host:
+        :version_added: '2.10'
+      :requestPath:
+        :version_added: '2.10'
+      :response:
+        :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+      :portName:
+        :version_added: '2.10'
+      :proxyHeader:
+        :version_added: '2.10'
+      :portSpecification:
+        :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
   :Route:
     :version_added: '2.6'
     :destRange:
