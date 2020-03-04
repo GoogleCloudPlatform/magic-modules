@@ -501,15 +501,6 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
-
-			"resource_policies": {
-				Type:             schema.TypeList,
-				Elem:             &schema.Schema{Type: schema.TypeString},
-				DiffSuppressFunc: compareSelfLinkRelativePaths,
-				Optional:         true,
-				ForceNew:         true,
-				MaxItems:         1,
-			},
 		},
 	}
 }
@@ -766,7 +757,6 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		Tags:              resourceInstanceTags(d),
 		ShieldedVmConfig:  expandShieldedVmConfigs(d),
 		DisplayDevice:     expandDisplayDevice(d),
-		ResourcePolicies:  convertStringArr(d.Get("resource_policies").([]interface{})),
 	}
 
 	if _, ok := d.GetOk("labels"); ok {
@@ -1085,9 +1075,6 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	if err = d.Set("instance_description", instanceTemplate.Properties.Description); err != nil {
 		return fmt.Errorf("Error setting instance_description: %s", err)
 	}
-	if err = d.Set("resource_policies", instanceTemplate.Properties.ResourcePolicies); err != nil {
-		return fmt.Errorf("Error setting resource_policies: %s", err)
-	}
 	if err = d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
@@ -1141,7 +1128,6 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error setting enable_display: %s", err)
 		}
 	}
-	
 	return nil
 }
 
