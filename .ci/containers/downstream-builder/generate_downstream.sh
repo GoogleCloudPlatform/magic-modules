@@ -65,8 +65,8 @@ pushd ../mm-$REPO-$VERSION-$COMMAND
 
 clone_repo
 
-git config --global user.name "Modular Magician"
-git config --global user.email "magic-modules@google.com"
+git config --local user.name "Modular Magician"
+git config --local user.email "magic-modules@google.com"
 
 if [ "$COMMAND" == "head" ]; then
     BRANCH=auto-pr-$REFERENCE
@@ -100,6 +100,8 @@ else
 fi
 
 pushd $LOCAL_PATH
+git config --local user.name "Modular Magician"
+git config --local user.email "magic-modules@google.com"
 git add .
 git checkout -b $BRANCH
 
