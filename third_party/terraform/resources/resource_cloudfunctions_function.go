@@ -484,9 +484,9 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 		updateMaskArr = append(updateMaskArr, "environmentVariables")
 	}
 
-	if d.HasChange("vpc_connector"){
+	if d.HasChange("vpc_connector") {
 		function.VpcConnector = d.Get("vpc_connector").(string)
-		updateMaskArr = append(updateMaskArr, "vpc_connector")
+		updateMaskArr = append(updateMaskArr, "vpcConnector")
 	}
 
 	if d.HasChange("event_trigger") {
