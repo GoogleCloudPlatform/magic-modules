@@ -28,7 +28,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Reservation'
     base_url: projects/{{project}}/locations/{{location}}/reservations
-    self_link: projects/{{project}}/locations/{{location}}/reservations/{{name}}
     create_url: projects/{{project}}/locations/{{location}}/reservations?reservationId={{name}}
     update_verb: :PATCH
     update_mask: true
