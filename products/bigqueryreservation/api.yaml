@@ -51,6 +51,7 @@ objects:
         name: 'name'
         url_param_only: true
         input: true
+        required: true
         description: |
           The name of the reservation. This field must only contain alphanumeric characters or dash.
     properties:
@@ -61,7 +62,6 @@ objects:
           The user specified display name for the transfer config.
       - !ruby/object:Api::Type::Boolean
         name: 'ignoreIdleSlots'
-        send_empty_value: true
         description: |
           If false, any query using this reservation will use idle slots from other reservations within
           the same admin project. If true, a query using this reservation will execute with the slot
