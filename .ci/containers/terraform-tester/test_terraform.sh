@@ -20,6 +20,7 @@ mkdir -p "$(dirname $LOCAL_PATH)"
 git clone $SCRATCH_PATH $LOCAL_PATH --single-branch --branch "auto-pr-$REFERENCE" --depth 1
 pushd $LOCAL_PATH
 
+make # The errors are unintuitive if you call 'make lint' on code that doesn't compile.
 make tools
 make docscheck
 make lint
