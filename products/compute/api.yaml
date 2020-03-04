@@ -10950,7 +10950,6 @@ objects:
           A list of URLs of the IP resources to be drained. These IPs must be
           valid static external IPs that have been assigned to the NAT.
         send_empty_value: true
-        min_version: beta
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'address'
           resource: 'Address'
