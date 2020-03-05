@@ -31,8 +31,8 @@ objects:
   - !ruby/object:Api::Resource
     name: 'SSHPublicKey'
     kind: user#sshPublicKeys
-    base_url: users/{{user}}/sshPublicKeys/{{fingerprint}}
-    create_url: users/{{user}}:importSshPublicKey
+    base_url: "users/{{user}}/sshPublicKeys/{{fingerprint}}"
+    create_url: "users/{{user}}:importSshPublicKey"
     create_verb: :POST    
     update_verb: :PATCH
     description: |
@@ -43,6 +43,13 @@ objects:
           'https://cloud.google.com/compute/docs/oslogin'
       api: 'https://cloud.google.com/compute/docs/oslogin/rest'      
     update_mask: true
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: user
+        description: |
+          The user email.
+        required: true
+        input: true
     properties:
       - !ruby/object:Api::Type::String
         name: fingerprint
@@ -54,12 +61,6 @@ objects:
         description: |
           Public key text in SSH format, defined by RFC4253 section 6.6.
         required: true
-      - !ruby/object:Api::Type::String
-        name: user
-        description: |
-          The ID of the instance or a fully qualified identifier for the instance.
-        required: true
-        input: true        
       - !ruby/object:Api::Type::String
         name: 'expirationTimeUsec'
         description: |
