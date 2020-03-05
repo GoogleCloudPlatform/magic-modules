@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2020 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -43,8 +43,7 @@ objects:
         name: fingerprint
         description: |
           The SHA-256 fingerprint of the SSH public key.
-        required: false
-        input: true     
+        output: true     
       - !ruby/object:Api::Type::String
         name: 'key'
         description: |
@@ -67,4 +66,3 @@ objects:
           The project ID of the Google Cloud Platform project.
         required: true
         input: true
-

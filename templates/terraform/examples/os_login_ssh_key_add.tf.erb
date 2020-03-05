@@ -8,7 +8,7 @@ resource "google_service_account_key" "mykey" {
   public_key_type    = "TYPE_X509_PEM_FILE"
 }
 
-resource "google_os_login_sshPublicKeys" "<%= ctx[:primary_resource_id] %>" {
+resource "google_os_login_ssh_public_key" "<%= ctx[:primary_resource_id] %>" {
   user           = "<%= ctx[:vars]["user"] %>"
   key = google_service_account_key.mykey.public_key
 }
