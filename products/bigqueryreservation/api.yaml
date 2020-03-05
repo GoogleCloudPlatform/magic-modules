@@ -58,7 +58,8 @@ objects:
         name: 'slotCapacity'
         required: true
         description: |
-          The user specified display name for the transfer config.
+          Minimum slots available to this reservation. A slot is a unit of computational power in BigQuery, and serves as the
+          unit of parallelism. Queries using this reservation might use more slots during runtime if ignoreIdleSlots is set to false.
       - !ruby/object:Api::Type::Boolean
         name: 'ignoreIdleSlots'
         description: |
