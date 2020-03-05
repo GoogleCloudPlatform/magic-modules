@@ -1,0 +1,7 @@
+resource "google_sql_source_representation_instance" "<%= ctx[:primary_resource_id] %>" {
+  name             = "<%= ctx[:vars]['name'] %>"
+  region           = "us-central1"
+  database_version = "MYSQL_5_7"
+  host             = "10.20.30.40"
+  port             = 3306
+}
