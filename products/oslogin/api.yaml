@@ -14,7 +14,7 @@
 # TODO(nelsonjr): Make all Zone and Region resource ref
 
 --- !ruby/object:Api::Product
-name: os-login
+name: OSLogin
 display_name: OS Login
 versions:
   - !ruby/object:Api::Product::Version
@@ -43,7 +43,7 @@ objects:
         name: fingerprint
         description: |
           The SHA-256 fingerprint of the SSH public key.
-        required: true
+        required: false
         input: true     
       - !ruby/object:Api::Type::String
         name: 'key'

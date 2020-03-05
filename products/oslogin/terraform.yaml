@@ -16,7 +16,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   SSHPublicKey: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "redis_instance_basic"
+        name: "os_login_ssh_key_add"
         primary_resource_id: "cache"
         vars:
-          instance_name: "memory-cache"
+          user: "my-sa@my-project.iam.gserviceaccount.com"
