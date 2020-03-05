@@ -22,8 +22,8 @@ scopes:
   - https://www.googleapis.com/auth/bigquery
 apis_required:
   - !ruby/object:Api::Product::ApiReference
-    name: BigQueryDataTransfer API
-    url: https://console.cloud.google.com/apis/api/bigquerydatatransfer.googleapis.com/
+    name: BigQueryReservation API
+    url: https://console.cloud.google.com/apis/api/bigqueryreservation.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
     name: 'Reservation'
