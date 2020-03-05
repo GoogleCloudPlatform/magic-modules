@@ -62,6 +62,7 @@ objects:
           unit of parallelism. Queries using this reservation might use more slots during runtime if ignoreIdleSlots is set to false.
       - !ruby/object:Api::Type::Boolean
         name: 'ignoreIdleSlots'
+        default_value: false
         description: |
           If false, any query using this reservation will use idle slots from other reservations within
           the same admin project. If true, a query using this reservation will execute with the slot
