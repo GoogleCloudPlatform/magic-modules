@@ -20,3 +20,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "cache"
         vars:
           user: "my-sa@my-project.iam.gserviceaccount.com"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/sshkeyfingerprint.erb
