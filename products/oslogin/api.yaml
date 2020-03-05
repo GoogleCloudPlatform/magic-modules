@@ -19,7 +19,7 @@ display_name: OS Login
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://oslogin.googleapis.com/v1
+    base_url: https://oslogin.googleapis.com/v1/
 apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Identity and Access Management (IAM) API
