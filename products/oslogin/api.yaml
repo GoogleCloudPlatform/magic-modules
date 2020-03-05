@@ -60,9 +60,3 @@ objects:
         description: |
           An expiration time in microseconds since epoch.
         required: false
-      - !ruby/object:Api::Type::String
-        name: 'projectId'
-        description: |
-          The project ID of the Google Cloud Platform project.
-        required: true
-        input: true

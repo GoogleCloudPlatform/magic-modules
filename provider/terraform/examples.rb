@@ -228,12 +228,14 @@ module Provider
         config.gsub!('path/to/certificate.crt', 'test-fixtures/ssl_cert/test.crt')
         config.gsub!('path/to/index.zip', '%{zip_path}')
         config.gsub!('verified-domain.com', 'tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com')
+        config.gsub!('path/to/id_rsa.pub', 'test-fixtures/ssh_rsa.pub')
         config
       end
 
       def substitute_example_paths(config)
         config.gsub!('../static/img/header-logo.png', '../static/header-logo.png')
         config.gsub!('path/to/private.key', '../static/ssl_cert/test.key')
+        config.gsub!('path/to/id_rsa.pub', 'test-fixtures/ssh_rsa.pub')
         config.gsub!('path/to/certificate.crt', '../static/ssl_cert/test.crt')
         config
       end

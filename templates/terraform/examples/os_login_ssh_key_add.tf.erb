@@ -1,14 +1,4 @@
-resource "google_service_account" "service_account" {
-  account_id   = "<%= ctx[:vars]["user"] %>"
-  display_name = "Service Account"
-}
-
-resource "google_service_account_key" "mykey" {
-  service_account_id = google_service_account.myaccount.name
-  public_key_type    = "TYPE_X509_PEM_FILE"
-}
-
 resource "google_os_login_ssh_public_key" "<%= ctx[:primary_resource_id] %>" {
   user           = "<%= ctx[:vars]["user"] %>"
-  key = google_service_account_key.mykey.public_key
+  key = file("path/to/id_rsa.pub")
 }
