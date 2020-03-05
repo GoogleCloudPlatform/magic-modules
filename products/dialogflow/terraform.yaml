@@ -41,10 +41,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       matchMode: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       tier: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      post_update: 'templates/terraform/post_create/dialogflow_agent_tier.go.erb'
-      post_create: 'templates/terraform/post_create/dialogflow_agent_tier.go.erb'
+        ignore_read: true
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
