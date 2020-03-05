@@ -1025,6 +1025,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
       networkEndpointGroup: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+        diff_suppress_func: compareResourceNames
       port: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/float64_to_int.go.erb
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
