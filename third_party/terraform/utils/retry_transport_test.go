@@ -44,7 +44,9 @@ func TestRetryTransport_SingleRequestError(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(400)
-			w.Write([]byte(testRetryTransportErrorMessageFailure))
+			if _, err := w.Write([]byte(testRetryTransportErrorMessageFailure)); err != nil {
+				t.Errorf("unable to write to response writer: %s", err)
+			}
 		}))
 	defer ts.Close()
 
