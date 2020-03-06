@@ -25,3 +25,4 @@ make tools
 make docscheck
 make lint
 make test
+make website-test
