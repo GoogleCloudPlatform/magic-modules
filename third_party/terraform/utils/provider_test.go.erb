@@ -223,41 +223,53 @@ func vcrSource(t *testing.T, path, mode string) (rand.Source, error) {
 	case "RECORDING":
 		seed := rand.Int63()
 		s := rand.NewSource(seed)
-		f, err := os.Create(fileName)
-		if err != nil {
-			return nil, err
-		}
-		defer f.Close()
-		_, err = f.WriteString(strconv.FormatInt(seed, 10))
+		err := writeSeedToFile(seed, fileName)
 		if err != nil {
 			return nil, err
 		}
 		sources[t.Name()] = s
 		return s, nil
 	case "REPLAYING":
-		// Max number of digits for int64 is 19
-		data := make([]byte, 19)
-		f, err := os.Open(fileName)
+		seed, err := readSeedFromFile(fileName)
 		if err != nil {
 			return nil, err
 		}
-		defer f.Close()
-		_, err = f.Read(data)
-		if err != nil {
-			return nil, err
-		}
-		seed := string(data)
-		seedInt, err := strconv.ParseInt(seed, 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		s := rand.NewSource(seedInt)
+		s := rand.NewSource(seed)
 		sources[t.Name()] = s
 		return s, nil
 	default:
 		log.Printf("[DEBUG] No valid environment var set for VCR_MODE, expected RECORDING or REPLAYING, skipping VCR. VCR_MODE: %s", mode)
 		return nil, errors.New("No valid VCR_MODE set")
 	}
+}
+
+func readSeedFromFile(fileName string) (int64, error) {
+	// Max number of digits for int64 is 19
+	data := make([]byte, 19)
+	f, err := os.Open(fileName)
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+	_, err = f.Read(data)
+	if err != nil {
+		return 0, err
+	}
+	seed := string(data)
+	return strconv.ParseInt(seed, 10, 64)
+}
+
+func writeSeedToFile(seed int64, fileName string) error {
+	f, err := os.Create(fileName)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	_, err = f.WriteString(strconv.FormatInt(seed, 10))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func randString(t *testing.T, length int) string {
