@@ -20,7 +20,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "cache"
     properties:
       user: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
         custom_expand: templates/terraform/custom_expand/default_to_userinfo_email.go.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/ssh_public_key_never_send_user.go.erb
