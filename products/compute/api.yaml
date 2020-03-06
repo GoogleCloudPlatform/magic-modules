@@ -2470,6 +2470,68 @@ objects:
           "10GB-10TB".
         output: true
   - !ruby/object:Api::Resource
+    name: 'RegionDiskResourcePolicyAttachment'
+    input: true
+    base_url: projects/{{project}}/regions/{{region}}/disks/{{disk}}
+    create_verb: :POST
+    create_url: projects/{{project}}/regions/{{region}}/disks/{{disk}}/addResourcePolicies
+    delete_verb: :POST
+    delete_url: projects/{{project}}/regions/{{region}}/disks/{{disk}}/removeResourcePolicies
+    self_link: projects/{{project}}/regions/{{region}}/disks/{{disk}}
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys:
+        - resourcePolicies
+      is_list_of_ids: true
+    identity:
+      - name
+    description: |
+      Disk resource policies define a schedule for taking snapshots and a
+      retention period for these snapshots.
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 4
+          delete_minutes: 4
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'disk'
+        resource: 'Disk'
+        imports: 'name'
+        description: |
+          The name of the regional disk in which the resource policies are attached to.
+        required: true
+        url_param_only: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        description: 'A reference to the region where the disk resides.'
+        required: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource policy to be attached to the disk for scheduling snapshot
+          creation. Do not specify the self link.
+        required: true
+  - !ruby/object:Api::Resource
     name: 'DiskResourcePolicyAttachment'
     input: true
     base_url: projects/{{project}}/zones/{{zone}}/disks/{{disk}}
