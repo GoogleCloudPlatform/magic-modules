@@ -48,6 +48,7 @@ objects:
         name: user
         description: |
           The user email.
+        url_param_only: true
         input: true
     properties:
       - !ruby/object:Api::Type::String
