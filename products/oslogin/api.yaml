@@ -48,7 +48,6 @@ objects:
         name: user
         description: |
           The user email.
-        required: true
         input: true
     properties:
       - !ruby/object:Api::Type::String

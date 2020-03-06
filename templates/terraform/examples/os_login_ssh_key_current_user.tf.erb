@@ -1,4 +1,3 @@
 resource "google_os_login_ssh_public_key" "<%= ctx[:primary_resource_id] %>" {
-  user           = "<%= ctx[:vars]["user"] %>"
   key = file("path/to/id_rsa.pub")
 }
