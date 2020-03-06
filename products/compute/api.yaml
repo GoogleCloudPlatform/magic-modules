@@ -10558,7 +10558,6 @@ objects:
               Collocation specifies whether to place VMs inside the same availability domain on the same low-latency network.
               Specify `COLLOCATED` to enable collocation. Can only be specified with `vm_count`.
             values:
-              - :UNSPECIFIED_COLLOCATION
               - :COLLOCATED
   - !ruby/object:Api::Resource
     name: 'Route'

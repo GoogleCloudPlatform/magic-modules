@@ -1784,24 +1784,6 @@ func TestAccComputeInstance_updateTerminated_desiredStatusRunning_notAllowStoppi
 	})
 }
 
-func TestAccComputeInstance_resourcePolicies(t *testing.T) {
-	t.Parallel()
-
-	instanceName := fmt.Sprintf("terraform-test-%s", acctest.RandString(10))
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeInstance_resourcePolicies(instanceName),
-			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
-		},
-	})
-}
-
 func TestAccComputeInstance_resourcePolicyCollocate(t *testing.T) {
 	t.Parallel()
 
@@ -4543,57 +4525,6 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
-func testAccComputeInstance_resourcePolicies(instance string) string {
-	return fmt.Sprintf(`
-data "google_compute_image" "my_image" {
-  family  = "debian-9"
-  project = "debian-cloud"
-}
-
-resource "google_compute_instance" "foobar" {
-  name           = "%s"
-  machine_type   = "n1-standard-1"
-  zone           = "us-central1-a"
-  can_ip_forward = false
-  tags           = ["foo", "bar"]
-
-  //deletion_protection = false is implicit in this config due to default value
-
-  boot_disk {
-    initialize_params {
-      image = data.google_compute_image.my_image.self_link
-    }
-  }
-
-  network_interface {
-    network = "default"
-  }
-
-  metadata = {
-    foo            = "bar"
-    baz            = "qux"
-    startup-script = "echo Hello"
-  }
-
-  labels = {
-    my_key       = "my_value"
-    my_other_key = "my_other_value"
-  }
-
-  resource_policies = [google_compute_resource_policy.foo.self_link]
-}
-
-resource "google_compute_resource_policy" "foo" {
-  name   = "policy-%s"
-  region = "us-central1"
-  group_placement_policy {
-    availability_domain_count = 2
-  }
-}
-
-`, instance, acctest.RandString(10))
-}
-
 func testAccComputeInstance_resourcePolicyCollocate(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -4629,7 +4560,7 @@ resource "google_compute_instance" "foobar" {
 }
 
 resource "google_compute_resource_policy" "foo" {
-  name   = "policy-%s"
+  name   = "tf-test-policy-%s"
   region = "us-central1"
   group_placement_policy {
     vm_count = 2
