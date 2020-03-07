@@ -89,6 +89,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       timeoutSec: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases:
           - timeout_seconds
+  RegionDiskResourcePolicyAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   DiskResourcePolicyAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Disk: !ruby/object:Overrides::Ansible::ResourceOverride
