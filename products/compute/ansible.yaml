@@ -22,6 +22,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  RegionDiskResourcePolicyAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   DiskResourcePolicyAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   # Readonly resources.

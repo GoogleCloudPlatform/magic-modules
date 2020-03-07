@@ -10,6 +10,8 @@
     :version_added: '2.7'
   :RegionBackendService:
     :version_added: '2.10'
+  :RegionDiskResourcePolicyAttachment:
+    :version_added: '2.10'
   :Disk:
     :version_added: '2.7'
   :Firewall:
@@ -229,33 +231,59 @@
       :version_added: '2.6'
   :RegionBackendService:
     :version_added: '2.10'
-    :name:
-      :version_added: '2.10'
-    :healthChecks:
-      :version_added: '2.10'
     :backends:
       :version_added: '2.10'
-      :description:
+      :balancingMode:
         :version_added: '2.10'
-      :group:
+      :capacityScaler:
+        :version_added: '2.10'
+      :description:
         :version_added: '2.10'
       :failover:
         :version_added: '2.10'
+      :group:
+        :version_added: '2.10'
+      :maxConnections:
+        :version_added: '2.10'
+      :maxConnectionsPerInstance:
+        :version_added: '2.10'
+      :maxConnectionsPerEndpoint:
+        :version_added: '2.10'
+      :maxRate:
+        :version_added: '2.10'
+      :maxRatePerInstance:
+        :version_added: '2.10'
+      :maxRatePerEndpoint:
+        :version_added: '2.10'
+      :maxUtilization:
+        :version_added: '2.10'
+    :connectionDraining:
+      :version_added: '2.10'
+      :drainingTimeoutSec:
+        :version_added: '2.10'
     :description:
+      :version_added: '2.10'
+    :healthChecks:
+      :version_added: '2.10'
+    :loadBalancingScheme:
+      :version_added: '2.10'
+    :name:
       :version_added: '2.10'
     :protocol:
       :version_added: '2.10'
     :sessionAffinity:
       :version_added: '2.10'
-    :region:
-      :version_added: '2.10'
     :timeoutSec:
       :version_added: '2.10'
-    :connectionDraining:
+    :region:
       :version_added: '2.10'
-      :drainingTimeoutSec:
-        :version_added: '2.10'
-    :loadBalancingScheme:
+  :RegionDiskResourcePolicyAttachment:
+    :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :disk:
+      :version_added: '2.10'
+    :region:
       :version_added: '2.10'
   :Disk:
     :version_added: '2.6'
@@ -319,6 +347,10 @@
       :version_added: '2.8'
     :disabled:
       :version_added: '2.8'
+    :logConfig:
+      :version_added: '2.10'
+      :enableLogging:
+        :version_added: '2.10'
     :name:
       :version_added: '2.6'
     :network:
@@ -344,8 +376,6 @@
     :IPProtocol:
       :version_added: '2.6'
     :backendService:
-      :version_added: '2.6'
-    :ipVersion:
       :version_added: '2.6'
     :loadBalancingScheme:
       :version_added: '2.6'
@@ -899,8 +929,6 @@
     :version_added: '2.6'
     :description:
       :version_added: '2.6'
-    :ipv4_range:
-      :version_added: '2.6'
     :name:
       :version_added: '2.6'
     :autoCreateSubnetworks:
@@ -1011,6 +1039,8 @@
       :version_added: '2.6'
     :nextHopVpnTunnel:
       :version_added: '2.6'
+    :nextHopIlb:
+      :version_added: '2.10'
   :Router:
     :version_added: '2.7'
     :name:
@@ -1123,8 +1153,6 @@
       :version_added: '2.6'
     :network:
       :version_added: '2.6'
-    :enableFlowLogs:
-      :version_added: '2.8'
     :secondaryIpRanges:
       :version_added: '2.8'
       :rangeName:
@@ -1227,6 +1255,28 @@
       :version_added: '2.6'
     :description:
       :version_added: '2.6'
+    :headerAction:
+      :version_added: '2.10'
+      :requestHeadersToAdd:
+        :version_added: '2.10'
+        :headerName:
+          :version_added: '2.10'
+        :headerValue:
+          :version_added: '2.10'
+        :replace:
+          :version_added: '2.10'
+      :requestHeadersToRemove:
+        :version_added: '2.10'
+      :responseHeadersToAdd:
+        :version_added: '2.10'
+        :headerName:
+          :version_added: '2.10'
+        :headerValue:
+          :version_added: '2.10'
+        :replace:
+          :version_added: '2.10'
+      :responseHeadersToRemove:
+        :version_added: '2.10'
     :hostRules:
       :version_added: '2.6'
       :description:
@@ -1243,14 +1293,332 @@
         :version_added: '2.6'
       :description:
         :version_added: '2.6'
+      :headerAction:
+        :version_added: '2.10'
+        :requestHeadersToAdd:
+          :version_added: '2.10'
+          :headerName:
+            :version_added: '2.10'
+          :headerValue:
+            :version_added: '2.10'
+          :replace:
+            :version_added: '2.10'
+        :requestHeadersToRemove:
+          :version_added: '2.10'
+        :responseHeadersToAdd:
+          :version_added: '2.10'
+          :headerName:
+            :version_added: '2.10'
+          :headerValue:
+            :version_added: '2.10'
+          :replace:
+            :version_added: '2.10'
+        :responseHeadersToRemove:
+          :version_added: '2.10'
       :name:
         :version_added: '2.6'
       :pathRules:
         :version_added: '2.6'
-        :paths:
-          :version_added: '2.6'
         :service:
           :version_added: '2.6'
+        :paths:
+          :version_added: '2.6'
+        :routeAction:
+          :version_added: '2.10'
+          :corsPolicy:
+            :version_added: '2.10'
+            :allowCredentials:
+              :version_added: '2.10'
+            :allowHeaders:
+              :version_added: '2.10'
+            :allowMethods:
+              :version_added: '2.10'
+            :allowOriginRegexes:
+              :version_added: '2.10'
+            :allowOrigins:
+              :version_added: '2.10'
+            :disabled:
+              :version_added: '2.10'
+            :exposeHeaders:
+              :version_added: '2.10'
+            :maxAge:
+              :version_added: '2.10'
+          :faultInjectionPolicy:
+            :version_added: '2.10'
+            :abort:
+              :version_added: '2.10'
+              :httpStatus:
+                :version_added: '2.10'
+              :percentage:
+                :version_added: '2.10'
+            :delay:
+              :version_added: '2.10'
+              :fixedDelay:
+                :version_added: '2.10'
+                :nanos:
+                  :version_added: '2.10'
+                :seconds:
+                  :version_added: '2.10'
+              :percentage:
+                :version_added: '2.10'
+          :requestMirrorPolicy:
+            :version_added: '2.10'
+            :backendService:
+              :version_added: '2.10'
+          :retryPolicy:
+            :version_added: '2.10'
+            :numRetries:
+              :version_added: '2.10'
+            :perTryTimeout:
+              :version_added: '2.10'
+              :nanos:
+                :version_added: '2.10'
+              :seconds:
+                :version_added: '2.10'
+            :retryConditions:
+              :version_added: '2.10'
+          :timeout:
+            :version_added: '2.10'
+            :nanos:
+              :version_added: '2.10'
+            :seconds:
+              :version_added: '2.10'
+          :urlRewrite:
+            :version_added: '2.10'
+            :hostRewrite:
+              :version_added: '2.10'
+            :pathPrefixRewrite:
+              :version_added: '2.10'
+          :weightedBackendServices:
+            :version_added: '2.10'
+            :backendService:
+              :version_added: '2.10'
+            :headerAction:
+              :version_added: '2.10'
+              :requestHeadersToAdd:
+                :version_added: '2.10'
+                :headerName:
+                  :version_added: '2.10'
+                :headerValue:
+                  :version_added: '2.10'
+                :replace:
+                  :version_added: '2.10'
+              :requestHeadersToRemove:
+                :version_added: '2.10'
+              :responseHeadersToAdd:
+                :version_added: '2.10'
+                :headerName:
+                  :version_added: '2.10'
+                :headerValue:
+                  :version_added: '2.10'
+                :replace:
+                  :version_added: '2.10'
+              :responseHeadersToRemove:
+                :version_added: '2.10'
+            :weight:
+              :version_added: '2.10'
+        :urlRedirect:
+          :version_added: '2.10'
+          :hostRedirect:
+            :version_added: '2.10'
+          :httpsRedirect:
+            :version_added: '2.10'
+          :pathRedirect:
+            :version_added: '2.10'
+          :prefixRedirect:
+            :version_added: '2.10'
+          :redirectResponseCode:
+            :version_added: '2.10'
+          :stripQuery:
+            :version_added: '2.10'
+      :routeRules:
+        :version_added: '2.10'
+        :priority:
+          :version_added: '2.10'
+        :service:
+          :version_added: '2.10'
+        :headerAction:
+          :version_added: '2.10'
+          :requestHeadersToAdd:
+            :version_added: '2.10'
+            :headerName:
+              :version_added: '2.10'
+            :headerValue:
+              :version_added: '2.10'
+            :replace:
+              :version_added: '2.10'
+          :requestHeadersToRemove:
+            :version_added: '2.10'
+          :responseHeadersToAdd:
+            :version_added: '2.10'
+            :headerName:
+              :version_added: '2.10'
+            :headerValue:
+              :version_added: '2.10'
+            :replace:
+              :version_added: '2.10'
+          :responseHeadersToRemove:
+            :version_added: '2.10'
+        :matchRules:
+          :version_added: '2.10'
+          :fullPathMatch:
+            :version_added: '2.10'
+          :headerMatches:
+            :version_added: '2.10'
+            :exactMatch:
+              :version_added: '2.10'
+            :headerName:
+              :version_added: '2.10'
+            :invertMatch:
+              :version_added: '2.10'
+            :prefixMatch:
+              :version_added: '2.10'
+            :presentMatch:
+              :version_added: '2.10'
+            :rangeMatch:
+              :version_added: '2.10'
+              :rangeEnd:
+                :version_added: '2.10'
+              :rangeStart:
+                :version_added: '2.10'
+            :regexMatch:
+              :version_added: '2.10'
+            :suffixMatch:
+              :version_added: '2.10'
+          :ignoreCase:
+            :version_added: '2.10'
+          :metadataFilters:
+            :version_added: '2.10'
+            :filterLabels:
+              :version_added: '2.10'
+              :name:
+                :version_added: '2.10'
+              :value:
+                :version_added: '2.10'
+            :filterMatchCriteria:
+              :version_added: '2.10'
+          :prefixMatch:
+            :version_added: '2.10'
+          :queryParameterMatches:
+            :version_added: '2.10'
+            :exactMatch:
+              :version_added: '2.10'
+            :name:
+              :version_added: '2.10'
+            :presentMatch:
+              :version_added: '2.10'
+            :regexMatch:
+              :version_added: '2.10'
+          :regexMatch:
+            :version_added: '2.10'
+        :routeAction:
+          :version_added: '2.10'
+          :corsPolicy:
+            :version_added: '2.10'
+            :allowCredentials:
+              :version_added: '2.10'
+            :allowHeaders:
+              :version_added: '2.10'
+            :allowMethods:
+              :version_added: '2.10'
+            :allowOriginRegexes:
+              :version_added: '2.10'
+            :allowOrigins:
+              :version_added: '2.10'
+            :disabled:
+              :version_added: '2.10'
+            :exposeHeaders:
+              :version_added: '2.10'
+            :maxAge:
+              :version_added: '2.10'
+          :faultInjectionPolicy:
+            :version_added: '2.10'
+            :abort:
+              :version_added: '2.10'
+              :httpStatus:
+                :version_added: '2.10'
+              :percentage:
+                :version_added: '2.10'
+            :delay:
+              :version_added: '2.10'
+              :fixedDelay:
+                :version_added: '2.10'
+                :nanos:
+                  :version_added: '2.10'
+                :seconds:
+                  :version_added: '2.10'
+              :percentage:
+                :version_added: '2.10'
+          :requestMirrorPolicy:
+            :version_added: '2.10'
+            :backendService:
+              :version_added: '2.10'
+          :retryPolicy:
+            :version_added: '2.10'
+            :numRetries:
+              :version_added: '2.10'
+            :perTryTimeout:
+              :version_added: '2.10'
+              :nanos:
+                :version_added: '2.10'
+              :seconds:
+                :version_added: '2.10'
+            :retryConditions:
+              :version_added: '2.10'
+          :timeout:
+            :version_added: '2.10'
+            :nanos:
+              :version_added: '2.10'
+            :seconds:
+              :version_added: '2.10'
+          :urlRewrite:
+            :version_added: '2.10'
+            :hostRewrite:
+              :version_added: '2.10'
+            :pathPrefixRewrite:
+              :version_added: '2.10'
+          :weightedBackendServices:
+            :version_added: '2.10'
+            :backendService:
+              :version_added: '2.10'
+            :headerAction:
+              :version_added: '2.10'
+              :requestHeadersToAdd:
+                :version_added: '2.10'
+                :headerName:
+                  :version_added: '2.10'
+                :headerValue:
+                  :version_added: '2.10'
+                :replace:
+                  :version_added: '2.10'
+              :requestHeadersToRemove:
+                :version_added: '2.10'
+              :responseHeadersToAdd:
+                :version_added: '2.10'
+                :headerName:
+                  :version_added: '2.10'
+                :headerValue:
+                  :version_added: '2.10'
+                :replace:
+                  :version_added: '2.10'
+              :responseHeadersToRemove:
+                :version_added: '2.10'
+            :weight:
+              :version_added: '2.10'
+        :urlRedirect:
+          :version_added: '2.10'
+          :hostRedirect:
+            :version_added: '2.10'
+          :httpsRedirect:
+            :version_added: '2.10'
+          :pathRedirect:
+            :version_added: '2.10'
+          :prefixRedirect:
+            :version_added: '2.10'
+          :redirectResponseCode:
+            :version_added: '2.10'
+          :stripQuery:
+            :version_added: '2.10'
     :tests:
       :version_added: '2.6'
       :description:
