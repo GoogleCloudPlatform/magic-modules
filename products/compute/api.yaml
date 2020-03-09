@@ -6479,6 +6479,7 @@ objects:
     name: 'InstanceGroupNamedPort'
     base_url:  'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
     self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
+    input: true
     description: |
       Mange the named ports setting for a managed instance group without
       managing the group as whole. This resource is primarily intended for use
@@ -6487,8 +6488,8 @@ objects:
       modified.
     create_verb: :POST
     create_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/setNamedPorts'
-    update_verb: :POST
-    update_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/setNamedPorts'
+    delete_verb: :POST
+    delete_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/setNamedPorts'
     identity:
       - port
       - name
