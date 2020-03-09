@@ -14,62 +14,48 @@ import (
 	"time"
 )
 
-const testRetryTransportErrorMessageRetry = "retry error"
-const testRetryTransportErrorMessageSuccess = "success"
-const testRetryTransportErrorMessageFailure = "fail the request"
+const testRetryTransportCodeRetry = 500
+const testRetryTransportCodeSuccess = 200
+const testRetryTransportCodeFailure = 400
 
-// Check for no errors if the request succeeds the first time
-func TestRetryTransport_SingleRequestSuccess(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(200)
-			if _, err := w.Write([]byte(testRetryTransportErrorMessageSuccess)); err != nil {
-				t.Errorf("unable to write to response writer: %s", err)
-			}
-		}))
-	defer ts.Close()
+func setUpRetryTransportServerClient(hf http.Handler) (*httptest.Server, *http.Client) {
+	ts := httptest.NewServer(hf)
 
 	client := ts.Client()
 	client.Transport = &retryTransport{
 		internal:        http.DefaultTransport,
 		retryPredicates: []RetryErrorPredicateFunc{testRetryTransportRetryPredicate},
 	}
+	return ts, client
+}
+
+// Check for no errors if the request succeeds the first time
+func TestRetryTransport_SingleRequestSuccess(t *testing.T) {
+	ts, client := setUpRetryTransportServerClient(
+		// Request succeeds immediately
+		testRetryTransportHandler_noRetries(t, testRetryTransportCodeSuccess))
+	defer ts.Close()
 
 	resp, err := client.Get(ts.URL)
-	testRetryTransportCheckResponseForSuccess(t, resp, err)
+	testRetryTransport_checkSuccess(t, resp, err)
 }
 
 // Check for error if the request fails the first time
 func TestRetryTransport_SingleRequestError(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(400)
-			if _, err := w.Write([]byte(testRetryTransportErrorMessageFailure)); err != nil {
-				t.Errorf("unable to write to response writer: %s", err)
-			}
-		}))
+	ts, client := setUpRetryTransportServerClient(
+		// Request fails immediately
+		testRetryTransportHandler_noRetries(t, testRetryTransportCodeFailure))
 	defer ts.Close()
-
-	client := ts.Client()
-	client.Transport = &retryTransport{
-		internal:        http.DefaultTransport,
-		retryPredicates: []RetryErrorPredicateFunc{testRetryTransportRetryPredicate},
-	}
 
 	resp, err := client.Get(ts.URL)
-	testRetryTransportCheckResponseForFailure(t, resp, err, 400, testRetryTransportErrorMessageFailure)
+	testRetryTransport_checkFailure(t, resp, err, 400)
 }
 
-// Check for no errors if the request succeeds after a certain amount of time
 func TestRetryTransport_SuccessAfterRetries(t *testing.T) {
-	ts := httptest.NewServer(testRetryTransportSucceedAfterHandler(t, time.Second*1))
+	ts, client := setUpRetryTransportServerClient(
+		// Request succeeds after a certain amount of time
+		testRetryTransportHandler_returnAfter(t, time.Second*1, testRetryTransportCodeSuccess))
 	defer ts.Close()
-
-	client := ts.Client()
-	client.Transport = &retryTransport{
-		internal:        http.DefaultTransport,
-		retryPredicates: []RetryErrorPredicateFunc{testRetryTransportRetryPredicate},
-	}
 
 	ctx, cc := context.WithTimeout(context.Background(), time.Second*2)
 	defer cc()
@@ -79,18 +65,14 @@ func TestRetryTransport_SuccessAfterRetries(t *testing.T) {
 	}
 
 	resp, err := client.Do(req)
-	testRetryTransportCheckResponseForSuccess(t, resp, err)
+	testRetryTransport_checkSuccess(t, resp, err)
 }
 
 func TestRetryTransport_FailAfterRetries(t *testing.T) {
-	ts := httptest.NewServer(testRetryTransportFailAfterHandler(t, time.Second*1))
+	ts, client := setUpRetryTransportServerClient(
+		// Request fails after a certain amount of time
+		testRetryTransportHandler_returnAfter(t, time.Second*1, testRetryTransportCodeFailure))
 	defer ts.Close()
-
-	client := ts.Client()
-	client.Transport = &retryTransport{
-		internal:        http.DefaultTransport,
-		retryPredicates: []RetryErrorPredicateFunc{testRetryTransportRetryPredicate},
-	}
 
 	ctx, cc := context.WithTimeout(context.Background(), time.Second*2)
 	defer cc()
@@ -100,18 +82,14 @@ func TestRetryTransport_FailAfterRetries(t *testing.T) {
 	}
 
 	resp, err := client.Do(req)
-	testRetryTransportCheckResponseForFailure(t, resp, err, 400, testRetryTransportErrorMessageFailure)
+	testRetryTransport_checkFailure(t, resp, err, 400)
 }
 
 func TestRetryTransport_ContextTimeout(t *testing.T) {
-	ts := httptest.NewServer(testRetryTransportSucceedAfterHandler(t, time.Second*4))
+	ts, client := setUpRetryTransportServerClient(
+		// Request succeeds after a certain amount of time
+		testRetryTransportHandler_returnAfter(t, time.Second*4, testRetryTransportCodeSuccess))
 	defer ts.Close()
-
-	client := ts.Client()
-	client.Transport = &retryTransport{
-		internal:        http.DefaultTransport,
-		retryPredicates: []RetryErrorPredicateFunc{testRetryTransportRetryPredicate},
-	}
 
 	ctx, cc := context.WithTimeout(context.Background(), time.Second*2)
 	defer cc()
@@ -119,59 +97,43 @@ func TestRetryTransport_ContextTimeout(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to construct err: %v", err)
 	}
+
 	resp, err := client.Do(req)
 	// Last failure should have been a retryable error since we timed out
-	testRetryTransportCheckResponseForFailure(t, resp, err, 500, testRetryTransportErrorMessageRetry)
+	testRetryTransport_checkFailedWhileRetrying(t, resp, err)
 }
 
 // Check for no errors if the request succeeds after a certain amount of time
-func TestRetryTransport_SuccessAfterRetriesWithBody(t *testing.T) {
-	ts := httptest.NewServer(testRetryTransportSuccessCheckBodyHandler(t, time.Second*1))
+func TestRetryTransport_SuccessWithBody(t *testing.T) {
+	ts, client := setUpRetryTransportServerClient(
+		// Request succeeds after a certain amount of time and returns the body
+		testRetryTransportHandler_returnAfter(t, time.Second*1, testRetryTransportCodeSuccess))
 	defer ts.Close()
 
-	client := ts.Client()
-	client.Transport = &retryTransport{
-		internal:        http.DefaultTransport,
-		retryPredicates: []RetryErrorPredicateFunc{testRetryTransportRetryPredicate},
-	}
-
-	msg := "body for successful request"
+	body := "body for successful request"
 	ctx, cc := context.WithTimeout(context.Background(), time.Second*2)
 	defer cc()
-
-	req, err := http.NewRequestWithContext(ctx, "GET", ts.URL, bytes.NewReader([]byte(msg)))
+	req, err := http.NewRequestWithContext(ctx, "GET", ts.URL, bytes.NewReader([]byte(body)))
 	if err != nil {
 		t.Fatalf("unable to construct err: %v", err)
 	}
 
 	resp, err := client.Do(req)
-	testRetryTransportCheckResponseForSuccess(t, resp, err)
+	testRetryTransport_checkSuccess(t, resp, err)
+	testRetryTransport_checkBody(t, resp, body)
 }
 
-// SUCCESS handlers and check
-func testRetryTransportSucceedAfterHandler(t *testing.T, successInterval time.Duration) http.Handler {
-	var firstReqTime time.Time
-	var testOnce sync.Once
-
+// handlers
+func testRetryTransportHandler_noRetries(t *testing.T, code int) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		testOnce.Do(func() {
-			firstReqTime = time.Now()
-		})
-		if time.Since(firstReqTime) >= successInterval {
-			w.WriteHeader(200)
-			if _, err := w.Write([]byte(testRetryTransportErrorMessageSuccess)); err != nil {
-				t.Errorf("[ERROR] unable to write to response writer: %v", err)
-			}
-		} else {
-			w.WriteHeader(500)
-			if _, err := w.Write([]byte(testRetryTransportErrorMessageRetry)); err != nil {
-				t.Errorf("[ERROR] unable to write to response writer: %v", err)
-			}
+		w.WriteHeader(code)
+		if _, err := w.Write([]byte(fmt.Sprintf("Code: %d", code))); err != nil {
+			t.Errorf("[ERROR] unable to write to response writer: %v", err)
 		}
 	})
 }
 
-func testRetryTransportSuccessCheckBodyHandler(t *testing.T, successInterval time.Duration) http.Handler {
+func testRetryTransportHandler_returnAfter(t *testing.T, interval time.Duration, code int) http.Handler {
 	var firstReqTime time.Time
 	var testOnce sync.Once
 
@@ -180,32 +142,38 @@ func testRetryTransportSuccessCheckBodyHandler(t *testing.T, successInterval tim
 			firstReqTime = time.Now()
 		})
 
-		slurp, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			w.WriteHeader(400)
-			if _, err := w.Write([]byte(fmt.Sprintf("unable to read request body: %v", err))); err != nil {
+		var slurp []byte
+		if r.Body != nil && r.Body != http.NoBody {
+			var err error
+			slurp, err = ioutil.ReadAll(r.Body)
+			if err != nil {
+				w.WriteHeader(testRetryTransportCodeFailure)
+				if _, err := w.Write([]byte(fmt.Sprintf("unable to read request body: %v", err))); err != nil {
+					t.Errorf("[ERROR] unable to write to response writer: %v", err)
+				}
+				return
+			}
+		}
+
+		if time.Since(firstReqTime) < interval {
+			w.WriteHeader(testRetryTransportCodeRetry)
+			resp := fmt.Sprintf("Code: %d\nRequest Body: %s", testRetryTransportCodeRetry, string(slurp))
+			if _, err := w.Write([]byte(resp)); err != nil {
 				t.Errorf("[ERROR] unable to write to response writer: %v", err)
 			}
 			return
 		}
 
-		if time.Since(firstReqTime) >= successInterval {
-			w.WriteHeader(200)
-			resp := fmt.Sprintf("%s\nRequest Body: %s", testRetryTransportErrorMessageSuccess, string(slurp))
-			if _, err := w.Write([]byte(resp)); err != nil {
-				t.Errorf("[ERROR] unable to write to response writer: %v", err)
-			}
-		} else {
-			w.WriteHeader(500)
-			resp := fmt.Sprintf("%s\nRequest Body: %s", testRetryTransportErrorMessageRetry, string(slurp))
-			if _, err := w.Write([]byte(resp)); err != nil {
-				t.Errorf("[ERROR] unable to write to response writer: %v", err)
-			}
+		w.WriteHeader(code)
+		resp := fmt.Sprintf("Code: %d\nRequest Body: %s", code, string(slurp))
+		if _, err := w.Write([]byte(resp)); err != nil {
+			t.Errorf("[ERROR] unable to write to response writer: %v", err)
 		}
 	})
 }
 
-func testRetryTransportCheckResponseForSuccess(t *testing.T, resp *http.Response, respErr error) {
+// Utils for checking
+func testRetryTransport_checkSuccess(t *testing.T, resp *http.Response, respErr error) {
 	if respErr != nil {
 		t.Fatalf("expected no error, got: %v", respErr)
 	}
@@ -214,32 +182,13 @@ func testRetryTransportCheckResponseForSuccess(t *testing.T, resp *http.Response
 	if err != nil {
 		t.Fatalf("expected no error, got response error: %v", err)
 	}
+
+	if resp.StatusCode != testRetryTransportCodeSuccess {
+		t.Fatalf("got unexpected error code %d, expected %d", resp.StatusCode, testRetryTransportCodeSuccess)
+	}
 }
 
-// FAILURE handler and check
-func testRetryTransportFailAfterHandler(t *testing.T, successInterval time.Duration) http.Handler {
-	var firstReqTime time.Time
-	var testOnce sync.Once
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		testOnce.Do(func() {
-			firstReqTime = time.Now()
-		})
-		if time.Since(firstReqTime) >= successInterval {
-			w.WriteHeader(400)
-			if _, err := w.Write([]byte(testRetryTransportErrorMessageFailure)); err != nil {
-				t.Errorf("[ERROR] unable to write to response writer: %v", err)
-			}
-		} else {
-			w.WriteHeader(500)
-			if _, err := w.Write([]byte(testRetryTransportErrorMessageRetry)); err != nil {
-				t.Errorf("[ERROR] unable to write to response writer: %v", err)
-			}
-		}
-	})
-}
-
-func testRetryTransportCheckResponseForFailure(t *testing.T, resp *http.Response, respErr error, expectedCode int, expectedMsg string) {
+func testRetryTransport_checkFailure(t *testing.T, resp *http.Response, respErr error, expectedCode int) {
 	if respErr != nil {
 		t.Fatalf("expected response error, got actual error for doing request: %v", respErr)
 	}
@@ -255,11 +204,48 @@ func testRetryTransportCheckResponseForFailure(t *testing.T, resp *http.Response
 	}
 
 	if gerr.Code != expectedCode {
-		t.Errorf("expected error code 400, got error: %v", err)
+		t.Errorf("expected error code %d, got error: %v", expectedCode, err)
 	}
 
+	expectedMsg := fmt.Sprintf("Code: %d", expectedCode)
 	if !strings.Contains(gerr.Body, expectedMsg) {
-		t.Errorf("expected error %q in %v", testRetryTransportErrorMessageFailure, err)
+		t.Errorf("expected error message %q, got: %v", expectedMsg, err)
+	}
+}
+
+func testRetryTransport_checkFailedWhileRetrying(t *testing.T, resp *http.Response, respErr error) {
+	if respErr != nil {
+		t.Fatalf("expected response error, got actual error for doing request: %v", respErr)
+	}
+
+	err := googleapi.CheckResponse(resp)
+	if err == nil {
+		t.Fatalf("expected googleapi error, got no error")
+	}
+
+	gerr, ok := err.(*googleapi.Error)
+	if !ok {
+		t.Fatalf("expected error to be googleapi error: %v", err)
+	}
+
+	if gerr.Code != testRetryTransportCodeRetry {
+		t.Errorf("expected error code %d, got error: %v", testRetryTransportCodeRetry, err)
+	}
+}
+
+func testRetryTransport_checkBody(t *testing.T, resp *http.Response, expectedMsg string) {
+	if resp == nil {
+		t.Fatal("expected non-empty response")
+	}
+
+	actualBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("expected no error, unable to read response body: %v", err)
+	}
+
+	expectedBody := fmt.Sprintf("Request Body: %s", expectedMsg)
+	if !strings.HasSuffix(string(actualBody), expectedBody) {
+		t.Fatalf(expectedBody)
 	}
 }
 
@@ -267,8 +253,8 @@ func testRetryTransportCheckResponseForFailure(t *testing.T, resp *http.Response
 // Retries 500.
 func testRetryTransportRetryPredicate(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
-		if gerr.Code == 500 && gerr.Message == "retry error" {
-			return true, "retry error"
+		if gerr.Code == testRetryTransportCodeRetry {
+			return true, "retryable error"
 		}
 	}
 	return false, ""
