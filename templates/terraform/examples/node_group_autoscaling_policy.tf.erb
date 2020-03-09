@@ -20,6 +20,7 @@ resource "google_compute_node_group" "<%= ctx[:primary_resource_id] %>" {
   node_template = google_compute_node_template.soletenant-tmpl.self_link
   autoscaling_policy {
     mode = "ON"
+    min_nodes = 1
     max_nodes = 10
   }
 }
