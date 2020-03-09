@@ -1119,11 +1119,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           group_name: "soletenant-group"
           template_name: "soletenant-tmpl"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "node_group_autoscaling_policy"
+        min_version: beta
+        primary_resource_id: "nodes"
+        vars:
+          group_name: "soletenant-group"
+          template_name: "soletenant-tmpl"
     properties:
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      autoscalingPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      autoscalingPolicy.mode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      autoscalingPolicy.minNodes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      autoscalingPolicy.maxNodes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   NodeTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
