@@ -303,6 +303,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   DiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  InstanceGroupNamedPort: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   License: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   MachineType: !ruby/object:Overrides::Ansible::ResourceOverride
