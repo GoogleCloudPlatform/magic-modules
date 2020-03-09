@@ -6484,8 +6484,7 @@ objects:
       Mange the named ports setting for a managed instance group without
       managing the group as whole. This resource is primarily intended for use
       with GKE-generated groups that shouldn't otherwise be managed by other
-      tools. Deleting this resource is a no-op and the group will not be
-      modified.
+      tools.
     create_verb: :POST
     create_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/setNamedPorts'
     delete_verb: :POST
@@ -6543,11 +6542,13 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
         description: |
           The name for this named port. The name must be 1-63 characters
           long, and comply with RFC1035.
       - !ruby/object:Api::Type::Integer
         name: 'port'
+        required: true
         description:
           The port number, which can be a value between 1 and 65535.
   - !ruby/object:Api::Resource
