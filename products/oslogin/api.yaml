@@ -49,12 +49,14 @@ objects:
         description: |
           The user email.
         input: true
-    properties:
+        url_param_only: true
+        required: true      
       - !ruby/object:Api::Type::String
         name: fingerprint
         description: |
           The SHA-256 fingerprint of the SSH public key.
-        output: true     
+        output: true
+    properties:
       - !ruby/object:Api::Type::String
         name: 'key'
         description: |

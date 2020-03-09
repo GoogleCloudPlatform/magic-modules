@@ -16,11 +16,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   SSHPublicKey: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "os_login_ssh_key_current_user"
+        name: "os_login_ssh_key_provided_user"
         primary_resource_id: "cache"
-    properties:
-      user: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_expand: templates/terraform/custom_expand/default_to_userinfo_email.go.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      encoder: templates/terraform/encoders/ssh_public_key_never_send_user.go.erb
-      post_create: templates/terraform/post_create/sshkeyfingerprint.erb
+      post_create: templates/terraform/post_create/sshkeyfingerprint.go.erb
