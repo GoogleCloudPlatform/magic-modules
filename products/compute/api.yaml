@@ -7382,7 +7382,7 @@ objects:
           - !ruby/object:Api::Type::Integer
             name: 'minNodes'
             description: |
-              Minimum size of the node group, and must be an integer value less 
+              Minimum size of the node group. Must be less 
               than or equal to max-nodes. The default value is 0.
           - !ruby/object:Api::Type::Integer
             name: 'maxNodes'
