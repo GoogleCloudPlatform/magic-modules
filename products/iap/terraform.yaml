@@ -167,6 +167,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project_id: 'brand-proj-'
         test_env_vars:
           org_id: :ORG_ID
+          org_domain: :ORG_DOMAIN
         skip_test: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
@@ -184,6 +185,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project_id: 'brand-proj-'
         test_env_vars:
           org_id: :ORG_ID
+          org_domain: :ORG_DOMAIN
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
         * `client_id`: The OAuth2 ID of the client.

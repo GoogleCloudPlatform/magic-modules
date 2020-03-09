@@ -12,6 +12,7 @@ func TestAccIapBrand_iapBrandExample(t *testing.T) {
 
 	context := map[string]interface{}{
 		"org_id":        getTestOrgFromEnv(t),
+		"org_domain":    getTestOrgDomainFromEnv(t),
 		"random_suffix": acctest.RandString(10),
 	}
 
@@ -46,7 +47,7 @@ resource "google_project_service" "project_service" {
 }
 
 resource "google_iap_brand" "project_brand" {
-  support_email     = "support@example.com"
+  support_email     = "support@%{org_domain}"
   application_title = "Cloud IAP protected Application"
   project           = google_project_service.project_service.project
 }

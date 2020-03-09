@@ -1,7 +1,7 @@
 resource "google_project" "project" {
   project_id = "tf-test%{random_suffix}"
   name       = "tf-test%{random_suffix}"
-  org_id     = "%{org_id}"
+  org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
 }
 
 resource "google_project_service" "project_service" {
@@ -10,7 +10,7 @@ resource "google_project_service" "project_service" {
 }
 
 resource "google_iap_brand" "project_brand" {
-  support_email     = "support@example.com"
+  support_email     = "support@<%= ctx[:test_env_vars]['org_domain'] %>"
   application_title = "Cloud IAP protected Application"
   project           = google_project_service.project_service.project
 }
