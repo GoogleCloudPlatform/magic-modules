@@ -43,8 +43,10 @@ objects:
         required: true
         input: true
         url_param_only: true
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: 'instance'
+        resource: 'Instance'
+        imports: 'name'
         description: 'The name of the instance to create the app profile within.'
         input: true
         url_param_only: true
