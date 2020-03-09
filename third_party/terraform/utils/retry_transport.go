@@ -99,7 +99,7 @@ Retry:
 
 		// Copy the request - we dont want to use the original request as
 		// RoundTrip contract says request body can/will be consumed
-		newRequest, copyErr := t.copyRequest(req)
+		newRequest, copyErr := copyHttpRequest(req)
 		if copyErr != nil {
 			respErr = errwrap.Wrapf("unable to copy invalid http.Request for retry: {{err}}", copyErr)
 			break Retry
@@ -123,9 +123,6 @@ Retry:
 		select {
 		case <-ctx.Done():
 			log.Printf("[DEBUG] Retry Transport: Stopping retries, context done: %v", ctx.Err())
-			if attempts == 0 {
-				respErr = ctx.Err()
-			}
 			break Retry
 		case <-time.After(backoff):
 			log.Printf("[DEBUG] Retry Transport: Finished waiting")
@@ -133,7 +130,8 @@ Retry:
 			continue
 		}
 	}
-	// Cancel context if needed
+	// Cleanup the child context created for the retry loop
+	// if it wasn't done.
 	if ctx.Err() == nil && ccancel != nil {
 		ccancel()
 	}
@@ -142,9 +140,9 @@ Retry:
 	return resp, respErr
 }
 
-// copyRequest shallow copies a HTTP request but creates a deep copy of the
-// Body, so it can be consumed by one RoundTrip in the retry loop.
-func (t *retryTransport) copyRequest(req *http.Request) (*http.Request, error) {
+// copyHttpRequest shallow copies a HTTP request but creates a deep copy of the
+// Body, so it can be consumed by a RoundTrip, i.e. in the retry loop.
+func copyHttpRequest(req *http.Request) (*http.Request, error) {
 	if req.Body == nil || req.Body == http.NoBody {
 		return req, nil
 	}
@@ -175,16 +173,16 @@ func (t *retryTransport) checkForRetryableError(resp *http.Response, respErr err
 		errToCheck = respErr
 	} else {
 		respToCheck := *resp
-		// RoundTrip contract states response/response error cannot be edited,
-		// but we read and consume the Body to check for errors.
-		// We can use httputil.DumpResponse since we don't really care
-		// about anything but error code and messages in the response body.
+		// The RoundTrip contract states that the HTTP response/response error
+		// returned cannot be edited. We need to consume the Body to check for
+		// errors, so we need to create a copy if the Response has a body.
 		if resp.Body != nil && resp.Body != http.NoBody {
+			// Use httputil.DumpResponse since the only important info is
+			// error code and messages in the response body.
 			dumpBytes, err := httputil.DumpResponse(resp, true)
 			if err != nil {
 				return resource.NonRetryableError(fmt.Errorf("unable to check response for error: %v", err))
 			}
-			respToCheck = *resp
 			respToCheck.Body = ioutil.NopCloser(bytes.NewReader(dumpBytes))
 		}
 		errToCheck = googleapi.CheckResponse(&respToCheck)
