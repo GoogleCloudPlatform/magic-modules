@@ -9,24 +9,23 @@
 // instead.
 //
 // Example Usage:
-
 // For handwritten/Go clients, the retry transport should be provided via
 // the main client or a shallow copy of the HTTP resources, depending on the
 // API-specific retry predicates.
 // Example Usage in Terraform Config:
-//      client := oauth2.NewClient(ctx, tokenSource)
-//     // Create with default retry predicates
-//     client.Transport := NewTransportWithDefaultRetries(client.Transport, defaultTimeout)
+//	client := oauth2.NewClient(ctx, tokenSource)
+//	// Create with default retry predicates
+//	client.Transport := NewTransportWithDefaultRetries(client.Transport, defaultTimeout)
 //
-//      // If API uses just default retry predicates:
-//		c.clientCompute, err = compute.NewService(ctx, option.WithHTTPClient(client))
-//		...
-//		// If API needs custom additional retry predicates:
-//      sqlAdminHttpClient := ClientWithAdditionalRetries(client, retryTransport,
-//     		isTemporarySqlError1,
-//    		isTemporarySqlError2)
-//		c.clientSqlAdmin, err = compute.NewService(ctx, option.WithHTTPClient(sqlAdminHttpClient))
-//		...
+//	// If API uses just default retry predicates:
+//	c.clientCompute, err = compute.NewService(ctx, option.WithHTTPClient(client))
+//	...
+//	// If API needs custom additional retry predicates:
+//	sqlAdminHttpClient := ClientWithAdditionalRetries(client, retryTransport,
+//			isTemporarySqlError1,
+//			isTemporarySqlError2)
+//	c.clientSqlAdmin, err = compute.NewService(ctx, option.WithHTTPClient(sqlAdminHttpClient))
+// ...
 
 package google
 
@@ -66,8 +65,8 @@ func ClientWithAdditionalRetries(baseClient *http.Client, baseRetryTransport *re
 	return &copied
 }
 
-// Returns a shallow copy of the retry transport with additional retry predicates but same internal transport
-// (http.RoundTripper)
+// Returns a shallow copy of the retry transport with additional retry
+// predicates but same wrapped http.RoundTripper
 func (t *retryTransport) WithAddedPredicates(predicates ...RetryErrorPredicateFunc) *retryTransport {
 	copyT := *t
 	copyT.retryPredicates = append(t.retryPredicates, predicates...)
@@ -79,7 +78,9 @@ type retryTransport struct {
 	internal        http.RoundTripper
 }
 
-//
+// RoundTrip implements the RoundTripper interface method.
+// It retries the given HTTP request based on the retry predicates
+// registered under the retryTransport.
 func (t *retryTransport) RoundTrip(req *http.Request) (resp *http.Response, respErr error) {
 	// Set timeout to default value.
 	ctx := req.Context()
@@ -95,12 +96,16 @@ func (t *retryTransport) RoundTrip(req *http.Request) (resp *http.Response, resp
 Retry:
 	for {
 		log.Printf("[DEBUG] Retry Transport: request attempt %d", attempts)
+
+		// Copy the request - we dont want to use the original request as
+		// RoundTrip contract says request body can/will be consumed
 		newRequest, copyErr := t.copyRequest(req)
 		if copyErr != nil {
 			respErr = errwrap.Wrapf("unable to copy invalid http.Request for retry: {{err}}", copyErr)
 			break Retry
 		}
 
+		// Do the wrapped Roundtrip. This is one request in the retry loop.
 		resp, respErr = t.internal.RoundTrip(newRequest)
 		attempts++
 
@@ -137,11 +142,15 @@ Retry:
 	return resp, respErr
 }
 
+// copyRequest shallow copies a HTTP request but creates a deep copy of the
+// Body, so it can be consumed by one RoundTrip in the retry loop.
 func (t *retryTransport) copyRequest(req *http.Request) (*http.Request, error) {
 	if req.Body == nil || req.Body == http.NoBody {
 		return req, nil
 	}
 
+	// Helpers like http.NewRequest add a GetBody for copying.
+	// If not given, we should reject the request.
 	if req.GetBody == nil {
 		return nil, errors.New("invalid HTTP request for transport, expected request.GetBody for non-empty Body")
 	}
@@ -156,6 +165,9 @@ func (t *retryTransport) copyRequest(req *http.Request) (*http.Request, error) {
 	return &newRequest, nil
 }
 
+// checkForRetryableError uses the googleapi.CheckResponse util to check for
+// errors in the response, and determines whether there is a retryable error.
+// in response/response error.
 func (t *retryTransport) checkForRetryableError(resp *http.Response, respErr error) *resource.RetryError {
 	var errToCheck error
 
@@ -163,6 +175,10 @@ func (t *retryTransport) checkForRetryableError(resp *http.Response, respErr err
 		errToCheck = respErr
 	} else {
 		respToCheck := *resp
+		// RoundTrip contract states response/response error cannot be edited,
+		// but we read and consume the Body to check for errors.
+		// We can use httputil.DumpResponse since we don't really care
+		// about anything but error code and messages in the response body.
 		if resp.Body != nil && resp.Body != http.NoBody {
 			dumpBytes, err := httputil.DumpResponse(resp, true)
 			if err != nil {
