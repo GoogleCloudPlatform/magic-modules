@@ -66,6 +66,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "basic"
         vars:
           display_name: "Test Notification Channel"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "notification_channel_sensitive"
+        primary_resource_id: "default"
+        # sensitive labels will fail the import verification step.
+        skip_test: true
+        vars:
+          display_name: "Sensitive Notification Channel test"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       resource_definition: templates/terraform/resource_definition/monitoring_notification_channel.erb
       encoder: templates/terraform/encoders/monitoring_notification_channel.go.erb
