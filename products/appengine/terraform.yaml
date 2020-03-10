@@ -103,7 +103,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       network.subnetworkName: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'subnetwork'
       betaSettings: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
+        # https://issuetracker.google.com/issues/150157861
+        ignore_read: true
+        # default_from_api: true
       # maxConcurrentRequests defaults to a runtime-specific value
       automaticScaling.maxConcurrentRequests: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true

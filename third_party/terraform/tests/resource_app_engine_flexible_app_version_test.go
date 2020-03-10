@@ -18,7 +18,16 @@ func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
 		CheckDestroy: testAccCheckAppEngineFlexibleAppVersionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAppEngineFlexibleAppVersion_python(resourceName),
+				Config: testAccAppEngineFlexibleAppVersion_python(resourceName, "B2"),
+			},
+			{
+				ResourceName:            "google_app_engine_flexible_app_version.foo",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"env_variables", "deployment", "entrypoint", "service", "delete_service_on_destroy"},
+			},
+			{
+				Config: testAccAppEngineFlexibleAppVersion_python(resourceName, "B1"),
 			},
 			{
 				ResourceName:            "google_app_engine_flexible_app_version.foo",
@@ -31,7 +40,7 @@ func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
 
 }
 
-func testAccAppEngineFlexibleAppVersion_python(resourceName string) string {
+func testAccAppEngineFlexibleAppVersion_python(resourceName, instanceClass string) string {
 	return fmt.Sprintf(`
 resource "google_app_engine_flexible_app_version" "foo" {
   version_id = "v1"
@@ -47,12 +56,23 @@ resource "google_app_engine_flexible_app_version" "foo" {
   }
 
   entrypoint {
-    shell = "gunicorn -b :$PORT project_name.wsgi"
+    shell = "gunicorn -b :$PORT main:app"
   }
 
   deployment {
-    zip {
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.object.name}"
+    files {
+      name = "main.py"
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.main.name}"
+    }
+
+    files {
+      name = "requirements.txt"
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.requirements.name}"
+    }
+
+    files {
+      name = "app.yaml"
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.yaml.name}"
     }
   }
 
@@ -73,7 +93,7 @@ resource "google_app_engine_flexible_app_version" "foo" {
     subnetwork = "default"
   }
 
-  instance_class = "B1"
+  instance_class = "%s"
 
   manual_scaling {
     instances = 1
@@ -86,9 +106,21 @@ resource "google_storage_bucket" "bucket" {
   name = "%s-bucket"
 }
 
-resource "google_storage_bucket_object" "object" {
-  name   = "hello-world-django.zip"
+resource "google_storage_bucket_object" "yaml" {
+  name   = "app.yaml"
   bucket = google_storage_bucket.bucket.name
-  source = "./test-fixtures/appengine/hello-world-django.zip"
-}`, resourceName, resourceName)
+  source = "./test-fixtures/appengine/hello-world-flask/app.yaml"
+}
+
+resource "google_storage_bucket_object" "requirements" {
+  name   = "requirements.txt"
+  bucket = google_storage_bucket.bucket.name
+  source = "./test-fixtures/appengine/hello-world-flask/requirements.txt"
+}
+
+resource "google_storage_bucket_object" "main" {
+  name   = "main.py"
+  bucket = google_storage_bucket.bucket.name
+  source = "./test-fixtures/appengine/hello-world-flask/main.py"
+}`, resourceName, instanceClass, resourceName)
 }
