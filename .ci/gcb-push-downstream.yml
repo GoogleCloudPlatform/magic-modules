@@ -197,6 +197,7 @@ timeout: 86400s
 options:
     machineType: 'N1_HIGHCPU_8'
 
+# This is the ciphertext of the token, encrypted using the above KMS key.
 secrets:
     - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/github-token
       secretEnv:
