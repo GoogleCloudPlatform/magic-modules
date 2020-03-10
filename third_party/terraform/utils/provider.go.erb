@@ -121,11 +121,6 @@ func Provider() terraform.ResourceProvider {
 			<% end -%>
 
 			// Handwritten Products / Versioned / Atypical Entries
-			<% unless version == 'ga' -%>
-			// start beta-only products
-			IAPCustomEndpointEntryKey: IAPCustomEndpointEntry,
-			// end beta-only products
-			<% end -%>
 			CloudBillingCustomEndpointEntryKey:           CloudBillingCustomEndpointEntry,
 			ComposerCustomEndpointEntryKey:               ComposerCustomEndpointEntry,
 			ComputeBetaCustomEndpointEntryKey:            ComputeBetaCustomEndpointEntry,
