@@ -1,0 +1,10 @@
+resource "google_monitoring_notification_channel" "<%= ctx[:primary_resource_id] %>" {
+  display_name = "Test Slack Channel"
+  type         = "slack"
+  labels = {
+    "channel_name" = "#foobar"
+  }
+  sensitive_labels {
+    auth_token = "one"
+  }
+}
