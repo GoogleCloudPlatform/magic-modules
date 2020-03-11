@@ -14,6 +14,8 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   SSHPublicKey: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "users/{{user}}/sshPublicKeys/{{fingerprint}}"
+    import_format: ["users/{{user}}/sshPublicKeys/{{fingerprint}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "os_login_ssh_key_provided_user"
