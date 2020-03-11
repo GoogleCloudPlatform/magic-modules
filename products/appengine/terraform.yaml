@@ -99,6 +99,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       entrypoint: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       envVariables: !ruby/object:Overrides::Terraform::PropertyOverride
+        description:
+          Environment variables available to the application.  As these are not returned
+          in the API request, Terraform will not detect any changes made outside of the Terraform config.
         ignore_read: true
       network.subnetworkName: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'subnetwork'

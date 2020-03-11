@@ -11,6 +11,15 @@ def hello():
     """Return a friendly HTTP greeting."""
     return 'Hello World!'
 
+@app.route('/alive')
+def alive():
+    """Liveness check."""
+    return 'Alive!'
+
+@app.route('/ready')
+def ready():
+    """Readiness check."""
+    return 'Ready!'
 
 @app.errorhandler(500)
 def server_error(e):
