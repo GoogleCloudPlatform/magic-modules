@@ -47,13 +47,15 @@ func computeInstanceSerialPortRead(d *schema.ResourceData, meta interface{}) err
 	}
 	d.Set("zone", zone)
 
-	output, err := config.clientCompute.Instances.GetSerialPortOutput(project, zone, d.Get("instance").(string)).Port(int64(d.Get("port").(int))).Do()
+	port := int64(d.Get("port").(int))
+	output, err := config.clientCompute.Instances.GetSerialPortOutput(project, zone, d.Get("instance").(string)).Port(port).Do()
 	if err != nil {
 		return err
 	}
 	contents := output.Contents
+	// When we reach the end of the serial port output stream the contents comes back empty
 	for output.Contents != "" {
-		output, err = config.clientCompute.Instances.GetSerialPortOutput(project, zone, d.Get("instance").(string)).Port(int64(d.Get("port").(int))).Start(output.Next).Do()
+		output, err = config.clientCompute.Instances.GetSerialPortOutput(project, zone, d.Get("instance").(string)).Port(port).Start(output.Next).Do()
 		if err != nil {
 			return err
 		}

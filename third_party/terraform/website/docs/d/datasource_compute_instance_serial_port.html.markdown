@@ -52,14 +52,14 @@ resource "google_compute_instance" "windows" {
     serial-port-logging-enable = "TRUE"
     // Derived from https://cloud.google.com/compute/docs/instances/windows/automate-pw-generation
     windows-keys = jsonencode(
-                {
-                  email    = "example.user@example.com"
-                  expireOn = "2020-04-14T01:37:19Z"
-                  exponent = "AQAB"
-                  modulus  = "wgsquN4IBNPqIUnu+h/5Za1kujb2YRhX1vCQVQAkBwnWigcCqOBVfRa5JoZfx6KIvEXjWqa77jPvlsxM4WPqnDIM2qiK36up3SKkYwFjff6F2ni/ry8vrwXCX3sGZ1hbIHlK0O012HpA3ISeEswVZmX2X67naOvJXfY5v0hGPWqCADao+xVxrmxsZD4IWnKl1UaZzI5lhAzr8fw6utHwx1EZ/MSgsEki6tujcZfN+GUDRnmJGQSnPTXmsf7Q4DKreTZk49cuyB3prV91S0x3DYjCUpSXrkVy1Ha5XicGD/q+ystuFsJnrrhbNXJbpSjM6sjo/aduAkZJl4FmOt0R7Q=="
-                  userName = "example-user"
-                }
-            )
+      {
+        email    = "example.user@example.com"
+        expireOn = "2020-04-14T01:37:19Z"
+        exponent = "AQAB"
+        modulus  = "wgsquN4IBNPqIUnu+h/5Za1kujb2YRhX1vCQVQAkBwnWigcCqOBVfRa5JoZfx6KIvEXjWqa77jPvlsxM4WPqnDIM2qiK36up3SKkYwFjff6F2ni/ry8vrwXCX3sGZ1hbIHlK0O012HpA3ISeEswVZmX2X67naOvJXfY5v0hGPWqCADao+xVxrmxsZD4IWnKl1UaZzI5lhAzr8fw6utHwx1EZ/MSgsEki6tujcZfN+GUDRnmJGQSnPTXmsf7Q4DKreTZk49cuyB3prV91S0x3DYjCUpSXrkVy1Ha5XicGD/q+ystuFsJnrrhbNXJbpSjM6sjo/aduAkZJl4FmOt0R7Q=="
+        userName = "example-user"
+      }
+    )
   }
 
   service_account {
@@ -82,7 +82,7 @@ output "serial_out" {
 
 The following arguments are supported:
 
-* `instance` - (Required) The name of the Compute Instance to read output from
+* `instance` - (Required) The name of the Compute Instance to read output from.
 
 * `port` - (Required) The number of the serial port to read output from. Possible values are 1-4.
 
