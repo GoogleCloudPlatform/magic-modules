@@ -69,8 +69,8 @@ resource "google_compute_instance" "windows" {
 
 data "google_compute_instance_serial_port" "serial" {
   instance = google_compute_instance.windows.name
-  zone = google_compute_instance.windows.zone
-  port = 4
+  zone     = google_compute_instance.windows.zone
+  port     = 4
 }
 
 output "serial_out" {
