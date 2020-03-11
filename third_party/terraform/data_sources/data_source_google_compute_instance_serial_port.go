@@ -59,7 +59,7 @@ func computeInstanceSerialPortRead(d *schema.ResourceData, meta interface{}) err
 		}
 		contents += output.Contents
 	}
-	
+
 	d.Set("contents", contents)
 	d.SetId(output.SelfLink)
 	return nil
