@@ -52,3 +52,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Tier: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  SourceRepresentationInstance: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true

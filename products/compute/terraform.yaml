@@ -66,9 +66,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       status: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-    docs: !ruby/object:Provider::Terraform::Docs
-      attributes: |
-          * `address` - The IP of the created resource.
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
   Autoscaler: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -355,6 +352,30 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
         Because the API does not return the sensitive key value,
         we cannot confirm or reverse changes to a key outside of Terraform.
+  RegionDiskResourcePolicyAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
+    description: |
+      Adds existing resource policies to a disk. You can only add one policy
+      which will be applied to this disk for scheduling snapshot creation.
+
+      ~> **Note:** This resource does not support zonal disks (`google_compute_disk`).
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_disk_resource_policy_attachment_basic"
+        primary_resource_id: "attachment"
+        vars:
+          base_disk_name: "my-base-disk"
+          snapshot_name: "my-snapshot"
+          disk_name: "my-disk"
+          policy_name: "my-resource-policy"
+    id_format: "{{project}}/{{region}}/{{disk}}/{{name}}"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/compute_region_disk_resource_policies_attachment.go.erb
+      decoder: templates/terraform/decoders/compute_disk_resource_policies_attachment.go.erb
+      pre_delete: templates/terraform/pre_delete/compute_region_disk_resource_policies_attachment.go.erb
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
   DiskResourcePolicyAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
     description: |
       Adds existing resource policies to a disk. You can only add one policy
@@ -1028,6 +1049,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
       networkEndpointGroup: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+        diff_suppress_func: compareResourceNames
       port: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/float64_to_int.go.erb
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1097,11 +1119,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           group_name: "soletenant-group"
           template_name: "soletenant-tmpl"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "node_group_autoscaling_policy"
+        min_version: beta
+        primary_resource_id: "nodes"
+        vars:
+          group_name: "soletenant-group"
+          template_name: "soletenant-tmpl"
     properties:
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      autoscalingPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      autoscalingPolicy.mode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      autoscalingPolicy.minNodes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      autoscalingPolicy.maxNodes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   NodeTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1125,6 +1162,42 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           If it is not provided, the provider region is used.
       serverBinding: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  PacketMirroring: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "compute_packet_mirroring_full"
+        primary_resource_id: "foobar"
+        min_version: 'beta'
+        vars:
+          instance_name: "my-instance"
+          subnetwork_name: "my-subnetwork"
+          service_name: "my-service"
+          hc_name: "my-healthcheck"
+          mirroring_name: "my-mirroring"
+          ilb_rule_name: "my-ilb"
+          network_name: "my-network"
+
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      priority: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      collectorIlb: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+            The Forwarding Rule resource (of type load_balancing_scheme=INTERNAL)
+            that will be used as collector for mirrored traffic. The
+            specified forwarding rule must have is_mirroring_collector
+            set to true.
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        description: |
+          The Region in which the created address should reside.
+          If it is not provided, the provider region is used.
+
   ProjectInfo: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -1377,6 +1450,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "resource_policy_full"
         primary_resource_id: "bar"
+        vars:
+          name: "policy"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "resource_policy_placement_policy"
+        primary_resource_id: "baz"
         vars:
           name: "policy"
     properties:

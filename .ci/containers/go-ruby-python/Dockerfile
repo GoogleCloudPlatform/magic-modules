@@ -1,11 +1,12 @@
-FROM gcr.io/magic-modules/go-ruby:1.13.8-2.6.0
+FROM gcr.io/magic-modules/go-ruby:1.13.8-2.6.0-v2
 
 # Install python & python libraries.
 RUN apt-get update
 RUN apt-get install -y git
+RUN apt-get install -y rsync
 RUN apt-get install -y build-essential libbz2-dev libssl-dev libreadline-dev \
                         libffi-dev libsqlite3-dev tk-dev
-RUN apt-get install -y libpng-dev libfreetype6-dev    
+RUN apt-get install -y libpng-dev libfreetype6-dev
 RUN apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev \
     libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
     xz-utils tk-dev libffi-dev liblzma-dev python-openssl

@@ -11,10 +11,15 @@ resource "google_bigquery_dataset" "<%= ctx[:primary_resource_id] %>" {
 
   access {
     role          = "OWNER"
-    user_by_email = "Joe@example.com"
+    user_by_email = google_service_account.bqowner.email
   }
+
   access {
     role   = "READER"
-    domain = "example.com"
+    domain = "hashicorp.com"
   }
+}
+
+resource "google_service_account" "bqowner" {
+  account_id = "<%= ctx[:vars]['account_name'] %>"
 }

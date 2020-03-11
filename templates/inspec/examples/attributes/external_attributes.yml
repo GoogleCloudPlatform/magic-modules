@@ -29,3 +29,4 @@ gcp_project_iam_custom_role_id: admin-role
 gcp_fr_udp_name: udp-forwarding-rule
 gcp_lb_region: europe-west2
 gcp_dns_zone_name: dns-zone-name.com.
+gcp_organization_iam_custom_role_id: org-role

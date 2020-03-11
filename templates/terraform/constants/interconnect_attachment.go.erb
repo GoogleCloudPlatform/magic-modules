@@ -1,3 +1,4 @@
+<% unless compiler == "terraformobjectlibrary-codegen" -%>
 // waitForAttachmentToBeProvisioned waits for an attachment to leave the
 // "UNPROVISIONED" state, to indicate that it's either ready or awaiting partner
 // activity.
@@ -16,3 +17,4 @@ func waitForAttachmentToBeProvisioned(d *schema.ResourceData, config *Config, ti
 		return nil
 	})
 }
+<% end -%>

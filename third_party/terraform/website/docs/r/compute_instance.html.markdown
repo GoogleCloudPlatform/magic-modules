@@ -92,6 +92,9 @@ The following arguments are supported:
 
 * `description` - (Optional) A brief description of this resource.
 
+* `desired_status` - (Optional) Desired status of the instance. Either
+`"RUNNING"` or `"TERMINATED"`.
+
 * `deletion_protection` - (Optional) Enable deletion protection on this instance. Defaults to false.
     **Note:** you must disable deletion protection before removing the resource (e.g., via `terraform destroy`), or the instance cannot be deleted and the Terraform run will not complete successfully.
 
@@ -113,19 +116,32 @@ The following arguments are supported:
     within the instance. Ssh keys attached in the Cloud Console will be removed.
     Add them to your config in order to keep them attached to your instance.
 
--> On import, `metadata_startup_script` will be set while 
-`metadata.startup-script` will not be. You'll need to match 
-`metadata_startup_script` to your `startup-script` value.
+-> Depending on the OS you choose for your instance, some metadata keys have
+   special functionality.  Most linux-based images will run the content of
+   `metadata.startup-script` in a shell on every boot.  At a minimum,
+   Debian, CentOS, RHEL, SLES, Container-Optimized OS, and Ubuntu images
+   support this key.  Windows instances require other keys depending on the format
+   of the script and the time you would like it to run - see [this table](https://cloud.google.com/compute/docs/startupscript#providing_a_startup_script_for_windows_instances).
+   For Container-Optimized OS, `metadata.user-data` accepts an Ignition Config,
+   see [this page](https://coreos.com/os/docs/latest/booting-on-google-compute-engine.html)
+   for more information.  For the convenience of the users of `metadata.startup-script`,
+   we provide a special attribute, `metadata_startup_script`, which is documented below.
 
 * `metadata_startup_script` - (Optional) An alternative to using the
     startup-script metadata key, except this one forces the instance to be
     recreated (thus re-running the script) if it is changed. This replaces the
     startup-script metadata key on the created instance and thus the two
-    mechanisms are not allowed to be used simultaneously.
+    mechanisms are not allowed to be used simultaneously.  Users are free to use
+    either mechanism - the only distinction is that this separate attribute
+    willl cause a recreate on modification.  On import, `metadata_startup_script`
+    will be set, but `metadata.startup-script` will not - if you choose to use the
+    other mechanism, you will see a diff immediately after import, which will cause a
+    destroy/recreate operation.  You may want to modify your state file manually
+    using `terraform state` commands, depending on your use case.
 
 * `min_cpu_platform` - (Optional) Specifies a minimum CPU platform for the VM instance. Applicable values are the friendly names of CPU platforms, such as
 `Intel Haswell` or `Intel Skylake`. See the complete list [here](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform).
-    **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true in order to update this field.
+    **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
@@ -138,7 +154,7 @@ The following arguments are supported:
 
 * `service_account` - (Optional) Service account to attach to the instance.
     Structure is documented below.
-    **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true in order to update this field.
+    **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
 * `tags` - (Optional) A list of tags to attach to the instance.
 
@@ -146,7 +162,9 @@ The following arguments are supported:
 	**Note**: [`shielded_instance_config`](#shielded_instance_config) can only be used with boot images with shielded vm support. See the complete list [here](https://cloud.google.com/compute/docs/images#shielded-images).
 
 * `enable_display` - (Optional) Enable [Virtual Displays](https://cloud.google.com/compute/docs/instances/enable-instance-virtual-display#verify_display_driver) on this instance.
-**Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true in order to update this field.
+**Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
+
+* `resource_policies` (Optional) -- A list of short names or self_links of resource policies to attach to the instance. Modifying this list will cause the instance to recreate. Currently a max of 1 resource policy is supported.
 
 
 ---
@@ -279,12 +297,12 @@ The `service_account` block supports:
 
 * `email` - (Optional) The service account e-mail address. If not given, the
     default Google Compute Engine service account is used.
-    **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true in order to update this field.
+    **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
 * `scopes` - (Required) A list of service scopes. Both OAuth2 URLs and gcloud
     short names are supported. To allow full access to all Cloud APIs, use the
     `cloud-platform` scope. See a complete list of scopes [here](https://cloud.google.com/sdk/gcloud/reference/alpha/compute/instances/set-scopes#--scopes).
-    **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true in order to update this field.
+    **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
 The `scheduling` block supports:
 
@@ -317,7 +335,7 @@ The `node_affinities` block supports:
 * `key` (Required) - The key for the node affinity label.
 
 * `operator` (Required) - The operator. Can be `IN` for node-affinities
-    or `NOT` for anti-affinities.
+    or `NOT_IN` for anti-affinities.
 
 * `value` (Required) - The values for the node affinity label.
 
@@ -374,6 +392,9 @@ This resource provides the following
 ## Import
 
 ~> **Note:** The fields `boot_disk.0.disk_encryption_raw` and `attached_disk.*.disk_encryption_key_raw` cannot be imported automatically. The API doesn't return this information. If you are setting one of these fields in your config, you will need to update your state manually after importing the resource.
+
+-> **Note:** The `desired_status` field will not be set on import. If you have it set, Terraform will update the field on the next `terraform apply`, bringing your instance to the desired status.
+
 
 Instances can be imported using the `project`, `zone` and `name`, e.g.
 

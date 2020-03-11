@@ -21,6 +21,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  RegionDiskResourcePolicyAttachment: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   DiskResourcePolicyAttachment: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   DiskType: !ruby/object:Overrides::Inspec::ResourceOverride
@@ -103,6 +105,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   NetworkEndpoint: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  PacketMirroring:  !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   ProjectInfo:  !ruby/object:Overrides::Inspec::ResourceOverride
     singular_only: true

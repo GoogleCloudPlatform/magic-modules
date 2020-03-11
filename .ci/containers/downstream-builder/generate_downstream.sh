@@ -65,8 +65,8 @@ pushd ../mm-$REPO-$VERSION-$COMMAND
 
 clone_repo
 
-git config --global user.name "Modular Magician"
-git config --global user.email "magic-modules@google.com"
+git config --local user.name "Modular Magician"
+git config --local user.email "magic-modules@google.com"
 
 if [ "$COMMAND" == "head" ]; then
     BRANCH=auto-pr-$REFERENCE
@@ -100,6 +100,8 @@ else
 fi
 
 pushd $LOCAL_PATH
+git config --local user.name "Modular Magician"
+git config --local user.email "magic-modules@google.com"
 git add .
 git checkout -b $BRANCH
 
@@ -111,11 +113,11 @@ if [ "$REPO" == "terraform" ]; then
   CHANGELOG=true
 fi
 
+PR_NUMBER=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=closed&base=master&sort=updated&direction=desc" | \
+    jq -r ".[] | if .merge_commit_sha == \"$REFERENCE\" then .number else empty end")
 if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && [ "$CHANGELOG" == "true" ]; then
     # Add the changelog entry!
-    PR_NUMBER=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
-        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=closed&base=master&sort=updated&direction=desc" | \
-        jq -r ".[] | if .merge_commit_sha == \"$REFERENCE\" then .number else empty end")
     mkdir -p .changelog/
     curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/$PR_NUMBER" | \

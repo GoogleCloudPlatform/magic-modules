@@ -66,26 +66,46 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "basic"
         vars:
           display_name: "Test Notification Channel"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "notification_channel_sensitive"
+        primary_resource_id: "default"
+        # sensitive labels will fail the import verification step.
+        skip_test: true
+        vars:
+          display_name: "Sensitive Notification Channel test"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      resource_definition: templates/terraform/resource_definition/monitoring_notification_channel.erb
+      encoder: templates/terraform/encoders/monitoring_notification_channel.go.erb
+      decoder: templates/terraform/decoders/monitoring_notification_channel.go.erb
+      constants: templates/terraform/constants/monitoring_notification_channel.go.erb
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
     properties:
+      sensitiveLabels: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: false
+        description: |
+          Different notification type behaviors are configured primarily using the the `labels` field on this
+          resource. This block contains the labels which contain secrets or passwords so that they can be marked
+          sensitive and hidden from plan output. The name of the field, eg: password, will be the key
+          in the `labels` map in the api request.
+
+          Credentials may not be specified in both locations and will cause an error. Changing from one location
+          to a different credential configuration in the config will require an apply to update state.
+      sensitiveLabels.authToken: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+      sensitiveLabels.password: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+      sensitiveLabels.serviceKey: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
       labels: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           Configuration fields that define the channel and its behavior. The
           permissible and required labels are specified in the
           NotificationChannelDescriptor corresponding to the type field.
 
-          **Note**: Some NotificationChannelDescriptor labels are
-          sensitive and the API will return an partially-obfuscated value.
-          For example, for `"type": "slack"` channels, an `auth_token`
-          label with value "SECRET" will be obfuscated as "**CRET". In order
-          to avoid a diff, Terraform will use the state value if it appears
-          that the obfuscated value matches the state value in
-          length/unobfuscated characters. However, Terraform will not detect a
-          diff if the obfuscated portion of the value was changed outside of
-          Terraform.
-        custom_flatten: "templates/terraform/custom_flatten/monitoring_obfuscated_labels.go.erb"
+          Labels with sensitive data are obfuscated by the API and therefore Terraform cannot
+          determine if there are upstream changes to these fields. They can also be configured via
+          the sensitive_labels block, but cannot be configured in both places.
 
   UptimeCheckConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"

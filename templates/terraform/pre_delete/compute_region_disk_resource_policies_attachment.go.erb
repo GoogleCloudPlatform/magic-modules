@@ -1,0 +1,16 @@
+obj = make(map[string]interface{})
+
+region, err := getRegion(d, config)
+if err != nil {
+	return err
+}
+if region == "" {
+	return fmt.Errorf("region must be non-empty - set in resource or at provider-level")
+}
+
+name, err := expandComputeDiskResourcePolicyAttachmentName(d.Get("name"), d, config)
+if err != nil {
+  return err
+} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(name)) && (ok || !reflect.DeepEqual(v, name)) {
+  obj["resourcePolicies"] = []interface{}{fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", project, region, name)}
+}

@@ -39,9 +39,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "ignore_warnings"
     properties:
+      instance: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: compareResourceNames
       multiClusterRoutingUseAny: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bigtable_app_profile_routing.erb'
         custom_flatten: 'templates/terraform/custom_flatten/bigtable_app_profile_routing.erb'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/bigtable_app_profile.go.erb
+
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

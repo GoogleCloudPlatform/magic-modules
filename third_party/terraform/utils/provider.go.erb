@@ -446,9 +446,6 @@ func providerConfigure(d *schema.ResourceData, p *schema.Provider, terraformVers
 	<% end -%>
 
 	// Handwritten Products / Versioned / Atypical Entries
-	<% unless version == 'ga' -%>
-	config.IAPBasePath = d.Get(IAPCustomEndpointEntryKey).(string)
-	<% end -%>
 
 	config.CloudBillingBasePath = d.Get(CloudBillingCustomEndpointEntryKey).(string)
 	config.ComposerBasePath = d.Get(ComposerCustomEndpointEntryKey).(string)

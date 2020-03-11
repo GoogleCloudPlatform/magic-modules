@@ -23,7 +23,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # identity.
     skip_sweeper: true
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 10
+      insert_minutes: 20
       delete_minutes: 10
     examples:
       - !ruby/object:Provider::Terraform::Examples

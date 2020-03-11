@@ -2470,6 +2470,68 @@ objects:
           "10GB-10TB".
         output: true
   - !ruby/object:Api::Resource
+    name: 'RegionDiskResourcePolicyAttachment'
+    input: true
+    base_url: projects/{{project}}/regions/{{region}}/disks/{{disk}}
+    create_verb: :POST
+    create_url: projects/{{project}}/regions/{{region}}/disks/{{disk}}/addResourcePolicies
+    delete_verb: :POST
+    delete_url: projects/{{project}}/regions/{{region}}/disks/{{disk}}/removeResourcePolicies
+    self_link: projects/{{project}}/regions/{{region}}/disks/{{disk}}
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys:
+        - resourcePolicies
+      is_list_of_ids: true
+    identity:
+      - name
+    description: |
+      Disk resource policies define a schedule for taking snapshots and a
+      retention period for these snapshots.
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 4
+          delete_minutes: 4
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'disk'
+        resource: 'Disk'
+        imports: 'name'
+        description: |
+          The name of the regional disk in which the resource policies are attached to.
+        required: true
+        url_param_only: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        description: 'A reference to the region where the disk resides.'
+        required: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource policy to be attached to the disk for scheduling snapshot
+          creation. Do not specify the self link.
+        required: true
+  - !ruby/object:Api::Resource
     name: 'DiskResourcePolicyAttachment'
     input: true
     base_url: projects/{{project}}/zones/{{zone}}/disks/{{disk}}
@@ -3130,7 +3192,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules'
-      api: 'https://cloud.google.com/compute/docs/reference/v1/forwardingRule'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/forwardingRules'
     input: true
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
@@ -3164,6 +3226,16 @@ objects:
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
         output: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'isMirroringCollector'
+        description: |
+            Indicates whether or not this load balancer can be used
+            as a collector for packet mirroring. To prevent mirroring loops,
+            instances behind this load balancer will not have their traffic
+            mirrored even if a PacketMirroring rule applies to them. This
+            can only be set to true for load balancers that have their
+            loadBalancingScheme set to INTERNAL.
+        min_version: beta
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
@@ -7286,6 +7358,38 @@ objects:
           The total number of nodes in the node group.
         required: true
         send_empty_value: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'autoscalingPolicy'
+        min_version: beta
+        description: |
+          If you use sole-tenant nodes for your workloads, you can use the node
+          group autoscaler to automatically manage the sizes of your node groups.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'mode'
+            required: true
+            description: |
+              The autoscaling mode. Set to one of the following:
+                - OFF: Disables the autoscaler.
+                - ON: Enables scaling in and scaling out.
+                - ONLY_SCALE_OUT: Enables only scaling out. 
+                You must use this mode if your node groups are configured to 
+                restart their hosted VMs on minimal servers.
+            values:
+              - :OFF
+              - :ON
+              - :ONLY_SCALE_OUT
+          - !ruby/object:Api::Type::Integer
+            name: 'minNodes'
+            description: |
+              Minimum size of the node group. Must be less 
+              than or equal to max-nodes. The default value is 0.
+          - !ruby/object:Api::Type::Integer
+            name: 'maxNodes'
+            description: |
+              Maximum size of the node group. Set to a value less than or equal
+              to 100 and greater than or equal to min-nodes.
+            required: true
   - !ruby/object:Api::Resource
     name: 'NetworkPeeringRoutesConfig'
     base_url:  'projects/{{project}}/global/networks/{{network}}'
@@ -7476,6 +7580,163 @@ objects:
             values:
               - :RESTART_NODE_ON_ANY_SERVER
               - :RESTART_NODE_ON_MINIMAL_SERVERS
+  - !ruby/object:Api::Resource
+    name: 'PacketMirroring'
+    min_version: beta
+    base_url: projects/{{project}}/regions/{{region}}/packetMirrorings
+    update_verb: :PATCH
+    self_link: projects/{{project}}/regions/{{region}}/packetMirrorings/{{name}}
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Using Packet Mirroring': 'https://cloud.google.com/vpc/docs/using-packet-mirroring#creating'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/packetMirroring'
+    description: |
+      Packet Mirroring mirrors traffic to and from particular VM instances.
+      You can use the collected traffic to help you detect security threats
+      and monitor application performance.
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: The name of the packet mirroring rule
+        required: true
+      - !ruby/object:Api::Type::String
+        name: description 
+        description: A human-readable description of the rule.
+        input: true
+      - !ruby/object:Api::Type::String
+        name: region
+        description: The region where this rule is active.
+        required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: network
+        description: |
+            Specifies the mirrored VPC network. Only packets in this network
+            will be mirrored. All mirrored VMs should have a NIC in the given
+            network. All mirrored subnetworks should belong to the given network.
+        properties:
+          - !ruby/object:Api::Type::ResourceRef
+            name: url
+            description: The full self_link URL of the network where this rule is active.
+            resource: 'Network'
+            imports: 'selfLink'
+            required: true
+        required: true
+      - !ruby/object:Api::Type::Integer
+        name: priority
+        description: |
+            Since only one rule can be active at a time, priority is
+            used to break ties in the case of two rules that apply to
+            the same instances.
+        required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: collectorIlb
+        description: |
+            The Forwarding Rule resource (of type loadBalancingScheme=INTERNAL)
+            that will be used as collector for mirrored traffic. The
+            specified forwarding rule must have isMirroringCollector
+            set to true.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::ResourceRef
+            name: url
+            required: true
+            resource: 'ForwardingRule'
+            imports: 'selfLink'
+            description: The URL of the forwarding rule.
+      - !ruby/object:Api::Type::NestedObject
+        name: filter 
+        description: |
+            A filter for mirrored traffic.  If unset, all traffic is mirrored.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: ipProtocols
+            api_name: 'IPProtocols'
+            description: |
+                Protocols that apply as a filter on mirrored traffic.
+            item_type: !ruby/object:Api::Type::Enum
+              name: ipProtocols
+              description: Possible IP protocols to filter on.
+              values:
+                - tcp
+                - udp
+                - icmp
+          - !ruby/object:Api::Type::Array
+            name: cidrRanges
+            description: |
+                IP CIDR ranges that apply as a filter on the source (ingress) or
+                destination (egress) IP in the IP header. Only IPv4 is supported.
+            item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: mirroredResources
+        required: true
+        description: |
+            A means of specifying which resources to mirror.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: subnetworks
+            at_least_one_of:
+                - mirrored_resources.0.subnetworks
+                - mirrored_resources.0.instances
+                - mirrored_resources.0.tags
+            description: |
+                All instances in one of these subnetworks will be mirrored.
+            item_type: !ruby/object:Api::Type::NestedObject
+              name: subnetworks
+              description: The subnetworks that should be mirrored.  Specify at most 5.
+              properties:
+                - !ruby/object:Api::Type::ResourceRef
+                  name: url
+                  resource: 'Subnetwork'
+                  imports: 'selfLink'
+                  description: The URL of the subnetwork where this rule should be active.
+                  required: true
+          - !ruby/object:Api::Type::Array
+            name: instances
+            description: |
+                All the listed instances will be mirrored.  Specify at most 50.
+            at_least_one_of:
+                - mirrored_resources.0.subnetworks
+                - mirrored_resources.0.instances
+                - mirrored_resources.0.tags
+            item_type: !ruby/object:Api::Type::NestedObject
+              name: instances
+              description: The instances that should be mirrored.
+              properties:
+                - !ruby/object:Api::Type::ResourceRef
+                  name: url
+                  resource: 'Instance'
+                  imports: 'selfLink'
+                  description: The URL of the instances where this rule should be active.
+                  required: true
+          - !ruby/object:Api::Type::Array
+            name: tags
+            at_least_one_of:
+                - mirrored_resources.0.subnetworks
+                - mirrored_resources.0.instances
+                - mirrored_resources.0.tags
+            description: |
+                All instances with these tags will be mirrored.
+            item_type: Api::Type::String
+ 
   - !ruby/object:Api::Resource
     name: 'ProjectInfo'
     base_url: projects
@@ -10220,6 +10481,8 @@ objects:
           which cannot be a dash.
       - !ruby/object:Api::Type::NestedObject
         name: 'snapshotSchedulePolicy'
+        conflicts:
+          - 'groupPlacementPolicy'
         description: |
           Policy for creating snapshots of persistent disks.
         properties:
@@ -10350,7 +10613,8 @@ objects:
                   - snapshot_schedule_policy.0.snapshot_properties.0.guest_flush
                 max_size: 1
                 description: |
-                  GCS bucket location in which to store the snapshot (regional or multi-regional).
+                  Cloud Storage bucket location to store the auto snapshot
+                  (regional or multi-regional)
                 item_type: Api::Type::String
               - !ruby/object:Api::Type::Boolean
                 name: 'guestFlush'
@@ -10360,6 +10624,35 @@ objects:
                   - snapshot_schedule_policy.0.snapshot_properties.0.guest_flush
                 description: |
                   Whether to perform a 'guest aware' snapshot.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'groupPlacementPolicy'
+        conflicts:
+          - 'snapshotSchedulePolicy'
+        description: |
+          Policy for creating snapshots of persistent disks.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'vmCount'
+            at_least_one_of:
+              - group_placement_policy.0.vm_count
+              - group_placement_policy.0.availability_domain_count
+            description: |
+              Number of vms in this placement group
+          - !ruby/object:Api::Type::Integer
+            name: 'availabilityDomainCount'
+            at_least_one_of:
+              - group_placement_policy.0.vm_count
+              - group_placement_policy.0.availability_domain_count
+            description: |
+              The number of availability domains instances will be spread across. If two instances are in different
+              availability domain, they will not be put in the same low latency network
+          - !ruby/object:Api::Type::Enum
+            name: 'collocation'
+            description: |
+              Collocation specifies whether to place VMs inside the same availability domain on the same low-latency network.
+              Specify `COLLOCATED` to enable collocation. Can only be specified with `vm_count`.
+            values:
+              - :COLLOCATED
   - !ruby/object:Api::Resource
     name: 'Route'
     kind: 'compute#route'
@@ -10782,7 +11075,6 @@ objects:
           A list of URLs of the IP resources to be drained. These IPs must be
           valid static external IPs that have been assigned to the NAT.
         send_empty_value: true
-        min_version: beta
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'address'
           resource: 'Address'
