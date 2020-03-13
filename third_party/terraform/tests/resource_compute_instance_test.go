@@ -1784,6 +1784,48 @@ func TestAccComputeInstance_updateTerminated_desiredStatusRunning_notAllowStoppi
 	})
 }
 
+func TestAccComputeInstance_updateStartupScript(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("instance-test-%s", acctest.RandString(10))
+	var zone = "us-central1-a"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_startUpScript(instanceName, zone, "to_be_changed"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						"google_compute_instance.foobar", &instance),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateId:     fmt.Sprintf("%s/%s/%s", getTestProjectFromEnv(), zone, instanceName),
+			},
+			{
+				Config: testAccComputeInstance_startUpScript(instanceName, zone, "changed"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						"google_compute_instance.foobar", &instance),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateId:     fmt.Sprintf("%s/%s/%s", getTestProjectFromEnv(), zone, instanceName),
+			},
+		},
+	})
+}
+
 func testAccCheckComputeInstanceUpdateMachineType(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -4517,4 +4559,72 @@ resource "google_compute_instance" "foobar" {
 	}
 }
 `, instance)
+}
+
+func testAccComputeInstance_startUpScript(instance, zone, startupScript string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_network" "default" {
+  name                    = "neg-network"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "neg-subnetwork"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.default.self_link
+}
+
+
+resource "google_compute_address" "endpoint-instance-internal" {
+  name         = "endpoint-instance-internal"
+  subnetwork   = google_compute_subnetwork.default.self_link
+  address_type = "INTERNAL"
+  address      = "10.0.0.3"
+  region       = "us-central1"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "n1-standard-1"
+  zone = "%s"
+
+  metadata_startup_script = "echo '%s'"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.default.self_link
+    network_ip = google_compute_address.endpoint-instance-internal.address
+    access_config {
+    }
+  }
+}
+
+resource "google_compute_network_endpoint_group" "group" {
+  name         = "my-lb-neg"
+  network      = google_compute_network.default.self_link
+  subnetwork   = google_compute_subnetwork.default.self_link
+  default_port = "90"
+  zone         = "%s"
+}
+
+resource "google_compute_network_endpoint" "default-endpoint" {
+  network_endpoint_group = google_compute_network_endpoint_group.group.name
+
+  zone       = "%s"
+  instance   = google_compute_instance.foobar.name
+  port       = google_compute_network_endpoint_group.group.default_port
+  ip_address = google_compute_instance.foobar.network_interface[0].network_ip
+}
+`, instance, zone, startupScript, zone, zone)
 }

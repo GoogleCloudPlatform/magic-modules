@@ -401,7 +401,6 @@ func resourceComputeInstance() *schema.Resource {
 			"metadata_startup_script": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 
 			"min_cpu_platform": {
@@ -1044,7 +1043,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	// Enable partial mode for the resource since it is possible
 	d.Partial(true)
 
-	if d.HasChange("metadata") {
+	if d.HasChange("metadata") || d.HasChange("metadata_startup_script") {
 		metadata, err := resourceInstanceMetadata(d)
 		if err != nil {
 			return fmt.Errorf("Error parsing metadata: %s", err)
@@ -1085,7 +1084,13 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			return err
 		}
 
-		d.SetPartial("metadata")
+		if d.HasChange("metadata") {
+			d.SetPartial("metadata")
+		}
+
+		if d.HasChange("metadata_startup_script") {
+			d.SetPartial("metadata_startup_script")
+		}
 	}
 
 	if d.HasChange("tags") {
