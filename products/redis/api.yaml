@@ -78,6 +78,17 @@ objects:
           instance is connected. If left unspecified, the default network
           will be used.
         input: true
+      - !ruby/object:Api::Type::Enum
+        name: connectMode
+        description: |
+          The connection mode of the Redis instance. Can be either
+          `DIRECT_PEERING` or `PRIVATE_SERVICE_ACCESS`. The default
+          connect mode if not provided is `DIRECT_PEERING`.
+        input: true
+        values:
+          - :DIRECT_PEERING
+          - :PRIVATE_SERVICE_ACCESS
+        default_value: :DIRECT_PEERING
       - !ruby/object:Api::Type::Time
         name: createTime
         description: |
