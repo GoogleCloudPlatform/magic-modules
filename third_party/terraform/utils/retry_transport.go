@@ -87,10 +87,17 @@ func (t *retryTransport) RoundTrip(req *http.Request) (resp *http.Response, resp
 	var ccancel context.CancelFunc
 	if _, ok := ctx.Deadline(); !ok {
 		ctx, ccancel = context.WithTimeout(ctx, defaultRetryTransportTimeoutSec*time.Second)
+		defer func(){
+			if ctx.Err() == nil {
+				// Cleanup child context created for retry loop if ctx not done.
+				ccancel()
+			}
+		}()
 	}
 
 	attempts := 0
 	backoff := time.Millisecond * 500
+	nextBackoff := time.Millisecond * 500
 
 	log.Printf("[DEBUG] Retry Transport: starting RoundTrip retry loop")
 Retry:
@@ -111,40 +118,42 @@ Retry:
 
 		retryErr := t.checkForRetryableError(resp, respErr)
 		if retryErr == nil {
-			log.Printf("[WARN] Retry Transport: Stopping retries, last request was successful")
+			log.Printf("[DEBUG] Retry Transport: Stopping retries, last request was successful")
 			break Retry
 		}
 		if !retryErr.Retryable {
-			log.Printf("[WARN] Retry Transport: Stopping retries, last request failed with non-retryable error: %s", retryErr.Err)
+			log.Printf("[DEBUG] Retry Transport: Stopping retries, last request failed with non-retryable error: %s", retryErr.Err)
 			break Retry
 		}
 
-		log.Printf("[DEBUG] Retry Transport: Continue retry after waiting for  %s", backoff)
+		log.Printf("[DEBUG] Retry Transport: Waiting %s before trying request again", backoff)
 		select {
 		case <-ctx.Done():
 			log.Printf("[DEBUG] Retry Transport: Stopping retries, context done: %v", ctx.Err())
 			break Retry
 		case <-time.After(backoff):
-			log.Printf("[DEBUG] Retry Transport: Finished waiting")
-			backoff *= 2
+			log.Printf("[DEBUG] Retry Transport: Finished waiting %s before next retry", backoff)
+
+			// Fibonnaci backoff - 0.5, 1, 1.5, 2.5, 4, 6.5, 10.5, ...
+			lastBackoff := backoff
+			backoff = backoff + nextBackoff
+			nextBackoff = lastBackoff
 			continue
 		}
-	}
-	// Cleanup the child context created for the retry loop
-	// if it wasn't done.
-	if ctx.Err() == nil && ccancel != nil {
-		ccancel()
 	}
 
 	log.Printf("[DEBUG] Retry Transport: Returning after %d attempts", attempts)
 	return resp, respErr
 }
 
-// copyHttpRequest shallow copies a HTTP request but creates a deep copy of the
-// Body, so it can be consumed by a RoundTrip, i.e. in the retry loop.
+// copyHttpRequest provides an copy of the given HTTP request for one RoundTrip.
+// If the request has a non-empty body (io.ReadCloser), the body is deep copied
+// so it can be consumed.
 func copyHttpRequest(req *http.Request) (*http.Request, error) {
+	newRequest := *req
+
 	if req.Body == nil || req.Body == http.NoBody {
-		return req, nil
+		return newRequest, nil
 	}
 
 	// Helpers like http.NewRequest add a GetBody for copying.
@@ -158,7 +167,6 @@ func copyHttpRequest(req *http.Request) (*http.Request, error) {
 		return nil, err
 	}
 
-	newRequest := *req
 	newRequest.Body = bd
 	return &newRequest, nil
 }

@@ -71,7 +71,7 @@ const connectionResetByPeerErr = ": connection reset by peer"
 
 func isConnectionResetNetworkError(err error) (bool, string) {
 	if strings.HasSuffix(err.Error(), connectionResetByPeerErr) {
-		return true, fmt.Sprintf("reset connection")
+		return true, fmt.Sprintf("reset connection error: %v", err)
 	}
 	return false, ""
 }
