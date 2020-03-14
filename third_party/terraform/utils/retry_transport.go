@@ -87,7 +87,7 @@ func (t *retryTransport) RoundTrip(req *http.Request) (resp *http.Response, resp
 	var ccancel context.CancelFunc
 	if _, ok := ctx.Deadline(); !ok {
 		ctx, ccancel = context.WithTimeout(ctx, defaultRetryTransportTimeoutSec*time.Second)
-		defer func(){
+		defer func() {
 			if ctx.Err() == nil {
 				// Cleanup child context created for retry loop if ctx not done.
 				ccancel()
@@ -153,7 +153,7 @@ func copyHttpRequest(req *http.Request) (*http.Request, error) {
 	newRequest := *req
 
 	if req.Body == nil || req.Body == http.NoBody {
-		return newRequest, nil
+		return &newRequest, nil
 	}
 
 	// Helpers like http.NewRequest add a GetBody for copying.
