@@ -52,17 +52,8 @@ func computeInstanceSerialPortRead(d *schema.ResourceData, meta interface{}) err
 	if err != nil {
 		return err
 	}
-	contents := output.Contents
-	// When we reach the end of the serial port output stream the contents comes back empty
-	for output.Contents != "" {
-		output, err = config.clientCompute.Instances.GetSerialPortOutput(project, zone, d.Get("instance").(string)).Port(port).Start(output.Next).Do()
-		if err != nil {
-			return err
-		}
-		contents += output.Contents
-	}
 
-	d.Set("contents", contents)
+	d.Set("contents", output.Contents)
 	d.SetId(output.SelfLink)
 	return nil
 }
