@@ -1,2 +1,11 @@
-d.Set("group", GetResourceNameFromSelfLink(d.Get("group").(string)))
+config := meta.(*Config)
+ig, err := ParseInstanceGroupFieldValue(d.Get("group").(string), d, config)
+if err != nil {
+  return nil, err
+}
+
+d.Set("group", ig.Name)
+d.Set("zone", ig.Zone)
+d.Set("project", ig.Project)
+
 return obj, nil

@@ -6,6 +6,14 @@ resource "google_compute_instance_group_named_port" "<%= ctx[:primary_resource_i
   port = 8080
 }
 
+resource "google_compute_instance_group_named_port" "<%= ctx[:primary_resource_id] %>s" {
+  group = google_container_cluster.my_cluster.instance_group_urls[0]
+  zone = "us-central1-a"
+
+  name = "https"
+  port = 4443
+}
+
 resource "google_compute_network" "container_network" {
   name                    = "<%= ctx[:vars]['network_name'] %>"
   auto_create_subnetworks = false

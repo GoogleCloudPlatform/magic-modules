@@ -945,6 +945,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   InstanceGroupNamedPort: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}'
     import_format: ['projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}']
+    mutex: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "instance_group_named_port_gke"
