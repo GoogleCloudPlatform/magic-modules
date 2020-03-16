@@ -673,6 +673,14 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'name'
               description: Name of the node pool
+      - !ruby/object:Api::Type::NestedObject
+        name: 'podSecurityPolicyConfig'
+        description: Configuration for the PodSecurityPolicy feature.
+        min_version: beta
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: If enabled, pods must be valid under a PodSecurityPolicy to be created.
   - !ruby/object:Api::Resource
     name: 'NodePool'
     base_url: projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools
