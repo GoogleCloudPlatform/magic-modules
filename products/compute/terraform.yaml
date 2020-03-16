@@ -1487,6 +1487,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "bar"
         vars:
           name: "policy"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "resource_policy_placement_policy"
+        primary_resource_id: "baz"
+        vars:
+          name: "policy"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
