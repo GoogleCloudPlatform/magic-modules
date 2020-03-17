@@ -106,6 +106,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       parserConfig.schema: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/healthcare_hl7_v2_store_schema.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/healthcare_hl7_v2_store_schema.erb'
       selfLink: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
