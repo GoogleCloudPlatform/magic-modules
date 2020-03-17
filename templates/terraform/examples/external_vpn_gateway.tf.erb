@@ -6,7 +6,6 @@ resource "google_compute_ha_vpn_gateway" "ha_gateway" {
 }
 
 resource "google_compute_external_vpn_gateway" "external_gateway" {
-  provider        = google-beta
   name            = "<%= ctx[:vars]['external_gateway_name'] %>"
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
