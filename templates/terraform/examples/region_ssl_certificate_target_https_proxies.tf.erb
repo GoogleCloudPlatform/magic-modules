@@ -9,6 +9,7 @@
 // name with name_prefix, or use random_id resource. Example:
 
 resource "google_compute_region_ssl_certificate" "default" {
+  provider    = google-beta
   region      = "us-central1"
   name_prefix = "my-certificate-"
   private_key = file("path/to/private.key")
@@ -20,6 +21,7 @@ resource "google_compute_region_ssl_certificate" "default" {
 }
 
 resource "google_compute_region_target_https_proxy" "default" {
+  provider         = google-beta
   region           = "us-central1"
   name             = "<%= ctx[:vars]['region_target_https_proxy_name'] %>"
   url_map          = google_compute_region_url_map.default.self_link
@@ -27,6 +29,7 @@ resource "google_compute_region_target_https_proxy" "default" {
 }
 
 resource "google_compute_region_url_map" "default" {
+  provider    = google-beta
   region      = "us-central1"
   name        = "<%= ctx[:vars]['region_url_map_name'] %>"
   description = "a description"
@@ -50,6 +53,7 @@ resource "google_compute_region_url_map" "default" {
 }
 
 resource "google_compute_region_backend_service" "default" {
+  provider    = google-beta
   region      = "us-central1"
   name        = "<%= ctx[:vars]['region_backend_service_name'] %>"
   protocol    = "HTTP"
@@ -59,6 +63,7 @@ resource "google_compute_region_backend_service" "default" {
 }
 
 resource "google_compute_region_health_check" "default" {
+  provider = google-beta
   region   = "us-central1"
   name     = "<%= ctx[:vars]['region_health_check_name'] %>"
   http_health_check {

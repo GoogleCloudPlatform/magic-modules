@@ -1803,6 +1803,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_ssl_certificate_target_https_proxies"
+        min_version: "beta"
         primary_resource_id: "default"
         vars:
           region_target_https_proxy_name: "test-proxy"
