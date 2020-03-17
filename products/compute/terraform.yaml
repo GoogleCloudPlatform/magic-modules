@@ -2155,6 +2155,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   ExternalVpnGateway: !ruby/object:Overrides::Terraform::ResourceOverride
+    min_version: 'beta'
     properties:
       interfaces: !ruby/object:Overrides::Terraform::PropertyOverride
         name: interface

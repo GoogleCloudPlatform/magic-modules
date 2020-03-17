@@ -10,8 +10,6 @@
     :version_added: '2.7'
   :RegionBackendService:
     :version_added: '2.10'
-  :RegionDiskResourcePolicyAttachment:
-    :version_added: '2.10'
   :Disk:
     :version_added: '2.7'
   :Firewall:
@@ -78,6 +76,8 @@
     :version_added: '2.7'
   :TargetVpnGateway:
     :version_added: '2.7'
+  :ExternalVpnGateway:
+    :version_added: '2.10'
   :UrlMap:
     :version_added: '2.7'
   :VpnTunnel:
@@ -274,14 +274,6 @@
     :sessionAffinity:
       :version_added: '2.10'
     :timeoutSec:
-      :version_added: '2.10'
-    :region:
-      :version_added: '2.10'
-  :RegionDiskResourcePolicyAttachment:
-    :version_added: '2.10'
-    :name:
-      :version_added: '2.10'
-    :disk:
       :version_added: '2.10'
     :region:
       :version_added: '2.10'
@@ -1249,6 +1241,20 @@
       :version_added: '2.7'
     :region:
       :version_added: '2.7'
+  :ExternalVpnGateway:
+    :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :redundancyType:
+      :version_added: '2.10'
+    :interfaces:
+      :version_added: '2.10'
+      :id:
+        :version_added: '2.10'
+      :ipAddress:
+        :version_added: '2.10'
   :UrlMap:
     :version_added: '2.6'
     :defaultService:
