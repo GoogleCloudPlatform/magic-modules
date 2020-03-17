@@ -104,7 +104,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      parser_config.schema: !ruby/object:Overrides::Terraform::PropertyOverride
+      parserConfig.schema: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/healthcare_hl7_v2_store.erb'
       selfLink: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true

@@ -353,8 +353,8 @@ objects:
               - parser_config.0.segment_terminator
               - parser_config.0.schema
             description: |
-              JSON encoded string schemas used to parse messages in this store
-              if schematized parsing is desired.
+              JSON encoded string for schemas used to parse messages in this
+              store if schematized parsing is desired.
       - !ruby/object:Api::Type::KeyValuePairs
         name: labels
         required: false
