@@ -49,8 +49,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionTargetHttpsProxy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  RegionUrlMap: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   ResourcePolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RouterBgpPeer: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -334,8 +332,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RegionTargetHttpProxy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionTargetHttpsProxy: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  RegionUrlMap: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RouterBgpPeer: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true

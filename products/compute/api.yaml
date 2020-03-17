@@ -8473,7 +8473,6 @@ objects:
           create the disk. Provide this when creating the disk.
   - !ruby/object:Api::Resource
     name: 'RegionUrlMap'
-    min_version: 'beta'
     kind: 'compute#urlMap'
     base_url: projects/{{project}}/regions/{{region}}/urlMaps
     collection_url_key: 'items'
