@@ -59,8 +59,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
@@ -316,8 +314,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   DiskType: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   License: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
