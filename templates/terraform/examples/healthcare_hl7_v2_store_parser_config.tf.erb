@@ -1,7 +1,3 @@
-resource "google_pubsub_topic" "topic" {
-  name     = "<%= ctx[:vars]['pubsub_topic']%>"
-}
-
 resource "google_healthcare_dataset" "dataset" {
   provider = google-beta
   name     = "<%= ctx[:vars]['dataset_name'] %>"
@@ -13,11 +9,11 @@ resource "google_healthcare_hl7_v2_store" "store" {
   name    = "<%= ctx[:vars]['hl7_v2_store_name'] %>"
   dataset = google_healthcare_dataset.dataset.id
 
-  notification_config {
-    pubsub_topic = google_pubsub_topic.topic.id
-  }
+  parser_config {
+    allow_null_header  = false
+    segment_terminator = "Jw=="
+    schema = jsonencode({
 
-  labels = {
-    label1 = "labelvalue1"
+    })
   }
 }

@@ -89,14 +89,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_hl7_v2_store_basic"
         skip_test: true
-        primary_resource_id: "default"
+        primary_resource_id: "store"
         vars:
           dataset_name: "example-dataset"
           hl7_v2_store_name: "example-hl7-v2-store"
           pubsub_topic: "hl7-v2-notifications"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "healthcare_hl7_v2_store_parser_config"
+        skip_test: true
+        primary_resource_id: "store"
+        vars:
+          dataset_name: "example-dataset"
+          hl7_v2_store_name: "example-hl7-v2-store"
     properties:
       creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      parser_config.schema: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/healthcare_hl7_v2_store.erb'
       selfLink: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
