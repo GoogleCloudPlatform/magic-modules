@@ -13237,7 +13237,6 @@ objects:
     collection_url_key: 'items'
     input: true
     has_self_link: true
-    min_version: beta
     description: |
       Represents a VPN gateway managed outside of GCP.
     references: !ruby/object:Api::Resource::ReferenceLinks
