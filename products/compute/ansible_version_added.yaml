@@ -36,6 +36,8 @@
     :version_added: '2.7'
   :InstanceGroupManager:
     :version_added: '2.7'
+  :RegionInstanceGroupManager:
+    :version_added: '2.10'
   :InterconnectAttachment:
     :version_added: '2.8'
   :Network:
@@ -899,6 +901,34 @@
       :version_added: '2.6'
     :zone:
       :version_added: '2.6'
+  :RegionInstanceGroupManager:
+    :version_added: '2.10'
+    :baseInstanceName:
+      :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :instanceTemplate:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :namedPorts:
+      :version_added: '2.10'
+      :name:
+        :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+    :targetPools:
+      :version_added: '2.10'
+    :targetSize:
+      :version_added: '2.10'
+    :autoHealingPolicies:
+      :version_added: '2.10'
+      :healthCheck:
+        :version_added: '2.10'
+      :initialDelaySec:
+        :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
   :InterconnectAttachment:
     :version_added: '2.8'
     :adminEnabled:
