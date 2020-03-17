@@ -566,7 +566,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_global_internallb"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           forwarding_rule_name: "website-forwarding-rule"
