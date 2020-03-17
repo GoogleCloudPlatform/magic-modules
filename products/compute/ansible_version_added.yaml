@@ -72,6 +72,10 @@
     :version_added: '2.7'
   :TargetHttpsProxy:
     :version_added: '2.7'
+  :RegionTargetHttpProxy:
+    :version_added: '2.10'
+  :RegionTargetHttpsProxy:
+    :version_added: '2.10'
   :TargetInstance:
     :version_added: '2.10'
   :TargetPool:
@@ -1645,6 +1649,28 @@
       :version_added: '2.8'
     :urlMap:
       :version_added: '2.6'
+  :RegionTargetHttpProxy:
+    :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :urlMap:
+      :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
+  :RegionTargetHttpsProxy:
+    :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :sslCertificates:
+      :version_added: '2.10'
+    :urlMap:
+      :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
   :TargetInstance:
     :version_added: '2.10'
     :name:

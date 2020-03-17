@@ -12442,7 +12442,6 @@ objects:
         update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setUrlMap'
   - !ruby/object:Api::Resource
     name: 'RegionTargetHttpProxy'
-    min_version: beta
     kind: 'compute#targetHttpProxy'
     base_url: projects/{{project}}/regions/{{region}}/targetHttpProxies
     collection_url_key: 'items'
@@ -12518,7 +12517,6 @@ objects:
         update_url: 'projects/{{project}}/regions/{{region}}/targetHttpProxies/{{name}}/setUrlMap'
   - !ruby/object:Api::Resource
     name: 'RegionTargetHttpsProxy'
-    min_version: beta
     kind: 'compute#targetHttpsProxy'
     base_url: projects/{{project}}/regions/{{region}}/targetHttpsProxies
     collection_url_key: 'items'
