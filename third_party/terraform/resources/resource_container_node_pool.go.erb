@@ -110,10 +110,12 @@ var schemaNodePool = map[string]*schema.Schema{
 		Computed: true,
 		Elem:     &schema.Schema{Type: schema.TypeString},
 	},
+<% end -%>
 
 	"upgrade_settings": {
 		Type:     schema.TypeList,
 		Optional: true,
+		Computed: true,
 		MaxItems: 1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -131,7 +133,6 @@ var schemaNodePool = map[string]*schema.Schema{
 			},
 		},
 	},
-<% end -%>
 
 	"initial_node_count": &schema.Schema{
 		Type:     schema.TypeInt,
@@ -556,7 +557,6 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*containerBeta.NodeP
 		}
 	}
 
-<% unless version == 'ga' -%>
 	if v, ok := d.GetOk(prefix + "upgrade_settings"); ok {
 		upgradeSettingsConfig := v.([]interface{})[0].(map[string]interface{})
 		np.UpgradeSettings = &containerBeta.UpgradeSettings{}
@@ -569,7 +569,6 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*containerBeta.NodeP
 			np.UpgradeSettings.MaxUnavailable = int64(v.(int))
 		}
 	}
-<% end -%>
 
 	return np, nil
 }
@@ -628,7 +627,6 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *containerBeta.N
 		},
 	}
 
-<% unless version == 'ga' -%>
 	if np.UpgradeSettings != nil {
 		nodePool["upgrade_settings"] = []map[string]interface{}{
 			{
@@ -639,7 +637,6 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *containerBeta.N
 	} else {
 		delete(nodePool, "upgrade_settings")
 	}
-<% end -%>
 
 	return nodePool, nil
 }
@@ -860,6 +857,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			d.SetPartial("node_locations")
 		}
 	}
+<% end -%>
 
 	if d.HasChange(prefix + "upgrade_settings") {
 		upgradeSettings := &containerBeta.UpgradeSettings{}
@@ -893,7 +891,6 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			d.SetPartial("upgrade_settings")
 		}
 	}
-<% end -%>
 
 	return nil
 }
