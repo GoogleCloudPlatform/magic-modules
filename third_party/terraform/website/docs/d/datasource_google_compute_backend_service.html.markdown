@@ -40,8 +40,6 @@ The following arguments are supported:
 
 In addition to the arguments listed above, the following attributes are exported:
 
-* `id` - an identifier for the resource with format `projects/{{project}}/global/backendServices/{{name}}`
-
 * `connection_draining_timeout_sec` - Time for which instance will be drained (not accept new connections, but still work to finish started ones).
 
 * `description` - Textual description for the Backend Service.
@@ -49,6 +47,8 @@ In addition to the arguments listed above, the following attributes are exported
 * `enable_cdn` - Whether or not Cloud CDN is enabled on the Backend Service.
 
 * `fingerprint` - The fingerprint of the Backend Service.
+
+* `id` - an identifier for the resource with format `projects/{{project}}/global/backendServices/{{name}}`
 
 * `port_name` - The name of a service that has been added to an instance group in this backend.
 
