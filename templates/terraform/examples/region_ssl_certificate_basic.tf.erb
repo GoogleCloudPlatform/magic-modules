@@ -1,5 +1,4 @@
 resource "google_compute_region_ssl_certificate" "default" {
-  provider    = google-beta
   region      = "us-central1"
   name_prefix = "my-certificate-"
   description = "a description"
