@@ -11252,6 +11252,7 @@ objects:
           The priority of routes advertised to this BGP peer.
           Where there is more than one matching route of maximum
           length, the routes with the lowest priority value win.
+        default_value: 100
       - !ruby/object:Api::Type::Enum
         name: advertiseMode
         description: |
@@ -11316,53 +11317,52 @@ objects:
           PARTNER InterconnectAttachment is created, updated,
           or deleted.
         output: true
-      - !ruby/object:Api::Type::Array
+      - !ruby/object:Api::Type::NestedObject
         name: bfd
         description: |
           BFD configuration for the BGP peering.
         min_version: beta
-        item_type: !ruby/object:Api::Type::NestedObject
-            properties:
-              - !ruby/object:Api::Type::Integer
-                name: minReceiveInterval
-                description: |
-                  The minimum interval, in milliseconds, between
-                  BFD control packets received from the peer router. The actual value
-                  is negotiated between the two routers and is equal to the greater of
-                  this value and the transmit interval of the other router. If set,
-                  this value must be between 100 and 30000. The default is 300.
-                default_value: 300
-              - !ruby/object:Api::Type::Integer
-                name: minTransmitInterval
-                description: |
-                  The minimum interval, in milliseconds, between
-                  BFD control packets transmitted to the peer router. The actual value
-                  is negotiated between the two routers and is equal to the greater of
-                  this value and the corresponding receive interval of the other
-                  router. If set, this value must be between 100 and 30000. The default
-                  is 300.
-                default_value: 300
-              - !ruby/object:Api::Type::Integer
-                name: multiplier
-                description: |
-                  The number of consecutive BFD packets that must be missed
-                  before BFD declares that a peer is unavailable. If set, the value
-                  must be a value between 2 and 16. The default is 3.
-                default_value: 3
-              - !ruby/object:Api::Type::Enum
-                name: sessionInitializationMode
-                description: |
-                  The BFD session initialization mode for
-                  this BGP peer. If set to `ACTIVE`, the Cloud Router will initiate the
-                  BFD session for this BGP peer. If set to `PASSIVE`, the Cloud Router
-                  will wait for the peer router to initiate the BFD session for this
-                  BGP peer. If set to `DISABLED`, BFD is disabled for this BGP peer. The
-                  default is `PASSIVE`.
-                values:
-                  - :ACTIVE
-                  - :DISABLED
-                  - :PASSIVE
-      - !ruby/object:Api::Type::Boolean
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: minReceiveInterval
+            description: |
+              The minimum interval, in milliseconds, between
+              BFD control packets received from the peer router. The actual value
+              is negotiated between the two routers and is equal to the greater of
+              this value and the transmit interval of the other router. If set,
+              this value must be between 100 and 30000. The default is 300.
+            default_value: 300
+          - !ruby/object:Api::Type::Integer
+            name: minTransmitInterval
+            description: |
+              The minimum interval, in milliseconds, between
+              BFD control packets transmitted to the peer router. The actual value
+              is negotiated between the two routers and is equal to the greater of
+              this value and the corresponding receive interval of the other
+              router. If set, this value must be between 100 and 30000. The default
+              is 300.
+            default_value: 300
+          - !ruby/object:Api::Type::Integer
+            name: multiplier
+            description: |
+              The number of consecutive BFD packets that must be missed
+              before BFD declares that a peer is unavailable. If set, the value
+              must be a value between 2 and 16. The default is 3.
+            default_value: 3
+          - !ruby/object:Api::Type::Enum
+            name: sessionInitializationMode
+            description: |
+              The BFD session initialization mode for
+              this BGP peer. If set to `ACTIVE`, the Cloud Router will initiate the
+              BFD session for this BGP peer. If set to `PASSIVE`, the Cloud Router
+              will wait for the peer router to initiate the BFD session for this
+              BGP peer. If set to `DISABLED`, BFD is disabled for this BGP peer.
+            values:
+              - :ACTIVE
+              - :DISABLED
+              - :PASSIVE
+            required: true
+      - !ruby/object:Api::Type::String
         name: 'enable'
         description: |
           The status of the BGP peer connection. If set to FALSE,
@@ -11370,7 +11370,7 @@ objects:
           routing information is removed. If set to TRUE, the peer connection
           can be established with routing information. The default is TRUE.
         min_version: beta
-        send_empty_value: true
+        default_value: "true"
   - !ruby/object:Api::Resource
     name: 'Snapshot'
     kind: 'compute#snapshot'
