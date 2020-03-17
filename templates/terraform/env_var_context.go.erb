@@ -1,6 +1,8 @@
 <% example.test_env_vars&.each do |var_name, var_type| -%>
 	<% if var_type == :ORG_ID  -%>
 		"<%= var_name -%>": getTestOrgFromEnv(t),
+	<% elsif var_type == :ORG_DOMAIN  -%>
+		"<%= var_name -%>": getTestOrgDomainFromEnv(t),
 	<% elsif var_type == :CREDENTIALS -%>
 		"<%= var_name -%>": getTestCredsFromEnv(t),
 	<% elsif var_type == :REGION -%>

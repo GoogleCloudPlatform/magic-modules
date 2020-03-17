@@ -122,6 +122,7 @@ module Provider
           CREDENTIALS: 'my/credentials/filename.json',
           REGION: 'us-west1',
           ORG_ID: '123456789',
+          ORG_DOMAIN: 'example.com',
           ORG_TARGET: '123456789',
           BILLING_ACCT: '000000-0000000-0000000-000000',
           SERVICE_ACCT: 'emailAddress:my@service-account.com'

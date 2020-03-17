@@ -275,6 +275,7 @@ func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 	t.Parallel()
@@ -325,7 +326,6 @@ func TestAccContainerNodePool_withInvalidUpgradeSettings(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerNodePool_withGPU(t *testing.T) {
 	t.Parallel()
@@ -1328,6 +1328,7 @@ resource "google_container_node_pool" "with_boot_disk_kms_key" {
 }
 `, project, cluster, cluster, cluster, np)
 }
+<% end -%>
 
 func testAccContainerNodePool_withUpgradeSettings(clusterName string, nodePoolName string, maxSurge int, maxUnavailable int) string {
 	return fmt.Sprintf(`
@@ -1354,7 +1355,6 @@ resource "google_container_node_pool" "with_upgrade_settings" {
 }
 `, clusterName, nodePoolName, maxSurge, maxUnavailable)
 }
-<% end -%>
 
 func testAccContainerNodePool_withGPU(cluster, np string) string {
 	return fmt.Sprintf(`

@@ -1,0 +1,5 @@
+brand := d.Get("brand")
+clientId := flattenIapClientClientId(res["name"], d, config)
+
+d.Set("client_id", clientId)
+d.SetId(fmt.Sprintf("%s/identityAwareProxyClients/%s", brand, clientId))
