@@ -1,6 +1,5 @@
 # You may also want to control name generation explicitly:
 resource "google_compute_region_ssl_certificate" "default" {
-  provider = google-beta
   region   = "us-central1"
 
   # The name will contain 8 random hex digits,
