@@ -1,5 +1,5 @@
 <%# The license inside this block applies to this file.
-	# Copyright 2019 Google Inc.
+	# Copyright 2020 Google Inc.
 	# Licensed under the Apache License, Version 2.0 (the "License");
 	# you may not use this file except in compliance with the License.
 	# You may obtain a copy of the License at
@@ -16,7 +16,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	b, err := json.Marshal(v)
 	if err != nil {
         // TODO: return error once https://github.com/GoogleCloudPlatform/magic-modules/issues/3257 is fixed.
-		log.Printf("failed to marshal schema to JSON: %v", err)
+		log.Printf("[ERROR] failed to marshal schema to JSON: %v", err)
 	}
 	return string(b)
 }
