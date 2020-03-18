@@ -1,0 +1,20 @@
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  AdminQuotaOverride: !ruby/object:Overrides::Terraform::ResourceOverride
+    # This resource is a child resource (requires app ID in the URL)
+    id_format: "projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}"
+    skip_sweeper: true
+    autogen_async: true
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  ConsumerQuotaOverride: !ruby/object:Overrides::Terraform::ResourceOverride
+    # This resource is a child resource (requires app ID in the URL)
+    id_format: "projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}"
+    skip_sweeper: true
+    autogen_async: true
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  Service: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true

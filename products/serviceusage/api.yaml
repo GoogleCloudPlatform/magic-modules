@@ -17,6 +17,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://serviceusage.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://serviceusage.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -24,6 +27,172 @@ apis_required:
     name: Service Usage API
     url: https://console.cloud.google.com/apis/library/serviceusage.googleapis.com/
 objects:
+  - !ruby/object:Api::Resource
+    name: AdminQuotaOverride
+    min_version: beta
+    base_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides
+    self_link: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/
+    delete_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}
+    create_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}?force={{force}}
+    update_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}
+    update_verb: :PATCH
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Getting Started': 'https://cloud.google.com/service-usage/docs/getting-started'
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      kind: 'serviceusage#overridesList'
+      keys:
+        - overrides
+    identity:
+      - name
+    description: |
+      A consumer override is applied to the consumer on its own authority to limit its own quota usage.
+      Consumer overrides cannot be used to grant more quota than would be allowed by admin overrides,
+      producer overrides, or the default limit of the service.
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: |
+          The server-generated name of the quota override.
+      - !ruby/object:Api::Type::Boolean
+        name: 'force'
+        url_param_only: true
+        default_value: false
+        description: |
+          If the new quota would decrease the existing quota by more than 10%, the request is rejected.
+          If `force` is `true`, that safety check is ignored.
+      - !ruby/object:Api::Type::String
+        name: 'service'
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The service that the metrics belong to, e.g. `compute.googleapis.com`.
+      - !ruby/object:Api::Type::String
+        name: 'metric'
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The metric that should be limited, e.g. `compute.googleapis.com/cpus`.
+      - !ruby/object:Api::Type::String
+        name: 'limit'
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The limit on the metric, e.g. `/project/region`.
+      - !ruby/object:Api::Type::String
+        name: 'overrideValue'
+        required: true
+        description: |
+          The overriding quota limit value. Can be any nonnegative integer, or -1 (unlimited quota).
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'dimensions'
+        description: |
+          If this map is nonempty, then this override applies only to specific values for dimensions defined in the limit unit.
+
+  - !ruby/object:Api::Resource
+    name: ConsumerQuotaOverride
+    min_version: beta
+    base_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides
+    self_link: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/
+    delete_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}
+    create_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}?force={{force}}
+    update_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}
+    update_verb: :PATCH
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Getting Started': 'https://cloud.google.com/service-usage/docs/getting-started'
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      kind: 'serviceusage#overridesList'
+      keys:
+        - overrides
+    identity:
+      - name
+    description: |
+      A consumer override is applied to the consumer on its own authority to limit its own quota usage.
+      Consumer overrides cannot be used to grant more quota than would be allowed by admin overrides,
+      producer overrides, or the default limit of the service.
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: |
+          The server-generated name of the quota override.
+      - !ruby/object:Api::Type::Boolean
+        name: 'force'
+        url_param_only: true
+        default_value: false
+        description: |
+          If the new quota would decrease the existing quota by more than 10%, the request is rejected.
+          If `force` is `true`, that safety check is ignored.
+      - !ruby/object:Api::Type::String
+        name: 'service'
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The service that the metrics belong to, e.g. `compute.googleapis.com`.
+      - !ruby/object:Api::Type::String
+        name: 'metric'
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The metric that should be limited, e.g. `compute.googleapis.com/cpus`.
+      - !ruby/object:Api::Type::String
+        name: 'limit'
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The limit on the metric, e.g. `/project/region`.
+      - !ruby/object:Api::Type::String
+        name: 'overrideValue'
+        required: true
+        description: |
+          The overriding quota limit value. Can be any nonnegative integer, or -1 (unlimited quota).
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'dimensions'
+        description: |
+          If this map is nonempty, then this override applies only to specific values for dimensions defined in the limit unit.
+
   - !ruby/object:Api::Resource
     name: Service
     base_url: projects/{{project}}/services
