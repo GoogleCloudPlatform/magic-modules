@@ -48,6 +48,8 @@
     :version_added: '2.10'
   :NodeTemplate:
     :version_added: '2.10'
+  :RegionAutoscaler:
+    :version_added: '2.10'
   :RegionDisk:
     :version_added: '2.8'
   :RegionUrlMap:
@@ -1013,6 +1015,44 @@
         :version_added: '2.10'
       :memory:
         :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
+  :RegionAutoscaler:
+    :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :autoscalingPolicy:
+      :version_added: '2.10'
+      :minNumReplicas:
+        :version_added: '2.10'
+      :maxNumReplicas:
+        :version_added: '2.10'
+      :coolDownPeriodSec:
+        :version_added: '2.10'
+      :cpuUtilization:
+        :version_added: '2.10'
+        :utilizationTarget:
+          :version_added: '2.10'
+      :customMetricUtilizations:
+        :version_added: '2.10'
+        :metric:
+          :version_added: '2.10'
+        :singleInstanceAssignment:
+          :version_added: '2.10'
+        :utilizationTarget:
+          :version_added: '2.10'
+        :utilizationTargetType:
+          :version_added: '2.10'
+        :filter:
+          :version_added: '2.10'
+      :loadBalancingUtilization:
+        :version_added: '2.10'
+        :utilizationTarget:
+          :version_added: '2.10'
+    :target:
+      :version_added: '2.10'
     :region:
       :version_added: '2.10'
   :RegionDisk:
