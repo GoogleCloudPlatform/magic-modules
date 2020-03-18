@@ -18,5 +18,5 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
         // TODO: return error once https://github.com/GoogleCloudPlatform/magic-modules/issues/3257 is fixed.
 		log.Printf("failed to marshal schema to JSON: %v", err)
 	}
-	return string(b), err
+	return string(b)
 }
