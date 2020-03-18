@@ -108,7 +108,7 @@ The following arguments are supported:
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
-* `id` - an identifier for the resource with format `projects/{{project}}/triggers/{{trigger_id}}`
+* `id` - an identifier for the resource with format `projects/{{project}}/zones/{{zone}}/disks/{{disk.name}}`
 
 ## Timeouts
 
