@@ -1010,7 +1010,6 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	d.Set("name", instance.Name)
 	d.Set("description", instance.Description)
 	d.Set("hostname", instance.Hostname)
-	d.Set("current_status", instance.Status)
 
 	if d.Get("desired_status") != "" {
 		d.Set("desired_status", instance.Status)
