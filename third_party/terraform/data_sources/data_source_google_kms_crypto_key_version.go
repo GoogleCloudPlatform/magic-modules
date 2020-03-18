@@ -106,10 +106,7 @@ func dataSourceGoogleKmsCryptoKeyVersionRead(d *schema.ResourceData, meta interf
 		}
 		log.Printf("[DEBUG] Getting public key of CryptoKeyVersion: %#v", url)
 
-		err = retryTimeDuration(func() error {
-			res, err = sendRequest(config, "GET", cryptoKeyId.KeyRingId.Project, url, nil)
-			return err
-		}, d.Timeout(schema.TimeoutRead), isCryptoKeyVersionsPendingGeneration)
+		res, err = sendRequestWithTimeout(config, "GET", cryptoKeyId.KeyRingId.Project, url, nil, d.Timeout(schema.TimeoutRead), isCryptoKeyVersionsPendingGeneration)
 
 		if err != nil {
 			log.Printf("Error generating public key: %s", err)
