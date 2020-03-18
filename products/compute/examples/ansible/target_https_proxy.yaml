@@ -22,13 +22,26 @@ dependencies:
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>
   - !ruby/object:Provider::Ansible::Task
-    name: gcp_compute_region_backend_service
+    name: gcp_compute_http_health_check
+    register: healthcheck
+    code:
+      name: <%= dependency_name('httpHealthCheck', 'targetHttpsProxy') %>
+      healthy_threshold: 10
+      port: 8080
+      timeout_sec: 2
+      unhealthy_threshold: 5
+      project: <%= ctx[:project] %>
+      auth_kind: <%= ctx[:auth_kind] %>
+      service_account_file: <%= ctx[:service_account_file] %>
+  - !ruby/object:Provider::Ansible::Task
+    name: gcp_compute_backend_service
     register: backendservice
     code:
       name: <%= dependency_name('backendService', 'targetHttpsProxy') %>
-      region: us-central1
       backends:
         - group: "{{ instancegroup.selfLink }}"
+      health_checks:
+        - "{{ healthcheck.selfLink }}"
       enable_cdn: true
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
@@ -38,7 +51,6 @@ dependencies:
     register: urlmap
     code:
       name: <%= dependency_name('urlMap', 'targetHttpsProxy') %>
-      region: us-central1
       default_service: "{{ backendservice }}"
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
@@ -77,10 +89,9 @@ dependencies:
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>
 task: !ruby/object:Provider::Ansible::Task
-  name: gcp_compute_region_target_https_proxy
+  name: gcp_compute_target_https_proxy
   code:
     name: <%= ctx[:name] %>
-    region: us-central1
     ssl_certificates:
       - "{{ sslcert }}"
     url_map: "{{ urlmap }}"
