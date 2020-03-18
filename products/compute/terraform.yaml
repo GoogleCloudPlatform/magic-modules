@@ -311,6 +311,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       protocol: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      portName: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       sessionAffinity: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
