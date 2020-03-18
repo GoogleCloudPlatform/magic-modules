@@ -36,6 +36,8 @@
     :version_added: '2.7'
   :InstanceGroupManager:
     :version_added: '2.7'
+  :RegionInstanceGroupManager:
+    :version_added: '2.10'
   :InterconnectAttachment:
     :version_added: '2.8'
   :Network:
@@ -46,8 +48,12 @@
     :version_added: '2.10'
   :NodeTemplate:
     :version_added: '2.10'
+  :RegionAutoscaler:
+    :version_added: '2.10'
   :RegionDisk:
     :version_added: '2.8'
+  :RegionUrlMap:
+    :version_added: '2.10'
   :RegionHealthCheck:
     :version_added: '2.10'
   :Route:
@@ -58,8 +64,6 @@
     :version_added: '2.9'
   :SslCertificate:
     :version_added: '2.7'
-  :RegionSslCertificate:
-    :version_added: '2.10'
   :Reservation:
     :version_added: '2.10'
   :SslPolicy:
@@ -70,6 +74,10 @@
     :version_added: '2.7'
   :TargetHttpsProxy:
     :version_added: '2.7'
+  :RegionTargetHttpProxy:
+    :version_added: '2.10'
+  :RegionTargetHttpsProxy:
+    :version_added: '2.10'
   :TargetInstance:
     :version_added: '2.10'
   :TargetPool:
@@ -387,6 +395,8 @@
       :version_added: '2.6'
     :target:
       :version_added: '2.7'
+    :allowGlobalAccess:
+      :version_added: '2.10'
     :allPorts:
       :version_added: '2.8'
     :networkTier:
@@ -897,6 +907,34 @@
       :version_added: '2.6'
     :zone:
       :version_added: '2.6'
+  :RegionInstanceGroupManager:
+    :version_added: '2.10'
+    :baseInstanceName:
+      :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :instanceTemplate:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :namedPorts:
+      :version_added: '2.10'
+      :name:
+        :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+    :targetPools:
+      :version_added: '2.10'
+    :targetSize:
+      :version_added: '2.10'
+    :autoHealingPolicies:
+      :version_added: '2.10'
+      :healthCheck:
+        :version_added: '2.10'
+      :initialDelaySec:
+        :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
   :InterconnectAttachment:
     :version_added: '2.8'
     :adminEnabled:
@@ -979,6 +1017,44 @@
         :version_added: '2.10'
     :region:
       :version_added: '2.10'
+  :RegionAutoscaler:
+    :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :autoscalingPolicy:
+      :version_added: '2.10'
+      :minNumReplicas:
+        :version_added: '2.10'
+      :maxNumReplicas:
+        :version_added: '2.10'
+      :coolDownPeriodSec:
+        :version_added: '2.10'
+      :cpuUtilization:
+        :version_added: '2.10'
+        :utilizationTarget:
+          :version_added: '2.10'
+      :customMetricUtilizations:
+        :version_added: '2.10'
+        :metric:
+          :version_added: '2.10'
+        :singleInstanceAssignment:
+          :version_added: '2.10'
+        :utilizationTarget:
+          :version_added: '2.10'
+        :utilizationTargetType:
+          :version_added: '2.10'
+        :filter:
+          :version_added: '2.10'
+      :loadBalancingUtilization:
+        :version_added: '2.10'
+        :utilizationTarget:
+          :version_added: '2.10'
+    :target:
+      :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
   :RegionDisk:
     :version_added: '2.8'
     :description:
@@ -1013,6 +1089,344 @@
         :version_added: '2.8'
       :kmsKeyName:
         :version_added: '2.8'
+  :RegionUrlMap:
+    :version_added: '2.10'
+    :defaultService:
+      :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :hostRules:
+      :version_added: '2.10'
+      :description:
+        :version_added: '2.10'
+      :hosts:
+        :version_added: '2.10'
+      :pathMatcher:
+        :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :pathMatchers:
+      :version_added: '2.10'
+      :defaultService:
+        :version_added: '2.10'
+      :description:
+        :version_added: '2.10'
+      :name:
+        :version_added: '2.10'
+      :routeRules:
+        :version_added: '2.10'
+        :priority:
+          :version_added: '2.10'
+        :service:
+          :version_added: '2.10'
+        :headerAction:
+          :version_added: '2.10'
+          :requestHeadersToAdd:
+            :version_added: '2.10'
+            :headerName:
+              :version_added: '2.10'
+            :headerValue:
+              :version_added: '2.10'
+            :replace:
+              :version_added: '2.10'
+          :requestHeadersToRemove:
+            :version_added: '2.10'
+          :responseHeadersToAdd:
+            :version_added: '2.10'
+            :headerName:
+              :version_added: '2.10'
+            :headerValue:
+              :version_added: '2.10'
+            :replace:
+              :version_added: '2.10'
+          :responseHeadersToRemove:
+            :version_added: '2.10'
+        :matchRules:
+          :version_added: '2.10'
+          :fullPathMatch:
+            :version_added: '2.10'
+          :headerMatches:
+            :version_added: '2.10'
+            :exactMatch:
+              :version_added: '2.10'
+            :headerName:
+              :version_added: '2.10'
+            :invertMatch:
+              :version_added: '2.10'
+            :prefixMatch:
+              :version_added: '2.10'
+            :presentMatch:
+              :version_added: '2.10'
+            :rangeMatch:
+              :version_added: '2.10'
+              :rangeEnd:
+                :version_added: '2.10'
+              :rangeStart:
+                :version_added: '2.10'
+            :regexMatch:
+              :version_added: '2.10'
+            :suffixMatch:
+              :version_added: '2.10'
+          :ignoreCase:
+            :version_added: '2.10'
+          :metadataFilters:
+            :version_added: '2.10'
+            :filterLabels:
+              :version_added: '2.10'
+              :name:
+                :version_added: '2.10'
+              :value:
+                :version_added: '2.10'
+            :filterMatchCriteria:
+              :version_added: '2.10'
+          :prefixMatch:
+            :version_added: '2.10'
+          :queryParameterMatches:
+            :version_added: '2.10'
+            :exactMatch:
+              :version_added: '2.10'
+            :name:
+              :version_added: '2.10'
+            :presentMatch:
+              :version_added: '2.10'
+            :regexMatch:
+              :version_added: '2.10'
+          :regexMatch:
+            :version_added: '2.10'
+        :routeAction:
+          :version_added: '2.10'
+          :corsPolicy:
+            :version_added: '2.10'
+            :allowCredentials:
+              :version_added: '2.10'
+            :allowHeaders:
+              :version_added: '2.10'
+            :allowMethods:
+              :version_added: '2.10'
+            :allowOriginRegexes:
+              :version_added: '2.10'
+            :allowOrigins:
+              :version_added: '2.10'
+            :disabled:
+              :version_added: '2.10'
+            :exposeHeaders:
+              :version_added: '2.10'
+            :maxAge:
+              :version_added: '2.10'
+          :faultInjectionPolicy:
+            :version_added: '2.10'
+            :abort:
+              :version_added: '2.10'
+              :httpStatus:
+                :version_added: '2.10'
+              :percentage:
+                :version_added: '2.10'
+            :delay:
+              :version_added: '2.10'
+              :fixedDelay:
+                :version_added: '2.10'
+                :nanos:
+                  :version_added: '2.10'
+                :seconds:
+                  :version_added: '2.10'
+              :percentage:
+                :version_added: '2.10'
+          :requestMirrorPolicy:
+            :version_added: '2.10'
+            :backendService:
+              :version_added: '2.10'
+          :retryPolicy:
+            :version_added: '2.10'
+            :numRetries:
+              :version_added: '2.10'
+            :perTryTimeout:
+              :version_added: '2.10'
+              :nanos:
+                :version_added: '2.10'
+              :seconds:
+                :version_added: '2.10'
+            :retryConditions:
+              :version_added: '2.10'
+          :timeout:
+            :version_added: '2.10'
+            :nanos:
+              :version_added: '2.10'
+            :seconds:
+              :version_added: '2.10'
+          :urlRewrite:
+            :version_added: '2.10'
+            :hostRewrite:
+              :version_added: '2.10'
+            :pathPrefixRewrite:
+              :version_added: '2.10'
+          :weightedBackendServices:
+            :version_added: '2.10'
+            :backendService:
+              :version_added: '2.10'
+            :headerAction:
+              :version_added: '2.10'
+              :requestHeadersToAdd:
+                :version_added: '2.10'
+                :headerName:
+                  :version_added: '2.10'
+                :headerValue:
+                  :version_added: '2.10'
+                :replace:
+                  :version_added: '2.10'
+              :requestHeadersToRemove:
+                :version_added: '2.10'
+              :responseHeadersToAdd:
+                :version_added: '2.10'
+                :headerName:
+                  :version_added: '2.10'
+                :headerValue:
+                  :version_added: '2.10'
+                :replace:
+                  :version_added: '2.10'
+              :responseHeadersToRemove:
+                :version_added: '2.10'
+            :weight:
+              :version_added: '2.10'
+        :urlRedirect:
+          :version_added: '2.10'
+          :hostRedirect:
+            :version_added: '2.10'
+          :httpsRedirect:
+            :version_added: '2.10'
+          :pathRedirect:
+            :version_added: '2.10'
+          :prefixRedirect:
+            :version_added: '2.10'
+          :redirectResponseCode:
+            :version_added: '2.10'
+          :stripQuery:
+            :version_added: '2.10'
+      :pathRules:
+        :version_added: '2.10'
+        :service:
+          :version_added: '2.10'
+        :paths:
+          :version_added: '2.10'
+        :routeAction:
+          :version_added: '2.10'
+          :corsPolicy:
+            :version_added: '2.10'
+            :allowCredentials:
+              :version_added: '2.10'
+            :allowHeaders:
+              :version_added: '2.10'
+            :allowMethods:
+              :version_added: '2.10'
+            :allowOriginRegexes:
+              :version_added: '2.10'
+            :allowOrigins:
+              :version_added: '2.10'
+            :disabled:
+              :version_added: '2.10'
+            :exposeHeaders:
+              :version_added: '2.10'
+            :maxAge:
+              :version_added: '2.10'
+          :faultInjectionPolicy:
+            :version_added: '2.10'
+            :abort:
+              :version_added: '2.10'
+              :httpStatus:
+                :version_added: '2.10'
+              :percentage:
+                :version_added: '2.10'
+            :delay:
+              :version_added: '2.10'
+              :fixedDelay:
+                :version_added: '2.10'
+                :nanos:
+                  :version_added: '2.10'
+                :seconds:
+                  :version_added: '2.10'
+              :percentage:
+                :version_added: '2.10'
+          :requestMirrorPolicy:
+            :version_added: '2.10'
+            :backendService:
+              :version_added: '2.10'
+          :retryPolicy:
+            :version_added: '2.10'
+            :numRetries:
+              :version_added: '2.10'
+            :perTryTimeout:
+              :version_added: '2.10'
+              :nanos:
+                :version_added: '2.10'
+              :seconds:
+                :version_added: '2.10'
+            :retryConditions:
+              :version_added: '2.10'
+          :timeout:
+            :version_added: '2.10'
+            :nanos:
+              :version_added: '2.10'
+            :seconds:
+              :version_added: '2.10'
+          :urlRewrite:
+            :version_added: '2.10'
+            :hostRewrite:
+              :version_added: '2.10'
+            :pathPrefixRewrite:
+              :version_added: '2.10'
+          :weightedBackendServices:
+            :version_added: '2.10'
+            :backendService:
+              :version_added: '2.10'
+            :headerAction:
+              :version_added: '2.10'
+              :requestHeadersToAdd:
+                :version_added: '2.10'
+                :headerName:
+                  :version_added: '2.10'
+                :headerValue:
+                  :version_added: '2.10'
+                :replace:
+                  :version_added: '2.10'
+              :requestHeadersToRemove:
+                :version_added: '2.10'
+              :responseHeadersToAdd:
+                :version_added: '2.10'
+                :headerName:
+                  :version_added: '2.10'
+                :headerValue:
+                  :version_added: '2.10'
+                :replace:
+                  :version_added: '2.10'
+              :responseHeadersToRemove:
+                :version_added: '2.10'
+            :weight:
+              :version_added: '2.10'
+        :urlRedirect:
+          :version_added: '2.10'
+          :hostRedirect:
+            :version_added: '2.10'
+          :httpsRedirect:
+            :version_added: '2.10'
+          :pathRedirect:
+            :version_added: '2.10'
+          :prefixRedirect:
+            :version_added: '2.10'
+          :redirectResponseCode:
+            :version_added: '2.10'
+          :stripQuery:
+            :version_added: '2.10'
+    :tests:
+      :version_added: '2.10'
+      :description:
+        :version_added: '2.10'
+      :host:
+        :version_added: '2.10'
+      :path:
+        :version_added: '2.10'
+      :service:
+        :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
   :RegionHealthCheck:
     :version_added: '2.10'
     :checkIntervalSec:
@@ -1189,18 +1603,6 @@
       :version_added: '2.6'
     :privateKey:
       :version_added: '2.6'
-  :RegionSslCertificate:
-    :version_added: '2.10'
-    :certificate:
-      :version_added: '2.10'
-    :description:
-      :version_added: '2.10'
-    :name:
-      :version_added: '2.10'
-    :privateKey:
-      :version_added: '2.10'
-    :region:
-      :version_added: '2.10'
   :Reservation:
     :version_added: '2.10'
     :description:
@@ -1287,6 +1689,28 @@
       :version_added: '2.8'
     :urlMap:
       :version_added: '2.6'
+  :RegionTargetHttpProxy:
+    :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :urlMap:
+      :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
+  :RegionTargetHttpsProxy:
+    :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :sslCertificates:
+      :version_added: '2.10'
+    :urlMap:
+      :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
   :TargetInstance:
     :version_added: '2.10'
     :name:

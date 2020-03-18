@@ -20,8 +20,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   ManagedSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   RegionDiskResourcePolicyAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   DiskResourcePolicyAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -41,15 +39,7 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  RegionInstanceGroupManager: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   RegionSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  RegionTargetHttpProxy: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  RegionTargetHttpsProxy: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  RegionUrlMap: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   ResourcePolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -303,8 +293,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   TargetVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: false
   # Not yet implemented.
-  RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   # Ansible tasks must alter infrastructure.
   # This means that virtual objects are a poor fit.
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -327,15 +315,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  RegionInstanceGroupManager: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   RegionSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  RegionTargetHttpProxy: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  RegionTargetHttpsProxy: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  RegionUrlMap: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RouterBgpPeer: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
