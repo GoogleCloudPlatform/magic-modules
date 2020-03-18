@@ -83,6 +83,9 @@
       <li<%%= sidebar_current("docs-google-datasource-compute-instance-group") %>>
       <a href="/docs/providers/google/d/google_compute_instance_group.html">google_compute_instance_group</a>
       </li>
+      <li<%%= sidebar_current("docs-google-datasource-compute-instance-serial-port") %>>
+      <a href="/docs/providers/google/d/datasource_compute_instance_serial_port.html">google_compute_instance_serial_port</a>
+      </li>
       <li<%%= sidebar_current("docs-google-datasource-compute-lb-ip-ranges") %>>
       <a href="/docs/providers/google/d/datasource_compute_lb_ip_ranges.html">google_compute_lb_ip_ranges</a>
       </li>
@@ -749,11 +752,11 @@
       <a href="/docs/providers/google/r/compute_region_instance_group_manager.html">google_compute_region_instance_group_manager</a>
       </li>
 
-<% unless version == 'ga' -%>
       <li<%%= sidebar_current("docs-google-compute-region-ssl-certificate") %>>
       <a href="/docs/providers/google/r/compute_region_ssl_certificate.html">google_compute_region_ssl_certificate</a>
       </li>
 
+<% unless version == 'ga' -%>
       <li<%%= sidebar_current("docs-google-compute-region-target-http-proxy") %>>
       <a href="/docs/providers/google/r/compute_region_target_http_proxy.html">google_compute_region_target_http_proxy</a>
       </li>
