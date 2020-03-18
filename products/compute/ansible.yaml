@@ -41,8 +41,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  RegionHealthCheck: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   RegionInstanceGroupManager: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -58,8 +56,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   RouterBgpPeer: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -317,8 +313,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   DiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   License: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   MachineType: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -332,8 +326,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Region: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-  RegionHealthCheck: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionInstanceGroupManager: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true

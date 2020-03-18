@@ -543,7 +543,10 @@ func resourceComputeInstance() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"RUNNING", "TERMINATED"}, false),
 			},
-
+			"current_status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -592,15 +595,6 @@ func resourceComputeInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-			},
-
-			"resource_policies": {
-				Type:             schema.TypeList,
-				Elem:             &schema.Schema{Type: schema.TypeString},
-				DiffSuppressFunc: compareSelfLinkRelativePaths,
-				Optional:         true,
-				ForceNew:         true,
-				MaxItems:         1,
 			},
 		},
 		CustomizeDiff: customdiff.All(
@@ -729,7 +723,6 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *Confi
 		ForceSendFields:    []string{"CanIpForward", "DeletionProtection"},
 		ShieldedVmConfig:   expandShieldedVmConfigs(d),
 		DisplayDevice:      expandDisplayDevice(d),
-		ResourcePolicies:   convertStringArr(d.Get("resource_policies").([]interface{})),
 	}, nil
 }
 
@@ -993,9 +986,6 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 			}
 		}
 	}
-
-	d.Set("resource_policies", instance.ResourcePolicies)
-
 	// Remove nils from map in case there were disks in the config that were not present on read;
 	// i.e. a disk was detached out of band
 	ads := []map[string]interface{}{}
@@ -1024,6 +1014,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	d.Set("name", instance.Name)
 	d.Set("description", instance.Description)
 	d.Set("hostname", instance.Hostname)
+	d.Set("current_status", instance.Status)
 
 	if d.Get("desired_status") != "" {
 		d.Set("desired_status", instance.Status)

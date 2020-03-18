@@ -146,6 +146,7 @@ func TestAccContainerCluster_withAddons(t *testing.T) {
 				ResourceName:		 "google_container_cluster.primary",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 			{
 				Config: testAccContainerCluster_updateAddons(clusterName),
@@ -154,6 +155,7 @@ func TestAccContainerCluster_withAddons(t *testing.T) {
 				ResourceName:		 "google_container_cluster.primary",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 		},
 	})
@@ -162,9 +164,9 @@ func TestAccContainerCluster_withAddons(t *testing.T) {
 func TestAccContainerCluster_withMasterAuthConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
 		CheckDestroy: testAccCheckContainerClusterDestroy,
@@ -214,7 +216,7 @@ func TestAccContainerCluster_withMasterAuthConfig(t *testing.T) {
 				ImportStateVerify:	 true,
 			},
 		},
-	})
+	}, testAccCheckContainerClusterDestroyProducer)
 }
 
 func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
@@ -1778,6 +1780,27 @@ func testAccCheckContainerClusterDestroy(s *terraform.State) error {
 	return nil
 }
 
+func testAccCheckContainerClusterDestroyProducer(provider *schema.Provider) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		config := provider.Meta().(*Config)
+
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_container_cluster" {
+				continue
+			}
+
+			attributes := rs.Primary.Attributes
+			_, err := config.clientContainer.Projects.Zones.Clusters.Get(
+				config.Project, attributes["location"], attributes["name"]).Do()
+			if err == nil {
+				return fmt.Errorf("Cluster still exists")
+			}
+		}
+
+		return nil
+	}
+}
+
 func getResourceAttributes(n string, s *terraform.State) (map[string]string, error) {
 	rs, ok := s.RootModule().Resources[n]
 	if !ok {
@@ -1957,6 +1980,8 @@ resource "google_container_cluster" "primary" {
   location           = "us-central1-a"
   initial_node_count = 1
 
+  min_master_version = "latest"
+
   addons_config {
     http_load_balancing {
       disabled = true
@@ -1975,6 +2000,9 @@ resource "google_container_cluster" "primary" {
     cloudrun_config {
       disabled = true
     }
+    dns_cache_config {
+      enabled = false
+    }
 <% end -%>
   }
 }
@@ -1987,6 +2015,8 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
+
+  min_master_version = "latest"
 
   addons_config {
     http_load_balancing {
@@ -2005,6 +2035,9 @@ resource "google_container_cluster" "primary" {
     }
     cloudrun_config {
       disabled = false
+    }
+    dns_cache_config {
+      enabled = true
     }
 <% end -%>
   }

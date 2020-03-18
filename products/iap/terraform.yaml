@@ -150,6 +150,53 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           instance_name: "tunnel-vm"
         primary_resource_name: "fmt.Sprintf(\"tf-test-tunnel-vm%s\", context[\"random_suffix\"])"
+  Brand: !ruby/object:Overrides::Terraform::ResourceOverride
+    description: |
+      {{description}}
+    
+      ~> **Note:** Brands can be created only once for a Google Cloud Platform
+      project and cannot be deleted. Destroying a Terraform-managed Brand
+      will remove it from state but *will not delete the resource on the server.*
+    id_format: '{{name}}'
+    import_format: ['{{name}}']
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iap_brand"
+        primary_resource_id: "project_brand"
+        vars:
+          project_id: 'brand-proj-'
+        test_env_vars:
+          org_id: :ORG_ID
+          org_domain: :ORG_DOMAIN
+        skip_test: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
+      custom_import: templates/terraform/custom_import/iap_brand.go.erb
+      post_create: templates/terraform/post_create/set_computed_name.erb
+  Client: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: '{{brand}}/identityAwareProxyClients/{{client_id}}'
+    self_link: '{{brand}}/identityAwareProxyClients/{{client_id}}'
+    import_format: ['{{brand}}/identityAwareProxyClients/{{client_id}}']
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iap_client"
+        primary_resource_id: "project_client"
+        vars:
+          project_id: 'brand-proj-'
+        test_env_vars:
+          org_id: :ORG_ID
+          org_domain: :ORG_DOMAIN
+    docs: !ruby/object:Provider::Terraform::Docs
+      attributes: |
+        * `client_id`: The OAuth2 ID of the client.
+    properties:
+      clientId: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      secret: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/iap_client.go.erb
+      custom_import: templates/terraform/custom_import/iap_client.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

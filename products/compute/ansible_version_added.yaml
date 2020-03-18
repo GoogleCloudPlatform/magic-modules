@@ -10,8 +10,6 @@
     :version_added: '2.7'
   :RegionBackendService:
     :version_added: '2.10'
-  :RegionDiskResourcePolicyAttachment:
-    :version_added: '2.10'
   :Disk:
     :version_added: '2.7'
   :Firewall:
@@ -50,6 +48,8 @@
     :version_added: '2.10'
   :RegionDisk:
     :version_added: '2.8'
+  :RegionHealthCheck:
+    :version_added: '2.10'
   :Route:
     :version_added: '2.7'
   :Router:
@@ -58,6 +58,8 @@
     :version_added: '2.9'
   :SslCertificate:
     :version_added: '2.7'
+  :RegionSslCertificate:
+    :version_added: '2.10'
   :Reservation:
     :version_added: '2.10'
   :SslPolicy:
@@ -78,6 +80,8 @@
     :version_added: '2.7'
   :TargetVpnGateway:
     :version_added: '2.7'
+  :ExternalVpnGateway:
+    :version_added: '2.10'
   :UrlMap:
     :version_added: '2.7'
   :VpnTunnel:
@@ -274,14 +278,6 @@
     :sessionAffinity:
       :version_added: '2.10'
     :timeoutSec:
-      :version_added: '2.10'
-    :region:
-      :version_added: '2.10'
-  :RegionDiskResourcePolicyAttachment:
-    :version_added: '2.10'
-    :name:
-      :version_added: '2.10'
-    :disk:
       :version_added: '2.10'
     :region:
       :version_added: '2.10'
@@ -1017,6 +1013,100 @@
         :version_added: '2.8'
       :kmsKeyName:
         :version_added: '2.8'
+  :RegionHealthCheck:
+    :version_added: '2.10'
+    :checkIntervalSec:
+      :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :healthyThreshold:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :unhealthyThreshold:
+      :version_added: '2.10'
+    :timeoutSec:
+      :version_added: '2.10'
+    :type:
+      :version_added: '2.10'
+    :httpHealthCheck:
+      :version_added: '2.10'
+      :host:
+        :version_added: '2.10'
+      :requestPath:
+        :version_added: '2.10'
+      :response:
+        :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+      :portName:
+        :version_added: '2.10'
+      :proxyHeader:
+        :version_added: '2.10'
+      :portSpecification:
+        :version_added: '2.10'
+    :httpsHealthCheck:
+      :version_added: '2.10'
+      :host:
+        :version_added: '2.10'
+      :requestPath:
+        :version_added: '2.10'
+      :response:
+        :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+      :portName:
+        :version_added: '2.10'
+      :proxyHeader:
+        :version_added: '2.10'
+      :portSpecification:
+        :version_added: '2.10'
+    :tcpHealthCheck:
+      :version_added: '2.10'
+      :request:
+        :version_added: '2.10'
+      :response:
+        :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+      :portName:
+        :version_added: '2.10'
+      :proxyHeader:
+        :version_added: '2.10'
+      :portSpecification:
+        :version_added: '2.10'
+    :sslHealthCheck:
+      :version_added: '2.10'
+      :request:
+        :version_added: '2.10'
+      :response:
+        :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+      :portName:
+        :version_added: '2.10'
+      :proxyHeader:
+        :version_added: '2.10'
+      :portSpecification:
+        :version_added: '2.10'
+    :http2HealthCheck:
+      :version_added: '2.10'
+      :host:
+        :version_added: '2.10'
+      :requestPath:
+        :version_added: '2.10'
+      :response:
+        :version_added: '2.10'
+      :port:
+        :version_added: '2.10'
+      :portName:
+        :version_added: '2.10'
+      :proxyHeader:
+        :version_added: '2.10'
+      :portSpecification:
+        :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
   :Route:
     :version_added: '2.6'
     :destRange:
@@ -1099,6 +1189,18 @@
       :version_added: '2.6'
     :privateKey:
       :version_added: '2.6'
+  :RegionSslCertificate:
+    :version_added: '2.10'
+    :certificate:
+      :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :privateKey:
+      :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
   :Reservation:
     :version_added: '2.10'
     :description:
@@ -1249,6 +1351,20 @@
       :version_added: '2.7'
     :region:
       :version_added: '2.7'
+  :ExternalVpnGateway:
+    :version_added: '2.10'
+    :description:
+      :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :redundancyType:
+      :version_added: '2.10'
+    :interfaces:
+      :version_added: '2.10'
+      :id:
+        :version_added: '2.10'
+      :ipAddress:
+        :version_added: '2.10'
   :UrlMap:
     :version_added: '2.6'
     :defaultService:

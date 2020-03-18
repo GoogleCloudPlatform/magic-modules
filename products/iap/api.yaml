@@ -135,3 +135,75 @@ objects:
         name: 'name'
         description: Name of the instance.
         required: true
+  - !ruby/object:Api::Resource
+    name: 'Brand'
+    base_url: 'projects/{{project}}/brands'
+    self_link: '{{name}}'
+    input: true
+    description: |
+      OAuth brand data. Only "Organization Internal" brands can be created
+      programatically via API. To convert it into an external brands
+      please use the GCP Console.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Output only. Identifier of the brand, in the format
+          `projects/{project_number}/brands/{brand_id}`. NOTE: The brand
+          identification corresponds to the project number as only one
+          brand per project can be created.
+        output: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'supportEmail'
+        description: |
+          Support email displayed on the OAuth consent screen. Can be either a
+          user or group email. When a user email is specified, the caller must
+          be the user with the associated email address. When a group email is
+          specified, the caller can be either a user or a service account which
+          is an owner of the specified group in Cloud Identity.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'applicationTitle'
+        description: |
+          Application name displayed on OAuth consent screen.
+        required: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'orgInternalOnly'
+        description: |
+          Whether the brand is only intended for usage inside the GSuite organization only.
+        output: true
+  - !ruby/object:Api::Resource
+    name: 'Client'
+    base_url: '{{brand}}/identityAwareProxyClients'
+    self_link: '{{client_id}}'
+    input: true
+    description: |
+      Contains the data that describes an Identity Aware Proxy owned client.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'clientId'
+        api_name: name
+        description: |
+          Output only. Unique identifier of the OAuth client.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'brand'
+        description: |
+          Identifier of the brand to which this client
+          is attached to. The format is
+          `projects/{project_number}/brands/{brand_id}/identityAwareProxyClients/{client_id}`.
+        input: true
+        required: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'secret'
+        description: |
+          Output only. Client secret of the OAuth client.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          Human-friendly name given to the OAuth client.
+        required: true
