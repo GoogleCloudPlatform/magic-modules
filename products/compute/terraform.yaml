@@ -1660,7 +1660,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       bfd: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       enable: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'caseDiffSuppress'
         custom_flatten: 'templates/terraform/custom_flatten/string_to_bool.erb'
         send_empty_value: true
       interfaceName: !ruby/object:Overrides::Terraform::PropertyOverride
