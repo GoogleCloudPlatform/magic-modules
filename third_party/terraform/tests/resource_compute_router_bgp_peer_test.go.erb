@@ -82,7 +82,7 @@ func TestAccComputeRouterPeer_enable(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeRouterPeerEnable(testId, "false"),
+				Config: testAccComputeRouterPeerEnable(testId, false),
 				Check: testAccCheckComputeRouterPeerExists(
 					"google_compute_router_peer.foobar"),
 			},
@@ -92,7 +92,7 @@ func TestAccComputeRouterPeer_enable(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeRouterPeerEnable(testId, "true"),
+				Config: testAccComputeRouterPeerEnable(testId, true),
 				Check: testAccCheckComputeRouterPeerExists(
 					"google_compute_router_peer.foobar"),
 			},
@@ -533,7 +533,7 @@ resource "google_compute_router_peer" "foobar" {
 }
 
 <% unless version == 'ga' -%>
-func testAccComputeRouterPeerEnable(testId, enable string) string {
+func testAccComputeRouterPeerEnable(testId string, enable bool) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
   name                    = "router-peer-test-%s"
@@ -619,7 +619,7 @@ resource "google_compute_router_peer" "foobar" {
   peer_asn        = 65515
   interface       = google_compute_router_interface.foobar.name
 
-  enable = %s
+  enable = %v
 }
 `, testId, testId, testId, testId, testId, testId, testId, testId, testId, testId, testId, enable)
 }

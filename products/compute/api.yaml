@@ -11362,7 +11362,7 @@ objects:
               - :DISABLED
               - :PASSIVE
             required: true
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Boolean
         name: 'enable'
         description: |
           The status of the BGP peer connection. If set to FALSE,
@@ -11370,7 +11370,7 @@ objects:
           routing information is removed. If set to TRUE, the peer connection
           can be established with routing information. The default is TRUE.
         min_version: beta
-        default_value: "true"
+        default_value: true
   - !ruby/object:Api::Resource
     name: 'Snapshot'
     kind: 'compute#snapshot'
