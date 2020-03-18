@@ -543,10 +543,6 @@ func resourceComputeInstance() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"RUNNING", "TERMINATED"}, false),
 			},
-			"current_status": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
