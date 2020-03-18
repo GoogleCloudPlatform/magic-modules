@@ -107,6 +107,7 @@ objects:
           The overriding quota limit value. Can be any nonnegative integer, or -1 (unlimited quota).
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'dimensions'
+        input: true
         description: |
           If this map is nonempty, then this override applies only to specific values for dimensions defined in the limit unit.
 
@@ -190,6 +191,7 @@ objects:
           The overriding quota limit value. Can be any nonnegative integer, or -1 (unlimited quota).
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'dimensions'
+        input: true
         description: |
           If this map is nonempty, then this override applies only to specific values for dimensions defined in the limit unit.
 
