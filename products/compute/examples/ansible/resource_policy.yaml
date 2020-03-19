@@ -17,9 +17,10 @@ task: !ruby/object:Provider::Ansible::Task
     name: <%= ctx[:name] %>
     region: 'us-central1'
     snapshot_schedule_policy:
-      daily_schedule:
-        days_in_cycle: 1
-        start_time: "04:00"
+      schedule:
+        daily_schedule:
+          days_in_cycle: 1
+          start_time: "04:00"
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>

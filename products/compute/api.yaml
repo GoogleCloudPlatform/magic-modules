@@ -10513,26 +10513,9 @@ objects:
     base_url: projects/{{project}}/regions/{{region}}/resourcePolicies
     input: true
     has_self_link: true
+    collection_url_key: 'items'
     description: |
       A policy that can be attached to a resource to specify or schedule actions on that resource.
-    async: !ruby/object:Api::OpAsync
-      operation: !ruby/object:Api::OpAsync::Operation
-        kind: 'compute#operation'
-        path: 'name'
-        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
-        wait_ms: 1000
-      result: !ruby/object:Api::OpAsync::Result
-        path: 'targetLink'
-      status: !ruby/object:Api::OpAsync::Status
-        path: 'status'
-        complete: 'DONE'
-        allowed:
-          - 'PENDING'
-          - 'RUNNING'
-          - 'DONE'
-      error: !ruby/object:Api::OpAsync::Error
-        path: 'error/errors'
-        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: region
