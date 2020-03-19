@@ -60,7 +60,9 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 		<% else -%>
 		Providers:    testAccProvidersOiCS,
 		<% end -%>
+		<% unless example.skip_delete -%>
 		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>Destroy,
+		<% end -%>
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc<%= test_slug -%>(context),
