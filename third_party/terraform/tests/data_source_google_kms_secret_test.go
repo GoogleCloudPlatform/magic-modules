@@ -23,6 +23,7 @@ func TestAccKmsSecret_basic(t *testing.T) {
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 
 	plaintext := fmt.Sprintf("secret-%s", acctest.RandString(10))
+	aad := "plainaad"
 
 	// The first test creates resources needed to encrypt plaintext and produce ciphertext
 	resource.Test(t, resource.TestCase{
@@ -57,7 +58,7 @@ func TestAccKmsSecret_basic(t *testing.T) {
 			{
 				Config: testGoogleKmsCryptoKey_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
 				Check: func(s *terraform.State) error {
-					ciphertext, cryptoKeyId, err := testAccEncryptSecretDataWithCryptoKey(s, "google_kms_crypto_key.crypto_key", plaintext, "plainaad")
+					ciphertext, cryptoKeyId, err := testAccEncryptSecretDataWithCryptoKey(s, "google_kms_crypto_key.crypto_key", plaintext, aad)
 
 					if err != nil {
 						return err
@@ -69,7 +70,7 @@ func TestAccKmsSecret_basic(t *testing.T) {
 						Providers: testAccProviders,
 						Steps: []resource.TestStep{
 							{
-								Config: testGoogleKmsSecret_aadDatasource(cryptoKeyId.terraformId(), ciphertext, base64.StdEncoding.EncodeToString([]byte("plainaad"))),
+								Config: testGoogleKmsSecret_aadDatasource(cryptoKeyId.terraformId(), ciphertext, base64.StdEncoding.EncodeToString([]byte(aad))),
 								Check:  resource.TestCheckResourceAttr("data.google_kms_secret.acceptance", "plaintext", plaintext),
 							},
 						},
