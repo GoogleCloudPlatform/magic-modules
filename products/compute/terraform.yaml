@@ -942,6 +942,27 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   InstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
+  InstanceGroupNamedPort: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}'
+    import_format: ['projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/{{port}}/{{name}}']
+    mutex: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "instance_group_named_port_gke"
+        primary_resource_id: "my_port"
+        vars:
+          network_name: "container-network"
+          subnetwork_name: "container-subnetwork"
+          gke_cluster_name: "my-cluster"
+    properties:
+      group: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareResourceNames'
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        ignore_read: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: 'templates/terraform/encoders/normalize_group.go.erb'
   InstanceTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   InterconnectAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
