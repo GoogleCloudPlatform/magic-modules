@@ -4759,6 +4759,17 @@ objects:
                 - :USE_FIXED_PORT
                 - :USE_NAMED_PORT
                 - :USE_SERVING_PORT
+      - !ruby/object:Api::Type::NestedObject
+        name: 'logConfig'
+        description: |
+          Configure logging on this health check.
+        min_version: beta
+        properties:
+            - !ruby/object:Api::Type::Boolean
+              name: 'enable'
+              description: |
+                Indicates whether or not to export logs. This is false by default,
+                which means no health check logging will be done.
   - !ruby/object:Api::Resource
     name: 'InstanceTemplate'
     kind: 'compute#instanceTemplate'
@@ -10507,6 +10518,17 @@ objects:
                 - :USE_FIXED_PORT
                 - :USE_NAMED_PORT
                 - :USE_SERVING_PORT
+      - !ruby/object:Api::Type::NestedObject
+        name: 'logConfig'
+        description: |
+          Configure logging on this health check.
+        min_version: beta
+        properties:
+            - !ruby/object:Api::Type::Boolean
+              name: 'enable'
+              description: |
+                Indicates whether or not to export logs. This is false by default,
+                which means no health check logging will be done.
   - !ruby/object:Api::Resource
     name: 'ResourcePolicy'
     kind: 'compute#resourcePolicy'
