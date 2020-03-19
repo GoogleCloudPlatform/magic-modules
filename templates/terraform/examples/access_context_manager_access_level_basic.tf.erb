@@ -1,6 +1,6 @@
 resource "google_access_context_manager_access_level" "<%= ctx[:primary_resource_id] %>" {
-  parent = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  name   = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/<%= ctx[:vars]['access_level_name'] %>"
+  parent = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}"
+  name   = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}/accessLevels/<%= ctx[:vars]['access_level_name'] %>"
   title  = "<%= ctx[:vars]['access_level_name'] %>"
   basic {
     conditions {
