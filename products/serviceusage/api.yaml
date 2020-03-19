@@ -32,13 +32,14 @@ objects:
     min_version: beta
     base_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides
     self_link: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/
-    delete_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}
     create_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}?force={{force}}
     update_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}
     update_verb: :PATCH
+    delete_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Getting Started': 'https://cloud.google.com/service-usage/docs/getting-started'
+        'REST API documentation': 'https://cloud.google.com/service-usage/docs/reference/rest/v1beta1/services.consumerQuotaMetrics.limits.adminOverrides'
     nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'serviceusage#overridesList'
       keys:
@@ -46,9 +47,10 @@ objects:
     identity:
       - name
     description: |
-      A consumer override is applied to the consumer on its own authority to limit its own quota usage.
-      Consumer overrides cannot be used to grant more quota than would be allowed by admin overrides,
-      producer overrides, or the default limit of the service.
+      Creates an admin override. An admin override is applied by an administrator of a parent
+      folder or parent organization of the consumer receiving the override. An admin override is
+      intended to limit the amount of quota the consumer can use out of the total quota pool
+      allocated to all children of the folder or organization.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
@@ -66,7 +68,7 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
-    properties:
+    parameters:
       - !ruby/object:Api::Type::String
         name: 'name'
         output: true
@@ -100,6 +102,7 @@ objects:
         input: true
         description: |
           The limit on the metric, e.g. `/project/region`.
+    properties:
       - !ruby/object:Api::Type::String
         name: 'overrideValue'
         required: true
@@ -116,13 +119,14 @@ objects:
     min_version: beta
     base_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides
     self_link: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/
-    delete_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}
     create_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}?force={{force}}
     update_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}
     update_verb: :PATCH
+    delete_url: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Getting Started': 'https://cloud.google.com/service-usage/docs/getting-started'
+        'REST API documentation': 'https://cloud.google.com/service-usage/docs/reference/rest/v1beta1/services.consumerQuotaMetrics.limits.consumerOverrides'
     nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'serviceusage#overridesList'
       keys:
@@ -150,7 +154,7 @@ objects:
       error: !ruby/object:Api::OpAsync::Error
         path: 'error'
         message: 'message'
-    properties:
+    parameters:
       - !ruby/object:Api::Type::String
         name: 'name'
         output: true
@@ -184,6 +188,7 @@ objects:
         input: true
         description: |
           The limit on the metric, e.g. `/project/region`.
+    properties:
       - !ruby/object:Api::Type::String
         name: 'overrideValue'
         required: true

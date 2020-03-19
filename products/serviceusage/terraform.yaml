@@ -13,6 +13,10 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   AdminQuotaOverride: !ruby/object:Overrides::Terraform::ResourceOverride
+    # At the moment, this resource isn't useful for most consumers, unless something changes in the way
+    # quotas are divided between organizations and projects within those organizations.  The team has
+    # asked us to skip it for now.
+    exclude: true
     id_format: "projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/adminOverrides/{{name}}"
     skip_sweeper: true
     autogen_async: true
