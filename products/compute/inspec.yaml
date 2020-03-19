@@ -85,6 +85,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         override_name: "instance_group_id"
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: "instance_group_name"
+  InstanceGroupNamedPort: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   InterconnectAttachment: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   License: !ruby/object:Overrides::Inspec::ResourceOverride
