@@ -27,7 +27,7 @@ func dataSourceGoogleKmsSecret() *schema.Resource {
 				Computed:  true,
 				Sensitive: true,
 			},
-			"additionalAuthenticatedData": {
+			"additional_authenticated_data": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -50,7 +50,7 @@ func dataSourceGoogleKmsSecretRead(d *schema.ResourceData, meta interface{}) err
 		Ciphertext: ciphertext,
 	}
 
-	if aad, ok := d.GetOk("additionalAuthenticatedData"); ok {
+	if aad, ok := d.GetOk("additional_authenticated_data"); ok {
 		kmsDecryptRequest.AdditionalAuthenticatedData = aad.(string)
 	}
 
