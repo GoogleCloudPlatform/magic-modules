@@ -1,0 +1,41 @@
+resource "google_compute_instance_group_named_port" "<%= ctx[:primary_resource_id] %>" {
+  group = google_container_cluster.my_cluster.instance_group_urls[0]
+  zone = "us-central1-a"
+
+  name = "http"
+  port = 8080
+}
+
+resource "google_compute_instance_group_named_port" "<%= ctx[:primary_resource_id] %>s" {
+  group = google_container_cluster.my_cluster.instance_group_urls[0]
+  zone = "us-central1-a"
+
+  name = "https"
+  port = 4443
+}
+
+resource "google_compute_network" "container_network" {
+  name                    = "<%= ctx[:vars]['network_name'] %>"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "container_subnetwork" {
+  name                     = "<%= ctx[:vars]['subnetwork_name'] %>"
+  region                   = "us-central1"
+  network                  = google_compute_network.container_network.name
+  ip_cidr_range            = "10.0.36.0/24"
+}
+
+resource "google_container_cluster" "my_cluster" {
+  name               = "<%= ctx[:vars]['gke_cluster_name'] %>"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  network    = google_compute_network.container_network.name
+  subnetwork = google_compute_subnetwork.container_subnetwork.name
+
+  ip_allocation_policy {
+    cluster_ipv4_cidr_block  = "/19"
+    services_ipv4_cidr_block = "/22"
+  }
+}
