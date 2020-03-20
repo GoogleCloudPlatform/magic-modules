@@ -14,4 +14,5 @@
 'libraries/google/iam/property/iam_policy_audit_configs.rb': 'templates/inspec/iam_policy/properties/iam_policy_audit_configs.rb'
 'libraries/google/iam/property/iam_policy_audit_configs_audit_log_configs.rb': 'templates/inspec/iam_policy/properties/iam_policy_audit_configs_audit_log_configs.rb'
 'libraries/google/iam/property/iam_policy_bindings.rb': 'templates/inspec/iam_policy/properties/iam_policy_bindings.rb'
+'libraries/google/iam/property/iam_binding_condition.rb': 'templates/inspec/iam_policy/properties/iam_binding_condition.rb'
 'Gemfile': 'provider/inspec/Gemfile'
