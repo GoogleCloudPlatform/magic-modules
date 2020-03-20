@@ -1,10 +1,7 @@
 package google
 
 import (
-	"context"
 	"fmt"
-	"log"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
