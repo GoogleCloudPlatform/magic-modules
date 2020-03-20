@@ -3,7 +3,6 @@ package google
 import (
 	"context"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )

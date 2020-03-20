@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -41,7 +42,7 @@ func sharedConfigForRegion(region string) (*Config, error) {
 	return conf, nil
 }
 
-func isSweepableResource(resourceName string) bool {
+func isSweepableTestResource(resourceName string) bool {
 	for _, p := range testResourcePrefixes {
 		if strings.HasPrefix(resourceName, p) {
 			return true
