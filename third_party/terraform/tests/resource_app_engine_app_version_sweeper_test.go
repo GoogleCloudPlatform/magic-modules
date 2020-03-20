@@ -49,7 +49,7 @@ func testSweepAppEngineAppVersion(region string) error {
 	rl := resourceList.([]interface{})
 
 	log.Printf("[INFO][SWEEPER_LOG] Found %d items in %s list response.", len(rl), resourceName)
-	// items who don't match the tf-test prefix
+	// Count items that weren't sweeped.
 	nonPrefixCount := 0
 	for _, ri := range rl {
 		obj := ri.(map[string]interface{})
@@ -59,8 +59,8 @@ func testSweepAppEngineAppVersion(region string) error {
 		}
 
 		id := obj["id"].(string)
-		// Only sweep resources with the test prefix
-		if !strings.HasPrefix(id, "tf-test") {
+		// Increment count and skip if resource is not sweepable.
+		if !isSweepableResource(id) {
 			nonPrefixCount++
 			continue
 		}

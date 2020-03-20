@@ -7,6 +7,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
+// List of prefixes used for test resource names
+var testResourcePrefixes = []string{
+	"tf-test",
+	"tfgen",
+}
+
 func TestMain(m *testing.M) {
 	resource.TestMain(m)
 }
@@ -33,4 +39,13 @@ func sharedConfigForRegion(region string) (*Config, error) {
 	ConfigureBasePaths(conf)
 
 	return conf, nil
+}
+
+func isSweepableResource(resourceName string) bool {
+	for _, p := range testResourcePrefixes {
+		if strings.HasPrefix(resourceName, p) {
+			return true
+		}
+	}
+	return false
 }
