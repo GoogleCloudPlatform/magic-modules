@@ -151,9 +151,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           instance_name: "tunnel-vm"
         primary_resource_name: "fmt.Sprintf(\"tf-test-tunnel-vm%s\", context[\"random_suffix\"])"
   Brand: !ruby/object:Overrides::Terraform::ResourceOverride
+    async: !ruby/object:Provider::Terraform::PollAsync
+      check_response_func: PollCheckForExistence
+      actions: ['create']
+      operation: !ruby/object:Api::Async::Operation
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 4
+          update_minutes: 4
     description: |
       {{description}}
-    
+
       ~> **Note:** Brands can be created only once for a Google Cloud Platform
       project and cannot be deleted. Destroying a Terraform-managed Brand
       will remove it from state but *will not delete the resource on the server.*
