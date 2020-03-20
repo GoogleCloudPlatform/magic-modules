@@ -59,7 +59,7 @@ func testSweepAppEngineAppVersion(region string) error {
 
 		id := obj["id"].(string)
 		// Increment count and skip if resource is not sweepable.
-		if !isSweepableResource(id) {
+		if !isSweepableTestResource(id) {
 			nonPrefixCount++
 			continue
 		}
