@@ -247,6 +247,16 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
     }
 
+<%      if object.custom_code.decoder -%>
+    opRes, err = resource<%= resource_name -%>Decoder(d, meta, opRes)
+    if err != nil {
+        return fmt.Errorf("Error decoding response from operation: %s", err)
+    }
+    if opRes == nil {
+        return fmt.Errorf("Error decoding response from operation, could not find object")
+    }
+<%      end -%>
+
     <% object.gettable_properties.each do |prop| -%>
     <% if object.identity.include?(prop) -%>
     if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(opRes["<%= prop.api_name -%>"], d, config)); err != nil {
@@ -265,16 +275,6 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         return fmt.Errorf("Error decoding response from operation, could not find nested object")
     }
 <%      end -%>
-<%      if object.custom_code.decoder -%>
-    opRes, err = resource<%= resource_name -%>Decoder(d, meta, opRes)
-    if err != nil {
-        return fmt.Errorf("Error decoding response from operation: %s", err)
-    }
-    if opRes == nil {
-        return fmt.Errorf("Error decoding response from operation, could not find object")
-    }
-<%      end -%>
-
     // This may have caused the ID to update - update it if so.
     id, err = replaceVars(d, config, "<%= id_format(object) -%>")
     if err != nil {
