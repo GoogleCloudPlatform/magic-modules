@@ -13,35 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'google/iam/property/iam_binding_condition'
 module GoogleInSpec
   module Iam
     module Property
-      class IamPolicyBindings
-        attr_reader :role
+      class IamBindingCondition
+        attr_reader :title
 
-        attr_reader :members
+        attr_reader :description
 
-        attr_reader :condition
+        attr_reader :expression
 
         def initialize(args = nil, parent_identifier = nil)
           return if args.nil?
           @parent_identifier = parent_identifier
-          @role = args['role']
-          @members = args['members']
-          @condition = GoogleInSpec::Iam::Property::IamBindingCondition.new(args['condition'], to_s)
+          @title = args['title']
+          @description = args['description']
+          @expression = args['expression']
         end
 
         def to_s
-          "#{@parent_identifier} IamPolicyBindings"
-        end
-      end
-
-      class IamPolicyBindingsArray
-        def self.parse(value, parent_identifier)
-          return if value.nil?
-          return IamPolicyBindings.new(value, parent_identifier) unless value.is_a?(::Array)
-          value.map { |v| IamPolicyBindings.new(v, parent_identifier) }
+          "#{@parent_identifier} IamBindingCondition"
         end
       end
     end

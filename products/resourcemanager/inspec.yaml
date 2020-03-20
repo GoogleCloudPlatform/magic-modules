@@ -33,6 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       exclude: false
       method_name_separator: ':'
       fetch_iam_policy_verb: :POST
+      iam_conditions_request_type: :REQUEST_BODY
   Organization: !ruby/object:Overrides::Inspec::ResourceOverride
     privileged: true
     # Name should be organizations/123456
