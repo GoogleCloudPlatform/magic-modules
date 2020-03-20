@@ -143,7 +143,7 @@ Retry:
 	}
 
 	// VCR depends on the original request body being consumed, so consume it here
-	_, err := httputil.DumpRequest(req, true)
+	_, err := httputil.DumpRequestOut(req, true)
 	if err != nil {
 		log.Printf("[DEBUG] Retry Transport: Reading request failed: %v", err)
 	}
