@@ -1919,6 +1919,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/compute.networkUser'
       parent_resource_attribute: 'subnetwork'
+      iam_conditions_request_type: :QUERY_PARAM
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
