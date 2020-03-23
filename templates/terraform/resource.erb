@@ -715,7 +715,14 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <% end # if updatable? -%>
 
 func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
-<% if object.custom_code.custom_delete -%>
+<% if object.skip_delete -%>
+    log.Printf("[WARNING] <%= object.__product.name + " " + object.name %> resources" +
+    " cannot be deleted from GCP. The resource %s will be removed from Terraform" +
+    " state, but will still be present on the server.", d.Id())
+    d.SetId("")
+
+    return nil
+<% elsif object.custom_code.custom_delete -%>
 <%= lines(compile(object.custom_code.custom_delete)) -%>
 <% else -%>
     config := meta.(*Config)

@@ -107,8 +107,6 @@ module Provider
       # Whether to skip generating tests for this resource
       attr_reader :skip_test
 
-      attr_reader :skip_delete
-
       # The name of the primary resource for use in IAM tests. IAM tests need
       # a reference to the primary resource to create IAM policies for
       attr_reader :primary_resource_name
@@ -253,7 +251,6 @@ module Provider
         check :ignore_read_extra, type: Array, item_type: String, default: []
         check :primary_resource_name, type: String
         check :skip_test, type: TrueClass
-        check :skip_delete, type: TrueClass
         check :config_path, type: String, default: "templates/terraform/examples/#{name}.tf.erb"
       end
     end

@@ -20,13 +20,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_minutes: 10
       delete_minutes: 10
     autogen_async: true
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
+    skip_delete: true
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_project_basic"
         min_version: 'beta'
-        skip_delete: true
         primary_resource_id: "basic"
         vars:
           instance_name: "memory-cache"
