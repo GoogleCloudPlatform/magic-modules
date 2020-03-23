@@ -574,13 +574,15 @@ resource "google_compute_region_backend_service" "lipsum" {
 
   backend {
     group = google_compute_instance_group_manager.foobar.instance_group
+<% unless version.nil? || version == 'ga' -%>
     failover = true
   }
 
   failover_policy {
     disable_connection_drain_on_failover = true
-    drop_traffic_if_unhealthy = true
-    failover_ratio = 0.4
+    drop_traffic_if_unhealthy            = true
+    failover_ratio                       = 0.4
+<% end -%>
   }
 
   network = google_compute_network.network2.self_link
