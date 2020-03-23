@@ -268,7 +268,7 @@ clusters with private nodes. Structure is documented below.
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
-* `release_channel` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration options for the
+* `release_channel` - (Optional) Configuration options for the
     [Release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels)
     feature, which provide more control over automatic upgrades of your GKE clusters. Structure is documented below.
 
@@ -413,7 +413,7 @@ maintenance_policy {
 }
 ```
 
-* `recurring_window` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Time window for
+* `recurring_window` - (Optional) Time window for
 recurring maintenance operations.
 
 Specify `start_time` and `end_time` in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) date format.  The start time's date is
