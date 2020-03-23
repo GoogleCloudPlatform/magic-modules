@@ -2308,7 +2308,6 @@ objects:
         description: |
           The URL of the network to which this backend service belongs.
           This field can only be specified when the load balancing scheme is set to INTERNAL.
-        min_version: beta
   - !ruby/object:Api::Resource
     name: 'BackendServiceSignedUrlKey'
     kind: 'compute#BackendServiceSignedUrlKey'
