@@ -843,6 +843,7 @@ func resourceContainerCluster() *schema.Resource {
 				},
 			},
 
+<% unless version == 'ga' -%>
 			"release_channel": {
 				Type:     schema.TypeList,
 				ForceNew: true,
@@ -862,7 +863,6 @@ func resourceContainerCluster() *schema.Resource {
 				},
 			},
 
-<% unless version == 'ga' -%>
 			"workload_identity_config": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
@@ -1044,12 +1044,12 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			Enabled:         d.Get("enable_binary_authorization").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
-		ReleaseChannel:          expandReleaseChannel(d.Get("release_channel")),
 <% unless version == 'ga' -%>
 		ShieldedNodes: &containerBeta.ShieldedNodes{
 			Enabled:         d.Get("enable_shielded_nodes").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
+		ReleaseChannel:          expandReleaseChannel(d.Get("release_channel")),
 		EnableTpu:               d.Get("enable_tpu").(bool),
 		NetworkConfig: &containerBeta.NetworkConfig{
 			EnableIntraNodeVisibility: d.Get("enable_intranode_visibility").(bool),
@@ -1315,11 +1315,11 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("enable_tpu", cluster.EnableTpu)
 	d.Set("tpu_ipv4_cidr_block", cluster.TpuIpv4CidrBlock)
 
-	d.Set("enable_intranode_visibility", cluster.NetworkConfig.EnableIntraNodeVisibility)
-<% end -%>
 	if err := d.Set("release_channel", flattenReleaseChannel(cluster.ReleaseChannel)); err != nil {
 		return err
 	}
+	d.Set("enable_intranode_visibility", cluster.NetworkConfig.EnableIntraNodeVisibility)
+<% end -%>
 	if err := d.Set("authenticator_groups_config", flattenAuthenticatorGroupsConfig(cluster.AuthenticatorGroupsConfig)); err != nil {
 		return err
 	}

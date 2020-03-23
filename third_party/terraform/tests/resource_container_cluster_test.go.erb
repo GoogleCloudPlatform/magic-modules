@@ -336,6 +336,7 @@ func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccContainerCluster_withReleaseChannelEnabled(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
@@ -399,6 +400,7 @@ func TestAccContainerCluster_withInvalidReleaseChannel(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccContainerCluster_withMasterAuthorizedNetworksConfig(t *testing.T) {
 	t.Parallel()
@@ -2124,6 +2126,7 @@ resource "google_container_cluster" "with_network_policy_enabled" {
 `, clusterName)
 }
 
+<% unless version == 'ga' -%>
 func testAccContainerCluster_withReleaseChannelEnabled(clusterName string, channel string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_release_channel" {
@@ -2137,6 +2140,7 @@ resource "google_container_cluster" "with_release_channel" {
 }
 `, clusterName, channel)
 }
+<% end -%>
 
 func testAccContainerCluster_removeNetworkPolicy(clusterName string) string {
 	return fmt.Sprintf(`
