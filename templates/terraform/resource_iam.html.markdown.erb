@@ -94,7 +94,7 @@ data "google_iam_policy" "admin" {
   }
 }
 
-resource "<%= resource_ns_iam -%>_policy" "editor" {
+resource "<%= resource_ns_iam -%>_policy" "policy" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
   policy_data = data.google_iam_policy.admin.policy_data
 }
@@ -119,7 +119,7 @@ data "google_iam_policy" "admin" {
   }
 }
 
-resource "<%= resource_ns_iam -%>_policy" "editor" {
+resource "<%= resource_ns_iam -%>_policy" "policy" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
   policy_data = data.google_iam_policy.admin.policy_data
 }
@@ -128,7 +128,7 @@ resource "<%= resource_ns_iam -%>_policy" "editor" {
 ## <%= markdown_escaped_name -%>\_binding
 
 ```hcl
-resource "<%= resource_ns_iam -%>_binding" "editor" {
+resource "<%= resource_ns_iam -%>_binding" "binding" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   members = [
@@ -141,7 +141,7 @@ resource "<%= resource_ns_iam -%>_binding" "editor" {
 With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 
 ```hcl
-resource "<%= resource_ns_iam -%>_binding" "editor" {
+resource "<%= resource_ns_iam -%>_binding" "binding" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   members = [
@@ -159,7 +159,7 @@ resource "<%= resource_ns_iam -%>_binding" "editor" {
 ## <%= markdown_escaped_name -%>\_member
 
 ```hcl
-resource "<%= resource_ns_iam -%>_member" "editor" {
+resource "<%= resource_ns_iam -%>_member" "member" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   member = "user:jane@example.com"
@@ -170,7 +170,7 @@ resource "<%= resource_ns_iam -%>_member" "editor" {
 With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 
 ```hcl
-resource "<%= resource_ns_iam -%>_member" "editor" {
+resource "<%= resource_ns_iam -%>_member" "member" {
 <%= lines(compile(object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   member = "user:jane@example.com"
