@@ -122,11 +122,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "delete_service_on_destroy"
         vars:
-          project_id: "tf-test-project"
+          project_id: "project"
           bucket_name: "appengine-static-content"
           service_name: "service-"
         test_env_vars:
           org_id: :ORG_ID
+          billing_acct: :BILLING_ACCT
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
