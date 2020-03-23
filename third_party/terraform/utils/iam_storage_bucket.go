@@ -121,16 +121,17 @@ func (u *StorageBucketIamUpdater) SetResourceIamPolicy(policy *cloudresourcemana
 	}
 	err = u.SendPolicyRequest(url, policy)
 	if err != nil {
-		// Cloud storage guards against race conditions with precondition checks, the policy
+		// Cloud storage guards against race conditions with precondition checks, the policy etag
 		// may be updated by the time we need to delete. See https://cloud.google.com/storage/docs/generations-preconditions
 		gerr, ok := err.(*googleapi.Error)
 		if ok && gerr.Code == 412 {
-			log.Printf("[DEBUG] Received 412 error, retrying once with updated policy")
+			log.Printf("[DEBUG] Received 412 error, retrying once with updated etag")
 			updatedPolicy, err := u.GetResourceIamPolicy()
 			if err != nil {
 				return err
 			}
-			err = u.SendPolicyRequest(url, updatedPolicy)
+			policy.Etag = updatedPolicy.Etag
+			err = u.SendPolicyRequest(url, policy)
 			if err == nil {
 				return nil
 			}
