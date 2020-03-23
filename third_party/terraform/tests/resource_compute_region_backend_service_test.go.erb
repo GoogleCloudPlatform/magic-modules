@@ -114,7 +114,6 @@ func TestAccComputeRegionBackendService_withBackendInternalManaged(t *testing.T)
   })
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeRegionBackendService_withBackendMultiNic(t *testing.T) {
         t.Parallel()
 
@@ -141,7 +140,6 @@ func TestAccComputeRegionBackendService_withBackendMultiNic(t *testing.T) {
                 },
         })
 }
-<% end -%>
 
 func TestAccComputeRegionBackendService_withConnectionDrainingAndUpdate(t *testing.T) {
 	t.Parallel()
@@ -559,7 +557,6 @@ resource "google_compute_health_check" "default" {
 `, serviceName, timeout, igName, itName, checkName)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeRegionBackendService_withBackendMultiNic(
         serviceName, net1Name, net2Name, igName, itName, checkName string, timeout int64) string {
         return fmt.Sprintf(`
@@ -658,7 +655,6 @@ resource "google_compute_health_check" "default" {
 }
 `, serviceName, timeout, net1Name, net1Name, net2Name, net2Name, igName, itName, checkName)
 }
-<% end -%>
 
 func testAccComputeRegionBackendService_withInvalidInternalBackend(
   serviceName, igName, itName, checkName string) string {
