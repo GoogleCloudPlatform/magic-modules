@@ -3133,8 +3133,6 @@ resource "google_container_cluster" "with_maintenance_window" {
 `, clusterName, maintenancePolicy)
 }
 
-
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withRecurringMaintenanceWindow(clusterName string, startTime, endTime string) string {
 	maintenancePolicy := ""
 	if len(startTime) > 0 {
@@ -3158,7 +3156,6 @@ resource "google_container_cluster" "with_recurring_maintenance_window" {
 `, clusterName, maintenancePolicy)
 
 }
-<% end %>
 
 func testAccContainerCluster_withIPAllocationPolicy_existingSecondaryRanges(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`
