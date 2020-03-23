@@ -257,6 +257,18 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 <%      end -%>
 
+<%      if object.nested_query -%>
+    if _, ok := opRes["<%=object.nested_query.keys[0]-%>"]; ok {
+        opRes, err = flattenNested<%= resource_name -%>(d, meta, opRes)
+        if err != nil {
+            return fmt.Errorf("Error getting nested object from operation response: %s", err)
+        }
+        if opRes == nil {
+            // Object isn't there any more - remove it from the state.
+            return fmt.Errorf("Error decoding response from operation, could not find nested object")
+        }
+    }
+<%      end -%>
     <% object.gettable_properties.each do |prop| -%>
     <% if object.identity.include?(prop) -%>
     if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(opRes["<%= prop.api_name -%>"], d, config)); err != nil {
@@ -265,16 +277,6 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     <% end -%>
     <% end -%>
 
-<%      if object.nested_query -%>
-    opRes, err = flattenNested<%= resource_name -%>(d, meta, opRes)
-    if err != nil {
-        return fmt.Errorf("Error getting nested object from operation response: %s", err)
-    }
-    if opRes == nil {
-        // Object isn't there any more - remove it from the state.
-        return fmt.Errorf("Error decoding response from operation, could not find nested object")
-    }
-<%      end -%>
     // This may have caused the ID to update - update it if so.
     id, err = replaceVars(d, config, "<%= id_format(object) -%>")
     if err != nil {
@@ -629,12 +631,12 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%  if object.custom_code.update_encoder -%>
     obj, err = resource<%= resource_name -%>UpdateEncoder(d, meta, obj)
     if err != nil {
-    	return err
+        return err
     }
 <%  elsif object.custom_code.encoder -%>
     obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
     if err != nil {
-    	return err
+        return err
     }
 <%  end -%>
 
