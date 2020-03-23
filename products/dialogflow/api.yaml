@@ -130,3 +130,315 @@ objects:
           - :TIER_STANDARD
           - :TIER_ENTERPRISE
           - :TIER_ENTERPRISE_PLUS
+  - !ruby/object:Api::Resource
+    name: 'Intent'
+    base_url: "projects/{{project}}/agent/intents/"
+    self_link: "{{name}}"
+    update_verb: :PATCH
+    description: |
+      Represents a Dialogflow intent. Intents convert a number of user expressions or patterns into an action. An action
+      is an extraction of a user command or sentence semantics.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/dialogflow/docs/'
+      api: 'https://cloud.google.com/dialogflow/docs/reference/rest/v2/projects.agent.intents'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: |
+          The unique identifier of this intent. 
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        required: true
+        description: |
+          The name of this intent to be displayed on the console.
+      - !ruby/object:Api::Type::Enum
+        name: 'webhookState'
+        description: |
+          Indicates whether webhooks are enabled for the intent.
+          * WEBHOOK_STATE_UNSPECIFIED: Webhook is disabled in the agent and in the intent.
+          * WEBHOOK_STATE_ENABLED: Webhook is enabled in the agent and in the intent.
+          * WEBHOOK_STATE_ENABLED_FOR_SLOT_FILLING: Webhook is enabled in the agent and in the intent. Also, each slot
+          filling prompt is forwarded to the webhook.
+        values:
+          - :WEBHOOK_STATE_UNSPECIFIED
+          - :WEBHOOK_STATE_ENABLED
+          - :WEBHOOK_STATE_ENABLED_FOR_SLOT_FILLING
+      - !ruby/object:Api::Type::Integer
+        name: 'priority'
+        description: |
+          The priority of this intent. Higher numbers represent higher priorities.
+            - If the supplied value is unspecified or 0, the service translates the value to 500,000, which corresponds
+            to the Normal priority in the console.
+            - If the supplied value is negative, the intent is ignored in runtime detect intent requests.
+      - !ruby/object:Api::Type::Boolean
+        name: 'isFallback'
+        description: |
+         Indicates whether this is a fallback intent.
+      - !ruby/object:Api::Type::Boolean
+        name: 'mlDisabled'
+        description: |
+         Indicates whether Machine Learning is disabled for the intent.
+         Note: If mlDisabled setting is set to true, then this intent is not taken into account during inference in ML
+         ONLY match mode. Also, auto-markup in the UI is turned off.
+      - !ruby/object:Api::Type::Array
+        name: 'inputContextNames'
+        item_type: Api::Type::String
+        description: |
+         The list of context names required for this intent to be triggered.
+         Format: projects/<Project ID>/agent/sessions/-/contexts/<Context ID>.
+      - !ruby/object:Api::Type::Array
+        name: 'events'
+        item_type: Api::Type::String
+        description: |
+         The collection of event names that trigger the intent. If the collection of input contexts is not empty, all of
+         the contexts must be present in the active user session for an event to trigger this intent.
+      - !ruby/object:Api::Type::Array
+        name: 'trainingPhrases'
+        description: |
+         The list of training phrases in the intent. Training phrases are example phrases for what end-users might type or
+         say, referred to as end-user expressions.
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: 'trainingPhrase'
+          description: |
+           Represents an example that the agent is trained on.
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              output: true
+              description: |
+                The unique identifier of this training phrase.
+            - !ruby/object:Api::Type::Enum
+              name: 'type'
+              required: true
+              description: |
+                The type of the training phrase.
+                * EXAMPLE: Examples do not contain @-prefixed entity type names, but example parts can be annotated with
+                entity types.
+                * TEMPLATE: Templates are not annotated with entity types, but they can contain @-prefixed entity type names
+                as substrings. Template mode has been deprecated. Example mode is the only supported way to create new training
+                phrases. If you have existing training phrases that you've created in template mode, those will continue to work.
+              values:
+                - :EXAMPLE
+                - :TEMPLATE
+            - !ruby/object:Api::Type::Array
+              name: 'parts'
+              required: true
+              description: |
+                The ordered list of training phrase parts. The parts are concatenated in order to form the training phrase.
+                Note: The API does not automatically annotate training phrases like the Dialogflow Console does.
+                The [REST documentation](https://cloud.google.com/dialogflow/docs/reference/rest/v2/projects.agent.intents#trainingphrase) contains many notes and instructions pertaining to parts.
+              item_type: !ruby/object:Api::Type::NestedObject
+                name: 'part'
+                description: |
+                 Represents a part of a training phrase.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'text'
+                    required: true
+                    description: |
+                      The text for this part.
+                  - !ruby/object:Api::Type::String
+                    name: 'entityType'
+                    description: |
+                      The entity type name prefixed with @. This field is required for annotated parts of the training phrase.
+                  - !ruby/object:Api::Type::String
+                    name: 'alias'
+                    description: |
+                      The parameter name for the value extracted from the annotated part of the example. This field is required
+                      for annotated parts of the training phrase.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'userDefined'
+                    description: |
+                      Indicates whether the text was manually annotated. This field is set to true when the Dialogflow Console
+                      is used to manually annotate the part. When creating an annotated part with the API, you must set this
+                      to true.
+            - !ruby/object:Api::Type::Integer
+              name: 'timesAddedCount'
+              output: true
+              description: |
+                Indicates how many times this example was added to the intent. Each time a developer adds an existing sample
+                by editing an intent or training, this counter is increased.
+      - !ruby/object:Api::Type::String
+        name: 'action'
+        description: |
+          The name of the action associated with the intent.
+          Note: The action name must not contain whitespaces.
+      - !ruby/object:Api::Type::Array
+        name: 'outputContexts'
+        description: |
+         The collection of contexts that are activated when the intent is matched. Context messages in this collection should
+         not set the parameters field. 
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: 'context'
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              required: true
+              description: |
+                The unique identifier of the context. 
+                Format: projects/<Project ID>/agent/sessions/<Session ID>/contexts/<Context ID>.
+                The Context ID is always converted to lowercase, may only contain characters in [a-zA-Z0-9_-%] and
+                may be at most 250 bytes long.
+            - !ruby/object:Api::Type::Integer
+              name: 'lifespanCount'
+              description: |
+                The number of conversational query requests after which the context expires. If set to 0 (the default) 
+                the context expires immediately. Contexts expire automatically after 20 minutes if there are no matching
+                queries.
+            - !ruby/object:Api::Type::KeyValuePairs
+              name: 'parameters'
+              description: |
+                The collection of parameters associated with this context. Refer to [this doc](https://cloud.google.com/dialogflow/docs/intents-actions-parameters)
+                for syntax.
+      - !ruby/object:Api::Type::Boolean
+        name: 'resetContexts'
+        description: |
+         Indicates whether to delete all contexts in the current session when this intent is matched.
+      - !ruby/object:Api::Type::Array
+        name: 'parameters'
+        description: |
+         The collection of parameters associated with the intent. Parameters are the extracted values from the user
+         expression that is matched by the intent.
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: 'parameter'
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              description: |
+                The unique identifier of the parameter. 
+            - !ruby/object:Api::Type::String
+              name: 'displayName'
+              required: true
+              description: |
+                The name of the parameter.
+            - !ruby/object:Api::Type::String
+              name: 'value'
+              description: |
+                The definition of the parameter value. It can be:
+                  - a constant string,
+                  - a parameter value defined as $parameterName,
+                  - an original parameter value defined as $parameterName.original,
+                  - a parameter value from some context defined as \#contextName.parameter_name.
+            - !ruby/object:Api::Type::String
+              name: 'defaultValue'
+              description: |
+                The default value to use when the value yields an empty result. Default values can be extracted from contexts
+                by using the following syntax: \#contextName.parameter_name.
+            - !ruby/object:Api::Type::String
+              name: 'entityTypeDisplayName'
+              description: |
+                The name of the entity type, prefixed with @, that describes values of the parameter. If the parameter is
+                required, this must be provided.
+            - !ruby/object:Api::Type::Boolean
+              name: 'mandatory'
+              description: |
+                Indicates whether the parameter is required. That is, whether the intent cannot be completed without collecting
+                the parameter value.
+            - !ruby/object:Api::Type::Array
+              name: 'prompts'
+              description: |
+                The collection of prompts that the agent can present to the user in order to collect a value for the parameter.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Boolean
+              name: 'isList'
+              description: |
+                Indicates whether the parameter represents a list of values.
+      - !ruby/object:Api::Type::Array
+        name: 'messages'
+        description: |
+         Corresponds to the Response field in the Dialogflow console. Intents have a built-in response handler that can
+         return responses after the intent is matched. Multiple types of responses can be provided, some of which are 
+         platform-specific.
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: 'message'
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: 'platform'
+              description: |
+                The platform that this message is intended for.
+              values:
+                - :PLATFORM_UNSPECIFIED
+                - :FACEBOOK
+                - :SLACK
+                - :TELEGRAM
+                - :KIK
+                - :SKYPE
+                - :LINE
+                - :VIBER
+                - :ACTIONS_ON_GOOGLE
+                - :GOOGLE_HANGOUTS
+            - !ruby/object:Api::Type::NestedObject
+              name: 'text'
+              exactly_one_of:
+                - messages.0.text
+                - messages.0.payload
+              description: |
+                The text response.
+              properties:
+                - !ruby/object:Api::Type::Array
+                  name: 'text'
+                  description: |
+                    The collection of the agent's responses.
+                  item_type: Api::Type::String
+            - !ruby/object:Api::Type::KeyValuePairs
+              name: 'payload'
+              exactly_one_of:
+                - messages.0.text
+                - messages.0.payload
+              description: |
+                Returns a response containing a custom, platform-specific payload. See the [Intent.Message.Platform](https://cloud.google.com/dialogflow/docs/reference/rest/v2/projects.agent.intents#Platform)
+                type for a description of the structure that may be required for your platform.
+      - !ruby/object:Api::Type::Array
+        name: 'defaultResponsePlatforms'
+        description: |
+         The list of platforms for which the first responses will be copied from the messages in PLATFORM_UNSPECIFIED
+         (i.e. default platform).
+        item_type: !ruby/object:Api::Type::Enum
+          name: 'platform'
+          description: |
+            Represents different platforms that a rich message can be intended for.
+          values:
+            - :PLATFORM_UNSPECIFIED
+            - :FACEBOOK
+            - :SLACK
+            - :TELEGRAM
+            - :KIK
+            - :SKYPE
+            - :LINE
+            - :VIBER
+            - :ACTIONS_ON_GOOGLE
+            - :GOOGLE_HANGOUTS
+      - !ruby/object:Api::Type::String
+        name: 'rootFollowupIntentName'
+        description: |
+          The unique identifier of the root intent in the chain of followup intents. It identifies the correct followup
+          intents chain for this intent.
+          Format: projects/<Project ID>/agent/intents/<Intent ID>.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'parentFollowupIntentName'
+        description: |
+         The unique identifier of the parent intent in the chain of followup intents.
+         Format: projects/<Project ID>/agent/intents/<Intent ID>.
+        input: true
+      - !ruby/object:Api::Type::Array
+        name: 'followupIntentInfo'
+        output: true
+        description: |
+         Information about all followup intents that have this intent as a direct or indirect parent. We populate this field
+         only in the output.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+          - !ruby/object:Api::Type::String
+            name: 'followupIntentName'
+            description: |
+              The unique identifier of the followup intent.
+              Format: projects/<Project ID>/agent/intents/<Intent ID>.
+          - !ruby/object:Api::Type::String
+            name: 'parentFollowupIntentName'
+            description: |
+              The unique identifier of the followup intent's parent.
+              Format: projects/<Project ID>/agent/intents/<Intent ID>.
