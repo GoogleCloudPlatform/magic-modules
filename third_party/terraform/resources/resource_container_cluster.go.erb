@@ -61,16 +61,6 @@ var (
 	}
 )
 
-<% unless version == 'ga' -%>
-<%# This is here because it is unused in ga, which trips up linters - when it starts being used, move it to validation.go. %>
-func validateRFC3339Date(v interface{}, k string) (warnings []string, errors []error) {
-	_, err := time.Parse(time.RFC3339, v.(string))
-	if err != nil {
-		errors = append(errors, err)
-	}
-	return
-}
-
 func rfc5545RecurrenceDiffSuppress(k, o, n string, d *schema.ResourceData) bool {
 	// This diff gets applied in the cloud console if you specify
 	// "FREQ=DAILY" in your config and add a maintenance exclusion.
@@ -83,7 +73,6 @@ func rfc5545RecurrenceDiffSuppress(k, o, n string, d *schema.ResourceData) bool 
 	// identical.
 	return false
 }
-<% end %>
 
 func resourceContainerCluster() *schema.Resource {
 	return &schema.Resource{
