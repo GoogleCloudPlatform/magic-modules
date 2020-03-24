@@ -286,6 +286,13 @@ objects:
                     name: 'requireCorpOwned'
                     description: |
                       Whether the device needs to be corp owned.
+              - !ruby/object:Api::Type::Array
+                name: 'regions'
+                description: |
+                  The request must originate from one of the provided
+                  countries/regions.
+                  Format: A valid ISO 3166-1 alpha-2 code.
+                item_type: Api::Type::String
   - !ruby/object:Api::Resource
     name: 'ServicePerimeter'
     # This is an unusual API, so we need to use a few fields to map the methods
