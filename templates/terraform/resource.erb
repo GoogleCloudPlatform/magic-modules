@@ -257,16 +257,6 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
     }
 
-<%      if object.nested_query -%>
-    opRes, err = flattenNested<%= resource_name -%>(d, meta, opRes)
-    if err != nil {
-        return fmt.Errorf("Error getting nested object from operation response: %s", err)
-    }
-    if opRes == nil {
-        // Object isn't there any more - remove it from the state.
-        return fmt.Errorf("Error decoding response from operation, could not find nested object")
-    }
-<%      end -%>
 <%      if object.custom_code.decoder -%>
     opRes, err = resource<%= resource_name -%>Decoder(d, meta, opRes)
     if err != nil {
@@ -274,6 +264,19 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
     if opRes == nil {
         return fmt.Errorf("Error decoding response from operation, could not find object")
+    }
+<%      end -%>
+
+<%      if object.nested_query -%>
+    if _, ok := opRes["<%=object.nested_query.keys[0]-%>"]; ok {
+        opRes, err = flattenNested<%= resource_name -%>(d, meta, opRes)
+        if err != nil {
+            return fmt.Errorf("Error getting nested object from operation response: %s", err)
+        }
+        if opRes == nil {
+            // Object isn't there any more - remove it from the state.
+            return fmt.Errorf("Error decoding response from operation, could not find nested object")
+        }
     }
 <%      end -%>
     <% object.gettable_properties.each do |prop| -%>
@@ -638,12 +641,12 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%  if object.custom_code.update_encoder -%>
     obj, err = resource<%= resource_name -%>UpdateEncoder(d, meta, obj)
     if err != nil {
-    	return err
+        return err
     }
 <%  elsif object.custom_code.encoder -%>
     obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
     if err != nil {
-    	return err
+        return err
     }
 <%  end -%>
 
