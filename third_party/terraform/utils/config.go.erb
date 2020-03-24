@@ -154,7 +154,6 @@ type Config struct {
 
 	clientServiceMan          *servicemanagement.APIService
 
-	ServiceUsageBasePath       string
 	clientServiceUsage         *serviceusage.Service
 
 	clientBigQuery   *bigquery.Service
@@ -682,7 +681,6 @@ func ConfigureBasePaths(c *Config) {
 	c.ResourceManagerV2Beta1BasePath = ResourceManagerV2Beta1DefaultBasePath
 	c.IAMBasePath = IAMDefaultBasePath
 	c.ServiceNetworkingBasePath = ServiceNetworkingDefaultBasePath
-	c.ServiceUsageBasePath = ServiceUsageDefaultBasePath
 	c.BigQueryBasePath = BigQueryDefaultBasePath
 	c.CloudIoTBasePath = CloudIoTDefaultBasePath
 	c.StorageTransferBasePath = StorageTransferDefaultBasePath
