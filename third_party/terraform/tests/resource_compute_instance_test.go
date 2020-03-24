@@ -4547,7 +4547,7 @@ data "google_compute_image" "my_image" {
 resource "google_compute_instance" "foobar" {
   name           = "%s"
   machine_type   = "c2-standard-4"
-  zone           = "us-central1-f"
+  zone           = "us-central1-a"
   can_ip_forward = false
   tags           = ["foo", "bar"]
 
@@ -4566,6 +4566,7 @@ resource "google_compute_instance" "foobar" {
   scheduling {
     # Instances with resource policies do not support live migration.
     on_host_maintenance = "TERMINATE"
+    automatic_restart = false
   }
 
   resource_policies = [google_compute_resource_policy.foo.self_link]
