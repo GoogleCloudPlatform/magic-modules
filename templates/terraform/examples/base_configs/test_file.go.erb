@@ -79,7 +79,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			},
 		<% end -%>
 		},
-	})
+	}, testAccCheck<%= "#{resource_name}" -%>DestroyProducer)
 }
 
 func testAcc<%= test_slug -%>(context map[string]interface{}) string {
@@ -116,4 +116,32 @@ func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
 
 	return nil
 }
-<%- end %>
+
+func testAccCheck<%= resource_name -%>DestroyProducer(provider *schema.Provider) func(s *terraform.State) error {
+	for name, rs := range s.RootModule().Resources {
+		if rs.Type != "<%= terraform_name -%>" {
+			continue
+		}
+		if strings.HasPrefix(name, "data.") {
+			continue
+		}
+
+	<% if object.custom_code.test_check_destroy -%>
+<%= lines(compile(object.custom_code.test_check_destroy)) -%>
+	<% else -%>
+	config := provider.Meta().(*Config)
+
+	url, err := replaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+	if err != nil {
+		return err
+	}
+
+	_, err = sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", "", url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+	if err == nil {
+			return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
+		}
+	<% end -%>
+	}
+
+	return nil
+}
