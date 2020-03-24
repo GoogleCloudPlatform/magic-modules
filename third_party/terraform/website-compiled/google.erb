@@ -1032,7 +1032,16 @@
       </li>
     </ul>
     </li>
-
+<% unless version == 'ga' %>
+    <li<%%= sidebar_current("docs-google-firebase") %>>
+    <a href="#">Google Firebase Resources</a>
+    <ul class="nav">
+      <li<%%= sidebar_current("docs-google-firebase-index") %>>
+          <a href="/docs/providers/google/r/firebase_project.html">google_firebase_project</a>
+      </li>
+    </ul>
+    </li>
+<% end %>
     <li<%%= sidebar_current("docs-google-filestore") %>>
     <a href="#">Google Filestore Resources</a>
     <ul class="nav">
