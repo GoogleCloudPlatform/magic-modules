@@ -60,7 +60,9 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 		<% else -%>
 		Providers:    testAccProvidersOiCS,
 		<% end -%>
+		<% unless object.skip_delete -%>
 		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>Destroy,
+		<% end -%>
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc<%= test_slug -%>(context),
@@ -85,6 +87,7 @@ func testAcc<%= test_slug -%>(context map[string]interface{}) string {
 }
 <%- end %>
 
+<% unless object.skip_delete -%>
 func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
 	for name, rs := range s.RootModule().Resources {
 		if rs.Type != "<%= terraform_name -%>" {
@@ -113,3 +116,4 @@ func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
 
 	return nil
 }
+<%- end %>
