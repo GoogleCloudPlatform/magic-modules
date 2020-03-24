@@ -169,6 +169,10 @@ objects:
           The plaintext to be encrypted.
         required: true
       - !ruby/object:Api::Type::String
+        name: 'additionalAuthenticatedData'
+        description: |
+          The additional authenticated data used for integrity checks during encryption and decryption.
+      - !ruby/object:Api::Type::String
         name: 'ciphertext'
         description: |
           Contains the result of encrypting the provided plaintext, encoded in base64.
