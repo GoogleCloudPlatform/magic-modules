@@ -1178,8 +1178,6 @@ func TestAccContainerCluster_withMaintenanceWindow(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
-
 func TestAccContainerCluster_withRecurringMaintenanceWindow(t *testing.T) {
 	t.Parallel()
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
@@ -1224,8 +1222,6 @@ func TestAccContainerCluster_withRecurringMaintenanceWindow(t *testing.T) {
 		},
 	})
 }
-
-<% end %>
 
 func TestAccContainerCluster_withIPAllocationPolicy_existingSecondaryRanges(t *testing.T) {
 	t.Parallel()
@@ -3137,8 +3133,6 @@ resource "google_container_cluster" "with_maintenance_window" {
 `, clusterName, maintenancePolicy)
 }
 
-
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withRecurringMaintenanceWindow(clusterName string, startTime, endTime string) string {
 	maintenancePolicy := ""
 	if len(startTime) > 0 {
@@ -3162,7 +3156,6 @@ resource "google_container_cluster" "with_recurring_maintenance_window" {
 `, clusterName, maintenancePolicy)
 
 }
-<% end %>
 
 func testAccContainerCluster_withIPAllocationPolicy_existingSecondaryRanges(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`
