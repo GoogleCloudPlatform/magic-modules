@@ -433,8 +433,10 @@ cluster_config {
 
 * `optional_components` - (Optional) The set of optional components to activate on the cluster. Possible values include:
     "ANACONDA"
+    "DRUID"
     "HIVE_WEBHCAT"
     "JUPYTER"
+    "KERBEROS"
     "PRESTO"
     "ZEPPELIN"
     "ZOOKEEPER"
