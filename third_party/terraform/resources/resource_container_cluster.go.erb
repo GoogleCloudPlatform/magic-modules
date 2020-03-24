@@ -61,16 +61,6 @@ var (
 	}
 )
 
-<% unless version == 'ga' -%>
-<%# This is here because it is unused in ga, which trips up linters - when it starts being used, move it to validation.go. %>
-func validateRFC3339Date(v interface{}, k string) (warnings []string, errors []error) {
-	_, err := time.Parse(time.RFC3339, v.(string))
-	if err != nil {
-		errors = append(errors, err)
-	}
-	return
-}
-
 func rfc5545RecurrenceDiffSuppress(k, o, n string, d *schema.ResourceData) bool {
 	// This diff gets applied in the cloud console if you specify
 	// "FREQ=DAILY" in your config and add a maintenance exclusion.
@@ -83,7 +73,6 @@ func rfc5545RecurrenceDiffSuppress(k, o, n string, d *schema.ResourceData) bool 
 	// identical.
 	return false
 }
-<% end %>
 
 func resourceContainerCluster() *schema.Resource {
 	return &schema.Resource{
@@ -465,15 +454,11 @@ func resourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"daily_maintenance_window": {
 							Type:     schema.TypeList,
-<% if version == 'ga' -%>
-							Required: true,
-<% else %>
 							Optional:     true,
 							ExactlyOneOf: []string{
 								"maintenance_policy.0.daily_maintenance_window",
 								"maintenance_policy.0.recurring_window",
 							},
-<% end %>
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -490,7 +475,6 @@ func resourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
-<% unless version == 'ga' -%>
 						"recurring_window": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -519,7 +503,6 @@ func resourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
-<% end %>
 					},
 				},
 			},
@@ -2314,7 +2297,6 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 			ResourceVersion: resourceVersion,
 		}
 	}
-<% unless version == 'ga' -%>
 	if recurringWindow, ok := maintenancePolicy["recurring_window"]; ok && len(recurringWindow.([]interface{})) > 0 {
 		rw := recurringWindow.([]interface{})[0].(map[string]interface{})
 		return &containerBeta.MaintenancePolicy{
@@ -2331,7 +2313,6 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 			ResourceVersion: resourceVersion,
 		}
 	}
-<% end %>
 	return nil
 }
 
@@ -2775,7 +2756,6 @@ func flattenMaintenancePolicy(mp *containerBeta.MaintenancePolicy) []map[string]
 			},
 		}
 	}
-<% unless version == 'ga' -%>
 	if mp.Window.RecurringWindow != nil {
 		return []map[string]interface{}{
 			{
@@ -2789,7 +2769,6 @@ func flattenMaintenancePolicy(mp *containerBeta.MaintenancePolicy) []map[string]
 			},
 		}
 	}
-<% end %>
 	return nil
 }
 
