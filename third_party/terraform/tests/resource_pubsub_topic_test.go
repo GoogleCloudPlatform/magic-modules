@@ -2,13 +2,10 @@ package google
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccPubsubTopic_update(t *testing.T) {
@@ -113,32 +110,4 @@ resource "google_pubsub_topic" "topic" {
   kms_key_name = "%s"
 }
 `, pid, topicName, kmsKey)
-}
-
-// Temporary until all destroy functions can be reworked to take a provider as an argument
-func testAccCheckPubsubTopicDestroyProducer(provider *schema.Provider) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_pubsub_topic" {
-				continue
-			}
-			if strings.HasPrefix(name, "data.") {
-				continue
-			}
-
-			config := provider.Meta().(*Config)
-
-			url, err := replaceVarsForTest(config, rs, "{{PubsubBasePath}}projects/{{project}}/topics/{{name}}")
-			if err != nil {
-				return err
-			}
-
-			_, err = sendRequest(config, "GET", "", url, nil, pubsubTopicProjectNotReady)
-			if err == nil {
-				return fmt.Errorf("PubsubTopic still exists at %s", url)
-			}
-		}
-
-		return nil
-	}
 }
