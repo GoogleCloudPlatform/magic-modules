@@ -10,12 +10,7 @@ import (
 func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
 	t.Parallel()
 
-	context := map[string]interface{}{
-		"service_name": fmt.Sprintf("tf-test-ae-service-%s", acctest.RandString(10)),
-		"project":      fmt.Sprintf("tf-test-project-%s", acctest.RandString(10)),
-		"org_id":       getTestOrgFromEnv(t),
-		"billing_acct": getTestBillingAccountFromEnv(t),
-	}
+	resourceName := fmt.Sprintf("tf-test-ae-service-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -23,7 +18,7 @@ func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
 		CheckDestroy: testAccCheckAppEngineFlexibleAppVersionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAppEngineFlexibleAppVersion_python(context),
+				Config: testAccAppEngineFlexibleAppVersion_python(resourceName),
 			},
 			{
 				ResourceName:            "google_app_engine_flexible_app_version.foo",
@@ -32,7 +27,7 @@ func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"env_variables", "deployment", "entrypoint", "service", "delete_service_on_destroy"},
 			},
 			{
-				Config: testAccAppEngineFlexibleAppVersion_pythonUpdate(context),
+				Config: testAccAppEngineFlexibleAppVersion_pythonUpdate(resourceName),
 			},
 			{
 				ResourceName:            "google_app_engine_flexible_app_version.foo",
@@ -44,8 +39,8 @@ func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
 	})
 }
 
-func testAccAppEngineFlexibleAppVersion_python(context map[string]interface{}) string {
-	return Nprintf(`
+func testAccAppEngineFlexibleAppVersion_python(resourceName string) string {
+	return fmt.Sprintf(`
 resource "google_project_service" "project" {
   service = "appengineflex.googleapis.com"
 
@@ -54,7 +49,7 @@ resource "google_project_service" "project" {
 
 resource "google_app_engine_flexible_app_version" "foo" {
   version_id = "v1"
-  service    = "%{service_name}"
+  service    = "%s"
   runtime    = "python"
 
   runtime_api_version = "1"
@@ -113,7 +108,7 @@ resource "google_app_engine_flexible_app_version" "foo" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name    = "%{service_name}-bucket"
+  name    = "%s-bucket"
 }
 
 resource "google_storage_bucket_object" "yaml" {
@@ -132,11 +127,11 @@ resource "google_storage_bucket_object" "main" {
   name   = "main.py"
   bucket = google_storage_bucket.bucket.name
   source = "./test-fixtures/appengine/hello-world-flask/main.py"
-}`, context)
+}`, resourceName, resourceName)
 }
 
-func testAccAppEngineFlexibleAppVersion_pythonUpdate(context map[string]interface{}) string {
-	return Nprintf(`
+func testAccAppEngineFlexibleAppVersion_pythonUpdate(resourceName string) string {
+	return fmt.Sprintf(`
 resource "google_project_service" "project" {
   service = "appengineflex.googleapis.com"
 
@@ -145,7 +140,7 @@ resource "google_project_service" "project" {
 
 resource "google_app_engine_flexible_app_version" "foo" {
   version_id = "v1"
-  service    = "%{service_name}"
+  service    = "%s"
   runtime    = "python"
 
   runtime_api_version = "1"
@@ -204,7 +199,7 @@ resource "google_app_engine_flexible_app_version" "foo" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name    = "%{service_name}-bucket"
+  name    = "%s-bucket"
 }
 
 resource "google_storage_bucket_object" "yaml" {
@@ -223,5 +218,5 @@ resource "google_storage_bucket_object" "main" {
   name   = "main.py"
   bucket = google_storage_bucket.bucket.name
   source = "./test-fixtures/appengine/hello-world-flask/main.py"
-}`, context)
+}`, resourceName, resourceName)
 }

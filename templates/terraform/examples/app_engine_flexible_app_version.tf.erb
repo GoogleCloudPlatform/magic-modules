@@ -42,7 +42,7 @@ resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id]
 }
 
 resource "google_storage_bucket" "bucket" {
-  name    = "<%= ctx[:vars]['bucket_name'] %>"
+  name = "<%= ctx[:vars]['bucket_name'] %>"
 }
 
 resource "google_storage_bucket_object" "object" {
