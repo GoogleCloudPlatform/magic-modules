@@ -46,15 +46,13 @@ func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
 
 func testAccAppEngineFlexibleAppVersion_python(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_project" "my_project" {
-  name            = "tf-test-project"
-  project_id      = "%{project}"
-  org_id          = "%{org_id}"
-  billing_account = "%{billing_acct}"
+resource "google_project_service" "project" {
+  service = "appengineflex.googleapis.com"
+
+  disable_dependent_services = true
 }
 
 resource "google_app_engine_flexible_app_version" "foo" {
-  project    = google_project.my_project.name
   version_id = "v1"
   service    = "%{service_name}"
   runtime    = "python"
@@ -115,7 +113,6 @@ resource "google_app_engine_flexible_app_version" "foo" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  project = google_project.my_project.project_id
   name    = "%{service_name}-bucket"
 }
 
@@ -140,15 +137,13 @@ resource "google_storage_bucket_object" "main" {
 
 func testAccAppEngineFlexibleAppVersion_pythonUpdate(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_project" "my_project" {
-  name            = "tf-test-project"
-  project_id      = "%{project}"
-  org_id          = "%{org_id}"
-  billing_account = "%{billing_acct}"
+resource "google_project_service" "project" {
+  service = "appengineflex.googleapis.com"
+
+  disable_dependent_services = true
 }
 
 resource "google_app_engine_flexible_app_version" "foo" {
-  project    = google_project.my_project.name
   version_id = "v1"
   service    = "%{service_name}"
   runtime    = "python"
@@ -209,7 +204,6 @@ resource "google_app_engine_flexible_app_version" "foo" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  project = google_project.my_project.project_id
   name    = "%{service_name}-bucket"
 }
 

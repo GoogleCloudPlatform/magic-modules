@@ -1,13 +1,11 @@
-resource "google_project" "my_project" {
-  name            = "tf-test-project"
-  project_id      = "<%= ctx[:vars]['project_id'] %>"
-  org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
-  billing_account = "<%= ctx[:test_env_vars]['billing_acct'] -%>"
+resource "google_project_service" "service" {
+  service = "appengineflex.googleapis.com"
+
+  disable_dependent_services = true
 }
 
 resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id] %>" {
   version_id = "v1"
-  project    = google_project.my_project.name
   service    = "<%= ctx[:vars]['service_name'] %>"
   runtime    = "nodejs"
 
@@ -44,7 +42,6 @@ resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id]
 }
 
 resource "google_storage_bucket" "bucket" {
-  project = google_project.my_project.project_id
   name    = "<%= ctx[:vars]['bucket_name'] %>"
 }
 
