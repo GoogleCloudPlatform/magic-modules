@@ -108,7 +108,7 @@ resource "google_app_engine_flexible_app_version" "foo" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name    = "%s-bucket"
+  name = "%s-bucket"
 }
 
 resource "google_storage_bucket_object" "yaml" {
@@ -199,7 +199,7 @@ resource "google_app_engine_flexible_app_version" "foo" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name    = "%s-bucket"
+  name = "%s-bucket"
 }
 
 resource "google_storage_bucket_object" "yaml" {
