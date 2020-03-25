@@ -19,7 +19,7 @@ resource "google_game_services_game_server_config" "<%= ctx[:primary_resource_id
 
   scaling_configs {
     name = "scaling-config-name"
-    fleet_autoscaler_spec = jsonencode({"spec":{"fleetName":"simple-udp","policy":{"type":"Webhook","webhook":{"service":{"name":"autoscaler-webhook-service","namespace":"default","path":"scale"}}}}})
+    fleet_autoscaler_spec = jsonencode({"policy": {"type": "Webhook","webhook": {"service": {"name": "autoscaler-webhook-service","namespace": "default","path": "scale"}}}})
     selectors {
       labels = {
         "one" : "two"
