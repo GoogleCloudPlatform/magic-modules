@@ -1,0 +1,194 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: CloudIot
+display_name: Cloud IoT Core
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://cloudiot.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloudiot
+  - https://www.googleapis.com/auth/cloud-platform
+objects:
+  - !ruby/object:Api::Resource
+    name: 'DeviceRegistry'
+    base_url: 'projects/{{project}}/locations/{{region}}/registries'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A Google Cloud IoT Core device registry.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/iot/docs/'
+      api: 'https://cloud.google.com/iot/docs/reference/cloudiot/rest/'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        input: true
+        url_param_only: true
+        required: true
+        description: |
+          The region of this Device Registry.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        input: true
+        required: true
+        description: |
+          The unique identifier for the device registry. For example,
+          `myRegistry`.
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource path name. For example,
+          `projects/example-proj/locations/us-central1/registries/my-registry`.
+      - !ruby/object:Api::Type::Array
+        name: 'eventNotificationConfigs'
+        description: |
+          List of configurations for event notifications, such as PubSub topics
+          to publish device events to.
+        max_size: 10
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'subfolderMatches'
+              description: |
+                If the subfolder name matches this string exactly, this
+                configuration will be used. The string must not include the
+                leading '/' character. If empty, all strings are matched. Empty
+                value can only be used for the last `event_notification_configs`
+                item.
+            - !ruby/object:Api::Type::String
+              name: 'pubsubTopicName'
+              required: true
+              description: |
+                PubSub topic name to publish device events.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'stateNotificationConfig'
+        description: |
+          A PubSub topic to publish device state updates.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'pubsubTopicName'
+            required: true
+            description: |
+              PubSub topic name to publish device state updates.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'mqttConfig'
+        description: |
+          Activate or deactivate MQTT.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'mqttEnabledState'
+            description: |
+              The field allows `MQTT_ENABLED` or `MQTT_DISABLED`
+            required: true
+            values:
+              - :MQTT_ENABLED
+              - :MQTT_DISABLED
+      - !ruby/object:Api::Type::NestedObject
+        name: 'httpConfig'
+        description: |
+          Activate or deactivate HTTP.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'httpEnabledState'
+            required: true
+            description: |
+              The field allows `HTTP_ENABLED` or `HTTP_DISABLED`.
+            values:
+              - :HTTP_ENABLED
+              - :HTTP_DISABLED
+      - !ruby/object:Api::Type::Enum
+        name: 'logLevel'
+        description: |
+          The default logging verbosity for activity from devices in this
+          registry. Specifies which events should be written to logs. For
+          example, if the LogLevel is ERROR, only events that terminate in
+          errors will be logged. LogLevel is inclusive; enabling INFO logging
+          will also enable ERROR logging.
+
+          The field allows `NONE`, `ERROR`, `INFO`, `DEBUG`.
+        values:
+          - :NONE
+          - :ERROR
+          - :INFO
+          - :DEBUG
+      - !ruby/object:Api::Type::Array
+        name: 'credentials'
+        description: |
+          List of public key certificates to authenticate devices.
+        max_size: 10
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'publicKeyCertificate'
+              required: true
+              description: |
+                A public key certificate format and data.
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: 'format'
+                  required: true
+                  description: |
+                    The field allows only `X509_CERTIFICATE_PEM`.
+                  values:
+                    - :X509_CERTIFICATE_PEM
+                - !ruby/object:Api::Type::String
+                  name: 'certificate'
+                  required: true
+                  description: |
+                    The certificate data.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'x509Details'
+                  output: true
+                  description: |
+                    The certificate details. Used only for X.509 certificates.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'issuer'
+                      output: true
+                      description: |
+                        The entity that signed the certificate.
+                    - !ruby/object:Api::Type::String
+                      name: 'subject'
+                      output: true
+                      description: |
+                        The entity the certificate and public key belong to.
+                    - !ruby/object:Api::Type::String
+                      name: 'startTime'
+                      output: true
+                      description: |
+                        The time the certificate becomes valid. A timestamp in
+                        RFC3339 UTC "Zulu" format, accurate to nanoseconds.
+                        Example: "2014-10-02T15:01:23.045123456Z".
+                    - !ruby/object:Api::Type::String
+                      name: 'expiryTime'
+                      output: true
+                      description: |
+                        The time the certificate becomes invalid. A timestamp in
+                        RFC3339 UTC "Zulu" format, accurate to nanoseconds.
+                        Example: "2014-10-02T15:01:23.045123456Z".
+                    - !ruby/object:Api::Type::String
+                      name: 'signatureAlgorithm'
+                      output: true
+                      description: |
+                        The algorithm used to sign the certificate.
+                    - !ruby/object:Api::Type::String
+                      name: 'publicKeyType'
+                      output: true
+                      description: |
+                        The type of public key in the certificate.

@@ -1,0 +1,118 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+legacy_name: "cloudiot"
+overrides: !ruby/object:Overrides::ResourceOverrides
+  DeviceRegistry: !ruby/object:Overrides::Terraform::ResourceOverride
+    legacy_name: "google_cloudiot_registry"
+    import_format: ["{{project}}/locations/{{region}}/registries/{{name}}"]
+    id_format: "projects/{{project}}/locations/{{region}}/registries/{{name}}"
+    self_link: 'projects/{{project}}/locations/{{region}}/registries/{{name}}'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/cloudiot.go.erb
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudiot_device_registry_basic"
+        primary_resource_id: "test-registry"
+        vars:
+          cloudiot_registry_name: "cloudiot-registry"
+        test_env_vars:
+          project: :PROJECT_NAME
+          region: :REGION
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudiot_device_registry_single_event_notification_configs"
+        primary_resource_id: "test-registry"
+        vars:
+          cloudiot_registry_name: "cloudiot-registry"
+          cloudiot_device_telemetry_topic_name: "default-telemetry"
+        test_env_vars:
+          project: :PROJECT_NAME
+          region: :REGION
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudiot_device_registry_full"
+        primary_resource_id: "test-registry"
+        vars:
+          cloudiot_registry_name: "cloudiot-registry"
+          cloudiot_device_status_topic_name: "default-devicestatus"
+          cloudiot_device_telemetry_topic_name: "default-telemetry"
+          cloudiot_additional_device_telemetry_topic_name: "additional-telemetr"
+          cloudiot_subfolder_matches_additional_device_telemetry_topic: "test/path"
+        test_env_vars:
+          project: :PROJECT_NAME
+          region: :REGION
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        name: 'name'
+        description: |
+          A unique name for the resource, required by device registry.
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateCloudIotDeviceRegistryId'
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        # We don't need this field, because it has the same format as the ID
+        exclude: true
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+        required: false
+        default_from_api: true
+        description: |
+          The region in which the created registry should reside.
+          If it is not provided, the provider region is used.
+      logLevel: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'log_level'
+        diff_suppress_func: 'emptyOrDefaultStringSuppress("")'
+      eventNotificationConfigs: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'event_notification_configs'
+        default_from_api: true
+      eventNotificationConfigs.subfolderMatches: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'subfolder_matches'
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateCloudIotDeviceRegistrySubfolderMatch'
+      eventNotificationConfigs.pubsubTopicName: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'pubsub_topic_name'
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      stateNotificationConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'state_notification_config'
+      stateNotificationConfig.pubsubTopicName: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'pubsub_topic_name'
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      mqttConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'mqtt_config'
+        default_from_api: true
+      mqttConfig.mqttEnabledState: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'mqtt_enabled_state'
+      httpConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'http_config'
+        default_from_api: true
+      httpConfig.httpEnabledState: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'http_enabled_state'
+      credentials.publicKeyCertificate: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'public_key_certificate'
+      credentials.publicKeyCertificate.x509Details: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'x509_details'
+      credentials.publicKeyCertificate.x509Details.startTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'start_time'
+      credentials.publicKeyCertificate.x509Details.expiryTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'expiry_time'
+      credentials.publicKeyCertificate.x509Details.signatureAlgorithm: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'signature_algorithm'
+      credentials.publicKeyCertificate.x509Details.publicKeyType: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'public_key_type'
+
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

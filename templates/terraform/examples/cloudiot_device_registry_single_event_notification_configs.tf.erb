@@ -1,0 +1,33 @@
+resource "google_project_service" "cloud-iot-apis" {
+  service = "cloudiot.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "pubsub-apis" {
+  service = "pubsub.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_pubsub_topic" "default-telemetry" {
+  name = "<%= ctx[:vars]['cloudiot_device_telemetry_topic_name'] %>"
+
+  depends_on = [
+    google_project_service.pubsub-apis
+  ]
+}
+
+resource "google_cloud_iot_device_registry" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloudiot_registry_name'] %>"
+
+  depends_on = [
+    google_pubsub_topic.default-telemetry,
+  ]
+
+  event_notification_configs {
+    pubsub_topic_name = google_pubsub_topic.default-telemetry.id
+    subfolder_matches = ""
+  }
+
+}
