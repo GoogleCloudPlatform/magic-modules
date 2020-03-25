@@ -85,6 +85,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       perimeterType: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
         input: true
+      status.restrictedServices: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
       custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
