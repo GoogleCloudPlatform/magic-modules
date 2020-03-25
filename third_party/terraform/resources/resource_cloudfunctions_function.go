@@ -28,10 +28,9 @@ var functionAllowedMemory = map[int]bool{
 
 const functionDefaultAllowedMemoryMb = 256
 
-var functionAllowedIngressSettings = map[string]bool{
-	"INGRESS_SETTINGS_UNSPECIFIED": true,
-	"ALLOW_ALL":                    true,
-	"ALLOW_INTERNAL_ONLY":          true,
+var allowedIngressSettings = []string{
+	"ALLOW_ALL",
+	"ALLOW_INTERNAL_ONLY",
 }
 
 const functionDefaultIngressSettings = "ALLOW_ALL"
@@ -69,14 +68,6 @@ func joinMapKeys(mapToJoin *map[int]bool) string {
 	var keys []string
 	for key := range *mapToJoin {
 		keys = append(keys, strconv.Itoa(key))
-	}
-	return strings.Join(keys, ",")
-}
-
-func joinMapKeysString(mapToJoin *map[string]bool) string {
-	var keys []string
-	for key := range *mapToJoin {
-		keys = append(keys, key)
 	}
 	return strings.Join(keys, ",")
 }
@@ -183,19 +174,10 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 			},
 
 			"ingress_settings": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  functionDefaultIngressSettings,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					ingressSettingValue := v.(string)
-
-					if !functionAllowedIngressSettings[ingressSettingValue] {
-						errors = append(errors, fmt.Errorf("Allowed values for ingress settings are: %s . Got %s",
-							joinMapKeysString(&functionAllowedIngressSettings), ingressSettingValue))
-					}
-					return
-				},
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      functionDefaultIngressSettings,
+				ValidateFunc: validation.StringInSlice(allowedIngressSettings, true),
 			},
 
 			"labels": {
@@ -508,7 +490,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 
 	if d.HasChange("ingress_settings") {
 		function.IngressSettings = d.Get("ingress_settings").(string)
-		updateMaskArr = append(updateMaskArr, "ingress_settings")
+		updateMaskArr = append(updateMaskArr, "ingressSettings")
 	}
 
 	if d.HasChange("labels") {
