@@ -1384,6 +1384,17 @@
     </ul>
     </li>
 
+<% unless version == 'ga' %>
+    <li<%%= sidebar_current("docs-google-service-usage") %>>
+    <a href="#">Google Service Usage Resources</a>
+    <ul class="nav">
+      <li<%%= sidebar_current("docs-google-service-usage-consumer-quota-override") %>>
+      <a href="/docs/providers/google/r/service_usage_consumer_quota_override.html">google_service_usage_consumer_quota_override</a>
+      </li>
+    </ul>
+    </li>
+<% end -%>
+
     <li<%%= sidebar_current("docs-google-sourcerepo") %>>
     <a href="#">Google Source Repositories Resources</a>
     <ul class="nav">
