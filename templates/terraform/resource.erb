@@ -569,11 +569,6 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     if err != nil {
         return err
     }
-<%  elsif object.custom_code.encoder -%>
-    obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
-    if err != nil {
-        return err
-    }
 <%  end -%>
 
 <%      if object.mutex -%>
