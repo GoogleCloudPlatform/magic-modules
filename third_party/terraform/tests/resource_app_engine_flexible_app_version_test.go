@@ -44,7 +44,7 @@ func testAccAppEngineFlexibleAppVersion_python(resourceName string) string {
 resource "google_project_service" "project" {
   service = "appengineflex.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
 }
 
 resource "google_app_engine_flexible_app_version" "foo" {
@@ -135,7 +135,7 @@ func testAccAppEngineFlexibleAppVersion_pythonUpdate(resourceName string) string
 resource "google_project_service" "project" {
   service = "appengineflex.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
 }
 
 resource "google_app_engine_flexible_app_version" "foo" {

@@ -1,7 +1,7 @@
 resource "google_project_service" "service" {
   service = "appengineflex.googleapis.com"
 
-  disable_dependent_services = true
+  disable_dependent_services = false
 }
 
 resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id] %>" {
