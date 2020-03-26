@@ -15,7 +15,7 @@ control '<%= name -%>-1.0' do
   title '<%= name -%> resource test'
 
 <% if privileged -%>
-  only_if { gcp_enable_privileged_resources.to_i == 1 }
+  only_if { gcp_enable_privileged_resources.to_i == 1 && gcp_organization_id != '' }
 <% end # if privileged -%>
 <% if vcr_mode -%>
   VCR.use_cassette('<%= name -%>', :record => :<%= vcr_mode -%>) do
