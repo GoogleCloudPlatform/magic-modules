@@ -3278,7 +3278,7 @@ resource "google_container_cluster" "with_resource_usage_export_config" {
   initial_node_count = 1
   resource_usage_export_config {
     enable_network_egress_metering = true
-		enable_resource_consumption_metering = %s
+    enable_resource_consumption_metering = %s
     bigquery_destination {
       dataset_id = google_bigquery_dataset.default.dataset_id
     }
