@@ -636,7 +636,7 @@ variable "project_sink" {
 }
 
 resource "google_logging_project_sink" "project-logging-sink" {
-  count = var.gcp_enable_privileged_resources
+  count = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
   project = var.gcp_project_id
 
   name = var.project_sink.name
@@ -1204,7 +1204,7 @@ resource "google_compute_image" "example" {
 variable "gcp_organization_iam_custom_role_id" {}
 
 resource "google_organization_iam_custom_role" "generic_org_iam_custom_role" {
-  count = var.gcp_enable_privileged_resources
+  count       = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
   org_id      = var.gcp_organization_id
   role_id     = var.gcp_organization_iam_custom_role_id
   title       = "GCP Inspec Generic Organization IAM Custom Role"
