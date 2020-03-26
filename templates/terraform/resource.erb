@@ -563,6 +563,19 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         }
 <%    end # props.each -%>
 
+<%# We need to decide what encoder to use here - if there's an update encoder, use that! -%>
+<%  if object.custom_code.update_encoder -%>
+    obj, err = resource<%= resource_name -%>UpdateEncoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+<%  elsif object.custom_code.encoder -%>
+    obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+<%  end -%>
+
 <%      if object.mutex -%>
         lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
         if err != nil {
