@@ -28,7 +28,7 @@ data "google_bigquery_default_service_account" "bq_sa" {
 resource "google_kms_crypto_key_iam_member" "key_sa_user" {
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${data.google_bigquery_default_service_account.bq_sa.email_address}"
+  member        = "serviceAccount:${data.google_bigquery_default_service_account.bq_sa.email}"
 }
 ```
 
