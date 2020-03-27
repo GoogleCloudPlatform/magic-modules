@@ -108,7 +108,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           topic_name: "example-topic"
           subscription_name: "example-subscription"
-          max_delivery_attempts: "10"
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
         * `path`: Path of the subscription in the format `projects/{project}/subscriptions/{name}`

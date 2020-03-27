@@ -12,6 +12,6 @@ resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
 
   expiration_policy {
     dead_letter_topic = google_pubsub_topic.<%= ctx[:primary_resource_id] %>_dead_letter.id
-    max_delivery_attempts = <%= ctx[:vars]['max_delivery_attempts'] %>
+    max_delivery_attempts = 10
   }
 }
