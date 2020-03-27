@@ -152,11 +152,11 @@ objects:
         output: true
       - !ruby/object:Api::Type::String
         name: 'nameServerSet'
-        input: true
         description: |
           Optionally specifies the NameServerSet for this ManagedZone. A
           NameServerSet is a set of DNS name servers that all host the same
           ManagedZones. Most users will leave this field unset.
+        input: true
       - !ruby/object:Api::Type::Time
         name: 'creationTime'
         description: |
@@ -254,6 +254,7 @@ objects:
         name: 'reverseLookup'
         api_name: reverseLookupConfig
         min_version: beta
+        input: true
         description: |
           Specifies if this is a managed reverse lookup zone. If true, Cloud DNS will resolve reverse
           lookup queries using automatically configured records for VPC resources. This only applies
