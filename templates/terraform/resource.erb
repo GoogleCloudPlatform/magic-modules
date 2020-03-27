@@ -211,7 +211,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  unless object.async&.is_a? Api::OpAsync -%>
     <% object.gettable_properties.each do |prop| -%>
         <% if object.identity.include?(prop) && prop.output -%>
-    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config)); err != nil {
+    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config)); err != nil {
         return fmt.Errorf(`Error setting computed identity field "<%=prop.name.underscore%>": %s`, err)
     }
         <% end -%>

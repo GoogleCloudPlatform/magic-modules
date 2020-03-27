@@ -16,7 +16,7 @@ if region == "" {
 	return fmt.Errorf("invalid zone %q, unable to infer region from zone", zone)
 }
 
-name, err := expandComputeDiskResourcePolicyAttachmentName(d.Get("name"), d, config)
+name, err := expandNestedComputeDiskResourcePolicyAttachmentName(d.Get("name"), d, config)
 if err != nil {
   return err
 } else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(name)) && (ok || !reflect.DeepEqual(v, name)) {
