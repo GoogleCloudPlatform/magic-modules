@@ -49,6 +49,7 @@ objects:
         name: 'dnsName'
         description: |
           The DNS name of this managed zone, for instance "example.com.".
+        input: true
         required: true
       - !ruby/object:Api::Type::NestedObject
         name: 'dnssecConfig'
@@ -140,6 +141,7 @@ objects:
         description: |
           User assigned name for this resource.
           Must be unique within the project.
+        input: true
         required: true
       - !ruby/object:Api::Type::Array
         name: 'nameServers'
@@ -150,6 +152,7 @@ objects:
         output: true
       - !ruby/object:Api::Type::String
         name: 'nameServerSet'
+        input: true
         description: |
           Optionally specifies the NameServerSet for this ManagedZone. A
           NameServerSet is a set of DNS name servers that all host the same
@@ -166,6 +169,7 @@ objects:
           A set of key/value label pairs to assign to this ManagedZone.
       - !ruby/object:Api::Type::Enum
         name: 'visibility'
+        input: true
         description: |
           The zone's visibility: public zones are exposed to the Internet,
           while private zones are visible only to Virtual Private Cloud resources.

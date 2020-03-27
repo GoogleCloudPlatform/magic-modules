@@ -69,7 +69,7 @@ func TestAccDNSManagedZone_privateUpdate(t *testing.T) {
 	})
 }
 
-func TestAccDNSManagedZone_dnssec(t *testing.T) {
+func TestAccDNSManagedZone_dnssec_update(t *testing.T) {
 	t.Parallel()
 
 	zoneSuffix := acctest.RandString(10)
