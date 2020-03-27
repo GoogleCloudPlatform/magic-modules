@@ -32,7 +32,7 @@ objects:
     name: 'ManagedZone'
     kind: 'dns#managedZone'
     base_url: 'projects/{{project}}/managedZones'
-    input: true
+    update_verb: :PATCH
     description: |
       A zone is a subtree of the DNS namespace under one administrative
       responsibility. A ManagedZone is a resource that represents a DNS zone
@@ -44,17 +44,12 @@ objects:
           A mutable string of at most 1024 characters associated with this
           resource for the user's convenience. Has no effect on the managed
           zone's function.
-        update_verb: :PATCH
-        update_url: 'projects/{{project}}/managedZones/{{name}}'
         required: true
       - !ruby/object:Api::Type::String
         name: 'dnsName'
         description: |
           The DNS name of this managed zone, for instance "example.com.".
         required: true
-      # TODO: Update support for dnssecConfig. Once this is added, property descriptions should be
-      # modified to state that properties (nonExistence, defaultKeySpecs) can only be updated while
-      # the state is "off".
       - !ruby/object:Api::Type::NestedObject
         name: 'dnssecConfig'
         description: DNSSEC configuration
@@ -77,6 +72,7 @@ objects:
               - dnssec_config.0.default_key_specs
             description: |
               Specifies the mechanism used to provide authenticated denial-of-existence responses.
+              non_existence can only be updated when the state is `off`.
             values:
               - "nsec"
               - "nsec3"
@@ -103,6 +99,7 @@ objects:
               Specifies parameters that will be used for generating initial DnsKeys
               for this ManagedZone. If you provide a spec for keySigning or zoneSigning,
               you must also provide one for the other.
+              default_key_specs can only be updated when the state is `off`.
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::Enum
@@ -167,8 +164,6 @@ objects:
         name: 'labels'
         description: |
           A set of key/value label pairs to assign to this ManagedZone.
-        update_verb: :PATCH
-        update_url: 'projects/{{project}}/managedZones/{{name}}'
       - !ruby/object:Api::Type::Enum
         name: 'visibility'
         description: |
@@ -184,8 +179,6 @@ objects:
         description: |
           For privately visible zones, the set of Virtual Private Cloud
           resources that the zone is visible from.
-        update_verb: :PATCH
-        update_url: 'projects/{{project}}/managedZones/{{name}}'
         properties:
           - !ruby/object:Api::Type::Array
             name: 'networks'
@@ -208,8 +201,6 @@ objects:
           The presence for this field indicates that outbound forwarding is enabled
           for this zone. The value of this field contains the set of destinations
           to forward to.
-        update_verb: :PATCH
-        update_url: 'projects/{{project}}/managedZones/{{name}}'
         properties:
           - !ruby/object:Api::Type::Array
             name: 'targetNameServers'
@@ -240,8 +231,6 @@ objects:
         description: |
           The presence of this field indicates that DNS Peering is enabled for this
           zone. The value of this field contains the network to peer with.
-        update_verb: :PATCH
-        update_url: 'projects/{{project}}/managedZones/{{name}}'
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'targetNetwork'
