@@ -43,7 +43,7 @@ func testSweepAccessContextManagerPolicies(region string) error {
 
 	resp, err := sendRequest(config, "GET", "", listUrl, nil)
 	if err != nil && !isGoogleApiErrorWithCode(err, 404) {
-		log.Printf(("unable to list AccessPolicies for organization %q: %v", testOrg, err)
+		log.Printf("unable to list AccessPolicies for organization %q: %v", testOrg, err)
 		return nil
 	}
 	var policies []interface{}
