@@ -64,6 +64,28 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/bigquery_dataset.go.erb
+  DatasetAccess: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude_import: true
+    skip_sweeper: true  # covered by Dataset sweeper
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_access_basic_user"
+        skip_test: true  # not importable
+        primary_resource_id: "access"
+        vars:
+          dataset_id: "example_dataset"
+          account_name: "bqowner"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_access_view"
+        skip_test: true  # not importable
+        primary_resource_id: "access"
+        vars:
+          dataset_id: "example_dataset"
+          dataset_id2: "example_dataset2"
+          table_id: "example_table"
+    properties:
+      datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
   Table: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
 
