@@ -127,7 +127,7 @@ The following arguments are supported:
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is documented below.
 
-* `range_partitioning` - (Optional, Beta) If specified, configures range-based
+* `range_partitioning` - (Optional) If specified, configures range-based
     partitioning for this table. Structure is documented below.
 
 * `clustering` - (Optional) Specifies column names to use for data clustering.

@@ -1,5 +1,3 @@
-// <% autogen_exception -%>
-
 package google
 
 import (
@@ -309,11 +307,10 @@ func resourceBigQueryTable() *schema.Resource {
 				},
 			},
 
-			<% unless version == 'ga' -%>
 			// RangePartitioning: [Optional] If specified, configures range-based
 			// partitioning for this table.
 			"range_partitioning": &schema.Schema{
-				Type: schema.TypeList,
+				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
@@ -328,7 +325,7 @@ func resourceBigQueryTable() *schema.Resource {
 
 						// Range: [Required] Information required to partition based on ranges.
 						"range": &schema.Schema{
-							Type: schema.TypeList,
+							Type:     schema.TypeList,
 							Required: true,
 							MaxItems: 1,
 							Elem: &schema.Resource{
@@ -356,7 +353,6 @@ func resourceBigQueryTable() *schema.Resource {
 					},
 				},
 			},
-			<% end -%>
 
 			// Clustering: [Optional] Specifies column names to use for data clustering.  Up to four
 			// top-level columns are allowed, and should be specified in descending priority order.
@@ -520,7 +516,6 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 		table.TimePartitioning = expandTimePartitioning(v)
 	}
 
-	<% unless version == 'ga' -%>
 	if v, ok := d.GetOk("range_partitioning"); ok {
 		rangePartitioning, err := expandRangePartitioning(v)
 		if err != nil {
@@ -529,7 +524,6 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 
 		table.RangePartitioning = rangePartitioning
 	}
-	<% end -%>
 
 	if v, ok := d.GetOk("clustering"); ok {
 		table.Clustering = &bigquery.Clustering{
@@ -620,13 +614,11 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	<% unless version == 'ga' -%>
 	if res.RangePartitioning != nil {
 		if err := d.Set("range_partitioning", flattenRangePartitioning(res.RangePartitioning)); err != nil {
 			return err
 		}
 	}
-	<% end -%>
 
 	if res.Clustering != nil {
 		d.Set("clustering", res.Clustering.Fields)
@@ -913,7 +905,6 @@ func expandTimePartitioning(configured interface{}) *bigquery.TimePartitioning {
 	return tp
 }
 
-<% unless version == 'ga' -%>
 func expandRangePartitioning(configured interface{}) (*bigquery.RangePartitioning, error) {
 	if configured == nil {
 		return nil, nil
@@ -945,7 +936,6 @@ func expandRangePartitioning(configured interface{}) (*bigquery.RangePartitionin
 
 	return rp, nil
 }
-<% end -%>
 
 func flattenEncryptionConfiguration(ec *bigquery.EncryptionConfiguration) []map[string]interface{} {
 	return []map[string]interface{}{{"kms_key_name": ec.KmsKeyName}}
@@ -969,7 +959,6 @@ func flattenTimePartitioning(tp *bigquery.TimePartitioning) []map[string]interfa
 	return []map[string]interface{}{result}
 }
 
-<% unless version == 'ga' -%>
 func flattenRangePartitioning(rp *bigquery.RangePartitioning) []map[string]interface{} {
 	result := map[string]interface{}{
 		"field": rp.Field,
@@ -984,7 +973,6 @@ func flattenRangePartitioning(rp *bigquery.RangePartitioning) []map[string]inter
 
 	return []map[string]interface{}{result}
 }
-<% end -%>
 
 func expandView(configured interface{}) *bigquery.ViewDefinition {
 	raw := configured.([]interface{})[0].(map[string]interface{})

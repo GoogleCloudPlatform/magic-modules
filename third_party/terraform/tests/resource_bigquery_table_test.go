@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -65,7 +64,6 @@ func TestAccBigQueryTable_Kms(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccBigQueryTable_RangePartitioning(t *testing.T) {
 	t.Parallel()
 	resourceName := "google_bigquery_table.test"
@@ -88,7 +86,6 @@ func TestAccBigQueryTable_RangePartitioning(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccBigQueryTable_View(t *testing.T) {
 	t.Parallel()
@@ -357,7 +354,6 @@ EOH
 `, datasetID, cryptoKeyName, tableID)
 }
 
-<% unless version == 'ga' -%>
 func testAccBigQueryTableRangePartitioning(datasetID, tableID string) string {
 	return fmt.Sprintf(`
 	resource "google_bigquery_dataset" "test" {
@@ -392,7 +388,6 @@ EOH
 }
 	`, datasetID, tableID)
 }
-<% end -%>
 
 func testAccBigQueryTableWithView(datasetID, tableID string) string {
 	return fmt.Sprintf(`
