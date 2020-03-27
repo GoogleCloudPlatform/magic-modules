@@ -1,0 +1,17 @@
+resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['topic_name'] %>"
+}
+
+resource "google_pubsub_topic" "<%= ctx[:primary_resource_id] %>_dead_letter" {
+  name = "<%= ctx[:vars]['topic_name'] %>"
+}
+
+resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
+  name  = "<%= ctx[:vars]['subscription_name'] %>"
+  topic = google_pubsub_topic.<%= ctx[:primary_resource_id] %>.name
+
+  expiration_policy {
+    dead_letter_topic = google_pubsub_topic.<%= ctx[:primary_resource_id] %>_dead_letter.id
+    max_delivery_attempts = <%= ctx[:vars]['max_delivery_attempts'] %>
+  }
+}

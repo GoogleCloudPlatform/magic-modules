@@ -102,6 +102,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           topic_project: "topic-project"
           subscription_name: "example-subscription"
           subscription_project: "subscription-project"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "pubsub_subscription_dead_letter"
+        primary_resource_id: "example"
+        vars:
+          topic_name: "example-topic"
+          subscription_name: "example-subscription"
+          max_delivery_attempts: "10"
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
         * `path`: Path of the subscription in the format `projects/{project}/subscriptions/{name}`

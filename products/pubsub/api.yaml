@@ -246,7 +246,6 @@ objects:
               Example - "3.5s".
       - !ruby/object:Api::Type::NestedObject
         name: 'deadLetterPolicy'
-        allow_empty_object: true
         send_empty_value: true
         description: |
           A policy that specifies the conditions for dead lettering messages in
@@ -254,7 +253,8 @@ objects:
           is disabled.
           
           The Cloud Pub/Sub service account associated with this subscriptions's
-          parent project (i.e.,\nservice-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com) must have
+          parent project (i.e.,
+          service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com) must have
           permission to Acknowledge() messages on this subscription.
         properties:
           - !ruby/object:Api::Type::String
@@ -263,7 +263,8 @@ objects:
               The name of the topic to which dead letter messages should be published.
               Format is `projects/{project}/topics/{topic}`.
 
-              The Cloud Pub/Sub service\naccount associated with the enclosing subscription's parent project (i.e., 
+              The Cloud Pub/Sub service\naccount associated with the enclosing subscription's
+              parent project (i.e., 
               service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com) must have
               permission to Publish() to this topic.
               
