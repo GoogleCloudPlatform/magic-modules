@@ -45,6 +45,7 @@ func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, me
   <%   else -%>
   expected<%= titlelize_property(id_prop) -%> := d.Get("<%= id_prop.name.underscore -%>")
   <%   end # settable_properties.include?(id_prop)-%>
+  expectedFlattened<%= titlelize_property(id_prop) -%> := flattenNested<%= resource_name -%><%= titlelize_property(id_prop) -%>(expected<%= titlelize_property(id_prop) -%>, d, meta.(*Config))
   <% end # object.identity.each -%>
 
   // Search list for this resource.
@@ -70,11 +71,10 @@ func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, me
     <% end -%>
 
     <% object.identity.each do |prop| -%>
-    // since the 'expected' values are the API representation, compare against the API representation (do not flatten)
-    item<%= titlelize_property(prop) -%> := item["<%= prop.api_name %>"]
+    item<%= titlelize_property(prop) -%> := flattenNested<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d, meta.(*Config))
     // isEmptyValue check so that if one is nil and the other is "", that's considered a match
-    if !(isEmptyValue(reflect.ValueOf(item<%= titlelize_property(prop) -%>)) && isEmptyValue(reflect.ValueOf(expected<%= titlelize_property(prop) -%>))) && !reflect.DeepEqual(item<%= titlelize_property(prop) -%>, expected<%= titlelize_property(prop) -%>) {
-      log.Printf("[DEBUG] Skipping item with <%= prop.api_name %>= %#v, looking for %#v)", item<%= titlelize_property(prop) -%>, expected<%= titlelize_property(prop) -%>)
+    if !(isEmptyValue(reflect.ValueOf(item<%= titlelize_property(prop) -%>)) && isEmptyValue(reflect.ValueOf(expectedFlattened<%= titlelize_property(prop) -%>))) && !reflect.DeepEqual(item<%= titlelize_property(prop) -%>, expectedFlattened<%= titlelize_property(prop) -%>) {
+      log.Printf("[DEBUG] Skipping item with <%= prop.api_name %>= %#v, looking for %#v)", item<%= titlelize_property(prop) -%>, expectedFlattened<%= titlelize_property(prop) -%>)
       continue
     }
     <% end -%>
