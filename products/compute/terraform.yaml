@@ -1494,11 +1494,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "gce_reservation"
         vars:
           reservation_name: "gce-reservation"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      update_encoder: templates/terraform/update_encoder/reservation.go.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       specificReservation.instanceProperties.minCpuPlatform: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      specificReservation.count: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(1)'
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples

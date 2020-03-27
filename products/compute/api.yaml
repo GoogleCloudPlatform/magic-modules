@@ -11906,6 +11906,8 @@ objects:
         required: true
         description: |
           Reservation for instances with specific machine shapes.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/zones/{{zone}}/reservations/{{name}}/resize'
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'count'
@@ -11920,6 +11922,7 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'instanceProperties'
             required: true
+            input: true
             description: |
               The instance properties for the reservation.
             properties:
