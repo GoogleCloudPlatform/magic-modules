@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-obj["specificSkuCount"] = obj["specificReservation"].(map[string]interface{})["count"]
-delete(obj, "specificReservation")
+newObj := make(map[string]interface{})
+newObj["specificSkuCount"] = obj["specificReservation"].(map[string]interface{})["count"]
 
-return obj, nil
+return newObj, nil
