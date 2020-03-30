@@ -47,14 +47,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "dialogflow_intent_basic"
         primary_resource_id: "basic_intent"
+        # moved to handwritten tests to create a new project per test
+        skip_test: true
         vars:
           intent_name: "basic-intent"
       - !ruby/object:Provider::Terraform::Examples
         name: "dialogflow_intent_full"
         primary_resource_id: "full_intent"
+        skip_test: true
         vars:
           intent_name: "full-intent"
     import_format: ["projects/{{project}}/agent/intents/{{name}}"]
+    # Skip sweeper gen since this is a child resource.
+    skip_sweeper: true
     properties:
       webhookState: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -69,8 +74,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       action: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       isFallback: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      parameters.name: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name_set_project.go.erb

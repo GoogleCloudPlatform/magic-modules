@@ -14,37 +14,6 @@ resource "google_dialogflow_intent" "<%= ctx[:primary_resource_id] %>" {
   action = "some_action"
   reset_contexts = true
   input_context_names = ["projects/my-project/agent/sessions/-/contexts/some_id"]
-  output_contexts {
-      name = "projects/my-project/agent/sessions/-/contexts/some_id"
-      lifespan_count = 20
-      parameters = {
-          idk = "hello"
-      }
-  }
   events = ["some_event"]
-  training_phrases{
-      type = "EXAMPLE"
-      parts {
-          text = "test_text"
-          entity_type = "@test"
-          alias = "test_alias"
-          user_defined=true
-      }
-  }
-  parameters {
-      display_name = "test_param"
-      value = "test_value"
-      default_value = "default_value"
-      entity_type_display_name = "@example_type"
-      mandatory = true
-      prompts = ["Example prompt"]
-      is_list = true
-  }
- messages {
-     platform = "FACEBOOK"
-     text {
-      text = ["some_text"]
-     }
- }
- default_response_platforms = ["FACEBOOK","SLACK"]
+  default_response_platforms = ["FACEBOOK","SLACK"]
 }

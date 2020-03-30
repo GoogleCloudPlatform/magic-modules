@@ -1,0 +1,192 @@
+<% autogen_exception -%>
+package google
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+)
+func TestAccDialogflowIntent_basic(t *testing.T) {
+	t.Parallel()
+
+	agentName := acctest.RandomWithPrefix("tf-test")
+	intentName := acctest.RandomWithPrefix("tf-test")
+	projectID := acctest.RandomWithPrefix("tf-test")
+	orgID := getTestOrgFromEnv(t)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDialogflowIntent_basic(projectID, orgID, agentName, intentName),
+			},
+			{
+				ResourceName:      "google_dialogflow_intent.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccDialogflowIntent_update(t *testing.T) {
+	t.Parallel()
+
+	agentName := acctest.RandomWithPrefix("tf-test")
+	intentName := acctest.RandomWithPrefix("tf-test")
+	intentNameUpdate := acctest.RandomWithPrefix("tf-test")
+	projectID := acctest.RandomWithPrefix("tf-test")
+	orgID := getTestOrgFromEnv(t)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDialogflowIntent_full1(projectID, orgID, agentName, intentName),
+			},
+			{
+				ResourceName:      "google_dialogflow_intent.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDialogflowIntent_full2(projectID, orgID, agentName, intentNameUpdate),
+			},
+			{
+				ResourceName:      "google_dialogflow_intent.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccDialogflowIntent_basic(projectID string, orgID string, agentName string, intentName string) string {
+	return fmt.Sprintf(`
+	resource "google_project" "agent_project" {
+		project_id = "%s"
+		name       = "%s"
+		org_id     = "%s"
+	  }
+
+	resource "google_project_service" "agent_project" {
+		project = google_project.agent_project.project_id
+		service = "dialogflow.googleapis.com"
+	  }
+	  
+	resource "google_project_iam_member" "agent_create" {
+		project = google_project_service.agent_project.project
+		role    = "roles/dialogflow.admin"
+		member  = "serviceAccount:service-${google_project.agent_project.number}@gcp-sa-dialogflow.iam.gserviceaccount.com"
+		depends_on = [google_project_service.agent_project]
+	  }
+
+	resource "google_dialogflow_agent" "agent" {
+		project = "%s"
+		display_name = "%s"
+		default_language_code = "en"
+		time_zone = "America/New_York"
+		depends_on = [google_project_iam_member.agent_create]
+	  }
+	resource "google_dialogflow_intent" "foobar" {
+		depends_on = [google_dialogflow_agent.agent]
+		project = "%s"
+		display_name = "%s"
+	  }
+	`, projectID, projectID, orgID, projectID, agentName, projectID, intentName)
+}
+
+func testAccDialogflowIntent_full1(projectID string, orgID string, agentName string, intentName string) string {
+	return fmt.Sprintf(`
+	resource "google_project" "agent_project" {
+		project_id = "%s"
+		name       = "%s"
+		org_id     = "%s"
+	  }
+
+	resource "google_project_service" "agent_project" {
+		project = google_project.agent_project.project_id
+		service = "dialogflow.googleapis.com"
+	  }
+	  
+	resource "google_project_iam_member" "agent_create" {
+		project = google_project_service.agent_project.project
+		role    = "roles/dialogflow.admin"
+		member  = "serviceAccount:service-${google_project.agent_project.number}@gcp-sa-dialogflow.iam.gserviceaccount.com"
+		depends_on = [google_project_service.agent_project]
+	  }
+
+	resource "google_dialogflow_agent" "agent" {
+		project = "%s"
+		display_name = "%s"
+		default_language_code = "en"
+		time_zone = "America/New_York"
+		depends_on = [google_project_iam_member.agent_create]
+	  }
+
+	resource "google_dialogflow_intent" "foobar" {
+		depends_on = [google_dialogflow_agent.agent]
+		project = "%s"
+		display_name = "%s"
+		webhook_state = "WEBHOOK_STATE_ENABLED"
+		priority = 1
+		is_fallback = false
+		ml_disabled = true
+		action = "some_action"
+		reset_contexts = true
+		input_context_names = ["projects/%s/agent/sessions/-/contexts/some_id"]
+		events = ["some_event"]
+		default_response_platforms = ["FACEBOOK","SLACK"]
+	  }
+	`, projectID, projectID, orgID, projectID, agentName, projectID, intentName, projectID)
+}
+
+func testAccDialogflowIntent_full2(projectID string, orgID string, agentName string, intentName string) string {
+	return fmt.Sprintf(`
+	resource "google_project" "agent_project" {
+		project_id = "%s"
+		name       = "%s"
+		org_id     = "%s"
+	  }
+
+	resource "google_project_service" "agent_project" {
+		project = google_project.agent_project.project_id
+		service = "dialogflow.googleapis.com"
+	  }
+	  
+	resource "google_project_iam_member" "agent_create" {
+		project = google_project_service.agent_project.project
+		role    = "roles/dialogflow.admin"
+		member  = "serviceAccount:service-${google_project.agent_project.number}@gcp-sa-dialogflow.iam.gserviceaccount.com"
+		depends_on = [google_project_service.agent_project]
+	  }
+
+	resource "google_dialogflow_agent" "agent" {
+		project = "%s"
+		display_name = "%s"
+		default_language_code = "en"
+		time_zone = "America/New_York"
+		depends_on = [google_project_iam_member.agent_create]
+	  }
+
+	resource "google_dialogflow_intent" "foobar" {
+		depends_on = [google_dialogflow_agent.agent]
+		project = "%s"
+		display_name = "%s"
+		webhook_state = "WEBHOOK_STATE_ENABLED_FOR_SLOT_FILLING"
+		priority = 2
+		is_fallback = false
+		ml_disabled = false
+		action = "some_other_action"
+		reset_contexts = false
+		input_context_names = ["projects/%s/agent/sessions/-/contexts/some_other_id"]
+		events = ["some_other_event"]
+		default_response_platforms = ["SKYPE"]
+	  }
+	`, projectID, projectID, orgID, projectID, agentName, projectID, intentName, projectID)
+}
