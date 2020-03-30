@@ -152,6 +152,11 @@ The `external_data_configuration` block supports:
     `source_format` is set to "GOOGLE_SHEETS". Structure is
     documented below.
 
+* `hive_partitioning_options` (Optional) - When set, configures hive partitioning
+    support. Not all storage formats support hive partitioning -- requesting hive
+    partitioning on an unsupported format will lead to an error, as will providing
+    an invalid specification.
+
 * `ignore_unknown_values` (Optional) - Indicates if BigQuery should
     allow extra values that are not represented in the table schema.
     If true, the extra values are ignored. If false, records with
@@ -206,6 +211,23 @@ The `google_sheets_options` block supports:
 * `skip_leading_rows` (Optional) - The number of rows at the top of the sheet
     that BigQuery will skip when reading the data. At least one of `range` or
     `skip_leading_rows` must be set.
+
+The `hive_partitioning_options` block supports:
+
+* `mode` (Optional) - When set, what mode of hive partitioning to use when
+    reading data. Two modes are supported. * AUTO: automatically infer
+    partition key name(s) and type(s). * STRINGS: automatically infer
+    partition key name(s). All types are Not all storage formats support hive
+    partitioning. Requesting hive partitioning on an unsupported format will
+    lead to an error. Currently supported formats are: JSON, CSV, ORC, Avro and Parquet.
+
+* `source_uri_prefix` (Optional) - When hive partition detection is requested,
+    a common for all source uris must be required. The prefix must end immediately
+    before the partition key encoding begins. For example, consider files following
+    this data layout. gs://bucket/path_to_table/dt=2019-06-01/country=USA/id=7/file.avro
+    gs://bucket/path_to_table/dt=2019-05-31/country=CA/id=3/file.avro When hive
+    partitioning is requested with either AUTO or STRINGS detection, the common prefix
+    can be either of gs://bucket/path_to_table or gs://bucket/path_to_table/.
 
 The `time_partitioning` block supports:
 

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/structure"
@@ -179,6 +178,31 @@ func resourceBigQueryTable() *schema.Resource {
 											"external_data_configuration.0.google_sheets_options.0.skip_leading_rows",
 											"external_data_configuration.0.google_sheets_options.0.range",
 										},
+									},
+								},
+							},
+						},
+
+						// HivePartitioningOptions:: [Optional] Options for configuring hive partitioning detect.
+						"hive_partitioning_options": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									// Mode: [Optional] [Experimental] When set, what mode of hive partitioning to use when reading data.
+									// Two modes are supported.
+									//* AUTO: automatically infer partition key name(s) and type(s).
+									//* STRINGS: automatically infer partition key name(s).
+									"mode": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									// SourceUriPrefix: [Optional] [Experimental] When hive partition detection is requested, a common for all source uris must be required.
+									// The prefix must end immediately before the partition key encoding begins.
+									"source_uri_prefix": {
+										Type:     schema.TypeString,
+										Optional: true,
 									},
 								},
 							},
@@ -717,6 +741,9 @@ func expandExternalDataConfiguration(cfg interface{}) (*bigquery.ExternalDataCon
 	if v, ok := raw["google_sheets_options"]; ok {
 		edc.GoogleSheetsOptions = expandGoogleSheetsOptions(v)
 	}
+	if v, ok := raw["hive_partitioning_options"]; ok {
+		edc.HivePartitioningOptions = expandHivePartitioningOptions(v)
+	}
 	if v, ok := raw["ignore_unknown_values"]; ok {
 		edc.IgnoreUnknownValues = v.(bool)
 	}
@@ -747,6 +774,10 @@ func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) (
 
 	if edc.GoogleSheetsOptions != nil {
 		result["google_sheets_options"] = flattenGoogleSheetsOptions(edc.GoogleSheetsOptions)
+	}
+
+	if edc.HivePartitioningOptions != nil {
+		result["hive_partitioning_options"] = flattenHivePartitioningOptions(edc.HivePartitioningOptions)
 	}
 
 	if edc.IgnoreUnknownValues {
@@ -858,6 +889,39 @@ func flattenGoogleSheetsOptions(opts *bigquery.GoogleSheetsOptions) []map[string
 
 	if opts.SkipLeadingRows != 0 {
 		result["skip_leading_rows"] = opts.SkipLeadingRows
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandHivePartitioningOptions(configured interface{}) *bigquery.HivePartitioningOptions {
+	if len(configured.([]interface{})) == 0 {
+		return nil
+	}
+
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	opts := &bigquery.HivePartitioningOptions{}
+
+	if v, ok := raw["mode"]; ok {
+		opts.Mode = v.(string)
+	}
+
+	if v, ok := raw["source_uri_prefix"]; ok {
+		opts.SourceUriPrefix = v.(string)
+	}
+
+	return opts
+}
+
+func flattenHivePartitioningOptions(opts *bigquery.HivePartitioningOptions) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	if opts.Mode != "" {
+		result["mode"] = opts.Mode
+	}
+
+	if opts.SourceUriPrefix != "" {
+		result["source_uri_prefix"] = opts.SourceUriPrefix
 	}
 
 	return []map[string]interface{}{result}
