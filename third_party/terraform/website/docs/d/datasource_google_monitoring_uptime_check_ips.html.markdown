@@ -27,7 +27,7 @@ output "ip_list" {
 
 The following computed attributes are exported:
 
-* `uptime_check_ips` - A list of uptime check ips used by Stackdriver Monitoring. Each `uptime_check_ip` contains:
+* `uptime_check_ips` - A list of uptime check IPs used by Stackdriver Monitoring. Each `uptime_check_ip` contains:
   * `region` - A broad region category in which the IP address is located.
   * `location` - A more specific location within the region that typically encodes a particular city/town/metro
   (and its containing state/province or country) within the broader umbrella region category.
