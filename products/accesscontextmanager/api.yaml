@@ -430,6 +430,23 @@ objects:
               - status.0.access_levels
               - status.0.restricted_services
             item_type: Api::Type::String
+          - !ruby/object:Api::Type::NestedObject
+            name: 'vpcAccessibleServices'
+            description: |
+              Specifies how APIs are allowed to communicate within the Service
+              Perimeter.
+            properties:
+            - !ruby/object:Api::Type::Boolean
+              name: 'enableRestriction'
+              description: |
+                Whether to restrict API calls within the Service Perimeter to the
+                list of APIs specified in 'allowedServices'.
+            - !ruby/object:Api::Type::Array
+              name: 'allowedServices'
+              description: |
+                The list of APIs usable within the Service Perimeter.
+                Must be empty unless `enableRestriction` is True.
+              item_type: Api::Type::String
   - !ruby/object:Api::Resource
     name: 'ServicePerimeterResource'
     create_url: "{{perimeter_name}}"

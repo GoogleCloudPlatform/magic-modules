@@ -87,6 +87,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         input: true
       status.restrictedServices: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+      status.vpcAccessibleServices.allowedServices: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
       custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
