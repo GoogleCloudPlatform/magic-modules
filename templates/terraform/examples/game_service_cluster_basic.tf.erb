@@ -1,0 +1,65 @@
+resource "google_game_services_game_server_cluster" "<%= ctx[:primary_resource_id] %>" {
+  provider   = google-beta
+  <%# depends_on = [google_project_iam_member.kubernetes_developer] -%>
+  <%# depends_on = [module.agones_cluster, module.helm_agones] -%>
+
+  cluster_id = "<%= ctx[:vars]['agones_cluster'] %>"
+  realm_id   = google_game_services_realm.default.realm_id
+
+  connection_info {
+    gke_cluster_reference {
+      cluster = "locations/us-west1/clusters/%{agones_cluster}"
+    }
+    namespace = "default"
+  }
+}
+
+resource "google_game_services_realm" "default" {
+  provider = google-beta
+
+  realm_id   = "<%= ctx[:vars]["realm_id"] %>"
+  time_zone  = "PST8PDT"
+
+  description = "Test Game Realm"
+}
+
+
+<%#  -
+This resource requires that a GKE cluster is already created with Agones provisioned
+and configured correctly for this test to succed. Since this set up requires a fair amount
+of bootstrapping that is non-essential to testing that the resource works we've decided to
+set up the cluster in advance and run the tests against it. The following Terraform config
+was used to provision the cluster. Since it is a manual set up this config not garunteed to
+work out of the box.
+
+module "agones_cluster" {
+  source = "git::https://github.com/googleforgames/agones.git//install/terraform/modules/gke/?ref=release-1.4.0"
+
+  cluster = {
+    "name"             = var.name
+    "zone"             = "us-west1"
+    "machineType"      = "n1-standard-4"
+    "initialNodeCount" = 1
+    "project"          = "<PROJECT_ID>"
+    "network"          = "default"
+  }
+}
+
+// Install Agones via Helm
+module "helm_agones" {
+  source = "git::https://github.com/googleforgames/agones.git//install/terraform/modules/helm/?ref=release-1.4.0"
+
+  agones_version         = "1.4.0"
+  values_file            = ""
+  chart                  = "agones"
+  host                   = module.agones_cluster.host
+  token                  = module.agones_cluster.token
+  cluster_ca_certificate = module.agones_cluster.cluster_ca_certificate
+}
+
+resource "google_project_iam_member" "agent_create" {
+  project = var.project
+  role    = "roles/container.developer"
+  member  = "serviceAccount:service-<PROJECT_NUMBER>@gcp-sa-gameservices.iam.gserviceaccount.com"
+}
+%>
