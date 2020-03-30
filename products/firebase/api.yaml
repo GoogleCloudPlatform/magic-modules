@@ -42,6 +42,7 @@ objects:
     name: 'Project'
     min_version: beta
     base_url: projects/{{project}}
+    self_link: projects/{{project}}
     create_url: projects/{{project}}:addFirebase
     input: true
     description: |
@@ -66,4 +67,33 @@ objects:
         output: true
         description: |
           The GCP project display name
+  - !ruby/object:Api::Resource
+    name: 'ProjectLocation'
+    min_version: beta
+    base_url: projects/{{project}}
+    self_link: projects/{{project}}
+    create_url: projects/{{project}}/defaultLocation:finalize
+    input: true
+    description: |
+      Sets the default Google Cloud Platform (GCP) resource location for the specified FirebaseProject.
 
+      This method creates an App Engine application with a default Cloud Storage bucket, located in the specified
+      locationId. This location must be one of the available GCP resource locations.
+
+      After the default GCP resource location is finalized, or if it was already set, it cannot be changed.
+      The default GCP resource location for the specified FirebaseProject might already be set because either the
+      GCP Project already has an App Engine application or defaultLocation.finalize was previously called with a
+      specified locationId. Any new calls to defaultLocation.finalize with a different specified locationId will
+      return a 409 error.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://firebase.google.com/'
+      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.defaultLocation/finalize'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: locationId
+        required: true
+        description: |
+          The ID of the default GCP resource location for the Project. The location must be one of the available GCP
+          resource locations.
