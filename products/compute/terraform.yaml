@@ -1098,6 +1098,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
+  GlobalNetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "global_network_endpoint_group"
+        primary_resource_id: "neg"
+        vars:
+          neg_name: "my-lb-neg"
+          network_name: "neg-network"
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      fqdn: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      port: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/global_network_endpoint_group.go.erb
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"
     import_format: ["projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"]

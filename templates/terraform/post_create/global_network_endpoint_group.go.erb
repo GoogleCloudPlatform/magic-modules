@@ -1,0 +1,31 @@
+endpointObj := make(map[string]interface{})
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("fqdn"); !isEmptyValue(reflect.ValueOf(fqdnProp)) && (ok || !reflect.DeepEqual(v, fqdnProp)) {
+	endpointObj["fqdn"] = fqdnProp
+}
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("port"); !isEmptyValue(reflect.ValueOf(portProp)) && (ok || !reflect.DeepEqual(v, portProp)) {
+	endpointObj["port"] = portProp
+}
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("ip_address"); !isEmptyValue(reflect.ValueOf(ipAddressProp)) && (ok || !reflect.DeepEqual(v, ipAddressProp)) {
+	endpointObj["ipAddress"] = ipAddressProp
+}
+
+wrappedReq := map[string]interface{}{
+	"networkEndpoints": []interface{}{endpointObj},
+}
+
+attachUrl, err := replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/global/networkEndpointGroups/{{name}}/attachNetworkEndpoints")
+if err != nil {
+	return err
+}
+
+log.Printf("[DEBUG] Creating new GlobalNetworkEndpoint: %#v", wrappedReq)
+_, err = sendRequestWithTimeout(config, "POST", project, attachUrl, wrappedReq, d.Timeout(schema.TimeoutCreate))
+if err != nil {
+	return fmt.Errorf("Error creating GlobalNetworkEndpoint: %s", err)
+}
