@@ -73,6 +73,9 @@ objects:
     base_url: projects/{{project}}
     self_link: projects/{{project}}
     create_url: projects/{{project}}/defaultLocation:finalize
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys:
+        - resources
     input: true
     description: |
       Sets the default Google Cloud Platform (GCP) resource location for the specified FirebaseProject.

@@ -1,6 +1,0 @@
-if resources, ok := res["resources"].(map[string]interface{}); ok {
-	if err := d.Set("location_id", resources["locationId"]); err != nil {
-		return nil, err
-	}
-}
-return res, nil
