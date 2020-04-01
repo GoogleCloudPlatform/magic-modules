@@ -1,12 +1,32 @@
+resource "google_project" "my_project" {
+  name = "<%= ctx[:vars]['project'] %>"
+  project_id = "<%= ctx[:vars]['project'] %>"
+  org_id = "<%= ctx[:test_env_vars]['org_id'] %>"
+  billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+}
+
+resource "google_app_engine_application" "app" {
+  project     = google_project.my_project.project_id
+  location_id = "us-central"
+}
+
 resource "google_project_service" "service" {
+  project = google_project.my_project.project_id
   service = "appengineflex.googleapis.com"
 
   disable_dependent_services = false
 }
 
+resource "google_project_iam_member" "gae_api" {
+  project = google_project_service.service.project
+  role    = "roles/compute.networkUser"
+  member  = "serviceAccount:service-${google_project.my_project.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
+}
+
 resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id] %>" {
   version_id = "v1"
-  service    = "<%= ctx[:vars]['service_name'] %>"
+  project    = google_project_iam_member.gae_api.project
+  service    = "default"
   runtime    = "nodejs"
 
   entrypoint {
@@ -42,6 +62,7 @@ resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id]
 }
 
 resource "google_storage_bucket" "bucket" {
+  project = google_project.my_project.project_id
   name = "<%= ctx[:vars]['bucket_name'] %>"
 }
 
