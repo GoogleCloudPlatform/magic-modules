@@ -2,3 +2,4 @@ gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gc
 gcp_location = attribute(:gcp_location, default: '<%= external_attribute('gcp_location') -%>', description: 'The GCP project location.')
 standardappversion = attribute('standardappversion', default: <%= JSON.pretty_generate(grab_attributes['standardappversion']) -%>, description: 'Cloud App Engine definition')
 gcp_enable_privileged_resources = attribute(:gcp_enable_privileged_resources, default:0, description:'Flag to enable privileged resources requiring elevated privileges in GCP.')
+gcp_organization_id = attribute(:gcp_organization_id, default: <%= external_attribute('gcp_organization_id') -%>, description: 'The identifier of the organization')
