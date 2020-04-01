@@ -154,6 +154,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  end -%>
 
 <%  if object.custom_code.encoder -%>
+    <%= "var err error"  if object.settable_properties.size == 0 %>
     obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
     if err != nil {
         return err
