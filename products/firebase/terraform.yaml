@@ -31,6 +31,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           instance_name: "memory-cache"
         test_env_vars:
           org_id: :ORG_ID
+  ProjectLocation: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ['projects/{{project}}', '{{project}}']
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 10
+    skip_delete: true
+    skip_sweeper: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebase_project_location_basic"
+        min_version: 'beta'
+        primary_resource_id: "basic"
+        test_env_vars:
+          org_id: :ORG_ID
+    properties:
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
