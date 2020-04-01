@@ -7416,6 +7416,7 @@ objects:
           you create the resource.
       - !ruby/object:Api::Type::Enum
         name: 'networkEndpointType'
+        required: true
         description: |
           Type of network endpoints in this network endpoint group. Supported values are:
             * INTERNET_IP_PORT
@@ -7423,37 +7424,25 @@ objects:
         values:
           - :INTERNET_IP_PORT
           - :INTERNET_FQDN_PORT
-        default_value: :GCE_VM_IP_PORT
-      - !ruby/object:Api::Type::Integer
-        name: 'size'
-        description: Number of network endpoints in the network endpoint group.
-        output: true
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'network'
-        resource: 'Network'
-        imports: 'selfLink'
-        description: |
-          The network to which all network endpoints in the NEG belong.
-          Uses "default" project network if unspecified.
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'subnetwork'
-        resource: 'Subnetwork'
-        imports: 'selfLink'
-        description: |
-          Optional subnetwork to which all network endpoints in the NEG belong.
       - !ruby/object:Api::Type::String
         name: 'fqdn'
+        input: true
         conflicts:
           - ipAddress
+        at_least_one_of:
+          - fqdn
+          - ip_address
         description: |
           Fully qualified domain name of network endpoint.
           This can only be specified when network_endpoint_type of the NEG is INTERNET_FQDN_PORT.
       - !ruby/object:Api::Type::Integer
         name: 'port'
+        input: true
         description: |
           Port number of network endpoint.
       - !ruby/object:Api::Type::String
         name: 'ipAddress'
+        input: true
         description: |
           IPv4 address of network endpoint. The IP address must belong
           to a VM in GCE (either the primary IP or as part of an aliased IP

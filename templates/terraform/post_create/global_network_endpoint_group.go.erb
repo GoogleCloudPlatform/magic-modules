@@ -1,17 +1,11 @@
 endpointObj := make(map[string]interface{})
-if err != nil {
-	return err
-} else if v, ok := d.GetOkExists("fqdn"); !isEmptyValue(reflect.ValueOf(fqdnProp)) && (ok || !reflect.DeepEqual(v, fqdnProp)) {
+if v, ok := d.GetOkExists("fqdn"); !isEmptyValue(reflect.ValueOf(fqdnProp)) && (ok || !reflect.DeepEqual(v, fqdnProp)) {
 	endpointObj["fqdn"] = fqdnProp
 }
-if err != nil {
-	return err
-} else if v, ok := d.GetOkExists("port"); !isEmptyValue(reflect.ValueOf(portProp)) && (ok || !reflect.DeepEqual(v, portProp)) {
+if v, ok := d.GetOkExists("port"); !isEmptyValue(reflect.ValueOf(portProp)) && (ok || !reflect.DeepEqual(v, portProp)) {
 	endpointObj["port"] = portProp
 }
-if err != nil {
-	return err
-} else if v, ok := d.GetOkExists("ip_address"); !isEmptyValue(reflect.ValueOf(ipAddressProp)) && (ok || !reflect.DeepEqual(v, ipAddressProp)) {
+if v, ok := d.GetOkExists("ip_address"); !isEmptyValue(reflect.ValueOf(ipAddressProp)) && (ok || !reflect.DeepEqual(v, ipAddressProp)) {
 	endpointObj["ipAddress"] = ipAddressProp
 }
 
