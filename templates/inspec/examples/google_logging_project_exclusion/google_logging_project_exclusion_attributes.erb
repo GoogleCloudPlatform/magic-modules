@@ -1,3 +1,4 @@
 project_exclusion = attribute('project_exclusion', default: <%= grab_attributes['project_exclusion'] -%>)
 gcp_project_id = attribute(:gcp_project_id, default: <%= external_attribute('gcp_project_id') -%>, description: 'The project identifier')
 gcp_enable_privileged_resources = attribute(:gcp_enable_privileged_resources, default:0, description:'Flag to enable privileged resources requiring elevated privileges in GCP.')
+gcp_organization_id = attribute(:gcp_organization_id, default: <%= external_attribute('gcp_organization_id') -%>, description: 'The identifier of the organization')
