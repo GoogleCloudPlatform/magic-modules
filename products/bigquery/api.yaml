@@ -825,38 +825,17 @@ objects:
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::String
-                      name: 'etag'
-                      description: |
-                        A hash of the resource.
-                      output: true
-                    - !ruby/object:Api::Type::String
-                      name: 'id'
-                      output: true
-                      description: |
-                        Opaque ID uniquely identifying the table.
-                    - !ruby/object:Api::Type::String
-                      name: 'selfLink'
-                      output: true
-                      description: |
-                        A URL that can be used to access this resource again.
-                    - !ruby/object:Api::Type::NestedObject
-                      name: 'tableReference'
-                      description: |
-                        Reference describing the ID of this table.
+                      name: 'projectId'
+                      description: 'The ID of the project containing this table.'
                       required: true
-                      properties:
-                        - !ruby/object:Api::Type::String
-                          name: 'projectId'
-                          description: 'The ID of the project containing this table.'
-                          required: true
-                        - !ruby/object:Api::Type::String
-                          name: 'datasetId'
-                          description: 'The ID of the dataset containing this table.'
-                          required: true
-                        - !ruby/object:Api::Type::String
-                          name: 'tableId'
-                          description: 'The ID of the table.'
-                          required: true
+                    - !ruby/object:Api::Type::String
+                      name: 'datasetId'
+                      description: 'The ID of the dataset containing this table.'
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: 'tableId'
+                      description: 'The ID of the table.'
+                      required: true
               - !ruby/object:Api::Type::NestedObject
                 name: 'destinationTable'
                 description: 'The destination table.'

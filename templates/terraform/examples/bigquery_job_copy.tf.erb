@@ -1,25 +1,17 @@
-resource "google_bigquery_table" "source-one" {
-  dataset_id = google_bigquery_dataset.source-one.dataset_id
-  table_id   = "<%= ctx[:vars]['job_id'] %>_one_table"
+resource "google_bigquery_table" "source" {
+  count = length(google_bigquery_dataset.source)
+
+  dataset_id = google_bigquery_dataset.source[count.index].dataset_id
+  table_id   = "<%= ctx[:vars]['job_id'] %>_${count.index}_table"
 }
 
-resource "google_bigquery_dataset" "source-one" {
-  dataset_id                  = "<%= ctx[:vars]['job_id'] %>_one_dataset"
+resource "google_bigquery_dataset" "source" {
+  count = 2
+
+  dataset_id                  = "<%= ctx[:vars]['job_id'] %>_${count.index}_dataset"
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "US"
-}
-
-resource "google_bigquery_table" "source-two" {
-  dataset_id = google_bigquery_dataset.source-two.dataset_id
-  table_id   = "<%= ctx[:vars]['job_id'] %>_two_table"
-}
-
-resource "google_bigquery_dataset" "source-two" {
-  dataset_id    = "<%= ctx[:vars]['job_id'] %>_two_dataset"
-  friendly_name = "test"
-  description   = "This is a test description"
-  location      = "US"
 }
 
 resource "google_bigquery_table" "dest" {
@@ -49,19 +41,15 @@ resource "google_bigquery_job" "<%= ctx[:primary_resource_id] %>" {
 
   copy {
     source_tables {
-      table_reference {
-        project_id = google_bigquery_table.source-one.project
-        dataset_id = google_bigquery_table.source-one.dataset_id
-        table_id   = google_bigquery_table.source-one.table_id
-      }
+      project_id = google_bigquery_table.source.0.project
+      dataset_id = google_bigquery_table.source.0.dataset_id
+      table_id   = google_bigquery_table.source.0.table_id
     }
 
     source_tables {
-      table_reference {
-        project_id = google_bigquery_table.source-two.project
-        dataset_id = google_bigquery_table.source-two.dataset_id
-        table_id   = google_bigquery_table.source-two.table_id
-      }
+      project_id = google_bigquery_table.source.1.project
+      dataset_id = google_bigquery_table.source.1.dataset_id
+      table_id   = google_bigquery_table.source.1.table_id
     }
 
     destination_table {
