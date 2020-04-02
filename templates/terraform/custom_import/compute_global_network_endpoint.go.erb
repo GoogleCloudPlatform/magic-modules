@@ -1,0 +1,18 @@
+config := meta.(*Config)
+// FQDN, port and ip_address are optional, so use * instead of + when reading the import id
+if err := parseImportId([]string{
+	"projects/(?P<project>[^/]?)/global/networkEndpointGroups/(?P<network_endpoint_group>[^/]+)/(?P<ip_address>[^/]+)/(?P<fqdn>[^/]*)/(?P<port>[^/]+)",
+	"(?P<project>[^/]+)/(?P<network_endpoint_group>[^/]+)/(?P<ip_address>[^/]*)/(?P<fqdn>[^/]*)/(?P<port>[^/]*)",
+	"(?P<network_endpoint_group>[^/]+)/(?P<ip_address>[^/]*)/(?P<fqdn>[^/]*)/(?P<port>[^/]*)",
+}, d, config); err != nil {
+	return nil, err
+}
+
+// Replace import id for the resource id
+id, err := replaceVars(d, config, "{{project}}/{{network_endpoint_group}}/{{ip_address}}/{{fqdn}}/{{port}}")
+if err != nil {
+	return nil, fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+return []*schema.ResourceData{d}, nil

@@ -7363,6 +7363,85 @@ objects:
           The default port used if the port number is not specified in the
           network endpoint.
   - !ruby/object:Api::Resource
+    name: 'GlobalNetworkEndpoint'
+    kind: 'compute#networkEndpoint'
+    base_url:  'projects/{{project}}/global/networkEndpointGroups/{{network_endpoint_group}}'
+    description: |
+      A Network endpoint represents a IP address and port combination that is
+      part of a specific network endpoint group (NEG). NEGs are zonals
+      collection of these endpoints for GCP resources within a
+      single subnet. **NOTE**: Network endpoints cannot be created outside of a
+      network endpoint group.
+    input: true
+    create_verb: :POST
+    create_url: projects/{{project}}/global/networkEndpointGroups/{{network_endpoint_group}}/attachNetworkEndpoints
+    delete_verb: :POST
+    delete_url: projects/{{project}}/global/networkEndpointGroups/{{network_endpoint_group}}/detachNetworkEndpoints
+    read_verb: :POST
+    self_link: projects/{{project}}/global/networkEndpointGroups/{{network_endpoint_group}}/listNetworkEndpoints
+    identity:
+      - fqdn
+      - ipAddress
+      - port
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys:
+        - items
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 6
+          update_minutes: 6
+          delete_minutes: 6
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'networkEndpointGroup'
+        resource: 'GlobalNetworkEndpointGroup'
+        imports: 'name'
+        description: |
+          The network endpoint group this endpoint is part of.
+        required: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'port'
+        description: |
+          Port number of network endpoint.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'ipAddress'
+        description: |
+          IPv4 address of network endpoint. The IP address must belong
+          to a VM in GCE (either the primary IP or as part of an aliased IP
+          range).
+      - !ruby/object:Api::Type::String
+        name: 'fqdn'
+        at_least_one_of:
+          - fqdn
+          - ip_address
+        description: |
+          Fully qualified domain name of network endpoint.
+          This can only be specified when network_endpoint_type of the NEG is INTERNET_FQDN_PORT.
+  - !ruby/object:Api::Resource
     name: 'GlobalNetworkEndpointGroup'
     kind: 'compute#networkEndpointGroup'
     base_url: 'projects/{{project}}/global/networkEndpointGroups'
@@ -7374,7 +7453,8 @@ objects:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/internet-neg-concepts'
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups'
     description: |
-      A global NEG resides outside of Google Cloud
+      A global NEG resides outside of Google Cloud. Currently a global network endpoint group can only
+      support a single endpoint.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -7424,29 +7504,11 @@ objects:
         values:
           - :INTERNET_IP_PORT
           - :INTERNET_FQDN_PORT
-      - !ruby/object:Api::Type::String
-        name: 'fqdn'
-        input: true
-        conflicts:
-          - ipAddress
-        at_least_one_of:
-          - fqdn
-          - ip_address
-        description: |
-          Fully qualified domain name of network endpoint.
-          This can only be specified when network_endpoint_type of the NEG is INTERNET_FQDN_PORT.
       - !ruby/object:Api::Type::Integer
-        name: 'port'
-        input: true
+        name: 'defaultPort'
         description: |
-          Port number of network endpoint.
-      - !ruby/object:Api::Type::String
-        name: 'ipAddress'
-        input: true
-        description: |
-          IPv4 address of network endpoint. The IP address must belong
-          to a VM in GCE (either the primary IP or as part of an aliased IP
-          range).
+          The default port used if the port number is not specified in the
+          network endpoint.
   - !ruby/object:Api::Resource
     name: 'NodeGroup'
     kind: 'compute#NodeGroup'

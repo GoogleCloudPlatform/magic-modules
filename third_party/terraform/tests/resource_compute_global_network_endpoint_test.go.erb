@@ -48,25 +48,6 @@ func TestAccComputeGlobalNetworkEndpoint_networkEndpointsBasic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				// Add two new endpoints
-				Config: testAccComputeGlobalNetworkEndpoint_networkEndpointsAdditional(context),
-			},
-			{
-				ResourceName:      "google_compute_global_network_endpoint.default",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				ResourceName:      "google_compute_global_network_endpoint.add1",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				ResourceName:      "google_compute_global_network_endpoint.add2",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
 				// delete all endpoints
 				Config: testAccComputeGlobalNetworkEndpoint_noNetworkEndpoints(context),
 				Check: resource.ComposeTestCheckFunc(
@@ -95,31 +76,6 @@ resource "google_compute_global_network_endpoint" "default" {
 
   ip_address = "8.8.8.8"
   port = "%{modified_port}"
-}
-`, context) + testAccComputeGlobalNetworkEndpoint_noNetworkEndpoints(context)
-}
-
-func testAccComputeGlobalNetworkEndpoint_networkEndpointsAdditional(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_compute_global_network_endpoint" "default" {
-  network_endpoint_group = google_compute_global_network_endpoint_group.neg.id
-
-  ip_address = "8.8.8.8"
-  port = "%{modified_port}"
-}
-
-resource "google_compute_global_network_endpoint" "add1" {
-  network_endpoint_group = google_compute_global_network_endpoint_group.neg.id
-
-  ip_address = "8.8.8.8"
-  port = "%{add1_port}"
-}
-
-resource "google_compute_global_network_endpoint" "add2" {
-  network_endpoint_group = google_compute_global_network_endpoint_group.neg.name
-
-  ip_address = "8.8.8.8"
-  port = "%{add2_port}"
 }
 `, context) + testAccComputeGlobalNetworkEndpoint_noNetworkEndpoints(context)
 }
