@@ -1,6 +1,5 @@
 resource "google_compute_global_network_endpoint_group" "<%= ctx[:primary_resource_id] %>" {
   name                  = "<%= ctx[:vars]['neg_name'] %>"
-  port                  = "90"
+  default_port          = "90"
   network_endpoint_type = "INTERNET_FQDN_PORT"
-  fqdn                  = "www.example.com"
 }
