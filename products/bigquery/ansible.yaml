@@ -49,6 +49,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           A unique ID for this dataset, without the project name. The ID
           must contain only letters (a-z, A-Z), numbers (0-9), or
           underscores. The maximum length is 1,024 characters.
+  DatasetAccess: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

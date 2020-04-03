@@ -139,7 +139,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     obj := make(map[string]interface{})
 <%  object.settable_properties.each do |prop| -%>
     <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
+    <%= prop.api_name -%>Prop, err := expand<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
     if err != nil {
         return err
 <%    if prop.send_empty_value -%>
@@ -212,7 +212,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  unless object.async&.is_a? Api::OpAsync -%>
     <% object.gettable_properties.each do |prop| -%>
         <% if object.identity.include?(prop) && prop.output -%>
-    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config)); err != nil {
+    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config)); err != nil {
         return fmt.Errorf(`Error setting computed identity field "<%=prop.name.underscore%>": %s`, err)
     }
         <% end -%>
@@ -282,7 +282,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%      end -%>
     <% object.gettable_properties.each do |prop| -%>
     <% if object.identity.include?(prop) -%>
-    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(opRes["<%= prop.api_name -%>"], d, config)); err != nil {
+    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(opRes["<%= prop.api_name -%>"], d, config)); err != nil {
         return err
     }
     <% end -%>
@@ -467,7 +467,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%    if prop.flatten_object -%>
 // Terraform must set the top level schema field, but since this object contains collapsed properties
 // it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
-    if flattenedProp := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config); flattenedProp != nil {
+    if flattenedProp := flatten<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config); flattenedProp != nil {
         if gerr, ok := flattenedProp.(*googleapi.Error); ok {
 			return fmt.Errorf("Error reading <%= object.name -%>: %s", gerr)
 		}
@@ -479,7 +479,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         }
     }
 <%    else -%>
-    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config)); err != nil {
+    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config)); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
 <%    end -%>
@@ -536,7 +536,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
           .reject(&:url_param_only)
           .each do |prop| -%>
         <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
-        <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
+        <%= prop.api_name -%>Prop, err := expand<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
         if err != nil {
             return err
 <%#         There is some nuance in when we choose to send a value to an update function.
@@ -635,7 +635,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%  update_body_properties.each do |prop| -%>
     <%# flattened objects won't have something stored in state so instead nil is passed to the next expander. -%>
     <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
+    <%= prop.api_name -%>Prop, err := expand<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
     if err != nil {
         return err
 <%      if prop.send_empty_value -%>
@@ -842,12 +842,13 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 }
 <% end -%>
 
+<%- nested_prefix = object.nested_query ? "Nested" : "" -%>
 <% object.gettable_properties.reject(&:ignore_read).each do |prop| -%>
-<%= lines(build_flatten_method(resource_name, prop, object), 1) -%>
+<%= lines(build_flatten_method(nested_prefix+resource_name, prop, object), 1) -%>
 <% end -%>
 
 <% object.settable_properties.each do |prop| -%>
-<%= lines(build_expand_method(resource_name, prop, object), 1) -%>
+<%= lines(build_expand_method(nested_prefix+resource_name, prop, object), 1) -%>
 <% end -%>
 
 <% if object.custom_code.encoder -%>
