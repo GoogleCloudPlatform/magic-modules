@@ -8,7 +8,7 @@ if region == "" {
 	return fmt.Errorf("region must be non-empty - set in resource or at provider-level")
 }
 
-name, err := expandComputeDiskResourcePolicyAttachmentName(d.Get("name"), d, config)
+name, err := expandNestedComputeDiskResourcePolicyAttachmentName(d.Get("name"), d, config)
 if err != nil {
   return err
 } else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(name)) && (ok || !reflect.DeepEqual(v, name)) {
