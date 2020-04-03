@@ -75,7 +75,7 @@ func testAccDialogflowAgent_full1(context map[string]interface{}) string {
 		supported_language_codes = ["fr","de","es"]
 		time_zone = "America/New_York"
 		description = "Description 1."
-		avatar_uri = "https://cloud.google.com/_static/images/cloud/icons/favicons/onecloud/super_cloud.png"
+		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
 		enable_logging = true
 		match_mode = "MATCH_MODE_ML_ONLY"
 		classification_threshold = 0.3
@@ -118,7 +118,7 @@ func testAccDialogflowAgent_full2(context map[string]interface{}) string {
 		supported_language_codes = ["no"]
 		time_zone = "America/New_York"
 		description = "Description 2!"
-		avatar_uri = "https://storage.googleapis.com/gweb-cloudblog-publish/images/f4xvje.max-200x200.PNG"
+		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo-2.png"
 		enable_logging = false
 		match_mode = "MATCH_MODE_HYBRID"
 		classification_threshold = 0.7
