@@ -6761,8 +6761,8 @@ objects:
     kind: 'compute#interconnectAttachment'
     base_url: 'projects/{{project}}/regions/{{region}}/interconnectAttachments'
     collection_url_key: 'items'
+    update_verb: :PATCH
     has_self_link: true
-    input: true
     description: |
       Represents an InterconnectAttachment (VLAN attachment) resource. For more
       information, see Creating VLAN Attachments.
@@ -6798,6 +6798,7 @@ objects:
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'adminEnabled'
+        send_empty_value: true
         description: |
           Whether the VLAN attachment is enabled or disabled.  When using
           PARTNER type this will Pre-Activate the interconnect attachment
@@ -6815,6 +6816,7 @@ objects:
         output: true
       - !ruby/object:Api::Type::String
         name: 'interconnect'
+        input: true
         description: |
           URL of the underlying Interconnect object that this attachment's
           traffic will traverse through. Required if type is DEDICATED, must not
@@ -6825,6 +6827,7 @@ objects:
           An optional description of this resource.
       - !ruby/object:Api::Type::Enum
         name: 'bandwidth'
+        input: true
         description: |
           Provisioned bandwidth capacity for the interconnect attachment.
           For attachments of type DEDICATED, the user can set the bandwidth.
@@ -6846,6 +6849,7 @@ objects:
           - :BPS_50G
       - !ruby/object:Api::Type::String
         name: 'edgeAvailabilityDomain'
+        input: true
         description: |
           Desired availability domain for the attachment. Only available for type
           PARTNER, at creation time. For improved reliability, customers should
@@ -6882,6 +6886,7 @@ objects:
             output: true
       - !ruby/object:Api::Type::Enum
         name: 'type'
+        input: true
         description: |
           The type of InterconnectAttachment you wish to create. Defaults to
           DEDICATED.
@@ -6924,6 +6929,7 @@ objects:
           automatically connect the Interconnect to the network & region within which the
           Cloud Router is configured.
         required: true
+        input: true
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: |
@@ -6945,8 +6951,10 @@ objects:
           lowercase letter, and all following characters must be a dash, lowercase
           letter, or digit, except the last character, which cannot be a dash.
         required: true
+        input: true
       - !ruby/object:Api::Type::Array
         name: candidateSubnets
+        input: true
         description: |
           Up to 16 candidate prefixes that can be used to restrict the allocation
           of cloudRouterIpAddress and customerRouterIpAddress for this attachment.
@@ -6958,6 +6966,7 @@ objects:
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Integer
         name: vlanTag8021q
+        input: true
         description: |
           The IEEE 802.1Q VLAN tag for this attachment, in the range 2-4094. When
           using PARTNER type this will be managed upstream.
