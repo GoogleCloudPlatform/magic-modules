@@ -69,7 +69,7 @@ func dataSourceMonitoringServiceTypeReadFromList(listFilter string, flattenTypeF
 			return fmt.Errorf("no Monitoring Services found for data source")
 		}
 		if len(ls) > 1 {
-			return fmt.Errorf("more than one Monitoring Services with given identifer found")
+			return fmt.Errorf("more than one Monitoring Services with given identifier found")
 		}
 		res := ls[0].(map[string]interface{})
 		log.Printf("[DEBUG] resp: %+v", res)
