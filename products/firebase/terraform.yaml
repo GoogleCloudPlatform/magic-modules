@@ -17,8 +17,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["projects/{{project}}", "{{project}}"]
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 10
-      update_minutes: 10
-      delete_minutes: 10
     autogen_async: true
     skip_delete: true
     skip_sweeper: true
@@ -44,8 +42,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "basic"
         test_env_vars:
           org_id: :ORG_ID
-    properties:
-
+  WebApp: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: '{{name}}'
+    import_format: ['{{name}}']
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 10
+      update_minutes: 10
+    autogen_async: true
+    skip_delete: true #currently only able to delete a webapp through the Firebase Admin console
+    skip_sweeper: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firebase_web_app_basic"
+        min_version: "beta"
+        primary_resource_id: "basic"
+        vars:
+          display_name: "Display Name Basic"
+        test_env_vars:
+          org_id: :ORG_ID
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

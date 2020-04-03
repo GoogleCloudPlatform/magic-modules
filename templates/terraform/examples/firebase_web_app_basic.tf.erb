@@ -1,0 +1,20 @@
+resource "google_project" "default" {
+	provider = google-beta
+
+	project_id = "tf-test%{random_suffix}"
+	name       = "tf-test%{random_suffix}"
+	org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
+}
+
+resource "google_firebase_project" "default" {
+	provider = google-beta
+	project  = google_project.default.project_id
+}
+
+resource "google_firebase_web_app" "<%= ctx[:primary_resource_id] %>" {
+	provider = google-beta
+	project = google_project.default.project_id
+	display_name = "<%= ctx[:vars]['display_name'] %>"
+
+	depends_on = [google_firebase_project.default]
+}
