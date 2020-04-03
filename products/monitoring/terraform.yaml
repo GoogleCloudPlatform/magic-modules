@@ -107,6 +107,25 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           determine if there are upstream changes to these fields. They can also be configured via
           the sensitive_labels block, but cannot be configured in both places.
 
+  Service: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    error_retry_predicates: ["isMonitoringRetryableError"]
+    properties:
+      serviceId: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[a-z0-9\-]+$'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "monitoring_service_custom"
+        primary_resource_id: "custom"
+        vars:
+          serviceId: "srv"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/monitoring_service.go.erb
+      decoder: templates/terraform/decoders/monitoring_service.go.erb
+
   UptimeCheckConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
