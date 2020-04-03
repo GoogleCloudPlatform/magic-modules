@@ -6799,6 +6799,7 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'adminEnabled'
         send_empty_value: true
+        default_value: true
         description: |
           Whether the VLAN attachment is enabled or disabled.  When using
           PARTNER type this will Pre-Activate the interconnect attachment
