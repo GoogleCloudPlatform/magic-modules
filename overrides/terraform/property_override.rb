@@ -78,6 +78,13 @@ module Overrides
           # Names of fields that should be included in the updateMask.
           :update_mask_fields,
 
+          # For a TypeMap, the expander function to call on the key.
+          # Defaults to expandString.
+          :key_expander,
+
+          # For a TypeMap, the DSF to apply to the ker.
+          :key_diff_suppress_func,
+
           # ====================
           # Schema Modifications
           # ====================
@@ -145,6 +152,10 @@ module Overrides
         check :default_from_api, type: :boolean, default: false
         check :unordered_list, type: :boolean, default: false
         check :schema_config_mode_attr, type: :boolean, default: false
+
+        # technically set as a default everywhere, but only maps will use this.
+        check :key_expander, type: String, default: 'expandString'
+        check :key_diff_suppress_func, type: String
 
         check :diff_suppress_func, type: String
         check :state_func, type: String

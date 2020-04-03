@@ -42,6 +42,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           Resource name of the repository, of the form `{{repo}}`.
           The repo name may contain slashes. eg, `name/with/slash`
+      pubsubConfigs: !ruby/object:Overrides::Terraform::PropertyOverride
+        key_diff_suppress_func: 'compareSelfLinkOrResourceName'
+        key_expander: 'expandSourceRepoRepositoryPubsubConfigsTopic'
       pubsubConfigs.serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
