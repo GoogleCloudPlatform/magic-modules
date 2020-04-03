@@ -47,17 +47,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "dialogflow_intent_basic"
         primary_resource_id: "basic_intent"
-        # moved to handwritten tests to create a new project per test
         skip_test: true
         vars:
           intent_name: "basic-intent"
       - !ruby/object:Provider::Terraform::Examples
         name: "dialogflow_intent_full"
         primary_resource_id: "full_intent"
-        skip_test: true
         vars:
           intent_name: "full-intent"
-    import_format: ["projects/{{project}}/agent/intents/{{name}}"]
+        test_env_vars:
+          org_id: :ORG_ID
     # Skip sweeper gen since this is a child resource.
     skip_sweeper: true
     properties:

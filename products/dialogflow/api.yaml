@@ -158,12 +158,10 @@ objects:
         name: 'webhookState'
         description: |
           Indicates whether webhooks are enabled for the intent.
-          * WEBHOOK_STATE_UNSPECIFIED: Webhook is disabled in the agent and in the intent.
           * WEBHOOK_STATE_ENABLED: Webhook is enabled in the agent and in the intent.
           * WEBHOOK_STATE_ENABLED_FOR_SLOT_FILLING: Webhook is enabled in the agent and in the intent. Also, each slot
           filling prompt is forwarded to the webhook.
         values:
-          - :WEBHOOK_STATE_UNSPECIFIED
           - :WEBHOOK_STATE_ENABLED
           - :WEBHOOK_STATE_ENABLED_FOR_SLOT_FILLING
       - !ruby/object:Api::Type::Integer
@@ -194,7 +192,8 @@ objects:
         item_type: Api::Type::String
         description: |
          The collection of event names that trigger the intent. If the collection of input contexts is not empty, all of
-         the contexts must be present in the active user session for an event to trigger this intent.
+         the contexts must be present in the active user session for an event to trigger this intent. See the 
+         [events reference](https://cloud.google.com/dialogflow/docs/events-overview) for more details.
       - !ruby/object:Api::Type::String
         name: 'action'
         description: |
@@ -214,7 +213,6 @@ objects:
           description: |
             Represents different platforms that a rich message can be intended for.
           values:
-            - :PLATFORM_UNSPECIFIED
             - :FACEBOOK
             - :SLACK
             - :TELEGRAM
