@@ -45,6 +45,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pubsubConfigs: !ruby/object:Overrides::Terraform::PropertyOverride
         key_diff_suppress_func: 'compareSelfLinkOrResourceName'
         key_expander: 'expandSourceRepoRepositoryPubsubConfigsTopic'
+        key_description: |
+          A Cloud Pub/Sub topic in this repo's project. Values are of the form
+          `projects/<project>/topics/<topic>` or `<topic>` (where the topic will
+          be inferred).
       pubsubConfigs.serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
