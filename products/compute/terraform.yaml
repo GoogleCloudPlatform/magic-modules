@@ -993,6 +993,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       vlanTag8021q: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      adminEnabled: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      candidateSubnets: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/interconnect_attachment.go.erb
       post_create: templates/terraform/post_create/interconnect_attachment.go.erb
