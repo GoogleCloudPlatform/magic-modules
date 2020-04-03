@@ -68,6 +68,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude_import: true # no unique way to specify
     skip_sweeper: true  # covered by Dataset sweeper
     exclude_validator: true
+    mutex: "{{dataset_id}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_dataset_access_basic_user"

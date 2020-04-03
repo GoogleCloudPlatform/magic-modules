@@ -69,6 +69,44 @@ func TestAccBigQueryDatasetAccess_view(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryDatasetAccess_multiple(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(10))
+
+	expected1 := map[string]interface{}{
+		"role":   "WRITER",
+		"domain": "google.com",
+	}
+
+	expected2 := map[string]interface{}{
+		"role":         "READER",
+		"specialGroup": "projectWriters",
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryDatasetAccess_multiple(datasetID),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBigQueryDatasetAccessPresent("google_bigquery_dataset.dataset", expected1),
+					testAccCheckBigQueryDatasetAccessPresent("google_bigquery_dataset.dataset", expected2),
+				),
+			},
+			{
+				// Destroy step instead of CheckDestroy so we can check the access is removed without deleting the dataset
+				Config: testAccBigQueryDatasetAccess_destroy(datasetID, "dataset"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBigQueryDatasetAccessAbsent("google_bigquery_dataset.dataset", expected1),
+					testAccCheckBigQueryDatasetAccessAbsent("google_bigquery_dataset.dataset", expected2),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckBigQueryDatasetAccessPresent(n string, expected map[string]interface{}) resource.TestCheckFunc {
 	return testAccCheckBigQueryDatasetAccess(n, expected, true)
 }
@@ -166,4 +204,24 @@ resource "google_bigquery_table" "public" {
 }
 
 `, datasetID, datasetID2, tableID, "SELECT state FROM `lookerdata.cdc.project_tycho_reports`")
+}
+
+func testAccBigQueryDatasetAccess_multiple(datasetID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset_access" "access" {
+  dataset_id = google_bigquery_dataset.dataset.dataset_id
+  role       = "WRITER"
+  domain     = "google.com"
+}
+
+resource "google_bigquery_dataset_access" "access2" {
+  dataset_id    = google_bigquery_dataset.dataset.dataset_id
+  role          = "READER"
+  special_group = "projectWriters"
+}
+
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id = "%s"
+}
+`, datasetID)
 }
