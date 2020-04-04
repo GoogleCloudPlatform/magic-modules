@@ -18,3 +18,24 @@ resource "google_firebase_web_app" "<%= ctx[:primary_resource_id] %>" {
 
 	depends_on = [google_firebase_project.default]
 }
+
+resource "google_storage_bucket" "default" {
+    provider = google-beta
+    name = "<%= ctx[:vars]['bucket_name'] %>"
+}
+
+resource "google_storage_bucket_object" "default" {
+    provider = google-beta
+    bucket = google_storage_bucket.default.name
+    name = "firebase-config.json"
+
+    content = jsonencode({
+        appId              = google_firebase_web_app.basic.app_id
+        apiKey             = google_firebase_web_app.basic.config.0.api_key
+        authDomain         = google_firebase_web_app.basic.config.0.auth_domain
+        databaseURL        = lookup(google_firebase_web_app.basic.config.0, "database_url", "")
+        storageBucket      = lookup(google_firebase_web_app.basic.config.0, "storage_bucket", "")
+        messagingSenderId  = lookup(google_firebase_web_app.basic.config.0, "messaging_sender_id", "")
+        measurementId      = lookup(google_firebase_web_app.basic.config.0, "measurement_id", "")
+    })
+}
