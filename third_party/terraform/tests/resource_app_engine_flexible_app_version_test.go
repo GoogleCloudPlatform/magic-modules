@@ -27,7 +27,7 @@ func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
 				ResourceName:            "google_app_engine_flexible_app_version.foo",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"env_variables", "deployment", "entrypoint", "service", "delete_service_on_destroy"},
+				ImportStateVerifyIgnore: []string{"env_variables", "deployment", "entrypoint", "service"},
 			},
 			{
 				Config: testAccAppEngineFlexibleAppVersion_pythonUpdate(context),
@@ -36,7 +36,7 @@ func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
 				ResourceName:            "google_app_engine_flexible_app_version.foo",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"env_variables", "deployment", "entrypoint", "service", "delete_service_on_destroy"},
+				ImportStateVerifyIgnore: []string{"env_variables", "deployment", "entrypoint", "service"},
 			},
 		},
 	})
@@ -126,13 +126,11 @@ resource "google_app_engine_flexible_app_version" "foo" {
   manual_scaling {
     instances = 1
   }
-
-  delete_service_on_destroy = true
 }
 
 resource "google_storage_bucket" "bucket" {
   project = google_project.my_project.project_id
-  name = "default-flex-ae-bucket"
+  name = "tf-test-%{random_suffix}-flex-ae-bucket"
 }
 
 resource "google_storage_bucket_object" "yaml" {
@@ -238,13 +236,11 @@ resource "google_app_engine_flexible_app_version" "foo" {
   manual_scaling {
     instances = 2
   }
-
-  delete_service_on_destroy = true
 }
 
 resource "google_storage_bucket" "bucket" {
   project = google_project.my_project.project_id
-  name = "default-flex-ae-bucket"
+  name = "tf-test-%{random_suffix}-flex-ae-bucket"
 }
 
 resource "google_storage_bucket_object" "yaml" {

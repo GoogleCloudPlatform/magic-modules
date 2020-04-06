@@ -89,7 +89,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           If set to `true`, the service will be deleted if it is the last version.    
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
+      custom_delete: templates/terraform/custom_delete/appversion_delete.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
       encoder: templates/terraform/encoders/flex_app_version.go.erb
     properties:
