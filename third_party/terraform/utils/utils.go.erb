@@ -432,7 +432,7 @@ func expandSourceRepoRepositoryPubsubConfigsTopic(v interface{}, d TerraformReso
 	// short-circuit if the topic is a full uri so we don't need to getProject
 	ok, err := regexp.MatchString("projects\\/.*\\/topics\\/.*", v.(string))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if ok {
@@ -441,7 +441,7 @@ func expandSourceRepoRepositoryPubsubConfigsTopic(v interface{}, d TerraformReso
 
 	project, err := getProject(d, config)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	return getComputedTopicName(project, v.(string)), err
