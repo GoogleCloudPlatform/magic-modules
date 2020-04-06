@@ -20,7 +20,7 @@ func dataSourceMonitoringServiceType(
 
 	// Convert monitoring schema to ds schema
 	dsSchema := datasourceSchemaFromResourceSchema(resourceMonitoringService().Schema)
-    addOptionalFieldsToSchema(dsSchema, "project")
+	addOptionalFieldsToSchema(dsSchema, "project")
 
 	// Add schema specific to the service type
 	dsSchema = mergeSchemas(typeSchema, dsSchema)
