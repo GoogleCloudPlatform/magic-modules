@@ -430,7 +430,12 @@ func expandString(v interface{}, d TerraformResourceData, config *Config) (strin
 
 func expandSourceRepoRepositoryPubsubConfigsTopic(v interface{}, d TerraformResourceData, config *Config) (string, error) {
 	// short-circuit if the topic is a full uri so we don't need to getProject
-	if regexp.MatchString("projects\\/.*\\/topics\\/.*", v) {
+	ok, err := regexp.MatchString("projects\\/.*\\/topics\\/.*", v.(string))
+	if err != nil {
+		return nil, err
+	}
+
+	if ok {
 			return v, nil
 	}
 
