@@ -28,7 +28,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Config'
     base_url: projects/{{project}}/locations/{{location}}/transferConfigs?serviceAccountName={{serviceAccountName}}
-    self_link: "{{name}}"
+    self_link: "{{name}}?serviceAccountName={{serviceAccountName}}"
     update_verb: :PATCH
     update_mask: true
     description: |
