@@ -17,8 +17,10 @@ func dataSourceMonitoringServiceType(
 	typeSchema map[string]*schema.Schema,
 	listFilter string,
 	flattenF monitoringServiceTypeFlattenFunc) *schema.Resource {
-	// Convert resource schema to ds schema
+
+	// Convert monitoring schema to ds schema
 	dsSchema := datasourceSchemaFromResourceSchema(resourceMonitoringService().Schema)
+    addOptionalFieldsToSchema(dsSchema, "project")
 
 	// Add schema specific to the service type
 	dsSchema = mergeSchemas(typeSchema, dsSchema)
