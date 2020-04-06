@@ -42,7 +42,43 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       tier: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
-
+  Intent: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dialogflow_intent_basic"
+        primary_resource_id: "basic_intent"
+        skip_test: true
+        vars:
+          intent_name: "basic-intent"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dialogflow_intent_full"
+        primary_resource_id: "full_intent"
+        vars:
+          intent_name: "full-intent"
+        test_env_vars:
+          org_id: :ORG_ID
+    # Skip sweeper gen since this is a child resource.
+    skip_sweeper: true
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    properties:
+      webhookState: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      resetContexts: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      mlDisabled: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      parentFollowupIntentName: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      priority: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      action: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      isFallback: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name_set_project.go.erb
+      post_create: 'templates/terraform/post_create/set_computed_name.erb'
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
