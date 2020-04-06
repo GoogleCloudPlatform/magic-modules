@@ -76,7 +76,7 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 <% if provider_default_values.include?(param) -%>
 	<%= param -%>, _ := get<%= param.capitalize -%>(d, config)
 	if <%= param -%> != "" {
-		values["<%= param -%>"] = <%= param -%>
+		d.Set("<%= param -%>", <%= param -%>)
 	}
 	values["<%= param -%>"] = <%= param -%>
 
