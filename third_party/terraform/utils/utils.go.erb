@@ -425,7 +425,7 @@ func migrateStateNoop(v int, is *terraform.InstanceState, meta interface{}) (*te
 }
 
 func expandString(v interface{}, d TerraformResourceData, config *Config) (string, error) {
-	return v, nil
+	return v.(string), nil
 }
 
 func expandSourceRepoRepositoryPubsubConfigsTopic(v interface{}, d TerraformResourceData, config *Config) (string, error) {
@@ -436,7 +436,7 @@ func expandSourceRepoRepositoryPubsubConfigsTopic(v interface{}, d TerraformReso
 	}
 
 	if ok {
-			return v, nil
+			return v.(string), nil
 	}
 
 	project, err := getProject(d, config)
@@ -444,5 +444,5 @@ func expandSourceRepoRepositoryPubsubConfigsTopic(v interface{}, d TerraformReso
 		return nil, err
 	}
 
-	return getComputedTopicName(project, v), err
+	return getComputedTopicName(project, v.(string)), err
 }
