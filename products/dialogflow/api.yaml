@@ -149,6 +149,7 @@ objects:
         output: true
         description: |
           The unique identifier of this intent. 
+          Format: projects/<Project ID>/agent/intents/<Intent ID>.
       - !ruby/object:Api::Type::String
         name: 'displayName'
         required: true

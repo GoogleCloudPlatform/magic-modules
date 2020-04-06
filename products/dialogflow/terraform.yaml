@@ -59,6 +59,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
     # Skip sweeper gen since this is a child resource.
     skip_sweeper: true
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
     properties:
       webhookState: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
