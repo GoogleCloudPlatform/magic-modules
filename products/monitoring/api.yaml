@@ -923,10 +923,8 @@ objects:
     create_url: projects/{{project}}/services?serviceId={{service_id}}
     self_link: "{{name}}"
     update_verb: :PATCH
+    update_mask: true
     description: |
-      The root resource under which operational aspects of a service are
-      accessible, where a service is some discrete, autonomous, and
-      network-accessible unit, designed to solve an individual concern.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Service Monitoring': 'https://cloud.google.com/monitoring/service-monitoring'
