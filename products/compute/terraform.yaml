@@ -864,6 +864,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "health_check_with_logging"
         primary_resource_id: "health-check-with-logging"
+        min_version: beta
         vars:
           health_check_name: "tcp-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
