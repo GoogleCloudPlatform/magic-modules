@@ -159,11 +159,11 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	// Verify project for services still exists
 	p, err := config.clientResourceManager.Projects.Get(project).Do()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if p.LifecycleState == "DELETE_REQUESTED" {
 		// Construct a 404 error for handleNotFoundError
-		return nil, &googleapi.Error{
+		return &googleapi.Error{
 			Code:    404,
 			Message: "Project deletion was requested",
 		}

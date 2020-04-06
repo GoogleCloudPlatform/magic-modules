@@ -575,7 +575,7 @@ func doEnableServicesRequest(services []string, project string, config *Config, 
 func listCurrentlyEnabledServices(project string, config *Config, timeout time.Duration) (map[string]struct{}, error) {
 	log.Printf("[DEBUG] Listing enabled services for project %s", project)
 	apiServices := make(map[string]struct{})
-	err = retryTimeDuration(func() error {
+	err := retryTimeDuration(func() error {
 		ctx := context.Background()
 		return config.clientServiceUsage.Services.
 			List(fmt.Sprintf("projects/%s", project)).
