@@ -861,6 +861,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "http2-health-check"
         vars:
           health_check_name: "http2-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_with_logging"
+        primary_resource_id: "health-check-with-logging"
+        min_version: beta
+        vars:
+          health_check_name: "tcp-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/health_check_type.erb
       constants: templates/terraform/constants/health_check.erb
@@ -1348,6 +1354,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "region_health_check_http"
         primary_resource_id: "http-region-health-check"
+        vars:
+          health_check_name: "http-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_http_logs"
+        primary_resource_id: "http-region-health-check"
+        min_version: beta
         vars:
           health_check_name: "http-region-health-check"
       - !ruby/object:Provider::Terraform::Examples
