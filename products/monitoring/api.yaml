@@ -1272,7 +1272,6 @@ objects:
       #   name: custom
       #   description: |
       #     Custom service type.
-      #   output: true
       #   properties: []
 
 
@@ -1309,7 +1308,6 @@ objects:
         required: true
       - !ruby/object:Api::Type::Enum # calendarPeriod
         name: calendarPeriod
-        output: true
         description: |
           A day.
           A week. Weeks begin on Monday, following
@@ -1333,7 +1331,6 @@ objects:
           - :YEAR
       - !ruby/object:Api::Type::String # rollingPeriod
         name: rollingPeriod
-        output: true
         description: |
           A rolling time period. Must be an integer multiple of 1 day no larger
           than 30 days.
@@ -1399,25 +1396,23 @@ objects:
                properties:
                 - !ruby/object:Api::Type::NestedObject # range
                   name: range
-                  output: true
                   required: true
                   description: |
                     Range of values considered \"good.\" For a one-sided range,
                     set one bound to an infinite value.
                   properties:
                     - !ruby/object:Api::Type::Double
-                      name: 'min'
+                      name: min
                       required: true
                       description: |
                         Range minimum.
                     - !ruby/object:Api::Type::Double
-                      name: 'max'
+                      name: max
                       required: true
                       description: |
                         Range maximum.
                 - !ruby/object:Api::Type::String # distributionFilter
                   name: distributionFilter
-                  output: true
                   required: true
                   description: |
                     A monitoring filter
@@ -1453,10 +1448,12 @@ objects:
                    properties:
                      - !ruby/object:Api::Type::Double
                        name: 'min'
+                       required: true
                        description: |
                          Range minimum.
                      - !ruby/object:Api::Type::Double
                        name: 'max'
+                       required: true
                        description: |
                          Range maximum.
              - !ruby/object:Api::Type::NestedObject # goodTotalRatioThreshold
@@ -1561,7 +1558,7 @@ objects:
                          the Service's methods. For service types that don't support
                          breaking down by method, setting this field will result in an
                          error
-                       item_type: !ruby/object:Api::Type::String
+                       item_type: Api::Type::String
                      - !ruby/object:Api::Type::Array # version
                        name: method
                        description: |
@@ -1570,9 +1567,9 @@ objects:
                          performance for this SLI. If omitted, this SLI applies to all API
                          versions. For service types that don't support breaking down by
                          version, setting this field will result in an error.
-                       item_type: !ruby/object:Api::Type::String
+                       item_type: Api::Type::String
                      - !ruby/object:Api::Type::Array # location
-                       name: method
+                       name: location
                        description: |
                          OPTIONAL: The set of locations to which this SLI is relevant.
                          Telemetry from other locations will not be used to calculate
@@ -1580,13 +1577,14 @@ objects:
                          locations in which the Service has activity. For service types
                          that don't support breaking down by location, setting this field
                          will result in an error.
-                       item_type: !ruby/object:Api::Type::String
-                     - !ruby/object:Api::Type::NestedObject # availability
-                       name: availability
-                       description: |
-                         Good service is defined to be the count of requests made to this
-                         service that return successfully.
-                       properties: {}
+                       item_type: Api::Type::String
+                     # TODO: Empty 'custom' properties is expected but fails with "Field 'custom' properties are nil!"
+                     # - !ruby/object:Api::Type::NestedObject # availability
+                     #   name: availability
+                     #   description: |
+                     #     Good service is defined to be the count of requests made to this
+                     #     service that return successfully.
+                     #   properties: {}
                  - !ruby/object:Api::Type::Double # threshold
                    name: threshold
                    required: true
@@ -1606,13 +1604,13 @@ objects:
                  good if any true values appear in the window.
              - !ruby/object:Api::Type::NestedObject # metricSumInRange
                name: metricSumInRange
-               output: true
                description: |
                  A window is good if the metric's value is in a good range,
                  summed across returned streams.
                properties:
                  - !ruby/object:Api::Type::String
                    name: timeSeries
+                   required: true
                    description: |
                      A monitoring filter
                      (https://cloud.google.com/monitoring/api/v3/filters)
@@ -1620,22 +1618,23 @@ objects:
                      quality.
                  - !ruby/object:Api::Type::NestedObject
                    name: range
-                   output: true
+                   required: true
                    description: |
                      Range of values considered \"good.\" For a one-sided range,
                      set one bound to an infinite value.
                    properties:
                      - !ruby/object:Api::Type::Double
-                       name: 'min'
+                       name: min
+                       required: true
                        description: |
                          Range minimum.
                      - !ruby/object:Api::Type::Double
-                       name: 'max'
+                       name: max
+                       required: true
                        description: |
                          Range maximum.
          - !ruby/object:Api::Type::NestedObject # basicSli
            name: basicSli
-           output: true
            description: |
              An SLI measuring performance on a well-known service type.
              Performance will be computed on the basis of pre-defined metrics.
@@ -1646,19 +1645,18 @@ objects:
            properties:
            - !ruby/object:Api::Type::NestedObject # latency
              name: latency
-             required: true
              description: |
                Good service is defined to be the count of requests made to this
                service that are fast enough with respect to latency.threshold.
              properties:
                - !ruby/object:Api::Type::String # latency
                  name: threshold
+                 required: true
                  description: |
                   Good service is defined to be the count of requests made to
                   this service that return in no more than threshold.
            - !ruby/object:Api::Type::Array # method
              name: method
-             required: false
              description: |
                OPTIONAL: The set of RPCs to which this SLI is relevant.
                Telemetry from other methods will not be used to calculate
@@ -1666,20 +1664,18 @@ objects:
                the Service's methods. For service types that don't support
                breaking down by method, setting this field will result in an
                error
-             item_type: !ruby/object:Api::Type::String
+             item_type: Api::Type::String
            - !ruby/object:Api::Type::Array # version
              name: method
-             required: false
              description: |
                OPTIONAL: The set of API versions to which this SLI is relevant.
                Telemetry from other API versions will not be used to calculate
                performance for this SLI. If omitted, this SLI applies to all API
                versions. For service types that don't support breaking down by
                version, setting this field will result in an error.
-             item_type: !ruby/object:Api::Type::String
+             item_type: Api::Type::String
            - !ruby/object:Api::Type::Array # location
-             name: method
-             required: false
+             name: location
              description: |
                OPTIONAL: The set of locations to which this SLI is relevant.
                Telemetry from other locations will not be used to calculate
@@ -1687,10 +1683,11 @@ objects:
                locations in which the Service has activity. For service types
                that don't support breaking down by location, setting this field
                will result in an error.
-             item_type: !ruby/object:Api::Type::String
-           - !ruby/object:Api::Type::NestedObject # availability
-             name: availability
-             description: |
-               Good service is defined to be the count of requests made to this
-               service that return successfully.
-             properties: {}
+             item_type: Api::Type::String
+           # TODO: Empty 'custom' properties is expected but fails with "Field 'custom' properties are nil!"
+           # - !ruby/object:Api::Type::NestedObject # availability
+           #   name: availability
+           #   description: |
+           #     Good service is defined to be the count of requests made to this
+           #     service that return successfully.
+           #   properties: {}
