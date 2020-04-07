@@ -78,7 +78,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "service-perimeter"
         vars:
           access_level_name: "chromeos_no_lock"
-          service_perimeter_name: "restrict_all"
+          service_perimeter_name: "restrict_storage"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "access_context_manager_service_perimeter_dry-run"
+        skip_test: true
+        primary_resource_id: "service-perimeter"
+        vars:
+          service_perimeter_name: "restrict_bigquery_dryrun_storage"
     properties:
       parent: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
