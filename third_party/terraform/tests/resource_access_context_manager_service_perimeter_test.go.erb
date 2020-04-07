@@ -71,6 +71,14 @@ func testAccAccessContextManagerServicePerimeter_updateTest(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccAccessContextManagerServicePerimeter_updateAllowed(org, "my policy", "level", "perimeter"),
+			},
+			{
+				ResourceName:      "google_access_context_manager_service_perimeter.test-access",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
