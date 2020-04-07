@@ -167,6 +167,7 @@ func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.Resour
 		return defaultMatch && b.String() == i.Body
 	})
 	config.client.Transport = rec
+	config.wrappedPubsubClient.Transport = rec
 	configs[testName] = config
 	return config, err
 }
@@ -186,11 +187,9 @@ func closeRecorder(t *testing.T) {
 }
 
 func getTestAccProviders(testName string) map[string]terraform.ResourceProvider {
-	prov := testAccProvider
+	prov := Provider().(*schema.Provider)
 	provRand := random.Provider().(*schema.Provider)
-	envPath := os.Getenv("VCR_PATH")
-	recordingMode := os.Getenv("VCR_MODE")
-	if envPath != "" && recordingMode != "" {
+	if isVcrEnabled() {
 		old := prov.ConfigureFunc
 		prov.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
 			return getCachedConfig(d, old, testName)
@@ -205,14 +204,27 @@ func getTestAccProviders(testName string) map[string]terraform.ResourceProvider 
 	}
 }
 
+func isVcrEnabled() bool {
+	envPath := os.Getenv("VCR_PATH")
+	vcrMode := os.Getenv("VCR_MODE")
+	return envPath != "" && vcrMode != ""
+}
+
 // Wrapper for resource.Test to swap out providers for VCR providers and handle VCR specific things
 // Can be called when VCR is not enabled, and it will behave as normal
-func vcrTest(t *testing.T, c resource.TestCase, destroyFuncProducer func(provider *schema.Provider) func(s *terraform.State) error) {
+func vcrTest(t *testing.T, c resource.TestCase) {
 	providers := getTestAccProviders(t.Name())
 	c.Providers = providers
 	defer closeRecorder(t)
-	c.CheckDestroy = destroyFuncProducer(providers["google"].(*schema.Provider))
 	resource.Test(t, c)
+}
+
+// Destroy checks rely on a provider that has already been configured
+// This must go through a VCR provider during VCR testing, but cannot use
+// getTestAccProviders which creates a new provider which hasn't been used
+func getGoogleProvider(t *testing.T) *schema.Provider {
+	providers := getTestAccProviders(t.Name())
+	return providers["google"].(*schema.Provider)
 }
 
 // Produces a rand.Source for VCR testing based on the given mode.
@@ -279,11 +291,11 @@ func writeSeedToFile(seed int64, fileName string) error {
 }
 
 func randString(t *testing.T, length int) string {
-	envPath := os.Getenv("VCR_PATH")
-	vcrMode := os.Getenv("VCR_MODE")
-	if envPath == "" || vcrMode == "" {
+	if !isVcrEnabled() {
 		return acctest.RandString(10)
 	}
+	envPath := os.Getenv("VCR_PATH")
+	vcrMode := os.Getenv("VCR_MODE")
 	s, err := vcrSource(t, envPath, vcrMode)
 	if err != nil {
 		// At this point we haven't created any resources, so fail fast
