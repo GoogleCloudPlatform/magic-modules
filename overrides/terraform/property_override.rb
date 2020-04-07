@@ -82,7 +82,7 @@ module Overrides
           # Defaults to expandString.
           :key_expander,
 
-          # For a TypeMap, the DSF to apply to the ker.
+          # For a TypeMap, the DSF to apply to the key.
           :key_diff_suppress_func,
 
           # ====================
