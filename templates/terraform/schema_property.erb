@@ -122,6 +122,9 @@
 			"<%= property.key_name -%>": {
 				Type:     schema.TypeString,
 				Required: true,
+				<% if !property.diff_suppress_func.nil? -%>
+					DiffSuppressFunc: <%= property.key_diff_suppress_func %>,
+				<% end -%>
 				<% if force_new?(property, object) -%>
 				ForceNew: true,
 				<% end -%>
