@@ -10,7 +10,7 @@ func expandSourceRepoRepositoryPubsubConfigsTopic(v interface{}, d TerraformReso
 	}
 
 	if ok {
-			return v.(string), nil
+		return v.(string), nil
 	}
 
 	project, err := getProject(d, config)
