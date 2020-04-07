@@ -1143,3 +1143,571 @@ objects:
         description: Values for all of the labels listed in the associated
           monitored resource descriptor. For example, Compute Engine VM instances use
           the labels "project_id", "instance_id", and "zone".
+
+
+  - !ruby/object:Api::Resource
+    name: 'Service'
+    base_url: projects/{{project}}/services
+    self_link: "{{name}}"
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A Service is a discrete, autonomous, and network-accessible unit,
+      designed to solve an individual concern (Wikipedia
+      (https://en.wikipedia.org/wiki/Service-orientation)).
+      In Cloud Monitoring, a Service acts as the root resource under which
+      operational aspects of the service are accessible.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/monitoring/service-monitoring/'
+      api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services'
+    properties:
+      - !ruby/object:Api::Type::String # name
+        name: name
+        description: |
+          Resource name for this Service.
+          The format is: projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]
+        output: true
+      - !ruby/object:Api::Type::String # displayName
+        name: 'displayName'
+        description: |
+          Name used for UI elements listing this Service.
+        required: true
+      - !ruby/object:Api::Type::NestedObject # meshIstio
+        name: meshIstio
+        description: |
+          Type used for Istio services scoped to an Istio mesh.
+        output: true
+        properties:
+         - !ruby/object:Api::Type::String # serviceNamespace
+           name: serviceNamespace
+           output: true
+           description: |
+             The namespace of the Istio service underlying this service.
+             Corresponds to the destination_service_namespace metric label in
+             Istio metrics.
+         - !ruby/object:Api::Type::String # serviceName
+           name: serviceName
+           output: true
+           description: |
+             The name of the Istio service underlying this service. Corresponds
+             to the destination_service_name metric label in Istio metrics.
+         - !ruby/object:Api::Type::String # meshUid
+           name: meshUid
+           output: true
+           description: |
+             Identifier for the mesh in which this Istio service is defined.
+             Corresponds to the mesh_uid metric label in Istio metrics.
+      - !ruby/object:Api::Type::NestedObject # telemetry
+        name: telemetry
+        description: |
+          Configuration for how to query telemetry on a Service.
+        output: true
+        properties:
+         - !ruby/object:Api::Type::String # resourceName
+           name: resourceName
+           output: true
+           description: |
+            The full name of the resource that defines this service.
+            Formatted as described in https://cloud.google.com/apis/design/resource_names.
+      - !ruby/object:Api::Type::NestedObject # cloudEndpoints
+        name: cloudEndpoints
+        description: |
+          Type used for Cloud Endpoints services.
+        output: true
+        properties:
+         - !ruby/object:Api::Type::String # service
+           name: service
+           output: true
+           description: |
+             The name of the Cloud Endpoints service underlying this service.
+             Corresponds to the service resource label in the api monitored
+             resource: https://cloud.google.com/monitoring/api/resources#tag_api
+      - !ruby/object:Api::Type::NestedObject # appEngine
+        name: appEngine
+        description: |
+          Type used for App Engine services.
+        output: true
+        properties:
+         - !ruby/object:Api::Type::String # moduleId
+           name: moduleId
+           output: true
+           description: |
+              The ID of the App Engine module underlying this service.
+              Corresponds to the module_id resource label in the gae_app
+              monitored resource:
+                https://cloud.google.com/monitoring/api/resources#tag_gae_app"
+      - !ruby/object:Api::Type::NestedObject # clusterIstio
+        name: clusterIstio
+        description: |
+          Type used for Istio services that live in a Kubernetes cluster.
+        output: true
+        properties:
+         - !ruby/object:Api::Type::String # clusterName
+           name: clusterName
+           output: true
+           description: |
+             The name of the Kubernetes cluster in which this Istio service is
+             defined. Corresponds to the cluster_name resource label in
+             k8s_cluster resources.
+         - !ruby/object:Api::Type::String # serviceNamespace
+           output: true
+           name: serviceNamespace
+           description: |
+             The namespace of the Kubernetes namespace underlying this service.
+             Corresponds to the destination_service_namespace metric label in
+             Istio metrics.
+         - !ruby/object:Api::Type::String # location
+           output: true
+           name: location
+           description: |
+             The location of the Kubernetes cluster in which this Istio service
+             is defined. Corresponds to the location resource label in
+             k8s_cluster resources.
+         - !ruby/object:Api::Type::String # serviceName
+           output: true
+           name: serviceName
+           description: |
+             The namespace of the Istio service underlying this service.
+             Corresponds to the destination_service_namespace metric label in
+             Istio metrics.
+      - !ruby/object:Api::Type::NestedObject # custom
+        name: custom
+        description: |
+          Custom service type.
+        output: true
+        properties: {}
+
+
+  - !ruby/object:Api::Resource
+    name: 'ServiceLevelObjective'
+    base_url: projects/{{project}}/services/{{service_id}}/serviceLevelObjectives
+    self_link: "{{name}}"
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A Service-Level Objective (SLO) describes a level of desired good service.
+      It consists of a service-level indicator (SLI), a performance goal, and a
+      period over which the objective is to be evaluated against that goal.
+      The SLO can use SLIs defined in a number of different manners.
+      Typical SLOs might include "99% of requests in each rolling week have
+      latency below 200 milliseconds" or "99.5% of requests in each calendar
+      month return successfully."
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/monitoring/service-monitoring/'
+      api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services.serviceLevelObjectives'
+    properties:
+      - !ruby/object:Api::Type::String # name
+        name: name
+        description: |
+          Resource name for this ServiceLevelObjective.
+          The format is: projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]/serviceLevelObjectives/[SLO_NAME]
+        output: true
+      - !ruby/object:Api::Type::String # displayName
+        name: 'displayName'
+        description: |
+          Name used for UI elements listing this SLO.
+        output: true
+        required: true
+      - !ruby/object:Api::Type::Enum # calendarPeriod
+        name: calendarPeriod
+        output: true
+        description: |
+          A day.
+          A week. Weeks begin on Monday, following
+          ISO 8601 (https://en.wikipedia.org/wiki/ISO_week_date).
+          A fortnight. The first calendar fortnight of the year begins at
+          the start of week 1 according to
+          ISO 8601 (https://en.wikipedia.org/wiki/ISO_week_date).
+          A month.
+          A quarter. Quarters start on dates 1-Jan, 1-Apr, 1-Jul, and 1-Oct
+          of each year.
+          A half-year. Half-years start on dates 1-Jan and 1-Jul.
+          A year.
+        values:
+          - :CALENDAR_PERIOD_UNSPECIFIED
+          - :DAY
+          - :WEEK
+          - :FORTNIGHT
+          - :MONTH
+          - :QUARTER
+          - :HALF
+          - :YEAR
+      - !ruby/object:Api::Type::String # rollingPeriod
+        name: rollingPeriod
+        output: true
+        description: |
+          A rolling time period. Must be an integer multiple of 1 day no larger
+          than 30 days.
+        output: true
+      - !ruby/object:Api::Type::Double # goal
+        name: goal
+        description: |
+          The fraction of service that must be good in order for this objective
+          to be met. Example: 0.999.
+        output: true
+        required: true
+      - !ruby/object:Api::Type::NestedObject # serviceLevelIndicator
+        name: serviceLevelIndicator
+        description: |
+          The definition of good service, used to measure and calculate the
+          quality of the Service's performance with respect to a single aspect
+          of service quality.
+        required: true
+        output: true
+        properties:
+         - !ruby/object:Api::Type::NestedObject # requestBased
+           name: requestBased
+           output: true
+           description: |
+             Service Level Indicators for which atomic units of service are
+             counted directly.
+           properties:
+             - !ruby/object:Api::Type::NestedObject # goodTotalRatio
+               name: goodTotalRatio
+               output: true
+               description: |
+                 good_total_ratio is used when the ratio of good_service to
+                 total_service is computed from two TimeSeries.
+               properties:
+                - !ruby/object:Api::Type::String # goodServiceFilter
+                  name: 'goodServiceFilter'
+                  description: |
+                    A monitoring filter
+                    (https://cloud.google.com/monitoring/api/v3/filters)
+                    specifying a TimeSeries quantifying good service provided.
+                    Must have ValueType = DOUBLE or ValueType = INT64 and must
+                    have MetricKind =\nDELTA or MetricKind = CUMULATIVE.
+                - !ruby/object:Api::Type::String # badServiceFilter
+                  name: 'badServiceFilter'
+                  description: |
+                    A monitoring filter
+                    (https://cloud.google.com/monitoring/api/v3/filters)
+                    specifying a TimeSeries quantifying bad service, either
+                    demanded service that was not provided or demanded service
+                    that was of inadequate quality.
+                    Must have ValueType = DOUBLE or ValueType = INT64 and must
+                    have MetricKind =\nDELTA or MetricKind = CUMULATIVE.
+                - !ruby/object:Api::Type::String # totalServiceFilter
+                  name: 'totalServiceFilter'
+                  description: |
+                    A monitoring filter
+                    (https://cloud.google.com/monitoring/api/v3/filters)
+                    specifying a TimeSeries quantifying total demanded service.
+                    Must have ValueType = DOUBLE or ValueType = INT64 and must
+                    have MetricKind =\nDELTA or MetricKind = CUMULATIVE.
+             - !ruby/object:Api::Type::NestedObject # distributionCut
+               name: distributionCut
+               output: true
+               description: |
+                 distribution_cut is used when good_service is a count of values
+                 aggregated in a Distribution that fall into a good range.
+                 The total_service is the total count of all values aggregated
+                 in the Distribution.
+               properties:
+                - !ruby/object:Api::Type::NestedObject # range
+                  name: range
+                  output: true
+                  required: true
+                  description: |
+                    Range of values considered \"good.\" For a one-sided range,
+                    set one bound to an infinite value.
+                  properties:
+                    - !ruby/object:Api::Type::Double
+                      name: 'min'
+                      required: true
+                      description: |
+                        Range minimum.
+                    - !ruby/object:Api::Type::Double
+                      name: 'max'
+                      required: true
+                      description: |
+                        Range maximum.
+                - !ruby/object:Api::Type::String # distributionFilter
+                  name: distributionFilter
+                  output: true
+                  required: true
+                  description: |
+                    A monitoring filter
+                    (https://cloud.google.com/monitoring/api/v3/filters)
+                    specifying a TimeSeries aggregating values.
+                    Must have ValueType =\nDISTRIBUTION and MetricKind = DELTA
+                    or MetricKind = CUMULATIVE.
+         - !ruby/object:Api::Type::NestedObject # windowBased
+           name: windowsBased
+           output: true
+           description: |
+             Windows-based SLIs.
+           properties:
+             - !ruby/object:Api::Type::NestedObject # metricMeanInRange
+               name: metricMeanInRange
+               output: true
+               description: |
+                 A window is good if the metric's value is in a good range,
+                 averaged across returned streams.
+               properties:
+                 - !ruby/object:Api::Type::String # timeSeries
+                   name: timeSeries
+                   description: |
+                     A monitoring filter
+                     (https://cloud.google.com/monitoring/api/v3/filters)
+                     specifying the TimeSeries to use for evaluating window
+                     quality.
+                 - !ruby/object:Api::Type::NestedObject # range
+                   name: range
+                   output: true
+                   description: |
+                     Range of values considered \"good.\" For a one-sided range,
+                     set one bound to an infinite value.
+                   properties:
+                     - !ruby/object:Api::Type::Double
+                       name: 'min'
+                       description: |
+                         Range minimum.
+                     - !ruby/object:Api::Type::Double
+                       name: 'max'
+                       description: |
+                         Range maximum.
+             - !ruby/object:Api::Type::NestedObject # goodTotalRatioThreshold
+               name: goodTotalRatioThreshold
+               output: true
+               description: |
+                 A window is good if its performance is high enough."
+               properties:
+                 - !ruby/object:Api::Type::NestedObject # performance
+                   name: performance
+                   output: true
+                   description: |
+                     RequestBasedSli to evaluate to judge window quality.
+                   properties:
+                     - !ruby/object:Api::Type::NestedObject # goodTotalRatio
+                       name: goodTotalRatio
+                       output: true
+                       description: |
+                         good_total_ratio is used when the ratio of good_service to
+                         total_service is computed from two TimeSeries.
+                       properties:
+                        - !ruby/object:Api::Type::String # goodServiceFilter
+                          name: 'goodServiceFilter'
+                          description: |
+                            A monitoring filter
+                            (https://cloud.google.com/monitoring/api/v3/filters)
+                            specifying a TimeSeries quantifying good service provided.
+                            Must have ValueType = DOUBLE or ValueType = INT64 and must
+                            have MetricKind =\nDELTA or MetricKind = CUMULATIVE.
+                        - !ruby/object:Api::Type::String # badServiceFilter
+                          name: 'badServiceFilter'
+                          description: |
+                            A monitoring filter
+                            (https://cloud.google.com/monitoring/api/v3/filters)
+                            specifying a TimeSeries quantifying bad service, either
+                            demanded service that was not provided or demanded service
+                            that was of inadequate quality.
+                            Must have ValueType = DOUBLE or ValueType = INT64 and must
+                            have MetricKind =\nDELTA or MetricKind = CUMULATIVE.
+                        - !ruby/object:Api::Type::String # totalServiceFilter
+                          name: 'totalServiceFilter'
+                          description: |
+                            A monitoring filter
+                            (https://cloud.google.com/monitoring/api/v3/filters)
+                            specifying a TimeSeries quantifying total demanded service.
+                            Must have ValueType = DOUBLE or ValueType = INT64 and must
+                            have MetricKind =\nDELTA or MetricKind = CUMULATIVE.
+                     - !ruby/object:Api::Type::NestedObject # distributionCut
+                       name: distributionCut
+                       output: true
+                       description: |
+                         distribution_cut is used when good_service is a count of values
+                         aggregated in a Distribution that fall into a good range.
+                         The total_service is the total count of all values aggregated
+                         in the Distribution.
+                       properties:
+                        - !ruby/object:Api::Type::NestedObject # range
+                          name: range
+                          output: true
+                          description: |
+                            Range of values considered \"good.\" For a one-sided range,
+                            set one bound to an infinite value.
+                          properties:
+                            - !ruby/object:Api::Type::Double
+                              name: 'min'
+                              description: |
+                                Range minimum.
+                            - !ruby/object:Api::Type::Double
+                              name: 'max'
+                              description: |
+                                Range maximum.
+                        - !ruby/object:Api::Type::String # distributionFilter
+                          name: distributionFilter
+                          description: |
+                            A monitoring filter
+                            (https://cloud.google.com/monitoring/api/v3/filters)
+                            specifying a TimeSeries aggregating values.
+                            Must have ValueType =\nDISTRIBUTION and MetricKind = DELTA
+                            or MetricKind = CUMULATIVE.
+                 - !ruby/object:Api::Type::NestedObject # basicSliPerformance
+                   name: basicSliPerformance
+                   output: true
+                   description: |
+                     BasicSli to evaluate to judge window quality."
+                   properties:
+                     - !ruby/object:Api::Type::NestedObject # latency
+                       name: latency
+                       required: true
+                       description: |
+                         Good service is defined to be the count of requests made to this
+                         service that are fast enough with respect to latency.threshold.
+                       properties:
+                         - !ruby/object:Api::Type::String # latency
+                           name: threshold
+                           description: |
+                            Good service is defined to be the count of requests made to
+                            this service that return in no more than threshold.
+                     - !ruby/object:Api::Type::Array # method
+                       name: method
+                       required: false
+                       description: |
+                         OPTIONAL: The set of RPCs to which this SLI is relevant.
+                         Telemetry from other methods will not be used to calculate
+                         performance for this SLI. If omitted, this SLI applies to all
+                         the Service's methods. For service types that don't support
+                         breaking down by method, setting this field will result in an
+                         error
+                       item_type: !ruby/object:Api::Type::String
+                     - !ruby/object:Api::Type::Array # version
+                       name: method
+                       required: false
+                       description: |
+                         OPTIONAL: The set of API versions to which this SLI is relevant.
+                         Telemetry from other API versions will not be used to calculate
+                         performance for this SLI. If omitted, this SLI applies to all API
+                         versions. For service types that don't support breaking down by
+                         version, setting this field will result in an error.
+                       item_type: !ruby/object:Api::Type::String
+                     - !ruby/object:Api::Type::Array # location
+                       name: method
+                       required: false
+                       description: |
+                         OPTIONAL: The set of locations to which this SLI is relevant.
+                         Telemetry from other locations will not be used to calculate
+                         performance for this SLI. If omitted, this SLI applies to all
+                         locations in which the Service has activity. For service types
+                         that don't support breaking down by location, setting this field
+                         will result in an error.
+                       item_type: !ruby/object:Api::Type::String
+                     - !ruby/object:Api::Type::NestedObject # availability
+                       name: availability
+                       description: |
+                         Good service is defined to be the count of requests made to this
+                         service that return successfully.
+                       properties: {}
+                 - !ruby/object:Api::Type::Double # threshold
+                   name: threshold
+                   description: If window performance \u003e= threshold, the
+                    window is counted as good.
+             - !ruby/object:Api::Type::String # windowPeriod
+               name: windowPeriod
+               output: true
+               description: |
+                 Duration over which window quality is evaluated.
+                 Must be an integer fraction of a day and at least 60s.
+             - !ruby/object:Api::Type::String # goodBadMetricFilter
+               name: goodBadMetricFilter
+               description: |
+                 A monitoring filter
+                 (https://cloud.google.com/monitoring/api/v3/filters)
+                 specifying a TimeSeries with ValueType = BOOL. The window is
+                 good if any true values appear in the window.
+             - !ruby/object:Api::Type::NestedObject # metricSumInRange
+               name: metricSumInRange
+               output: true
+               description: |
+                 A window is good if the metric's value is in a good range,
+                 summed across returned streams.
+               properties:
+                 - !ruby/object:Api::Type::String
+                   name: timeSeries
+                   description: |
+                     A monitoring filter
+                     (https://cloud.google.com/monitoring/api/v3/filters)
+                     specifying the TimeSeries to use for evaluating window
+                     quality.
+                 - !ruby/object:Api::Type::NestedObject
+                   name: range
+                   output: true
+                   description: |
+                     Range of values considered \"good.\" For a one-sided range,
+                     set one bound to an infinite value.
+                   properties:
+                     - !ruby/object:Api::Type::Double
+                       name: 'min'
+                       description: |
+                         Range minimum.
+                     - !ruby/object:Api::Type::Double
+                       name: 'max'
+                       description: |
+                         Range maximum.
+         - !ruby/object:Api::Type::NestedObject # basicSli
+           name: basicSli
+           output: true
+           description: |
+             An SLI measuring performance on a well-known service type.
+             Performance will be computed on the basis of pre-defined metrics.
+             The type of the service_resource determines the metrics to use and
+             the service_resource.labels and metric_labels are used to construct
+             a monitoring filter to filter that metric down to just the data
+             relevant to this service.
+           properties:
+           - !ruby/object:Api::Type::NestedObject # latency
+             name: latency
+             required: true
+             description: |
+               Good service is defined to be the count of requests made to this
+               service that are fast enough with respect to latency.threshold.
+             properties:
+               - !ruby/object:Api::Type::String # latency
+                 name: threshold
+                 description: |
+                  Good service is defined to be the count of requests made to
+                  this service that return in no more than threshold.
+           - !ruby/object:Api::Type::Array # method
+             name: method
+             required: false
+             description: |
+               OPTIONAL: The set of RPCs to which this SLI is relevant.
+               Telemetry from other methods will not be used to calculate
+               performance for this SLI. If omitted, this SLI applies to all
+               the Service's methods. For service types that don't support
+               breaking down by method, setting this field will result in an
+               error
+             item_type: !ruby/object:Api::Type::String
+           - !ruby/object:Api::Type::Array # version
+             name: method
+             required: false
+             description: |
+               OPTIONAL: The set of API versions to which this SLI is relevant.
+               Telemetry from other API versions will not be used to calculate
+               performance for this SLI. If omitted, this SLI applies to all API
+               versions. For service types that don't support breaking down by
+               version, setting this field will result in an error.
+             item_type: !ruby/object:Api::Type::String
+           - !ruby/object:Api::Type::Array # location
+             name: method
+             required: false
+             description: |
+               OPTIONAL: The set of locations to which this SLI is relevant.
+               Telemetry from other locations will not be used to calculate
+               performance for this SLI. If omitted, this SLI applies to all
+               locations in which the Service has activity. For service types
+               that don't support breaking down by location, setting this field
+               will result in an error.
+             item_type: !ruby/object:Api::Type::String
+           - !ruby/object:Api::Type::NestedObject # availability
+             name: availability
+             description: |
+               Good service is defined to be the count of requests made to this
+               service that return successfully.
+             properties: {}
