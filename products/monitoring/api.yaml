@@ -1146,7 +1146,7 @@ objects:
 
 
   - !ruby/object:Api::Resource
-    name: 'Service'
+    name: Service
     base_url: projects/{{project}}/services
     self_link: "{{name}}"
     update_verb: :PATCH
@@ -1178,24 +1178,23 @@ objects:
         name: meshIstio
         description: |
           Type used for Istio services scoped to an Istio mesh.
-        output: true
         properties:
          - !ruby/object:Api::Type::String # serviceNamespace
            name: serviceNamespace
-           output: true
+           required: true
            description: |
              The namespace of the Istio service underlying this service.
              Corresponds to the destination_service_namespace metric label in
              Istio metrics.
          - !ruby/object:Api::Type::String # serviceName
            name: serviceName
-           output: true
+           required: true
            description: |
              The name of the Istio service underlying this service. Corresponds
              to the destination_service_name metric label in Istio metrics.
          - !ruby/object:Api::Type::String # meshUid
            name: meshUid
-           output: true
+           required: true
            description: |
              Identifier for the mesh in which this Istio service is defined.
              Corresponds to the mesh_uid metric label in Istio metrics.
@@ -1203,11 +1202,10 @@ objects:
         name: telemetry
         description: |
           Configuration for how to query telemetry on a Service.
-        output: true
         properties:
          - !ruby/object:Api::Type::String # resourceName
            name: resourceName
-           output: true
+           required: true
            description: |
             The full name of the resource that defines this service.
             Formatted as described in https://cloud.google.com/apis/design/resource_names.
@@ -1215,11 +1213,10 @@ objects:
         name: cloudEndpoints
         description: |
           Type used for Cloud Endpoints services.
-        output: true
         properties:
          - !ruby/object:Api::Type::String # service
            name: service
-           output: true
+           required: true
            description: |
              The name of the Cloud Endpoints service underlying this service.
              Corresponds to the service resource label in the api monitored
@@ -1228,11 +1225,10 @@ objects:
         name: appEngine
         description: |
           Type used for App Engine services.
-        output: true
         properties:
          - !ruby/object:Api::Type::String # moduleId
            name: moduleId
-           output: true
+           required: true
            description: |
               The ID of the App Engine module underlying this service.
               Corresponds to the module_id resource label in the gae_app
@@ -1242,46 +1238,46 @@ objects:
         name: clusterIstio
         description: |
           Type used for Istio services that live in a Kubernetes cluster.
-        output: true
         properties:
          - !ruby/object:Api::Type::String # clusterName
            name: clusterName
-           output: true
+           required: true
            description: |
              The name of the Kubernetes cluster in which this Istio service is
              defined. Corresponds to the cluster_name resource label in
              k8s_cluster resources.
          - !ruby/object:Api::Type::String # serviceNamespace
-           output: true
+           required: true
            name: serviceNamespace
            description: |
              The namespace of the Kubernetes namespace underlying this service.
              Corresponds to the destination_service_namespace metric label in
              Istio metrics.
          - !ruby/object:Api::Type::String # location
-           output: true
+           required: true
            name: location
            description: |
              The location of the Kubernetes cluster in which this Istio service
              is defined. Corresponds to the location resource label in
              k8s_cluster resources.
          - !ruby/object:Api::Type::String # serviceName
-           output: true
+           required: true
            name: serviceName
            description: |
              The namespace of the Istio service underlying this service.
              Corresponds to the destination_service_namespace metric label in
              Istio metrics.
-      - !ruby/object:Api::Type::NestedObject # custom
-        name: custom
-        description: |
-          Custom service type.
-        output: true
-        properties: {}
+      # TODO: Empty 'custom' properties is expected but fails with "Field 'custom' properties are nil!"
+      # - !ruby/object:Api::Type::NestedObject # custom
+      #   name: custom
+      #   description: |
+      #     Custom service type.
+      #   output: true
+      #   properties: []
 
 
   - !ruby/object:Api::Resource
-    name: 'ServiceLevelObjective'
+    name: ServiceLevelObjective
     base_url: projects/{{project}}/services/{{service_id}}/serviceLevelObjectives
     self_link: "{{name}}"
     update_verb: :PATCH
@@ -1310,7 +1306,6 @@ objects:
         name: 'displayName'
         description: |
           Name used for UI elements listing this SLO.
-        output: true
         required: true
       - !ruby/object:Api::Type::Enum # calendarPeriod
         name: calendarPeriod
@@ -1342,13 +1337,11 @@ objects:
         description: |
           A rolling time period. Must be an integer multiple of 1 day no larger
           than 30 days.
-        output: true
       - !ruby/object:Api::Type::Double # goal
         name: goal
         description: |
           The fraction of service that must be good in order for this objective
           to be met. Example: 0.999.
-        output: true
         required: true
       - !ruby/object:Api::Type::NestedObject # serviceLevelIndicator
         name: serviceLevelIndicator
@@ -1357,18 +1350,15 @@ objects:
           quality of the Service's performance with respect to a single aspect
           of service quality.
         required: true
-        output: true
         properties:
          - !ruby/object:Api::Type::NestedObject # requestBased
            name: requestBased
-           output: true
            description: |
              Service Level Indicators for which atomic units of service are
              counted directly.
            properties:
              - !ruby/object:Api::Type::NestedObject # goodTotalRatio
                name: goodTotalRatio
-               output: true
                description: |
                  good_total_ratio is used when the ratio of good_service to
                  total_service is computed from two TimeSeries.
@@ -1401,7 +1391,6 @@ objects:
                     have MetricKind =\nDELTA or MetricKind = CUMULATIVE.
              - !ruby/object:Api::Type::NestedObject # distributionCut
                name: distributionCut
-               output: true
                description: |
                  distribution_cut is used when good_service is a count of values
                  aggregated in a Distribution that fall into a good range.
@@ -1438,19 +1427,18 @@ objects:
                     or MetricKind = CUMULATIVE.
          - !ruby/object:Api::Type::NestedObject # windowBased
            name: windowsBased
-           output: true
            description: |
              Windows-based SLIs.
            properties:
              - !ruby/object:Api::Type::NestedObject # metricMeanInRange
                name: metricMeanInRange
-               output: true
                description: |
                  A window is good if the metric's value is in a good range,
                  averaged across returned streams.
                properties:
                  - !ruby/object:Api::Type::String # timeSeries
                    name: timeSeries
+                   required: true
                    description: |
                      A monitoring filter
                      (https://cloud.google.com/monitoring/api/v3/filters)
@@ -1458,7 +1446,7 @@ objects:
                      quality.
                  - !ruby/object:Api::Type::NestedObject # range
                    name: range
-                   output: true
+                   required: true
                    description: |
                      Range of values considered \"good.\" For a one-sided range,
                      set one bound to an infinite value.
@@ -1473,19 +1461,16 @@ objects:
                          Range maximum.
              - !ruby/object:Api::Type::NestedObject # goodTotalRatioThreshold
                name: goodTotalRatioThreshold
-               output: true
                description: |
                  A window is good if its performance is high enough."
                properties:
                  - !ruby/object:Api::Type::NestedObject # performance
                    name: performance
-                   output: true
                    description: |
                      RequestBasedSli to evaluate to judge window quality.
                    properties:
                      - !ruby/object:Api::Type::NestedObject # goodTotalRatio
                        name: goodTotalRatio
-                       output: true
                        description: |
                          good_total_ratio is used when the ratio of good_service to
                          total_service is computed from two TimeSeries.
@@ -1518,7 +1503,6 @@ objects:
                             have MetricKind =\nDELTA or MetricKind = CUMULATIVE.
                      - !ruby/object:Api::Type::NestedObject # distributionCut
                        name: distributionCut
-                       output: true
                        description: |
                          distribution_cut is used when good_service is a count of values
                          aggregated in a Distribution that fall into a good range.
@@ -1527,21 +1511,24 @@ objects:
                        properties:
                         - !ruby/object:Api::Type::NestedObject # range
                           name: range
-                          output: true
+                          required: true
                           description: |
                             Range of values considered \"good.\" For a one-sided range,
                             set one bound to an infinite value.
                           properties:
                             - !ruby/object:Api::Type::Double
                               name: 'min'
+                              required: true
                               description: |
                                 Range minimum.
                             - !ruby/object:Api::Type::Double
                               name: 'max'
+                              required: true
                               description: |
                                 Range maximum.
                         - !ruby/object:Api::Type::String # distributionFilter
                           name: distributionFilter
+                          required: true
                           description: |
                             A monitoring filter
                             (https://cloud.google.com/monitoring/api/v3/filters)
@@ -1550,25 +1537,23 @@ objects:
                             or MetricKind = CUMULATIVE.
                  - !ruby/object:Api::Type::NestedObject # basicSliPerformance
                    name: basicSliPerformance
-                   output: true
                    description: |
                      BasicSli to evaluate to judge window quality."
                    properties:
                      - !ruby/object:Api::Type::NestedObject # latency
                        name: latency
-                       required: true
                        description: |
                          Good service is defined to be the count of requests made to this
                          service that are fast enough with respect to latency.threshold.
                        properties:
                          - !ruby/object:Api::Type::String # latency
                            name: threshold
+                           required: true
                            description: |
                             Good service is defined to be the count of requests made to
                             this service that return in no more than threshold.
                      - !ruby/object:Api::Type::Array # method
                        name: method
-                       required: false
                        description: |
                          OPTIONAL: The set of RPCs to which this SLI is relevant.
                          Telemetry from other methods will not be used to calculate
@@ -1579,7 +1564,6 @@ objects:
                        item_type: !ruby/object:Api::Type::String
                      - !ruby/object:Api::Type::Array # version
                        name: method
-                       required: false
                        description: |
                          OPTIONAL: The set of API versions to which this SLI is relevant.
                          Telemetry from other API versions will not be used to calculate
@@ -1589,7 +1573,6 @@ objects:
                        item_type: !ruby/object:Api::Type::String
                      - !ruby/object:Api::Type::Array # location
                        name: method
-                       required: false
                        description: |
                          OPTIONAL: The set of locations to which this SLI is relevant.
                          Telemetry from other locations will not be used to calculate
@@ -1606,11 +1589,11 @@ objects:
                        properties: {}
                  - !ruby/object:Api::Type::Double # threshold
                    name: threshold
+                   required: true
                    description: If window performance \u003e= threshold, the
                     window is counted as good.
              - !ruby/object:Api::Type::String # windowPeriod
                name: windowPeriod
-               output: true
                description: |
                  Duration over which window quality is evaluated.
                  Must be an integer fraction of a day and at least 60s.
