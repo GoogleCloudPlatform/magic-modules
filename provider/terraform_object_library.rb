@@ -128,6 +128,8 @@ module Provider
                         'third_party/terraform/utils/batcher.go'],
                        ['google/retry_utils.go',
                         'third_party/terraform/utils/retry_utils.go'],
+                       ['google/source_repo_utils.go',
+                        'third_party/terraform/utils/source_repo_utils.go'],
                        ['google/retry_transport.go',
                         'third_party/terraform/utils/retry_transport.go'],
                        ['google/error_retry_predicates.go',
