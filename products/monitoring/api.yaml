@@ -917,6 +917,52 @@ objects:
         to receive notifications from the same set of alerting policies on the channel
         at some point in the future.
 
+  - !ruby/object:Api::Resource
+    name: Service
+    base_url: projects/{{project}}/services
+    create_url: projects/{{project}}/services?serviceId={{service_id}}
+    self_link: "{{name}}"
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A Service is a discrete, autonomous, and network-accessible unit,
+      designed to solve an individual concern (Wikipedia). In Cloud Monitoring,
+      a Service acts as the root resource under which operational aspects of
+      the service are accessible
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Service Monitoring': 'https://cloud.google.com/monitoring/service-monitoring'
+        'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
+      api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services'
+    parameters:
+    - !ruby/object:Api::Type::String
+      name: serviceId
+      description: |
+        An optional service ID to use. If not given, the server will generate a
+        service ID.
+      input: true
+    properties:
+    - !ruby/object:Api::Type::String
+      name: name
+      description: |
+        The full resource name for this service. The syntax is:
+        projects/[PROJECT_ID]/services/[SERVICE_ID].
+      output: true
+    - !ruby/object:Api::Type::String
+      name: displayName
+      description: |
+        Name used for UI elements listing this Service.
+    - !ruby/object:Api::Type::NestedObject
+      name: telemetry
+      description: |
+        Configuration for how to query telemetry on a Service.
+      properties:
+        - !ruby/object:Api::Type::String
+          name: resourceName
+          description: |
+            The full name of the resource that defines this service.
+            Formatted as described in
+            https://cloud.google.com/apis/design/resource_names.
 
   - !ruby/object:Api::Resource
     name: UptimeCheckConfig
