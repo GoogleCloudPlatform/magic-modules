@@ -3,6 +3,6 @@ resource "google_monitoring_service" "<%= ctx[:primary_resource_id] -%>" {
   display_name = "My Custom Service <%= ctx[:vars]['service_id'] -%>"
 
   telemetry {
-  	resource_name = "<%= ctx[:vars]['service_id'] -%>"
+  	resource_name = "<%= ctx[:vars]['resource_name'] -%>"
   }
 }

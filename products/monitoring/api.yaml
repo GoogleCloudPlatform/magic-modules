@@ -925,18 +925,23 @@ objects:
     update_verb: :PATCH
     update_mask: true
     description: |
+      A Service is a discrete, autonomous, and network-accessible unit,
+      designed to solve an individual concern (Wikipedia). In Cloud Monitoring,
+      a Service acts as the root resource under which operational aspects of
+      the service are accessible
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Service Monitoring': 'https://cloud.google.com/monitoring/service-monitoring'
         'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
       api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services'
-    properties:
+    parameters:
     - !ruby/object:Api::Type::String
       name: serviceId
       description: |
-        An service ID to use.
-      url_param_only: true
+        An optional service ID to use. If not given, the server will generate a
+        service ID.
       input: true
+    properties:
     - !ruby/object:Api::Type::String
       name: name
       description: |

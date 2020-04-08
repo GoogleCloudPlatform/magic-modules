@@ -18,4 +18,7 @@
 if _, ok := obj["custom"]; !ok {
 	obj["custom"] = map[string]interface{}{}
 }
+// Name/Service ID is a query parameter only
+delete(obj, "name")
+
 return obj, nil

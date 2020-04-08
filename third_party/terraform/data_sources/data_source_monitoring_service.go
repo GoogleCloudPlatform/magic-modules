@@ -3,11 +3,10 @@ package google
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"log"
 	neturl "net/url"
 )
 
-type monitoringServiceTypeFlattenFunc func(map[string]interface{}, *schema.ResourceData, interface{}) error
+type monitoringServiceTypeStateSetter func(map[string]interface{}, *schema.ResourceData, interface{}) error
 
 // dataSourceMonitoringServiceType creates a Datasource resource for a type of service. It takes
 // - schema for identifying the service, specific to the type (AppEngine moduleId)
@@ -16,7 +15,7 @@ type monitoringServiceTypeFlattenFunc func(map[string]interface{}, *schema.Resou
 func dataSourceMonitoringServiceType(
 	typeSchema map[string]*schema.Schema,
 	listFilter string,
-	flattenF monitoringServiceTypeFlattenFunc) *schema.Resource {
+	typeStateSetter monitoringServiceTypeStateSetter) *schema.Resource {
 
 	// Convert monitoring schema to ds schema
 	dsSchema := datasourceSchemaFromResourceSchema(resourceMonitoringService().Schema)
@@ -26,7 +25,7 @@ func dataSourceMonitoringServiceType(
 	dsSchema = mergeSchemas(typeSchema, dsSchema)
 
 	return &schema.Resource{
-		Read:   dataSourceMonitoringServiceTypeReadFromList(listFilter, flattenF),
+		Read:   dataSourceMonitoringServiceTypeReadFromList(listFilter, typeStateSetter),
 		Schema: dsSchema,
 	}
 }
@@ -34,7 +33,7 @@ func dataSourceMonitoringServiceType(
 // dataSourceMonitoringServiceRead returns a ReadFunc that calls service.list with proper filters
 // to identify both the type of service and underlying service resource.
 // It takes the list query filter (i.e. ?filter=$listFilter) and a ReadFunc to handle reading any type-specific schema.
-func dataSourceMonitoringServiceTypeReadFromList(listFilter string, flattenTypeF monitoringServiceTypeFlattenFunc) schema.ReadFunc {
+func dataSourceMonitoringServiceTypeReadFromList(listFilter string, typeStateSetter monitoringServiceTypeStateSetter) schema.ReadFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*Config)
 
@@ -74,26 +73,20 @@ func dataSourceMonitoringServiceTypeReadFromList(listFilter string, flattenTypeF
 			return fmt.Errorf("more than one Monitoring Services with given identifier found")
 		}
 		res := ls[0].(map[string]interface{})
-		log.Printf("[DEBUG] resp: %+v", res)
-
-		// Keep the same as resource Read
-		res, err = resourceMonitoringServiceDecoder(d, meta, res)
-		if err != nil {
-			return err
-		}
 
 		if err := d.Set("project", project); err != nil {
 			return fmt.Errorf("Error reading Service: %s", err)
 		}
-
 		if err := d.Set("display_name", flattenMonitoringServiceDisplayName(res["displayName"], d, config)); err != nil {
 			return fmt.Errorf("Error reading Service: %s", err)
 		}
 		if err := d.Set("telemetry", flattenMonitoringServiceTelemetry(res["telemetry"], d, config)); err != nil {
 			return fmt.Errorf("Error reading Service: %s", err)
 		}
-
-		if err := flattenTypeF(res, d, config); err != nil {
+		if err := d.Set("service_id", flattenMonitoringServiceServiceId(res["name"], d, config)); err != nil {
+			return fmt.Errorf("Error reading Service: %s", err)
+		}
+		if err := typeStateSetter(res, d, config); err != nil {
 			return fmt.Errorf("Error reading Service: %s", err)
 		}
 
@@ -101,8 +94,6 @@ func dataSourceMonitoringServiceTypeReadFromList(listFilter string, flattenTypeF
 		d.Set("name", name)
 		d.SetId(name)
 
-		log.Printf("[DEBUG] resp: %+v", d.Get("telemetry"))
-		log.Printf("[DEBUG] resp: %+v", d.Get("telemetry.0.resource_name"))
 		return nil
 	}
 }

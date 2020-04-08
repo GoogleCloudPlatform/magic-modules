@@ -34,11 +34,6 @@ data "google_monitoring_app_engine_service" "srv" {
   module_id = google_app_engine_standard_app_version.myapp.service
 }
 
-# Monitors a TF-created AppEngine service
-data "google_monitoring_app_engine_service" "srv" {
-  module_id = google_app_engine_standard_app_version.myapp.service
-}
-
 resource "google_app_engine_standard_app_version" "myapp" {
   version_id = "v1"
   service    = "myapp"
