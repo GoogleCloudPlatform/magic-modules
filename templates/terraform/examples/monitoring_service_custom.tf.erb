@@ -1,4 +1,4 @@
-resource "google_monitoring_service" "<%= ctx[:primary_resource_id] -%>" {
+resource "google_monitoring_custom_service" "<%= ctx[:primary_resource_id] -%>" {
   service_id = "<%= ctx[:vars]['service_id'] -%>"
   display_name = "My Custom Service <%= ctx[:vars]['service_id'] -%>"
 
