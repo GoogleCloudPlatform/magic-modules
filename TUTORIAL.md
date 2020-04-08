@@ -84,21 +84,15 @@ Now, let's compile those changes.
 
 Since we're running in Cloud Shell, this command will make sure we connect to GitHub via HTTPS
 instead of SSH. You will probably not have to do this in your typical development environment.
-```bash
-git config --file=.gitmodules submodule.build/ansible.url https://github.com/modular-magician/ansible.git && git submodule sync
-```
 
-## Compiling magic-modules
-
-Now, initialize the submodules in order to get an up-to-date version of each provider.
-Since we only changed the URL for Ansible, we'll only initialize that submodule.
-```bash
-git submodule update --init build/ansible
-```
-
-If you haven't already, run `bundle install` to make sure all ruby dependencies are available:
+First, uun `bundle install` to make sure all ruby dependencies are available:
 ```bash
 bundle install
+```
+
+Then, check out a copy of Ansible's GCP collection to a folder called `build/ansible`.
+```bash
+git clone https://github.com/ansible-collections/ansible_collections_google.git ./build/ansible
 ```
 
 Next, run the compiler:
@@ -107,7 +101,7 @@ bundle exec compiler -p products/pubsub -e ansible -o build/ansible
 ```
 
 This command tells us to run the compiler for the pubsub API, and generate Ansible into the
-`build/ansible` directory (where the submodule is).
+`build/ansible` directory.
 
 Let's see our changes! Navigate to the Ansible submodule and run `git diff` to see what changed:
 ```bash
