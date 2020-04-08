@@ -85,7 +85,7 @@ Now, let's compile those changes.
 Since we're running in Cloud Shell, this command will make sure we connect to GitHub via HTTPS
 instead of SSH. You will probably not have to do this in your typical development environment.
 
-First, uun `bundle install` to make sure all ruby dependencies are available:
+First, run `bundle install` to make sure all ruby dependencies are available:
 ```bash
 bundle install
 ```
