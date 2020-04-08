@@ -861,6 +861,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "http2-health-check"
         vars:
           health_check_name: "http2-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_with_logging"
+        primary_resource_id: "health-check-with-logging"
+        min_version: beta
+        vars:
+          health_check_name: "tcp-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/health_check_type.erb
       constants: templates/terraform/constants/health_check.erb
@@ -993,6 +999,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       vlanTag8021q: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      candidateSubnets: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/interconnect_attachment.go.erb
       post_create: templates/terraform/post_create/interconnect_attachment.go.erb
@@ -1349,6 +1357,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           health_check_name: "http-region-health-check"
       - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_http_logs"
+        primary_resource_id: "http-region-health-check"
+        min_version: beta
+        vars:
+          health_check_name: "http-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
         name: "region_health_check_http_full"
         primary_resource_id: "http-region-health-check"
         vars:
@@ -1494,11 +1508,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "gce_reservation"
         vars:
           reservation_name: "gce-reservation"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      update_encoder: templates/terraform/update_encoder/reservation.go.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       specificReservation.instanceProperties.minCpuPlatform: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      specificReservation.count: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(1)'
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1919,6 +1938,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/compute.networkUser'
       parent_resource_attribute: 'subnetwork'
+      iam_conditions_request_type: :QUERY_PARAM
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true

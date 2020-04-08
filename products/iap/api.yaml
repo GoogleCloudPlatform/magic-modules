@@ -140,6 +140,8 @@ objects:
     base_url: 'projects/{{project}}/brands'
     self_link: '{{name}}'
     input: true
+    identity:
+      - name
     description: |
       OAuth brand data. Only "Organization Internal" brands can be created
       programatically via API. To convert it into an external brands

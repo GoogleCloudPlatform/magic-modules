@@ -24,6 +24,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           realm_id: "tf-test-realm"
     properties:
   GameServerCluster: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
+        name: "game_service_cluster_basic"
+        primary_resource_id: "default"
+        vars:
+          realm_id: "realm"
+        test_vars_overrides:
+          agones_cluster: "\"bootstrapped-agones-cluster\""
     properties:
       # clusters can be specified as {name}, locations/{location}/cluster/{name} or as the full
       # /projects/... style link. So using a substring check instead of normal self link functions

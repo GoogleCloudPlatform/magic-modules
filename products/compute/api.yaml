@@ -2308,7 +2308,6 @@ objects:
         description: |
           The URL of the network to which this backend service belongs.
           This field can only be specified when the load balancing scheme is set to INTERNAL.
-        min_version: beta
   - !ruby/object:Api::Resource
     name: 'BackendServiceSignedUrlKey'
     kind: 'compute#BackendServiceSignedUrlKey'
@@ -2966,7 +2965,7 @@ objects:
                 The IP protocol to which this rule applies. The protocol type is
                 required when creating a firewall rule. This value can either be
                 one of the following well known protocol strings (tcp, udp,
-                icmp, esp, ah, sctp), or the IP protocol number.
+                icmp, esp, ah, sctp, ipip), or the IP protocol number.
               api_name: 'IPProtocol'
               required: true
             - !ruby/object:Api::Type::Array
@@ -3006,7 +3005,7 @@ objects:
                 The IP protocol to which this rule applies. The protocol type is
                 required when creating a firewall rule. This value can either be
                 one of the following well known protocol strings (tcp, udp,
-                icmp, esp, ah, sctp), or the IP protocol number.
+                icmp, esp, ah, sctp, ipip), or the IP protocol number.
               api_name: 'IPProtocol'
               required: true
             - !ruby/object:Api::Type::Array
@@ -4759,6 +4758,17 @@ objects:
                 - :USE_FIXED_PORT
                 - :USE_NAMED_PORT
                 - :USE_SERVING_PORT
+      - !ruby/object:Api::Type::NestedObject
+        name: 'logConfig'
+        description: |
+          Configure logging on this health check.
+        min_version: beta
+        properties:
+            - !ruby/object:Api::Type::Boolean
+              name: 'enable'
+              description: |
+                Indicates whether or not to export logs. This is false by default,
+                which means no health check logging will be done.
   - !ruby/object:Api::Resource
     name: 'InstanceTemplate'
     kind: 'compute#instanceTemplate'
@@ -6762,8 +6772,8 @@ objects:
     kind: 'compute#interconnectAttachment'
     base_url: 'projects/{{project}}/regions/{{region}}/interconnectAttachments'
     collection_url_key: 'items'
+    update_verb: :PATCH
     has_self_link: true
-    input: true
     description: |
       Represents an InterconnectAttachment (VLAN attachment) resource. For more
       information, see Creating VLAN Attachments.
@@ -6799,6 +6809,8 @@ objects:
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'adminEnabled'
+        send_empty_value: true
+        default_value: true
         description: |
           Whether the VLAN attachment is enabled or disabled.  When using
           PARTNER type this will Pre-Activate the interconnect attachment
@@ -6816,6 +6828,7 @@ objects:
         output: true
       - !ruby/object:Api::Type::String
         name: 'interconnect'
+        input: true
         description: |
           URL of the underlying Interconnect object that this attachment's
           traffic will traverse through. Required if type is DEDICATED, must not
@@ -6826,6 +6839,7 @@ objects:
           An optional description of this resource.
       - !ruby/object:Api::Type::Enum
         name: 'bandwidth'
+        input: true
         description: |
           Provisioned bandwidth capacity for the interconnect attachment.
           For attachments of type DEDICATED, the user can set the bandwidth.
@@ -6847,6 +6861,7 @@ objects:
           - :BPS_50G
       - !ruby/object:Api::Type::String
         name: 'edgeAvailabilityDomain'
+        input: true
         description: |
           Desired availability domain for the attachment. Only available for type
           PARTNER, at creation time. For improved reliability, customers should
@@ -6883,6 +6898,7 @@ objects:
             output: true
       - !ruby/object:Api::Type::Enum
         name: 'type'
+        input: true
         description: |
           The type of InterconnectAttachment you wish to create. Defaults to
           DEDICATED.
@@ -6925,6 +6941,7 @@ objects:
           automatically connect the Interconnect to the network & region within which the
           Cloud Router is configured.
         required: true
+        input: true
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: |
@@ -6946,8 +6963,10 @@ objects:
           lowercase letter, and all following characters must be a dash, lowercase
           letter, or digit, except the last character, which cannot be a dash.
         required: true
+        input: true
       - !ruby/object:Api::Type::Array
         name: candidateSubnets
+        input: true
         description: |
           Up to 16 candidate prefixes that can be used to restrict the allocation
           of cloudRouterIpAddress and customerRouterIpAddress for this attachment.
@@ -6959,6 +6978,7 @@ objects:
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Integer
         name: vlanTag8021q
+        input: true
         description: |
           The IEEE 802.1Q VLAN tag for this attachment, in the range 2-4094. When
           using PARTNER type this will be managed upstream.
@@ -10507,19 +10527,31 @@ objects:
                 - :USE_FIXED_PORT
                 - :USE_NAMED_PORT
                 - :USE_SERVING_PORT
+      - !ruby/object:Api::Type::NestedObject
+        name: 'logConfig'
+        description: |
+          Configure logging on this health check.
+        min_version: beta
+        properties:
+            - !ruby/object:Api::Type::Boolean
+              name: 'enable'
+              description: |
+                Indicates whether or not to export logs. This is false by default,
+                which means no health check logging will be done.
   - !ruby/object:Api::Resource
     name: 'ResourcePolicy'
     kind: 'compute#resourcePolicy'
     base_url: projects/{{project}}/regions/{{region}}/resourcePolicies
     input: true
     has_self_link: true
+    collection_url_key: 'items'
     description: |
       A policy that can be attached to a resource to specify or schedule actions on that resource.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
-        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
@@ -11906,6 +11938,8 @@ objects:
         required: true
         description: |
           Reservation for instances with specific machine shapes.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/zones/{{zone}}/reservations/{{name}}/resize'
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'count'
@@ -11920,6 +11954,7 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'instanceProperties'
             required: true
+            input: true
             description: |
               The instance properties for the reservation.
             properties:

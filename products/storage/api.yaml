@@ -52,6 +52,7 @@ objects:
       set_iam_policy_method: 'iam'
       set_iam_policy_verb: :PUT
       wrapped_policy_obj: false
+      custom_diff_suppress: 'templates/terraform/iam/storage_bucket_diff_suppress.go.erb'
     properties:
       - !ruby/object:Api::Type::Array
         name: 'acl'

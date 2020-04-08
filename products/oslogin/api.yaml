@@ -1,0 +1,67 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: OSLogin
+display_name: OS Login
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://oslogin.googleapis.com/v1/
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Identity and Access Management (IAM) API
+    url: https://console.cloud.google.com/apis/library/iam.googleapis.com/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+  - https://www.googleapis.com/auth/compute    
+objects:
+  - !ruby/object:Api::Resource
+    name: 'SSHPublicKey'
+    kind: user#sshPublicKeys
+    base_url: "users/{{user}}/sshPublicKeys/{{fingerprint}}"
+    create_url: "users/{{user}}:importSshPublicKey"
+    create_verb: :POST    
+    update_verb: :PATCH
+    description: |
+      The SSH public key information associated with a Google account.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/compute/docs/oslogin'
+      api: 'https://cloud.google.com/compute/docs/oslogin/rest'      
+    update_mask: true
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: user
+        description: |
+          The user email.
+        input: true
+        url_param_only: true
+        required: true      
+      - !ruby/object:Api::Type::String
+        name: fingerprint
+        description: |
+          The SHA-256 fingerprint of the SSH public key.
+        output: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'key'
+        description: |
+          Public key text in SSH format, defined by RFC4253 section 6.6.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'expirationTimeUsec'
+        description: |
+          An expiration time in microseconds since epoch.
+        required: false

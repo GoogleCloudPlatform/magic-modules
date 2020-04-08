@@ -1,0 +1,16 @@
+resource "google_project" "my_project" {
+  provider   = google-beta
+  name       = "tf-test-project"
+  project_id = "<%= ctx[:vars]['project_id'] %>"
+  org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
+}
+
+resource "google_service_usage_consumer_quota_override" "override" {
+  provider       = google-beta
+  project        = google_project.my_project.project_id
+  service        = "servicemanagement.googleapis.com"
+  metric         = "servicemanagement.googleapis.com%2Fdefault_requests"
+  limit          = "%2Fmin%2Fproject"
+  override_value = "95"
+  force          = true
+}

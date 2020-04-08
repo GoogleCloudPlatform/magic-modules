@@ -1,0 +1,102 @@
+# Copyright 2018 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Firebase
+display_name: Firebase
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://firebase.googleapis.com/v1beta1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Project'
+    min_version: beta
+    base_url: projects/{{project}}
+    self_link: projects/{{project}}
+    create_url: projects/{{project}}:addFirebase
+    input: true
+    description: |
+      A Google Cloud Firebase instance. This enables Firebase resources on a given google project.
+      Since a FirebaseProject is actually also a GCP Project, a FirebaseProject uses underlying GCP
+      identifiers (most importantly, the projectId) as its own for easy interop with GCP APIs.
+
+      Once Firebase has been added to a Google Project it cannot be removed.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://firebase.google.com/'
+      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: projectNumber
+        output: true
+        description: |
+          The number of the google project that firebase is enabled on.
+      - !ruby/object:Api::Type::String
+        name: displayName
+        output: true
+        description: |
+          The GCP project display name
+  - !ruby/object:Api::Resource
+    name: 'ProjectLocation'
+    min_version: beta
+    base_url: projects/{{project}}
+    self_link: projects/{{project}}
+    create_url: projects/{{project}}/defaultLocation:finalize
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys:
+        - resources
+    input: true
+    description: |
+      Sets the default Google Cloud Platform (GCP) resource location for the specified FirebaseProject.
+
+      This method creates an App Engine application with a default Cloud Storage bucket, located in the specified
+      locationId. This location must be one of the available GCP resource locations.
+
+      After the default GCP resource location is finalized, or if it was already set, it cannot be changed.
+      The default GCP resource location for the specified FirebaseProject might already be set because either the
+      GCP Project already has an App Engine application or defaultLocation.finalize was previously called with a
+      specified locationId. Any new calls to defaultLocation.finalize with a different specified locationId will
+      return a 409 error.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://firebase.google.com/'
+      api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.defaultLocation/finalize'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: locationId
+        required: true
+        description: |
+          The ID of the default GCP resource location for the Project. The location must be one of the available GCP
+          resource locations.

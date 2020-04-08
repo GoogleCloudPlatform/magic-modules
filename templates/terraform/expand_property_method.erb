@@ -40,7 +40,11 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 
 <%     end -%>
 
-    m[original["<%= property.key_name -%>"].(string)] = transformed
+    transformed<%= property.key_name.camelize(:upper) -%>, err := <%= property.key_expander -%>(original["<%= Google::StringUtils.underscore(property.key_name) -%>"], d, config)
+    if err != nil {
+      return nil, err
+    }
+    m[transformed<%= property.key_name.camelize(:upper) -%>] = transformed
   }
   return m, nil
 }
@@ -176,8 +180,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 <%   property.nested_properties.each do |prop| -%>
 <%# Map is a map from {key -> object} in the API, but Terraform can't represent that
 so we treat the key as a property of the object in Terraform schema. %>
-<%     next if property.is_a?(Api::Type::Map) && prop.name == property.key_name -%>
-<%=      lines(build_expand_method(prefix + titlelize_property(property), prop, object), 1) -%>
+<%=    lines(build_expand_method(prefix + titlelize_property(property), prop, object), 1) -%>
 <%   end -%>
 <% end -%>
 
