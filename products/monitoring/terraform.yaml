@@ -124,9 +124,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "monitoring_service_custom"
         primary_resource_id: "custom"
         vars:
-          service_id: "srv"
-          resource_name: "//product.googleapis.com/foo/foo/services/srv"
+          service_id: "custom-srv"
+          resource_name: "//product.googleapis.com/foo/foo/services/test"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
       encoder: templates/terraform/encoders/monitoring_service.go.erb
 
   UptimeCheckConfig: !ruby/object:Overrides::Terraform::ResourceOverride
