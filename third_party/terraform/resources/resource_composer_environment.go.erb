@@ -359,17 +359,20 @@ func resourceComposerEnvironmentCreate(d *schema.ResourceData, meta interface{})
 		int(d.Timeout(schema.TimeoutCreate).Minutes()))
 
 	if waitErr != nil {
-		// The resource didn't actually get created, remove from state.
-		d.SetId("")
+		err = CheckEnvExistsDespiteError(d, config, err)
+		if err != nil {
+			// The resource didn't actually get created, remove from state.
+			d.SetId("")
 
-		errMsg := fmt.Sprintf("Error waiting to create Environment: %s", waitErr)
-		if err := handleComposerEnvironmentCreationOpFailure(id, envName, d, config); err != nil {
-			return fmt.Errorf("Error waiting to create Environment: %s. An initial "+
-				"environment was or is still being created, and clean up failed with "+
-				"error: %s.", errMsg, err)
+			errMsg := fmt.Sprintf("Error waiting to create Environment: %s", waitErr)
+			if err := handleComposerEnvironmentCreationOpFailure(id, envName, d, config); err != nil {
+				return fmt.Errorf("Error waiting to create Environment: %s. An initial "+
+					"environment was or is still being created, and clean up failed with "+
+					"error: %s.", errMsg, err)
+			}
+
+			return fmt.Errorf("Error waiting to create Environment: %s", waitErr)
 		}
-
-		return fmt.Errorf("Error waiting to create Environment: %s", waitErr)
 	}
 
 	log.Printf("[DEBUG] Finished creating Environment %q: %#v", d.Id(), op)
@@ -540,7 +543,10 @@ func resourceComposerEnvironmentPostCreateUpdate(updateEnv *composer.Environment
 		log.Printf("[DEBUG] Running post-create update for Environment %q", d.Id())
 		err := resourceComposerEnvironmentPatchField("config.softwareConfig.pypiPackages", updateEnv, d, cfg)
 		if err != nil {
-			return err
+			err = CheckEnvExistsDespiteError(d, cfg, err)
+			if err != nil {
+				return err
+			}
 		}
 
 		log.Printf("[DEBUG] Finish update to Environment %q post create for update only fields", d.Id())
@@ -616,6 +622,22 @@ func resourceComposerEnvironmentImport(d *schema.ResourceData, meta interface{})
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+
+// In some cases err will be populated, but really the environment is ok, we'll fetch the environment here
+// check that it exists, and if it's fine, we'll continue, if not, we'll return the original error
+func CheckEnvExistsDespiteError(d *schema.ResourceData, cfg *Config, err error) error {
+	envName, envNameErr := resourceComposerEnvironmentName(d, cfg)
+	if envNameErr != nil {
+		return envNameErr
+	}
+
+	if _, readErr := cfg.clientComposer.Projects.Locations.Environments.Get(envName.resourceName()).Do(); readErr != nil {
+		return err
+	}
+
+	return nil
 }
 
 func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interface{} {
