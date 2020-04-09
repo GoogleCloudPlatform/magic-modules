@@ -129,20 +129,20 @@ func TestAccComputeInstanceFromTemplate_overrideScheduling(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
-	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-	templateName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-	templateDisk := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	templateName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	templateDisk := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	resourceName := "google_compute_instance_from_template.inst"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceFromTemplateDestroy,
+		CheckDestroy: testAccCheckComputeInstanceFromTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstanceFromTemplate_overrideScheduling(templateDisk, templateName, instanceName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(resourceName, &instance),
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
 				),
 			},
 		},
