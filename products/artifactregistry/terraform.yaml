@@ -1,0 +1,45 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Repository: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: projects/{{project}}/locations/{{region}}/repositories/{{name}}
+    autogen_async: true
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      parent_resource_attribute: 'repository'
+      method_name_separator: ':'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "artifact_registry_repository_basic"
+        min_version: 'beta'
+        primary_resource_id: "my-repo"
+        vars:
+          repository_name: "my-repository"
+          description: "example docker repository"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "artifact_registry_repository_iam"
+        min_version: 'beta'
+        primary_resource_id: "my-repo"
+        vars:
+          account_id: "my-account"
+          repository_name: "my-repository"
+          description: "example docker repository with iam"
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+        required: false
+        default_from_api: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
