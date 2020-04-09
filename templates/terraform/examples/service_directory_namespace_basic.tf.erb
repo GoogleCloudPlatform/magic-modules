@@ -1,0 +1,11 @@
+resource "google_service_directory_namespace" "<%= ctx[:primary_resource_id] %>" {
+  provider     = google-beta
+  namespace_id = "<%= ctx[:vars]["namespace_id"] %>"
+  location     = "us-central1"
+
+  labels = {
+    key = "value"
+    foo = "bar"
+  }
+
+}

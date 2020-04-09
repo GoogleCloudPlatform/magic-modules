@@ -1,0 +1,25 @@
+resource "google_service_directory_namespace" "<%= ctx[:primary_resource_id] %>" {
+  provider     = google-beta
+  namespace_id = "<%= ctx[:vars]["namespace_id"] %>"
+  location     = "us-central1"
+}
+
+resource "google_service_directory_service" "<%= ctx[:primary_resource_id] %>" {
+  provider   = google-beta
+  service_id = "<%= ctx[:vars]["service_id"] %>"
+  namespace  = google_service_directory_namespace.<%= ctx[:primary_resource_id] %>.name
+}
+
+resource "google_service_directory_endpoint" "<%= ctx[:primary_resource_id] %>" {
+  provider    = google-beta
+  endpoint_id = "<%= ctx[:vars]["endpoint_id"] %>"
+  service     = google_service_directory_service.<%= ctx[:primary_resource_id] %>.name
+
+  metadata = {
+    stage  = "prod"
+    region = "us-central1"
+  }
+
+  address = "1.2.3.4"
+  port    = 5353
+}

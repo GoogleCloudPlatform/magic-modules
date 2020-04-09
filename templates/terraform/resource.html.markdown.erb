@@ -120,7 +120,7 @@ The following arguments are supported:
 <% object.root_properties.reject(&:required).reject(&:output).each do |prop| -%>
 <%=    lines(build_property_documentation(prop)) -%>
 <% end -%>
-<% if object.base_url.include?("{{project}}")-%>
+<% if object.base_url.include?("{{project}}") || object.create_url && object.create_url.include?('{{project}}')-%>
 <%# The following new line allow for project to be bullet-formatted properly. -%>
 
 * `project` - (Optional) The ID of the project in which the resource belongs.
