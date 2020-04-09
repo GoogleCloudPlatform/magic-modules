@@ -652,6 +652,10 @@ resource "google_storage_bucket" "bucket" {
   project       = var.gcp_project_id
   location      = var.gcp_location
   force_destroy = true
+
+  labels = {
+    "key" = "value"
+  }
 }
 
 resource "google_storage_bucket_object" "object" {
