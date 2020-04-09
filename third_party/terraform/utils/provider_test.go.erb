@@ -219,14 +219,6 @@ func vcrTest(t *testing.T, c resource.TestCase) {
 	resource.Test(t, c)
 }
 
-// Destroy checks rely on a provider that has already been configured
-// This must go through a VCR provider during VCR testing, but cannot use
-// getTestAccProviders which creates a new provider which hasn't been used
-func getGoogleProvider(t *testing.T) *schema.Provider {
-	providers := getTestAccProviders(t.Name())
-	return providers["google"].(*schema.Provider)
-}
-
 // Produces a rand.Source for VCR testing based on the given mode.
 // In RECORDING mode, generates a new seed and saves it to a file, using the seed for the source
 // In REPLAYING mode, reads a seed from a file and creates a source from it
