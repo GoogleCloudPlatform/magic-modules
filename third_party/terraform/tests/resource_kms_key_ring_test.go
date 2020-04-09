@@ -76,7 +76,7 @@ func TestAccKmsKeyRing_basic(t *testing.T) {
 	projectBillingAccount := getTestBillingAccountFromEnv(t)
 	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleKmsKeyRingWasRemovedFromState("google_kms_key_ring.key_ring"),

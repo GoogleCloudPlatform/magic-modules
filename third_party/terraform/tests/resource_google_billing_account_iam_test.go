@@ -16,7 +16,7 @@ func TestAccBillingAccountIam(t *testing.T) {
 	billing := getTestBillingAccountFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	role := "roles/billing.viewer"
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

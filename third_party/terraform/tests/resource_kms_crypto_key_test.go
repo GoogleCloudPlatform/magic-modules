@@ -174,7 +174,7 @@ func TestAccKmsCryptoKey_basic(t *testing.T) {
 	keyRingName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -211,7 +211,7 @@ func TestAccKmsCryptoKey_rotation(t *testing.T) {
 	rotationPeriod := "100000s"
 	updatedRotationPeriod := "7776000s"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -264,7 +264,7 @@ func TestAccKmsCryptoKey_template(t *testing.T) {
 	algorithm := "EC_SIGN_P256_SHA256"
 	updatedAlgorithm := "EC_SIGN_P384_SHA384"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

@@ -30,7 +30,7 @@ func TestAccSecurityScannerScanConfig_scanConfigUpdate(t *testing.T) {
 		"max_qps":             20,
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSecurityScannerScanConfigDestroyProducer(t),

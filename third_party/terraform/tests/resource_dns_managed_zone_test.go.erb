@@ -13,7 +13,7 @@ func TestAccDNSManagedZone_update(t *testing.T) {
 
 	zoneSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
@@ -43,7 +43,7 @@ func TestAccDNSManagedZone_privateUpdate(t *testing.T) {
 
 	zoneSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
@@ -73,7 +73,7 @@ func TestAccDNSManagedZone_dnssec_update(t *testing.T) {
 
 	zoneSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
@@ -103,7 +103,7 @@ func TestAccDNSManagedZone_dnssec_empty(t *testing.T) {
 
 	zoneSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
@@ -126,7 +126,7 @@ func TestAccDNSManagedZone_privateForwardingUpdate(t *testing.T) {
 
 	zoneSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
@@ -158,7 +158,7 @@ func TestAccDNSManagedZone_reverseLookup(t *testing.T) {
 
 	zoneSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
@@ -425,7 +425,7 @@ func TestAccDNSManagedZone_importWithProject(t *testing.T) {
 	zoneSuffix := randString(t, 10)
 	project := getTestProjectFromEnv()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),

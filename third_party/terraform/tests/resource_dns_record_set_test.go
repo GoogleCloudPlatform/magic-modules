@@ -37,7 +37,7 @@ func TestAccDNSRecordSet_basic(t *testing.T) {
 	t.Parallel()
 
 	zoneName := fmt.Sprintf("dnszone-test-%s", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
@@ -70,7 +70,7 @@ func TestAccDNSRecordSet_modify(t *testing.T) {
 	t.Parallel()
 
 	zoneName := fmt.Sprintf("dnszone-test-%s", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
@@ -104,7 +104,7 @@ func TestAccDNSRecordSet_changeType(t *testing.T) {
 	t.Parallel()
 
 	zoneName := fmt.Sprintf("dnszone-test-%s", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
@@ -131,7 +131,7 @@ func TestAccDNSRecordSet_ns(t *testing.T) {
 	t.Parallel()
 
 	zoneName := fmt.Sprintf("dnszone-test-ns-%s", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
@@ -157,7 +157,7 @@ func TestAccDNSRecordSet_nestedNS(t *testing.T) {
 	t.Parallel()
 
 	zoneName := fmt.Sprintf("dnszone-test-ns-%s", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
@@ -177,7 +177,7 @@ func TestAccDNSRecordSet_quotedTXT(t *testing.T) {
 	t.Parallel()
 
 	zoneName := fmt.Sprintf("dnszone-test-txt-%s", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
@@ -197,7 +197,7 @@ func TestAccDNSRecordSet_uppercaseMX(t *testing.T) {
 	t.Parallel()
 
 	zoneName := fmt.Sprintf("dnszone-test-txt-%s", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),

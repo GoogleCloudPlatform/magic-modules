@@ -213,7 +213,7 @@ func TestAccComputeInstanceTemplate_basic(t *testing.T) {
 
 	var instanceTemplate computeBeta.InstanceTemplate
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -243,7 +243,7 @@ func TestAccComputeInstanceTemplate_imageShorthand(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -269,7 +269,7 @@ func TestAccComputeInstanceTemplate_preemptible(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -297,7 +297,7 @@ func TestAccComputeInstanceTemplate_IP(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -322,7 +322,7 @@ func TestAccComputeInstanceTemplate_IP(t *testing.T) {
 func TestAccComputeInstanceTemplate_networkTier(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -345,7 +345,7 @@ func TestAccComputeInstanceTemplate_networkIP(t *testing.T) {
 	var instanceTemplate compute.InstanceTemplate
 	networkIP := "10.128.0.2"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -375,7 +375,7 @@ func TestAccComputeInstanceTemplate_networkIPAddress(t *testing.T) {
 	var instanceTemplate compute.InstanceTemplate
 	ipAddress := "10.128.0.2"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -402,7 +402,7 @@ func TestAccComputeInstanceTemplate_networkIPAddress(t *testing.T) {
 func TestAccComputeInstanceTemplate_disks(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -422,7 +422,7 @@ func TestAccComputeInstanceTemplate_disks(t *testing.T) {
 func TestAccComputeInstanceTemplate_disksInvalid(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -438,7 +438,7 @@ func TestAccComputeInstanceTemplate_disksInvalid(t *testing.T) {
 func TestAccComputeInstanceTemplate_regionDisks(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -461,7 +461,7 @@ func TestAccComputeInstanceTemplate_subnet_auto(t *testing.T) {
 	var instanceTemplate compute.InstanceTemplate
 	network := "network-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -488,7 +488,7 @@ func TestAccComputeInstanceTemplate_subnet_custom(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -518,7 +518,7 @@ func TestAccComputeInstanceTemplate_subnet_xpn(t *testing.T) {
 	billingId := getTestBillingAccountFromEnv(t)
 	projectName := fmt.Sprintf("tf-testxpn-%d", time.Now().Unix())
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -541,7 +541,7 @@ func TestAccComputeInstanceTemplate_metadata_startup_script(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -563,7 +563,7 @@ func TestAccComputeInstanceTemplate_primaryAliasIpRange(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -589,7 +589,7 @@ func TestAccComputeInstanceTemplate_secondaryAliasIpRange(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -615,7 +615,7 @@ func TestAccComputeInstanceTemplate_guestAccelerator(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -642,7 +642,7 @@ func TestAccComputeInstanceTemplate_guestAcceleratorSkip(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -664,7 +664,7 @@ func TestAccComputeInstanceTemplate_minCpuPlatform(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -691,7 +691,7 @@ func TestAccComputeInstanceTemplate_EncryptKMS(t *testing.T) {
 	var instanceTemplate compute.InstanceTemplate
 	kms := BootstrapKMSKey(t)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -714,7 +714,7 @@ func TestAccComputeInstanceTemplate_EncryptKMS(t *testing.T) {
 func TestAccComputeInstanceTemplate_soleTenantNodeAffinities(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -736,7 +736,7 @@ func TestAccComputeInstanceTemplate_shieldedVmConfig1(t *testing.T) {
 
 	var instanceTemplate computeBeta.InstanceTemplate
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -762,7 +762,7 @@ func TestAccComputeInstanceTemplate_shieldedVmConfig2(t *testing.T) {
 
 	var instanceTemplate computeBeta.InstanceTemplate
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -786,7 +786,7 @@ func TestAccComputeInstanceTemplate_shieldedVmConfig2(t *testing.T) {
 func TestAccComputeInstanceTemplate_enableDisplay(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
@@ -806,7 +806,7 @@ func TestAccComputeInstanceTemplate_enableDisplay(t *testing.T) {
 func TestAccComputeInstanceTemplate_invalidDiskType(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -825,7 +825,7 @@ func TestAccComputeInstanceTemplate_imageResourceTest(t *testing.T) {
 	imageDesc1 := "Some description"
 	imageDesc2 := "Some other description"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),

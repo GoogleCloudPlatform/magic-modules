@@ -15,7 +15,7 @@ func TestAccDataKmsSecretCiphertext_basic(t *testing.T) {
 
 	plaintext := fmt.Sprintf("secret-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

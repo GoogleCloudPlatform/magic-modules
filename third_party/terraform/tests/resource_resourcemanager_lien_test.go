@@ -17,7 +17,7 @@ func TestAccResourceManagerLien_basic(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	var lien resourceManager.Lien
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckResourceManagerLienDestroyProducer(t),

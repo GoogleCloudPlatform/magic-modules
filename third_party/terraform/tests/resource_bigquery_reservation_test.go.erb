@@ -20,7 +20,7 @@ func TestAccBigqueryReservationReservation_bigqueryReservationUpdate(t *testing.
 		"location":      location,
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigqueryReservationReservationDestroyProducer(t),

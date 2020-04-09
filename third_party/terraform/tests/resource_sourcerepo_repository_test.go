@@ -11,7 +11,7 @@ func TestAccSourceRepoRepository_basic(t *testing.T) {
 	t.Parallel()
 
 	repositoryName := fmt.Sprintf("source-repo-repository-test-%s", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSourceRepoRepositoryDestroyProducer(t),
@@ -34,7 +34,7 @@ func TestAccSourceRepoRepository_update(t *testing.T) {
 	repositoryName := fmt.Sprintf("source-repo-repository-test-%s", randString(t, 10))
 	accountId := fmt.Sprintf("account-id-%s", randString(t, 10))
 	topicName := fmt.Sprintf("topic-name-%s", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSourceRepoRepositoryDestroyProducer(t),

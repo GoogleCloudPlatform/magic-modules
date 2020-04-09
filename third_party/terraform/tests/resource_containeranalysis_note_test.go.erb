@@ -15,7 +15,7 @@ func TestAccContainerAnalysisNote_basic(t *testing.T) {
 
 	name := randString(t, 10)
 	readableName := randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerAnalysisNoteDestroyProducer(t),
@@ -38,7 +38,7 @@ func TestAccContainerAnalysisNote_update(t *testing.T) {
 	name := randString(t, 10)
 	readableName := randString(t, 10)
 	readableName2 := randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContainerAnalysisNoteDestroyProducer(t),

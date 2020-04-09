@@ -18,7 +18,7 @@ func TestAccComputeInstanceFromTemplate_basic(t *testing.T) {
 	templateName := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 	resourceName := "google_compute_instance_from_template.foobar"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceFromTemplateDestroyProducer(t),
@@ -48,7 +48,7 @@ func TestAccComputeInstanceFromTemplate_overrideBootDisk(t *testing.T) {
 	overrideDisk := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 	resourceName := "google_compute_instance_from_template.inst"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceFromTemplateDestroyProducer(t),
@@ -77,7 +77,7 @@ func TestAccComputeInstanceFromTemplate_overrideAttachedDisk(t *testing.T) {
 	overrideDisk := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 	resourceName := "google_compute_instance_from_template.inst"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceFromTemplateDestroyProducer(t),
@@ -106,7 +106,7 @@ func TestAccComputeInstanceFromTemplate_overrideScratchDisk(t *testing.T) {
 	overrideDisk := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 	resourceName := "google_compute_instance_from_template.inst"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceFromTemplateDestroyProducer(t),
@@ -163,7 +163,7 @@ func TestAccComputeInstanceFromTemplate_012_removableFields(t *testing.T) {
 	config2 := testAccComputeInstanceFromTemplate_012_removableFieldsTpl(templateName) +
 		testAccComputeInstanceFromTemplate_012_removableFields2(instanceName)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceFromTemplateDestroyProducer(t),
@@ -198,7 +198,7 @@ func TestAccComputeInstanceFromTemplate_overrideMetadataDotStartupScript(t *test
 	templateName := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 	resourceName := "google_compute_instance_from_template.inst"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceFromTemplateDestroyProducer(t),

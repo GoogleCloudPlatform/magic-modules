@@ -12,7 +12,7 @@ func TestAccCloudBuildTrigger_basic(t *testing.T) {
 	t.Parallel()
 	name := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudBuildTriggerDestroyProducer(t),
@@ -42,7 +42,7 @@ func TestAccCloudBuildTrigger_customizeDiffTimeoutSum(t *testing.T) {
 
 	name := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudBuildTriggerDestroyProducer(t),
@@ -60,7 +60,7 @@ func TestAccCloudBuildTrigger_customizeDiffTimeoutFormat(t *testing.T) {
 
 	name := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudBuildTriggerDestroyProducer(t),
@@ -77,7 +77,7 @@ func TestAccCloudBuildTrigger_disable(t *testing.T) {
 	t.Parallel()
 	name := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudBuildTriggerDestroyProducer(t),
@@ -105,7 +105,7 @@ func TestAccCloudBuildTrigger_disable(t *testing.T) {
 func TestAccCloudBuildTrigger_fullStep(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudBuildTriggerDestroyProducer(t),

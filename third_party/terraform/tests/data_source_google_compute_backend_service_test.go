@@ -13,7 +13,7 @@ func TestAccDataSourceComputeBackendService_basic(t *testing.T) {
 	serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),

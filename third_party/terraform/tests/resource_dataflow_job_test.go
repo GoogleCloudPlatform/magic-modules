@@ -25,7 +25,7 @@ func TestAccDataflowJob_basic(t *testing.T) {
 	job := "tf-test-dataflow-job-" + randStr
 	zone := "us-central1-f"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
@@ -47,7 +47,7 @@ func TestAccDataflowJob_withRegion(t *testing.T) {
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDataflowJobRegionDestroyProducer(t),
@@ -70,7 +70,7 @@ func TestAccDataflowJob_withServiceAccount(t *testing.T) {
 	job := "tf-test-dataflow-job-" + randStr
 	accountId := "tf-test-dataflow-sa" + randStr
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
@@ -94,7 +94,7 @@ func TestAccDataflowJob_withNetwork(t *testing.T) {
 	job := "tf-test-dataflow-job-" + randStr
 	network := "tf-test-dataflow-net" + randStr
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
@@ -119,7 +119,7 @@ func TestAccDataflowJob_withSubnetwork(t *testing.T) {
 	network := "tf-test-dataflow-net" + randStr
 	subnetwork := "tf-test-dataflow-subnet" + randStr
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
@@ -144,7 +144,7 @@ func TestAccDataflowJob_withLabels(t *testing.T) {
 	key := "my-label"
 	value := "my-value"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
@@ -167,7 +167,7 @@ func TestAccDataflowJob_withIpConfig(t *testing.T) {
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),

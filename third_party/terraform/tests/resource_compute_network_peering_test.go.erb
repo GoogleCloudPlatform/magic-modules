@@ -18,7 +18,7 @@ func TestAccComputeNetworkPeering_basic(t *testing.T) {
 	peeringName := fmt.Sprintf("peering-test-1-%d", randInt(t))
 	importId := fmt.Sprintf("%s/%s/%s", getTestProjectFromEnv(), primaryNetworkName, peeringName)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccComputeNetworkPeeringDestroyProducer(t),

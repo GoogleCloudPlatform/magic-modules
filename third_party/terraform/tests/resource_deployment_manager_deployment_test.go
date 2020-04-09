@@ -21,7 +21,7 @@ func TestAccDeploymentManagerDeployment_basicFile(t *testing.T) {
 		"account_id": accountId,
 	})
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: resource.ComposeTestCheckFunc(
@@ -48,7 +48,7 @@ func TestAccDeploymentManagerDeployment_deleteInvalidOnCreate(t *testing.T) {
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-" + randStr
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDeploymentManagerDestroyInvalidDeployment(t, deploymentName),
@@ -68,7 +68,7 @@ func TestAccDeploymentManagerDeployment_createDeletePolicy(t *testing.T) {
 	deploymentName := "tf-dm-" + randStr
 	accountId := "tf-dm-" + randStr
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDeploymentManagerDeploymentDestroyProducer(t),
@@ -96,7 +96,7 @@ func TestAccDeploymentManagerDeployment_imports(t *testing.T) {
 		"account_id": "{{ env['name'] }}",
 	})
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: resource.ComposeTestCheckFunc(
@@ -125,7 +125,7 @@ func TestAccDeploymentManagerDeployment_update(t *testing.T) {
 	accountId := "tf-dm-first" + randStr
 	accountId2 := "tf-dm-second" + randStr
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: resource.ComposeTestCheckFunc(

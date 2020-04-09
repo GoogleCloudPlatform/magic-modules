@@ -25,7 +25,7 @@ func TestAccKmsSecret_basic(t *testing.T) {
 	aad := "plainaad"
 
 	// The first test creates resources needed to encrypt plaintext and produce ciphertext
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -39,7 +39,7 @@ func TestAccKmsSecret_basic(t *testing.T) {
 					}
 
 					// The second test asserts that the data source has the correct plaintext, given the created ciphertext
-					resource.Test(t, resource.TestCase{
+					vcrTest(t, resource.TestCase{
 						PreCheck:  func() { testAccPreCheck(t) },
 						Providers: testAccProviders,
 						Steps: []resource.TestStep{
@@ -64,7 +64,7 @@ func TestAccKmsSecret_basic(t *testing.T) {
 					}
 
 					// The second test asserts that the data source has the correct plaintext, given the created ciphertext
-					resource.Test(t, resource.TestCase{
+					vcrTest(t, resource.TestCase{
 						PreCheck:  func() { testAccPreCheck(t) },
 						Providers: testAccProviders,
 						Steps: []resource.TestStep{

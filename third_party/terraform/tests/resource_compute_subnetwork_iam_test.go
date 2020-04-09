@@ -18,7 +18,7 @@ func TestAccComputeSubnetworkIamPolicy(t *testing.T) {
 	region := getTestRegionFromEnv()
 	subnetwork := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

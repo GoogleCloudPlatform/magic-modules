@@ -14,7 +14,7 @@ func TestAccComputeForwardingRule_update(t *testing.T) {
 	poolName := fmt.Sprintf("tf-%s", randString(t, 10))
 	ruleName := fmt.Sprintf("tf-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
@@ -46,7 +46,7 @@ func TestAccComputeForwardingRule_ip(t *testing.T) {
 	poolName := fmt.Sprintf("tf-%s", randString(t, 10))
 	ruleName := fmt.Sprintf("tf-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),
@@ -69,7 +69,7 @@ func TestAccComputeForwardingRule_networkTier(t *testing.T) {
 	poolName := fmt.Sprintf("tf-%s", randString(t, 10))
 	ruleName := fmt.Sprintf("tf-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeForwardingRuleDestroyProducer(t),

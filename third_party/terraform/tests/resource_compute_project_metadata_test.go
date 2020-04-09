@@ -16,7 +16,7 @@ func TestAccComputeProjectMetadata_basic(t *testing.T) {
 	billingId := getTestBillingAccountFromEnv(t)
 	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeProjectMetadataDestroyProducer(t),
@@ -41,7 +41,7 @@ func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 	billingId := getTestBillingAccountFromEnv(t)
 	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeProjectMetadataDestroyProducer(t),
@@ -75,7 +75,7 @@ func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 	billingId := getTestBillingAccountFromEnv(t)
 	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeProjectMetadataDestroyProducer(t),

@@ -12,7 +12,7 @@ func TestAccComputeRouterPeer_basic(t *testing.T) {
 	t.Parallel()
 
 	testId := randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeRouterPeerDestroyProducer(t),
@@ -40,7 +40,7 @@ func TestAccComputeRouterPeer_advertiseMode(t *testing.T) {
 	t.Parallel()
 
 	testId := randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeRouterPeerDestroyProducer(t),

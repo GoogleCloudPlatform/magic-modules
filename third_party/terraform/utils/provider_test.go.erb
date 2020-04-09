@@ -404,7 +404,7 @@ func TestProvider_loadCredentialsFromJSON(t *testing.T) {
 func TestAccProviderBasePath_setBasePath(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeAddressDestroy,
@@ -424,7 +424,7 @@ func TestAccProviderBasePath_setBasePath(t *testing.T) {
 func TestAccProviderBasePath_setInvalidBasePath(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeAddressDestroy,
@@ -446,7 +446,7 @@ func TestAccProviderUserProjectOverride(t *testing.T) {
 	sa := acctest.RandomWithPrefix("tf-test")
 	topicName := "tf-test-topic-" + acctest.RandString(10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		// No TestDestroy since that's not really the point of this test
@@ -489,7 +489,7 @@ func TestAccProviderIndirectUserProjectOverride(t *testing.T) {
 	pid := acctest.RandomWithPrefix("tf-test")
 	sa := acctest.RandomWithPrefix("tf-test")
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		// No TestDestroy since that's not really the point of this test

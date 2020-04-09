@@ -15,7 +15,7 @@ func TestAccSpannerInstanceIamBinding(t *testing.T) {
 	project := getTestProjectFromEnv()
 	instance := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -56,7 +56,7 @@ func TestAccSpannerInstanceIamMember(t *testing.T) {
 	role := "roles/spanner.databaseAdmin"
 	instance := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -85,7 +85,7 @@ func TestAccSpannerInstanceIamPolicy(t *testing.T) {
 	role := "roles/spanner.databaseAdmin"
 	instance := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

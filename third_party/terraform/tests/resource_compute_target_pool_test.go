@@ -11,7 +11,7 @@ import (
 func TestAccComputeTargetPool_basic(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeTargetPoolDestroyProducer(t),
@@ -43,7 +43,7 @@ func TestAccComputeTargetPool_update(t *testing.T) {
 	name1 := fmt.Sprintf("tptest-%s", randString(t, 10))
 	name2 := fmt.Sprintf("tptest-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeTargetPoolDestroyProducer(t),

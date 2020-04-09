@@ -58,7 +58,7 @@ func TestAccComputeSubnetwork_basic(t *testing.T) {
 	subnetwork2Name := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	subnetwork3Name := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeSubnetworkDestroyProducer(t),
@@ -94,7 +94,7 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 	cnName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	subnetworkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeSubnetworkDestroyProducer(t),
@@ -151,7 +151,7 @@ func TestAccComputeSubnetwork_secondaryIpRanges(t *testing.T) {
 	cnName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	subnetworkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeSubnetworkDestroyProducer(t),
@@ -207,7 +207,7 @@ func TestAccComputeSubnetwork_flowLogs(t *testing.T) {
 	cnName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	subnetworkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeSubnetworkDestroyProducer(t),
@@ -260,7 +260,7 @@ func TestAccComputeSubnetwork_flowLogsMigrate(t *testing.T) {
 	cnName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	subnetworkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeSubnetworkDestroyProducer(t),

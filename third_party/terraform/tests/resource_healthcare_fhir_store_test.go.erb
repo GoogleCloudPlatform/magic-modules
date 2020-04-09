@@ -79,7 +79,7 @@ func TestAccHealthcareFhirStore_basic(t *testing.T) {
 	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
 	resourceName := "google_healthcare_fhir_store.default"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckHealthcareFhirStoreDestroyProducer(t),

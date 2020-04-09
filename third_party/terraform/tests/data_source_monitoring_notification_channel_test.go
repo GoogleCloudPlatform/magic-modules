@@ -9,7 +9,7 @@ import (
 )
 
 func TestAccDataSourceGoogleMonitoringNotificationChannel_byDisplayName(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -26,7 +26,7 @@ func TestAccDataSourceGoogleMonitoringNotificationChannel_byDisplayName(t *testi
 }
 
 func TestAccDataSourceGoogleMonitoringNotificationChannel_byTypeAndLabel(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -43,7 +43,7 @@ func TestAccDataSourceGoogleMonitoringNotificationChannel_byTypeAndLabel(t *test
 }
 
 func TestAccDataSourceGoogleMonitoringNotificationChannel_UserLabel(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -60,7 +60,7 @@ func TestAccDataSourceGoogleMonitoringNotificationChannel_UserLabel(t *testing.T
 }
 
 func TestAccDataSourceGoogleMonitoringNotificationChannel_byDisplayNameAndType(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -77,7 +77,7 @@ func TestAccDataSourceGoogleMonitoringNotificationChannel_byDisplayNameAndType(t
 }
 
 func TestAccDataSourceGoogleMonitoringNotificationChannel_ErrorNoDisplayNameOrType(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -92,7 +92,7 @@ func TestAccDataSourceGoogleMonitoringNotificationChannel_ErrorNoDisplayNameOrTy
 func TestAccDataSourceGoogleMonitoringNotificationChannel_ErrorNotFound(t *testing.T) {
 	displayName := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -106,7 +106,7 @@ func TestAccDataSourceGoogleMonitoringNotificationChannel_ErrorNotFound(t *testi
 
 func TestAccDataSourceGoogleMonitoringNotificationChannel_ErrorNotUnique(t *testing.T) {
 	displayName := fmt.Sprintf("tf-test-%d", randInt(t))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

@@ -18,7 +18,7 @@ func TestAccComputeSharedVpc_basic(t *testing.T) {
 	hostProjectResourceName := "google_compute_shared_vpc_host_project.host"
 	serviceProjectResourceName := "google_compute_shared_vpc_service_project.service"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

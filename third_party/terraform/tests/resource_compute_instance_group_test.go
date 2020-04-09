@@ -18,7 +18,7 @@ func TestAccComputeInstanceGroup_basic(t *testing.T) {
 	var instanceName = fmt.Sprintf("instancegroup-test-%s", randString(t, 10))
 	var zone = "us-central1-c"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccComputeInstanceGroup_destroyProducer(t),
@@ -55,7 +55,7 @@ func TestAccComputeInstanceGroup_rename(t *testing.T) {
 	var backendName = fmt.Sprintf("instancegroup-test-%s", randString(t, 10))
 	var healthName = fmt.Sprintf("instancegroup-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccComputeInstanceGroup_destroyProducer(t),
@@ -86,7 +86,7 @@ func TestAccComputeInstanceGroup_update(t *testing.T) {
 	var instanceGroup compute.InstanceGroup
 	var instanceName = fmt.Sprintf("instancegroup-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccComputeInstanceGroup_destroyProducer(t),
@@ -127,7 +127,7 @@ func TestAccComputeInstanceGroup_outOfOrderInstances(t *testing.T) {
 	var instanceGroup compute.InstanceGroup
 	var instanceName = fmt.Sprintf("instancegroup-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccComputeInstanceGroup_destroyProducer(t),
@@ -149,7 +149,7 @@ func TestAccComputeInstanceGroup_network(t *testing.T) {
 	var instanceGroup compute.InstanceGroup
 	var instanceName = fmt.Sprintf("instancegroup-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccComputeInstanceGroup_destroyProducer(t),

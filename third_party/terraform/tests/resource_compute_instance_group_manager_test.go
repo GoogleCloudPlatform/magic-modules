@@ -16,7 +16,7 @@ func TestAccInstanceGroupManager_basic(t *testing.T) {
 	igm1 := fmt.Sprintf("igm-test-%s", randString(t, 10))
 	igm2 := fmt.Sprintf("igm-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckInstanceGroupManagerDestroyProducer(t),
@@ -44,7 +44,7 @@ func TestAccInstanceGroupManager_targetSizeZero(t *testing.T) {
 	templateName := fmt.Sprintf("igm-test-%s", randString(t, 10))
 	igmName := fmt.Sprintf("igm-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckInstanceGroupManagerDestroyProducer(t),
@@ -70,7 +70,7 @@ func TestAccInstanceGroupManager_update(t *testing.T) {
 	template2 := fmt.Sprintf("igm-test-%s", randString(t, 10))
 	igm := fmt.Sprintf("igm-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckInstanceGroupManagerDestroyProducer(t),
@@ -102,7 +102,7 @@ func TestAccInstanceGroupManager_updateLifecycle(t *testing.T) {
 	tag2 := "tag2"
 	igm := fmt.Sprintf("igm-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckInstanceGroupManagerDestroyProducer(t),
@@ -132,7 +132,7 @@ func TestAccInstanceGroupManager_updatePolicy(t *testing.T) {
 
 	igm := fmt.Sprintf("igm-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckInstanceGroupManagerDestroyProducer(t),
@@ -180,7 +180,7 @@ func TestAccInstanceGroupManager_separateRegions(t *testing.T) {
 	igm1 := fmt.Sprintf("igm-test-%s", randString(t, 10))
 	igm2 := fmt.Sprintf("igm-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckInstanceGroupManagerDestroyProducer(t),
@@ -209,7 +209,7 @@ func TestAccInstanceGroupManager_versions(t *testing.T) {
 	canaryTemplate := fmt.Sprintf("igm-test-%s", randString(t, 10))
 	igm := fmt.Sprintf("igm-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckInstanceGroupManagerDestroyProducer(t),
@@ -234,7 +234,7 @@ func TestAccInstanceGroupManager_autoHealingPolicies(t *testing.T) {
 	igm := fmt.Sprintf("igm-test-%s", randString(t, 10))
 	hck := fmt.Sprintf("igm-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckInstanceGroupManagerDestroyProducer(t),

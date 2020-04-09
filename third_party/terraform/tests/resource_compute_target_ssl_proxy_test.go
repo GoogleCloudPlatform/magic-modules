@@ -17,7 +17,7 @@ func TestAccComputeTargetSslProxy_update(t *testing.T) {
 	backend2 := fmt.Sprintf("tssl-test-%s", randString(t, 10))
 	hc := fmt.Sprintf("tssl-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeTargetSslProxyDestroyProducer(t),

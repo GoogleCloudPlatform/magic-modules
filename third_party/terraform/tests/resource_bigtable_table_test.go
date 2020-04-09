@@ -15,7 +15,7 @@ func TestAccBigtableTable_basic(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
@@ -38,7 +38,7 @@ func TestAccBigtableTable_splitKeys(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
@@ -63,7 +63,7 @@ func TestAccBigtableTable_family(t *testing.T) {
 	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	family := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),
@@ -87,7 +87,7 @@ func TestAccBigtableTable_familyMany(t *testing.T) {
 	tableName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	family := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigtableTableDestroyProducer(t),

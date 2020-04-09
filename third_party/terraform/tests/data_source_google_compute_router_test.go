@@ -11,7 +11,7 @@ func TestAccDataSourceComputeRouter(t *testing.T) {
 	t.Parallel()
 	name := fmt.Sprintf("router-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

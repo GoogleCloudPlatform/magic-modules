@@ -14,7 +14,7 @@ func TestAccDataSourceComputeImage(t *testing.T) {
 	family := fmt.Sprintf("tf-test-%d", randInt(t))
 	name := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeImageDestroyProducer(t),

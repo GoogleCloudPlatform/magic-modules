@@ -16,7 +16,7 @@ func TestAccRuntimeconfigConfig_basic(t *testing.T) {
 	configName := fmt.Sprintf("runtimeconfig-test-%s", randString(t, 10))
 	description := "my test description"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckRuntimeconfigConfigDestroyProducer(t),
@@ -46,7 +46,7 @@ func TestAccRuntimeconfig_update(t *testing.T) {
 	firstDescription := "my test description"
 	secondDescription := "my updated test description"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckRuntimeconfigConfigDestroyProducer(t),
@@ -77,7 +77,7 @@ func TestAccRuntimeconfig_updateEmptyDescription(t *testing.T) {
 	configName := fmt.Sprintf("runtimeconfig-test-%s", randString(t, 10))
 	description := "my test description"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckRuntimeconfigConfigDestroyProducer(t),

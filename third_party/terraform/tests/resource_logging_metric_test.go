@@ -14,7 +14,7 @@ func TestAccLoggingMetric_update(t *testing.T) {
 	filter := "resource.type=gae_app AND severity>=ERROR"
 	updatedFilter := "resource.type=gae_app AND severity=ERROR"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),
@@ -45,7 +45,7 @@ func TestAccLoggingMetric_explicitBucket(t *testing.T) {
 	suffix := randString(t, 10)
 	filter := "resource.type=gae_app AND severity>=ERROR"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingMetricDestroyProducer(t),

@@ -16,7 +16,7 @@ func TestAccSpannerDatabaseIamBinding(t *testing.T) {
 	database := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	instance := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -60,7 +60,7 @@ func TestAccSpannerDatabaseIamMember(t *testing.T) {
 	database := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	instance := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -91,7 +91,7 @@ func TestAccSpannerDatabaseIamPolicy(t *testing.T) {
 	database := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	instance := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

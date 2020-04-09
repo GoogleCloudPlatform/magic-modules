@@ -19,7 +19,7 @@ func TestAccSqlDatabase_basic(t *testing.T) {
 	instanceName := fmt.Sprintf("sqldatabasetest-%d", randInt(t))
 	dbName := fmt.Sprintf("sqldatabasetest-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccSqlDatabaseDestroyProducer(t),
@@ -73,7 +73,7 @@ func TestAccSqlDatabase_update(t *testing.T) {
 	instance_name := fmt.Sprintf("sqldatabasetest-%d", randInt(t))
 	database_name := fmt.Sprintf("sqldatabasetest-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccSqlDatabaseDestroyProducer(t),

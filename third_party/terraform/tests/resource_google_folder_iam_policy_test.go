@@ -16,7 +16,7 @@ func TestAccFolderIamPolicy_basic(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	parent := "organizations/" + org
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleFolderIamPolicyDestroyProducer(t),
@@ -48,7 +48,7 @@ func TestAccFolderIamPolicy_auditConfigs(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	parent := "organizations/" + org
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleFolderIamPolicyDestroyProducer(t),

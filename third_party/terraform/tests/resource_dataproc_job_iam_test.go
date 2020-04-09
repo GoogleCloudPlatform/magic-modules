@@ -18,7 +18,7 @@ func TestAccDataprocJobIamBinding(t *testing.T) {
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s %s",
 		getTestProjectFromEnv(), "us-central1", job, role)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -61,7 +61,7 @@ func TestAccDataprocJobIamMember(t *testing.T) {
 		role,
 		serviceAccountCanonicalEmail(account))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -90,7 +90,7 @@ func TestAccDataprocJobIamPolicy(t *testing.T) {
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s",
 		getTestProjectFromEnv(), "us-central1", job)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

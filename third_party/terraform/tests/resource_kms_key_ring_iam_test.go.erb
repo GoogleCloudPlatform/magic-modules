@@ -29,7 +29,7 @@ func TestAccKmsKeyRingIamBinding(t *testing.T) {
 		Name:     keyRingName,
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -82,7 +82,7 @@ func TestAccKmsKeyRingIamBinding_withCondition(t *testing.T) {
 		Name:     keyRingName,
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -116,7 +116,7 @@ func TestAccKmsKeyRingIamMember(t *testing.T) {
 		Name:     keyRingName,
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -155,7 +155,7 @@ func TestAccKmsKeyRingIamMember_withCondition(t *testing.T) {
 		Name:     keyRingName,
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -189,7 +189,7 @@ func TestAccKmsKeyRingIamPolicy(t *testing.T) {
 		Name:     keyRingName,
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -227,7 +227,7 @@ func TestAccKmsKeyRingIamPolicy_withCondition(t *testing.T) {
 		Name:     keyRingName,
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

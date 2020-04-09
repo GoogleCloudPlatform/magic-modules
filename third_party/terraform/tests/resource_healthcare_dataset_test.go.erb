@@ -78,7 +78,7 @@ func TestAccHealthcareDataset_basic(t *testing.T) {
 	timeZone := "America/New_York"
 	resourceName := "google_healthcare_dataset.dataset"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckHealthcareDatasetDestroyProducer(t),

@@ -12,7 +12,7 @@ func TestAccRedisInstance_update(t *testing.T) {
 
 	name := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckRedisInstanceDestroyProducer(t),
@@ -51,7 +51,7 @@ func TestAccRedisInstance_regionFromLocation(t *testing.T) {
 		zone = "us-central1-a"
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckRedisInstanceDestroyProducer(t),

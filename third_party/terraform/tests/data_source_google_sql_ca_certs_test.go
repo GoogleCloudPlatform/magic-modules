@@ -13,7 +13,7 @@ func TestAccDataSourceGoogleSQLCaCerts_basic(t *testing.T) {
 
 	instanceName := fmt.Sprintf("data-ssl-ca-cert-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),

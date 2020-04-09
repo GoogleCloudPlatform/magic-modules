@@ -14,7 +14,7 @@ func TestAccComputeProjectDefaultNetworkTier_basic(t *testing.T) {
 	billingId := getTestBillingAccountFromEnv(t)
 	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -37,7 +37,7 @@ func TestAccComputeProjectDefaultNetworkTier_modify(t *testing.T) {
 	billingId := getTestBillingAccountFromEnv(t)
 	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

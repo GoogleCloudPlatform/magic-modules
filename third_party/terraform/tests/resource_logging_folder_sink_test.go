@@ -21,7 +21,7 @@ func TestAccLoggingFolderSink_basic(t *testing.T) {
 
 	var sink logging.LogSink
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
@@ -49,7 +49,7 @@ func TestAccLoggingFolderSink_removeOptionals(t *testing.T) {
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 	folderName := "tf-test-folder-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
@@ -84,7 +84,7 @@ func TestAccLoggingFolderSink_folderAcceptsFullFolderPath(t *testing.T) {
 
 	var sink logging.LogSink
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
@@ -116,7 +116,7 @@ func TestAccLoggingFolderSink_update(t *testing.T) {
 
 	var sinkBefore, sinkAfter logging.LogSink
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
@@ -159,7 +159,7 @@ func TestAccLoggingFolderSink_updateBigquerySink(t *testing.T) {
 	bqDatasetID := "tf_test_sink_" + randString(t, 10)
 	folderName := "tf-test-folder-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),
@@ -194,7 +194,7 @@ func TestAccLoggingFolderSink_heredoc(t *testing.T) {
 
 	var sink logging.LogSink
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderSinkDestroyProducer(t),

@@ -51,7 +51,7 @@ func TestAccSpannerInstance_basic(t *testing.T) {
 	t.Parallel()
 
 	idName := fmt.Sprintf("spanner-test-%s", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),
@@ -75,7 +75,7 @@ func TestAccSpannerInstance_basicWithAutogenName(t *testing.T) {
 	t.Parallel()
 
 	displayName := fmt.Sprintf("spanner-test-%s-dname", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),
@@ -100,7 +100,7 @@ func TestAccSpannerInstance_update(t *testing.T) {
 
 	dName1 := fmt.Sprintf("spanner-dname1-%s", randString(t, 10))
 	dName2 := fmt.Sprintf("spanner-dname2-%s", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),

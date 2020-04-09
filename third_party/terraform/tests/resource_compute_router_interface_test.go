@@ -12,7 +12,7 @@ func TestAccComputeRouterInterface_basic(t *testing.T) {
 	t.Parallel()
 
 	testId := randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeRouterInterfaceDestroyProducer(t),
@@ -40,7 +40,7 @@ func TestAccComputeRouterInterface_withTunnel(t *testing.T) {
 	t.Parallel()
 
 	testId := randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeRouterInterfaceDestroyProducer(t),

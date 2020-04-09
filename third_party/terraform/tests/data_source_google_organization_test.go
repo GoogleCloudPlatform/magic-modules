@@ -12,7 +12,7 @@ func TestAccDataSourceGoogleOrganization_byFullName(t *testing.T) {
 	orgId := getTestOrgFromEnv(t)
 	name := "organizations/" + orgId
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -31,7 +31,7 @@ func TestAccDataSourceGoogleOrganization_byShortName(t *testing.T) {
 	orgId := getTestOrgFromEnv(t)
 	name := "organizations/" + orgId
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -49,7 +49,7 @@ func TestAccDataSourceGoogleOrganization_byShortName(t *testing.T) {
 func TestAccDataSourceGoogleOrganization_byDomain(t *testing.T) {
 	name := randString(t, 16) + ".com"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

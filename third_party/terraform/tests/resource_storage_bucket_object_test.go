@@ -35,7 +35,7 @@ func TestAccStorageObject_basic(t *testing.T) {
 	if err := ioutil.WriteFile(testFile.Name(), data, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)
 	}
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageObjectDestroyProducer(t),
@@ -70,7 +70,7 @@ func TestAccStorageObject_recreate(t *testing.T) {
 	updatedName := testFile.Name() + ".update"
 	updated_data_md5 := writeFile(updatedName, []byte("datum"))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageObjectDestroyProducer(t),
@@ -108,7 +108,7 @@ func TestAccStorageObject_content(t *testing.T) {
 	if err := ioutil.WriteFile(testFile.Name(), data, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)
 	}
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageObjectDestroyProducer(t),
@@ -143,7 +143,7 @@ func TestAccStorageObject_withContentCharacteristics(t *testing.T) {
 	}
 
 	disposition, encoding, language, content_type := "inline", "compress", "en", "binary/octet-stream"
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageObjectDestroyProducer(t),
@@ -170,7 +170,7 @@ func TestAccStorageObject_withContentCharacteristics(t *testing.T) {
 func TestAccStorageObject_dynamicContent(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageObjectDestroyProducer(t),
@@ -204,7 +204,7 @@ func TestAccStorageObject_cacheControl(t *testing.T) {
 	}
 
 	cacheControl := "private"
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageObjectDestroyProducer(t),
@@ -237,7 +237,7 @@ func TestAccStorageObject_storageClass(t *testing.T) {
 	}
 
 	storageClass := "MULTI_REGIONAL"
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageObjectDestroyProducer(t),
@@ -269,7 +269,7 @@ func TestAccStorageObject_metadata(t *testing.T) {
 		t.Errorf("error writing file: %v", err)
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageObjectDestroyProducer(t),

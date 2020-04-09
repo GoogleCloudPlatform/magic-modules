@@ -17,7 +17,7 @@ func testAccAccessContextManagerServicePerimeterResource_basicTest(t *testing.T)
 	policyTitle := "my policy"
 	perimeterTitle := "perimeter"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

@@ -37,7 +37,7 @@ func testAccLoggingFolderExclusion_basic(t *testing.T) {
 	folderName := "tf-test-folder-" + randString(t, 10)
 	description := "Description " + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderExclusionDestroyProducer(t),
@@ -74,7 +74,7 @@ func testAccLoggingFolderExclusion_folderAcceptsFullFolderPath(t *testing.T) {
 		return nil
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderExclusionDestroyProducer(t),
@@ -105,7 +105,7 @@ func testAccLoggingFolderExclusion_update(t *testing.T) {
 	descriptionBefore := "Basic Folder Logging Exclusion" + randString(t, 10)
 	descriptionAfter := "Updated Basic Folder Logging Exclusion" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderExclusionDestroyProducer(t),
@@ -135,7 +135,7 @@ func testAccLoggingFolderExclusion_multiple(t *testing.T) {
 	folderName := "tf-test-folder-" + randString(t, 10)
 	parent := "organizations/" + org
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingFolderExclusionDestroyProducer(t),

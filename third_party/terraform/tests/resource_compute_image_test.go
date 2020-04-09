@@ -12,7 +12,7 @@ import (
 func TestAccComputeImage_withLicense(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeImageDestroyProducer(t),
@@ -36,7 +36,7 @@ func TestAccComputeImage_update(t *testing.T) {
 
 	name := "image-test-" + randString(t, 10)
 	// Only labels supports an update
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeImageDestroyProducer(t),
@@ -77,7 +77,7 @@ func TestAccComputeImage_basedondisk(t *testing.T) {
 
 	var image compute.Image
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeImageDestroyProducer(t),
@@ -136,7 +136,7 @@ func TestAccComputeImage_resolveImage(t *testing.T) {
 	name := fmt.Sprintf("test-image-%s", rand)
 	fam := fmt.Sprintf("test-image-family-%s", rand)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeImageDestroyProducer(t),

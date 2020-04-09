@@ -13,7 +13,7 @@ func TestAccSqlClientCert_mysql(t *testing.T) {
 	t.Parallel()
 
 	instance := acctest.RandomWithPrefix("i")
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccSqlClientCertDestroy,
@@ -33,7 +33,7 @@ func TestAccSqlClientCert_postgres(t *testing.T) {
 	t.Parallel()
 
 	instance := acctest.RandomWithPrefix("i")
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccSqlClientCertDestroy,

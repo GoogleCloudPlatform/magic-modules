@@ -11,7 +11,7 @@ func TestAccStorageBucketAccessControl_update(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck: func() {
 			if errObjectAcl != nil {
 				panic(errObjectAcl)

@@ -14,7 +14,7 @@ func TestAccLoggingProjectSink_basic(t *testing.T) {
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
@@ -38,7 +38,7 @@ func TestAccLoggingProjectSink_updatePreservesUniqueWriter(t *testing.T) {
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 	updatedBucketName := "tf-test-sink-bucket-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
@@ -69,7 +69,7 @@ func TestAccLoggingProjectSink_updateBigquerySink(t *testing.T) {
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bqDatasetID := "tf_test_sink_" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
@@ -100,7 +100,7 @@ func TestAccLoggingProjectSink_heredoc(t *testing.T) {
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),

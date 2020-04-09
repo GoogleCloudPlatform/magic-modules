@@ -18,7 +18,7 @@ func TestAccStorageTransferJob_basic(t *testing.T) {
 	testUpdatedDataSinkBucketName := randString(t, 10)
 	testUpdatedTransferJobDescription := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageTransferJobDestroyProducer(t),
@@ -66,7 +66,7 @@ func TestAccStorageTransferJob_omitScheduleEndDate(t *testing.T) {
 	testDataSinkName := randString(t, 10)
 	testTransferJobDescription := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageTransferJobDestroyProducer(t),

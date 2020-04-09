@@ -12,7 +12,7 @@ func TestAccDataSourceGoogleVpnGateway(t *testing.T) {
 	t.Parallel()
 
 	vpnGatewayName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

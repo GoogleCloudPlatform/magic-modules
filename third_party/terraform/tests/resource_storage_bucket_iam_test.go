@@ -14,7 +14,7 @@ func TestAccStorageBucketIamPolicy(t *testing.T) {
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	serviceAcct := getTestServiceAccountFromEnv(t)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

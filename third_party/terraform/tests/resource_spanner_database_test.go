@@ -15,7 +15,7 @@ func TestAccSpannerDatabase_basic(t *testing.T) {
 	instanceName := fmt.Sprintf("my-instance-%s", rnd)
 	databaseName := fmt.Sprintf("mydb_%s", rnd)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSpannerDatabaseDestroyProducer(t),

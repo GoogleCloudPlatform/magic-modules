@@ -13,7 +13,7 @@ func TestAccComputeHealthCheck_tcp_update(t *testing.T) {
 
 	hckName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeHealthCheckDestroyProducer(t),
@@ -43,7 +43,7 @@ func TestAccComputeHealthCheck_ssl_port_spec(t *testing.T) {
 
 	hckName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeHealthCheckDestroyProducer(t),
@@ -65,7 +65,7 @@ func TestAccComputeHealthCheck_http_port_spec(t *testing.T) {
 
 	hckName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeHealthCheckDestroyProducer(t),
@@ -86,7 +86,7 @@ func TestAccComputeHealthCheck_https_serving_port(t *testing.T) {
 
 	hckName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeHealthCheckDestroyProducer(t),
@@ -108,7 +108,7 @@ func TestAccComputeHealthCheck_typeTransition(t *testing.T) {
 
 	hckName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeHealthCheckDestroyProducer(t),
@@ -140,7 +140,7 @@ func TestAccComputeHealthCheck_tcpAndSsl_shouldFail(t *testing.T) {
 
 	hckName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeHealthCheckDestroyProducer(t),

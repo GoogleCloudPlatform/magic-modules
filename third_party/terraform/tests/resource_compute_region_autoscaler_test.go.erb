@@ -17,7 +17,7 @@ func TestAccComputeRegionAutoscaler_update(t *testing.T) {
 	var igm_name = fmt.Sprintf("region-autoscaler-test-%s", randString(t, 10))
 	var autoscaler_name = fmt.Sprintf("region-autoscaler-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeRegionAutoscalerDestroyProducer(t),

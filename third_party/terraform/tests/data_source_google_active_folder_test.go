@@ -14,7 +14,7 @@ func TestAccDataSourceGoogleActiveFolder_default(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s", org)
 	displayName := "terraform-test-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -34,7 +34,7 @@ func TestAccDataSourceGoogleActiveFolder_space(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s", org)
 	displayName := "terraform test " + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

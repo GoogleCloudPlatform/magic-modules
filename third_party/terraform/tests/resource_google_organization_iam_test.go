@@ -28,7 +28,7 @@ func TestAccOrganizationIam(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	roleId := "tfIamTest" + randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

@@ -15,7 +15,7 @@ func TestAccComputeAttachedDisk_basic(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-inst-%d", randInt(t))
 	importID := fmt.Sprintf("%s/us-central1-a/%s/%s", getTestProjectFromEnv(), instanceName, diskName)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		// Check destroy isn't a good test here, see comment on testCheckAttachedDiskIsNowDetached
@@ -47,7 +47,7 @@ func TestAccComputeAttachedDisk_full(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%d", randInt(t))
 	importID := fmt.Sprintf("%s/us-central1-a/%s/%s", getTestProjectFromEnv(), instanceName, diskName)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		// Check destroy isn't a good test here, see comment on testCheckAttachedDiskIsNowDetached
@@ -74,7 +74,7 @@ func TestAccComputeAttachedDisk_region(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%d", randInt(t))
 	importID := fmt.Sprintf("%s/us-central1-a/%s/%s", getTestProjectFromEnv(), instanceName, diskName)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		// Check destroy isn't a good test here, see comment on testCheckAttachedDiskIsNowDetached
@@ -101,7 +101,7 @@ func TestAccComputeAttachedDisk_count(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%d", randInt(t))
 	count := 2
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: nil,

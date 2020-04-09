@@ -11,7 +11,7 @@ import (
 func TestAccComputeSslCertificate_no_name(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeSslCertificateDestroyProducer(t),

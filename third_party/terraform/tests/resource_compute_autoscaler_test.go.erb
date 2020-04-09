@@ -19,7 +19,7 @@ func TestAccComputeAutoscaler_update(t *testing.T) {
 	var igm_name = fmt.Sprintf("autoscaler-test-%s", randString(t, 10))
 	var autoscaler_name = fmt.Sprintf("autoscaler-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeAutoscalerDestroyProducer(t),
@@ -53,7 +53,7 @@ func TestAccComputeAutoscaler_multicondition(t *testing.T) {
 	var igm_name = fmt.Sprintf("autoscaler-test-%s", randString(t, 10))
 	var autoscaler_name = fmt.Sprintf("autoscaler-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeAutoscalerDestroyProducer(t),

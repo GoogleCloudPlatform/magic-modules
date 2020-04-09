@@ -35,7 +35,7 @@ func TestAccComputeInstance_basic1(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -68,7 +68,7 @@ func TestAccComputeInstance_basic2(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -93,7 +93,7 @@ func TestAccComputeInstance_basic3(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -118,7 +118,7 @@ func TestAccComputeInstance_basic4(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -143,7 +143,7 @@ func TestAccComputeInstance_basic5(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -169,7 +169,7 @@ func TestAccComputeInstance_IP(t *testing.T) {
 	var ipName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -194,7 +194,7 @@ func TestAccComputeInstance_PTRRecord(t *testing.T) {
 	var ipName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -225,7 +225,7 @@ func TestAccComputeInstance_networkTier(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -266,7 +266,7 @@ func TestAccComputeInstance_diskEncryption(t *testing.T) {
 		},
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -297,7 +297,7 @@ func TestAccComputeInstance_diskEncryptionRestart(t *testing.T) {
 		},
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -342,7 +342,7 @@ func TestAccComputeInstance_kmsDiskEncryption(t *testing.T) {
 		},
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -366,7 +366,7 @@ func TestAccComputeInstance_attachedDisk(t *testing.T) {
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 	var diskName = fmt.Sprintf("instance-testd-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -391,7 +391,7 @@ func TestAccComputeInstance_attachedDisk_sourceUrl(t *testing.T) {
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 	var diskName = fmt.Sprintf("instance-testd-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -416,7 +416,7 @@ func TestAccComputeInstance_attachedDisk_modeRo(t *testing.T) {
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 	var diskName = fmt.Sprintf("instance-testd-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -442,7 +442,7 @@ func TestAccComputeInstance_attachedDiskUpdate(t *testing.T) {
 	var diskName = fmt.Sprintf("instance-testd-%s", randString(t, 10))
 	var diskName2 = fmt.Sprintf("instance-testd-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -494,7 +494,7 @@ func TestAccComputeInstance_bootDisk_source(t *testing.T) {
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 	var diskName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -519,7 +519,7 @@ func TestAccComputeInstance_bootDisk_sourceUrl(t *testing.T) {
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 	var diskName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -544,7 +544,7 @@ func TestAccComputeInstance_bootDisk_type(t *testing.T) {
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 	var diskType = "pd-ssd"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -567,7 +567,7 @@ func TestAccComputeInstance_bootDisk_mode(t *testing.T) {
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 	var diskMode = "READ_WRITE"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -586,7 +586,7 @@ func TestAccComputeInstance_scratchDisk(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -610,7 +610,7 @@ func TestAccComputeInstance_forceNewAndChangeMetadata(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -641,7 +641,7 @@ func TestAccComputeInstance_update(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -675,7 +675,7 @@ func TestAccComputeInstance_stopInstanceToUpdate(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -717,7 +717,7 @@ func TestAccComputeInstance_serviceAccount(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -746,7 +746,7 @@ func TestAccComputeInstance_scheduling(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -778,7 +778,7 @@ func TestAccComputeInstance_soleTenantNodeAffinities(t *testing.T) {
 	var templateName = fmt.Sprintf("nodetmpl-%s", randString(t, 10))
 	var groupName = fmt.Sprintf("nodegroup-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -801,7 +801,7 @@ func TestAccComputeInstance_subnet_auto(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -825,7 +825,7 @@ func TestAccComputeInstance_subnet_custom(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -852,7 +852,7 @@ func TestAccComputeInstance_subnet_xpn(t *testing.T) {
 	billingId := getTestBillingAccountFromEnv(t)
 	projectName := fmt.Sprintf("tf-xpntest-%d", time.Now().Unix())
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -876,7 +876,7 @@ func TestAccComputeInstance_networkIPAuto(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -899,7 +899,7 @@ func TestAccComputeInstance_network_ip_custom(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 	var ipAddress = "10.0.200.200"
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -924,7 +924,7 @@ func TestAccComputeInstance_private_image_family(t *testing.T) {
 	var diskName = fmt.Sprintf("instance-testd-%s", randString(t, 10))
 	var familyName = fmt.Sprintf("instance-testf-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -946,7 +946,7 @@ func TestAccComputeInstance_forceChangeMachineTypeManually(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -972,7 +972,7 @@ func TestAccComputeInstance_multiNic(t *testing.T) {
 	networkName := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 	subnetworkName := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -995,7 +995,7 @@ func TestAccComputeInstance_guestAccelerator(t *testing.T) {
 	var instance compute.Instance
 	instanceName := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1019,7 +1019,7 @@ func TestAccComputeInstance_guestAcceleratorSkip(t *testing.T) {
 	var instance compute.Instance
 	instanceName := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1042,7 +1042,7 @@ func TestAccComputeInstance_minCpuPlatform(t *testing.T) {
 	var instance compute.Instance
 	instanceName := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1065,7 +1065,7 @@ func TestAccComputeInstance_deletionProtectionExplicitFalse(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1088,7 +1088,7 @@ func TestAccComputeInstance_deletionProtectionExplicitTrueAndUpdateFalse(t *test
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1121,7 +1121,7 @@ func TestAccComputeInstance_primaryAliasIpRange(t *testing.T) {
 	var instance compute.Instance
 	instanceName := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1146,7 +1146,7 @@ func TestAccComputeInstance_secondaryAliasIpRange(t *testing.T) {
 	networkName := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 	subnetName := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1177,7 +1177,7 @@ func TestAccComputeInstance_hostname(t *testing.T) {
 	var instance computeBeta.Instance
 	instanceName := fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1200,7 +1200,7 @@ func TestAccComputeInstance_shieldedVmConfig1(t *testing.T) {
 	var instance computeBeta.Instance
 	instanceName := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1223,7 +1223,7 @@ func TestAccComputeInstance_shieldedVmConfig2(t *testing.T) {
 	var instance computeBeta.Instance
 	instanceName := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1245,7 +1245,7 @@ func TestAccComputeInstance_enableDisplay(t *testing.T) {
 
 	instanceName := fmt.Sprintf("terraform-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1268,7 +1268,7 @@ func TestAccComputeInstance_desiredStatusOnCreation(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1295,7 +1295,7 @@ func TestAccComputeInstance_desiredStatusUpdateBasic(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1349,7 +1349,7 @@ func TestAccComputeInstance_desiredStatusTerminatedUpdateFields(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1391,7 +1391,7 @@ func TestAccComputeInstance_updateRunning_desiredStatusRunning_allowStoppingForU
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1423,7 +1423,7 @@ func TestAccComputeInstance_updateRunning_desiredStatusNotSet_notAllowStoppingFo
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1454,7 +1454,7 @@ func TestAccComputeInstance_updateRunning_desiredStatusRunning_notAllowStoppingF
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1485,7 +1485,7 @@ func TestAccComputeInstance_updateRunning_desiredStatusTerminated_allowStoppingF
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1517,7 +1517,7 @@ func TestAccComputeInstance_updateRunning_desiredStatusTerminated_notAllowStoppi
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1549,7 +1549,7 @@ func TestAccComputeInstance_updateTerminated_desiredStatusNotSet_allowStoppingFo
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1589,7 +1589,7 @@ func TestAccComputeInstance_updateTerminated_desiredStatusTerminated_allowStoppi
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1629,7 +1629,7 @@ func TestAccComputeInstance_updateTerminated_desiredStatusNotSet_notAllowStoppin
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1669,7 +1669,7 @@ func TestAccComputeInstance_updateTerminated_desiredStatusTerminated_notAllowSto
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1709,7 +1709,7 @@ func TestAccComputeInstance_updateTerminated_desiredStatusRunning_allowStoppingF
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
@@ -1749,7 +1749,7 @@ func TestAccComputeInstance_updateTerminated_desiredStatusRunning_notAllowStoppi
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("instance-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),

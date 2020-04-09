@@ -81,7 +81,7 @@ func TestAccCloudFunctionsFunction_basic(t *testing.T) {
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
@@ -135,7 +135,7 @@ func TestAccCloudFunctionsFunction_update(t *testing.T) {
 	zipFileUpdatePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerUpdatePath)
 	defer os.Remove(zipFilePath) // clean up
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -196,7 +196,7 @@ func TestAccCloudFunctionsFunction_pubsub(t *testing.T) {
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testPubSubTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
@@ -222,7 +222,7 @@ func TestAccCloudFunctionsFunction_bucket(t *testing.T) {
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testBucketTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
@@ -255,7 +255,7 @@ func TestAccCloudFunctionsFunction_firestore(t *testing.T) {
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testFirestoreTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
@@ -279,7 +279,7 @@ func TestAccCloudFunctionsFunction_sourceRepo(t *testing.T) {
 	functionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	proj := getTestProjectFromEnv()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
@@ -305,7 +305,7 @@ func TestAccCloudFunctionsFunction_serviceAccountEmail(t *testing.T) {
 	zipFilePath := createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 	defer os.Remove(zipFilePath) // clean up
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
@@ -334,7 +334,7 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 	projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
 	defer os.Remove(zipFilePath) // clean up
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),

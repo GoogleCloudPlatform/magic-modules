@@ -13,7 +13,7 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 
 	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
@@ -37,7 +37,7 @@ func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
 
 	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),

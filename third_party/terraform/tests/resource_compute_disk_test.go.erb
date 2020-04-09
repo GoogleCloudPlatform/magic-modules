@@ -209,7 +209,7 @@ func TestAccComputeDisk_timeout(t *testing.T) {
 	t.Parallel()
 
 	diskName := fmt.Sprintf("tf-test-disk-%d", randInt(t))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -226,7 +226,7 @@ func TestAccComputeDisk_update(t *testing.T) {
 
 	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -258,7 +258,7 @@ func TestAccComputeDisk_fromSnapshot(t *testing.T) {
 	snapshotName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	projectName := getTestProjectFromEnv()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeDiskDestroyProducer(t),
@@ -289,7 +289,7 @@ func TestAccComputeDisk_encryption(t *testing.T) {
 	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var disk compute.Disk
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeDiskDestroyProducer(t),
@@ -316,7 +316,7 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 	importID := fmt.Sprintf("%s/%s/%s", pid, "us-central1-a", diskName)
 	var disk compute.Disk
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeDiskDestroyProducer(t),
@@ -346,7 +346,7 @@ func TestAccComputeDisk_deleteDetach(t *testing.T) {
 	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeDiskDestroyProducer(t),
@@ -382,7 +382,7 @@ func TestAccComputeDisk_deleteDetachIGM(t *testing.T) {
 	diskName2 := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	mgrName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeDiskDestroyProducer(t),
@@ -436,7 +436,7 @@ func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	policyName := fmt.Sprintf("tf-test-policy-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

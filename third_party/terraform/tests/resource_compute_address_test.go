@@ -10,7 +10,7 @@ import (
 func TestAccComputeAddress_networkTier(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
@@ -28,7 +28,7 @@ func TestAccComputeAddress_networkTier(t *testing.T) {
 }
 
 func TestAccComputeAddress_internal(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),

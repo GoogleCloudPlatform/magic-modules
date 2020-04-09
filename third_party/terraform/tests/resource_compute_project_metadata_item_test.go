@@ -15,7 +15,7 @@ func TestAccComputeProjectMetadataItem_basic(t *testing.T) {
 	// Key must be unique to avoid concurrent tests interfering with each other
 	key := "myKey" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
@@ -41,7 +41,7 @@ func TestAccComputeProjectMetadataItem_basicMultiple(t *testing.T) {
 	config := testAccProjectMetadataItem_basic("foobar", key1, "myValue") +
 		testAccProjectMetadataItem_basic("foobar2", key2, "myOtherValue")
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
@@ -69,7 +69,7 @@ func TestAccComputeProjectMetadataItem_basicWithEmptyVal(t *testing.T) {
 	// Key must be unique to avoid concurrent tests interfering with each other
 	key := "myKey" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
@@ -92,7 +92,7 @@ func TestAccComputeProjectMetadataItem_basicUpdate(t *testing.T) {
 	// Key must be unique to avoid concurrent tests interfering with each other
 	key := "myKey" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),
@@ -124,7 +124,7 @@ func TestAccComputeProjectMetadataItem_exists(t *testing.T) {
 	key := "myKey" + randString(t, 10)
 	originalConfig := testAccProjectMetadataItem_basic("foobar", key, "myValue")
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckProjectMetadataItemDestroyProducer(t),

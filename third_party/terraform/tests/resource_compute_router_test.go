@@ -12,7 +12,7 @@ func TestAccComputeRouter_basic(t *testing.T) {
 
 	testId := randString(t, 10)
 	resourceRegion := "europe-west1"
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeRouterDestroyProducer(t),
@@ -34,7 +34,7 @@ func TestAccComputeRouter_noRegion(t *testing.T) {
 
 	testId := randString(t, 10)
 	providerRegion := "us-central1"
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeRouterDestroyProducer(t),
@@ -55,7 +55,7 @@ func TestAccComputeRouter_full(t *testing.T) {
 	t.Parallel()
 
 	testId := randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeRouterDestroyProducer(t),
@@ -77,7 +77,7 @@ func TestAccComputeRouter_update(t *testing.T) {
 
 	testId := randString(t, 10)
 	region := getTestRegionFromEnv()
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeRouterDestroyProducer(t),
@@ -115,7 +115,7 @@ func TestAccComputeRouter_updateAddRemoveBGP(t *testing.T) {
 
 	testId := randString(t, 10)
 	region := getTestRegionFromEnv()
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeRouterDestroyProducer(t),

@@ -12,7 +12,7 @@ func TestAccDataSourceGoogleProject_basic(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	project := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

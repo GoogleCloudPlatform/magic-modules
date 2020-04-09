@@ -36,7 +36,7 @@ func testAccMonitoringAlertPolicy_basic(t *testing.T) {
 	conditionName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	filter := `metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\"`
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAlertPolicyDestroyProducer(t),
@@ -62,7 +62,7 @@ func testAccMonitoringAlertPolicy_update(t *testing.T) {
 	filter2 := `metric.type=\"compute.googleapis.com/instance/cpu/utilization\" AND resource.type=\"gce_instance\"`
 	aligner2 := "ALIGN_MAX"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAlertPolicyDestroyProducer(t),
@@ -93,7 +93,7 @@ func testAccMonitoringAlertPolicy_full(t *testing.T) {
 	conditionName1 := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	conditionName2 := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAlertPolicyDestroyProducer(t),

@@ -14,7 +14,7 @@ func TestAccComputeNetwork_explicitAutoSubnet(t *testing.T) {
 
 	var network compute.Network
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeNetworkDestroyProducer(t),
@@ -42,7 +42,7 @@ func TestAccComputeNetwork_customSubnet(t *testing.T) {
 
 	var network compute.Network
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeNetworkDestroyProducer(t),
@@ -71,7 +71,7 @@ func TestAccComputeNetwork_routingModeAndUpdate(t *testing.T) {
 	var network compute.Network
 	networkName := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeNetworkDestroyProducer(t),
@@ -106,7 +106,7 @@ func TestAccComputeNetwork_default_routing_mode(t *testing.T) {
 
 	expectedRoutingMode := "REGIONAL"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeNetworkDestroyProducer(t),
@@ -127,7 +127,7 @@ func TestAccComputeNetwork_default_routing_mode(t *testing.T) {
 func TestAccComputeNetwork_networkDeleteDefaultRoute(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeNetworkDestroyProducer(t),

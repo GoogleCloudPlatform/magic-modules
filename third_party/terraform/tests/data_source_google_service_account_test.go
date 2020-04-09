@@ -13,7 +13,7 @@ func TestAccDatasourceGoogleServiceAccount_basic(t *testing.T) {
 	resourceName := "data.google_service_account.acceptance"
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

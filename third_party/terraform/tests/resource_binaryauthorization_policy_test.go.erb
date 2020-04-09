@@ -16,7 +16,7 @@ func TestAccBinaryAuthorizationPolicy_basic(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	pid := "tf-test-" + randString(t, 10)
 	billingId := getTestBillingAccountFromEnv(t)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -48,7 +48,7 @@ func TestAccBinaryAuthorizationPolicy_full(t *testing.T) {
 	note := randString(t, 10)
 	attestor := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -80,7 +80,7 @@ func TestAccBinaryAuthorizationPolicy_separateProject(t *testing.T) {
 	note := randString(t, 10)
 	attestor := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -111,7 +111,7 @@ func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 	note := randString(t, 10)
 	attestor := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

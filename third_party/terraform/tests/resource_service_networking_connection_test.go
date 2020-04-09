@@ -15,7 +15,7 @@ func TestAccServiceNetworkingConnection_create(t *testing.T) {
 	addr := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	service := "servicenetworking.googleapis.com"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testServiceNetworkingConnectionDestroy(t, service, network),
@@ -40,7 +40,7 @@ func TestAccServiceNetworkingConnection_update(t *testing.T) {
 	addr2 := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	service := "servicenetworking.googleapis.com"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testServiceNetworkingConnectionDestroy(t, service, network),

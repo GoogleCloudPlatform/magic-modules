@@ -19,7 +19,7 @@ func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
 		"random_suffix":   randString(t, 10),
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAppEngineFlexibleAppVersionDestroyProducer(t),

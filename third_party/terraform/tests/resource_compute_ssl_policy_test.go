@@ -15,7 +15,7 @@ func TestAccComputeSslPolicy_update(t *testing.T) {
 	var sslPolicy compute.SslPolicy
 	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeSslPolicyDestroyProducer(t),
@@ -62,7 +62,7 @@ func TestAccComputeSslPolicy_update_to_custom(t *testing.T) {
 	var sslPolicy compute.SslPolicy
 	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeSslPolicyDestroyProducer(t),
@@ -109,7 +109,7 @@ func TestAccComputeSslPolicy_update_from_custom(t *testing.T) {
 	var sslPolicy compute.SslPolicy
 	sslPolicyName := fmt.Sprintf("test-ssl-policy-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeSslPolicyDestroyProducer(t),

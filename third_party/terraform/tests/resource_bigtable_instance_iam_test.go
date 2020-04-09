@@ -18,7 +18,7 @@ func TestAccBigtableInstanceIamBinding(t *testing.T) {
 	importId := fmt.Sprintf("projects/%s/instances/%s %s",
 		getTestProjectFromEnv(), instance, role)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -64,7 +64,7 @@ func TestAccBigtableInstanceIamMember(t *testing.T) {
 		role,
 		serviceAccountCanonicalEmail(account))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -99,7 +99,7 @@ func TestAccBigtableInstanceIamPolicy(t *testing.T) {
 	importId := fmt.Sprintf("projects/%s/instances/%s",
 		getTestProjectFromEnv(), instance)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

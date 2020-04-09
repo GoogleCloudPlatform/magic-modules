@@ -14,7 +14,7 @@ func TestAccComputeBackendBucket_basicModified(t *testing.T) {
 	storageName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	secondStorageName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeBackendBucketDestroyProducer(t),
@@ -46,7 +46,7 @@ func TestAccComputeBackendBucket_withCdnPolicy(t *testing.T) {
 	backendName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	storageName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeBackendBucketDestroyProducer(t),

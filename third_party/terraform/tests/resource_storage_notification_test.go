@@ -25,7 +25,7 @@ func TestAccStorageNotification_basic(t *testing.T) {
 	topicName := fmt.Sprintf("tf-pstopic-test-%d", randInt(t))
 	topic := fmt.Sprintf("//pubsub.googleapis.com/projects/%s/topics/%s", os.Getenv("GOOGLE_PROJECT"), topicName)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageNotificationDestroyProducer(t),
@@ -71,7 +71,7 @@ func TestAccStorageNotification_withEventsAndAttributes(t *testing.T) {
 	eventType1 := "OBJECT_FINALIZE"
 	eventType2 := "OBJECT_ARCHIVE"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageNotificationDestroyProducer(t),

@@ -19,7 +19,7 @@ func TestAccLoggingOrganizationSink_basic(t *testing.T) {
 
 	var sink logging.LogSink
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingOrganizationSinkDestroyProducer(t),
@@ -49,7 +49,7 @@ func TestAccLoggingOrganizationSink_update(t *testing.T) {
 
 	var sinkBefore, sinkAfter logging.LogSink
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingOrganizationSinkDestroyProducer(t),
@@ -91,7 +91,7 @@ func TestAccLoggingOrganizationSink_updateBigquerySink(t *testing.T) {
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bqDatasetID := "tf_test_sink_" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingOrganizationSinkDestroyProducer(t),
@@ -125,7 +125,7 @@ func TestAccLoggingOrganizationSink_heredoc(t *testing.T) {
 
 	var sink logging.LogSink
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingOrganizationSinkDestroyProducer(t),

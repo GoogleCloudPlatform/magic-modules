@@ -17,7 +17,7 @@ func TestAccComputeRegionDisk_basic(t *testing.T) {
 
 	var disk computeBeta.Disk
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeRegionDiskDestroyProducer(t),
@@ -57,7 +57,7 @@ func TestAccComputeRegionDisk_basicUpdate(t *testing.T) {
 
 	var disk computeBeta.Disk
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeRegionDiskDestroyProducer(t),
@@ -100,7 +100,7 @@ func TestAccComputeRegionDisk_encryption(t *testing.T) {
 	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var disk computeBeta.Disk
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeRegionDiskDestroyProducer(t),
@@ -127,7 +127,7 @@ func TestAccComputeRegionDisk_deleteDetach(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	var disk computeBeta.Disk
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeRegionDiskDestroyProducer(t),

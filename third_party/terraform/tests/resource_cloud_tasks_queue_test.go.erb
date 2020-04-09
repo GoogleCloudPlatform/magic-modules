@@ -13,7 +13,7 @@ func TestAccCloudTasksQueue_update(t *testing.T) {
 
 	name := "cloudtasksqueuetest-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -44,7 +44,7 @@ func TestAccCloudTasksQueue_update2Basic(t *testing.T) {
 
 	name := "cloudtasksqueuetest-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

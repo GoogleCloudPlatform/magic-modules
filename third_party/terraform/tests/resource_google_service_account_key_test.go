@@ -15,7 +15,7 @@ func TestAccServiceAccountKey_basic(t *testing.T) {
 	resourceName := "google_service_account_key.acceptance"
 	accountID := "a" + randString(t, 10)
 	displayName := "Terraform Test"
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -39,7 +39,7 @@ func TestAccServiceAccountKey_fromEmail(t *testing.T) {
 	resourceName := "google_service_account_key.acceptance"
 	accountID := "a" + randString(t, 10)
 	displayName := "Terraform Test"
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

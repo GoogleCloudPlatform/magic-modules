@@ -13,7 +13,7 @@ func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 	project := getTestProjectFromEnv()
 	name := "tftest-cloudrun-" + randString(t, 6)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

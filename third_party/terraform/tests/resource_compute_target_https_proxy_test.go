@@ -19,7 +19,7 @@ func TestAccComputeTargetHttpsProxy_update(t *testing.T) {
 	var proxy compute.TargetHttpsProxy
 	resourceSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeTargetHttpsProxyDestroyProducer(t),

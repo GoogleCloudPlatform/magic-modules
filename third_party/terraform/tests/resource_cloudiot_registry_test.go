@@ -38,7 +38,7 @@ func TestAccCloudIoTRegistry_basic(t *testing.T) {
 
 	registryName := fmt.Sprintf("psregistry-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudIoTRegistryDestroyProducer(t),
@@ -60,7 +60,7 @@ func TestAccCloudIoTRegistry_extended(t *testing.T) {
 
 	registryName := fmt.Sprintf("psregistry-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudIoTRegistryDestroyProducer(t),
@@ -82,7 +82,7 @@ func TestAccCloudIoTRegistry_update(t *testing.T) {
 
 	registryName := fmt.Sprintf("psregistry-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudIoTRegistryDestroyProducer(t),
@@ -121,7 +121,7 @@ func TestAccCloudIoTRegistry_eventNotificationConfigsSingle(t *testing.T) {
 	registryName := fmt.Sprintf("tf-registry-test-%s", randString(t, 10))
 	topic := fmt.Sprintf("tf-registry-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudIoTRegistryDestroyProducer(t),
@@ -144,7 +144,7 @@ func TestAccCloudIoTRegistry_eventNotificationConfigsMultiple(t *testing.T) {
 	registryName := fmt.Sprintf("tf-registry-test-%s", randString(t, 10))
 	topic := fmt.Sprintf("tf-registry-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudIoTRegistryDestroyProducer(t),

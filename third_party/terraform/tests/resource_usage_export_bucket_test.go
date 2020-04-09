@@ -13,7 +13,7 @@ func TestAccComputeResourceUsageExportBucket(t *testing.T) {
 
 	baseProject := fmt.Sprintf("tf-test-%d", randInt(t))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

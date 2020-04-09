@@ -17,7 +17,7 @@ func TestAccProjectService_basic(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", randInt(t))
 	services := []string{"iam.googleapis.com", "cloudresourcemanager.googleapis.com"}
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -72,7 +72,7 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 	pid := fmt.Sprintf("tf-test-%d", randInt(t))
 	services := []string{"cloudbuild.googleapis.com", "containerregistry.googleapis.com"}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -112,7 +112,7 @@ func TestAccProjectService_handleNotFound(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", randInt(t))
 	service := "iam.googleapis.com"
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -136,7 +136,7 @@ func TestAccProjectService_renamedService(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", randInt(t))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

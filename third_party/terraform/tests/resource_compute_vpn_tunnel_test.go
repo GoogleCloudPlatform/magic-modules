@@ -17,7 +17,7 @@ func TestAccComputeVpnTunnel_regionFromGateway(t *testing.T) {
 		region = "us-west1"
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeVpnTunnelDestroyProducer(t),
@@ -40,7 +40,7 @@ func TestAccComputeVpnTunnel_router(t *testing.T) {
 	t.Parallel()
 
 	router := fmt.Sprintf("tf-test-tunnel-%s", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeVpnTunnelDestroyProducer(t),
@@ -61,7 +61,7 @@ func TestAccComputeVpnTunnel_router(t *testing.T) {
 func TestAccComputeVpnTunnel_defaultTrafficSelectors(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeVpnTunnelDestroyProducer(t),

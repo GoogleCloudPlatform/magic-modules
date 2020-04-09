@@ -12,7 +12,7 @@ func TestAccMonitoringUptimeCheckConfig_update(t *testing.T) {
 	project := getTestProjectFromEnv()
 	host := "192.168.1.1"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckMonitoringUptimeCheckConfigDestroyProducer(t),
@@ -45,7 +45,7 @@ func TestAccMonitoringUptimeCheckConfig_changeNonUpdatableFields(t *testing.T) {
 	t.Parallel()
 	project := getTestProjectFromEnv()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckMonitoringUptimeCheckConfigDestroyProducer(t),

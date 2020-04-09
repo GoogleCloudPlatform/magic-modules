@@ -15,7 +15,7 @@ func TestAccDataSourceGoogleFolder_byFullName(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s", org)
 	displayName := "terraform-test-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -35,7 +35,7 @@ func TestAccDataSourceGoogleFolder_byShortName(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s", org)
 	displayName := "terraform-test-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -55,7 +55,7 @@ func TestAccDataSourceGoogleFolder_lookupOrganization(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s", org)
 	displayName := "terraform-test-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -73,7 +73,7 @@ func TestAccDataSourceGoogleFolder_lookupOrganization(t *testing.T) {
 func TestAccDataSourceGoogleFolder_byFullNameNotFound(t *testing.T) {
 	name := "folders/" + randString(t, 16)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

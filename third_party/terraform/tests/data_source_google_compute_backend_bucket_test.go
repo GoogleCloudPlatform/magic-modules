@@ -13,7 +13,7 @@ func TestAccDataSourceComputeBackendBucket_basic(t *testing.T) {
 	backendBucketName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	bucketName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeBackendBucketDestroyProducer(t),

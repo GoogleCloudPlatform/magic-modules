@@ -14,7 +14,7 @@ func TestAccComputeSecurityPolicy_basic(t *testing.T) {
 
 	spName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeSecurityPolicyDestroyProducer(t),
@@ -36,7 +36,7 @@ func TestAccComputeSecurityPolicy_withRule(t *testing.T) {
 
 	spName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeSecurityPolicyDestroyProducer(t),
@@ -59,7 +59,7 @@ func TestAccComputeSecurityPolicy_withRuleExpr(t *testing.T) {
 
 	spName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeSecurityPolicyDestroyProducer(t),
@@ -82,7 +82,7 @@ func TestAccComputeSecurityPolicy_update(t *testing.T) {
 
 	spName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeSecurityPolicyDestroyProducer(t),

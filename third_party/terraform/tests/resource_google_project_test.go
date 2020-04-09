@@ -81,7 +81,7 @@ func TestAccProject_createWithoutOrg(t *testing.T) {
 	}
 
 	pid := fmt.Sprintf("%s-%d", testPrefix, randInt(t))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -103,7 +103,7 @@ func TestAccProject_create(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", testPrefix, randInt(t))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -127,7 +127,7 @@ func TestAccProject_billing(t *testing.T) {
 	billingId2 := os.Getenv("GOOGLE_BILLING_ACCOUNT_2")
 	billingId := getTestBillingAccountFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", testPrefix, randInt(t))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -169,7 +169,7 @@ func TestAccProject_labels(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", testPrefix, randInt(t))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -212,7 +212,7 @@ func TestAccProject_deleteDefaultNetwork(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", testPrefix, randInt(t))
 	billingId := getTestBillingAccountFromEnv(t)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -229,7 +229,7 @@ func TestAccProject_parentFolder(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", testPrefix, randInt(t))
 	folderDisplayName := testPrefix + randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

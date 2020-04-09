@@ -15,7 +15,7 @@ func TestAccComputeUrlMap_update_path_matcher(t *testing.T) {
 	bsName := fmt.Sprintf("urlmap-test-%s", randString(t, 10))
 	hcName := fmt.Sprintf("urlmap-test-%s", randString(t, 10))
 	umName := fmt.Sprintf("urlmap-test-%s", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
@@ -42,7 +42,7 @@ func TestAccComputeUrlMap_update_path_matcher(t *testing.T) {
 func TestAccComputeUrlMap_advanced(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
@@ -72,7 +72,7 @@ func TestAccComputeUrlMap_noPathRulesWithUpdate(t *testing.T) {
 	bsName := fmt.Sprintf("urlmap-test-%s", randString(t, 10))
 	hcName := fmt.Sprintf("urlmap-test-%s", randString(t, 10))
 	umName := fmt.Sprintf("urlmap-test-%s", randString(t, 10))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
@@ -130,7 +130,7 @@ func TestAccComputeUrlMap_trafficDirectorUpdate(t *testing.T) {
 	bsName := fmt.Sprintf("urlmap-test-%s", randString)
 	hcName := fmt.Sprintf("urlmap-test-%s", randString)
 	umName := fmt.Sprintf("urlmap-test-%s", randString)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
@@ -163,7 +163,7 @@ func TestAccComputeUrlMap_trafficDirectorPathUpdate(t *testing.T) {
 	bsName := fmt.Sprintf("urlmap-test-%s", randString)
 	hcName := fmt.Sprintf("urlmap-test-%s", randString)
 	umName := fmt.Sprintf("urlmap-test-%s", randString)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
@@ -196,7 +196,7 @@ func TestAccComputeUrlMap_trafficDirectorRemoveRouteRule(t *testing.T) {
 	bsName := fmt.Sprintf("urlmap-test-%s", randString)
 	hcName := fmt.Sprintf("urlmap-test-%s", randString)
 	umName := fmt.Sprintf("urlmap-test-%s", randString)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),

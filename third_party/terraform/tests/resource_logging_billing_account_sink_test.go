@@ -18,7 +18,7 @@ func TestAccLoggingBillingAccountSink_basic(t *testing.T) {
 
 	var sink logging.LogSink
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountSinkDestroyProducer(t),
@@ -48,7 +48,7 @@ func TestAccLoggingBillingAccountSink_update(t *testing.T) {
 
 	var sinkBefore, sinkAfter logging.LogSink
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountSinkDestroyProducer(t),
@@ -90,7 +90,7 @@ func TestAccLoggingBillingAccountSink_updateBigquerySink(t *testing.T) {
 	bqDatasetID := "tf_test_sink_" + randString(t, 10)
 	billingAccount := getTestBillingAccountFromEnv(t)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountSinkDestroyProducer(t),
@@ -124,7 +124,7 @@ func TestAccLoggingBillingAccountSink_heredoc(t *testing.T) {
 
 	var sink logging.LogSink
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingBillingAccountSinkDestroyProducer(t),

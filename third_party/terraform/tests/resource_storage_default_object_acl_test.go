@@ -12,7 +12,7 @@ func TestAccStorageDefaultObjectAcl_basic(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageDefaultObjectAclDestroyProducer(t),
@@ -32,7 +32,7 @@ func TestAccStorageDefaultObjectAcl_noRoleEntity(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageDefaultObjectAclDestroyProducer(t),
@@ -49,7 +49,7 @@ func TestAccStorageDefaultObjectAcl_upgrade(t *testing.T) {
 
 	bucketName := testBucketName(t)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageDefaultObjectAclDestroyProducer(t),
@@ -87,7 +87,7 @@ func TestAccStorageDefaultObjectAcl_downgrade(t *testing.T) {
 
 	bucketName := testBucketName(t)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageDefaultObjectAclDestroyProducer(t),
@@ -126,7 +126,7 @@ func TestAccStorageDefaultObjectAcl_unordered(t *testing.T) {
 
 	bucketName := testBucketName(t)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageDefaultObjectAclDestroyProducer(t),

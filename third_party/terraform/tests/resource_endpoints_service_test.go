@@ -15,7 +15,7 @@ func TestAccEndpointsService_basic(t *testing.T) {
 	t.Parallel()
 	serviceId := "tf-test" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		CheckDestroy: testAccCheckEndpointServiceDestroyProducer(t),
 		Providers:    testAccProviders,
@@ -32,7 +32,7 @@ func TestAccEndpointsService_grpc(t *testing.T) {
 	t.Parallel()
 	serviceId := "tf-test" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckEndpointServiceDestroyProducer(t),

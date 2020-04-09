@@ -12,7 +12,7 @@ func TestAccSqlUser_mysql(t *testing.T) {
 	t.Parallel()
 
 	instance := fmt.Sprintf("i-%d", randInt(t))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
@@ -47,7 +47,7 @@ func TestAccSqlUser_postgres(t *testing.T) {
 	t.Parallel()
 
 	instance := fmt.Sprintf("i-%d", randInt(t))
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccSqlUserDestroyProducer(t),

@@ -101,7 +101,7 @@ func TestAccAccessContextManager(t *testing.T) {
 func testAccAccessContextManagerAccessPolicy_basicTest(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAccessContextManagerAccessPolicyDestroyProducer(t),

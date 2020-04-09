@@ -15,7 +15,7 @@ func TestAccComputeRegionUrlMap_update_path_matcher(t *testing.T) {
 
 	randomSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
@@ -45,7 +45,7 @@ func TestAccComputeRegionUrlMap_advanced(t *testing.T) {
 
 	randomSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
@@ -75,7 +75,7 @@ func TestAccComputeRegionUrlMap_noPathRulesWithUpdate(t *testing.T) {
 
 	randomSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
@@ -105,7 +105,7 @@ func TestAccComputeRegionUrlMap_ilbPathUpdate(t *testing.T) {
 
 	randomSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
@@ -135,7 +135,7 @@ func TestAccComputeRegionUrlMap_ilbRouteUpdate(t *testing.T) {
 
 	randomSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),

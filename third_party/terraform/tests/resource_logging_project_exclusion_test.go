@@ -34,7 +34,7 @@ func TestAccLoggingProjectExclusion(t *testing.T) {
 func testAccLoggingProjectExclusion_basic(t *testing.T) {
 	exclusionName := "tf-test-exclusion-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectExclusionDestroyProducer(t),
@@ -54,7 +54,7 @@ func testAccLoggingProjectExclusion_basic(t *testing.T) {
 func testAccLoggingProjectExclusion_disablePreservesFilter(t *testing.T) {
 	exclusionName := "tf-test-exclusion-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectExclusionDestroyProducer(t),
@@ -82,7 +82,7 @@ func testAccLoggingProjectExclusion_disablePreservesFilter(t *testing.T) {
 func testAccLoggingProjectExclusion_update(t *testing.T) {
 	exclusionName := "tf-test-exclusion-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectExclusionDestroyProducer(t),
@@ -108,7 +108,7 @@ func testAccLoggingProjectExclusion_update(t *testing.T) {
 }
 
 func testAccLoggingProjectExclusion_multiple(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLoggingProjectExclusionDestroyProducer(t),

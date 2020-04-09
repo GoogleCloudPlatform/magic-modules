@@ -25,7 +25,7 @@ func TestAccStorageBucketAcl_basic(t *testing.T) {
 
 	bucketName := testBucketName(t)
 	skipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageBucketAclDestroyProducer(t),
@@ -46,7 +46,7 @@ func TestAccStorageBucketAcl_upgrade(t *testing.T) {
 
 	bucketName := testBucketName(t)
 	skipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageBucketAclDestroyProducer(t),
@@ -84,7 +84,7 @@ func TestAccStorageBucketAcl_downgrade(t *testing.T) {
 
 	bucketName := testBucketName(t)
 	skipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageBucketAclDestroyProducer(t),
@@ -121,7 +121,7 @@ func TestAccStorageBucketAcl_predefined(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageBucketAclDestroyProducer(t),
@@ -139,7 +139,7 @@ func TestAccStorageBucketAcl_unordered(t *testing.T) {
 
 	bucketName := testBucketName(t)
 	skipIfEnvNotSet(t, "GOOGLE_PROJECT_NUMBER")
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageBucketAclDestroyProducer(t),
@@ -156,7 +156,7 @@ func TestAccStorageBucketAcl_RemoveOwner(t *testing.T) {
 	t.Parallel()
 
 	bucketName := testBucketName(t)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageBucketAclDestroyProducer(t),

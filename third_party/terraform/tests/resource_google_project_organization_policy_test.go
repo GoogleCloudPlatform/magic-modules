@@ -40,7 +40,7 @@ func TestAccProjectOrganizationPolicy(t *testing.T) {
 func testAccProjectOrganizationPolicy_boolean(t *testing.T) {
 	projectId := getTestProjectFromEnv()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
@@ -76,7 +76,7 @@ func testAccProjectOrganizationPolicy_boolean(t *testing.T) {
 func testAccProjectOrganizationPolicy_list_allowAll(t *testing.T) {
 	projectId := getTestProjectFromEnv()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
@@ -97,7 +97,7 @@ func testAccProjectOrganizationPolicy_list_allowAll(t *testing.T) {
 func testAccProjectOrganizationPolicy_list_allowSome(t *testing.T) {
 	project := getTestProjectFromEnv()
 	canonicalProject := canonicalProjectId(project)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
@@ -117,7 +117,7 @@ func testAccProjectOrganizationPolicy_list_allowSome(t *testing.T) {
 
 func testAccProjectOrganizationPolicy_list_denySome(t *testing.T) {
 	projectId := getTestProjectFromEnv()
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
@@ -137,7 +137,7 @@ func testAccProjectOrganizationPolicy_list_denySome(t *testing.T) {
 
 func testAccProjectOrganizationPolicy_list_update(t *testing.T) {
 	projectId := getTestProjectFromEnv()
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
@@ -162,7 +162,7 @@ func testAccProjectOrganizationPolicy_list_update(t *testing.T) {
 func testAccProjectOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 	projectId := getTestProjectFromEnv()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),
@@ -183,7 +183,7 @@ func testAccProjectOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 func testAccProjectOrganizationPolicy_none(t *testing.T) {
 	projectId := getTestProjectFromEnv()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t),

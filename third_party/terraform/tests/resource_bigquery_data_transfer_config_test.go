@@ -33,7 +33,7 @@ func TestAccBigqueryDataTransferConfig(t *testing.T) {
 func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 	random_suffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
@@ -54,7 +54,7 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
 	random_suffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
@@ -78,7 +78,7 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
 func testAccBigqueryDataTransferConfig_copy_booleanParam(t *testing.T) {
 	random_suffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroyProducer(t),

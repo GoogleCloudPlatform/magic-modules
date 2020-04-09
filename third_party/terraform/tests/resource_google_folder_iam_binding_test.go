@@ -18,7 +18,7 @@ func TestAccFolderIamBinding_basic(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	fname := "terraform-" + randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -49,7 +49,7 @@ func TestAccFolderIamBinding_multiple(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	fname := "terraform-" + randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -94,7 +94,7 @@ func TestAccFolderIamBinding_multipleAtOnce(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	fname := "terraform-" + randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -129,7 +129,7 @@ func TestAccFolderIamBinding_update(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	fname := "terraform-" + randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -180,7 +180,7 @@ func TestAccFolderIamBinding_remove(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	fname := "terraform-" + randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

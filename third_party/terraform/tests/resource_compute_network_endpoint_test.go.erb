@@ -21,7 +21,7 @@ func TestAccComputeNetworkEndpoint_networkEndpointsBasic(t *testing.T) {
 	negId := fmt.Sprintf("projects/%s/zones/%s/networkEndpointGroups/neg-%s",
 		getTestProjectFromEnv(), getTestZoneFromEnv(), context["random_suffix"])
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

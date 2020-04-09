@@ -14,7 +14,7 @@ func TestAccComputeFirewall_update(t *testing.T) {
 	networkName := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 	firewallName := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeFirewallDestroyProducer(t),
@@ -53,7 +53,7 @@ func TestAccComputeFirewall_priority(t *testing.T) {
 	networkName := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 	firewallName := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeFirewallDestroyProducer(t),
@@ -76,7 +76,7 @@ func TestAccComputeFirewall_noSource(t *testing.T) {
 	networkName := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 	firewallName := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeFirewallDestroyProducer(t),
@@ -99,7 +99,7 @@ func TestAccComputeFirewall_denied(t *testing.T) {
 	networkName := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 	firewallName := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeFirewallDestroyProducer(t),
@@ -122,7 +122,7 @@ func TestAccComputeFirewall_egress(t *testing.T) {
 	networkName := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 	firewallName := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeFirewallDestroyProducer(t),
@@ -148,7 +148,7 @@ func TestAccComputeFirewall_serviceAccounts(t *testing.T) {
 	sourceSa := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 	targetSa := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeFirewallDestroyProducer(t),
@@ -171,7 +171,7 @@ func TestAccComputeFirewall_disabled(t *testing.T) {
 	networkName := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 	firewallName := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeFirewallDestroyProducer(t),
@@ -202,7 +202,7 @@ func TestAccComputeFirewall_enableLogging(t *testing.T) {
 	networkName := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 	firewallName := fmt.Sprintf("firewall-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeFirewallDestroyProducer(t),

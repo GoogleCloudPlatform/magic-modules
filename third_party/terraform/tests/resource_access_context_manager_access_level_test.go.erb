@@ -15,7 +15,7 @@ import (
 func testAccAccessContextManagerAccessLevel_basicTest(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAccessContextManagerAccessLevelDestroyProducer(t),
@@ -43,7 +43,7 @@ func testAccAccessContextManagerAccessLevel_basicTest(t *testing.T) {
 func testAccAccessContextManagerAccessLevel_fullTest(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAccessContextManagerAccessLevelDestroyProducer(t),

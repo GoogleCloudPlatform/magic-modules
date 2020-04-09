@@ -17,7 +17,7 @@ func TestAccFolderOrganizationPolicy_boolean(t *testing.T) {
 	folder := fmt.Sprintf("tf-test-%d", randInt(t))
 
 	org := getTestOrgFromEnv(t)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t),
@@ -56,7 +56,7 @@ func TestAccFolderOrganizationPolicy_list_allowAll(t *testing.T) {
 	folder := fmt.Sprintf("tf-test-%d", randInt(t))
 
 	org := getTestOrgFromEnv(t)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t),
@@ -80,7 +80,7 @@ func TestAccFolderOrganizationPolicy_list_allowSome(t *testing.T) {
 	folder := fmt.Sprintf("tf-test-%d", randInt(t))
 	org := getTestOrgFromEnv(t)
 	project := getTestProjectFromEnv()
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t),
@@ -103,7 +103,7 @@ func TestAccFolderOrganizationPolicy_list_denySome(t *testing.T) {
 
 	folder := fmt.Sprintf("tf-test-%d", randInt(t))
 	org := getTestOrgFromEnv(t)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t),
@@ -126,7 +126,7 @@ func TestAccFolderOrganizationPolicy_list_update(t *testing.T) {
 
 	folder := fmt.Sprintf("tf-test-%d", randInt(t))
 	org := getTestOrgFromEnv(t)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleFolderOrganizationPolicyDestroyProducer(t),
@@ -153,7 +153,7 @@ func TestAccFolderOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 
 	folder := fmt.Sprintf("tf-test-%d", randInt(t))
 	org := getTestOrgFromEnv(t)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroyProducer(t),

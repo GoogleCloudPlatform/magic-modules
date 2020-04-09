@@ -15,7 +15,7 @@ func TestAccBigtableInstance_basic(t *testing.T) {
 
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigtableInstanceDestroyProducer(t),
@@ -51,7 +51,7 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigtableInstanceDestroyProducer(t),
@@ -105,7 +105,7 @@ func TestAccBigtableInstance_development(t *testing.T) {
 
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckBigtableInstanceDestroyProducer(t),

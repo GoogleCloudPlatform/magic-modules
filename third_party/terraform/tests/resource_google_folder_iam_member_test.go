@@ -14,7 +14,7 @@ func TestAccFolderIamMember_basic(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	fname := "terraform-" + randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -45,7 +45,7 @@ func TestAccFolderIamMember_multiple(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	fname := "terraform-" + randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -86,7 +86,7 @@ func TestAccFolderIamMember_remove(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	fname := "terraform-" + randString(t, 10)
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

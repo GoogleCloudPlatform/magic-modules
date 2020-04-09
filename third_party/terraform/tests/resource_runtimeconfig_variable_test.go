@@ -19,7 +19,7 @@ func TestAccRuntimeconfigVariable_basic(t *testing.T) {
 	varName := fmt.Sprintf("variable-test-%s", randString(t, 10))
 	varText := "this is my test value"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckRuntimeconfigVariableDestroyProducer(t),
@@ -52,7 +52,7 @@ func TestAccRuntimeconfigVariable_basicUpdate(t *testing.T) {
 	varText := "this is my test value"
 	varText2 := "this is my updated value"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckRuntimeconfigVariableDestroyProducer(t),
@@ -84,7 +84,7 @@ func TestAccRuntimeconfigVariable_basicValue(t *testing.T) {
 	varName := fmt.Sprintf("variable-test-%s", randString(t, 10))
 	varValue := "Zm9vYmFyCg=="
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckRuntimeconfigVariableDestroyProducer(t),
@@ -110,7 +110,7 @@ func TestAccRuntimeconfigVariable_basicValue(t *testing.T) {
 func TestAccRuntimeconfigVariable_errorsOnBothValueAndText(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -125,7 +125,7 @@ func TestAccRuntimeconfigVariable_errorsOnBothValueAndText(t *testing.T) {
 func TestAccRuntimeconfigVariable_errorsOnMissingValueAndText(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
