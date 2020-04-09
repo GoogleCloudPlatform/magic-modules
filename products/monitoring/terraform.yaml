@@ -130,6 +130,34 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       encoder: templates/terraform/encoders/monitoring_service.go.erb
 
+  Slo: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "monitoring_slo_appengine"
+        primary_resource_id: "appeng_slo"
+        vars:
+          slo_id: "ae-slo"
+    properties:
+      sloId: !ruby/object:Overrides::Terraform::PropertyOverride
+        api_name: 'name'
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+        default_from_api: true
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[a-z0-9\-]+$'
+      serviceLevelIndicator: !ruby/object:Overrides::Terraform::PropertyOverride
+        flatten_object: true
+      serviceLevelIndicator.basicSli.method: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      serviceLevelIndicator.basicSli.location: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      serviceLevelIndicator.basicSli.version: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      encoder: templates/terraform/encoders/monitoring_slo.go.erb
+
   UptimeCheckConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
