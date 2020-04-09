@@ -186,6 +186,14 @@ func closeRecorder(t *testing.T) {
 	}
 }
 
+func googleProviderConfig(t *testing.T) *Config {
+	config, ok := configs[t.Name()]
+	if ok {
+		return config
+	}
+	return testAccProvider.Meta().(*Config)
+}
+
 func getTestAccProviders(testName string) map[string]terraform.ResourceProvider {
 	prov := Provider().(*schema.Provider)
 	provRand := random.Provider().(*schema.Provider)
