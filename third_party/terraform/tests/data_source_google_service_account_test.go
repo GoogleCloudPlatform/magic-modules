@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
@@ -12,7 +11,7 @@ func TestAccDatasourceGoogleServiceAccount_basic(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "data.google_service_account.acceptance"
-	account := acctest.RandomWithPrefix("tf-test")
+	account := fmt.Sprintf("tf-test-%d", randInt(t))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },

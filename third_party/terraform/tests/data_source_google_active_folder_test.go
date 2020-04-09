@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
@@ -13,7 +12,7 @@ func TestAccDataSourceGoogleActiveFolder_default(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "terraform-test-" + acctest.RandString(10)
+	displayName := "terraform-test-" + randString(t, 10)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -33,7 +32,7 @@ func TestAccDataSourceGoogleActiveFolder_space(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "terraform test " + acctest.RandString(10)
+	displayName := "terraform test " + randString(t, 10)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },

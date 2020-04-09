@@ -10,7 +10,7 @@ import (
 func TestAccStorageBucketAccessControl_update(t *testing.T) {
 	t.Parallel()
 
-	bucketName := testBucketName()
+	bucketName := testBucketName(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			if errObjectAcl != nil {
@@ -19,7 +19,7 @@ func TestAccStorageBucketAccessControl_update(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckStorageObjectAccessControlDestroy,
+		CheckDestroy: testAccCheckStorageObjectAccessControlDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageBucketAccessControlBasic(bucketName, "READER", "allUsers"),

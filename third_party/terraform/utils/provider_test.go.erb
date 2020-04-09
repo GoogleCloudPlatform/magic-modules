@@ -311,6 +311,21 @@ func randString(t *testing.T, length int) string {
 	return string(result)
 }
 
+func randInt(t *testing.T) int {
+	if !isVcrEnabled() {
+		return acctest.RandInt()
+	}
+	envPath := os.Getenv("VCR_PATH")
+	vcrMode := os.Getenv("VCR_MODE")
+	s, err := vcrSource(t, envPath, vcrMode)
+	if err != nil {
+		// At this point we haven't created any resources, so fail fast
+		t.Fatal(err)
+	}
+
+	return rand.New(s).Int()
+}
+
 func TestProvider(t *testing.T) {
 	if err := Provider().(*schema.Provider).InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)

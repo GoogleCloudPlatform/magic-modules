@@ -4,15 +4,14 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccStorageBucketIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	bucket := acctest.RandomWithPrefix("tf-test")
-	account := acctest.RandomWithPrefix("tf-test")
+	bucket := fmt.Sprintf("tf-test-%d", randInt(t))
+	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	serviceAcct := getTestServiceAccountFromEnv(t)
 
 	resource.Test(t, resource.TestCase{

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
@@ -12,7 +11,7 @@ func TestAccAppEngineApplication_basic(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := acctest.RandomWithPrefix("tf-test")
+	pid := fmt.Sprintf("tf-test-%d", randInt(t))
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
@@ -48,7 +47,7 @@ func TestAccAppEngineApplication_withIAP(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := acctest.RandomWithPrefix("tf-test")
+	pid := fmt.Sprintf("tf-test-%d", randInt(t))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },

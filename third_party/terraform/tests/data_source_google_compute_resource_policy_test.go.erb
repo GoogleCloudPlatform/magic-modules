@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
@@ -14,7 +13,7 @@ import (
 func TestAccDataSourceComputeResourcePolicy(t *testing.T) {
 	t.Parallel()
 
-	randomSuffix := acctest.RandString(10)
+	randomSuffix := randString(t, 10)
 
 	rsName := "foo_" + randomSuffix
 	rsFullName := fmt.Sprintf("google_compute_resource_policy.%s", rsName)
@@ -24,19 +23,19 @@ func TestAccDataSourceComputeResourcePolicy(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataSourceComputeResourcePolicyDestroy(rsFullName),
+		CheckDestroy: testAccCheckDataSourceComputeResourcePolicyDestroy(t, rsFullName),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeResourcePolicyConfig(rsName, dsName, randomSuffix),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceComputeResourcePolicyCheck(dsFullName, rsFullName),
+					testAccDataSourceComputeResourcePolicyCheck(t, dsFullName, rsFullName),
 				),
 			},
 		},
 	})
 }
 
-func testAccDataSourceComputeResourcePolicyCheck(dataSourceName string, resourceName string) resource.TestCheckFunc {
+func testAccDataSourceComputeResourcePolicyCheck(t *testing.T, dataSourceName string, resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		ds, ok := s.RootModule().Resources[dataSourceName]
 		if !ok {
@@ -74,9 +73,9 @@ func testAccDataSourceComputeResourcePolicyCheck(dataSourceName string, resource
 	}
 }
 
-func testAccCheckDataSourceComputeResourcePolicyDestroy(resourceName string) resource.TestCheckFunc {
+func testAccCheckDataSourceComputeResourcePolicyDestroy(t *testing.T, resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := testAccProvider.Meta().(*Config)
+		config := configs[t.Name()]
 
 		rs, ok := s.RootModule().Resources[resourceName]
 		if !ok {

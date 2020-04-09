@@ -13,7 +13,7 @@ func TestAccMonitoringNotificationChannel_update(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMonitoringNotificationChannelDestroy,
+		CheckDestroy: testAccCheckMonitoringNotificationChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMonitoringNotificationChannel_update("email", `email_address = "fake_email@blahblah.com"`, "true"),
@@ -41,7 +41,7 @@ func TestAccMonitoringNotificationChannel_updateSensitiveLabels(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMonitoringNotificationChannelDestroy,
+		CheckDestroy: testAccCheckMonitoringNotificationChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMonitoringNotificationChannel_updateSensitiveLabels(),

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
@@ -13,7 +12,7 @@ func TestAccComputeProjectDefaultNetworkTier_basic(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	billingId := getTestBillingAccountFromEnv(t)
-	projectID := acctest.RandomWithPrefix("tf-test")
+	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -36,7 +35,7 @@ func TestAccComputeProjectDefaultNetworkTier_modify(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	billingId := getTestBillingAccountFromEnv(t)
-	projectID := acctest.RandomWithPrefix("tf-test")
+	projectID := fmt.Sprintf("tf-test-%d", randInt(t))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },

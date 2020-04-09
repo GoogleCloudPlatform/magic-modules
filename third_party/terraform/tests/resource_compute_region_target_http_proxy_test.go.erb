@@ -6,23 +6,22 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccComputeRegionTargetHttpProxy_update(t *testing.T) {
 	t.Parallel()
 
-	target := fmt.Sprintf("thttp-test-%s", acctest.RandString(10))
-	backend := fmt.Sprintf("thttp-test-%s", acctest.RandString(10))
-	hc := fmt.Sprintf("thttp-test-%s", acctest.RandString(10))
-	urlmap1 := fmt.Sprintf("thttp-test-%s", acctest.RandString(10))
-	urlmap2 := fmt.Sprintf("thttp-test-%s", acctest.RandString(10))
+	target := fmt.Sprintf("thttp-test-%s", randString(t, 10))
+	backend := fmt.Sprintf("thttp-test-%s", randString(t, 10))
+	hc := fmt.Sprintf("thttp-test-%s", randString(t, 10))
+	urlmap1 := fmt.Sprintf("thttp-test-%s", randString(t, 10))
+	urlmap2 := fmt.Sprintf("thttp-test-%s", randString(t, 10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeTargetHttpProxyDestroy,
+		CheckDestroy: testAccCheckComputeTargetHttpProxyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRegionTargetHttpProxy_basic1(target, backend, hc, urlmap1, urlmap2),

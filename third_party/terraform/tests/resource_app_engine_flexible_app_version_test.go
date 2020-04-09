@@ -1,7 +1,11 @@
 package google
 
 import (
+<<<<<<< HEAD
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+=======
+	"fmt"
+>>>>>>> Changes to all tests to work with VCR
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"testing"
 )
@@ -12,13 +16,13 @@ func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":          getTestOrgFromEnv(t),
 		"billing_account": getTestBillingAccountFromEnv(t),
-		"random_suffix":   acctest.RandString(10),
+		"random_suffix":   randString(t, 10),
 	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAppEngineFlexibleAppVersionDestroy,
+		CheckDestroy: testAccCheckAppEngineFlexibleAppVersionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAppEngineFlexibleAppVersion_python(context),

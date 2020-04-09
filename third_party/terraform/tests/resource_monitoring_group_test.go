@@ -13,7 +13,7 @@ func TestAccMonitoringGroup_update(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMonitoringGroupDestroy,
+		CheckDestroy: testAccCheckMonitoringGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMonitoringGroup_update("europe-west1"),

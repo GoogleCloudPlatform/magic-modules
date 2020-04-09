@@ -6,19 +6,18 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccComputeRegionTargetHttpsProxy_update(t *testing.T) {
 	t.Parallel()
 
-	resourceSuffix := acctest.RandString(10)
+	resourceSuffix := randString(t, 10)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeTargetHttpsProxyDestroy,
+		CheckDestroy: testAccCheckComputeTargetHttpsProxyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRegionTargetHttpsProxy_basic1(resourceSuffix),

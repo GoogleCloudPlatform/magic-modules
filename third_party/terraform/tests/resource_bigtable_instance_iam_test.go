@@ -4,16 +4,15 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccBigtableInstanceIamBinding(t *testing.T) {
 	t.Parallel()
 
-	instance := "tf-bigtable-iam-" + acctest.RandString(10)
-	cluster := "c-" + acctest.RandString(10)
-	account := "tf-bigtable-iam-" + acctest.RandString(10)
+	instance := "tf-bigtable-iam-" + randString(t, 10)
+	cluster := "c-" + randString(t, 10)
+	account := "tf-bigtable-iam-" + randString(t, 10)
 	role := "roles/bigtable.user"
 
 	importId := fmt.Sprintf("projects/%s/instances/%s %s",
@@ -54,9 +53,9 @@ func TestAccBigtableInstanceIamBinding(t *testing.T) {
 func TestAccBigtableInstanceIamMember(t *testing.T) {
 	t.Parallel()
 
-	instance := "tf-bigtable-iam-" + acctest.RandString(10)
-	cluster := "c-" + acctest.RandString(10)
-	account := "tf-bigtable-iam-" + acctest.RandString(10)
+	instance := "tf-bigtable-iam-" + randString(t, 10)
+	cluster := "c-" + randString(t, 10)
+	account := "tf-bigtable-iam-" + randString(t, 10)
 	role := "roles/bigtable.user"
 
 	importId := fmt.Sprintf("projects/%s/instances/%s %s serviceAccount:%s",
@@ -92,9 +91,9 @@ func TestAccBigtableInstanceIamMember(t *testing.T) {
 func TestAccBigtableInstanceIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	instance := "tf-bigtable-iam-" + acctest.RandString(10)
-	cluster := "c-" + acctest.RandString(10)
-	account := "tf-bigtable-iam-" + acctest.RandString(10)
+	instance := "tf-bigtable-iam-" + randString(t, 10)
+	cluster := "c-" + randString(t, 10)
+	account := "tf-bigtable-iam-" + randString(t, 10)
 	role := "roles/bigtable.user"
 
 	importId := fmt.Sprintf("projects/%s/instances/%s",

@@ -19,7 +19,7 @@ func TestAccDataSourceComputeGlobalAddress(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeGlobalAddressDestroy,
+		CheckDestroy: testAccCheckComputeGlobalAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeGlobalAddressConfig(rsName, dsName),

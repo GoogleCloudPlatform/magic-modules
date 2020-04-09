@@ -21,8 +21,8 @@ func TestAccSqlClientCert_mysql(t *testing.T) {
 			{
 				Config: testGoogleSqlClientCert_mysql(instance),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleSqlClientCertExists("google_sql_ssl_cert.cert1"),
-					testAccCheckGoogleSqlClientCertExists("google_sql_ssl_cert.cert2"),
+					testAccCheckGoogleSqlClientCertExists(t, "google_sql_ssl_cert.cert1"),
+					testAccCheckGoogleSqlClientCertExists(t, "google_sql_ssl_cert.cert2"),
 				),
 			},
 		},
@@ -41,14 +41,14 @@ func TestAccSqlClientCert_postgres(t *testing.T) {
 			{
 				Config: testGoogleSqlClientCert_postgres(instance),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleSqlClientCertExists("google_sql_ssl_cert.cert"),
+					testAccCheckGoogleSqlClientCertExists(t, "google_sql_ssl_cert.cert"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckGoogleSqlClientCertExists(n string) resource.TestCheckFunc {
+func testAccCheckGoogleSqlClientCertExists(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
 		rs, ok := s.RootModule().Resources[n]

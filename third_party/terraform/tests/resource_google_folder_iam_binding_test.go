@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -18,7 +17,7 @@ func TestAccFolderIamBinding_basic(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	fname := "terraform-" + acctest.RandString(10)
+	fname := "terraform-" + randString(t, 10)
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
@@ -34,7 +33,7 @@ func TestAccFolderIamBinding_basic(t *testing.T) {
 			{
 				Config: testAccFolderAssociateBindingBasic(org, fname),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleFolderIamBindingExists(&cloudresourcemanager.Binding{
+					testAccCheckGoogleFolderIamBindingExists(t, &cloudresourcemanager.Binding{
 						Role:    "roles/compute.instanceAdmin",
 						Members: []string{"user:admin@hashicorptest.com"},
 					}, org, fname),
@@ -49,7 +48,7 @@ func TestAccFolderIamBinding_multiple(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	fname := "terraform-" + acctest.RandString(10)
+	fname := "terraform-" + randString(t, 10)
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
@@ -65,7 +64,7 @@ func TestAccFolderIamBinding_multiple(t *testing.T) {
 			{
 				Config: testAccFolderAssociateBindingBasic(org, fname),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleFolderIamBindingExists(&cloudresourcemanager.Binding{
+					testAccCheckGoogleFolderIamBindingExists(t, &cloudresourcemanager.Binding{
 						Role:    "roles/compute.instanceAdmin",
 						Members: []string{"user:admin@hashicorptest.com"},
 					}, org, fname),
@@ -75,11 +74,11 @@ func TestAccFolderIamBinding_multiple(t *testing.T) {
 			{
 				Config: testAccFolderAssociateBindingMultiple(org, fname),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleFolderIamBindingExists(&cloudresourcemanager.Binding{
+					testAccCheckGoogleFolderIamBindingExists(t, &cloudresourcemanager.Binding{
 						Role:    "roles/viewer",
 						Members: []string{"user:paddy@hashicorp.com"},
 					}, org, fname),
-					testAccCheckGoogleFolderIamBindingExists(&cloudresourcemanager.Binding{
+					testAccCheckGoogleFolderIamBindingExists(t, &cloudresourcemanager.Binding{
 						Role:    "roles/compute.instanceAdmin",
 						Members: []string{"user:admin@hashicorptest.com"},
 					}, org, fname),
@@ -94,7 +93,7 @@ func TestAccFolderIamBinding_multipleAtOnce(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	fname := "terraform-" + acctest.RandString(10)
+	fname := "terraform-" + randString(t, 10)
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
@@ -110,11 +109,11 @@ func TestAccFolderIamBinding_multipleAtOnce(t *testing.T) {
 			{
 				Config: testAccFolderAssociateBindingMultiple(org, fname),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleFolderIamBindingExists(&cloudresourcemanager.Binding{
+					testAccCheckGoogleFolderIamBindingExists(t, &cloudresourcemanager.Binding{
 						Role:    "roles/compute.instanceAdmin",
 						Members: []string{"user:admin@hashicorptest.com"},
 					}, org, fname),
-					testAccCheckGoogleFolderIamBindingExists(&cloudresourcemanager.Binding{
+					testAccCheckGoogleFolderIamBindingExists(t, &cloudresourcemanager.Binding{
 						Role:    "roles/compute.instanceAdmin",
 						Members: []string{"user:admin@hashicorptest.com"},
 					}, org, fname),
@@ -129,7 +128,7 @@ func TestAccFolderIamBinding_update(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	fname := "terraform-" + acctest.RandString(10)
+	fname := "terraform-" + randString(t, 10)
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
@@ -145,7 +144,7 @@ func TestAccFolderIamBinding_update(t *testing.T) {
 			{
 				Config: testAccFolderAssociateBindingBasic(org, fname),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleFolderIamBindingExists(&cloudresourcemanager.Binding{
+					testAccCheckGoogleFolderIamBindingExists(t, &cloudresourcemanager.Binding{
 						Role:    "roles/compute.instanceAdmin",
 						Members: []string{"user:admin@hashicorptest.com"},
 					}, org, fname),
@@ -155,7 +154,7 @@ func TestAccFolderIamBinding_update(t *testing.T) {
 			{
 				Config: testAccFolderAssociateBindingUpdated(org, fname),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleFolderIamBindingExists(&cloudresourcemanager.Binding{
+					testAccCheckGoogleFolderIamBindingExists(t, &cloudresourcemanager.Binding{
 						Role:    "roles/compute.instanceAdmin",
 						Members: []string{"user:admin@hashicorptest.com", "user:paddy@hashicorp.com"},
 					}, org, fname),
@@ -165,7 +164,7 @@ func TestAccFolderIamBinding_update(t *testing.T) {
 			{
 				Config: testAccFolderAssociateBindingDropMemberFromBasic(org, fname),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleFolderIamBindingExists(&cloudresourcemanager.Binding{
+					testAccCheckGoogleFolderIamBindingExists(t, &cloudresourcemanager.Binding{
 						Role:    "roles/compute.instanceAdmin",
 						Members: []string{"user:paddy@hashicorp.com"},
 					}, org, fname),
@@ -180,7 +179,7 @@ func TestAccFolderIamBinding_remove(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	fname := "terraform-" + acctest.RandString(10)
+	fname := "terraform-" + randString(t, 10)
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
@@ -196,11 +195,11 @@ func TestAccFolderIamBinding_remove(t *testing.T) {
 			{
 				Config: testAccFolderAssociateBindingMultiple(org, fname),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleFolderIamBindingExists(&cloudresourcemanager.Binding{
+					testAccCheckGoogleFolderIamBindingExists(t, &cloudresourcemanager.Binding{
 						Role:    "roles/viewer",
 						Members: []string{"user:paddy@hashicorp.com"},
 					}, org, fname),
-					testAccCheckGoogleFolderIamBindingExists(&cloudresourcemanager.Binding{
+					testAccCheckGoogleFolderIamBindingExists(t, &cloudresourcemanager.Binding{
 						Role:    "roles/compute.instanceAdmin",
 						Members: []string{"user:admin@hashicorptest.com"},
 					}, org, fname),
@@ -217,9 +216,9 @@ func TestAccFolderIamBinding_remove(t *testing.T) {
 	})
 }
 
-func testAccCheckGoogleFolderIamBindingExists(expected *cloudresourcemanager.Binding, org, fname string) resource.TestCheckFunc {
+func testAccCheckGoogleFolderIamBindingExists(t *testing.T, expected *cloudresourcemanager.Binding, org, fname string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := testAccProvider.Meta().(*Config)
+		config := configs[t.Name()]
 		folderPolicy, err := getFolderIamPolicyByParentAndDisplayName("organizations/"+org, fname, config)
 		if err != nil {
 			return fmt.Errorf("Failed to retrieve IAM policy for folder %q: %s", fname, err)

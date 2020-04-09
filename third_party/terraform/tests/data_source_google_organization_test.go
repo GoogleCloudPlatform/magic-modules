@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
@@ -48,7 +47,7 @@ func TestAccDataSourceGoogleOrganization_byShortName(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleOrganization_byDomain(t *testing.T) {
-	name := acctest.RandString(16) + ".com"
+	name := randString(t, 16) + ".com"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },

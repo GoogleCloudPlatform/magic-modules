@@ -4,16 +4,15 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccDataprocJobIamBinding(t *testing.T) {
 	t.Parallel()
 
-	cluster := "tf-dataproc-iam-cluster" + acctest.RandString(10)
-	job := "tf-dataproc-iam-job-" + acctest.RandString(10)
-	account := "tf-dataproc-iam-" + acctest.RandString(10)
+	cluster := "tf-dataproc-iam-cluster" + randString(t, 10)
+	job := "tf-dataproc-iam-job-" + randString(t, 10)
+	account := "tf-dataproc-iam-" + randString(t, 10)
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s %s",
@@ -50,9 +49,9 @@ func TestAccDataprocJobIamBinding(t *testing.T) {
 func TestAccDataprocJobIamMember(t *testing.T) {
 	t.Parallel()
 
-	cluster := "tf-dataproc-iam-cluster" + acctest.RandString(10)
-	job := "tf-dataproc-iam-jobid-" + acctest.RandString(10)
-	account := "tf-dataproc-iam-" + acctest.RandString(10)
+	cluster := "tf-dataproc-iam-cluster" + randString(t, 10)
+	job := "tf-dataproc-iam-jobid-" + randString(t, 10)
+	account := "tf-dataproc-iam-" + randString(t, 10)
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s %s serviceAccount:%s",
@@ -83,9 +82,9 @@ func TestAccDataprocJobIamMember(t *testing.T) {
 func TestAccDataprocJobIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	cluster := "tf-dataproc-iam-cluster" + acctest.RandString(10)
-	job := "tf-dataproc-iam-jobid-" + acctest.RandString(10)
-	account := "tf-dataproc-iam-" + acctest.RandString(10)
+	cluster := "tf-dataproc-iam-cluster" + randString(t, 10)
+	job := "tf-dataproc-iam-jobid-" + randString(t, 10)
+	account := "tf-dataproc-iam-" + randString(t, 10)
 	role := "roles/editor"
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s",

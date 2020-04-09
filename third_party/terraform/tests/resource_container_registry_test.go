@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
@@ -24,7 +23,7 @@ func TestAccContainerRegistry_basic(t *testing.T) {
 
 func TestAccContainerRegistry_iam(t *testing.T) {
 	t.Parallel()
-	account := acctest.RandString(10)
+	account := randString(t, 10)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },

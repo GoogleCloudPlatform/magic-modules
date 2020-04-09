@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
@@ -14,7 +13,7 @@ func TestAccDataSourceGoogleFolder_byFullName(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "terraform-test-" + acctest.RandString(10)
+	displayName := "terraform-test-" + randString(t, 10)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -34,7 +33,7 @@ func TestAccDataSourceGoogleFolder_byShortName(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "terraform-test-" + acctest.RandString(10)
+	displayName := "terraform-test-" + randString(t, 10)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -54,7 +53,7 @@ func TestAccDataSourceGoogleFolder_lookupOrganization(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 
 	parent := fmt.Sprintf("organizations/%s", org)
-	displayName := "terraform-test-" + acctest.RandString(10)
+	displayName := "terraform-test-" + randString(t, 10)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -72,7 +71,7 @@ func TestAccDataSourceGoogleFolder_lookupOrganization(t *testing.T) {
 }
 
 func TestAccDataSourceGoogleFolder_byFullNameNotFound(t *testing.T) {
-	name := "folders/" + acctest.RandString(16)
+	name := "folders/" + randString(t, 16)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
