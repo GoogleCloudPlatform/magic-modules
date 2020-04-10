@@ -10,29 +10,29 @@
 updateMask := []string{}
 <% update_body_properties.each do |prop| -%>
 <%
-mask = prop.api_name
-if prop.update_mask_fields
-  mask = prop.update_mask_fields.join(',')
-end
+    mask = prop.api_name
+    if prop.update_mask_fields
+      mask = prop.update_mask_fields.join(',')
+    end
 -%>
-<% if prop.flatten_object -%>
-<% prop.properties.each do |nested| %>
+<%  if prop.flatten_object -%>
+<%    prop.properties.each do |nested| %>
 <%
-if nested.update_mask_fields
-  mask = nest_p.update_mask_fields.join(',')
-end
+        if nested.update_mask_fields
+          mask = nest_p.update_mask_fields.join(',')
+        end
 -%>
 
 if d.HasChange("<%= nested.name.underscore -%>") {
   updateMask = append(updateMask, "<%= mask -%>")
 }
-<% end # prop.properties.each do -%>
-<% else # if !prop.flatten_object -%>
+<%    end # prop.properties.each do -%>
+<%  else # if !prop.flatten_object -%>
 
 if d.HasChange("<%= prop.name.underscore -%>") {
   updateMask = append(updateMask, "<%= mask -%>")
 }
-<% end # if prop.flatten_object  -%>
+<%  end # if prop.flatten_object  -%>
 <% end # update_body_properties.each -%>
 // updateMask is a URL parameter but not present in the schema, so replaceVars
 // won't set it
