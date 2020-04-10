@@ -1749,7 +1749,7 @@ func testAccContainerCluster_masterAuthorizedNetworksDisabled(t *testing.T, reso
 			return fmt.Errorf("can't find %s in state", resource_name)
 		}
 
-		config := getTestAccProviders(t.Name())["google"].(*schema.Provider).Meta().(*Config)
+		config := googleProviderConfig(t)
 		attributes := rs.Primary.Attributes
 
 		cluster, err := config.clientContainer.Projects.Zones.Clusters.Get(
