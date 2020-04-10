@@ -61,9 +61,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           bucket_name: "fb-webapp-"
         test_env_vars:
           org_id: :ORG_ID
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-        decoder: templates/terraform/decoders/firebase_web_app_config.go.erb
-# This is for copying files over
+
+          # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.

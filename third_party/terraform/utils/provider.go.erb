@@ -188,6 +188,7 @@ func Provider() terraform.ResourceProvider {
 			"google_kms_secret_ciphertext":                     dataSourceGoogleKmsSecretCiphertext(),
 			<% unless version == 'ga' -%>
 			"google_firebase_web_app":                          dataSourceGoogleFirebaseWebApp(),
+			"google_firebase_web_app_config":                  dataSourceGoogleFirebaseWebappConfig(),
 			<% end -%>
 			"google_folder":                                    dataSourceGoogleFolder(),
 			"google_folder_organization_policy":                dataSourceGoogleFolderOrganizationPolicy(),
