@@ -360,6 +360,10 @@ func resourceComposerEnvironmentCreate(d *schema.ResourceData, meta interface{})
 
 	if waitErr != nil {
 		err = CheckEnvExistsDespiteError(d, config, err)
+		// TODO (mbang): When warnings are available in the SDK, add a warning here, if possible
+		// This will likely create a permadiff, but that's ok, because what's in state won't match the confi
+		// The user will be able to see the diff, and where the error was and what they maybe need to fix. But this way
+		// The environment will at least be in state that they won't need to manually destroy and re-create.
 		if err != nil {
 			// The resource didn't actually get created, remove from state.
 			d.SetId("")
@@ -544,6 +548,10 @@ func resourceComposerEnvironmentPostCreateUpdate(updateEnv *composer.Environment
 		err := resourceComposerEnvironmentPatchField("config.softwareConfig.pypiPackages", updateEnv, d, cfg)
 		if err != nil {
 			err = CheckEnvExistsDespiteError(d, cfg, err)
+			// TODO (mbang): When warnings are available in the SDK, add a warning here, if possible
+			// This will likely create a permadiff, but that's ok, because what's in state won't match the config
+			// The user will be able to see the diff, and where the error was and what they maybe need to fix. But this way
+			// The environment will at least be in state that they won't need to manually destroy and re-create.
 			if err != nil {
 				return err
 			}
