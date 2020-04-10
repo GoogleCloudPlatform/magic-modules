@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package google
+<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -126,3 +128,4 @@ func dataSourceGoogleFirebaseWebappConfigRead(d *schema.ResourceData, meta inter
 	d.SetId(id)
 	return nil
 }
+<% end -%>
