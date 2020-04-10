@@ -1797,7 +1797,7 @@ func TestAccComputeInstance_resourcePolicyCollocate(t *testing.T) {
 			{
 				Config: testAccComputeInstance_resourcePolicyCollocate(instanceName),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep("us-east4-b", instanceName, []string{"allow_stopping_for_update"}),
 		},
 	})
 }
@@ -4547,7 +4547,35 @@ data "google_compute_image" "my_image" {
 resource "google_compute_instance" "foobar" {
   name           = "%s"
   machine_type   = "c2-standard-4"
-  zone           = "us-central1-a"
+  zone           = "us-east4-b"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  //deletion_protection = false is implicit in this config due to default value
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    # Instances with resource policies do not support live migration.
+    on_host_maintenance = "TERMINATE"
+    automatic_restart = false
+  }
+
+  resource_policies = [google_compute_resource_policy.foo.self_link]
+}
+
+resource "google_compute_instance" "second" {
+  name           = "%s-2"
+  machine_type   = "c2-standard-4"
+  zone           = "us-east4-b"
   can_ip_forward = false
   tags           = ["foo", "bar"]
 
@@ -4574,12 +4602,12 @@ resource "google_compute_instance" "foobar" {
 
 resource "google_compute_resource_policy" "foo" {
   name   = "tf-test-policy-%s"
-  region = "us-central1"
+  region = "us-east4"
   group_placement_policy {
     vm_count = 2
     collocation = "COLLOCATED"
   }
 }
 
-`, instance, acctest.RandString(10))
+`, instance, instance, acctest.RandString(10))
 }
