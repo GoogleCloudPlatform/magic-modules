@@ -11571,7 +11571,7 @@ objects:
       - !ruby/object:Api::Type::Integer
         name: 'storageBytes'
         description: |
-          A size of the the storage used by the snapshot. As snapshots share
+          A size of the storage used by the snapshot. As snapshots share
           storage, this number is expected to change with snapshot
           creation/deletion.
         output: true
