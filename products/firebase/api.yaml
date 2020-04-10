@@ -114,6 +114,24 @@ objects:
         'Official Documentation':
           'https://firebase.google.com/'
       api: 'https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.webApps'
+    async: !ruby/object:Api::OpAsync
+      actions: ["create"]
+      operation: !ruby/object:Api::OpAsync::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'done'
+        complete: true
+        allowed:
+          - true
+          - false
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
         name: name
