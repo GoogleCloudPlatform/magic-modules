@@ -43,7 +43,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           org_id: :ORG_ID
   WebApp: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: '{{name}}'
+    # id_format: '{{name}}'
     import_format: ['{{name}}']
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 10
@@ -61,8 +61,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           bucket_name: "fb-webapp-"
         test_env_vars:
           org_id: :ORG_ID
-
-          # This is for copying files over
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+# This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
