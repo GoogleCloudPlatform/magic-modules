@@ -359,24 +359,17 @@ func resourceComposerEnvironmentCreate(d *schema.ResourceData, meta interface{})
 		int(d.Timeout(schema.TimeoutCreate).Minutes()))
 
 	if waitErr != nil {
-		err = CheckEnvExistsDespiteError(d, config, err)
-		// TODO (mbang): When warnings are available in the SDK, add a warning here, if possible
-		// This will likely create a permadiff, but that's ok, because what's in state won't match the confi
-		// The user will be able to see the diff, and where the error was and what they maybe need to fix. But this way
-		// The environment will at least be in state that they won't need to manually destroy and re-create.
-		if err != nil {
-			// The resource didn't actually get created, remove from state.
-			d.SetId("")
+		// The resource didn't actually get created, remove from state.
+		d.SetId("")
 
-			errMsg := fmt.Sprintf("Error waiting to create Environment: %s", waitErr)
-			if err := handleComposerEnvironmentCreationOpFailure(id, envName, d, config); err != nil {
-				return fmt.Errorf("Error waiting to create Environment: %s. An initial "+
-					"environment was or is still being created, and clean up failed with "+
-					"error: %s.", errMsg, err)
-			}
-
-			return fmt.Errorf("Error waiting to create Environment: %s", waitErr)
+		errMsg := fmt.Sprintf("Error waiting to create Environment: %s", waitErr)
+		if err := handleComposerEnvironmentCreationOpFailure(id, envName, d, config); err != nil {
+			return fmt.Errorf("Error waiting to create Environment: %s. An initial "+
+				"environment was or is still being created, and clean up failed with "+
+				"error: %s.", errMsg, err)
 		}
+
+		return fmt.Errorf("Error waiting to create Environment: %s", waitErr)
 	}
 
 	log.Printf("[DEBUG] Finished creating Environment %q: %#v", d.Id(), op)
