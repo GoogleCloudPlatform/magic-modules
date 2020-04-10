@@ -47,7 +47,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         key_expander: 'expandSourceRepoRepositoryPubsubConfigsTopic'
         key_description: |
           A Cloud Pub/Sub topic in this repo's project. Values are of the form
-          `projects/<project>/topics/<topic>` or `<topic>` (where the topic will
+          `projects/<project>/topics/<topic>` or `<topic>` (where the project will
           be inferred).
       pubsubConfigs.serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
