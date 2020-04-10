@@ -352,7 +352,7 @@ EOF
 
 func testDeploymentManagerDeploymentVerifyServiceAccountMissing(t *testing.T, accountId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		exists, err := testCheckDeploymentServiceAccountExists(accountId, config)
 		if err != nil {
 			return err
@@ -366,7 +366,7 @@ func testDeploymentManagerDeploymentVerifyServiceAccountMissing(t *testing.T, ac
 
 func testDeploymentManagerDeploymentVerifyServiceAccountExists(t *testing.T, accountId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		exists, err := testCheckDeploymentServiceAccountExists(accountId, config)
 		if err != nil {
 			return err
@@ -398,7 +398,7 @@ func testAccCheckDeploymentManagerDestroyInvalidDeployment(t *testing.T, deploym
 			}
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		url := fmt.Sprintf("%sprojects/%s/global/deployments/%s", config.DeploymentManagerBasePath, getTestProjectFromEnv(), deploymentName)
 		_, err := sendRequest(config, "GET", "", url, nil)
 		if !isGoogleApiErrorWithCode(err, 404) {
@@ -421,7 +421,7 @@ func testAccCheckDeploymentManagerDeploymentDestroyProducer(t *testing.T) func(s
 				continue
 			}
 
-			config := configs[t.Name()]
+			config := googleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{DeploymentManagerBasePath}}projects/{{project}}/global/deployments/{{name}}")
 			if err != nil {

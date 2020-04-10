@@ -50,7 +50,7 @@ func testAccCheckAccessContextManagerServicePerimeterResourceDestroyProducer(t *
 				continue
 			}
 
-			config := configs[t.Name()]
+			config := googleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{perimeter_name}}")
 			if err != nil {

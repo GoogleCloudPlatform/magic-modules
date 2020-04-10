@@ -173,7 +173,7 @@ func TestAccComputeInstanceGroup_network(t *testing.T) {
 
 func testAccComputeInstanceGroup_destroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_instance_group" {
@@ -201,7 +201,7 @@ func testAccComputeInstanceGroup_exists(t *testing.T, n string, instanceGroup *c
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		found, err := config.clientCompute.InstanceGroups.Get(
 			config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
@@ -226,7 +226,7 @@ func testAccComputeInstanceGroup_updated(t *testing.T, n string, size int64, ins
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		instanceGroup, err := config.clientCompute.InstanceGroups.Get(
 			config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
@@ -255,7 +255,7 @@ func testAccComputeInstanceGroup_named_ports(t *testing.T, n string, np map[stri
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		instanceGroup, err := config.clientCompute.InstanceGroups.Get(
 			config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
@@ -282,7 +282,7 @@ func testAccComputeInstanceGroup_named_ports(t *testing.T, n string, np map[stri
 
 func testAccComputeInstanceGroup_hasCorrectNetwork(t *testing.T, nInstanceGroup string, nNetwork string, instanceGroup *compute.InstanceGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		rsInstanceGroup, ok := s.RootModule().Resources[nInstanceGroup]
 		if !ok {

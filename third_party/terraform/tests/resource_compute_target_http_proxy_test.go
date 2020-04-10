@@ -52,7 +52,7 @@ func testAccCheckComputeTargetHttpProxyExists(t *testing.T, n string) resource.T
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		name := rs.Primary.Attributes["name"]
 
 		found, err := config.clientCompute.TargetHttpProxies.Get(

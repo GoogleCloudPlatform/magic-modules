@@ -170,7 +170,7 @@ EOF
 
 func testAccCheckEndpointExistsByName(t *testing.T, serviceId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		service, err := config.clientServiceMan.Services.GetConfig(
 			fmt.Sprintf("%s.endpoints.%s.cloud.goog", serviceId, config.Project)).Do()
 		if err != nil {
@@ -186,7 +186,7 @@ func testAccCheckEndpointExistsByName(t *testing.T, serviceId string) resource.T
 
 func testAccCheckEndpointServiceDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for name, rs := range s.RootModule().Resources {
 			if strings.HasPrefix(name, "data.") {

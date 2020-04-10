@@ -78,7 +78,7 @@ func TestAccSqlUser_postgres(t *testing.T) {
 
 func testAccCheckGoogleSqlUserExists(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("Resource not found: %s", n)
@@ -107,7 +107,7 @@ func testAccCheckGoogleSqlUserExists(t *testing.T, n string) resource.TestCheckF
 func testAccSqlUserDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
-			config := configs[t.Name()]
+			config := googleProviderConfig(t)
 			if rs.Type != "google_sql_database" {
 				continue
 			}

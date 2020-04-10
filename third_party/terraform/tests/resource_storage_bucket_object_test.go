@@ -288,7 +288,7 @@ func TestAccStorageObject_metadata(t *testing.T) {
 
 func testAccCheckGoogleStorageObject(t *testing.T, bucket, object, md5 string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		objectsService := storage.NewObjectsService(config.clientStorage)
 
@@ -309,7 +309,7 @@ func testAccCheckGoogleStorageObject(t *testing.T, bucket, object, md5 string) r
 
 func testAccStorageObjectDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_storage_bucket_object" {

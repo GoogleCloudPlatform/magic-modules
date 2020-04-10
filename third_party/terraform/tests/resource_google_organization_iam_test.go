@@ -88,7 +88,7 @@ func testAccCheckGoogleOrganizationIamBindingExists(t *testing.T, bindingResourc
 			return fmt.Errorf("Not found: %s", roleResourceName)
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		p, err := config.clientResourceManager.Organizations.GetIamPolicy("organizations/"+bindingRs.Primary.Attributes["org_id"], &cloudresourcemanager.GetIamPolicyRequest{}).Do()
 		if err != nil {
 			return err
@@ -118,7 +118,7 @@ func testAccCheckGoogleOrganizationIamMemberExists(t *testing.T, n, role, member
 			return fmt.Errorf("Not found: %s", n)
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		p, err := config.clientResourceManager.Organizations.GetIamPolicy("organizations/"+rs.Primary.Attributes["org_id"], &cloudresourcemanager.GetIamPolicyRequest{}).Do()
 		if err != nil {
 			return err

@@ -167,7 +167,7 @@ func testAccCheckCloudIoTRegistryDestroyProducer(t *testing.T) func(s *terraform
 			if rs.Type != "google_cloudiot_registry" {
 				continue
 			}
-			config := configs[t.Name()]
+			config := googleProviderConfig(t)
 			registry, _ := config.clientCloudIoT.Projects.Locations.Registries.Get(rs.Primary.ID).Do()
 			if registry != nil {
 				return fmt.Errorf("Registry still present")

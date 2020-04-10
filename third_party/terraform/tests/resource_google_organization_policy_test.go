@@ -208,7 +208,7 @@ func testAccOrganizationPolicy_restore_defaultTrue(t *testing.T) {
 
 func testAccCheckGoogleOrganizationPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_organization_policy" {
@@ -328,7 +328,7 @@ func getGoogleOrganizationPolicyTestResource(t *testing.T, s *terraform.State, n
 		return nil, fmt.Errorf("No ID is set")
 	}
 
-	config := configs[t.Name()]
+	config := googleProviderConfig(t)
 
 	return config.clientResourceManager.Organizations.GetOrgPolicy("organizations/"+rs.Primary.Attributes["org_id"], &cloudresourcemanager.GetOrgPolicyRequest{
 		Constraint: rs.Primary.Attributes["constraint"],

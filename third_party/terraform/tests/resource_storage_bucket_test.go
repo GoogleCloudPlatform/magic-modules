@@ -955,7 +955,7 @@ func testAccCheckStorageBucketExists(t *testing.T, n string, bucketName string, 
 			return fmt.Errorf("No Project_ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		found, err := config.clientStorage.Buckets.Get(rs.Primary.ID).Do()
 		if err != nil {
@@ -995,7 +995,7 @@ func testAccCheckStorageBucketWasRecreated(newBucket *storage.Bucket, b *storage
 
 func testAccCheckStorageBucketPutItem(t *testing.T, bucketName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		data := bytes.NewBufferString("test")
 		dataReader := bytes.NewReader(data.Bytes())
@@ -1014,7 +1014,7 @@ func testAccCheckStorageBucketPutItem(t *testing.T, bucketName string) resource.
 
 func testAccCheckStorageBucketRetentionPolicy(t *testing.T, bucketName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		data := bytes.NewBufferString("test")
 		dataReader := bytes.NewReader(data.Bytes())
@@ -1047,7 +1047,7 @@ func testAccCheckStorageBucketRetentionPolicy(t *testing.T, bucketName string) r
 
 func testAccCheckStorageBucketMissing(t *testing.T, bucketName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		_, err := config.clientStorage.Buckets.Get(bucketName).Do()
 		if err == nil {
@@ -1083,7 +1083,7 @@ func testAccCheckStorageBucketLifecycleConditionState(expected *bool, b *storage
 
 func testAccStorageBucketDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_storage_bucket" {

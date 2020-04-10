@@ -137,7 +137,7 @@ func testAccCheckGoogleHealthcareFhirStoreIamBindingExists(t *testing.T, binding
 			return fmt.Errorf("Not found: %s", bindingResourceName)
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		fhirStoreId, err := parseHealthcareFhirStoreId(bindingRs.Primary.Attributes["fhir_store_id"], config)
 
 		if err != nil {
@@ -173,7 +173,7 @@ func testAccCheckGoogleHealthcareFhirStoreIamMemberExists(t *testing.T, n, role,
 			return fmt.Errorf("Not found: %s", n)
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		fhirStoreId, err := parseHealthcareFhirStoreId(rs.Primary.Attributes["fhir_store_id"], config)
 
 		if err != nil {
@@ -208,7 +208,7 @@ func testAccCheckGoogleHealthcareFhirStoreIamPolicyExists(t *testing.T, n, role,
 			return fmt.Errorf("Not found: %s", n)
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		fhirStoreId, err := parseHealthcareFhirStoreId(rs.Primary.Attributes["fhir_store_id"], config)
 
 		if err != nil {

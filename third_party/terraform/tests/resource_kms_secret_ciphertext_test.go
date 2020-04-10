@@ -53,7 +53,7 @@ func TestAccKmsSecretCiphertext_basic(t *testing.T) {
 }
 
 func testAccDecryptSecretDataWithCryptoKey(t *testing.T, s *terraform.State, cryptoKeyId string, secretCiphertextResourceName, aad string) (string, error) {
-	config := configs[t.Name()]
+	config := googleProviderConfig(t)
 	rs, ok := s.RootModule().Resources[secretCiphertextResourceName]
 	if !ok {
 		return "", fmt.Errorf("Resource not found: %s", secretCiphertextResourceName)

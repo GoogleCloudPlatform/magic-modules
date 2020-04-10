@@ -267,7 +267,7 @@ func TestAccDataprocJob_SparkSql(t *testing.T) {
 
 func testAccCheckDataprocJobDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_dataproc_job" {
@@ -305,7 +305,7 @@ func testAccCheckDataprocJobDestroyProducer(t *testing.T) func(s *terraform.Stat
 
 func testAccCheckDataprocJobCompletesSuccessfully(t *testing.T, n string, job *dataproc.Job) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		attributes := s.RootModule().Resources[n].Primary.Attributes
 		region := attributes["region"]
@@ -370,7 +370,7 @@ func testAccCheckDataprocJobExists(t *testing.T, n string, job *dataproc.Job) re
 			return fmt.Errorf("No ID is set for Dataproc job")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		parts := strings.Split(s.RootModule().Resources[n].Primary.ID, "/")
 		jobId := parts[len(parts)-1]
 		project, err := getTestProject(s.RootModule().Resources[n].Primary, config)

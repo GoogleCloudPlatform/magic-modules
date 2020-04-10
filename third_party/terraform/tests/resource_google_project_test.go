@@ -274,7 +274,7 @@ func testAccCheckGoogleProjectHasBillingAccount(t *testing.T, r, pid, billingId 
 
 		// Actual value in API should match state and expected
 		// Read the billing account
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		ba, err := config.clientBilling.Projects.GetBillingInfo(prefixedProject(pid)).Do()
 		if err != nil {
 			return fmt.Errorf("Error reading billing account for project %q: %v", prefixedProject(pid), err)
@@ -299,7 +299,7 @@ func testAccCheckGoogleProjectHasLabels(t *testing.T, r, pid string, expected ma
 		}
 
 		// Actual value in API should match state and expected
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		found, err := config.clientResourceManager.Projects.Get(pid).Do()
 		if err != nil {
@@ -341,7 +341,7 @@ func testAccCheckGoogleProjectHasNoLabels(t *testing.T, r, pid string) resource.
 		}
 
 		// Actual value in API should match state and expected
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		found, err := config.clientResourceManager.Projects.Get(pid).Do()
 		if err != nil {

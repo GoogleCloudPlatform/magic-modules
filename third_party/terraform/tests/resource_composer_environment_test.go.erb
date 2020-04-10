@@ -277,7 +277,7 @@ func TestAccComposerEnvironment_withUpdateOnCreate(t *testing.T) {
 
 func testAccComposerEnvironmentDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_composer_environment" {
@@ -686,7 +686,7 @@ func testSweepComposerEnvironmentCleanUpBucket(config *Config, bucket *storage.B
 // Destroy test step for config with a network will fail unless we clean up the firewalls before.
 func testAccCheckClearComposerEnvironmentFirewalls(t *testing.T, networkName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		config.Project = getTestProjectFromEnv()
 		network, err := config.clientCompute.Networks.Get(getTestProjectFromEnv(), networkName).Do()
 		if err != nil {

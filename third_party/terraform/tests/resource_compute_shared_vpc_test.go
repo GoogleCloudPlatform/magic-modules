@@ -54,7 +54,7 @@ func TestAccComputeSharedVpc_basic(t *testing.T) {
 
 func testAccCheckComputeSharedVpcHostProject(t *testing.T, hostProject string, enabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		found, err := config.clientCompute.Projects.Get(hostProject).Do()
 		if err != nil {
@@ -75,7 +75,7 @@ func testAccCheckComputeSharedVpcHostProject(t *testing.T, hostProject string, e
 
 func testAccCheckComputeSharedVpcServiceProject(t *testing.T, hostProject, serviceProject string, enabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		serviceHostProject, err := config.clientCompute.Projects.GetXpnHost(serviceProject).Do()
 		if err != nil {
 			if enabled {

@@ -59,7 +59,7 @@ func testAccCheckComputeTargetHttpsProxyExists(t *testing.T, n string, proxy *co
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		name := rs.Primary.Attributes["name"]
 
 		found, err := config.clientCompute.TargetHttpsProxies.Get(
@@ -89,7 +89,7 @@ func testAccComputeTargetHttpsProxyDescription(description string, proxy *comput
 
 func testAccComputeTargetHttpsProxyHasSslCertificate(t *testing.T, cert string, proxy *compute.TargetHttpsProxy) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		certUrl := fmt.Sprintf(canonicalSslCertificateTemplate, config.Project, cert)
 
 		for _, sslCertificate := range proxy.SslCertificates {

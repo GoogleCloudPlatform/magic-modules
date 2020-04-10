@@ -167,7 +167,7 @@ func TestAccComputeRouterNat_withNatIpsAndDrainNatIps(t *testing.T) {
 
 func testAccCheckComputeRouterNatDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		routersService := config.clientCompute.Routers
 
@@ -201,7 +201,7 @@ func testAccCheckComputeRouterNatDestroyProducer(t *testing.T) func(s *terraform
 
 func testAccCheckComputeRouterNatDelete(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		routersService := config.clientComputeBeta.Routers
 

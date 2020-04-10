@@ -61,7 +61,7 @@ func TestAccComputeRouterPeer_advertiseMode(t *testing.T) {
 
 func testAccCheckComputeRouterPeerDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		routersService := config.clientCompute.Routers
 
@@ -96,7 +96,7 @@ func testAccCheckComputeRouterPeerDestroyProducer(t *testing.T) func(s *terrafor
 
 func testAccCheckComputeRouterPeerDelete(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		routersService := config.clientCompute.Routers
 
@@ -148,7 +148,7 @@ func testAccCheckComputeRouterPeerExists(t *testing.T, n string) resource.TestCh
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		project, err := getTestProject(rs.Primary, config)
 		if err != nil {

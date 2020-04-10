@@ -110,7 +110,7 @@ func testAccCheckComputeImageExists(t *testing.T, n string, image *compute.Image
 			return fmt.Errorf("No name is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		found, err := config.clientCompute.Images.Get(
 			config.Project, rs.Primary.Attributes["name"]).Do()
@@ -155,7 +155,7 @@ func TestAccComputeImage_resolveImage(t *testing.T) {
 
 func testAccCheckComputeImageResolution(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		project := config.Project
 
 		rs, ok := s.RootModule().Resources[n]

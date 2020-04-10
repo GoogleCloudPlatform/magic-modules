@@ -112,7 +112,7 @@ func testAccCheckBigtableTableDestroyProducer(t *testing.T) func(s *terraform.St
 				continue
 			}
 
-			config := configs[t.Name()]
+			config := googleProviderConfig(t)
 			c, err := config.bigtableClientFactory.NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
 			if err != nil {
 				// The instance is already gone

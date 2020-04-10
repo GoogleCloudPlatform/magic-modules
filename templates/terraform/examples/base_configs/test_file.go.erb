@@ -100,7 +100,7 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 		<% if object.custom_code.test_check_destroy -%>
 	<%= lines(compile(object.custom_code.test_check_destroy)) -%>
 		<% else -%>
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		url, err := replaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
 		if err != nil {

@@ -85,7 +85,7 @@ func TestAccStorageTransferJob_omitScheduleEndDate(t *testing.T) {
 
 func testAccStorageTransferJobDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_storage_transfer_job" {

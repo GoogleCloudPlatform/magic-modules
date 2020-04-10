@@ -44,7 +44,7 @@ func testAccCheckComputeSslCertificateExists(t *testing.T, n string) resource.Te
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		// We don't specify a name, but it is saved during create
 		name := rs.Primary.Attributes["name"]
 

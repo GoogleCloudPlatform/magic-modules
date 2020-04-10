@@ -68,7 +68,7 @@ func TestAccServiceNetworkingConnection_update(t *testing.T) {
 
 func testServiceNetworkingConnectionDestroy(t *testing.T, parent, network string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		parentService := "services/" + parent
 		networkName := fmt.Sprintf("projects/%s/global/networks/%s", getTestProjectFromEnv(), network)
 

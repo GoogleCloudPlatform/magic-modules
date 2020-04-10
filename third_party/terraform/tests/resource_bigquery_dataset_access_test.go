@@ -121,7 +121,7 @@ func testAccCheckBigQueryDatasetAccess(t *testing.T, n string, expected map[stri
 			return fmt.Errorf("Not found: %s", n)
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		url, err := replaceVarsForTest(config, rs, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}")
 		if err != nil {
 			return err

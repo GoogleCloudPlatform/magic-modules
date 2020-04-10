@@ -150,7 +150,7 @@ func testAccCheckComputeNetworkExists(t *testing.T, n string, network *compute.N
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		found, err := config.clientCompute.Networks.Get(
 			config.Project, rs.Primary.Attributes["name"]).Do()
@@ -170,7 +170,7 @@ func testAccCheckComputeNetworkExists(t *testing.T, n string, network *compute.N
 
 func testAccCheckComputeNetworkIsAutoSubnet(t *testing.T, n string, network *compute.Network) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		found, err := config.clientCompute.Networks.Get(
 			config.Project, network.Name).Do()
@@ -192,7 +192,7 @@ func testAccCheckComputeNetworkIsAutoSubnet(t *testing.T, n string, network *com
 
 func testAccCheckComputeNetworkIsCustomSubnet(t *testing.T, n string, network *compute.Network) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		found, err := config.clientCompute.Networks.Get(
 			config.Project, network.Name).Do()
@@ -214,7 +214,7 @@ func testAccCheckComputeNetworkIsCustomSubnet(t *testing.T, n string, network *c
 
 func testAccCheckComputeNetworkHasRoutingMode(t *testing.T, n string, network *compute.Network, routingMode string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {

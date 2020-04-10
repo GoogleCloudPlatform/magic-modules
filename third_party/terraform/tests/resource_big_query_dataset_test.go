@@ -160,7 +160,7 @@ func TestAccBigQueryDataset_cmek(t *testing.T) {
 func testAccAddTable(t *testing.T, datasetID string, tableID string) resource.TestCheckFunc {
 	// Not actually a check, but adds a table independently of terraform
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		table := &bigquery.Table{
 			TableReference: &bigquery.TableReference{
 				DatasetId: datasetID,

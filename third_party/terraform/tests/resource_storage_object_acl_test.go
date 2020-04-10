@@ -281,7 +281,7 @@ func TestAccStorageObjectAcl_unordered(t *testing.T) {
 func testAccCheckGoogleStorageObjectAcl(t *testing.T, bucket, object, roleEntityS string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		roleEntity, _ := getRoleEntityPair(roleEntityS)
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		res, err := config.clientStorage.ObjectAccessControls.Get(bucket,
 			object, roleEntity.Entity).Do()
@@ -301,7 +301,7 @@ func testAccCheckGoogleStorageObjectAcl(t *testing.T, bucket, object, roleEntity
 func testAccCheckGoogleStorageObjectAclDelete(t *testing.T, bucket, object, roleEntityS string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		roleEntity, _ := getRoleEntityPair(roleEntityS)
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		_, err := config.clientStorage.ObjectAccessControls.Get(bucket,
 			object, roleEntity.Entity).Do()
@@ -316,7 +316,7 @@ func testAccCheckGoogleStorageObjectAclDelete(t *testing.T, bucket, object, role
 
 func testAccStorageObjectAclDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_storage_bucket_acl" {

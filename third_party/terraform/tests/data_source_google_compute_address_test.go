@@ -136,7 +136,7 @@ func testAccDataSourceComputeAddressCheck(t *testing.T, data_source_name string,
 
 func testAccCheckDataSourceComputeAddressDestroy(t *testing.T, resource_name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		rs, ok := s.RootModule().Resources[resource_name]
 		if !ok {

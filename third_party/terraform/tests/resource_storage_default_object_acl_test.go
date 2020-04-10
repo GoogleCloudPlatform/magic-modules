@@ -141,7 +141,7 @@ func TestAccStorageDefaultObjectAcl_unordered(t *testing.T) {
 func testAccCheckGoogleStorageDefaultObjectAcl(t *testing.T, bucket, roleEntityS string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		roleEntity, _ := getRoleEntityPair(roleEntityS)
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		res, err := config.clientStorage.DefaultObjectAccessControls.Get(bucket,
 			roleEntity.Entity).Do()
@@ -160,7 +160,7 @@ func testAccCheckGoogleStorageDefaultObjectAcl(t *testing.T, bucket, roleEntityS
 
 func testAccStorageDefaultObjectAclDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 
@@ -182,7 +182,7 @@ func testAccStorageDefaultObjectAclDestroyProducer(t *testing.T) func(s *terrafo
 func testAccCheckGoogleStorageDefaultObjectAclDelete(t *testing.T, bucket, roleEntityS string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		roleEntity, _ := getRoleEntityPair(roleEntityS)
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		_, err := config.clientStorage.DefaultObjectAccessControls.Get(bucket, roleEntity.Entity).Do()
 

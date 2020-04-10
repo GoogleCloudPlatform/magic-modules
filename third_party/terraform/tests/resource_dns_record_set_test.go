@@ -215,7 +215,7 @@ func TestAccDNSRecordSet_uppercaseMX(t *testing.T) {
 
 func testAccCheckDnsRecordSetDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			// Deletion of the managed_zone implies everything is gone
@@ -246,7 +246,7 @@ func testAccCheckDnsRecordSetExists(t *testing.T, resourceType, resourceName str
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		resp, err := config.clientDns.ResourceRecordSets.List(
 			config.Project, resourceName).Name(dnsName).Type(dnsType).Do()

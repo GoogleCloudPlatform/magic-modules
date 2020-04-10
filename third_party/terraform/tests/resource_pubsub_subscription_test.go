@@ -280,7 +280,7 @@ func TestGetComputedTopicName(t *testing.T) {
 
 func testAccCheckPubsubSubscriptionCache404(t *testing.T, subName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		url := fmt.Sprintf("%sprojects/%s/subscriptions/%s", config.PubsubBasePath, getTestProjectFromEnv(), subName)
 		resp, err := sendRequest(config, "GET", "", url, nil)
 		if err == nil {

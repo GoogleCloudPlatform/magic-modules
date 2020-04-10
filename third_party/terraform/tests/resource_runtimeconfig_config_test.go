@@ -122,7 +122,7 @@ func testAccCheckRuntimeConfigExists(t *testing.T, resourceName string, runtimeC
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		found, err := config.clientRuntimeconfig.Projects.Configs.Get(rs.Primary.ID).Do()
 		if err != nil {
@@ -137,7 +137,7 @@ func testAccCheckRuntimeConfigExists(t *testing.T, resourceName string, runtimeC
 
 func testAccCheckRuntimeconfigConfigDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_runtimeconfig_config" {

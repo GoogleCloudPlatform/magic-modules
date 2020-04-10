@@ -316,7 +316,7 @@ func testAccCheckComputeSubnetworkExists(t *testing.T, n string, subnetwork *com
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		region := rs.Primary.Attributes["region"]
 		subnet_name := rs.Primary.Attributes["name"]
 

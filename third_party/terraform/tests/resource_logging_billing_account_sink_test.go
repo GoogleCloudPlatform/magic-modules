@@ -146,7 +146,7 @@ func TestAccLoggingBillingAccountSink_heredoc(t *testing.T) {
 
 func testAccCheckLoggingBillingAccountSinkDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_logging_billing_account_sink" {
@@ -171,7 +171,7 @@ func testAccCheckLoggingBillingAccountSinkExists(t *testing.T, n string, sink *l
 		if err != nil {
 			return err
 		}
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		si, err := config.clientLogging.BillingAccounts.Sinks.Get(attributes["id"]).Do()
 		if err != nil {

@@ -83,7 +83,7 @@ func TestAccKmsSecret_basic(t *testing.T) {
 }
 
 func testAccEncryptSecretDataWithCryptoKey(t *testing.T, s *terraform.State, cryptoKeyResourceName, plaintext, aad string) (string, *kmsCryptoKeyId, error) {
-	config := configs[t.Name()]
+	config := googleProviderConfig(t)
 
 	rs, ok := s.RootModule().Resources[cryptoKeyResourceName]
 	if !ok {

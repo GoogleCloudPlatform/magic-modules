@@ -119,7 +119,7 @@ func TestAccLoggingProjectSink_heredoc(t *testing.T) {
 
 func testAccCheckLoggingProjectSinkDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_logging_project_sink" {

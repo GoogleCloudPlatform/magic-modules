@@ -186,7 +186,7 @@ func testAccCheckComputeRegionDiskExists(t *testing.T, n string, disk *computeBe
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		found, err := config.clientComputeBeta.RegionDisks.Get(
 			p, rs.Primary.Attributes["region"], rs.Primary.Attributes["name"]).Do()

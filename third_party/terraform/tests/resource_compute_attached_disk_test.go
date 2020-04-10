@@ -126,7 +126,7 @@ func TestAccComputeAttachedDisk_count(t *testing.T) {
 // situation where the detach fails but since the instance/disk get destroyed we wouldn't notice.
 func testCheckAttachedDiskIsNowDetached(t *testing.T, instanceName, diskName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		instance, err := config.clientCompute.Instances.Get(getTestProjectFromEnv(), "us-central1-a", instanceName).Do()
 		if err != nil {
@@ -144,7 +144,7 @@ func testCheckAttachedDiskIsNowDetached(t *testing.T, instanceName, diskName str
 
 func testCheckAttachedDiskContainsManyDisks(t *testing.T, instanceName string, count int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		instance, err := config.clientCompute.Instances.Get(getTestProjectFromEnv(), "us-central1-a", instanceName).Do()
 		if err != nil {

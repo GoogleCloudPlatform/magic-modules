@@ -170,7 +170,7 @@ func testAccCheckHealthcareHl7V2StoreDestroyProducer(t *testing.T) func(s *terra
 				continue
 			}
 
-			config := configs[t.Name()]
+			config := googleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{HealthcareBasePath}}{{dataset}}/hl7V2Stores/{{name}}")
 			if err != nil {
@@ -196,7 +196,7 @@ func testAccCheckGoogleHealthcareHl7V2StoreUpdate(t *testing.T, pubsubTopic stri
 			}
 			foundResource = true
 
-			config := configs[t.Name()]
+			config := googleProviderConfig(t)
 
 			gcpResourceUri, err := replaceVarsForTest(config, rs, "{{dataset}}/hl7V2Stores/{{name}}")
 			if err != nil {

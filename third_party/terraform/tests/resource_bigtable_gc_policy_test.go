@@ -63,7 +63,7 @@ func testAccCheckBigtableGCPolicyDestroyProducer(t *testing.T) func(s *terraform
 				continue
 			}
 
-			config := configs[t.Name()]
+			config := googleProviderConfig(t)
 			c, err := config.bigtableClientFactory.NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
 			if err != nil {
 				// The instance is already gone
@@ -102,7 +102,7 @@ func testAccBigtableGCPolicyExists(t *testing.T, n string) resource.TestCheckFun
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		c, err := config.bigtableClientFactory.NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
 		if err != nil {
 			return fmt.Errorf("Error starting admin client. %s", err)

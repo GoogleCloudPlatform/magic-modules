@@ -135,7 +135,7 @@ func TestAccPubsubTopicIamPolicy(t *testing.T) {
 
 func testAccCheckPubsubTopicIam(t *testing.T, topic, role string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		p, err := config.clientPubsub.Projects.Topics.GetIamPolicy(getComputedTopicName(getTestProjectFromEnv(), topic)).Do()
 		if err != nil {
 			return err

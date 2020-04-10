@@ -205,9 +205,9 @@ func getTestAccProviders(testName string) map[string]terraform.ResourceProvider 
 	} else {
 		log.Print("[DEBUG] VCR_PATH or VCR_MODE not set, skipping VCR")
 	}
-	// TODO(slevenick): Add OICS provider
 	return map[string]terraform.ResourceProvider{
 		"google": prov,
+		"google-beta": prov,
 		"random": provRand,
 	}
 }
@@ -221,9 +221,11 @@ func isVcrEnabled() bool {
 // Wrapper for resource.Test to swap out providers for VCR providers and handle VCR specific things
 // Can be called when VCR is not enabled, and it will behave as normal
 func vcrTest(t *testing.T, c resource.TestCase) {
-	providers := getTestAccProviders(t.Name())
-	c.Providers = providers
-	defer closeRecorder(t)
+	if isVcrEnabled() {
+		providers := getTestAccProviders(t.Name())
+		c.Providers = providers
+		defer closeRecorder(t)
+	}
 	resource.Test(t, c)
 }
 

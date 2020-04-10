@@ -75,7 +75,7 @@ func testAccDataSourceComputeResourcePolicyCheck(t *testing.T, dataSourceName st
 
 func testAccCheckDataSourceComputeResourcePolicyDestroy(t *testing.T, resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		rs, ok := s.RootModule().Resources[resourceName]
 		if !ok {

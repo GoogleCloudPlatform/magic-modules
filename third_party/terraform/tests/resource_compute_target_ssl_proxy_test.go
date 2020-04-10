@@ -51,7 +51,7 @@ func testAccCheckComputeTargetSslProxy(t *testing.T, n, proxyHeader, sslCert str
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 		name := rs.Primary.Attributes["name"]
 
 		found, err := config.clientCompute.TargetSslProxies.Get(

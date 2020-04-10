@@ -68,7 +68,7 @@ func testAccCheckGoogleServiceAccountKeyExists(t *testing.T, r string) resource.
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		_, err := config.clientIAM.Projects.ServiceAccounts.Keys.Get(rs.Primary.ID).Do()
 		if err != nil {

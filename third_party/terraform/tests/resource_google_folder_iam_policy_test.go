@@ -67,7 +67,7 @@ func TestAccFolderIamPolicy_auditConfigs(t *testing.T) {
 
 func testAccCheckGoogleFolderIamPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_folder_iam_policy" {

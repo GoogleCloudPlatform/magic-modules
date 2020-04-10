@@ -1812,7 +1812,7 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		op, err := config.clientCompute.Instances.Stop(config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
 		if err != nil {
@@ -1842,7 +1842,7 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 
 func testAccCheckComputeInstanceDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_instance" {
@@ -1886,7 +1886,7 @@ func testAccCheckComputeInstanceExistsInProject(t *testing.T, n, p string, insta
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		found, err := config.clientCompute.Instances.Get(
 			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
@@ -1915,7 +1915,7 @@ func testAccCheckComputeBetaInstanceExistsInProject(t *testing.T, n, p string, i
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		found, err := config.clientComputeBeta.Instances.Get(
 			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
@@ -2052,7 +2052,7 @@ func testAccCheckComputeInstanceBootDisk(instance *compute.Instance, source stri
 
 func testAccCheckComputeInstanceBootDiskType(t *testing.T, instanceName string, diskType string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		// boot disk is named the same as the Instance
 		disk, err := config.clientCompute.Disks.Get(config.Project, "us-central1-a", instanceName).Do()

@@ -58,7 +58,7 @@ func testAccCheckComputeHttpHealthCheckExists(t *testing.T, n string, healthChec
 			return fmt.Errorf("No name is set")
 		}
 
-		config := configs[t.Name()]
+		config := googleProviderConfig(t)
 
 		found, err := config.clientCompute.HttpHealthChecks.Get(
 			config.Project, rs.Primary.Attributes["name"]).Do()
