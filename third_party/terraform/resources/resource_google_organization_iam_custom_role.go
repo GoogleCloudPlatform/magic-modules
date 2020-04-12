@@ -122,6 +122,7 @@ func resourceGoogleOrganizationIamCustomRoleRead(d *schema.ResourceData, meta in
 	d.Set("role_id", parsedRoleName.Name)
 	d.Set("org_id", parsedRoleName.OrgId)
 	d.Set("title", role.Title)
+	d.Set("name", role.Name)
 	d.Set("description", role.Description)
 	d.Set("permissions", role.IncludedPermissions)
 	d.Set("stage", role.Stage)

@@ -60,6 +60,8 @@ exported:
 
 * `deleted` - (Optional) The current deleted state of the role.
 
+* `name` - The name of the role which can be used with iam role bindings in the format `organizations/{{org_id}}/roles/{{role_id}}`
+
 ## Import
 
 Customized IAM organization role can be imported using their URI, e.g.
