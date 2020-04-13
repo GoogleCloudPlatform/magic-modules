@@ -121,7 +121,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "app_engine_flexible_app_version"
         primary_resource_id: "myapp_v1"
         ignore_read_extra:
-          - "delete_service_on_destroy"
+          - "noop_on_destroy"
         vars:
           bucket_name: "appengine-static-content"
           project: "appeng-flex"
