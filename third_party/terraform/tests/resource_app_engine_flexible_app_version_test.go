@@ -126,6 +126,8 @@ resource "google_app_engine_flexible_app_version" "foo" {
   manual_scaling {
     instances = 1
   }
+
+  noop_on_destroy = true
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -236,6 +238,8 @@ resource "google_app_engine_flexible_app_version" "foo" {
   manual_scaling {
     instances = 2
   }
+
+  noop_on_destroy = true
 }
 
 resource "google_storage_bucket" "bucket" {

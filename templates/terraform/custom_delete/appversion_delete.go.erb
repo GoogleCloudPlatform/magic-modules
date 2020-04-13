@@ -17,16 +17,6 @@ if err != nil {
 mutexKV.Lock(lockName)
 defer mutexKV.Unlock(lockName)
 
-// the default service cannot be deleted no matter what, so we'll return nil and log this warning instead
-if d.Get("service").(string) == "default" {
-	log.Printf("[WARNING] <%= object.__product.name + " " + object.name %> resources" +
-	" cannot be deleted from GCP. The resource %s will be removed from Terraform" +
-	" state, but will still be present on the server.", d.Id())
-	d.SetId("")
-
-	return nil
-}
-
 if d.Get("delete_service_on_destroy") == true {
 	url, err := replaceVars(d, config, "{{AppEngineBasePath}}apps/{{project}}/services/{{service}}")
 	if err != nil {
