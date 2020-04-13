@@ -59,7 +59,7 @@ func resourceGoogleProjectIamCustomRole() *schema.Resource {
 				Computed: true,
 			},
 			"name": {
-				Type:     schema.TypeBool,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
