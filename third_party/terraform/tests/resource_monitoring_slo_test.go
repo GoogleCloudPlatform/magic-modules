@@ -114,7 +114,7 @@ resource "google_monitoring_slo" "primary" {
   service = data.google_monitoring_app_engine_service.ae.service_id
 
   goal = 0.9
-  rolling_period = "86400s"
+  rolling_period_days = 1
 
   basic_sli {
     latency {

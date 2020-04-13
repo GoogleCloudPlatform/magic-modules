@@ -1013,18 +1013,19 @@ objects:
       description: |
         The fraction of service that must be good in order for this objective
         to be met. 0 < goal <= 0.999
-    - !ruby/object:Api::Type::String
-      name: rollingPeriod
+    - !ruby/object:Api::Type::Integer
+      name: rollingPeriodDays
+      api_name: rollingPeriod
       exactly_one_of:
-        - rolling_period
+        - rolling_period_days
         - calendar_period
       description: |
-        A rolling time period, semantically "in the past <rollingPeriod>".
+        A rolling time period, semantically "in the past X days".
         Must be an integer multiple of 1 day no larger than 30 days.
     - !ruby/object:Api::Type::Enum
       name: calendarPeriod
       exactly_one_of:
-        - rolling_period
+        - rolling_period_days
         - calendar_period
       description: |
         A calendar period, semantically "since the start of the current
