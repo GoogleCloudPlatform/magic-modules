@@ -1,11 +1,6 @@
 package google
 
 import (
-<<<<<<< HEAD
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-=======
-	"fmt"
->>>>>>> Changes to all tests to work with VCR
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"testing"
 )
