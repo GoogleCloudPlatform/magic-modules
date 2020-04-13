@@ -83,9 +83,9 @@ func TestAccMonitoringSlo_update(t *testing.T) {
 				Check:  setTestCheckMonitoringSloId("google_monitoring_slo.primary", &generatedId),
 			},
 			{
-				ResourceName:            "google_monitoring_slo.primary",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_monitoring_slo.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
 				// Ignore input-only field for import
 				ImportStateVerifyIgnore: []string{"service"},
 			},
@@ -94,9 +94,9 @@ func TestAccMonitoringSlo_update(t *testing.T) {
 				Check:  testCheckMonitoringSloIdAfterUpdate("google_monitoring_slo.primary", &generatedId),
 			},
 			{
-				ResourceName:            "google_monitoring_slo.primary",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_monitoring_slo.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
 				// Ignore input-only field for import
 				ImportStateVerifyIgnore: []string{"service"},
 			},
