@@ -294,7 +294,7 @@ func writeSeedToFile(seed int64, fileName string) error {
 
 func randString(t *testing.T, length int) string {
 	if !isVcrEnabled() {
-		return acctest.RandString(10)
+		return acctest.RandString(length)
 	}
 	envPath := os.Getenv("VCR_PATH")
 	vcrMode := os.Getenv("VCR_MODE")
