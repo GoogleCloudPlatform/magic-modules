@@ -90,7 +90,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           If set to `true`, the service will be deleted if it is the last version.    
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/appversion_delete.go.erb
-      test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.erb
+      test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
       encoder: templates/terraform/encoders/flex_app_version.go.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -121,10 +121,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "app_engine_flexible_app_version"
         primary_resource_id: "myapp_v1"
         ignore_read_extra:
-          - "delete_service_on_destroy"
+          - "noop_on_destroy"
         vars:
           bucket_name: "appengine-static-content"
-          service_name: "service-"
+          project: "appeng-flex"
+        test_env_vars:
+          org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
