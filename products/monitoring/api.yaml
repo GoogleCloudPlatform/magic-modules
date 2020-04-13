@@ -1043,8 +1043,7 @@ objects:
       properties:
         - !ruby/object:Api::Type::NestedObject
           name: basicSli
-          exactly_one_of:
-            - basic_sli
+          required: true
           description: |
             Basic Service-Level Indicator (SLI) on a well-known service type.
             Performance will be computed on the basis of pre-defined metrics.
@@ -1086,8 +1085,7 @@ objects:
               name: latency
               description: |
                 Parameters for a latency threshold SLI.
-              exactly_one_of:
-              - basic_sli.0.latency
+              required: true
               properties:
               - !ruby/object:Api::Type::String
                 required: true
