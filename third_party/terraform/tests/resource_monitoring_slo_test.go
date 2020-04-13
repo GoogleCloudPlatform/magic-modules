@@ -22,7 +22,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
-func testCheckSetInitialMonitoringSloId(res string, sloId *string) resource.TestCheckFunc {
+func setTestCheckMonitoringSloId(res string, sloId *string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		updateId, err := getTestResourceMonitoringSloId(res, s)
 		if err != nil {
@@ -80,7 +80,7 @@ func TestAccMonitoringSlo_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMonitoringSlo_basic(),
-				Check:  testCheckSetInitialMonitoringSloId("google_monitoring_slo.primary", &generatedId),
+				Check:  setTestCheckMonitoringSloId("google_monitoring_slo.primary", &generatedId),
 			},
 			{
 				ResourceName:            "google_monitoring_slo.primary",
@@ -113,10 +113,7 @@ data "google_monitoring_app_engine_service" "ae" {
 resource "google_monitoring_slo" "primary" {
   service = data.google_monitoring_app_engine_service.ae.service_id
 
-  display_name = "Terraform Test SLO"
-
   goal = 0.9
-
   rolling_period = "86400s"
 
   basic_sli {
@@ -137,10 +134,8 @@ data "google_monitoring_app_engine_service" "ae" {
 resource "google_monitoring_slo" "primary" {
   service = data.google_monitoring_app_engine_service.ae.service_id
 
-  display_name = "Terraform Test updated SLO"
-
   goal = 0.8
-
+  display_name = "Terraform Test updated SLO"
   calendar_period = "WEEK"
 
   basic_sli {
