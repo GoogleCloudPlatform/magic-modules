@@ -60,7 +60,9 @@ exported:
 
 * `deleted` - (Optional) The current deleted state of the role.
 
-* `name` - The name of the role which can be used with iam role bindings in the format `organizations/{{org_id}}/roles/{{role_id}}`
+* `id` - an identifier for the resource with the format `organizations/{{org_id}}/roles/{{role_id}}`
+
+* `name` - The name of the role in the format `organizations/{{org_id}}/roles/{{role_id}}`. Like `id`, this field can be used as a reference in other resources such as IAM role bindings.
 
 ## Import
 

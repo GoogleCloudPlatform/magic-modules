@@ -49,7 +49,7 @@ The following arguments are supported:
 
 * `stage` - (Optional) The current launch stage of the role.
     Defaults to `GA`.
-    List of possible stages is [here](https://cloud.google.com/iam/reference/rest/v1/projects.roles#Role.RoleLaunchStage).
+    List of possible stages is [here](https://cloud.google.com/iam/reference/rest/v1/organizations.roles#Role.RoleLaunchStage).
 
 * `description` - (Optional) A human-readable description for the role.
 
@@ -60,7 +60,9 @@ exported:
 
  * `deleted` - (Optional) The current deleted state of the role.
 
- * `name` - The name of the role which can be used with iam role bindings in the format `projects/{{project}}/roles/{{role_id}}`
+ * `id` - an identifier for the resource with the format `projects/{{project}}/roles/{{role_id}}`
+
+ * `name` - The name of the role in the format `projects/{{project}}/roles/{{role_id}}`. Like `id`, this field can be used as a reference in other resources such as IAM role bindings.
 
 ## Import
 
