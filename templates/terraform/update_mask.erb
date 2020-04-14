@@ -1,22 +1,39 @@
-updateMask := []string{}
-<% update_body_properties.each do |prop| -%>
-<%# UpdateMask documentation is not not obvious about which fields are supported or
+<%# Template for code adding update mask query parameter to update URL.
+
+   UpdateMask documentation is not not obvious about which fields are supported or
    how deeply nesting is supported.  For instance, if we change the field foo.bar.baz,
    it seems that *sometimes*, 'foo' is a valid value.  Other times, it needs to be
    'foo.bar', and other times 'foo.bar.baz'. If the defaults don't work for you,
-   You can customize the exact list of fields that are passed for a property
+   you can customize the exact list of fields that are passed for a property
    using `update_mask_fields`.
--#%>
-if d.HasChange("<%= prop.name.underscore -%>") {
-<%
-mask = prop.api_name
-if prop.update_mask_fields
-  mask = prop.update_mask_fields.join(',')
-end
 -%>
+updateMask := []string{}
+<% update_body_properties.each do |prop| -%>
+<%
+    mask = prop.api_name
+    if prop.update_mask_fields
+      mask = prop.update_mask_fields.join(',')
+    end
+-%>
+<%  if prop.flatten_object -%>
+<%    prop.properties.each do |nested| %>
+<%
+        if nested.update_mask_fields
+          mask = nest_p.update_mask_fields.join(',')
+        end
+-%>
+
+if d.HasChange("<%= nested.name.underscore -%>") {
   updateMask = append(updateMask, "<%= mask -%>")
 }
-<% end -%>
+<%    end # prop.properties.each do -%>
+<%  else # if !prop.flatten_object -%>
+
+if d.HasChange("<%= prop.name.underscore -%>") {
+  updateMask = append(updateMask, "<%= mask -%>")
+}
+<%  end # if prop.flatten_object  -%>
+<% end # update_body_properties.each -%>
 // updateMask is a URL parameter but not present in the schema, so replaceVars
 // won't set it
 url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
