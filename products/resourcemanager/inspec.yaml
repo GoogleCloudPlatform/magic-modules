@@ -33,6 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       exclude: false
       method_name_separator: ':'
       fetch_iam_policy_verb: :POST
+      iam_conditions_request_type: :REQUEST_BODY
   Organization: !ruby/object:Overrides::Inspec::ResourceOverride
     privileged: true
     # Name should be organizations/123456
@@ -50,3 +51,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     product_url: https://cloudresourcemanager.googleapis.com/v2/
     # Creating and viewing folders requires organization level privileges
     privileged: true
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST

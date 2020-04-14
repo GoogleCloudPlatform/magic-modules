@@ -20,6 +20,21 @@ describe <%= iam_resource_name -%>(<%= identifiers_out -%>, role: "roles/editor"
 end
 ```
 
+<% if object.iam_policy.iam_conditions_request_type == :REQUEST_BODY -%>
+
+This resource supports [IAM conditions](https://cloud.google.com/iam/docs/conditions-overview). Specifying a `condition` in the constructor matches only bindings with that condition. `condition` has three possible fields, `title`, `expression` and `description`. If any of these fields are unspecified they will not be matched.
+
+```
+describe <%= iam_resource_name -%>(<%= identifiers_out -%>, role: "roles/browser", condition: { title: "my title" }) do
+  it { should exist }
+  its('members.count'){ should cmp 1 }
+  its('members') { should include 'user:testuser@example.com' }
+  its('condition.title') {should cmp 'my title' }
+  its('condition.expression') { should cmp "request.time < timestamp('2020-10-01T00:00:00.000Z')" }
+end
+```
+<% end -%>
+
 ## Properties
 Properties that can be accessed from the `<%= iam_resource_name -%>` resource:
 
@@ -27,6 +42,16 @@ Properties that can be accessed from the `<%= iam_resource_name -%>` resource:
 
   * `members`: Specifies the identities requesting access for a Cloud Platform resource.
 
+<% if object.iam_policy.iam_conditions_request_type == :REQUEST_BODY -%>
+  * `condition`: Contains information about when this binding is to be applied.
+
+  	* `expression`: Textual representation of an expression in Common Expression Language syntax.
+
+  	* `title`: An optional title for the expression, i.e. a short string describing its purpose.
+
+  	* `description`: An optional description of the expression. This is a longer text which describes the expression.
+
+<% end -%>
 <% unless @api.apis_required.empty? -%>
 
 ## GCP Permissions

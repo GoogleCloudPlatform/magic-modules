@@ -1,0 +1,46 @@
+resource "google_project" "default" {
+	provider = google-beta
+
+	project_id = "tf-test%{random_suffix}"
+	name       = "tf-test%{random_suffix}"
+	org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
+}
+
+resource "google_firebase_project" "default" {
+	provider = google-beta
+	project  = google_project.default.project_id
+}
+
+resource "google_firebase_web_app" "<%= ctx[:primary_resource_id] %>" {
+	provider = google-beta
+	project = google_project.default.project_id
+	display_name = "<%= ctx[:vars]['display_name'] %>"
+
+	depends_on = [google_firebase_project.default]
+}
+
+data "google_firebase_web_app_config" "basic" {
+  provider   = google-beta
+  web_app_id = google_firebase_web_app.basic.app_id
+}
+
+resource "google_storage_bucket" "default" {
+    provider = google-beta
+    name = "<%= ctx[:vars]['bucket_name'] %>"
+}
+
+resource "google_storage_bucket_object" "default" {
+    provider = google-beta
+    bucket = google_storage_bucket.default.name
+    name = "firebase-config.json"
+
+    content = jsonencode({
+        appId              = google_firebase_web_app.basic.app_id
+        apiKey             = data.google_firebase_web_app_config.api_key
+        authDomain         = data.google_firebase_web_app_config.auth_domain
+        databaseURL        = lookup(data.google_firebase_web_app_config, "database_url", "")
+        storageBucket      = lookup(data.google_firebase_web_app_config, "storage_bucket", "")
+        messagingSenderId  = lookup(data.google_firebase_web_app_config, "messaging_sender_id", "")
+        measurementId      = lookup(data.google_firebase_web_app_config, "measurement_id", "")
+    })
+}

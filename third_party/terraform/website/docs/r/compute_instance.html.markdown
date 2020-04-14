@@ -164,8 +164,6 @@ The following arguments are supported:
 * `enable_display` - (Optional) Enable [Virtual Displays](https://cloud.google.com/compute/docs/instances/enable-instance-virtual-display#verify_display_driver) on this instance.
 **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
-* `resource_policies` (Optional) -- A list of short names or self_links of resource policies to attach to the instance. Modifying this list will cause the instance to recreate. Currently a max of 1 resource policy is supported.
-
 
 ---
 
@@ -396,10 +394,12 @@ This resource provides the following
 -> **Note:** The `desired_status` field will not be set on import. If you have it set, Terraform will update the field on the next `terraform apply`, bringing your instance to the desired status.
 
 
-Instances can be imported using the `project`, `zone` and `name`, e.g.
+Instances can be imported using any of these accepted formats:
 
 ```
-$ terraform import google_compute_instance.default gcp-project/us-central1-a/test
+$ terraform import google_compute_instance.default projects/{{project}}/zones/{{zone}}/instances/{{name}}
+$ terraform import google_compute_instance.default {{project}}/{{zone}}/{{name}}
+$ terraform import google_compute_instance.default {{name}}
 ```
 
 [custom-vm-types]: https://cloud.google.com/dataproc/docs/concepts/compute/custom-machine-types

@@ -130,6 +130,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
         sensitive: true
         custom_expand: templates/terraform/custom_expand/base64.go.erb
+      additionalAuthenticatedData: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+        sensitive: true
+        custom_expand: templates/terraform/custom_expand/base64.go.erb
       ciphertext: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode

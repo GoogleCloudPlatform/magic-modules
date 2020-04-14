@@ -9,6 +9,8 @@ import (
 	"regexp"
 	"time"
 
+	"google.golang.org/api/option"
+	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/logging"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
 	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
@@ -70,6 +72,9 @@ type Config struct {
 	BatchingConfig		*batchingConfig
 	UserProjectOverride bool
 	RequestTimeout  time.Duration
+	// PollInterval is passed to resource.StateChangeConf in common_operation.go
+	// It controls the interval at which we poll for successful operations
+	PollInterval time.Duration
 
 	client           *http.Client
 	context          context.Context
@@ -149,7 +154,6 @@ type Config struct {
 
 	clientServiceMan          *servicemanagement.APIService
 
-	ServiceUsageBasePath       string
 	clientServiceUsage         *serviceusage.Service
 
 	clientBigQuery   *bigquery.Service
@@ -204,8 +208,23 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	}
 	c.tokenSource = tokenSource
 
-	client := oauth2.NewClient(context.Background(), tokenSource)
-	client.Transport = logging.NewTransport("Google", client.Transport)
+	cleanCtx := context.WithValue(ctx, oauth2.HTTPClient, cleanhttp.DefaultClient())
+
+	// 1. OAUTH2 TRANSPORT/CLIENT - sets up proper auth headers
+	client := oauth2.NewClient(cleanCtx, tokenSource)
+
+	// 2. Logging Transport - ensure we log HTTP requests to GCP APIs.
+	loggingTransport := logging.NewTransport("Google", client.Transport)
+
+	// 3. Retry Transport - retries common temporary errors
+	// Keep order for wrapping logging so we log each retried request as well.
+	// This value should be used if needed to create shallow copies with additional retry predicates.
+	// See ClientWithAdditionalRetries
+	retryTransport := NewTransportWithDefaultRetries(loggingTransport)
+
+	// Set final transport value.
+	client.Transport = retryTransport
+
 	// This timeout is a timeout per HTTP request, not per logical operation.
 	client.Timeout = c.synchronousTimeout()
 
@@ -318,7 +337,8 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 
 	pubsubClientBasePath := removeBasePathVersion(c.PubsubBasePath)
 	log.Printf("[INFO] Instantiating Google Pubsub client for path %s", pubsubClientBasePath)
-	c.clientPubsub, err = pubsub.NewService(ctx, option.WithHTTPClient(client))
+	wrappedPubsubClient := ClientWithAdditionalRetries(client, retryTransport, pubsubTopicProjectNotReady)
+	c.clientPubsub, err = pubsub.NewService(ctx, option.WithHTTPClient(wrappedPubsubClient))
 	if err != nil {
 		return err
 	}
@@ -417,7 +437,8 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 
 	bigQueryClientBasePath := c.BigQueryBasePath
 	log.Printf("[INFO] Instantiating Google Cloud BigQuery client for path %s", bigQueryClientBasePath)
-	c.clientBigQuery, err = bigquery.NewService(ctx, option.WithHTTPClient(client))
+	wrappedBigQueryClient := ClientWithAdditionalRetries(client, retryTransport, iamMemberMissing)
+	c.clientBigQuery, err = bigquery.NewService(ctx, option.WithHTTPClient(wrappedBigQueryClient))
 	if err != nil {
 		return err
 	}
@@ -556,6 +577,8 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	c.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, c.BatchingConfig)
 	c.requestBatcherIam = NewRequestBatcher("IAM", ctx, c.BatchingConfig)
 
+	c.PollInterval = 10 * time.Second
+
 	return nil
 }
 
@@ -658,7 +681,6 @@ func ConfigureBasePaths(c *Config) {
 	c.ResourceManagerV2Beta1BasePath = ResourceManagerV2Beta1DefaultBasePath
 	c.IAMBasePath = IAMDefaultBasePath
 	c.ServiceNetworkingBasePath = ServiceNetworkingDefaultBasePath
-	c.ServiceUsageBasePath = ServiceUsageDefaultBasePath
 	c.BigQueryBasePath = BigQueryDefaultBasePath
 	c.CloudIoTBasePath = CloudIoTDefaultBasePath
 	c.StorageTransferBasePath = StorageTransferDefaultBasePath

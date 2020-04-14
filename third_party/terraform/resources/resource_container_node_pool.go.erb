@@ -110,10 +110,12 @@ var schemaNodePool = map[string]*schema.Schema{
 		Computed: true,
 		Elem:     &schema.Schema{Type: schema.TypeString},
 	},
+<% end -%>
 
 	"upgrade_settings": {
 		Type:     schema.TypeList,
 		Optional: true,
+		Computed: true,
 		MaxItems: 1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -131,7 +133,6 @@ var schemaNodePool = map[string]*schema.Schema{
 			},
 		},
 	},
-<% end -%>
 
 	"initial_node_count": &schema.Schema{
 		Type:     schema.TypeInt,
@@ -321,27 +322,13 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	nodePoolInfo, err := extractNodePoolInformation(d, config)
-
-	name := getNodePoolName(d.Id())
-
 	if err != nil {
 		return err
 	}
 
-	var nodePool = &containerBeta.NodePool{}
-	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		nodePool, err = config.clientContainerBeta.
-			Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name)).Do()
+	name := getNodePoolName(d.Id())
 
-		if err != nil {
-			return resource.NonRetryableError(err)
-		}
-		if nodePool.Status != "RUNNING" {
-			return resource.RetryableError(fmt.Errorf("Nodepool %q has status %q with message %q", d.Get("name"), nodePool.Status, nodePool.StatusMessage))
-		}
-		return nil
-	})
-
+	nodePool, err := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name)).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("NodePool %q from cluster %q", name, nodePoolInfo.cluster))
 	}
@@ -556,7 +543,6 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*containerBeta.NodeP
 		}
 	}
 
-<% unless version == 'ga' -%>
 	if v, ok := d.GetOk(prefix + "upgrade_settings"); ok {
 		upgradeSettingsConfig := v.([]interface{})[0].(map[string]interface{})
 		np.UpgradeSettings = &containerBeta.UpgradeSettings{}
@@ -569,7 +555,6 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*containerBeta.NodeP
 			np.UpgradeSettings.MaxUnavailable = int64(v.(int))
 		}
 	}
-<% end -%>
 
 	return np, nil
 }
@@ -628,7 +613,6 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *containerBeta.N
 		},
 	}
 
-<% unless version == 'ga' -%>
 	if np.UpgradeSettings != nil {
 		nodePool["upgrade_settings"] = []map[string]interface{}{
 			{
@@ -639,7 +623,6 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *containerBeta.N
 	} else {
 		delete(nodePool, "upgrade_settings")
 	}
-<% end -%>
 
 	return nodePool, nil
 }
@@ -860,6 +843,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			d.SetPartial("node_locations")
 		}
 	}
+<% end -%>
 
 	if d.HasChange(prefix + "upgrade_settings") {
 		upgradeSettings := &containerBeta.UpgradeSettings{}
@@ -893,7 +877,6 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			d.SetPartial("upgrade_settings")
 		}
 	}
-<% end -%>
 
 	return nil
 }

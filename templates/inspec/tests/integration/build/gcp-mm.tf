@@ -636,7 +636,7 @@ variable "project_sink" {
 }
 
 resource "google_logging_project_sink" "project-logging-sink" {
-  count = var.gcp_enable_privileged_resources
+  count = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
   project = var.gcp_project_id
 
   name = var.project_sink.name
@@ -652,6 +652,10 @@ resource "google_storage_bucket" "bucket" {
   project       = var.gcp_project_id
   location      = var.gcp_location
   force_destroy = true
+
+  labels = {
+    "key" = "value"
+  }
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -1204,10 +1208,43 @@ resource "google_compute_image" "example" {
 variable "gcp_organization_iam_custom_role_id" {}
 
 resource "google_organization_iam_custom_role" "generic_org_iam_custom_role" {
-  count = var.gcp_enable_privileged_resources
+  count       = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
   org_id      = var.gcp_organization_id
   role_id     = var.gcp_organization_iam_custom_role_id
   title       = "GCP Inspec Generic Organization IAM Custom Role"
   description = "Custom role allowing to list IAM roles only"
   permissions = ["iam.roles.list"]
+}
+
+variable "security_policy" {
+  type = any
+}
+
+resource "google_compute_security_policy" "policy" {
+  project = var.gcp_project_id
+  name = var.security_policy["name"]
+
+  rule {
+    action   = var.security_policy["action"]
+    priority = var.security_policy["priority"]
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = [var.security_policy["ip_range"]]
+      }
+    }
+    description = var.security_policy["description"]
+  }
+
+  rule {
+    action   = "allow"
+    priority = "2147483647"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "default rule"
+  }
 }

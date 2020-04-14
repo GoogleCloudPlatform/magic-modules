@@ -1,0 +1,26 @@
+resource "google_bigquery_dataset_access" "<%= ctx[:primary_resource_id] %>" {
+  dataset_id    = google_bigquery_dataset.private.dataset_id
+  view {
+    project_id = google_bigquery_table.public.project
+    dataset_id = google_bigquery_dataset.public.dataset_id
+    table_id   = google_bigquery_table.public.table_id
+  }
+}
+
+resource "google_bigquery_dataset" "private" {
+  dataset_id = "<%= ctx[:vars]['dataset_id'] %>"
+}
+
+resource "google_bigquery_dataset" "public" {
+  dataset_id = "<%= ctx[:vars]['dataset_id2'] %>"
+}
+
+resource "google_bigquery_table" "public" {
+  dataset_id = google_bigquery_dataset.public.dataset_id
+  table_id   = "<%= ctx[:vars]['table_id'] %>"
+
+  view {
+    query          = "SELECT state FROM [lookerdata:cdc.project_tycho_reports]"
+    use_legacy_sql = false
+  }
+}

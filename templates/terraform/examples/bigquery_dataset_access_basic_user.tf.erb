@@ -1,0 +1,13 @@
+resource "google_bigquery_dataset_access" "<%= ctx[:primary_resource_id] %>" {
+  dataset_id    = google_bigquery_dataset.dataset.dataset_id
+  role          = "OWNER"
+  user_by_email = google_service_account.bqowner.email
+}
+
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id = "<%= ctx[:vars]['dataset_id'] %>"
+}
+
+resource "google_service_account" "bqowner" {
+  account_id = "<%= ctx[:vars]['account_name'] %>"
+}

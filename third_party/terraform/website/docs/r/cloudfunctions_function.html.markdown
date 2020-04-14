@@ -123,6 +123,8 @@ Eg. `"nodejs8"`, `"nodejs10"`, `"python37"`, `"go111"`.
 
 * `trigger_http` - (Optional) Boolean variable. Any HTTP request (of a supported type) to the endpoint will trigger function execution. Supported HTTP request types are: POST, PUT, GET, DELETE, and OPTIONS. Endpoint is returned as `https_trigger_url`. Cannot be used with `trigger_bucket` and `trigger_topic`.
 
+* `ingress_settings` - (Optional) String value that controls what traffic can reach the function. Allowed values are ALLOW_ALL and ALLOW_INTERNAL_ONLY. Changes to this field will recreate the cloud function.
+
 * `labels` - (Optional) A set of key/value label pairs to assign to the function.
 
 * `service_account_email` - (Optional) If provided, the self-provided service account to run the function with.
@@ -130,6 +132,8 @@ Eg. `"nodejs8"`, `"nodejs10"`, `"python37"`, `"go111"`.
 * `environment_variables` - (Optional) A set of key/value environment variable pairs to assign to the function.
 
 * `vpc_connector` - (Optional) The VPC Network Connector that this cloud function can connect to. It can be either the fully-qualified URI, or the short name of the network connector resource. The format of this field is `projects/*/locations/*/connectors/*`.
+
+* `vpc_connector_egress_settings` - (Optional) The egress settings for the connector, controlling what traffic is diverted through it. Allowed values are `ALL_TRAFFIC` and `PRIVATE_RANGES_ONLY`. Defaults to `PRIVATE_RANGES_ONLY`. If unset, this field preserves the previously set value.
 
 * `source_archive_bucket` - (Optional) The GCS bucket containing the zip archive which contains the function.
 
@@ -167,6 +171,8 @@ The `source_repository` block supports:
 
 In addition to the arguments listed above, the following computed attributes are
 exported:
+
+* `id` - an identifier for the resource with format `{{name}}`
 
 * `https_trigger_url` - URL which triggers function execution. Returned only if `trigger_http` is used.
 

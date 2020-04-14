@@ -33,6 +33,10 @@ objects:
     has_self_link: true
     description: |
       Datasets allow you to organize and control access to your tables.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Datasets Intro': 'https://cloud.google.com/bigquery/docs/datasets-intro'
+      api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -231,6 +235,154 @@ objects:
               Describes the Cloud KMS encryption key that will be used to protect destination
               BigQuery table. The BigQuery Service Account associated with your project requires
               access to this encryption key.
+  - !ruby/object:Api::Resource
+    name: 'DatasetAccess'
+    input: true
+    base_url: projects/{{project}}/datasets/{{dataset_id}}
+    self_link: projects/{{project}}/datasets/{{dataset_id}}
+    create_verb: :PATCH
+    delete_verb: :PATCH
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys:
+        - access
+      modify_by_patch: true
+    identity:
+      - role
+      - userByEmail
+      - groupByEmail
+      - domain
+      - specialGroup
+      - iamMember
+      - view
+    description: |
+      Gives dataset access for a single entity. This resource is intended to be used in cases where
+      it is not possible to compile a full list of access blocks to include in a
+      `google_bigquery_dataset` resource, to enable them to be added separately.
+
+      ~> **Note:** If this resource is used alongside a `google_bigquery_dataset` resource, the
+      dataset resource must either have no defined `access` blocks or a `lifecycle` block with
+      `ignore_changes = [access]` so they don't fight over which accesses should be on the dataset.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Controlling access to datasets': 'https://cloud.google.com/bigquery/docs/dataset-access-controls'
+      api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'datasetId'
+        description: |
+          A unique ID for this dataset, without the project name. The ID
+          must contain only letters (a-z, A-Z), numbers (0-9), or
+          underscores (_). The maximum length is 1,024 characters.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'role'
+        description: |
+          Describes the rights granted to the user specified by the other
+          member of the access object. Primitive, Predefined and custom
+          roles are supported. Predefined roles that have equivalent
+          primitive roles are swapped by the API to their Primitive
+          counterparts, and will show a diff post-create. See
+          [official docs](https://cloud.google.com/bigquery/docs/access-control).
+      - !ruby/object:Api::Type::String
+        name: 'userByEmail'
+        description: |
+          An email address of a user to grant access to. For example:
+          fred@example.com
+        exactly_one_of:
+          - user_by_email
+          - group_by_email
+          - domain
+          - special_group
+          - iam_member
+          - view
+      - !ruby/object:Api::Type::String
+        name: 'groupByEmail'
+        description: An email address of a Google Group to grant access to.
+        exactly_one_of:
+          - user_by_email
+          - group_by_email
+          - domain
+          - special_group
+          - iam_member
+          - view
+      - !ruby/object:Api::Type::String
+        name: 'domain'
+        description: |
+          A domain to grant access to. Any users signed in with the
+          domain specified will be granted the specified access
+        exactly_one_of:
+          - user_by_email
+          - group_by_email
+          - domain
+          - special_group
+          - iam_member
+          - view
+      - !ruby/object:Api::Type::String
+        name: 'specialGroup'
+        description: |
+          A special group to grant access to. Possible values include:
+          
+          
+          * `projectOwners`: Owners of the enclosing project.
+          
+          
+          * `projectReaders`: Readers of the enclosing project.
+          
+          
+          * `projectWriters`: Writers of the enclosing project.
+          
+          
+          * `allAuthenticatedUsers`: All authenticated BigQuery users.
+        exactly_one_of:
+          - user_by_email
+          - group_by_email
+          - domain
+          - special_group
+          - iam_member
+          - view
+      - !ruby/object:Api::Type::String
+        name: 'iamMember'
+        description: |
+          Some other type of member that appears in the IAM Policy but isn't a user,
+          group, domain, or special group. For example: `allUsers`
+        exactly_one_of:
+          - user_by_email
+          - group_by_email
+          - domain
+          - special_group
+          - iam_member
+          - view
+      - !ruby/object:Api::Type::NestedObject
+        name: 'view'
+        description: |
+          A view from a different dataset to grant access to. Queries
+          executed against that view will have read access to tables in
+          this dataset. The role field is not required when this field is
+          set. If that view is updated by any user, access to the view
+          needs to be granted again via an update operation.
+        exactly_one_of:
+          - user_by_email
+          - group_by_email
+          - domain
+          - special_group
+          - iam_member
+          - view
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'datasetId'
+            description: The ID of the dataset containing this table.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'projectId'
+            description: The ID of the project containing this table.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'tableId'
+            description: |
+              The ID of the table. The ID must contain only letters (a-z,
+              A-Z), numbers (0-9), or underscores (_). The maximum length
+              is 1,024 characters.
+            required: true
   - !ruby/object:Api::Resource
     name: 'Table'
     kind: 'bigquery#table'

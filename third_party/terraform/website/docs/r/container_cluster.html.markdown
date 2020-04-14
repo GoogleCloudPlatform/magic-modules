@@ -11,7 +11,7 @@ description: |-
 
 Manages a Google Kubernetes Engine (GKE) cluster. For more information see
 [the official documentation](https://cloud.google.com/container-engine/docs/clusters)
-and [the API reference](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.locations.clusters).
+and [the API reference](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters).
 
 ~> **Note:** All arguments and attributes, including basic auth username and
 passwords as well as certificate outputs will be stored in the raw state as
@@ -324,6 +324,13 @@ The `addons_config` block supports:
 * `cloudrun_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     The status of the CloudRun addon. It requires `istio_config` enabled. It is disabled by default.
     Set `disabled = false` to enable. This addon can only be enabled at cluster creation time.
+    
+* `dns_cache_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+    The status of the NodeLocal DNSCache addon. It is disabled by default.
+    Set `enabled = true` to enable. 
+    
+    **Enabling/Disabling NodeLocal DNSCache in an existing cluster is a disruptive operation.
+    All cluster nodes running GKE 1.15 and higher are recreated.**
 
 This example `addons_config` disables two addons:
 
@@ -406,7 +413,7 @@ maintenance_policy {
 }
 ```
 
-* `recurring_window` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Time window for
+* `recurring_window` - (Optional) Time window for
 recurring maintenance operations.
 
 Specify `start_time` and `end_time` in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) date format.  The start time's date is
@@ -657,6 +664,12 @@ The `resource_usage_export_config` block supports:
 * `enable_network_egress_metering` (Optional) - Whether to enable network egress metering for this cluster. If enabled, a daemonset will be created
     in the cluster to meter network egress traffic.
 
+* `enable_resource_consumption_metering` (Optional) - Whether to enable resource
+consumption metering on this cluster. When enabled, a table will be created in
+the resource export BigQuery dataset to store resource consumption data. The
+resulting table can be joined with the resource usage table or with BigQuery
+billing export. Defaults to `true`.
+
 * `bigquery_destination` (Required) - Parameters for using BigQuery as the destination of resource usage export.
 
 * `bigquery_destination.dataset_id` (Required) - The ID of a BigQuery Dataset. For Example:
@@ -664,6 +677,7 @@ The `resource_usage_export_config` block supports:
 ```hcl
 resource_usage_export_config {
   enable_network_egress_metering = false
+  enable_resource_consumption_metering = true
 
   bigquery_destination {
     dataset_id = "cluster_resource_usage"

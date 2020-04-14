@@ -13,7 +13,9 @@ func flattenNested<%= resource_name -%>(d *schema.ResourceData, meta interface{}
   <% end -%>
   v, ok = res["<%=object.nested_query.keys[-1]-%>"]
   if !ok || v == nil {
-    return nil, nil
+    // It's possible that there is only one of these resources and
+    // that res represents that resource.
+    v = res
   }
 
   switch v.(type) {
@@ -36,13 +38,14 @@ func flattenNested<%= resource_name -%>(d *schema.ResourceData, meta interface{}
 func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, meta interface{}, items []interface{}) (index int, item map[string]interface{}, err error) {
   <% object.identity.each do |id_prop| -%>
   <%   if settable_properties.include?(id_prop) -%>
-  expected<%= titlelize_property(id_prop) -%>, err := expand<%= resource_name -%><%= titlelize_property(id_prop) -%>(d.Get("<%= id_prop.name.underscore -%>"), d, meta.(*Config))
+  expected<%= titlelize_property(id_prop) -%>, err := expandNested<%= resource_name -%><%= titlelize_property(id_prop) -%>(d.Get("<%= id_prop.name.underscore -%>"), d, meta.(*Config))
   if err != nil {
     return -1, nil, err
   }
   <%   else -%>
   expected<%= titlelize_property(id_prop) -%> := d.Get("<%= id_prop.name.underscore -%>")
   <%   end # settable_properties.include?(id_prop)-%>
+  expectedFlattened<%= titlelize_property(id_prop) -%> := flattenNested<%= resource_name -%><%= titlelize_property(id_prop) -%>(expected<%= titlelize_property(id_prop) -%>, d, meta.(*Config))
   <% end # object.identity.each -%>
 
   // Search list for this resource.
@@ -68,9 +71,10 @@ func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, me
     <% end -%>
 
     <% object.identity.each do |prop| -%>
-    item<%= titlelize_property(prop) -%> := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d, meta.(*Config))
-    if !reflect.DeepEqual(item<%= titlelize_property(prop) -%>, expected<%= titlelize_property(prop) -%>) {
-      log.Printf("[DEBUG] Skipping item with <%= prop.api_name %>= %#v, looking for %#v)", item<%= titlelize_property(prop) -%>, expected<%= titlelize_property(prop) -%>)
+    item<%= titlelize_property(prop) -%> := flattenNested<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d, meta.(*Config))
+    // isEmptyValue check so that if one is nil and the other is "", that's considered a match
+    if !(isEmptyValue(reflect.ValueOf(item<%= titlelize_property(prop) -%>)) && isEmptyValue(reflect.ValueOf(expectedFlattened<%= titlelize_property(prop) -%>))) && !reflect.DeepEqual(item<%= titlelize_property(prop) -%>, expectedFlattened<%= titlelize_property(prop) -%>) {
+      log.Printf("[DEBUG] Skipping item with <%= prop.api_name %>= %#v, looking for %#v)", item<%= titlelize_property(prop) -%>, expectedFlattened<%= titlelize_property(prop) -%>)
       continue
     }
     <% end -%>

@@ -286,6 +286,13 @@ objects:
                     name: 'requireCorpOwned'
                     description: |
                       Whether the device needs to be corp owned.
+              - !ruby/object:Api::Type::Array
+                name: 'regions'
+                description: |
+                  The request must originate from one of the provided
+                  countries/regions.
+                  Format: A valid ISO 3166-1 alpha-2 code.
+                item_type: Api::Type::String
   - !ruby/object:Api::Resource
     name: 'ServicePerimeter'
     # This is an unusual API, so we need to use a few fields to map the methods
@@ -423,6 +430,102 @@ objects:
               - status.0.access_levels
               - status.0.restricted_services
             item_type: Api::Type::String
+          - !ruby/object:Api::Type::NestedObject
+            name: 'vpcAccessibleServices'
+            description: |
+              Specifies how APIs are allowed to communicate within the Service
+              Perimeter.
+            properties:
+            - !ruby/object:Api::Type::Boolean
+              name: 'enableRestriction'
+              description: |
+                Whether to restrict API calls within the Service Perimeter to the
+                list of APIs specified in 'allowedServices'.
+            - !ruby/object:Api::Type::Array
+              name: 'allowedServices'
+              description: |
+                The list of APIs usable within the Service Perimeter.
+                Must be empty unless `enableRestriction` is True.
+              item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: 'spec'
+        description: |
+          Proposed (or dry run) ServicePerimeter configuration.
+          This configuration allows to specify and test ServicePerimeter configuration
+          without enforcing actual access restrictions. Only allowed to be set when
+          the `useExplicitDryRunSpec` flag is set.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'resources'
+            description: |
+              A list of GCP resources that are inside of the service perimeter.
+              Currently only projects are allowed.
+              Format: projects/{project_number}
+            at_least_one_of:
+              - status.0.resources
+              - status.0.access_levels
+              - status.0.restricted_services
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            name: 'accessLevels'
+            description: |
+              A list of AccessLevel resource names that allow resources within
+              the ServicePerimeter to be accessed from the internet.
+              AccessLevels listed must be in the same policy as this
+              ServicePerimeter. Referencing a nonexistent AccessLevel is a
+              syntax error. If no AccessLevel names are listed, resources within
+              the perimeter can only be accessed via GCP calls with request
+              origins within the perimeter. For Service Perimeter Bridge, must
+              be empty.
+
+              Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
+            at_least_one_of:
+              - status.0.resources
+              - status.0.access_levels
+              - status.0.restricted_services
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            name: 'restrictedServices'
+            description: |
+              GCP services that are subject to the Service Perimeter
+              restrictions. Must contain a list of services. For example, if
+              `storage.googleapis.com` is specified, access to the storage
+              buckets inside the perimeter must meet the perimeter's access
+              restrictions.
+            at_least_one_of:
+              - status.0.resources
+              - status.0.access_levels
+              - status.0.restricted_services
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::NestedObject
+            name: 'vpcAccessibleServices'
+            description: |
+              Specifies how APIs are allowed to communicate within the Service
+              Perimeter.
+            properties:
+            - !ruby/object:Api::Type::Boolean
+              name: 'enableRestriction'
+              description: |
+                Whether to restrict API calls within the Service Perimeter to the
+                list of APIs specified in 'allowedServices'.
+            - !ruby/object:Api::Type::Array
+              name: 'allowedServices'
+              description: |
+                The list of APIs usable within the Service Perimeter.
+                Must be empty unless `enableRestriction` is True.
+              item_type: Api::Type::String
+      - !ruby/object:Api::Type::Boolean
+        name: 'useExplicitDryRunSpec'
+        description: |
+          Use explicit dry run spec flag. Ordinarily, a dry-run spec implicitly exists
+          for all Service Perimeters, and that spec is identical to the status for those
+          Service Perimeters. When this flag is set, it inhibits the generation of the
+          implicit spec, thereby allowing the user to explicitly provide a
+          configuration ("spec") to use in a dry-run version of the Service Perimeter.
+          This allows the user to test changes to the enforced config ("status") without
+          actually enforcing them. This testing is done through analyzing the differences
+          between currently enforced and suggested restrictions. useExplicitDryRunSpec must
+          bet set to True if any of the fields in the spec are set to non-default values.
   - !ruby/object:Api::Resource
     name: 'ServicePerimeterResource'
     create_url: "{{perimeter_name}}"

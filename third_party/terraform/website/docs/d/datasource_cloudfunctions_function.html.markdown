@@ -51,8 +51,11 @@ exported:
 * `trigger_http` - If function is triggered by HTTP, this boolean is set.
 * `event_trigger` - A source that fires events in response to a condition in another service. Structure is documented below.
 * `https_trigger_url` - If function is triggered by HTTP, trigger URL is set here.
+* `ingress_settings` - Controls what traffic can reach the function.
 * `labels` - A map of labels applied to this function.
 * `service_account_email` - The service account email to be assumed by the cloud function.
+* `vpc_connector` - The VPC Network Connector that this cloud function can connect to. 
+* `vpc_connector_egress_settings` - The egress settings for the connector, controlling what traffic is diverted through it.
 
 The `event_trigger` block contains:
 

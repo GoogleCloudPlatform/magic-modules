@@ -2,3 +2,4 @@ gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gc
 gcp_location = attribute(:gcp_location, default: '<%= external_attribute('gcp_location') -%>', description: 'GCP location')
 gcp_kms_key_ring_policy_name = attribute(:gcp_kms_key_ring_policy_name, default: '<%= external_attribute('gcp_kms_key_ring_policy_name') -%>', description: 'Key ring name')
 gcp_enable_privileged_resources = attribute(:gcp_enable_privileged_resources, default: '<%= external_attribute('gcp_enable_privileged_resources') -%>', description: 'If we are running tests with escalated permissions(required for this test)')
+gcp_organization_id = attribute(:gcp_organization_id, default: <%= external_attribute('gcp_organization_id') -%>, description: 'The identifier of the organization')
