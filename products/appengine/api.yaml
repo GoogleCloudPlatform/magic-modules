@@ -215,8 +215,9 @@ objects:
     name: 'StandardAppVersion'
     description: |
       Standard App Version resource to create a new version of standard GAE Application.
+      Learn about the differences between the standard environment and the flexible environment
+      at https://cloud.google.com/appengine/docs/the-appengine-environments.
       Currently supporting Zip and File Containers.
-      Currently does not support async operation checking.
     collection_url_key: 'versions'
     base_url: 'apps/{{project}}/services/{{service}}/versions'
     delete_url: 'apps/{{project}}/services/{{service}}/versions/{{version_id}}'
@@ -401,8 +402,8 @@ objects:
         name: 'deployment'
         description: |
            Code and application artifacts that make up this version.
-        required: false
-        properties:      
+        required: true
+        properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'zip'
             description: 'Zip File'
@@ -457,8 +458,96 @@ objects:
         name: 'instanceClass'
         description: |
           Instance class that is used to run this version. Valid values are
-          AutomaticScaling F1, F2, F4, F4_1G
-          (Only AutomaticScaling is supported at the moment)
+          AutomaticScaling: F1, F2, F4, F4_1G
+          BasicScaling or ManualScaling: B1, B2, B4, B4_1G, B8
+          Defaults to F1 for AutomaticScaling and B2 for ManualScaling and BasicScaling. If no scaling is specified, AutomaticScaling is chosen.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'automaticScaling'
+        description: |
+          Automatic scaling is based on request rate, response latencies, and other application metrics.
+        exactly_one_of:
+          - automatic_scaling
+          - basic_scaling
+          - manual_scaling
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'maxConcurrentRequests'
+            description: |
+              Number of concurrent requests an automatic scaling instance can accept before the scheduler spawns a new instance.
+
+              Defaults to a runtime-specific value.
+          - !ruby/object:Api::Type::Integer
+            name: 'maxIdleInstances'
+            description: |
+              Maximum number of idle instances that should be maintained for this version.
+          - !ruby/object:Api::Type::String
+            name: 'maxPendingLatency'
+            description: |
+              Maximum amount of time that a request should wait in the pending queue before starting a new instance to handle it.
+          - !ruby/object:Api::Type::Integer
+            name: 'minIdleInstances'
+            description: |
+              Minimum number of idle instances that should be maintained for this version. Only applicable for the default version of a service.
+          - !ruby/object:Api::Type::String
+            name: 'minPendingLatency'
+            description: |
+              Minimum amount of time a request should wait in the pending queue before starting a new instance to handle it.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'standardSchedulerSettings'
+            description: |
+              Scheduler settings for standard environment.
+            properties:
+              - !ruby/object:Api::Type::Double
+                name: 'targetCpuUtilization'
+                description: |
+                  Target CPU utilization ratio to maintain when scaling. Should be a value in the range [0.50, 0.95], zero, or a negative value.
+              - !ruby/object:Api::Type::Double
+                name: 'targetThroughputUtilization'
+                description: |
+                  Target throughput utilization ratio to maintain when scaling. Should be a value in the range [0.50, 0.95], zero, or a negative value.
+              - !ruby/object:Api::Type::Integer
+                name: 'minInstances'
+                description: |
+                  Minimum number of instances to run for this version. Set to zero to disable minInstances configuration.
+              - !ruby/object:Api::Type::Integer
+                name: 'maxInstances'
+                description: |
+                  Maximum number of instances to run for this version. Set to zero to disable maxInstances configuration.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'basicScaling'
+        description: |
+          Basic scaling creates instances when your application receives requests. Each instance will be shut down when the application becomes idle. Basic scaling is ideal for work that is intermittent or driven by user activity.
+        exactly_one_of:
+          - automatic_scaling
+          - basic_scaling
+          - manual_scaling
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'idleTimeout'
+            default_value: 900s
+            description: |
+              Duration of time after the last request that an instance must wait before the instance is shut down.
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s". Defaults to 900s.
+          - !ruby/object:Api::Type::Integer
+            name: 'maxInstances'
+            required: true
+            description: |
+              Maximum number of instances to create for this version. Must be in the range [1.0, 200.0].
+      - !ruby/object:Api::Type::NestedObject
+        name: 'manualScaling'
+        description: |
+          A service with manual scaling runs continuously, allowing you to perform complex initialization and rely on the state of its memory over time.
+        exactly_one_of:
+          - automatic_scaling
+          - basic_scaling
+          - manual_scaling
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'instances'
+            required: true
+            description: |
+              Number of instances to assign to the service at the start. This number can later be altered by using the Modules API set_num_instances() function.
+
   # StandardAppVersion and FlexibleAppVersion use the same API endpoint (apps.services.versions)
   # They are split apart as some of the fields will are necessary for one and not the other, and
   # other fields may have different defaults.  However, some fields are the same.  If fixing a bug

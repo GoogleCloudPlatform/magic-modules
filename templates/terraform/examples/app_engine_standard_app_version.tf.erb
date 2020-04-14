@@ -17,6 +17,13 @@ resource "google_app_engine_standard_app_version" "<%= ctx[:primary_resource_id]
     port = "8080"
   }
 
+  automatic_scaling {
+    max_concurrent_requests = 10
+    standard_scheduler_settings {
+      target_cpu_utilization = 0.5
+    }
+  }
+
   delete_service_on_destroy = true
 }
 
@@ -37,6 +44,10 @@ resource "google_app_engine_standard_app_version" "myapp_v2" {
 
   env_variables = {
     port = "8080"
+  }
+
+  basic_scaling {
+    max_instances = 5
   }
 
   noop_on_destroy = true
