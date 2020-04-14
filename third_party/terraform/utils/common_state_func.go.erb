@@ -1,0 +1,14 @@
+<% autogen_exception -%>
+// Contains common diff suppress functions.
+
+package google
+
+import (
+	"crypto/sha256"
+	"encoding/hex"
+)
+
+func sha256HashState(val interface{}) string {
+	hash := sha256.Sum256([]byte(val.(string)))
+	return hex.EncodeToString(hash[:])
+}
