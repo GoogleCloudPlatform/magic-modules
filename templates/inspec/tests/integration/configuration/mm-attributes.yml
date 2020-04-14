@@ -438,3 +438,9 @@ compute_image:
   name: inspec-image
   source: https://storage.googleapis.com/bosh-cpi-artifacts/bosh-stemcell-3262.4-google-kvm-ubuntu-trusty-go_agent-raw.tar.gz
  
+security_policy:
+  name: sec-policy
+  action: deny(403)
+  priority: "1000"
+  ip_range: "9.9.9.0/24"
+  description: my description

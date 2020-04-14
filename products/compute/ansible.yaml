@@ -51,6 +51,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  SecurityPolicy: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
@@ -328,6 +330,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RouterBgpPeer: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  SecurityPolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
