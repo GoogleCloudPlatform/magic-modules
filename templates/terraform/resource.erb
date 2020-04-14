@@ -594,7 +594,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             project = parts[1]
         }
 <%      end -%>
-<%      if object.async.is_a? Api::OpAsync-%>
+<%      if object.async&.allow?('update') && object.async.is_a?(Api::OpAsync) -%>
         res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 <%      else -%>
         _, err = sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
@@ -692,7 +692,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         project = parts[1]
     }
 <%  end -%>
-<%  if object.async.is_a? Api::OpAsync-%>
+<%  if object.async&.allow?('update') && object.async.is_a?(Api::OpAsync) -%>
     res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 <%  else -%>
     _, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)

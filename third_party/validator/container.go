@@ -178,6 +178,14 @@ func GetContainerClusterApiObject(d TerraformResourceData, config *Config) (map[
 	} else if v, ok := d.GetOkExists("private_cluster_config"); !isEmptyValue(reflect.ValueOf(privateClusterConfigProp)) && (ok || !reflect.DeepEqual(v, privateClusterConfigProp)) {
 		obj["privateClusterConfig"] = privateClusterConfigProp
 	}
+
+	workloadIdentityConfigProp, err := expandContainerClusterWorkloadIdentityConfig(d.Get("workload_identity_config"), d, config)
+	if err != nil {
+		return nil, err
+	} else if v, ok := d.GetOkExists("workload_identity_config"); !isEmptyValue(reflect.ValueOf(workloadIdentityConfigProp)) && (ok || !reflect.DeepEqual(v, workloadIdentityConfigProp)) {
+		obj["workloadIdentityConfig"] = workloadIdentityConfigProp
+	}
+
 	clusterIpv4CidrProp, err := expandContainerClusterClusterIpv4Cidr(d.Get("cluster_ipv4_cidr"), d, config)
 	if err != nil {
 		return nil, err
@@ -708,6 +716,28 @@ func expandContainerClusterLoggingService(v interface{}, d TerraformResourceData
 }
 
 func expandContainerClusterMonitoringService(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandContainerClusterWorkloadIdentityConfig(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	transformedWorkloadPool, err := expandContainerClusterWorkloadIdentityConfigWorkloadPool(original["identity_namespace"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedWorkloadPool); val.IsValid() && !isEmptyValue(val) {
+		transformed["workloadPool"] = transformedWorkloadPool
+	}
+	return transformed, nil
+}
+
+func expandContainerClusterWorkloadIdentityConfigWorkloadPool(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	return v, nil
 }
 

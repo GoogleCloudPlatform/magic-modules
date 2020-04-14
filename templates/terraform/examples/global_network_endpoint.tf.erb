@@ -1,0 +1,18 @@
+resource "google_compute_global_network_endpoint" "<%= ctx[:primary_resource_id] %>" {
+  global_network_endpoint_group = google_compute_network_endpoint_group.neg.name
+
+  fqdn       = "www.example.com"
+  port       = google_compute_network_endpoint_group.neg.default_port
+  ip_address = google_compute_instance.endpoint-instance.network_interface[0].network_ip
+}
+
+resource "google_compute_global_network_endpoint_group" "group" {
+  name         = "<%= ctx[:vars]['neg_name'] %>"
+  network      = google_compute_network.default.self_link
+  default_port = "90"
+}
+
+resource "google_compute_network" "default" {
+  name                    = "<%= ctx[:vars]['network_name'] %>"
+  auto_create_subnetworks = false
+}

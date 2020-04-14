@@ -106,6 +106,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         override_name: "network_name"
   NetworkEndpoint: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  GlobalNetworkEndpoint: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  GlobalNetworkEndpointGroup: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   PacketMirroring:  !ruby/object:Overrides::Inspec::ResourceOverride

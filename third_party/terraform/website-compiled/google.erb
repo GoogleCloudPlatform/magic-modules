@@ -148,6 +148,14 @@
       <li<%%= sidebar_current("docs-google-datasource-dns-managed-zone") %>>
       <a href="/docs/providers/google/d/dns_managed_zone.html">google_dns_managed_zone</a>
       </li>
+<% unless version == 'ga' -%>
+      <li<%%= sidebar_current("docs-google-datasource-firebase-web-app") %>>
+          <a href="/docs/providers/google/d/datasource_firebase_web_app.html">google_firebase_web_app</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-datasource-firebase-web-app-config") %>>
+          <a href="/docs/providers/google/d/datasource_firebase_web_app_config.html">google_firebase_web_app_config</a>
+      </li>
+<% end  -%>
       <li<%%= sidebar_current("docs-google-datasource-iam-policy") %>>
         <a href="/docs/providers/google/d/google_iam_policy.html">google_iam_policy</a>
       </li>
@@ -633,6 +641,14 @@
       <a href="/docs/providers/google/r/compute_global_forwarding_rule.html">google_compute_global_forwarding_rule</a>
       </li>
 
+      <li<%%= sidebar_current("docs-google-compute-global-network-endpoint") %>>
+      <a href="/docs/providers/google/r/compute_global_network_endpoint.html">google_compute_global_network_endpoint</a>
+      </li>
+
+      <li<%%= sidebar_current("docs-google-compute-global-network-endpoint-group") %>>
+      <a href="/docs/providers/google/r/compute_global_network_endpoint_group.html">google_compute_global_network_endpoint_group</a>
+      </li>
+
 <% unless version == 'ga' %>
       <li<%%= sidebar_current("docs-google-compute-ha-vpn-gateway") %>>
       <a href="/docs/providers/google/r/compute_ha_vpn_gateway.html">google_compute_ha_vpn_gateway</a>
@@ -1066,6 +1082,11 @@
     <ul class="nav">
       <li<%%= sidebar_current("docs-google-firebase-project-location") %>>
           <a href="/docs/providers/google/r/firebase_project_location.html">google_firebase_project_location</a>
+      </li>
+    </ul>
+    <ul class="nav">
+      <li<%%= sidebar_current("docs-google-firebase-web-app") %>>
+          <a href="/docs/providers/google/r/firebase_web_app.html">google_firebase_web_app</a>
       </li>
     </ul>
     </li>
