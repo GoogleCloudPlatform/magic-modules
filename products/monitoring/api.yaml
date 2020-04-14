@@ -1021,7 +1021,7 @@ objects:
         - calendar_period
       description: |
         A rolling time period, semantically "in the past X days".
-        Must be an integer multiple of 1 day no larger than 30 days.
+        Must be between 1 to 30 days, inclusive.
     - !ruby/object:Api::Type::Enum
       name: calendarPeriod
       exactly_one_of:
