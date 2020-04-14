@@ -1738,6 +1738,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           {{description}}
           If it is not provided, the provider region is used.
+  SecurityPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
   Snapshot: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 5
