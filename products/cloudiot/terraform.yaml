@@ -83,21 +83,40 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'pubsub_topic_name'
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       stateNotificationConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        # Excluding this because the original (manually-generated) implementation
+        # wrongly set this to be a Map, instead of a NestedObject. To avoid breaking
+        # changes, we observe that behaviour by excluding this field and adding a
+        # corresponding custom element (of type Map) to the schema. When we're
+        # ready to introduce this breaking change, remove this "exclude" directive
+        # along with the corresponding custom schema element.
+        exclude: true
         name: 'state_notification_config'
       stateNotificationConfig.pubsubTopicName: !ruby/object:Overrides::Terraform::PropertyOverride
+        # See the comment on stateNotificationConfig.exclude
+        exclude: true
         name: 'pubsub_topic_name'
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       mqttConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        # See the comment on stateNotificationConfig.exclude
+        exclude: true
         name: 'mqtt_config'
         default_from_api: true
       mqttConfig.mqttEnabledState: !ruby/object:Overrides::Terraform::PropertyOverride
+        # See the comment on stateNotificationConfig.exclude
+        exclude: true
         name: 'mqtt_enabled_state'
       httpConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        # See the comment on stateNotificationConfig.exclude
+        exclude: true
         name: 'http_config'
         default_from_api: true
       httpConfig.httpEnabledState: !ruby/object:Overrides::Terraform::PropertyOverride
+        # See the comment on stateNotificationConfig.exclude
+        exclude: true
         name: 'http_enabled_state'
       credentials.publicKeyCertificate: !ruby/object:Overrides::Terraform::PropertyOverride
+        # See the comment on stateNotificationConfig.exclude
+        exclude: true
         name: 'public_key_certificate'
       credentials.publicKeyCertificate.x509Details: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'x509_details'
