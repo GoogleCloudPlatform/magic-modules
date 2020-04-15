@@ -1,0 +1,83 @@
+<% autogen_exception -%>
+package google
+<% unless version == 'ga' -%>
+
+import (
+	"fmt"
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+)
+
+func TestAccServiceDirectoryService_serviceDirectoryServiceUpdateExample(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(10),
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckServiceDirectoryServiceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccServiceDirectoryService_basic(context),
+			},
+			{
+				ResourceName:      "google_service_directory_service.example",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccServiceDirectoryService_update(context),
+			},
+			{
+				ResourceName:      "google_service_directory_service.example",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccServiceDirectoryService_basic(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_service_directory_namespace" "example" {
+  namespace_id = "tf-test-example-namespace%{random_suffix}"
+  location     = "us-central1"
+}
+
+resource "google_service_directory_service" "example" {
+  service_id = "tf-test-example-service%{random_suffix}"
+  namespace  = google_service_directory_namespace.example.id
+
+  metadata = {
+	stage  = "prod"
+	region = "us-central1"
+  }
+}
+`, context)
+}
+
+func testAccServiceDirectoryService_update(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_service_directory_namespace" "example" {
+  namespace_id = "tf-test-example-namespace%{random_suffix}"
+  location     = "us-central1"
+}
+
+resource "google_service_directory_service" "example" {
+  service_id = "tf-test-example-service%{random_suffix}"
+  namespace  = google_service_directory_namespace.example.id
+
+  metadata = {
+    stage  = "dev"
+  }
+}
+`, context)
+}
+<% end -%>

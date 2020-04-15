@@ -25,8 +25,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       location: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/service_directory_namespace.go.erb
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["{{namespace}}/services/{{service_id}}"]
+    import_format: ["projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "service_directory_service_basic"
@@ -38,8 +40,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       namespace: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/service_directory_service.go.erb
   Endpoint: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["{{service}}/endpoints/{{name}}"]
+    import_format: ["projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}/endpoints/{{endpoint_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "service_directory_endpoint_basic"
@@ -52,6 +56,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       service: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/service_directory_endpoint.go.erb
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.

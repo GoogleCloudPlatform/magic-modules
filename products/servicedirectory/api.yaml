@@ -58,7 +58,8 @@ objects:
       - !ruby/object:Api::Type::String
         name: namespaceId
         description: |
-          The Resource ID must be 1-63 characters long, and comply with RFC1035.
+          The Resource ID must be 1-63 characters long, including digits,
+          lowercase letters or the hyphen character.
         required: true
         input: true
         url_param_only: true
@@ -105,7 +106,8 @@ objects:
       - !ruby/object:Api::Type::String
         name: serviceId
         description: |
-          The Resource ID must be 1-63 characters long, and comply with RFC1035.
+          The Resource ID must be 1-63 characters long, including digits,
+          lowercase letters or the hyphen character.
         required: true
         input: true
         url_param_only: true
@@ -147,7 +149,8 @@ objects:
       - !ruby/object:Api::Type::String
         name: endpointId
         description: |
-          The Resource ID must be 1-63 characters long, and comply with RFC1035.
+          The Resource ID must be 1-63 characters long, including digits,
+          lowercase letters or the hyphen character.
         required: true
         input: true
         url_param_only: true

@@ -28,7 +28,7 @@ package google
     client_name_camel = client_name.camelize(:lower)
     client_name_pascal = client_name.camelize(:upper)
     client_name_lower = client_name.downcase
-    has_project = object.base_url.include?('{{project}}') || object.create_url && object.create_url.include?('{{project}}')
+    has_project = object.base_url.include?('{{project}}') || (object.create_url && object.create_url.include?('{{project}}'))
     has_region = object.base_url.include?('{{region}}') && object.parameters.any?{ |p| p.name == 'region' && p.ignore_read }
     # In order of preference, use TF override,
     # general defined timeouts, or default Timeouts

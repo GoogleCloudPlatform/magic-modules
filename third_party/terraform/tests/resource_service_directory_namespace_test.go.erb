@@ -1,0 +1,74 @@
+<% autogen_exception -%>
+package google
+<% unless version == 'ga' -%>
+
+import (
+	"fmt"
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+)
+
+func TestAccServiceDirectoryNamespace_serviceDirectoryNamespaceUpdateExample(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(10),
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckServiceDirectoryNamespaceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccServiceDirectoryNamespace_basic(context),
+			},
+			{
+				ResourceName:      "google_service_directory_namespace.example",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccServiceDirectoryNamespace_update(context),
+			},
+			{
+				ResourceName:      "google_service_directory_namespace.example",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccServiceDirectoryNamespace_basic(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_service_directory_namespace" "example" {
+  namespace_id = "tf-test-example-namespace%{random_suffix}"
+  location     = "us-central1"
+
+  labels = {
+    key = "value"
+    foo = "bar"
+  }
+}
+`, context)
+}
+
+func testAccServiceDirectoryNamespace_update(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_service_directory_namespace" "example" {
+  namespace_id = "tf-test-example-namespace%{random_suffix}"
+  location     = "us-central1"
+
+  labels = {
+    key2 = "value2"
+    foo2 = "bar2"
+  }
+}
+`, context)
+}
+<% end -%>
