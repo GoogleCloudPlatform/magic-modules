@@ -18,7 +18,7 @@ resource "google_bigquery_job" "<%= ctx[:primary_resource_id] %>" {
   }
 
   query {
-    query = "SELECT country_name from \"bigquery-public-data.utility_us.country_code_iso\""
+    query = "SELECT state FROM [lookerdata:cdc.project_tycho_reports]"
 
     destination_table {
       project_id = google_bigquery_table.foo.project

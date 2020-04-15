@@ -98,11 +98,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           job_id: "job_query"
           account_name: "bqowner"
+        ignore_read_extra:
+          - "etag"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_load"
         primary_resource_id: "job"
         vars:
           job_id: "job_load"
+        ignore_read_extra:
+          - "etag"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_copy"
         primary_resource_id: "job"
@@ -111,12 +115,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           account_name: "bqowner"
           key_name: "example-key"
           keyring_name: "example-keyring"
+        test_env_vars:
+          project: :PROJECT_NAME
+        ignore_read_extra:
+          - "etag"
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_extract"
         primary_resource_id: "job"
         vars:
           job_id: "job_extract"
           account_name: "bqowner"
+        ignore_read_extra:
+          - "etag"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -125,6 +135,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       configuration.load.skipLeadingRows: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntAtLeast(0)'
+      configuration.load.fieldDelimiter: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      configuration.load.quote: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      configuration.extract.fieldDelimiter: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       configuration.extract.destinationFormat: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       jobReference: !ruby/object:Overrides::Terraform::PropertyOverride

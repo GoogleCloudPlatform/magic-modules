@@ -691,7 +691,6 @@ objects:
                   the string to ISO-8859-1 encoding, and then uses the first byte of the encoded string to split the
                   data in its raw, binary state. BigQuery also supports the escape sequence "\t" to specify a tab separator.
                   The default value is a comma (',').
-                default_value: ','
               - !ruby/object:Api::Type::Integer
                 name: 'skipLeadingRows'
                 description: |
@@ -718,7 +717,6 @@ objects:
                   and then uses the first byte of the encoded string to split the data in its raw, binary state.
                   The default value is a double-quote ('"'). If your data does not contain quoted sections, set the property value to an empty string.
                   If your data contains quoted newline characters, you must also set the allowQuotedNewlines property to true.
-                default_value: '\"'
               - !ruby/object:Api::Type::Integer
                 name: 'maxBadRecords'
                 description: |
@@ -913,7 +911,6 @@ objects:
                 description: |
                   When extracting data in CSV format, this defines the delimiter to use between fields in the exported data.
                   Default is ','
-                default_value: ','
               - !ruby/object:Api::Type::String
                 name: 'destinationFormat'
                 description: |

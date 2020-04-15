@@ -28,6 +28,10 @@ resource "google_bigquery_job" "<%= ctx[:primary_resource_id] %>" {
       table_id   = google_bigquery_table.foo.table_id
     }
 
+    skip_leading_rows = 1
+    schema_update_options = ["ALLOW_FIELD_RELAXATION", "ALLOW_FIELD_ADDITION"]
+
+    write_disposition = "WRITE_APPEND"
     autodetect = true
   }
 }
