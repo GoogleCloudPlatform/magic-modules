@@ -1730,10 +1730,29 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           router_name: "my-router"
           peer_name: "my-router-peer"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_peer_disabled"
+        primary_resource_id: "peer"
+        skip_test: true
+        vars:
+          router_name: "my-router"
+          peer_name: "my-router-peer"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_peer_bfd"
+        primary_resource_id: "peer"
+        skip_test: true
+        vars:
+          router_name: "my-router"
+          peer_name: "my-router-peer"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateRFC1035Name(2, 63)'
+      bfd: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      enable: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/string_to_bool.erb'
+        send_empty_value: true
       interfaceName: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'interface'
       region: !ruby/object:Overrides::Terraform::PropertyOverride
