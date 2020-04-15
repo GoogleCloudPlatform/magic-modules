@@ -2068,6 +2068,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           url_map_name: "url-map"
           backend_service_name: "backend-service"
           http_health_check_name: "http-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "target_http_proxy_https_redirect"
+        primary_resource_id: "default"
+        vars:
+          target_http_proxy_name: "test-https-redirect-proxy"
+          url_map_name: "url-map"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
@@ -2099,6 +2105,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           region_url_map_name: "url-map"
           region_backend_service_name: "backend-service"
           region_health_check_name: "http-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_target_http_proxy_https_redirect"
+        primary_resource_id: "default"
+        vars:
+          region_target_http_proxy_name: "test-https-redirect-proxy"
+          region_url_map_name: "url-map"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
