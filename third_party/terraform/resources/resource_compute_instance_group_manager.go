@@ -758,7 +758,7 @@ func flattenStatefulPolicy(statefulPolicy *computeBeta.StatefulPolicy) []map[str
 	result := make([]map[string]interface{}, 0, len(statefulPolicy.PreservedState.Disks))
 	for deviceName, disk := range statefulPolicy.PreservedState.Disks {
 		data := map[string]interface{}{
-			"device_name":   deviceName,
+			"device_name": deviceName,
 			"delete_rule": disk.AutoDelete,
 		}
 
