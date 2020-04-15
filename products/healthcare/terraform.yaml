@@ -88,7 +88,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_hl7_v2_store_basic"
-        skip_test: true
         primary_resource_id: "store"
         vars:
           dataset_name: "example-dataset"
