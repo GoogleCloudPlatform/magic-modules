@@ -8438,7 +8438,7 @@ objects:
       guides:
         'Adding or Resizing Regional Persistent Disks':
           'https://cloud.google.com/compute/docs/disks/regional-persistent-disk'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionDisks'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionDisks'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -10051,7 +10051,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/health-checks'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionHealthChecks'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionHealthChecks'
     description: |
       Health Checks determine whether instances are responsive and able to do work.
       They are an important part of a comprehensive load balancing configuration,
@@ -12896,7 +12896,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionTargetHttpProxies'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionTargetHttpProxies'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -12970,7 +12970,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionTargetHttpsProxies'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionTargetHttpsProxies'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
