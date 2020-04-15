@@ -21,7 +21,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_dataset_basic"
-        skip_test: true
         primary_resource_id: "default"
         vars:
           dataset_name: "example-dataset"
@@ -44,7 +43,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_fhir_store_basic"
-        skip_test: true
         primary_resource_id: "default"
         vars:
           dataset_name: "example-dataset"
@@ -66,7 +64,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_dicom_store_basic"
-        skip_test: true
         primary_resource_id: "default"
         vars:
           dataset_name: "example-dataset"
