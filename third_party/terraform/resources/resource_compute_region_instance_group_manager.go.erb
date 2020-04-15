@@ -1,4 +1,5 @@
-// <% autogen_exception -%>
+
+ <% autogen_exception -%>
 
 package google
 
@@ -265,8 +266,8 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
-
 <% unless version == 'ga' -%>
+
 			"stateful_disk": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -286,7 +287,6 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
-
 <% end -%>
 		},
 	}
@@ -427,6 +427,7 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	if err := d.Set("update_policy", flattenRegionUpdatePolicy(manager.UpdatePolicy)); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
+
 <% unless version == 'ga' -%>
 	if err = d.Set("stateful_disk", flattenStatefulPolicy(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_disk in state: %s", err.Error())
