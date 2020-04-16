@@ -215,7 +215,7 @@ The `google_sheets_options` block supports:
 The `hive_partitioning_options` block supports:
 
 * `mode` (Optional) - When set, what mode of hive partitioning to use when
-    reading data. Two modes are supported.
+    reading data. The following modes are supported.
     * AUTO: automatically infer partition key name(s) and type(s).
     * STRINGS: automatically infer partition key name(s). All types are
       Not all storage formats support hive partitioning. Requesting hive
