@@ -54,7 +54,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 
 <%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers:    testAccProvidersOiCS,
@@ -94,7 +94,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 
 <%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers: testAccProvidersOiCS,
@@ -126,7 +126,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 	context["service_account"] = getTestServiceAccountFromEnv(t)
 <% end -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers: testAccProvidersOiCS,
@@ -166,7 +166,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 
 <%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers: testAccProvidersOiCS,
@@ -194,7 +194,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *
 
 <%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers: testAccProvidersOiCS,
@@ -230,7 +230,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 
 <%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers: testAccProvidersOiCS,
@@ -258,7 +258,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *t
 
 <%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers: testAccProvidersOiCS,
@@ -297,7 +297,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 	context["service_account"] = getTestServiceAccountFromEnv(t)
 <% end -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers: testAccProvidersOiCS,
