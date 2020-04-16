@@ -422,7 +422,7 @@ objects:
               A Cloud KMS key that will be used to encrypt objects inserted into this bucket,
               if no encryption method is specified.
       - !ruby/object:Api::Type::NestedObject
-        name: 'rententionPolicy'
+        name: 'retentionPolicy'
         description: |
           Retention policy for the bucket
         properties:
