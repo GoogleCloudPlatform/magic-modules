@@ -7,7 +7,6 @@ describe google_storage_bucket(name: <%= doc_generation ? "bucket-name" : "\"ins
   its('storage_class') { should eq "STANDARD" }
   its('labels') { should include("key" => "value") }
   its('retention_policy.retention_period') { should cmp 1000 }
-  its('retention_policy.is_locked') { should be false }
 end
 
 describe google_storage_bucket(name: "nonexistent") do
