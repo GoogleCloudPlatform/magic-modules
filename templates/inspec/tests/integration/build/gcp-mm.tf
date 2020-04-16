@@ -656,6 +656,10 @@ resource "google_storage_bucket" "bucket" {
   labels = {
     "key" = "value"
   }
+
+  retention_policy {
+    retention_period = 1000
+  }
 }
 
 resource "google_storage_bucket_object" "object" {
