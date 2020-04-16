@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: BigQuery
+name: Bigquery
 display_name: BigQuery
 versions:
   - !ruby/object:Api::Product::Version
@@ -387,18 +387,12 @@ objects:
     name: 'Job'
     kind: 'bigquery#job'
     base_url: projects/{{project}}/jobs
-    delete_url: projects/{{project}}/jobs/{{job_id}}/cancel
-    delete_verb: :POST
     self_link: projects/{{project}}/jobs/{{job_id}}
     input: true
     description: |
       Jobs are actions that BigQuery runs on your behalf to load data, export data, query data, or copy data.
+      Once a BigQuery job is created, it cannot be changed or deleted.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'etag'
-        description: |
-          A hash of the resource.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'id'
         output: true
@@ -975,12 +969,12 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'projectId'
             description: |
-              The ID of the project containing this job.
+              The project ID of the project containing this job.
             required: true
           - !ruby/object:Api::Type::String
             name: 'jobId'
             description: |
-              The ID of the job.
+              The ID of the job. The ID must contain only letters (a-z, A-Z), numbers (0-9), underscores (_), or dashes (-). The maximum length is 1,024 characters.
             required: true
           - !ruby/object:Api::Type::String
             name: 'location'
