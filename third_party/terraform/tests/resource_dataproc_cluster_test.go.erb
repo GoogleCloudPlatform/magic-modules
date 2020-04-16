@@ -372,7 +372,7 @@ func TestAccDataprocCluster_updatable(t *testing.T) {
 			{
 				Config: testAccDataprocCluster_updatable(rnd, 2, 0),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDataprocClusterExists("google_dataproc_cluster.updatable", &cluster),
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.updatable", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.updatable", "cluster_config.0.master_config.0.num_instances", "1"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.updatable", "cluster_config.0.worker_config.0.num_instances", "2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.updatable", "cluster_config.0.preemptible_worker_config.0.num_instances", "0")),

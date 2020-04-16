@@ -1794,7 +1794,7 @@ func TestAccComputeInstance_resourcePolicyCollocate(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_resourcePolicyCollocate(instanceName),
+				Config: testAccComputeInstance_resourcePolicyCollocate(instanceName, randString(t, 10)),
 			},
 			computeInstanceImportStep("us-east4-b", instanceName, []string{"allow_stopping_for_update"}),
 		},
@@ -4538,7 +4538,7 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
-func testAccComputeInstance_resourcePolicyCollocate(instance string) string {
+func testAccComputeInstance_resourcePolicyCollocate(instance, suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-9"
@@ -4610,5 +4610,5 @@ resource "google_compute_resource_policy" "foo" {
   }
 }
 
-`, instance, instance, acctest.RandString(10))
+`, instance, instance, suffix)
 }
