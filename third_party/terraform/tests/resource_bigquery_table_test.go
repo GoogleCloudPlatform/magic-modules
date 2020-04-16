@@ -392,25 +392,25 @@ resource "google_storage_bucket_object" "test" {
 }
 
 resource "google_bigquery_dataset" "test" {
-		dataset_id = "%s"
-	}
+        dataset_id = "%s"
+}
 
-	resource "google_bigquery_table" "test" {
-		table_id   = "%s"
-		dataset_id = google_bigquery_dataset.test.dataset_id
+resource "google_bigquery_table" "test" {
+	table_id   = "%s"
+	dataset_id = google_bigquery_dataset.test.dataset_id
 
-		external_data_configuration {
-		        source_format = "CSV"
-			autodetect = true
-			source_uris= ["gs://${google_storage_bucket.test.name}/*"]
+	external_data_configuration {
+            source_format = "CSV"
+            autodetect = true
+            source_uris= ["gs://${google_storage_bucket.test.name}/*"]
 
-			hive_partitioning_options {
-			    mode = "AUTO"
-			    source_uri_prefix = "gs://${google_storage_bucket.test.name}/"
-			}
+            hive_partitioning_options {
+                mode = "AUTO"
+                source_uri_prefix = "gs://${google_storage_bucket.test.name}/"
+	    }
 
-		}
-		depends_on = ["google_storage_bucket_object.test"]
+        }
+	depends_on = ["google_storage_bucket_object.test"]
 }
 `, bucketName, datasetID, tableID)
 }
