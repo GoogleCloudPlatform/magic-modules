@@ -333,6 +333,7 @@ objects:
             at_least_one_of:
               - parser_config.0.allow_null_header
               - parser_config.0.segment_terminator
+              - parser_config.0.schema
             description: |
               Determines whether messages with no header are allowed.
           - !ruby/object:Api::Type::String
@@ -340,11 +341,20 @@ objects:
             at_least_one_of:
               - parser_config.0.allow_null_header
               - parser_config.0.segment_terminator
+              - parser_config.0.schema
             description: |
               Byte(s) to be used as the segment terminator. If this is unset, '\r' will be used as segment terminator.
 
               A base64-encoded string.
-
+          - !ruby/object:Api::Type::String
+            name: schema
+            at_least_one_of:
+              - parser_config.0.allow_null_header
+              - parser_config.0.segment_terminator
+              - parser_config.0.schema
+            description: |
+              JSON encoded string for schemas used to parse messages in this
+              store if schematized parsing is desired.
       - !ruby/object:Api::Type::KeyValuePairs
         name: labels
         required: false
