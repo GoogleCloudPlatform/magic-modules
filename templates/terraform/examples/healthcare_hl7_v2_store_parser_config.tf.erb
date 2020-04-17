@@ -6,84 +6,86 @@ resource "google_healthcare_hl7_v2_store" "default" {
   parser_config {
     allow_null_header  = false
     segment_terminator = "Jw=="
-    schema = jsonencode({
-      "schemas": [{
-        "messageSchemaConfigs": {
-          "ADT_A01": {
-            "name": "ADT_A01",
-            "minOccurs": 1,
-            "maxOccurs": 1,
-            "members": [{
-                "segment": {
-                  "type": "MSH",
-                  "minOccurs": 1,
-                  "maxOccurs": 1
+    schema = <<EOF
+{
+  "schemas": [{
+    "messageSchemaConfigs": {
+      "ADT_A01": {
+        "name": "ADT_A01",
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "members": [{
+            "segment": {
+              "type": "MSH",
+              "minOccurs": 1,
+              "maxOccurs": 1
+            }
+          },
+          {
+            "segment": {
+              "type": "EVN",
+              "minOccurs": 1,
+              "maxOccurs": 1
+            }
+          },
+          {
+            "segment": {
+              "type": "PID",
+              "minOccurs": 1,
+              "maxOccurs": 1
+            }
+          },
+          {
+            "segment": {
+              "type": "ZPD",
+              "minOccurs": 1,
+              "maxOccurs": 1
+            }
+          },
+          {
+            "segment": {
+              "type": "OBX"
+            }
+          },
+          {
+            "group": {
+              "name": "PROCEDURE",
+              "members": [{
+                  "segment": {
+                    "type": "PR1",
+                    "minOccurs": 1,
+                    "maxOccurs": 1
+                  }
+                },
+                {
+                  "segment": {
+                    "type": "ROL"
+                  }
                 }
-              },
-              {
-                "segment": {
-                  "type": "EVN",
-                  "minOccurs": 1,
-                  "maxOccurs": 1
-                }
-              },
-              {
-                "segment": {
-                  "type": "PID",
-                  "minOccurs": 1,
-                  "maxOccurs": 1
-                }
-              },
-              {
-                "segment": {
-                  "type": "ZPD",
-                  "minOccurs": 1,
-                  "maxOccurs": 1
-                }
-              },
-              {
-                "segment": {
-                  "type": "OBX"
-                }
-              },
-              {
-                "group": {
-                  "name": "PROCEDURE",
-                  "members": [{
-                      "segment": {
-                        "type": "PR1",
-                        "minOccurs": 1,
-                        "maxOccurs": 1
-                      }
-                    },
-                    {
-                      "segment": {
-                        "type": "ROL"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "segment": {
-                  "type": "PDA",
-                  "maxOccurs": 1
-                }
-              }
-            ]
+              ]
+            }
+          },
+          {
+            "segment": {
+              "type": "PDA",
+              "maxOccurs": 1
+            }
           }
-        }
-      }],
-      "types": [{
-        "type": [{
-            "name": "ZPD",
-            "primitive": "VARIES"
-          }
-
         ]
-      }],
-      "ignoreMinOccurs": true
-    })
+      }
+    }
+  }],
+  "types": [{
+    "type": [{
+        "name": "ZPD",
+        "primitive": "VARIES"
+      }
+
+    ]
+  }],
+  "ignoreMinOccurs": true
+}
+EOF
   }
 }
 
