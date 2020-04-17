@@ -14,7 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Repository: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: projects/{{project}}/locations/{{region}}/repositories/{{name}}
+    id_format: projects/{{project}}/locations/{{region}}/repositories/{{repsitory_id}}
     autogen_async: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       parent_resource_attribute: 'repository'
@@ -25,7 +25,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: 'beta'
         primary_resource_id: "my-repo"
         vars:
-          repository_name: "my-repository"
+          repository_id: "my-repository"
           description: "example docker repository"
       - !ruby/object:Provider::Terraform::Examples
         name: "artifact_registry_repository_iam"
@@ -33,13 +33,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "my-repo"
         vars:
           account_id: "my-account"
-          repository_name: "my-repository"
+          repository_id: "my-repository"
           description: "example docker repository with iam"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
         required: false
         default_from_api: true
+      repository_id: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
