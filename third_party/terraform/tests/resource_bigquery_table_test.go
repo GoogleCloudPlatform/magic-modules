@@ -66,15 +66,15 @@ func TestAccBigQueryTable_Kms(t *testing.T) {
 
 func TestAccBigQueryTable_HivePartitioning(t *testing.T) {
 	t.Parallel()
-	bucketName := testBucketName()
+	bucketName := testBucketName(t)
 	resourceName := "google_bigquery_table.test"
-	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(10))
-	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(10))
+	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigQueryTableDestroy,
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryTableHivePartitioning(bucketName, datasetID, tableID),
