@@ -1,10 +1,4 @@
-resource "google_healthcare_dataset" "dataset" {
-  provider = google-beta
-  name     = "<%= ctx[:vars]['dataset_name'] %>"
-  location = "us-central1"
-}
-
-resource "google_healthcare_hl7_v2_store" "store" {
+resource "google_healthcare_hl7_v2_store" "default" {
   provider = google-beta
   name    = "<%= ctx[:vars]['hl7_v2_store_name'] %>"
   dataset = google_healthcare_dataset.dataset.id
@@ -91,4 +85,10 @@ resource "google_healthcare_hl7_v2_store" "store" {
       "ignoreMinOccurs": true
     })
   }
+}
+
+resource "google_healthcare_dataset" "dataset" {
+  provider = google-beta
+  name     = "<%= ctx[:vars]['dataset_name'] %>"
+  location = "us-central1"
 }
