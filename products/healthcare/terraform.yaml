@@ -85,8 +85,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_hl7_v2_store_basic"
-        min_version: beta
-        primary_resource_id: "store"
+        primary_resource_id: "default"
         vars:
           dataset_name: "example-dataset"
           hl7_v2_store_name: "example-hl7-v2-store"
