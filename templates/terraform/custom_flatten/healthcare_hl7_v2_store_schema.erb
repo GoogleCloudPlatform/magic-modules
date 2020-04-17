@@ -13,6 +13,9 @@
 	# limitations under the License.
 -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+	if v == nil {
+		return nil
+	}
 	b, err := json.Marshal(v)
 	if err != nil {
         // TODO: return error once https://github.com/GoogleCloudPlatform/magic-modules/issues/3257 is fixed.
