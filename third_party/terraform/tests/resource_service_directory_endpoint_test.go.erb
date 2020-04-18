@@ -15,9 +15,9 @@ import (
 func TestAccServiceDirectoryEndpoint_serviceDirectoryEndpointUpdateExample(t *testing.T) {
 	t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(10),
-	}
+	project := getTestProjectFromEnv()
+	location := "us-central1"
+	testId := fmt.Sprintf("tf-test-example-endpoint%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -25,7 +25,7 @@ func TestAccServiceDirectoryEndpoint_serviceDirectoryEndpointUpdateExample(t *te
 		CheckDestroy: testAccCheckServiceDirectoryEndpointDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServiceDirectoryEndpoint_basic(context),
+				Config: testAccServiceDirectoryEndpoint_basic(location, testId),
 			},
 			{
 				ResourceName:      "google_service_directory_endpoint.example",
@@ -33,7 +33,21 @@ func TestAccServiceDirectoryEndpoint_serviceDirectoryEndpointUpdateExample(t *te
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccServiceDirectoryEndpoint_update(context),
+				ResourceName:      "google_service_directory_endpoint.example",
+				// {{project}}/{{location}}/{{namespace_id}}/{{service_id}}/{{endpoint_id}}
+				ImportStateId:     fmt.Sprintf("%s/%s/%s/%s/%s", project, location, testId, testId, testId),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "google_service_directory_endpoint.example",
+				// {{location}}/{{namespace_id}}/{{service_id}}/{{endpoint_id}}
+				ImportStateId:     fmt.Sprintf("%s/%s/%s/%s", location, testId, testId, testId),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccServiceDirectoryEndpoint_update(location, testId),
 			},
 			{
 				ResourceName:      "google_service_directory_endpoint.example",
@@ -44,20 +58,39 @@ func TestAccServiceDirectoryEndpoint_serviceDirectoryEndpointUpdateExample(t *te
 	})
 }
 
-func testAccServiceDirectoryEndpoint_basic(context map[string]interface{}) string {
-	return Nprintf(`
+func testAccServiceDirectoryEndpoint_basic(location, testId string) string {
+	return fmt.Sprintf(`
 resource "google_service_directory_namespace" "example" {
-  namespace_id = "tf-test-example-namespace%{random_suffix}"
-  location     = "us-central1"
+  namespace_id = "%s"
+  location     = "%s"
 }
 
 resource "google_service_directory_service" "example" {
-  service_id = "tf-test-example-service%{random_suffix}"
+  service_id = "%s"
   namespace  = google_service_directory_namespace.example.id
 }
 
 resource "google_service_directory_endpoint" "example" {
-  endpoint_id = "tf-test-example-endpoint%{random_suffix}"
+  endpoint_id = "%s"
+  service     = google_service_directory_service.example.id
+}
+`, testId, location, testId, testId)
+}
+
+func testAccServiceDirectoryEndpoint_update(location, testId string) string {
+	return fmt.Sprintf(`
+resource "google_service_directory_namespace" "example" {
+  namespace_id = "%s"
+  location     = "%s"
+}
+
+resource "google_service_directory_service" "example" {
+  service_id = "%s"
+  namespace  = google_service_directory_namespace.example.id
+}
+
+resource "google_service_directory_endpoint" "example" {
+  endpoint_id = "%s"
   service     = google_service_directory_service.example.id
 
   metadata = {
@@ -68,33 +101,6 @@ resource "google_service_directory_endpoint" "example" {
   address = "1.2.3.4"
   port    = 5353
 }
-`, context)
-}
-
-func testAccServiceDirectoryEndpoint_update(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_service_directory_namespace" "example" {
-  namespace_id = "tf-test-example-namespace%{random_suffix}"
-  location     = "us-central1"
-}
-
-resource "google_service_directory_service" "example" {
-  service_id = "tf-test-example-service%{random_suffix}"
-  namespace  = google_service_directory_namespace.example.id
-}
-
-resource "google_service_directory_endpoint" "example" {
-  endpoint_id = "tf-test-example-endpoint%{random_suffix}"
-  service     = google_service_directory_service.example.id
-
-  metadata = {
-    stage  = "dev"
-    region = "us-central1"
-  }
-
-  address = "4.3.2.1"
-  port    = 3535
-}
-`, context)
+`, testId, location, testId, testId)
 }
 <% end -%>

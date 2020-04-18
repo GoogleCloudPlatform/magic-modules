@@ -164,11 +164,12 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'address'
         description: |
-          An IPv4 or IPv6 address.
+          IPv4 or IPv6 address of the endpoint.
       - !ruby/object:Api::Type::Integer
         name: 'port'
         description: |
-          Service Directory will reject values outside of [0, 65535].
+          Port that the endpoint is running on, must be in the
+          range of [0, 65535]. If unspecified, the default is 0.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'metadata'
         description: |
