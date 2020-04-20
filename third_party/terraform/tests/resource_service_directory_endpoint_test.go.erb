@@ -22,7 +22,7 @@ func TestAccServiceDirectoryEndpoint_serviceDirectoryEndpointUpdateExample(t *te
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckServiceDirectoryEndpointDestroy,
+		CheckDestroy: testAccCheckServiceDirectoryEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceDirectoryEndpoint_basic(location, testId),

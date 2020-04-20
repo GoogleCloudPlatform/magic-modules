@@ -22,7 +22,7 @@ func TestAccServiceDirectoryNamespace_serviceDirectoryNamespaceUpdateExample(t *
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckServiceDirectoryNamespaceDestroy,
+		CheckDestroy: testAccCheckServiceDirectoryNamespaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceDirectoryNamespace_basic(location, testId),
