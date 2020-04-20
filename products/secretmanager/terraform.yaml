@@ -28,6 +28,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: templates/terraform/custom_expand/bool_to_object.go.erb
 
   SecretVersion: !ruby/object:Overrides::Terraform::ResourceOverride
+    # Versions will be sweeped by the Secret sweeper
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "secret_version_basic"
