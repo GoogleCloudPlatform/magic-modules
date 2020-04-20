@@ -465,10 +465,9 @@ objects:
         name: 'automaticScaling'
         description: |
           Automatic scaling is based on request rate, response latencies, and other application metrics.
-        exactly_one_of:
-          - automatic_scaling
-          - basic_scaling
-          - manual_scaling
+        conflicts:
+          - basicScaling
+          - manualScaling
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'maxConcurrentRequests'
@@ -517,10 +516,9 @@ objects:
         name: 'basicScaling'
         description: |
           Basic scaling creates instances when your application receives requests. Each instance will be shut down when the application becomes idle. Basic scaling is ideal for work that is intermittent or driven by user activity.
-        exactly_one_of:
-          - automatic_scaling
-          - basic_scaling
-          - manual_scaling
+        conflicts:
+          - automaticScaling
+          - manualScaling
         properties:
           - !ruby/object:Api::Type::String
             name: 'idleTimeout'
@@ -537,10 +535,9 @@ objects:
         name: 'manualScaling'
         description: |
           A service with manual scaling runs continuously, allowing you to perform complex initialization and rely on the state of its memory over time.
-        exactly_one_of:
-          - automatic_scaling
-          - basic_scaling
-          - manual_scaling
+        conflicts:
+          - automaticScaling
+          - basicScaling
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'instances'
