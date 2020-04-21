@@ -1,10 +1,9 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
+
 import (
-"fmt"
-"regexp"
-"strings"
+	"fmt"
+	"regexp"
+	"strings"
 )
 
 type healthcareDatasetId struct {
@@ -176,7 +175,6 @@ func parseHealthcareHl7V2StoreId(id string, config *Config) (*healthcareHl7V2Sto
 	return nil, fmt.Errorf("Invalid Hl7V2Store id format, expecting `{projectId}/{locationId}/{datasetName}/{hl7V2StoreName}` or `{locationId}/{datasetName}/{hl7V2StoreName}.`")
 }
 
-
 type healthcareDicomStoreId struct {
 	DatasetId healthcareDatasetId
 	Name      string
@@ -235,6 +233,3 @@ func parseHealthcareDicomStoreId(id string, config *Config) (*healthcareDicomSto
 	}
 	return nil, fmt.Errorf("Invalid DicomStore id format, expecting `{projectId}/{locationId}/{datasetName}/{dicomStoreName}` or `{locationId}/{datasetName}/{dicomStoreName}.`")
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>

@@ -9,17 +9,13 @@ resource "google_healthcare_hl7_v2_store" "default" {
   labels = {
     label1 = "labelvalue1"
   }
-
-  provider = google-beta
 }
 
 resource "google_pubsub_topic" "topic" {
   name     = "<%= ctx[:vars]['pubsub_topic']%>"
-  provider = google-beta
 }
 
 resource "google_healthcare_dataset" "dataset" {
   name     = "<%= ctx[:vars]['dataset_name'] %>"
   location = "us-central1"
-  provider = google-beta
 }
