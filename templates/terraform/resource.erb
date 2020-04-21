@@ -407,7 +407,11 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
     res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
+<%  if object.read_error_transform -%>
+        return handleNotFoundError(<%= object.read_error_transform %>(err), d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
+<%  else -%>
         return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
+<%  end -%>
     }
 
 <%  if object.nested_query -%>
