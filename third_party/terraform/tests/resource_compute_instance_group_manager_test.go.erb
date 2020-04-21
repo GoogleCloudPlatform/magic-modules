@@ -272,7 +272,7 @@ func TestAccInstanceGroupManager_stateful(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckInstanceGroupManagerDestroy,
+		CheckDestroy: testAccCheckInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccInstanceGroupManager_stateful(template, target, igm, hck),

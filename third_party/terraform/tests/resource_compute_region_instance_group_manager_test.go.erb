@@ -284,7 +284,7 @@ func TestAccRegionInstanceGroupManager_stateful(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckRegionInstanceGroupManagerDestroy,
+		CheckDestroy: testAccCheckRegionInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRegionInstanceGroupManager_stateful(template, igm),
