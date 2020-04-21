@@ -1,0 +1,16 @@
+resource "google_service_directory_namespace" "<%= ctx[:primary_resource_id] %>" {
+  provider     = google-beta
+  namespace_id = "<%= ctx[:vars]["namespace_id"] %>"
+  location     = "us-central1"
+}
+
+resource "google_service_directory_service" "<%= ctx[:primary_resource_id] %>" {
+  provider   = google-beta
+  service_id = "<%= ctx[:vars]["service_id"] %>"
+  namespace  = google_service_directory_namespace.<%= ctx[:primary_resource_id] %>.id
+
+  metadata = {
+    stage  = "prod"
+    region = "us-central1"
+  }
+}

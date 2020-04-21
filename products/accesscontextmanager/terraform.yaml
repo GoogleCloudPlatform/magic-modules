@@ -78,13 +78,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "service-perimeter"
         vars:
           access_level_name: "chromeos_no_lock"
-          service_perimeter_name: "restrict_all"
+          service_perimeter_name: "restrict_storage"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "access_context_manager_service_perimeter_dry-run"
+        skip_test: true
+        primary_resource_id: "service-perimeter"
+        vars:
+          service_perimeter_name: "restrict_bigquery_dryrun_storage"
     properties:
       parent: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       perimeterType: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
         input: true
+      status.restrictedServices: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      status.vpcAccessibleServices.allowedServices: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
       custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb

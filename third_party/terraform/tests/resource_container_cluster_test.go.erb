@@ -9,7 +9,6 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
@@ -35,7 +34,8 @@ func testSweepContainerClusters(region string) error {
 	// List clusters for all zones by using "-" as the zone name
 	found, err := config.clientContainer.Projects.Zones.Clusters.List(config.Project, "-").Do()
 	if err != nil {
-		log.Fatalf("error listing container clusters: %s", err)
+		log.Printf("error listing container clusters: %s", err)
+		return nil
 	}
 
 	if len(found.Clusters) == 0 {
@@ -44,13 +44,14 @@ func testSweepContainerClusters(region string) error {
 	}
 
 	for _, cluster := range found.Clusters {
-		if strings.HasPrefix(cluster.Name, "tf-test") {
+		if isSweepableTestResource(cluster.Name) {
 			log.Printf("Sweeping Container Cluster: %s", cluster.Name)
 			clusterURL := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", config.Project, cluster.Location, cluster.Name)
 			_, err := config.clientContainer.Projects.Locations.Clusters.Delete(clusterURL).Do()
 
 			if err != nil {
-				return fmt.Errorf("Error, failed to delete cluster %s: %s", cluster.Name, err)
+				log.Printf("Error, failed to delete cluster %s: %s", cluster.Name, err)
+				return nil
 			}
 		}
 	}
@@ -61,11 +62,11 @@ func testSweepContainerClusters(region string) error {
 func TestAccContainerCluster_basic(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	resource.Test(t, resource.TestCase{
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_basic(clusterName),
@@ -97,11 +98,11 @@ func TestAccContainerCluster_basic(t *testing.T) {
 func TestAccContainerCluster_misc(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	resource.Test(t, resource.TestCase{
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_misc(clusterName),
@@ -132,12 +133,12 @@ func TestAccContainerCluster_misc(t *testing.T) {
 func TestAccContainerCluster_withAddons(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withAddons(clusterName),
@@ -169,7 +170,7 @@ func TestAccContainerCluster_withMasterAuthConfig(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withMasterAuth(clusterName),
@@ -216,18 +217,18 @@ func TestAccContainerCluster_withMasterAuthConfig(t *testing.T) {
 				ImportStateVerify:	 true,
 			},
 		},
-	}, testAccCheckContainerClusterDestroyProducer)
+	})
 }
 
 func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withMasterAuthNoCert(clusterName),
@@ -246,12 +247,12 @@ func TestAccContainerCluster_withMasterAuthConfig_NoCert(t *testing.T) {
 
 func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 	t.Parallel()
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(10))
-	resource.Test(t, resource.TestCase{
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withAuthenticatorGroupsConfig(containerNetName, clusterName),
@@ -268,12 +269,12 @@ func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withNetworkPolicyEnabled(clusterName),
@@ -339,11 +340,11 @@ func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 <% unless version == 'ga' -%>
 func TestAccContainerCluster_withReleaseChannelEnabled(t *testing.T) {
 	t.Parallel()
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	resource.Test(t, resource.TestCase{
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withReleaseChannelEnabled(clusterName, "STABLE"),
@@ -387,11 +388,11 @@ func TestAccContainerCluster_withReleaseChannelEnabled(t *testing.T) {
 
 func TestAccContainerCluster_withInvalidReleaseChannel(t *testing.T) {
 	t.Parallel()
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	resource.Test(t, resource.TestCase{
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withReleaseChannelEnabled(clusterName, "CANARY"),
@@ -405,12 +406,12 @@ func TestAccContainerCluster_withInvalidReleaseChannel(t *testing.T) {
 func TestAccContainerCluster_withMasterAuthorizedNetworksConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withMasterAuthorizedNetworksConfig(clusterName, []string{}, ""),
@@ -468,12 +469,12 @@ func TestAccContainerCluster_withMasterAuthorizedNetworksConfig(t *testing.T) {
 func TestAccContainerCluster_regional(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-regional-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-regional-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_regional(clusterName),
@@ -490,13 +491,13 @@ func TestAccContainerCluster_regional(t *testing.T) {
 func TestAccContainerCluster_regionalWithNodePool(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-regional-%s", acctest.RandString(10))
-	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-regional-%s", randString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_regionalWithNodePool(clusterName, npName),
@@ -513,12 +514,12 @@ func TestAccContainerCluster_regionalWithNodePool(t *testing.T) {
 func TestAccContainerCluster_regionalWithNodeLocations(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_regionalNodeLocations(clusterName),
@@ -544,13 +545,13 @@ func TestAccContainerCluster_regionalWithNodeLocations(t *testing.T) {
 func TestAccContainerCluster_withTpu(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withTpu(containerNetName, clusterName),
@@ -571,13 +572,13 @@ func TestAccContainerCluster_withTpu(t *testing.T) {
 func TestAccContainerCluster_withPrivateClusterConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withPrivateClusterConfig(containerNetName, clusterName),
@@ -594,13 +595,13 @@ func TestAccContainerCluster_withPrivateClusterConfig(t *testing.T) {
 func TestAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config:	testAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(containerNetName, clusterName),
@@ -614,12 +615,12 @@ func TestAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(t *testing
 func TestAccContainerCluster_withIntraNodeVisibility(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withIntraNodeVisibility(clusterName),
@@ -651,12 +652,12 @@ func TestAccContainerCluster_withIntraNodeVisibility(t *testing.T) {
 func TestAccContainerCluster_withVersion(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withVersion(clusterName),
@@ -674,12 +675,12 @@ func TestAccContainerCluster_withVersion(t *testing.T) {
 func TestAccContainerCluster_updateVersion(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withLowerVersion(clusterName),
@@ -706,12 +707,12 @@ func TestAccContainerCluster_updateVersion(t *testing.T) {
 func TestAccContainerCluster_withNodeConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withNodeConfig(clusterName),
@@ -736,12 +737,12 @@ func TestAccContainerCluster_withNodeConfig(t *testing.T) {
 func TestAccContainerCluster_withNodeConfigScopeAlias(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withNodeConfigScopeAlias(clusterName),
@@ -758,12 +759,12 @@ func TestAccContainerCluster_withNodeConfigScopeAlias(t *testing.T) {
 func TestAccContainerCluster_withNodeConfigShieldedInstanceConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withNodeConfigShieldedInstanceConfig(clusterName),
@@ -781,12 +782,12 @@ func TestAccContainerCluster_withNodeConfigShieldedInstanceConfig(t *testing.T) 
 func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withWorkloadMetadataConfig(clusterName),
@@ -808,12 +809,12 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withSandboxConfig(clusterName),
@@ -837,12 +838,12 @@ func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withBootDiskKmsKey(getTestProjectFromEnv(), clusterName),
@@ -861,13 +862,13 @@ func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
 func TestAccContainerCluster_network(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	network := fmt.Sprintf("tf-test-net-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	network := fmt.Sprintf("tf-test-net-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_networkRef(clusterName, network),
@@ -889,12 +890,12 @@ func TestAccContainerCluster_network(t *testing.T) {
 func TestAccContainerCluster_backend(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_backendRef(clusterName),
@@ -911,13 +912,13 @@ func TestAccContainerCluster_backend(t *testing.T) {
 func TestAccContainerCluster_withNodePoolBasic(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(10))
-	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", randString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withNodePoolBasic(clusterName, npName),
@@ -934,13 +935,13 @@ func TestAccContainerCluster_withNodePoolBasic(t *testing.T) {
 func TestAccContainerCluster_withNodePoolUpdateVersion(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(10))
-	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", randString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withNodePoolLowerVersion(clusterName, npName),
@@ -967,12 +968,12 @@ func TestAccContainerCluster_withNodePoolUpdateVersion(t *testing.T) {
 func TestAccContainerCluster_withNodePoolResize(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(10))
-	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(10))
-	resource.Test(t, resource.TestCase{
+	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", randString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withNodePoolNodeLocations(clusterName, npName),
@@ -1003,13 +1004,13 @@ func TestAccContainerCluster_withNodePoolResize(t *testing.T) {
 func TestAccContainerCluster_withNodePoolAutoscaling(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(10))
-	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-nodepool-%s", randString(t, 10))
+	npName := fmt.Sprintf("tf-test-cluster-nodepool-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccContainerCluster_withNodePoolAutoscaling(clusterName, npName),
@@ -1054,13 +1055,13 @@ func TestAccContainerCluster_withNodePoolAutoscaling(t *testing.T) {
 func TestAccContainerCluster_withNodePoolNamePrefix(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 	npNamePrefix := "tf-test-np-"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withNodePoolNamePrefix(clusterName, npNamePrefix),
@@ -1078,13 +1079,13 @@ func TestAccContainerCluster_withNodePoolNamePrefix(t *testing.T) {
 func TestAccContainerCluster_withNodePoolMultiple(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 	npNamePrefix := "tf-test-np-"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withNodePoolMultiple(clusterName, npNamePrefix),
@@ -1101,13 +1102,13 @@ func TestAccContainerCluster_withNodePoolMultiple(t *testing.T) {
 func TestAccContainerCluster_withNodePoolConflictingNameFields(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 	npPrefix := "tf-test-np"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config:		 testAccContainerCluster_withNodePoolConflictingNameFields(clusterName, npPrefix),
@@ -1120,13 +1121,13 @@ func TestAccContainerCluster_withNodePoolConflictingNameFields(t *testing.T) {
 func TestAccContainerCluster_withNodePoolNodeConfig(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withNodePoolNodeConfig(cluster, np),
@@ -1143,13 +1144,13 @@ func TestAccContainerCluster_withNodePoolNodeConfig(t *testing.T) {
 func TestAccContainerCluster_withMaintenanceWindow(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_window"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withMaintenanceWindow(clusterName, "03:00"),
@@ -1178,17 +1179,15 @@ func TestAccContainerCluster_withMaintenanceWindow(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
-
 func TestAccContainerCluster_withRecurringMaintenanceWindow(t *testing.T) {
 	t.Parallel()
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 	resourceName := "google_container_cluster.with_recurring_maintenance_window"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withRecurringMaintenanceWindow(cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z"),
@@ -1225,17 +1224,15 @@ func TestAccContainerCluster_withRecurringMaintenanceWindow(t *testing.T) {
 	})
 }
 
-<% end %>
-
 func TestAccContainerCluster_withIPAllocationPolicy_existingSecondaryRanges(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(10))
-	resource.Test(t, resource.TestCase{
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withIPAllocationPolicy_existingSecondaryRanges(containerNetName, clusterName),
@@ -1252,12 +1249,12 @@ func TestAccContainerCluster_withIPAllocationPolicy_existingSecondaryRanges(t *t
 func TestAccContainerCluster_withIPAllocationPolicy_specificIPRanges(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(10))
-	resource.Test(t, resource.TestCase{
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withIPAllocationPolicy_specificIPRanges(containerNetName, clusterName),
@@ -1274,12 +1271,12 @@ func TestAccContainerCluster_withIPAllocationPolicy_specificIPRanges(t *testing.
 func TestAccContainerCluster_withIPAllocationPolicy_specificSizes(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	containerNetName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	resource.Test(t, resource.TestCase{
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withIPAllocationPolicy_specificSizes(containerNetName, clusterName),
@@ -1296,12 +1293,12 @@ func TestAccContainerCluster_withIPAllocationPolicy_specificSizes(t *testing.T) 
 func TestAccContainerCluster_nodeAutoprovisioning(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_autoprovisioning(clusterName, true),
@@ -1336,12 +1333,12 @@ func TestAccContainerCluster_nodeAutoprovisioning(t *testing.T) {
 func TestAccContainerCluster_nodeAutoprovisioningDefaults(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_autoprovisioningDefaults(clusterName, false),
@@ -1368,11 +1365,11 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaults(t *testing.T) {
 <% unless version == 'ga' -%>
 func TestAccContainerCluster_withAutoscalingProfile(t *testing.T) {
 	t.Parallel()
-	clusterName := fmt.Sprintf("cluster-test-%s", acctest.RandString(10))
-	resource.Test(t, resource.TestCase{
+	clusterName := fmt.Sprintf("cluster-test-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withAutoscalingProfile(clusterName, "BALANCED"),
@@ -1398,11 +1395,11 @@ func TestAccContainerCluster_withAutoscalingProfile(t *testing.T) {
 
 func TestAccContainerCluster_withInvalidAutoscalingProfile(t *testing.T) {
 	t.Parallel()
-	clusterName := fmt.Sprintf("cluster-test-%s", acctest.RandString(10))
-	resource.Test(t, resource.TestCase{
+	clusterName := fmt.Sprintf("cluster-test-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withAutoscalingProfile(clusterName, "AS_CHEAP_AS_POSSIBLE"),
@@ -1415,18 +1412,19 @@ func TestAccContainerCluster_withInvalidAutoscalingProfile(t *testing.T) {
 func TestAccContainerCluster_sharedVpc(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 	org := getTestOrgFromEnv(t)
 	billingId := getTestBillingAccountFromEnv(t)
-	projectName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	projectName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	suffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_sharedVpc(org, billingId, projectName, clusterName),
+				Config: testAccContainerCluster_sharedVpc(org, billingId, projectName, clusterName, suffix),
 			},
 			{
 				ResourceName:		 "google_container_cluster.shared_vpc_cluster",
@@ -1441,13 +1439,13 @@ func TestAccContainerCluster_sharedVpc(t *testing.T) {
 func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 	pid := getTestProjectFromEnv()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withWorkloadIdentityConfigEnabled(pid, clusterName),
@@ -1489,12 +1487,12 @@ func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 func TestAccContainerCluster_withBinaryAuthorization(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withBinaryAuthorization(clusterName, true),
@@ -1519,12 +1517,12 @@ func TestAccContainerCluster_withBinaryAuthorization(t *testing.T) {
 func TestAccContainerCluster_withShieldedNodes(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withShieldedNodes(clusterName, true),
@@ -1549,13 +1547,13 @@ func TestAccContainerCluster_withShieldedNodes(t *testing.T) {
 func TestAccContainerCluster_withFlexiblePodCIDR(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withFlexiblePodCIDR(containerNetName, clusterName),
@@ -1573,18 +1571,18 @@ func TestAccContainerCluster_withFlexiblePodCIDR(t *testing.T) {
 func TestAccContainerCluster_errorCleanDanglingCluster(t *testing.T) {
 	t.Parallel()
 
-	prefix := acctest.RandString(10)
+	prefix := randString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", prefix)
 	clusterNameError := fmt.Sprintf("tf-test-cluster-err-%s", prefix)
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", randString(t, 10))
 
 	initConfig := testAccContainerCluster_withInitialCIDR(containerNetName, clusterName)
 	overlapConfig := testAccContainerCluster_withCIDROverlap(initConfig, clusterNameError)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: initConfig,
@@ -1611,10 +1609,10 @@ func TestAccContainerCluster_errorCleanDanglingCluster(t *testing.T) {
 func TestAccContainerCluster_errorNoClusterCreated(t *testing.T) {
 	t.Parallel()
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config:		 testAccContainerCluster_withInvalidLocation("wonderland"),
@@ -1628,7 +1626,7 @@ func TestAccContainerCluster_errorNoClusterCreated(t *testing.T) {
 func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
 	// Use the bootstrapped KMS key so we can avoid creating keys needlessly
 	// as they will pile up in the project because they can not be completely
@@ -1637,10 +1635,10 @@ func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 	// See https://cloud.google.com/kubernetes-engine/docs/how-to/encrypting-secrets#creating_a_key
 	kmsData := BootstrapKMSKeyInLocation(t, "us-central1")
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withDatabaseEncryption(clusterName, kmsData),
@@ -1653,21 +1651,22 @@ func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccContainerCluster_withResourceUsageExportConfig(t *testing.T) {
 	t.Parallel()
 
-	suffix := acctest.RandString(10)
+	suffix := randString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", suffix)
 	datesetId := fmt.Sprintf("tf_test_cluster_resource_usage_%s", suffix)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withResourceUsageExportConfig(clusterName, datesetId, true),
+				Config: testAccContainerCluster_withResourceUsageExportConfig(clusterName, datesetId, "true"),
 			},
 			{
 				ResourceName:        "google_container_cluster.with_resource_usage_export_config",
@@ -1675,7 +1674,15 @@ func TestAccContainerCluster_withResourceUsageExportConfig(t *testing.T) {
 				ImportStateVerify:   true,
 			},
 			{
-				Config: testAccContainerCluster_withResourceUsageExportConfig(clusterName, datesetId, false),
+				Config: testAccContainerCluster_withResourceUsageExportConfig(clusterName, datesetId, "false"),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_resource_usage_export_config",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config: testAccContainerCluster_withResourceUsageExportConfigNoConfig(clusterName, datesetId),
 			},
 			{
 				ResourceName:        "google_container_cluster.with_resource_usage_export_config",
@@ -1685,24 +1692,22 @@ func TestAccContainerCluster_withResourceUsageExportConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
-
 
 func TestAccContainerCluster_withMasterAuthorizedNetworksDisabled(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
 		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withMasterAuthorizedNetworksDisabled(containerNetName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccContainerCluster_masterAuthorizedNetworksDisabled("google_container_cluster.with_private_cluster"),
+					testAccContainerCluster_masterAuthorizedNetworksDisabled(t, "google_container_cluster.with_private_cluster"),
 				),
 			},
 			{
@@ -1717,13 +1722,13 @@ func TestAccContainerCluster_withMasterAuthorizedNetworksDisabled(t *testing.T) 
 func TestAccContainerCluster_withEnableKubernetesAlpha(t *testing.T) {
 	t.Parallel()
 
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	npName := fmt.Sprintf("tf-test-np-%s", acctest.RandString(10))
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	npName := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withEnableKubernetesAlpha(clusterName, npName),
@@ -1737,14 +1742,14 @@ func TestAccContainerCluster_withEnableKubernetesAlpha(t *testing.T) {
 	})
 }
 
-func testAccContainerCluster_masterAuthorizedNetworksDisabled(resource_name string) resource.TestCheckFunc {
+func testAccContainerCluster_masterAuthorizedNetworksDisabled(t *testing.T, resource_name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resource_name]
 		if !ok {
 			return fmt.Errorf("can't find %s in state", resource_name)
 		}
 
-		config := testAccProvider.Meta().(*Config)
+		config := googleProviderConfig(t)
 		attributes := rs.Primary.Attributes
 
 		cluster, err := config.clientContainer.Projects.Zones.Clusters.Get(
@@ -1761,28 +1766,9 @@ func testAccContainerCluster_masterAuthorizedNetworksDisabled(resource_name stri
 	}
 }
 
-func testAccCheckContainerClusterDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_container_cluster" {
-			continue
-		}
-
-		attributes := rs.Primary.Attributes
-		_, err := config.clientContainer.Projects.Zones.Clusters.Get(
-			config.Project, attributes["location"], attributes["name"]).Do()
-		if err == nil {
-			return fmt.Errorf("Cluster still exists")
-		}
-	}
-
-	return nil
-}
-
-func testAccCheckContainerClusterDestroyProducer(provider *schema.Provider) func(s *terraform.State) error {
+func testAccCheckContainerClusterDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := provider.Meta().(*Config)
+		config := googleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_container_cluster" {
@@ -3137,8 +3123,6 @@ resource "google_container_cluster" "with_maintenance_window" {
 `, clusterName, maintenancePolicy)
 }
 
-
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withRecurringMaintenanceWindow(clusterName string, startTime, endTime string) string {
 	maintenancePolicy := ""
 	if len(startTime) > 0 {
@@ -3162,7 +3146,6 @@ resource "google_container_cluster" "with_recurring_maintenance_window" {
 `, clusterName, maintenancePolicy)
 
 }
-<% end %>
 
 func testAccContainerCluster_withIPAllocationPolicy_existingSecondaryRanges(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`
@@ -3264,21 +3247,8 @@ resource "google_container_cluster" "with_ip_allocation_policy" {
 `, containerNetName, clusterName)
 }
 
-<% unless version == 'ga' -%>
-func testAccContainerCluster_withResourceUsageExportConfig(clusterName, datasetId string, resourceUsage bool) string {
-	resourceUsageConfig := ""
-	if resourceUsage {
-		resourceUsageConfig = `
-  resource_usage_export_config {
-    enable_network_egress_metering = true
-
-    bigquery_destination {
-      dataset_id = google_bigquery_dataset.default.dataset_id
-    }
-  }`
-	}
-
-	config := fmt.Sprintf(`
+func testAccContainerCluster_withResourceUsageExportConfig(clusterName, datasetId, enableMetering string) string {
+	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "default" {
   dataset_id                 = "%s"
   description                = "gke resource usage dataset tests"
@@ -3289,12 +3259,32 @@ resource "google_container_cluster" "with_resource_usage_export_config" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  %s
+  resource_usage_export_config {
+    enable_network_egress_metering = true
+    enable_resource_consumption_metering = %s
+    bigquery_destination {
+      dataset_id = google_bigquery_dataset.default.dataset_id
+    }
+  }
 }
-`, datasetId, clusterName, resourceUsageConfig)
-	return config
+`, datasetId, clusterName, enableMetering)
 }
-<% end -%>
+
+func testAccContainerCluster_withResourceUsageExportConfigNoConfig(clusterName, datasetId string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "default" {
+  dataset_id                 = "%s"
+  description                = "gke resource usage dataset tests"
+  delete_contents_on_destroy = true
+}
+
+resource "google_container_cluster" "with_resource_usage_export_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+}
+`, datasetId, clusterName)
+}
 
 func testAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`
@@ -3391,7 +3381,7 @@ resource "google_container_cluster" "with_private_cluster" {
 `, containerNetName, clusterName)
 }
 <% unless version.nil? || version == 'ga' -%>
-func testAccContainerCluster_sharedVpc(org, billingId, projectName, name string) string {
+func testAccContainerCluster_sharedVpc(org, billingId, projectName, name string, suffix string) string {
 	return fmt.Sprintf(`
 resource "google_project" "host_project" {
   name            = "Test Project XPN Host"
@@ -3493,7 +3483,7 @@ resource "google_container_cluster" "shared_vpc_cluster" {
     google_compute_subnetwork_iam_member.service_network_gke_user,
   ]
 }
-`, projectName, org, billingId, projectName, org, billingId, acctest.RandString(10), acctest.RandString(10), name)
+`, projectName, org, billingId, projectName, org, billingId, suffix, suffix, name)
 }
 
 func testAccContainerCluster_withWorkloadIdentityConfigEnabled(projectID string, clusterName string) string {

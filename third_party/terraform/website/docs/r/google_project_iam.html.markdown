@@ -28,7 +28,8 @@ Four different resources help you manage your IAM policy for a project. Each of 
    from anyone without organization-level access to the project. Proceed with caution.
    It's not recommended to use `google_project_iam_policy` with your provider project
    to avoid locking yourself out, and it should generally only be used with projects
-   fully managed by Terraform.
+   fully managed by Terraform. If you do use this resource, it is recommended to **import** the policy before
+   applying the change.
 
 ```hcl
 resource "google_project_iam_policy" "project" {
@@ -138,6 +139,9 @@ resource "google_project_iam_member" "project" {
 resource "google_project_iam_audit_config" "project" {
   project = "your-project-id"
   service = "allServices"
+  audit_log_config {
+    log_type = "ADMIN_READ"
+  }
   audit_log_config {
     log_type = "DATA_READ"
     exempted_members = [

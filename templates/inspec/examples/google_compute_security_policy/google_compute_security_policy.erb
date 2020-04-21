@@ -1,0 +1,12 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% security_policy = grab_attributes['security_policy'] -%>
+describe google_compute_security_policy(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{security_policy['name']}'" : "security_policy['name']" -%>) do
+  it { should exist }
+  its('rules.size') { should cmp 2 }
+  its('rules.first.priority') { should cmp <%= doc_generation ? "'#{security_policy['priority']}'" : "security_policy['priority']" -%> }
+  its('rules.first.match.config.src_ip_ranges.first') { should cmp <%= doc_generation ? "'#{security_policy['ip_range']}'" : "security_policy['ip_range']" -%> }
+end
+
+describe google_compute_security_policy(project: <%= gcp_project_id -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

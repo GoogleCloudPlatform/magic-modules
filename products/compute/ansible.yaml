@@ -27,11 +27,17 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   # Readonly resources.
   DiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  InstanceGroupNamedPort: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   License: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   MachineType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   NetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  GlobalNetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  GlobalNetworkEndpointGroup: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   ProjectInfo: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -41,11 +47,11 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  ResourcePolicy: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   RouterBgpPeer: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  SecurityPolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -257,8 +263,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The source snapshot used to create this disk. You can provide this as
           a partial or full URL to the resource.
-  ResourcePolicy: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   Reservation: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       specificReservation.instanceProperties.minCpuPlatform: !ruby/object:Overrides::Ansible::PropertyOverride
@@ -301,11 +305,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   DiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  InstanceGroupNamedPort: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   License: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   MachineType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   NetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  GlobalNetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  GlobalNetworkEndpointGroup: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -320,6 +330,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RouterBgpPeer: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  SecurityPolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true

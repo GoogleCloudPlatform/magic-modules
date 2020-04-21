@@ -6,7 +6,6 @@ import (
 	"log"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"google.golang.org/api/cloudkms/v1"
@@ -17,16 +16,30 @@ func TestAccKmsSecretCiphertext_basic(t *testing.T) {
 
 	kms := BootstrapKMSKey(t)
 
-	plaintext := fmt.Sprintf("secret-%s", acctest.RandString(10))
+	plaintext := fmt.Sprintf("secret-%s", randString(t, 10))
+	aad := "plainaad"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsSecretCiphertext(kms.CryptoKey.Name, plaintext),
 				Check: func(s *terraform.State) error {
-					plaintext, err := testAccDecryptSecretDataWithCryptoKey(s, kms.CryptoKey.Name, "google_kms_secret_ciphertext.acceptance")
+					plaintext, err := testAccDecryptSecretDataWithCryptoKey(t, s, kms.CryptoKey.Name, "google_kms_secret_ciphertext.acceptance", "")
+
+					if err != nil {
+						return err
+					}
+
+					return resource.TestCheckResourceAttr("google_kms_secret_ciphertext.acceptance", "plaintext", plaintext)(s)
+				},
+			},
+			// With AAD
+			{
+				Config: testGoogleKmsSecretCiphertext_withAAD(kms.CryptoKey.Name, plaintext, aad),
+				Check: func(s *terraform.State) error {
+					plaintext, err := testAccDecryptSecretDataWithCryptoKey(t, s, kms.CryptoKey.Name, "google_kms_secret_ciphertext.acceptance", aad)
 
 					if err != nil {
 						return err
@@ -39,8 +52,8 @@ func TestAccKmsSecretCiphertext_basic(t *testing.T) {
 	})
 }
 
-func testAccDecryptSecretDataWithCryptoKey(s *terraform.State, cryptoKeyId string, secretCiphertextResourceName string) (string, error) {
-	config := testAccProvider.Meta().(*Config)
+func testAccDecryptSecretDataWithCryptoKey(t *testing.T, s *terraform.State, cryptoKeyId string, secretCiphertextResourceName, aad string) (string, error) {
+	config := googleProviderConfig(t)
 	rs, ok := s.RootModule().Resources[secretCiphertextResourceName]
 	if !ok {
 		return "", fmt.Errorf("Resource not found: %s", secretCiphertextResourceName)
@@ -52,6 +65,10 @@ func testAccDecryptSecretDataWithCryptoKey(s *terraform.State, cryptoKeyId strin
 
 	kmsDecryptRequest := &cloudkms.DecryptRequest{
 		Ciphertext: ciphertext,
+	}
+
+	if aad != "" {
+		kmsDecryptRequest.AdditionalAuthenticatedData = base64.StdEncoding.EncodeToString([]byte(aad))
 	}
 
 	decryptResponse, err := config.clientKms.Projects.Locations.KeyRings.CryptoKeys.Decrypt(cryptoKeyId, kmsDecryptRequest).Do()
@@ -79,4 +96,14 @@ resource "google_kms_secret_ciphertext" "acceptance" {
   plaintext  = "%s"
 }
 `, cryptoKeyTerraformId, plaintext)
+}
+
+func testGoogleKmsSecretCiphertext_withAAD(cryptoKeyTerraformId, plaintext, aad string) string {
+	return fmt.Sprintf(`
+resource "google_kms_secret_ciphertext" "acceptance" {
+  crypto_key                    = "%s"
+  plaintext                     = "%s"
+  additional_authenticated_data = "%s"
+}
+`, cryptoKeyTerraformId, plaintext, aad)
 }

@@ -2308,7 +2308,6 @@ objects:
         description: |
           The URL of the network to which this backend service belongs.
           This field can only be specified when the load balancing scheme is set to INTERNAL.
-        min_version: beta
   - !ruby/object:Api::Resource
     name: 'BackendServiceSignedUrlKey'
     kind: 'compute#BackendServiceSignedUrlKey'
@@ -2966,7 +2965,7 @@ objects:
                 The IP protocol to which this rule applies. The protocol type is
                 required when creating a firewall rule. This value can either be
                 one of the following well known protocol strings (tcp, udp,
-                icmp, esp, ah, sctp), or the IP protocol number.
+                icmp, esp, ah, sctp, ipip), or the IP protocol number.
               api_name: 'IPProtocol'
               required: true
             - !ruby/object:Api::Type::Array
@@ -3006,7 +3005,7 @@ objects:
                 The IP protocol to which this rule applies. The protocol type is
                 required when creating a firewall rule. This value can either be
                 one of the following well known protocol strings (tcp, udp,
-                icmp, esp, ah, sctp), or the IP protocol number.
+                icmp, esp, ah, sctp, ipip), or the IP protocol number.
               api_name: 'IPProtocol'
               required: true
             - !ruby/object:Api::Type::Array
@@ -4759,6 +4758,17 @@ objects:
                 - :USE_FIXED_PORT
                 - :USE_NAMED_PORT
                 - :USE_SERVING_PORT
+      - !ruby/object:Api::Type::NestedObject
+        name: 'logConfig'
+        description: |
+          Configure logging on this health check.
+        min_version: beta
+        properties:
+            - !ruby/object:Api::Type::Boolean
+              name: 'enable'
+              description: |
+                Indicates whether or not to export logs. This is false by default,
+                which means no health check logging will be done.
   - !ruby/object:Api::Resource
     name: 'InstanceTemplate'
     kind: 'compute#instanceTemplate'
@@ -6476,6 +6486,82 @@ objects:
           group. Deleting or abandoning instances reduces this number. Resizing
           the group changes this number.
   - !ruby/object:Api::Resource
+    name: 'InstanceGroupNamedPort'
+    base_url:  'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
+    self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}'
+    input: true
+    description: |
+      Mange the named ports setting for a managed instance group without
+      managing the group as whole. This resource is primarily intended for use
+      with GKE-generated groups that shouldn't otherwise be managed by other
+      tools.
+    create_verb: :POST
+    create_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/setNamedPorts'
+    delete_verb: :POST
+    delete_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{group}}/setNamedPorts'
+    identity:
+      - port
+      - name
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      modify_by_patch: true
+      keys:
+        - namedPorts
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/compute/docs/instance-groups/'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroup'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 6
+          update_minutes: 6
+          delete_minutes: 6
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'group'
+        resource: 'InstanceGroup'
+        imports: 'name'
+        required: true
+        url_param_only: true
+        description: |
+          The name of the instance group.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'zone'
+        resource: 'Zone'
+        imports: 'name'
+        required: true
+        url_param_only: true
+        description: |
+          The zone of the instance group.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        description: |
+          The name for this named port. The name must be 1-63 characters
+          long, and comply with RFC1035.
+      - !ruby/object:Api::Type::Integer
+        name: 'port'
+        required: true
+        description:
+          The port number, which can be a value between 1 and 65535.
+  - !ruby/object:Api::Resource
     name: 'RegionInstanceGroupManager'
     kind: 'compute#instanceGroupManager'
     base_url: projects/{{project}}/regions/{{region}}/instanceGroupManagers
@@ -6686,8 +6772,8 @@ objects:
     kind: 'compute#interconnectAttachment'
     base_url: 'projects/{{project}}/regions/{{region}}/interconnectAttachments'
     collection_url_key: 'items'
+    update_verb: :PATCH
     has_self_link: true
-    input: true
     description: |
       Represents an InterconnectAttachment (VLAN attachment) resource. For more
       information, see Creating VLAN Attachments.
@@ -6723,6 +6809,8 @@ objects:
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'adminEnabled'
+        send_empty_value: true
+        default_value: true
         description: |
           Whether the VLAN attachment is enabled or disabled.  When using
           PARTNER type this will Pre-Activate the interconnect attachment
@@ -6740,6 +6828,7 @@ objects:
         output: true
       - !ruby/object:Api::Type::String
         name: 'interconnect'
+        input: true
         description: |
           URL of the underlying Interconnect object that this attachment's
           traffic will traverse through. Required if type is DEDICATED, must not
@@ -6750,6 +6839,7 @@ objects:
           An optional description of this resource.
       - !ruby/object:Api::Type::Enum
         name: 'bandwidth'
+        input: true
         description: |
           Provisioned bandwidth capacity for the interconnect attachment.
           For attachments of type DEDICATED, the user can set the bandwidth.
@@ -6771,6 +6861,7 @@ objects:
           - :BPS_50G
       - !ruby/object:Api::Type::String
         name: 'edgeAvailabilityDomain'
+        input: true
         description: |
           Desired availability domain for the attachment. Only available for type
           PARTNER, at creation time. For improved reliability, customers should
@@ -6807,6 +6898,7 @@ objects:
             output: true
       - !ruby/object:Api::Type::Enum
         name: 'type'
+        input: true
         description: |
           The type of InterconnectAttachment you wish to create. Defaults to
           DEDICATED.
@@ -6849,6 +6941,7 @@ objects:
           automatically connect the Interconnect to the network & region within which the
           Cloud Router is configured.
         required: true
+        input: true
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: |
@@ -6870,8 +6963,10 @@ objects:
           lowercase letter, and all following characters must be a dash, lowercase
           letter, or digit, except the last character, which cannot be a dash.
         required: true
+        input: true
       - !ruby/object:Api::Type::Array
         name: candidateSubnets
+        input: true
         description: |
           Up to 16 candidate prefixes that can be used to restrict the allocation
           of cloudRouterIpAddress and customerRouterIpAddress for this attachment.
@@ -6883,6 +6978,7 @@ objects:
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Integer
         name: vlanTag8021q
+        input: true
         description: |
           The IEEE 802.1Q VLAN tag for this attachment, in the range 2-4094. When
           using PARTNER type this will be managed upstream.
@@ -7260,8 +7356,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'networkEndpointType'
         description: |
-          Type of network endpoints in this network endpoint group. Currently
-          the only supported value is GCE_VM_IP_PORT.
+          Type of network endpoints in this network endpoint group. The only supported value is GCE_VM_IP_PORT
         values:
           - :GCE_VM_IP_PORT
         default_value: :GCE_VM_IP_PORT
@@ -7283,6 +7378,149 @@ objects:
         imports: 'selfLink'
         description: |
           Optional subnetwork to which all network endpoints in the NEG belong.
+      - !ruby/object:Api::Type::Integer
+        name: 'defaultPort'
+        description: |
+          The default port used if the port number is not specified in the
+          network endpoint.
+  - !ruby/object:Api::Resource
+    name: 'GlobalNetworkEndpoint'
+    kind: 'compute#networkEndpoint'
+    base_url:  'projects/{{project}}/global/networkEndpointGroups/{{global_network_endpoint_group}}'
+    description: |
+      A Global Network endpoint represents a IP address and port combination that exists outside of GCP.
+      **NOTE**: Global network endpoints cannot be created outside of a
+      global network endpoint group.
+    input: true
+    create_verb: :POST
+    create_url: projects/{{project}}/global/networkEndpointGroups/{{global_network_endpoint_group}}/attachNetworkEndpoints
+    delete_verb: :POST
+    delete_url: projects/{{project}}/global/networkEndpointGroups/{{global_network_endpoint_group}}/detachNetworkEndpoints
+    read_verb: :POST
+    self_link: projects/{{project}}/global/networkEndpointGroups/{{global_network_endpoint_group}}/listNetworkEndpoints
+    identity:
+      - fqdn
+      - ipAddress
+      - port
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys:
+        - items
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 6
+          update_minutes: 6
+          delete_minutes: 6
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'globalNetworkEndpointGroup'
+        resource: 'GlobalNetworkEndpointGroup'
+        imports: 'name'
+        description: |
+          The global network endpoint group this endpoint is part of.
+        required: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'port'
+        description: |
+          Port number of the external endpoint.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'ipAddress'
+        description: |
+          IPv4 address external endpoint.
+      - !ruby/object:Api::Type::String
+        name: 'fqdn'
+        at_least_one_of:
+          - fqdn
+          - ip_address
+        description: |
+          Fully qualified domain name of network endpoint.
+          This can only be specified when network_endpoint_type of the NEG is INTERNET_FQDN_PORT.
+  - !ruby/object:Api::Resource
+    name: 'GlobalNetworkEndpointGroup'
+    kind: 'compute#networkEndpointGroup'
+    base_url: 'projects/{{project}}/global/networkEndpointGroups'
+    input: true
+    has_self_link: true
+    collection_url_key: 'items'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/internet-neg-concepts'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups'
+    description: |
+      A global network endpoint group contains endpoints that reside outside of Google Cloud.
+      Currently a global network endpoint group can only support a single endpoint.
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource; provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource. Provide this property when
+          you create the resource.
+      - !ruby/object:Api::Type::Enum
+        name: 'networkEndpointType'
+        required: true
+        description: |
+          Type of network endpoints in this network endpoint group. Supported values are:
+            * INTERNET_IP_PORT
+            * INTERNET_FQDN_PORT
+        values:
+          - :INTERNET_IP_PORT
+          - :INTERNET_FQDN_PORT
       - !ruby/object:Api::Type::Integer
         name: 'defaultPort'
         description: |
@@ -10431,19 +10669,31 @@ objects:
                 - :USE_FIXED_PORT
                 - :USE_NAMED_PORT
                 - :USE_SERVING_PORT
+      - !ruby/object:Api::Type::NestedObject
+        name: 'logConfig'
+        description: |
+          Configure logging on this health check.
+        min_version: beta
+        properties:
+            - !ruby/object:Api::Type::Boolean
+              name: 'enable'
+              description: |
+                Indicates whether or not to export logs. This is false by default,
+                which means no health check logging will be done.
   - !ruby/object:Api::Resource
     name: 'ResourcePolicy'
     kind: 'compute#resourcePolicy'
     base_url: projects/{{project}}/regions/{{region}}/resourcePolicies
     input: true
     has_self_link: true
+    collection_url_key: 'items'
     description: |
       A policy that can be attached to a resource to specify or schedule actions on that resource.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
-        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
       result: !ruby/object:Api::OpAsync::Result
         path: 'targetLink'
@@ -10479,6 +10729,8 @@ objects:
           which cannot be a dash.
       - !ruby/object:Api::Type::NestedObject
         name: 'snapshotSchedulePolicy'
+        conflicts:
+          - 'groupPlacementPolicy'
         description: |
           Policy for creating snapshots of persistent disks.
         properties:
@@ -10620,6 +10872,37 @@ objects:
                   - snapshot_schedule_policy.0.snapshot_properties.0.guest_flush
                 description: |
                   Whether to perform a 'guest aware' snapshot.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'groupPlacementPolicy'
+        conflicts:
+          - 'snapshotSchedulePolicy'
+        description: |
+          Policy for creating snapshots of persistent disks.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'vmCount'
+            at_least_one_of:
+              - group_placement_policy.0.vm_count
+              - group_placement_policy.0.availability_domain_count
+            description: |
+              Number of vms in this placement group.
+          - !ruby/object:Api::Type::Integer
+            name: 'availabilityDomainCount'
+            at_least_one_of:
+              - group_placement_policy.0.vm_count
+              - group_placement_policy.0.availability_domain_count
+            description: |
+              The number of availability domains instances will be spread across. If two instances are in different
+              availability domain, they will not be put in the same low latency network
+          - !ruby/object:Api::Type::Enum
+            name: 'collocation'
+            description: |
+              Collocation specifies whether to place VMs inside the same availability domain on the same low-latency network.
+              Specify `COLLOCATED` to enable collocation. Can only be specified with `vm_count`. If compute instances are created
+              with a COLLOCATED policy, then exactly `vm_count` instances must be created at the same time with the resource policy
+              attached.
+            values:
+              - :COLLOCATED
   - !ruby/object:Api::Resource
     name: 'Route'
     kind: 'compute#route'
@@ -11315,6 +11598,106 @@ objects:
           or deleted.
         output: true
   - !ruby/object:Api::Resource
+    name: 'SecurityPolicy'
+    kind: 'compute#securityPolicy'
+    base_url: projects/{{project}}/global/securityPolicies
+    collection_url_key: 'items'
+    has_self_link: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/armor/docs/security-policy-concepts'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/securityPolicies'
+    description: |
+      Represents a Cloud Armor Security Policy resource.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the security policy.'
+        required: true
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: 'rules'
+        description: |
+          A list of rules that belong to this policy.
+          There must always be a default rule (rule with priority 2147483647 and match "*").
+          If no rules are provided when creating a security policy, a default rule with action "allow" will be added.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'description'
+              description: |
+                A description of the rule.
+            - !ruby/object:Api::Type::Integer
+              name: 'priority'
+              description: |
+                An integer indicating the priority of a rule in the list. The priority must be a positive value
+                between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
+                highest priority and 2147483647 is the lowest prority.
+            - !ruby/object:Api::Type::String
+              name: 'action'
+              description: |
+                The Action to preform when the client connection triggers the rule. Can currently be either
+                "allow" or "deny()" where valid values for status are 403, 404, and 502.
+            - !ruby/object:Api::Type::Boolean
+              name: 'preview'
+              description: |
+                If set to true, the specified action is not enforced.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'match'
+              description:
+                A match condition that incoming traffic is evaluated against. If it evaluates to true,
+                the corresponding 'action' is enforced.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'description'
+                  description: |
+                    A description of the rule.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'expr'
+                  description:
+                    User defined CEVAL expression. A CEVAL expression is used to specify match criteria such as origin.ip,
+                    source.region_code and contents in the request header.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'expression'
+                      description: |
+                        Textual representation of an expression in Common Expression Language syntax.
+                    - !ruby/object:Api::Type::String
+                      name: 'title'
+                      description: |
+                        Optional. Title for the expression, i.e. a short string describing its purpose.
+                        This can be used e.g. in UIs which allow to enter the expression.
+                    - !ruby/object:Api::Type::String
+                      name: 'description'
+                      description: |
+                        Optional. Description of the expression. This is a longer text which describes the expression,
+                        e.g. when hovered over it in a UI.
+                    - !ruby/object:Api::Type::String
+                      name: 'location'
+                      description: |
+                        Optional. String indicating the location of the expression for error reporting,
+                        e.g. a file name and a position in the file.
+                - !ruby/object:Api::Type::String
+                  name: 'versionedExpr'
+                  description: |
+                    Preconfigured versioned expression. If this field is specified, config must also be specified.
+                    Available preconfigured expressions along with their requirements are: `SRC_IPS_V1` - must specify
+                    the corresponding srcIpRange field in config.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'config'
+                  description:
+                    The configuration options available when specifying versionedExpr. This field must be specified
+                    if versionedExpr is specified and cannot be specified if versionedExpr is not specified.
+                  properties:
+                    - !ruby/object:Api::Type::Array
+                      name: 'srcIpRanges'
+                      description: |
+                        CIDR IP address range.
+                      item_type: Api::Type::String
+  - !ruby/object:Api::Resource
     name: 'Snapshot'
     kind: 'compute#snapshot'
     input: true
@@ -11830,6 +12213,8 @@ objects:
         required: true
         description: |
           Reservation for instances with specific machine shapes.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/zones/{{zone}}/reservations/{{name}}/resize'
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'count'
@@ -11844,6 +12229,7 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'instanceProperties'
             required: true
+            input: true
             description: |
               The instance properties for the reservation.
             properties:

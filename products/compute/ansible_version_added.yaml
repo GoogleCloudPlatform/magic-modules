@@ -56,6 +56,8 @@
     :version_added: '2.10'
   :RegionHealthCheck:
     :version_added: '2.10'
+  :ResourcePolicy:
+    :version_added: '2.10'
   :Route:
     :version_added: '2.7'
   :Router:
@@ -1519,6 +1521,50 @@
         :version_added: '2.10'
       :portSpecification:
         :version_added: '2.10'
+    :region:
+      :version_added: '2.10'
+  :ResourcePolicy:
+    :version_added: '2.10'
+    :name:
+      :version_added: '2.10'
+    :snapshotSchedulePolicy:
+      :version_added: '2.10'
+      :schedule:
+        :version_added: '2.10'
+        :hourlySchedule:
+          :version_added: '2.10'
+          :hoursInCycle:
+            :version_added: '2.10'
+          :startTime:
+            :version_added: '2.10'
+        :dailySchedule:
+          :version_added: '2.10'
+          :daysInCycle:
+            :version_added: '2.10'
+          :startTime:
+            :version_added: '2.10'
+        :weeklySchedule:
+          :version_added: '2.10'
+          :dayOfWeeks:
+            :version_added: '2.10'
+            :startTime:
+              :version_added: '2.10'
+            :day:
+              :version_added: '2.10'
+      :retentionPolicy:
+        :version_added: '2.10'
+        :maxRetentionDays:
+          :version_added: '2.10'
+        :onSourceDiskDelete:
+          :version_added: '2.10'
+      :snapshotProperties:
+        :version_added: '2.10'
+        :labels:
+          :version_added: '2.10'
+        :storageLocations:
+          :version_added: '2.10'
+        :guestFlush:
+          :version_added: '2.10'
     :region:
       :version_added: '2.10'
   :Route:

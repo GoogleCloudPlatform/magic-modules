@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"google.golang.org/api/compute/v1"
@@ -14,14 +13,14 @@ import (
 func TestAccComputeRegionBackendService_basic(t *testing.T) {
 	t.Parallel()
 
-	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-	extraCheckName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	extraCheckName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRegionBackendServiceDestroy,
+		CheckDestroy: testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccComputeRegionBackendService_basic(serviceName, checkName),
@@ -47,14 +46,14 @@ func TestAccComputeRegionBackendService_basic(t *testing.T) {
 func TestAccComputeRegionBackendService_withBackendInternal(t *testing.T) {
   t.Parallel()
 
-  serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-  igName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-  itName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-  checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-  resource.Test(t, resource.TestCase{
+  serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+  igName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+  itName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+  checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+  vcrTest(t, resource.TestCase{
     PreCheck:     func() { testAccPreCheck(t) },
     Providers:    testAccProviders,
-    CheckDestroy: testAccCheckComputeRegionBackendServiceDestroy,
+    CheckDestroy: testAccCheckComputeRegionBackendServiceDestroyProducer(t),
     Steps: []resource.TestStep{
       {
         Config: testAccComputeRegionBackendService_withInvalidInternalBackend(
@@ -86,13 +85,13 @@ func TestAccComputeRegionBackendService_withBackendInternal(t *testing.T) {
 func TestAccComputeRegionBackendService_withBackendInternalManaged(t *testing.T) {
   t.Parallel()
 
-  serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-  igmName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-  hcName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-  resource.Test(t, resource.TestCase{
+  serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+  igmName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+  hcName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+  vcrTest(t, resource.TestCase{
     PreCheck:     func() { testAccPreCheck(t) },
     Providers:    testAccProviders,
-    CheckDestroy: testAccCheckComputeRegionBackendServiceDestroy,
+    CheckDestroy: testAccCheckComputeRegionBackendServiceDestroyProducer(t),
     Steps: []resource.TestStep{
       {
         Config:      testAccComputeRegionBackendService_internalManagedInvalidBackend(serviceName, igmName, hcName),
@@ -114,20 +113,19 @@ func TestAccComputeRegionBackendService_withBackendInternalManaged(t *testing.T)
   })
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeRegionBackendService_withBackendMultiNic(t *testing.T) {
         t.Parallel()
 
-        serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-        net1Name := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-        net2Name := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-        igName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-        itName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-        checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-        resource.Test(t, resource.TestCase{
+        serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+        net1Name := fmt.Sprintf("tf-test-%s", randString(t, 10))
+        net2Name := fmt.Sprintf("tf-test-%s", randString(t, 10))
+        igName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+        itName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+        checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+        vcrTest(t, resource.TestCase{
                 PreCheck:     func() { testAccPreCheck(t) },
                 Providers:    testAccProviders,
-                CheckDestroy: testAccCheckComputeRegionBackendServiceDestroy,
+                CheckDestroy: testAccCheckComputeRegionBackendServiceDestroyProducer(t),
                 Steps: []resource.TestStep{
                         resource.TestStep{
                                 Config: testAccComputeRegionBackendService_withBackendMultiNic(
@@ -141,18 +139,17 @@ func TestAccComputeRegionBackendService_withBackendMultiNic(t *testing.T) {
                 },
         })
 }
-<% end -%>
 
 func TestAccComputeRegionBackendService_withConnectionDrainingAndUpdate(t *testing.T) {
 	t.Parallel()
 
-	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	serviceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	checkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRegionBackendServiceDestroy,
+		CheckDestroy: testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccComputeRegionBackendService_withConnectionDraining(serviceName, checkName, 10),
@@ -178,13 +175,13 @@ func TestAccComputeRegionBackendService_withConnectionDrainingAndUpdate(t *testi
 func TestAccComputeRegionBackendService_ilbUpdateBasic(t *testing.T) {
 	t.Parallel()
 
-	backendName := fmt.Sprintf("foo-%s", acctest.RandString(10))
-	checkName := fmt.Sprintf("bar-%s", acctest.RandString(10))
+	backendName := fmt.Sprintf("foo-%s", randString(t, 10))
+	checkName := fmt.Sprintf("bar-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRegionBackendServiceDestroy,
+		CheckDestroy: testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRegionBackendService_ilbBasic(backendName, checkName),
@@ -211,17 +208,17 @@ func TestAccComputeRegionBackendService_ilbUpdateBasic(t *testing.T) {
 func TestAccComputeRegionBackendService_ilbUpdateFull(t *testing.T) {
 	t.Parallel()
 
-  randString := acctest.RandString(10)
+  randString := randString(t, 10)
 
 	backendName := fmt.Sprintf("foo-%s", randString)
 	checkName := fmt.Sprintf("bar-%s", randString)
   igName := fmt.Sprintf("baz-%s", randString)
   instanceName := fmt.Sprintf("boz-%s", randString)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRegionBackendServiceDestroy,
+		CheckDestroy: testAccCheckComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRegionBackendService_ilbFull(backendName, checkName),
@@ -559,7 +556,6 @@ resource "google_compute_health_check" "default" {
 `, serviceName, timeout, igName, itName, checkName)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeRegionBackendService_withBackendMultiNic(
         serviceName, net1Name, net2Name, igName, itName, checkName string, timeout int64) string {
         return fmt.Sprintf(`
@@ -577,13 +573,15 @@ resource "google_compute_region_backend_service" "lipsum" {
 
   backend {
     group = google_compute_instance_group_manager.foobar.instance_group
+<% unless version.nil? || version == 'ga' -%>
     failover = true
   }
 
   failover_policy {
     disable_connection_drain_on_failover = true
-    drop_traffic_if_unhealthy = true
-    failover_ratio = 0.4
+    drop_traffic_if_unhealthy            = true
+    failover_ratio                       = 0.4
+<% end -%>
   }
 
   network = google_compute_network.network2.self_link
@@ -658,7 +656,6 @@ resource "google_compute_health_check" "default" {
 }
 `, serviceName, timeout, net1Name, net1Name, net2Name, net2Name, igName, itName, checkName)
 }
-<% end -%>
 
 func testAccComputeRegionBackendService_withInvalidInternalBackend(
   serviceName, igName, itName, checkName string) string {

@@ -28,7 +28,7 @@ package google
     client_name_camel = client_name.camelize(:lower)
     client_name_pascal = client_name.camelize(:upper)
     client_name_lower = client_name.downcase
-    has_project = object.base_url.include?('{{project}}')
+    has_project = object.base_url.include?('{{project}}') || (object.create_url && object.create_url.include?('{{project}}'))
     has_region = object.base_url.include?('{{region}}') && object.parameters.any?{ |p| p.name == 'region' && p.ignore_read }
     # In order of preference, use TF override,
     # general defined timeouts, or default Timeouts
@@ -139,7 +139,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     obj := make(map[string]interface{})
 <%  object.settable_properties.each do |prop| -%>
     <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
+    <%= prop.api_name -%>Prop, err := expand<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
     if err != nil {
         return err
 <%    if prop.send_empty_value -%>
@@ -154,6 +154,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  end -%>
 
 <%  if object.custom_code.encoder -%>
+    <%= "var err error"  if object.settable_properties.size == 0 %>
     obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
     if err != nil {
         return err
@@ -207,6 +208,16 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  end -%>
         return fmt.Errorf("Error creating <%= object.name -%>: %s", err)
     }
+<% # Set resource properties from create API response (unless it returns an Operation) -%>
+<%  unless object.async&.is_a? Api::OpAsync -%>
+    <% object.gettable_properties.each do |prop| -%>
+        <% if object.identity.include?(prop) && prop.output -%>
+    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config)); err != nil {
+        return fmt.Errorf(`Error setting computed identity field "<%=prop.name.underscore%>": %s`, err)
+    }
+        <% end -%>
+    <% end -%>
+<% end -%>
 
     // Store the ID now
     id, err := replaceVars(d, config, "<%= id_format(object) -%>")
@@ -247,16 +258,6 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
     }
 
-<%      if object.nested_query -%>
-    opRes, err = flattenNested<%= resource_name -%>(d, meta, opRes)
-    if err != nil {
-        return fmt.Errorf("Error getting nested object from operation response: %s", err)
-    }
-    if opRes == nil {
-        // Object isn't there any more - remove it from the state.
-        return fmt.Errorf("Error decoding response from operation, could not find nested object")
-    }
-<%      end -%>
 <%      if object.custom_code.decoder -%>
     opRes, err = resource<%= resource_name -%>Decoder(d, meta, opRes)
     if err != nil {
@@ -266,9 +267,22 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         return fmt.Errorf("Error decoding response from operation, could not find object")
     }
 <%      end -%>
+
+<%      if object.nested_query -%>
+    if _, ok := opRes["<%=object.nested_query.keys[0]-%>"]; ok {
+        opRes, err = flattenNested<%= resource_name -%>(d, meta, opRes)
+        if err != nil {
+            return fmt.Errorf("Error getting nested object from operation response: %s", err)
+        }
+        if opRes == nil {
+            // Object isn't there any more - remove it from the state.
+            return fmt.Errorf("Error decoding response from operation, could not find nested object")
+        }
+    }
+<%      end -%>
     <% object.gettable_properties.each do |prop| -%>
     <% if object.identity.include?(prop) -%>
-    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(opRes["<%= prop.api_name -%>"], d, config)); err != nil {
+    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(opRes["<%= prop.api_name -%>"], d, config)); err != nil {
         return err
     }
     <% end -%>
@@ -453,7 +467,10 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%    if prop.flatten_object -%>
 // Terraform must set the top level schema field, but since this object contains collapsed properties
 // it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
-    if flattenedProp := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config); flattenedProp != nil {
+    if flattenedProp := flatten<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config); flattenedProp != nil {
+        if gerr, ok := flattenedProp.(*googleapi.Error); ok {
+			return fmt.Errorf("Error reading <%= object.name -%>: %s", gerr)
+		}
         casted := flattenedProp.([]interface{})[0]
         if casted != nil {
             for k, v := range casted.(map[string]interface{}) {
@@ -462,7 +479,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         }
     }
 <%    else -%>
-    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config)); err != nil {
+    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config)); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
 <%    end -%>
@@ -519,7 +536,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
           .reject(&:url_param_only)
           .each do |prop| -%>
         <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
-        <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
+        <%= prop.api_name -%>Prop, err := expand<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
         if err != nil {
             return err
 <%#         There is some nuance in when we choose to send a value to an update function.
@@ -550,6 +567,14 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         }
 <%    end # props.each -%>
 
+<%# We need to decide what encoder to use here - if there's an update encoder, use that! -%>
+<%  if object.custom_code.update_encoder -%>
+    obj, err = resource<%= resource_name -%>UpdateEncoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+<%  end -%>
+
 <%      if object.mutex -%>
         lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
         if err != nil {
@@ -569,7 +594,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             project = parts[1]
         }
 <%      end -%>
-<%      if object.async.is_a? Api::OpAsync-%>
+<%      if object.async&.allow?('update') && object.async.is_a?(Api::OpAsync) -%>
         res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 <%      else -%>
         _, err = sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
@@ -610,7 +635,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%  update_body_properties.each do |prop| -%>
     <%# flattened objects won't have something stored in state so instead nil is passed to the next expander. -%>
     <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
+    <%= prop.api_name -%>Prop, err := expand<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
     if err != nil {
         return err
 <%      if prop.send_empty_value -%>
@@ -628,12 +653,12 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%  if object.custom_code.update_encoder -%>
     obj, err = resource<%= resource_name -%>UpdateEncoder(d, meta, obj)
     if err != nil {
-    	return err
+        return err
     }
 <%  elsif object.custom_code.encoder -%>
     obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
     if err != nil {
-    	return err
+        return err
     }
 <%  end -%>
 
@@ -667,7 +692,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         project = parts[1]
     }
 <%  end -%>
-<%  if object.async.is_a? Api::OpAsync-%>
+<%  if object.async&.allow?('update') && object.async.is_a?(Api::OpAsync) -%>
     res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 <%  else -%>
     _, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
@@ -705,7 +730,14 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <% end # if updatable? -%>
 
 func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
-<% if object.custom_code.custom_delete -%>
+<% if object.skip_delete -%>
+    log.Printf("[WARNING] <%= object.__product.name + " " + object.name %> resources" +
+    " cannot be deleted from GCP. The resource %s will be removed from Terraform" +
+    " state, but will still be present on the server.", d.Id())
+    d.SetId("")
+
+    return nil
+<% elsif object.custom_code.custom_delete -%>
 <%= lines(compile(object.custom_code.custom_delete)) -%>
 <% else -%>
     config := meta.(*Config)
@@ -810,12 +842,13 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 }
 <% end -%>
 
+<%- nested_prefix = object.nested_query ? "Nested" : "" -%>
 <% object.gettable_properties.reject(&:ignore_read).each do |prop| -%>
-<%= lines(build_flatten_method(resource_name, prop, object), 1) -%>
+<%= lines(build_flatten_method(nested_prefix+resource_name, prop, object), 1) -%>
 <% end -%>
 
 <% object.settable_properties.each do |prop| -%>
-<%= lines(build_expand_method(resource_name, prop, object), 1) -%>
+<%= lines(build_expand_method(nested_prefix+resource_name, prop, object), 1) -%>
 <% end -%>
 
 <% if object.custom_code.encoder -%>

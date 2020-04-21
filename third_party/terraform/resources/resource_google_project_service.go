@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/serviceusage/v1"
 )
 
@@ -154,7 +155,19 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	if err != nil {
 		return err
 	}
-	srv := d.Get("service").(string)
+
+	// Verify project for services still exists
+	p, err := config.clientResourceManager.Projects.Get(project).Do()
+	if err == nil && p.LifecycleState == "DELETE_REQUESTED" {
+		// Construct a 404 error for handleNotFoundError
+		err = &googleapi.Error{
+			Code:    404,
+			Message: "Project deletion was requested",
+		}
+	}
+	if err != nil {
+		return handleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
+	}
 
 	servicesRaw, err := BatchRequestReadServices(project, d, config)
 	if err != nil {
@@ -162,6 +175,7 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	}
 	servicesList := servicesRaw.(map[string]struct{})
 
+	srv := d.Get("service").(string)
 	if _, ok := servicesList[srv]; ok {
 		d.Set("project", project)
 		d.Set("service", srv)
@@ -215,7 +229,7 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 			return err
 		}
 		// Wait for the operation to complete
-		waitErr := serviceUsageOperationWait(config, sop, "api to disable")
+		waitErr := serviceUsageOperationWait(config, sop, project, "api to disable")
 		if waitErr != nil {
 			return waitErr
 		}

@@ -5,5 +5,5 @@
 // us to know the server-side generated name of the object we're
 // trying to fetch, and the only way to know that is to capture
 // it here.  The following two lines do that.
-d.SetId(flattenResourceManagerLienName(res["name"], d, config).(string))
-d.Set("name", flattenResourceManagerLienName(res["name"], d, config))
+d.SetId(flattenNestedResourceManagerLienName(res["name"], d, config).(string))
+d.Set("name", flattenNestedResourceManagerLienName(res["name"], d, config))

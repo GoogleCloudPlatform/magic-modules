@@ -52,6 +52,7 @@ objects:
       set_iam_policy_method: 'iam'
       set_iam_policy_verb: :PUT
       wrapped_policy_obj: false
+      custom_diff_suppress: 'templates/terraform/iam/storage_bucket_diff_suppress.go.erb'
     properties:
       - !ruby/object:Api::Type::Array
         name: 'acl'
@@ -406,6 +407,39 @@ objects:
               object is missing, if applicable, the service will return the
               named object from this bucket as the content for a 404 Not Found
               result.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Labels applied to this bucket.  A list of key->value pairs.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'encryption'
+        description: |
+          Encryption configuration for the bucket
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'defaultKmsKeyName'
+            description: |
+              A Cloud KMS key that will be used to encrypt objects inserted into this bucket,
+              if no encryption method is specified.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'retentionPolicy'
+        description: |
+          Retention policy for the bucket
+        properties:
+          - !ruby/object:Api::Type::Time
+            name: 'effectiveTime'
+            description: |
+              The time from which the retention policy was effective
+          - !ruby/object:Api::Type::Boolean
+            name: 'isLocked'
+            description: |
+              If the retention policy is locked. If true, the retention policy cannot be removed and the period cannot
+              be reduced.
+          - !ruby/object:Api::Type::Integer
+            name: 'retentionPeriod'
+            description: |
+              The period of time, in seconds, that objects in the bucket must be retained and cannot be deleted,
+              overwritten, or made noncurrent.
     parameters:
       - !ruby/object:Api::Type::String
         name: 'project'

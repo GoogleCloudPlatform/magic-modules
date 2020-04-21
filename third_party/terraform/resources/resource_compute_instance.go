@@ -596,6 +596,15 @@ func resourceComputeInstance() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+
+			"resource_policies": {
+				Type:             schema.TypeList,
+				Elem:             &schema.Schema{Type: schema.TypeString},
+				DiffSuppressFunc: compareSelfLinkRelativePaths,
+				Optional:         true,
+				ForceNew:         true,
+				MaxItems:         1,
+			},
 		},
 		CustomizeDiff: customdiff.All(
 			customdiff.If(
@@ -723,6 +732,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *Confi
 		ForceSendFields:    []string{"CanIpForward", "DeletionProtection"},
 		ShieldedVmConfig:   expandShieldedVmConfigs(d),
 		DisplayDevice:      expandDisplayDevice(d),
+		ResourcePolicies:   convertStringArr(d.Get("resource_policies").([]interface{})),
 	}, nil
 }
 
@@ -986,6 +996,9 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 			}
 		}
 	}
+
+	d.Set("resource_policies", instance.ResourcePolicies)
+
 	// Remove nils from map in case there were disks in the config that were not present on read;
 	// i.e. a disk was detached out of band
 	ads := []map[string]interface{}{}
@@ -1773,16 +1786,21 @@ func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceComputeInstanceImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-
-	if len(parts) != 3 {
-		return nil, fmt.Errorf("Invalid import id %q. Expecting {project}/{zone}/{instance_name}", d.Id())
+	config := meta.(*Config)
+	if err := parseImportId([]string{
+		"projects/(?P<project>[^/]+)/zones/(?P<zone>[^/]+)/instances/(?P<name>[^/]+)",
+		"(?P<project>[^/]+)/(?P<zone>[^/]+)/(?P<name>[^/]+)",
+		"(?P<name>[^/]+)",
+	}, d, config); err != nil {
+		return nil, err
 	}
 
-	d.Set("project", parts[0])
-	d.Set("zone", parts[1])
-	d.Set("name", parts[2])
-	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", parts[0], parts[1], parts[2]))
+	// Replace import id for the resource id
+	id, err := replaceVars(d, config, "projects/{{project}}/zones/{{zone}}/instances/{{name}}")
+	if err != nil {
+		return nil, fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
 }

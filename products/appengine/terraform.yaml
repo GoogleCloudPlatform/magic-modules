@@ -15,6 +15,7 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   FirewallRule: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["apps/{{project}}/firewall/ingressRules/{{priority}}"]
+    mutex: "apps/{{project}}"
     # This resource is a child resource (requires app ID in the URL)
     skip_sweeper: true
     examples:
@@ -89,7 +90,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           If set to `true`, the service will be deleted if it is the last version.    
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/appversion_delete.go.erb
-      test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.erb
+      test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
       encoder: templates/terraform/encoders/flex_app_version.go.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -120,19 +121,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "app_engine_flexible_app_version"
         primary_resource_id: "myapp_v1"
         ignore_read_extra:
-          - "delete_service_on_destroy"
+          - "noop_on_destroy"
         vars:
-          project_id: "tf-test-project"
           bucket_name: "appengine-static-content"
-          service_name: "service-"
+          project: "appeng-flex"
         test_env_vars:
           org_id: :ORG_ID
+          billing_account: :BILLING_ACCT
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
     self_link: 'apps/{{project}}/domainMappings/{{domain_name}}'
     id_format: 'apps/{{project}}/domainMappings/{{domain_name}}'
     import_format: ['apps/{{project}}/domainMappings/{{domain_name}}']
+    mutex: "apps/{{project}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_domain_mapping_basic"
@@ -175,7 +177,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
     properties:
       split: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true    
+        ignore_read: true
       split.allocations: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/float64_to_string.go.erb
     examples:
@@ -187,7 +189,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           split.allocations.v1: "1"
           bucket_name: "appengine-static-content"
         test_env_vars:
-          org_id: :ORG_ID    
+          org_id: :ORG_ID
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

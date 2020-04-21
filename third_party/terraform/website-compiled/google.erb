@@ -41,6 +41,9 @@
       <li<%%= sidebar_current("docs-google-datasource-active-folder") %>>
       <a href="/docs/providers/google/d/google_active_folder.html">google_active_folder</a>
       </li>
+      <li<%%= sidebar_current("docs-google-datasource-bigquery-default-service-account") %>>
+        <a href="/docs/providers/google/d/google_bigquery_default_service_account.html">google_bigquery_default_service_account</a>
+      </li>
       <li<%%= sidebar_current("docs-google-datasource-billing-account") %>>
         <a href="/docs/providers/google/d/google_billing_account.html">google_billing_account</a>
       </li>
@@ -145,6 +148,14 @@
       <li<%%= sidebar_current("docs-google-datasource-dns-managed-zone") %>>
       <a href="/docs/providers/google/d/dns_managed_zone.html">google_dns_managed_zone</a>
       </li>
+<% unless version == 'ga' -%>
+      <li<%%= sidebar_current("docs-google-datasource-firebase-web-app") %>>
+          <a href="/docs/providers/google/d/datasource_firebase_web_app.html">google_firebase_web_app</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-datasource-firebase-web-app-config") %>>
+          <a href="/docs/providers/google/d/datasource_firebase_web_app_config.html">google_firebase_web_app_config</a>
+      </li>
+<% end  -%>
       <li<%%= sidebar_current("docs-google-datasource-iam-policy") %>>
         <a href="/docs/providers/google/d/google_iam_policy.html">google_iam_policy</a>
       </li>
@@ -174,6 +185,12 @@
       </li>
       <li<%%= sidebar_current("docs-google-datasource-monitoring-notification-channel") %>>
       <a href="/docs/providers/google/d/datasource_monitoring_notification_channel.html">google_monitoring_notification_channel</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-datasource-monitoring-app-engine-service") %>>
+      <a href="/docs/providers/google/d/datasource_monitoring_app_engine_service.html">google_monitoring_app_engine_service</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-datasource-google-monitoring-uptime-check-ips") %>>
+        <a href="/docs/providers/google/d/datasource_google_monitoring_uptime_check_ips.html">google_monitoring_uptime_check_ips</a>
       </li>
       <li<%%= sidebar_current("docs-google-datasource-netblock-ip-ranges") %>>
       <a href="/docs/providers/google/d/datasource_google_netblock_ip_ranges.html">google_netblock_ip_ranges</a>
@@ -274,6 +291,13 @@
     <ul class="nav">
       <li<%%= sidebar_current("docs-google-bigquery-dataset") %>>
       <a href="/docs/providers/google/r/bigquery_dataset.html">google_bigquery_dataset</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-bigquery-dataset-access") %>>
+      <a href="/docs/providers/google/r/bigquery_dataset_access.html">google_bigquery_dataset_access</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-bigquery-job") %>>
+      <a href="/docs/providers/google/r/bigquery_job.html">google_bigquery_job</a>
+      </li>
       <li<%%= sidebar_current("docs-google-bigquery-table") %>>
       <a href="/docs/providers/google/r/bigquery_table.html">google_bigquery_table</a>
       </li>
@@ -622,6 +646,14 @@
       <a href="/docs/providers/google/r/compute_global_forwarding_rule.html">google_compute_global_forwarding_rule</a>
       </li>
 
+      <li<%%= sidebar_current("docs-google-compute-global-network-endpoint") %>>
+      <a href="/docs/providers/google/r/compute_global_network_endpoint.html">google_compute_global_network_endpoint</a>
+      </li>
+
+      <li<%%= sidebar_current("docs-google-compute-global-network-endpoint-group") %>>
+      <a href="/docs/providers/google/r/compute_global_network_endpoint_group.html">google_compute_global_network_endpoint_group</a>
+      </li>
+
 <% unless version == 'ga' %>
       <li<%%= sidebar_current("docs-google-compute-ha-vpn-gateway") %>>
       <a href="/docs/providers/google/r/compute_ha_vpn_gateway.html">google_compute_ha_vpn_gateway</a>
@@ -670,6 +702,10 @@
 
       <li<%%= sidebar_current("docs-google-compute-instance-group-manager") %>>
       <a href="/docs/providers/google/r/compute_instance_group_manager.html">google_compute_instance_group_manager</a>
+      </li>
+
+      <li<%%= sidebar_current("docs-google-compute-instance-group-named-port") %>>
+      <a href="/docs/providers/google/r/compute_instance_group_named_port.html">google_compute_instance_group_named_port</a>
       </li>
 
       <li<%%= sidebar_current("docs-google-compute-instance-template") %>>
@@ -992,6 +1028,18 @@
     </ul>
     </li>
 
+    <li<%%= sidebar_current("docs-google-dialogflow") %>>
+    <a href="#">Google Dialogflow Resources</a>
+    <ul class="nav">
+      <li<%%= sidebar_current("docs-google-dialogflow-agent") %>>
+          <a href="/docs/providers/google/r/dialogflow_agent.html">google_dialogflow_agent</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-dialogflow-intent") %>>
+          <a href="/docs/providers/google/r/dialogflow_intent.html">google_dialogflow_intent</a>
+      </li>
+    </ul>
+    </li>
+
     <li<%%= sidebar_current("docs-google-dns") %>>
     <a href="#">Google DNS Resources</a>
     <ul class="nav">
@@ -1028,7 +1076,26 @@
       </li>
     </ul>
     </li>
-
+<% unless version == 'ga' %>
+    <li<%%= sidebar_current("docs-google-firebase") %>>
+    <a href="#">Google Firebase Resources</a>
+    <ul class="nav">
+      <li<%%= sidebar_current("docs-google-firebase-project") %>>
+          <a href="/docs/providers/google/r/firebase_project.html">google_firebase_project</a>
+      </li>
+    </ul>
+    <ul class="nav">
+      <li<%%= sidebar_current("docs-google-firebase-project-location") %>>
+          <a href="/docs/providers/google/r/firebase_project_location.html">google_firebase_project_location</a>
+      </li>
+    </ul>
+    <ul class="nav">
+      <li<%%= sidebar_current("docs-google-firebase-web-app") %>>
+          <a href="/docs/providers/google/r/firebase_web_app.html">google_firebase_web_app</a>
+      </li>
+    </ul>
+    </li>
+<% end %>
     <li<%%= sidebar_current("docs-google-filestore") %>>
     <a href="#">Google Filestore Resources</a>
     <ul class="nav">
@@ -1268,6 +1335,14 @@
     </ul>
     </li>
 
+    <li<%%= sidebar_current("docs-google-os-login-ssh-public-key") %>>
+    <a href="#">Google OS Login</a>
+    <ul class="nav">
+      <li<%%= sidebar_current("docs-google-os-login-ssh-public-key") %>>
+      <a href="/docs/providers/google/r/os_login_ssh_public_key.html">google_os_login_ssh_public_key</a>
+    </ul>
+    </li>
+
     <li<%%= sidebar_current("docs-google-pubsub") %>>
     <a href="#">Google PubSub Resources</a>
     <ul class="nav">
@@ -1362,6 +1437,41 @@
     </li>
 <% end -%>
 
+<% unless version == 'ga' %>
+    <li<%%= sidebar_current("docs-google-service-directory") %>>
+    <a href="#">Google Service Directory Resources</a>
+    <ul class="nav">
+      <li<%%= sidebar_current("docs-google-service-directory-endpoint") %>>
+      <a href="/docs/providers/google/r/service_directory_endpoint.html">google_service_directory_endpoint</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-service-directory-namespace") %>>
+      <a href="/docs/providers/google/r/service_directory_namespace.html">google_service_directory_namespace</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-service-directory-namespace-iam") %>>
+      <a href="/docs/providers/google/r/service_directory_namespace_iam.html">google_service_directory_namespace_iam_member</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-service-directory-namespace-iam") %>>
+      <a href="/docs/providers/google/r/service_directory_namespace_iam.html">google_service_directory_namespace_iam_binding</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-service-directory-namespace-iam") %>>
+      <a href="/docs/providers/google/r/service_directory_namespace_iam.html">google_service_directory_namespace_iam_policy</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-service-directory-service") %>>
+      <a href="/docs/providers/google/r/service_directory_service.html">google_service_directory_service</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-service-directory-service-iam") %>>
+      <a href="/docs/providers/google/r/service_directory_service_iam.html">google_service_directory_service_iam_member</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-service-directory-service-iam") %>>
+      <a href="/docs/providers/google/r/service_directory_service_iam.html">google_service_directory_service_iam_binding</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-service-directory-service-iam") %>>
+      <a href="/docs/providers/google/r/service_directory_service_iam.html">google_service_directory_service_iam_policy</a>
+      </li>
+    </ul>
+    </li>
+<% end -%>
+
     <li<%%= sidebar_current("docs-google-service-networking") %>>
     <a href="#">Google Service Networking Resources</a>
     <ul class="nav">
@@ -1370,6 +1480,17 @@
       </li>
     </ul>
     </li>
+
+<% unless version == 'ga' %>
+    <li<%%= sidebar_current("docs-google-service-usage") %>>
+    <a href="#">Google Service Usage Resources</a>
+    <ul class="nav">
+      <li<%%= sidebar_current("docs-google-service-usage-consumer-quota-override") %>>
+      <a href="/docs/providers/google/r/service_usage_consumer_quota_override.html">google_service_usage_consumer_quota_override</a>
+      </li>
+    </ul>
+    </li>
+<% end -%>
 
     <li<%%= sidebar_current("docs-google-sourcerepo") %>>
     <a href="#">Google Source Repositories Resources</a>
@@ -1497,6 +1618,12 @@
       </li>
       <li<%%= sidebar_current("docs-google-monitoring-notification-channel") %>>
       <a href="/docs/providers/google/r/monitoring_notification_channel.html">google_monitoring_notification_channel</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-monitoring-custom-service") %>>
+      <a href="/docs/providers/google/r/monitoring_service.html">google_monitoring_custom_service</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-monitoring-slo") %>>
+      <a href="/docs/providers/google/r/monitoring_slo.html">google_monitoring_slo</a>
       </li>
       <li<%%= sidebar_current("docs-google-monitoring-uptime-check-config") %>>
       <a href="/docs/providers/google/r/monitoring_uptime_check_config.html">google_monitoring_uptime_check_config</a>

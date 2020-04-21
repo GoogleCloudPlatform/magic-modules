@@ -77,6 +77,7 @@ type Config struct {
 	PollInterval time.Duration
 
 	client           *http.Client
+	wrappedPubsubClient *http.Client
 	context          context.Context
 	terraformVersion string
 	userAgent        string
@@ -154,7 +155,6 @@ type Config struct {
 
 	clientServiceMan          *servicemanagement.APIService
 
-	ServiceUsageBasePath       string
 	clientServiceUsage         *serviceusage.Service
 
 	clientBigQuery   *bigquery.Service
@@ -339,6 +339,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	pubsubClientBasePath := removeBasePathVersion(c.PubsubBasePath)
 	log.Printf("[INFO] Instantiating Google Pubsub client for path %s", pubsubClientBasePath)
 	wrappedPubsubClient := ClientWithAdditionalRetries(client, retryTransport, pubsubTopicProjectNotReady)
+	c.wrappedPubsubClient = wrappedPubsubClient
 	c.clientPubsub, err = pubsub.NewService(ctx, option.WithHTTPClient(wrappedPubsubClient))
 	if err != nil {
 		return err
@@ -682,7 +683,6 @@ func ConfigureBasePaths(c *Config) {
 	c.ResourceManagerV2Beta1BasePath = ResourceManagerV2Beta1DefaultBasePath
 	c.IAMBasePath = IAMDefaultBasePath
 	c.ServiceNetworkingBasePath = ServiceNetworkingDefaultBasePath
-	c.ServiceUsageBasePath = ServiceUsageDefaultBasePath
 	c.BigQueryBasePath = BigQueryDefaultBasePath
 	c.CloudIoTBasePath = CloudIoTDefaultBasePath
 	c.StorageTransferBasePath = StorageTransferDefaultBasePath

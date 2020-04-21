@@ -28,6 +28,18 @@ var functionAllowedMemory = map[int]bool{
 
 const functionDefaultAllowedMemoryMb = 256
 
+var allowedIngressSettings = []string{
+	"ALLOW_ALL",
+	"ALLOW_INTERNAL_ONLY",
+}
+
+var allowedVpcConnectorEgressSettings = []string{
+	"ALL_TRAFFIC",
+	"PRIVATE_RANGES_ONLY",
+}
+
+const functionDefaultIngressSettings = "ALLOW_ALL"
+
 type cloudFunctionId struct {
 	Project string
 	Region  string
@@ -164,6 +176,20 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+			},
+
+			"ingress_settings": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      functionDefaultIngressSettings,
+				ValidateFunc: validation.StringInSlice(allowedIngressSettings, true),
+			},
+
+			"vpc_connector_egress_settings": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice(allowedVpcConnectorEgressSettings, true),
 			},
 
 			"labels": {
@@ -330,6 +356,10 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 			"You must specify a trigger when deploying a new function.")
 	}
 
+	if v, ok := d.GetOk("ingress_settings"); ok {
+		function.IngressSettings = v.(string)
+	}
+
 	if _, ok := d.GetOk("labels"); ok {
 		function.Labels = expandLabels(d)
 	}
@@ -340,6 +370,10 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 
 	if v, ok := d.GetOk("vpc_connector"); ok {
 		function.VpcConnector = v.(string)
+	}
+
+	if v, ok := d.GetOk("vpc_connector_egress_settings"); ok {
+		function.VpcConnectorEgressSettings = v.(string)
 	}
 
 	if v, ok := d.GetOk("max_instances"); ok {
@@ -388,11 +422,13 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 	d.Set("timeout", timeout)
+	d.Set("ingress_settings", function.IngressSettings)
 	d.Set("labels", function.Labels)
 	d.Set("runtime", function.Runtime)
 	d.Set("service_account_email", function.ServiceAccountEmail)
 	d.Set("environment_variables", function.EnvironmentVariables)
 	d.Set("vpc_connector", function.VpcConnector)
+	d.Set("vpc_connector_egress_settings", function.VpcConnectorEgressSettings)
 	if function.SourceArchiveUrl != "" {
 		// sourceArchiveUrl should always be a Google Cloud Storage URL (e.g. gs://bucket/object)
 		// https://cloud.google.com/functions/docs/reference/rest/v1/projects.locations.functions
@@ -469,6 +505,11 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 		updateMaskArr = append(updateMaskArr, "timeout")
 	}
 
+	if d.HasChange("ingress_settings") {
+		function.IngressSettings = d.Get("ingress_settings").(string)
+		updateMaskArr = append(updateMaskArr, "ingressSettings")
+	}
+
 	if d.HasChange("labels") {
 		function.Labels = expandLabels(d)
 		updateMaskArr = append(updateMaskArr, "labels")
@@ -487,6 +528,11 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	if d.HasChange("vpc_connector") {
 		function.VpcConnector = d.Get("vpc_connector").(string)
 		updateMaskArr = append(updateMaskArr, "vpcConnector")
+	}
+
+	if d.HasChange("vpc_connector_egress_settings") {
+		function.VpcConnectorEgressSettings = d.Get("vpc_connector_egress_settings").(string)
+		updateMaskArr = append(updateMaskArr, "vpcConnectorEgressSettings")
 	}
 
 	if d.HasChange("event_trigger") {
