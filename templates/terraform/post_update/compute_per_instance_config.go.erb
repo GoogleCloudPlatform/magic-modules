@@ -1,0 +1,40 @@
+// Instance name in applyUpdatesToInstances request must include zone
+instanceName, err := replaceVars(d, config, "zones/{{zone}}/instances/{{name}}")
+if err != nil {
+	return err
+}
+
+obj = make(map[string]interface{})
+obj["instances"] = []string{instanceName}
+
+minAction := d.Get("minimal_action")
+if minAction == "" {
+	minAction = "NONE"
+}
+obj["minimalAction"] = minAction
+
+mostDisruptiveAction := d.Get("most_disruptive_action_allowed")
+if mostDisruptiveAction != "" {
+	mostDisruptiveAction = "REPLACE"
+}
+obj["mostDisruptiveActionAllowed"] = mostDisruptiveAction
+
+url, err = replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/applyUpdatesToInstances")
+if err != nil {
+	return err
+}
+
+log.Printf("[DEBUG] Applying updates to PerInstanceConfig %q: %#v", d.Id(), obj)
+res, err = sendRequestWithTimeout(config, "POST", project, url, obj, d.Timeout(schema.TimeoutUpdate))
+
+if err != nil {
+	return fmt.Errorf("Error updating PerInstanceConfig %q: %s", d.Id(), err)
+}
+
+err = computeOperationWaitTime(
+	config, res, project, "Applying update to PerInstanceConfig",
+	int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+
+if err != nil {
+	return err
+}

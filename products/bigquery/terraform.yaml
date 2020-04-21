@@ -35,8 +35,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           key_name: "example-key"
           keyring_name: "example-keyring"
     virtual_fields:
-      - !ruby/object:Provider::Terraform::VirtualFields
+      - !ruby/object:Api::Type::Boolean
         name: 'delete_contents_on_destroy'
+        default_value: false
         description: |
           If set to `true`, delete all the tables in the
           dataset when destroying the resource; otherwise,

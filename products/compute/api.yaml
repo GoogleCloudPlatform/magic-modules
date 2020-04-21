@@ -15556,3 +15556,91 @@ objects:
         description: 'The available CPU platforms in this zone'
         item_type: Api::Type::String
         output: true
+  - !ruby/object:Api::Resource
+    name: 'PerInstanceConfig'
+    base_url:  'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}'
+    description: |
+      A Network endpoint represents a IP address and port combination that is
+      part of a specific network endpoint group (NEG). NEGs are zonals
+      collection of these endpoints for GCP resources within a
+      single subnet. **NOTE**: Network endpoints cannot be created outside of a
+      network endpoint group.
+    create_verb: :POST
+    create_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/createInstances
+    update_verb: :POST
+    update_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/updatePerInstanceConfigs
+    delete_verb: :POST
+    delete_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/deletePerInstanceConfigs
+    read_verb: :POST
+    self_link: projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/listPerInstanceConfigs
+    identity:
+      - name
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys:
+        - items
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/compute/docs/instance-groups/stateful-migs#per-instance_configs'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 6
+          update_minutes: 6
+          delete_minutes: 6
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'zone'
+        resource: 'Zone'
+        imports: 'name'
+        description: |
+          Zone where the containing instance group manager is located
+        required: true
+        url_param_only: true
+        input: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'instanceGroupManager'
+        resource: 'InstanceGroupManager'
+        imports: 'name'
+        description: |
+          The instance group manager this instance config is part of.
+        required: true
+        url_param_only: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The name for this per-instance config and its corresponding instance.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'preservedState'
+        description: 'The preserved state for this instance.'
+        update_verb: :POST
+        update_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/updatePerInstanceConfigs'
+        properties:
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'metadata'
+            description: |
+              Preserved metadata defined for this instance. This is a list of key->value pairs.
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'disks'
+            description: |
+              Preserved disks defined for this instance. Stored as key->value with the key being the device name
