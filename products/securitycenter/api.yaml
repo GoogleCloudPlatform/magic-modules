@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: SecurityCenter
-display_name: Cloud Security Command Center
+display_name: Security Command Center (SCC)
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

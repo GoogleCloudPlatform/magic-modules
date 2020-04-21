@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: KMS
-display_name: Cloud KMS
+display_name: Cloud Key Management Service
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

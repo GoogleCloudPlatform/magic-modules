@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Product
 name: Firestore
-display_name: Cloud Firestore
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
