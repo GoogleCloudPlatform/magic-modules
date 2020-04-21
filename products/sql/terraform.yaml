@@ -16,6 +16,7 @@ client_name: 'SqlAdmin'
 overrides: !ruby/object:Overrides::ResourceOverrides
   Database: !ruby/object:Overrides::Terraform::ResourceOverride
     mutex: "google-sql-database-instance-{{project}}-{{instance}}"
+    read_error_transform: "transformSQLDatabaseReadError"
     import_format: ["projects/{{project}}/instances/{{instance}}/databases/{{name}}",
                     "{{project}}/{{instance}}/{{name}}",
                     "instances/{{instance}}/databases/{{name}}",

@@ -75,7 +75,12 @@ module Overrides
 
           # This enables resources that get their project via a reference to a different resource
           # instead of a project field to use User Project Overrides
-          :supports_indirect_user_project_override
+          :supports_indirect_user_project_override,
+
+          # Function to transform a read error so that handleNotFound recognises
+          # it as a 404. This should be added as a handwritten fn that takes in
+          # an error and returns one.
+          :read_error_transform
         ]
       end
 
@@ -108,6 +113,7 @@ module Overrides
         check :skip_sweeper, type: :boolean, default: false
         check :skip_delete, type: :boolean, default: false
         check :supports_indirect_user_project_override, type: :boolean, default: false
+        check :read_error_transform, type: String
       end
 
       def apply(resource)
