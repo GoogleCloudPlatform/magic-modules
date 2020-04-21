@@ -14,8 +14,9 @@
 <%   end -%>
 <% end -%>
 <%= indent(property.description.strip.gsub("\n\n", "\n"), 2) -%>
+<% if property.sensitive -%>
+  **Note:** Sensitive fields will be stored in the raw state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+<% end -%>
 <% if property.is_a?(Api::Type::NestedObject) || property.is_a?(Api::Type::Map) || (property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject)) -%>
   Structure is documented below.
-<%   elsif property.sensitive -%>
-  **Note:** Sensitive fields will be stored in the raw state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
 <% end -%>
