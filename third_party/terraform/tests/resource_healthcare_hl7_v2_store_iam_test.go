@@ -351,4 +351,3 @@ resource "google_healthcare_hl7_v2_store_iam_policy" "foo" {
 }
 `, account, datasetName, hl7V2StoreName, roleId)
 }
-

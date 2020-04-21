@@ -3,7 +3,6 @@ package google
 import (
 	"fmt"
 	"path"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -209,4 +208,3 @@ func testAccCheckGoogleHealthcareFhirStoreUpdate(pubsubTopic string) resource.Te
 		return nil
 	}
 }
-
