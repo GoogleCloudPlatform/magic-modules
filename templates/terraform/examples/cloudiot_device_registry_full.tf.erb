@@ -34,7 +34,7 @@ resource "google_pubsub_topic" "additional-telemetry" {
   ]
 }
 
-resource "google_cloud_iot_device_registry" "<%= ctx[:primary_resource_id] %>" {
+resource "google_cloudiot_registry" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['cloudiot_registry_name'] %>"
 
   depends_on = [
@@ -52,7 +52,7 @@ resource "google_cloud_iot_device_registry" "<%= ctx[:primary_resource_id] %>" {
     subfolder_matches = ""
   }
 
-  state_notification_config {
+  state_notification_config = {
     pubsub_topic_name = google_pubsub_topic.default-devicestatus.id
   }
 

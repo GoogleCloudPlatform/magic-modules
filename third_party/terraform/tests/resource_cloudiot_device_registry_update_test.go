@@ -63,8 +63,19 @@ func testAccCheckCloudIoTRegistryDestroy(s *terraform.State) error {
 
 func testAccCloudIoTRegistryBasic(registryName string) string {
 	return fmt.Sprintf(`
-resource "google_cloud_iot_device_registry" "%s" {
+
+resource "google_project_service" "cloud-iot-apis" {
+  service = "cloudiot.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_cloudiot_registry" "%s" {
   name = "%s"
+
+  depends_on = [
+    google_project_service.cloud-iot-apis
+  ]
 }
 `, registryName, registryName)
 }
@@ -108,7 +119,7 @@ resource "google_pubsub_topic" "additional-telemetry" {
   ]
 }
 
-resource "google_cloud_iot_device_registry" "%s" {
+resource "google_cloudiot_registry" "%s" {
   name     = "%s"
 
   depends_on = [
@@ -126,7 +137,7 @@ resource "google_cloud_iot_device_registry" "%s" {
     subfolder_matches = ""
   }
 
-  state_notification_config {
+  state_notification_config = {
     pubsub_topic_name = google_pubsub_topic.default-devicestatus.id
   }
 

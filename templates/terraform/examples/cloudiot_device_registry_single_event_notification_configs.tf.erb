@@ -18,7 +18,7 @@ resource "google_pubsub_topic" "default-telemetry" {
   ]
 }
 
-resource "google_cloud_iot_device_registry" "<%= ctx[:primary_resource_id] %>" {
+resource "google_cloudiot_registry" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['cloudiot_registry_name'] %>"
 
   depends_on = [
