@@ -160,7 +160,7 @@ resource "google_pubsub_topic" "topic" {
 `, fhirStoreName, datasetName, pubsubTopic)
 }
 
-func testAccCheckGoogleHealthcareFhirStoreUpdate(pubsubTopic string) resource.TestCheckFunc {
+func testAccCheckGoogleHealthcareFhirStoreUpdate(t *testing.T, pubsubTopic string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		var foundResource = false
 		for _, rs := range s.RootModule().Resources {

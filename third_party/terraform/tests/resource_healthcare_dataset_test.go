@@ -2,7 +2,6 @@ package google
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -105,7 +104,7 @@ func TestAccHealthcareDataset_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckGoogleHealthcareDatasetUpdate(timeZone string) resource.TestCheckFunc {
+func testAccCheckGoogleHealthcareDatasetUpdate(t *testing.T, timeZone string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_healthcare_dataset" {
