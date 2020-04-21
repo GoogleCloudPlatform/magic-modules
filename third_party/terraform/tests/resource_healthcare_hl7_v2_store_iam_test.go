@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
+
 import (
 	"fmt"
 	"reflect"
@@ -11,19 +10,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
-func TestAccHealthcareDicomStoreIamBinding(t *testing.T) {
+func TestAccHealthcareHl7V2StoreIamBinding(t *testing.T) {
 	t.Parallel()
 
 	projectId := getTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
-	roleId := "roles/healthcare.dicomStoreAdmin"
+	roleId := "roles/healthcare.hl7V2StoreAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	datasetId := &healthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
 	}
-	dicomStoreName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	hl7V2StoreName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -31,28 +30,28 @@ func TestAccHealthcareDicomStoreIamBinding(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
-				Config: testAccHealthcareDicomStoreIamBinding_basic(account, datasetName, dicomStoreName, roleId),
-				Check: testAccCheckGoogleHealthcareDicomStoreIamBindingExists(t, "foo", roleId, []string{
+				Config: testAccHealthcareHl7V2StoreIamBinding_basic(account, datasetName, hl7V2StoreName, roleId),
+				Check: testAccCheckGoogleHealthcareHl7V2StoreIamBindingExists(t, "foo", roleId, []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 				}),
 			},
 			{
-				ResourceName:      "google_healthcare_dicom_store_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("%s/%s %s", datasetId.terraformId(), dicomStoreName, roleId),
+				ResourceName:      "google_healthcare_hl7_v2_store_iam_binding.foo",
+				ImportStateId:     fmt.Sprintf("%s/%s %s", datasetId.terraformId(), hl7V2StoreName, roleId),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				// Test Iam Binding update
-				Config: testAccHealthcareDicomStoreIamBinding_update(account, datasetName, dicomStoreName, roleId),
-				Check: testAccCheckGoogleHealthcareDicomStoreIamBindingExists(t, "foo", roleId, []string{
+				Config: testAccHealthcareHl7V2StoreIamBinding_update(account, datasetName, hl7V2StoreName, roleId),
+				Check: testAccCheckGoogleHealthcareHl7V2StoreIamBindingExists(t, "foo", roleId, []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 					fmt.Sprintf("serviceAccount:%s-2@%s.iam.gserviceaccount.com", account, projectId),
 				}),
 			},
 			{
-				ResourceName:      "google_healthcare_dicom_store_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("%s/%s %s", datasetId.terraformId(), dicomStoreName, roleId),
+				ResourceName:      "google_healthcare_hl7_v2_store_iam_binding.foo",
+				ImportStateId:     fmt.Sprintf("%s/%s %s", datasetId.terraformId(), hl7V2StoreName, roleId),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -60,19 +59,19 @@ func TestAccHealthcareDicomStoreIamBinding(t *testing.T) {
 	})
 }
 
-func TestAccHealthcareDicomStoreIamMember(t *testing.T) {
+func TestAccHealthcareHl7V2StoreIamMember(t *testing.T) {
 	t.Parallel()
 
 	projectId := getTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
-	roleId := "roles/healthcare.dicomEditor"
+	roleId := "roles/healthcare.hl7V2Editor"
 	datasetName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	datasetId := &healthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
 	}
-	dicomStoreName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	hl7V2StoreName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -80,14 +79,14 @@ func TestAccHealthcareDicomStoreIamMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
-				Config: testAccHealthcareDicomStoreIamMember_basic(account, datasetName, dicomStoreName, roleId),
-				Check: testAccCheckGoogleHealthcareDicomStoreIamMemberExists(t, "foo", roleId,
+				Config: testAccHealthcareHl7V2StoreIamMember_basic(account, datasetName, hl7V2StoreName, roleId),
+				Check: testAccCheckGoogleHealthcareHl7V2StoreIamMemberExists(t, "foo", roleId,
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 				),
 			},
 			{
-				ResourceName:      "google_healthcare_dicom_store_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("%s/%s %s serviceAccount:%s@%s.iam.gserviceaccount.com", datasetId.terraformId(), dicomStoreName, roleId, account, projectId),
+				ResourceName:      "google_healthcare_hl7_v2_store_iam_member.foo",
+				ImportStateId:     fmt.Sprintf("%s/%s %s serviceAccount:%s@%s.iam.gserviceaccount.com", datasetId.terraformId(), hl7V2StoreName, roleId, account, projectId),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -95,19 +94,19 @@ func TestAccHealthcareDicomStoreIamMember(t *testing.T) {
 	})
 }
 
-func TestAccHealthcareDicomStoreIamPolicy(t *testing.T) {
+func TestAccHealthcareHl7V2StoreIamPolicy(t *testing.T) {
 	t.Parallel()
 
 	projectId := getTestProjectFromEnv()
 	account := fmt.Sprintf("tf-test-%d", randInt(t))
-	roleId := "roles/healthcare.dicomViewer"
+	roleId := "roles/healthcare.hl7V2Consumer"
 	datasetName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	datasetId := &healthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
 	}
-	dicomStoreName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	hl7V2StoreName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -115,14 +114,14 @@ func TestAccHealthcareDicomStoreIamPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Policy creation (no update for policy, no need to test)
-				Config: testAccHealthcareDicomStoreIamPolicy_basic(account, datasetName, dicomStoreName, roleId),
-				Check: testAccCheckGoogleHealthcareDicomStoreIamPolicyExists(t, "foo", roleId,
+				Config: testAccHealthcareHl7V2StoreIamPolicy_basic(account, datasetName, hl7V2StoreName, roleId),
+				Check: testAccCheckGoogleHealthcareHl7V2StoreIamPolicyExists(t, "foo", roleId,
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 				),
 			},
 			{
-				ResourceName:      "google_healthcare_dicom_store_iam_policy.foo",
-				ImportStateId:     fmt.Sprintf("%s/%s", datasetId.terraformId(), dicomStoreName),
+				ResourceName:      "google_healthcare_hl7_v2_store_iam_policy.foo",
+				ImportStateId:     fmt.Sprintf("%s/%s", datasetId.terraformId(), hl7V2StoreName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -130,21 +129,21 @@ func TestAccHealthcareDicomStoreIamPolicy(t *testing.T) {
 	})
 }
 
-func testAccCheckGoogleHealthcareDicomStoreIamBindingExists(t *testing.T, bindingResourceName, roleId string, members []string) resource.TestCheckFunc {
+func testAccCheckGoogleHealthcareHl7V2StoreIamBindingExists(t *testing.T, bindingResourceName, roleId string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		bindingRs, ok := s.RootModule().Resources[fmt.Sprintf("google_healthcare_dicom_store_iam_binding.%s", bindingResourceName)]
+		bindingRs, ok := s.RootModule().Resources[fmt.Sprintf("google_healthcare_hl7_v2_store_iam_binding.%s", bindingResourceName)]
 		if !ok {
 			return fmt.Errorf("Not found: %s", bindingResourceName)
 		}
 
 		config := googleProviderConfig(t)
-		dicomStoreId, err := parseHealthcareDicomStoreId(bindingRs.Primary.Attributes["dicom_store_id"], config)
+		hl7V2StoreId, err := parseHealthcareHl7V2StoreId(bindingRs.Primary.Attributes["hl7_v2_store_id"], config)
 
 		if err != nil {
 			return err
 		}
 
-		p, err := config.clientHealthcare.Projects.Locations.Datasets.DicomStores.GetIamPolicy(dicomStoreId.dicomStoreId()).Do()
+		p, err := config.clientHealthcare.Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(hl7V2StoreId.hl7V2StoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -166,21 +165,21 @@ func testAccCheckGoogleHealthcareDicomStoreIamBindingExists(t *testing.T, bindin
 	}
 }
 
-func testAccCheckGoogleHealthcareDicomStoreIamMemberExists(t *testing.T, n, role, member string) resource.TestCheckFunc {
+func testAccCheckGoogleHealthcareHl7V2StoreIamMemberExists(t *testing.T, n, role, member string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources["google_healthcare_dicom_store_iam_member."+n]
+		rs, ok := s.RootModule().Resources["google_healthcare_hl7_v2_store_iam_member."+n]
 		if !ok {
 			return fmt.Errorf("Not found: %s", n)
 		}
 
 		config := googleProviderConfig(t)
-		dicomStoreId, err := parseHealthcareDicomStoreId(rs.Primary.Attributes["dicom_store_id"], config)
+		hl7V2StoreId, err := parseHealthcareHl7V2StoreId(rs.Primary.Attributes["hl7_v2_store_id"], config)
 
 		if err != nil {
 			return err
 		}
 
-		p, err := config.clientHealthcare.Projects.Locations.Datasets.DicomStores.GetIamPolicy(dicomStoreId.dicomStoreId()).Do()
+		p, err := config.clientHealthcare.Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(hl7V2StoreId.hl7V2StoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -201,21 +200,21 @@ func testAccCheckGoogleHealthcareDicomStoreIamMemberExists(t *testing.T, n, role
 	}
 }
 
-func testAccCheckGoogleHealthcareDicomStoreIamPolicyExists(t *testing.T, n, role, policy string) resource.TestCheckFunc {
+func testAccCheckGoogleHealthcareHl7V2StoreIamPolicyExists(t *testing.T, n, role, policy string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources["google_healthcare_dicom_store_iam_policy."+n]
+		rs, ok := s.RootModule().Resources["google_healthcare_hl7_v2_store_iam_policy."+n]
 		if !ok {
 			return fmt.Errorf("Not found: %s", n)
 		}
 
 		config := googleProviderConfig(t)
-		dicomStoreId, err := parseHealthcareDicomStoreId(rs.Primary.Attributes["dicom_store_id"], config)
+		hl7V2StoreId, err := parseHealthcareHl7V2StoreId(rs.Primary.Attributes["hl7_v2_store_id"], config)
 
 		if err != nil {
 			return err
 		}
 
-		p, err := config.clientHealthcare.Projects.Locations.Datasets.DicomStores.GetIamPolicy(dicomStoreId.dicomStoreId()).Do()
+		p, err := config.clientHealthcare.Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(hl7V2StoreId.hl7V2StoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -238,7 +237,7 @@ func testAccCheckGoogleHealthcareDicomStoreIamPolicyExists(t *testing.T, n, role
 
 // We are using a custom role since iam_binding is authoritative on the member list and
 // we want to avoid removing members from an existing role to prevent unwanted side effects.
-func testAccHealthcareDicomStoreIamBinding_basic(account, datasetName, dicomStoreName, roleId string) string {
+func testAccHealthcareHl7V2StoreIamBinding_basic(account, datasetName, hl7V2StoreName, roleId string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "test_account" {
   account_id   = "%s"
@@ -250,20 +249,20 @@ resource "google_healthcare_dataset" "dataset" {
   name     = "%s"
 }
 
-resource "google_healthcare_dicom_store" "dicom_store" {
+resource "google_healthcare_hl7_v2_store" "hl7_v2_store" {
   dataset  = google_healthcare_dataset.dataset.id
   name     = "%s"
 }
 
-resource "google_healthcare_dicom_store_iam_binding" "foo" {
-  dicom_store_id = google_healthcare_dicom_store.dicom_store.id
-  role           = "%s"
-  members        = ["serviceAccount:${google_service_account.test_account.email}"]
+resource "google_healthcare_hl7_v2_store_iam_binding" "foo" {
+  hl7_v2_store_id = google_healthcare_hl7_v2_store.hl7_v2_store.id
+  role            = "%s"
+  members         = ["serviceAccount:${google_service_account.test_account.email}"]
 }
-`, account, datasetName, dicomStoreName, roleId)
+`, account, datasetName, hl7V2StoreName, roleId)
 }
 
-func testAccHealthcareDicomStoreIamBinding_update(account, datasetName, dicomStoreName, roleId string) string {
+func testAccHealthcareHl7V2StoreIamBinding_update(account, datasetName, hl7V2StoreName, roleId string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "test_account" {
   account_id   = "%s"
@@ -280,23 +279,23 @@ resource "google_healthcare_dataset" "dataset" {
   name     = "%s"
 }
 
-resource "google_healthcare_dicom_store" "dicom_store" {
+resource "google_healthcare_hl7_v2_store" "hl7_v2_store" {
   dataset  = google_healthcare_dataset.dataset.id
   name     = "%s"
 }
 
-resource "google_healthcare_dicom_store_iam_binding" "foo" {
-  dicom_store_id = google_healthcare_dicom_store.dicom_store.id
-  role           = "%s"
+resource "google_healthcare_hl7_v2_store_iam_binding" "foo" {
+  hl7_v2_store_id = google_healthcare_hl7_v2_store.hl7_v2_store.id
+  role            = "%s"
   members = [
     "serviceAccount:${google_service_account.test_account.email}",
     "serviceAccount:${google_service_account.test_account_2.email}",
   ]
 }
-`, account, account, datasetName, dicomStoreName, roleId)
+`, account, account, datasetName, hl7V2StoreName, roleId)
 }
 
-func testAccHealthcareDicomStoreIamMember_basic(account, datasetName, dicomStoreName, roleId string) string {
+func testAccHealthcareHl7V2StoreIamMember_basic(account, datasetName, hl7V2StoreName, roleId string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "test_account" {
   account_id   = "%s"
@@ -308,20 +307,20 @@ resource "google_healthcare_dataset" "dataset" {
   name     = "%s"
 }
 
-resource "google_healthcare_dicom_store" "dicom_store" {
+resource "google_healthcare_hl7_v2_store" "hl7_v2_store" {
   dataset  = google_healthcare_dataset.dataset.id
   name     = "%s"
 }
 
-resource "google_healthcare_dicom_store_iam_member" "foo" {
-  dicom_store_id = google_healthcare_dicom_store.dicom_store.id
-  role           = "%s"
-  member         = "serviceAccount:${google_service_account.test_account.email}"
+resource "google_healthcare_hl7_v2_store_iam_member" "foo" {
+  hl7_v2_store_id = google_healthcare_hl7_v2_store.hl7_v2_store.id
+  role            = "%s"
+  member          = "serviceAccount:${google_service_account.test_account.email}"
 }
-`, account, datasetName, dicomStoreName, roleId)
+`, account, datasetName, hl7V2StoreName, roleId)
 }
 
-func testAccHealthcareDicomStoreIamPolicy_basic(account, datasetName, dicomStoreName, roleId string) string {
+func testAccHealthcareHl7V2StoreIamPolicy_basic(account, datasetName, hl7V2StoreName, roleId string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "test_account" {
   account_id   = "%s"
@@ -333,7 +332,7 @@ resource "google_healthcare_dataset" "dataset" {
   name     = "%s"
 }
 
-resource "google_healthcare_dicom_store" "dicom_store" {
+resource "google_healthcare_hl7_v2_store" "hl7_v2_store" {
   dataset  = google_healthcare_dataset.dataset.id
   name     = "%s"
 }
@@ -346,12 +345,9 @@ data "google_iam_policy" "foo" {
   }
 }
 
-resource "google_healthcare_dicom_store_iam_policy" "foo" {
-  dicom_store_id = google_healthcare_dicom_store.dicom_store.id
-  policy_data    = data.google_iam_policy.foo.policy_data
+resource "google_healthcare_hl7_v2_store_iam_policy" "foo" {
+  hl7_v2_store_id = google_healthcare_hl7_v2_store.hl7_v2_store.id
+  policy_data     = data.google_iam_policy.foo.policy_data
 }
-`, account, datasetName, dicomStoreName, roleId)
+`, account, datasetName, hl7V2StoreName, roleId)
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
