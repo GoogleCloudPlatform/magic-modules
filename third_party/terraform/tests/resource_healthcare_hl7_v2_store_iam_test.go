@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
+
 import (
 	"fmt"
 	"reflect"
@@ -352,6 +351,4 @@ resource "google_healthcare_hl7_v2_store_iam_policy" "foo" {
 }
 `, account, datasetName, hl7V2StoreName, roleId)
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
+

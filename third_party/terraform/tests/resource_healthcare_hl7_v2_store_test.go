@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
+
 import (
 	"fmt"
 	"path"
@@ -209,6 +208,4 @@ func testAccCheckGoogleHealthcareHl7V2StoreUpdate(t *testing.T, pubsubTopic stri
 		return nil
 	}
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
+
