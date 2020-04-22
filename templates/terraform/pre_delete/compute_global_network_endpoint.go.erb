@@ -1,0 +1,28 @@
+toDelete := make(map[string]interface{})
+portProp, err := expandNestedComputeGlobalNetworkEndpointPort(d.Get("port"), d, config)
+if err != nil {
+  return err
+}
+if portProp != "" {
+	toDelete["port"] = portProp	
+}
+
+ipAddressProp, err := expandNestedComputeGlobalNetworkEndpointIpAddress(d.Get("ip_address"), d, config)
+if err != nil {
+  return err
+}
+if ipAddressProp != "" {
+	toDelete["ipAddress"] = ipAddressProp	
+}
+
+fqdnProp, err := expandNestedComputeGlobalNetworkEndpointFqdn(d.Get("fqdn"), d, config)
+if err != nil {
+  return err
+}
+if fqdnProp != "" {
+	toDelete["fqdn"] = fqdnProp	
+}
+
+obj = map[string]interface{}{
+  "networkEndpoints": []map[string]interface{}{toDelete},
+} 

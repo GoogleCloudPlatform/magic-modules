@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: BigqueryDataTransfer
-display_name: BigQueryDataTransfer
+display_name: BigQuery Data Transfer
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

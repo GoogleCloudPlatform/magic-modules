@@ -35,6 +35,10 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   NetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  GlobalNetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  GlobalNetworkEndpointGroup: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   ProjectInfo: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -46,6 +50,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   RouterBgpPeer: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  SecurityPolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -307,6 +313,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   NetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  GlobalNetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  GlobalNetworkEndpointGroup: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   ProjectInfo: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -320,6 +330,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RouterBgpPeer: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RouterNat: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  SecurityPolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true

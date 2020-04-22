@@ -42,9 +42,7 @@ import (
 	"google.golang.org/api/dns/v1"
 	dnsBeta "google.golang.org/api/dns/v1beta2"
 	file "google.golang.org/api/file/v1beta1"
-<% unless version == 'ga' -%>
 	healthcare "google.golang.org/api/healthcare/v1beta1"
-<% end -%>
 	"google.golang.org/api/iam/v1"
 	iamcredentials "google.golang.org/api/iamcredentials/v1"
 	cloudlogging "google.golang.org/api/logging/v2"
@@ -77,6 +75,7 @@ type Config struct {
 	PollInterval time.Duration
 
 	client           *http.Client
+	wrappedPubsubClient *http.Client
 	context          context.Context
 	terraformVersion string
 	userAgent        string
@@ -147,10 +146,8 @@ type Config struct {
 
 	IAMBasePath string
 	clientIAM   *iam.Service
-	<% unless version == 'ga' -%>
 
 	clientHealthcare   *healthcare.Service
-	<% end -%>
 
 	clientServiceMan          *servicemanagement.APIService
 
@@ -338,6 +335,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	pubsubClientBasePath := removeBasePathVersion(c.PubsubBasePath)
 	log.Printf("[INFO] Instantiating Google Pubsub client for path %s", pubsubClientBasePath)
 	wrappedPubsubClient := ClientWithAdditionalRetries(client, retryTransport, pubsubTopicProjectNotReady)
+	c.wrappedPubsubClient = wrappedPubsubClient
 	c.clientPubsub, err = pubsub.NewService(ctx, option.WithHTTPClient(wrappedPubsubClient))
 	if err != nil {
 		return err
@@ -560,7 +558,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	c.clientStorageTransfer.UserAgent = userAgent
   	c.clientStorageTransfer.BasePath = storageTransferClientBasePath
 
-	<% unless version == 'ga' -%>
 	healthcareClientBasePath := removeBasePathVersion(c.HealthcareBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud Healthcare client for path %s", healthcareClientBasePath)
 
@@ -570,7 +567,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	}
 	c.clientHealthcare.UserAgent = userAgent
 	c.clientHealthcare.BasePath = healthcareClientBasePath
-	<% end -%>
 
 	c.Region = GetRegionFromRegionSelfLink(c.Region)
 

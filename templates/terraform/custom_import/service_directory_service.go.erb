@@ -1,0 +1,40 @@
+config := meta.(*Config)
+
+// current import_formats cannot import fields with forward slashes in their value
+if err := parseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+	return nil, err
+}
+
+nameParts := strings.Split(d.Get("name").(string), "/")
+if len(nameParts) == 8 {
+	// `projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}`
+	d.Set("namespace", fmt.Sprintf("projects/%s/locations/%s/namespaces/%s", nameParts[1], nameParts[3], nameParts[5]))
+	d.Set("service_id", nameParts[7])
+} else if len(nameParts) == 4 {
+	// `{{project}}/{{location}}/{{namespace_id}}/{{service_id}}`
+	d.Set("namespace", fmt.Sprintf("projects/%s/locations/%s/namespaces/%s", nameParts[0], nameParts[1], nameParts[2]))
+	d.Set("service_id", nameParts[3])
+	id := fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", nameParts[0], nameParts[1], nameParts[2], nameParts[3])
+	d.Set("name", id)
+	d.SetId(id)
+} else if len(nameParts) == 3 {
+	// `{{location}}/{{namespace_id}}/{{service_id}}`
+	project, err := getProject(d, config)
+	if err != nil {
+			return nil, err
+	}
+	d.Set("namespace", fmt.Sprintf("projects/%s/locations/%s/namespaces/%s", project, nameParts[0], nameParts[1]))
+	d.Set("service_id", nameParts[2])
+	id := fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", project, nameParts[0], nameParts[1], nameParts[2])
+	d.Set("name", id)
+	d.SetId(id)
+} else {
+	return nil, fmt.Errorf(
+		"Saw %s when the name is expected to have shape %s, %s or %s",
+		d.Get("name"),
+		"projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}",
+		"{{project}}/{{location}}/{{namespace_id}}/{{service_id}}",
+		"{{location}}/{{namespace_id}}/{{service_id}}")
+}
+return []*schema.ResourceData{d}, nil
+

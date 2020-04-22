@@ -1,13 +1,11 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
+
 import (
 	"fmt"
 	"reflect"
 	"sort"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
@@ -16,24 +14,24 @@ func TestAccHealthcareHl7V2StoreIamBinding(t *testing.T) {
 	t.Parallel()
 
 	projectId := getTestProjectFromEnv()
-	account := acctest.RandomWithPrefix("tf-test")
+	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	roleId := "roles/healthcare.hl7V2StoreAdmin"
-	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	datasetName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	datasetId := &healthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
 	}
-	hl7V2StoreName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	hl7V2StoreName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
 				Config: testAccHealthcareHl7V2StoreIamBinding_basic(account, datasetName, hl7V2StoreName, roleId),
-				Check: testAccCheckGoogleHealthcareHl7V2StoreIamBindingExists("foo", roleId, []string{
+				Check: testAccCheckGoogleHealthcareHl7V2StoreIamBindingExists(t, "foo", roleId, []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 				}),
 			},
@@ -46,7 +44,7 @@ func TestAccHealthcareHl7V2StoreIamBinding(t *testing.T) {
 			{
 				// Test Iam Binding update
 				Config: testAccHealthcareHl7V2StoreIamBinding_update(account, datasetName, hl7V2StoreName, roleId),
-				Check: testAccCheckGoogleHealthcareHl7V2StoreIamBindingExists("foo", roleId, []string{
+				Check: testAccCheckGoogleHealthcareHl7V2StoreIamBindingExists(t, "foo", roleId, []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 					fmt.Sprintf("serviceAccount:%s-2@%s.iam.gserviceaccount.com", account, projectId),
 				}),
@@ -65,24 +63,24 @@ func TestAccHealthcareHl7V2StoreIamMember(t *testing.T) {
 	t.Parallel()
 
 	projectId := getTestProjectFromEnv()
-	account := acctest.RandomWithPrefix("tf-test")
+	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	roleId := "roles/healthcare.hl7V2Editor"
-	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	datasetName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	datasetId := &healthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
 	}
-	hl7V2StoreName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	hl7V2StoreName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
 				Config: testAccHealthcareHl7V2StoreIamMember_basic(account, datasetName, hl7V2StoreName, roleId),
-				Check: testAccCheckGoogleHealthcareHl7V2StoreIamMemberExists("foo", roleId,
+				Check: testAccCheckGoogleHealthcareHl7V2StoreIamMemberExists(t, "foo", roleId,
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 				),
 			},
@@ -100,24 +98,24 @@ func TestAccHealthcareHl7V2StoreIamPolicy(t *testing.T) {
 	t.Parallel()
 
 	projectId := getTestProjectFromEnv()
-	account := acctest.RandomWithPrefix("tf-test")
+	account := fmt.Sprintf("tf-test-%d", randInt(t))
 	roleId := "roles/healthcare.hl7V2Consumer"
-	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	datasetName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	datasetId := &healthcareDatasetId{
 		Project:  projectId,
 		Location: DEFAULT_HEALTHCARE_TEST_LOCATION,
 		Name:     datasetName,
 	}
-	hl7V2StoreName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	hl7V2StoreName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Policy creation (no update for policy, no need to test)
 				Config: testAccHealthcareHl7V2StoreIamPolicy_basic(account, datasetName, hl7V2StoreName, roleId),
-				Check: testAccCheckGoogleHealthcareHl7V2StoreIamPolicyExists("foo", roleId,
+				Check: testAccCheckGoogleHealthcareHl7V2StoreIamPolicyExists(t, "foo", roleId,
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 				),
 			},
@@ -131,14 +129,14 @@ func TestAccHealthcareHl7V2StoreIamPolicy(t *testing.T) {
 	})
 }
 
-func testAccCheckGoogleHealthcareHl7V2StoreIamBindingExists(bindingResourceName, roleId string, members []string) resource.TestCheckFunc {
+func testAccCheckGoogleHealthcareHl7V2StoreIamBindingExists(t *testing.T, bindingResourceName, roleId string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		bindingRs, ok := s.RootModule().Resources[fmt.Sprintf("google_healthcare_hl7_v2_store_iam_binding.%s", bindingResourceName)]
 		if !ok {
 			return fmt.Errorf("Not found: %s", bindingResourceName)
 		}
 
-		config := testAccProvider.Meta().(*Config)
+		config := googleProviderConfig(t)
 		hl7V2StoreId, err := parseHealthcareHl7V2StoreId(bindingRs.Primary.Attributes["hl7_v2_store_id"], config)
 
 		if err != nil {
@@ -167,14 +165,14 @@ func testAccCheckGoogleHealthcareHl7V2StoreIamBindingExists(bindingResourceName,
 	}
 }
 
-func testAccCheckGoogleHealthcareHl7V2StoreIamMemberExists(n, role, member string) resource.TestCheckFunc {
+func testAccCheckGoogleHealthcareHl7V2StoreIamMemberExists(t *testing.T, n, role, member string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources["google_healthcare_hl7_v2_store_iam_member."+n]
 		if !ok {
 			return fmt.Errorf("Not found: %s", n)
 		}
 
-		config := testAccProvider.Meta().(*Config)
+		config := googleProviderConfig(t)
 		hl7V2StoreId, err := parseHealthcareHl7V2StoreId(rs.Primary.Attributes["hl7_v2_store_id"], config)
 
 		if err != nil {
@@ -202,14 +200,14 @@ func testAccCheckGoogleHealthcareHl7V2StoreIamMemberExists(n, role, member strin
 	}
 }
 
-func testAccCheckGoogleHealthcareHl7V2StoreIamPolicyExists(n, role, policy string) resource.TestCheckFunc {
+func testAccCheckGoogleHealthcareHl7V2StoreIamPolicyExists(t *testing.T, n, role, policy string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources["google_healthcare_hl7_v2_store_iam_policy."+n]
 		if !ok {
 			return fmt.Errorf("Not found: %s", n)
 		}
 
-		config := testAccProvider.Meta().(*Config)
+		config := googleProviderConfig(t)
 		hl7V2StoreId, err := parseHealthcareHl7V2StoreId(rs.Primary.Attributes["hl7_v2_store_id"], config)
 
 		if err != nil {
@@ -353,6 +351,3 @@ resource "google_healthcare_hl7_v2_store_iam_policy" "foo" {
 }
 `, account, datasetName, hl7V2StoreName, roleId)
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>

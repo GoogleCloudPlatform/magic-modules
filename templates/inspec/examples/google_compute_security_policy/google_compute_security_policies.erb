@@ -1,0 +1,6 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% security_policy = grab_attributes['security_policy'] -%>
+describe google_compute_security_policies(project: <%= gcp_project_id -%>) do
+  its('count') { should be >= 1 }
+  its('names') { should include <%= doc_generation ? "'#{security_policy['name']}'" : "security_policy['name']" -%> }
+end

@@ -1,13 +1,10 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
+
 import (
 	"fmt"
 	"path"
-	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
@@ -75,15 +72,15 @@ func TestAccHealthcareDicomStoreIdParsing(t *testing.T) {
 func TestAccHealthcareDicomStore_basic(t *testing.T) {
 	t.Parallel()
 
-	datasetName := fmt.Sprintf("tf-test-dataset-%s", acctest.RandString(10))
-	dicomStoreName := fmt.Sprintf("tf-test-dicom-store-%s", acctest.RandString(10))
-	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(10))
+	datasetName := fmt.Sprintf("tf-test-dataset-%s", randString(t, 10))
+	dicomStoreName := fmt.Sprintf("tf-test-dicom-store-%s", randString(t, 10))
+	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
 	resourceName := "google_healthcare_dicom_store.default"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckHealthcareDicomStoreDestroy,
+		CheckDestroy: testAccCheckHealthcareDicomStoreDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleHealthcareDicomStore_basic(dicomStoreName, datasetName),
@@ -96,7 +93,7 @@ func TestAccHealthcareDicomStore_basic(t *testing.T) {
 			{
 				Config: testGoogleHealthcareDicomStore_update(dicomStoreName, datasetName, pubsubTopic),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleHealthcareDicomStoreUpdate(pubsubTopic),
+					testAccCheckGoogleHealthcareDicomStoreUpdate(t, pubsubTopic),
 				),
 			},
 			{
@@ -157,32 +154,7 @@ resource "google_pubsub_topic" "topic" {
 `, dicomStoreName, datasetName, pubsubTopic)
 }
 
-func testAccCheckHealthcareDicomStoreDestroy(s *terraform.State) error {
-	for name, rs := range s.RootModule().Resources {
-		if rs.Type != "google_healthcare_dicom_store" {
-			continue
-		}
-		if strings.HasPrefix(name, "data.") {
-			continue
-		}
-
-		config := testAccProvider.Meta().(*Config)
-
-		url, err := replaceVarsForTest(config, rs, "{{HealthcareBasePath}}{{dataset}}/dicomStores/{{name}}")
-		if err != nil {
-			return err
-		}
-
-		_, err = sendRequest(config, "GET", "", url, nil)
-		if err == nil {
-			return fmt.Errorf("HealthcareDicomStore still exists at %s", url)
-		}
-	}
-
-	return nil
-}
-
-func testAccCheckGoogleHealthcareDicomStoreUpdate(pubsubTopic string) resource.TestCheckFunc {
+func testAccCheckGoogleHealthcareDicomStoreUpdate(t *testing.T, pubsubTopic string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		var foundResource = false
 		for _, rs := range s.RootModule().Resources {
@@ -191,7 +163,7 @@ func testAccCheckGoogleHealthcareDicomStoreUpdate(pubsubTopic string) resource.T
 			}
 			foundResource = true
 
-			config := testAccProvider.Meta().(*Config)
+			config := googleProviderConfig(t)
 
 			gcpResourceUri, err := replaceVarsForTest(config, rs, "{{dataset}}/dicomStores/{{name}}")
 			if err != nil {
@@ -219,6 +191,3 @@ func testAccCheckGoogleHealthcareDicomStoreUpdate(pubsubTopic string) resource.T
 		return nil
 	}
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>

@@ -1,13 +1,10 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
+
 import (
 	"fmt"
 	"path"
-	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
@@ -75,15 +72,15 @@ func TestAccHealthcareFhirStoreIdParsing(t *testing.T) {
 func TestAccHealthcareFhirStore_basic(t *testing.T) {
 	t.Parallel()
 
-	datasetName := fmt.Sprintf("tf-test-dataset-%s", acctest.RandString(10))
-	fhirStoreName := fmt.Sprintf("tf-test-fhir-store-%s", acctest.RandString(10))
-	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(10))
+	datasetName := fmt.Sprintf("tf-test-dataset-%s", randString(t, 10))
+	fhirStoreName := fmt.Sprintf("tf-test-fhir-store-%s", randString(t, 10))
+	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", randString(t, 10))
 	resourceName := "google_healthcare_fhir_store.default"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckHealthcareFhirStoreDestroy,
+		CheckDestroy: testAccCheckHealthcareFhirStoreDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleHealthcareFhirStore_basic(fhirStoreName, datasetName),
@@ -96,7 +93,7 @@ func TestAccHealthcareFhirStore_basic(t *testing.T) {
 			{
 				Config: testGoogleHealthcareFhirStore_update(fhirStoreName, datasetName, pubsubTopic),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleHealthcareFhirStoreUpdate(pubsubTopic),
+					testAccCheckGoogleHealthcareFhirStoreUpdate(t, pubsubTopic),
 				),
 			},
 			{
@@ -163,32 +160,7 @@ resource "google_pubsub_topic" "topic" {
 `, fhirStoreName, datasetName, pubsubTopic)
 }
 
-func testAccCheckHealthcareFhirStoreDestroy(s *terraform.State) error {
-	for name, rs := range s.RootModule().Resources {
-		if rs.Type != "google_healthcare_fhir_store" {
-			continue
-		}
-		if strings.HasPrefix(name, "data.") {
-			continue
-		}
-
-		config := testAccProvider.Meta().(*Config)
-
-		url, err := replaceVarsForTest(config, rs, "{{HealthcareBasePath}}{{dataset}}/fhirStores/{{name}}")
-		if err != nil {
-			return err
-		}
-
-		_, err = sendRequest(config, "GET", "", url, nil)
-		if err == nil {
-			return fmt.Errorf("HealthcareFhirStore still exists at %s", url)
-		}
-	}
-
-	return nil
-}
-
-func testAccCheckGoogleHealthcareFhirStoreUpdate(pubsubTopic string) resource.TestCheckFunc {
+func testAccCheckGoogleHealthcareFhirStoreUpdate(t *testing.T, pubsubTopic string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		var foundResource = false
 		for _, rs := range s.RootModule().Resources {
@@ -197,7 +169,7 @@ func testAccCheckGoogleHealthcareFhirStoreUpdate(pubsubTopic string) resource.Te
 			}
 			foundResource = true
 
-			config := testAccProvider.Meta().(*Config)
+			config := googleProviderConfig(t)
 
 			gcpResourceUri, err := replaceVarsForTest(config, rs, "{{dataset}}/fhirStores/{{name}}")
 			if err != nil {
@@ -236,6 +208,3 @@ func testAccCheckGoogleHealthcareFhirStoreUpdate(pubsubTopic string) resource.Te
 		return nil
 	}
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>

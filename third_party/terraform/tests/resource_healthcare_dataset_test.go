@@ -1,12 +1,9 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
+
 import (
 	"fmt"
-	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
@@ -75,14 +72,14 @@ func TestAccHealthcareDataset_basic(t *testing.T) {
 	t.Parallel()
 
 	location := "us-central1"
-	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	datasetName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	timeZone := "America/New_York"
 	resourceName := "google_healthcare_dataset.dataset"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckHealthcareDatasetDestroy,
+		CheckDestroy: testAccCheckHealthcareDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleHealthcareDataset_basic(datasetName, location),
@@ -95,7 +92,7 @@ func TestAccHealthcareDataset_basic(t *testing.T) {
 			{
 				Config: testGoogleHealthcareDataset_update(datasetName, location, timeZone),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleHealthcareDatasetUpdate(timeZone),
+					testAccCheckGoogleHealthcareDatasetUpdate(t, timeZone),
 				),
 			},
 			{
@@ -107,39 +104,14 @@ func TestAccHealthcareDataset_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckHealthcareDatasetDestroy(s *terraform.State) error {
-	for name, rs := range s.RootModule().Resources {
-		if rs.Type != "google_healthcare_dataset" {
-			continue
-		}
-		if strings.HasPrefix(name, "data.") {
-			continue
-		}
-
-		config := testAccProvider.Meta().(*Config)
-
-		url, err := replaceVarsForTest(config, rs, "{{HealthcareBasePath}}projects/{{project}}/locations/{{location}}/datasets/{{name}}")
-		if err != nil {
-			return err
-		}
-
-		_, err = sendRequest(config, "GET", "", url, nil)
-		if err == nil {
-			return fmt.Errorf("HealthcareDataset still exists at %s", url)
-		}
-	}
-
-	return nil
-}
-
-func testAccCheckGoogleHealthcareDatasetUpdate(timeZone string) resource.TestCheckFunc {
+func testAccCheckGoogleHealthcareDatasetUpdate(t *testing.T, timeZone string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_healthcare_dataset" {
 				continue
 			}
 
-			config := testAccProvider.Meta().(*Config)
+			config := googleProviderConfig(t)
 
 			gcpResourceUri, err := replaceVarsForTest(config, rs, "projects/{{project}}/locations/{{location}}/datasets/{{name}}")
 			if err != nil {
@@ -178,6 +150,3 @@ resource "google_healthcare_dataset" "dataset" {
 }
 `, datasetName, location, timeZone)
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
