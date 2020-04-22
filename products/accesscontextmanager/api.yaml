@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: AccessContextManager
-display_name: Access Context Manager
+display_name: Access Context Manager (VPC Service Controls)
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
