@@ -49,7 +49,7 @@ func testSweepComputeInstance(region string) error {
 
 	// Keep count of items that aren't sweepable for logging.
 	nonPrefixCount := 0
-	for zone, itemList := range found.InstancesScopedList {
+	for zone, itemList := range found.Items {
 		for _, instance := range itemList.Instances {
 			if !isSweepableTestResource(instance.Name) {
 				nonPrefixCount++
