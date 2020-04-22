@@ -205,6 +205,16 @@ module Api
       all_user_properties.select(&:required)
     end
 
+    def all_nested_properties(parent, props)
+      nested = props
+      props.each do |prop|
+        if !prop.flatten_object && prop.nested_properties?
+          nested = nested + all_nested_properties(prop.name, prop.nested_properties)
+        end
+      end
+      nested
+    end
+
     # Returns all resourcerefs at any depth
     def all_resourcerefs
       resourcerefs_for_properties(all_user_properties, self)
