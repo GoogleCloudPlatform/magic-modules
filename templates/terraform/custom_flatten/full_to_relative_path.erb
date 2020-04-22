@@ -2,9 +2,9 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	if v == nil {
 		return v
 	}
-	stringParts := strings.SplitAfterN(v.(string), "projects/", 2)
-	if len(stringParts) != 2 {
-			return v
+	relative, err := getRelativePath(v.(string))
+	if err != nil {
+		return v
 	}
-	return "projects/" + stringParts[1]
+	return relative
 }
