@@ -42,6 +42,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           zone_name: "peering-zone"
           network_source_name: "network-source"
           network_target_name: "network-target"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dns_managed_zone_service_directory"
+        min_version: 'beta'
+        primary_resource_id: "sd-zone"
+        vars:
+          zone_name: "peering-zone"
+          network_name: "network"
     properties:
       creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -94,6 +101,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZoneForwardingConfigTargetNameServersSchema())
             return hashcode.String(buf.String())
           }
+      serviceDirectoryConfig.namespace.namespaceUrl: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/sd_full_url.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/full_to_relative_path.erb'
+        description: |
+          The fully qualified or partial URL of the service directory namespace that should be
+          associated with the zone. This should be formatted like
+          `https://servicedirectory.googleapis.com/v1/projects/{project}/locations/{location}/namespaces/{namespace_id}`
+          or simply `projects/{project}/locations/{location}/namespaces/{namespace_id}`
+          Ignored for `public` visibility zones.
       visibility: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'caseDiffSuppress'
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
