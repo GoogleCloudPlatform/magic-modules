@@ -384,7 +384,25 @@
       </li>
     </ul>
     </li>
-
+<% unless version == 'ga' -%>
+    <li>
+    <a href="#">Artifact Registry</a>
+    <ul class="nav">
+      <li>
+      <a href="/docs/providers/google/r/artifact_registry_repository.html">artifact_registry_repository</a>
+      </li>
+      <li>
+      <a href="/docs/providers/google/r/artifact_registry_repository_iam.html">google_artifact_registry_repository_iam_binding</a>
+      </li>
+      <li>
+      <a href="/docs/providers/google/r/artifact_registry_repository_iam.html">google_artifact_registry_repository_iam_member</a>
+      </li>
+      <li>
+      <a href="/docs/providers/google/r/artifact_registry_repository_iam.html">google_artifact_registry_repository_iam_policy</a>
+      </li>
+    </ul>
+    </li>
+<% end -%>
     <li>
     <a href="#">BigQuery</a>
     <ul class="nav">
