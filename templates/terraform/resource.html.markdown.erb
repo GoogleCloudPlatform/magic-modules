@@ -40,7 +40,7 @@
   tf_subcategory = (object.__product.display_name)
   terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   properties = object.all_user_properties
-  sensitive_props = object.all_nested_properties(object.name, object.root_properties).select(&:sensitive)
+  sensitive_props = object.all_nested_properties(object.root_properties).select(&:sensitive)
   # In order of preference, use TF override,
   # general defined timeouts, or default Timeouts
   timeouts = object.timeouts
@@ -93,7 +93,6 @@ To get more information about <%= object.name -%>, see:
   else
     sense_props = sense_props.slice(0,sense_props.length-1).join(", ") + " and " + sense_props[sense_props.length-1]
   end
-  p sense_props
 -%>
 
 ~> **Warning:** All arguments including <%= sense_props -%> will be stored in the raw
