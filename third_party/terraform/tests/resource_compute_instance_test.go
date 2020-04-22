@@ -57,7 +57,7 @@ func testSweepComputeInstance(region string) error {
 			}
 
 			// Don't wait on operations as we may have a lot to delete
-			_, err := config.clientCompute.Instances.Delete(config.Project, zone, instance.Name).Do()
+			_, err := config.clientCompute.Instances.Delete(config.Project, GetResourceNameFromSelfLink(zone), instance.Name).Do()
 			if err != nil {
 				log.Printf("[INFO][SWEEPER_LOG] Error deleting %s resource %s : %s", resourceName, instance.Name, err)
 			} else {
