@@ -4,7 +4,7 @@
 require 'gcp_backend'
 require 'google/iam/property/iam_policy_bindings'
 
-# A provider to manage <%= @api.product_full_name -%> IAM Binding resources.
+# A provider to manage <%= @api.display_name -%> IAM Binding resources.
 class <%= object.name -%>IamBinding < GcpResourceBase
   name '<%= resource_name(object, product) -%>_iam_binding'
   desc '<%= object.name -%> Iam Binding'

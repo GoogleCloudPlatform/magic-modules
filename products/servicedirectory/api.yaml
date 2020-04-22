@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: ServiceDirectory
-display_name: ServiceDirectory
+display_name: Service Directory
 versions:
   - !ruby/object:Api::Product::Version
     name: beta

@@ -26,7 +26,7 @@
 -%>
 <%= lines(emit_requires(requires)) -%>
 
-# A provider to manage <%= @api.product_full_name -%> resources.
+# A provider to manage <%= @api.display_name -%> resources.
 class <%= object.__product.name.camelize(:upper) -%><%= object.name -%> < GcpResourceBase
   name '<%= resource_name(object, product) -%>'
   desc '<%= object.name -%>'

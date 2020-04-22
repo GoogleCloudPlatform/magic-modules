@@ -19,7 +19,6 @@
 # include a small hack to rename the library - see
 # templates/terraform/constants/filestore.erb.
 name: Filestore
-display_name: Cloud Filestore
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

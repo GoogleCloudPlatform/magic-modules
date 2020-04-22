@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: RuntimeConfig
-display_name: Cloud Runtime Configuration
+display_name: Runtime Configurator
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
