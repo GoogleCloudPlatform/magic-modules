@@ -14,11 +14,8 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Repository: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: projects/{{project}}/locations/{{region}}/repositories/{{repsitory_id}}
+    id_format: projects/{{project}}/locations/{{location}}/repositories/{{repsitory_id}}
     autogen_async: true
-    iam_policy: !ruby/object:Api::Resource::IamPolicy
-      parent_resource_attribute: 'repository'
-      method_name_separator: ':'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "artifact_registry_repository_basic"
@@ -36,7 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           repository_id: "my-repository"
           description: "example docker repository with iam"
     properties:
-      region: !ruby/object:Overrides::Terraform::PropertyOverride
+      location: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
       repository_id: !ruby/object:Overrides::Terraform::PropertyOverride

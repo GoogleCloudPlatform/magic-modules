@@ -1,6 +1,7 @@
 resource "google_artifact_registry_repository" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
 
+  location = "us-central1"
   repository_id = "<%= ctx[:vars]['repository_id'] %>"
   description = "<%= ctx[:vars]['description'] %>"
   format = "DOCKER"
@@ -16,6 +17,7 @@ resource "google_service_account" "test-account" {
 resource "google_artifact_registry_repository_iam_member" "test-iam" {
   provider = google-beta
 
+  location = google_artifact_registry_repository.<%= ctx[:primary_resource_id] %>.location
   repository = google_artifact_registry_repository.<%= ctx[:primary_resource_id] %>.name
   role   = "roles/artifactregistry.reader"
   member = "serviceAccount:${google_service_account.test-account.email}"

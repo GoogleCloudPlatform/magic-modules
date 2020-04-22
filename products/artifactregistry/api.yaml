@@ -44,8 +44,8 @@ async: !ruby/object:Api::OpAsync
 objects:
   - !ruby/object:Api::Resource
     name: 'Repository'
-    base_url: projects/{{project}}/locations/{{region}}/repositories
-    create_url: projects/{{project}}/locations/{{region}}/repositories?repository_id={{repository_id}}
+    base_url: projects/{{project}}/locations/{{location}}/repositories
+    create_url: projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}
     min_version: beta
     description: A repository for storing artifacts
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -56,6 +56,8 @@ objects:
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ':'
+      parent_resource_attribute: 'repository'
+      import_format: ["projects/{{project}}/locations/{{location}}/repositories/{{repository}}", "{{repository}}"]
     properties:
     - !ruby/object:Api::Type::String
       name: name
@@ -72,9 +74,9 @@ objects:
       input: true
       url_param_only: true
     - !ruby/object:Api::Type::String
-      name: 'region'
+      name: 'location'
       description: |
-        The name of the region this repository is located in.
+        The name of the location this repository is located in.
       required: true
       input: true
       url_param_only: true
