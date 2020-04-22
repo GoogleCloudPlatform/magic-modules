@@ -259,6 +259,25 @@ objects:
           Specifies if this is a managed reverse lookup zone. If true, Cloud DNS will resolve reverse
           lookup queries using automatically configured records for VPC resources. This only applies
           to networks listed under `private_visibility_config`.
+      - !ruby/object:Api::Type::NestedObject
+        min_version: beta
+        input: true
+        name: 'serviceDirectoryConfig'
+        description:
+          The presence of this field indicates that this zone is backed by Service Directory. The value
+          of this field contains information related to the namespace associated with the zone.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'namespace'
+            required: true
+            description: 'The namespace associated with the zone.'
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'namespaceUrl'
+                required: true
+                description: |
+                  The fully qualified URL of the service directory namespace that should be
+                  associated with the zone. Ignored for `public` visibility zones.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Zones':
