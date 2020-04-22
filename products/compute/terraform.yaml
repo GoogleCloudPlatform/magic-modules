@@ -1821,6 +1821,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dns_zone_name: "dnszone"
           forwarding_rule_name: "forwarding-rule"
           http_health_check_name: "http-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "managed_ssl_certificate_recreation"
+        primary_resource_id: "default"
+        min_version: beta
     description: |
       {{description}}
       For a resource where you provide the key, see the
