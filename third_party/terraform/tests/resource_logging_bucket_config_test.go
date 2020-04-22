@@ -1,7 +1,6 @@
 package google
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"testing"
@@ -225,7 +224,7 @@ func getOrganizationBucket(name string) (*logging.LogBucket, error) {
 // with a retention bucket in terraform state. We can do this because each of these parent objects return the same proto
 // for the bucket config and the only difference is the url to fetch it at.
 // Parents can be folders, organizations, projects or billing accounts.
-func testAccCheckLoggingBucketConfig(f bucketConfigFetcher, parent, parentId, bucket string, retention int64) resource.TestCheckFunc {
+func testAccCheckLoggingBucketConfig(f bucketConfigFetcher, parent, parentID, bucket string, retention int64) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
 		pr, ok := s.RootModule().Resources[parent]
@@ -239,7 +238,7 @@ func testAccCheckLoggingBucketConfig(f bucketConfigFetcher, parent, parentId, bu
 		}
 		ba := br.Primary.Attributes
 
-		bucket, err := f(pa[parentId] + "/locations/global/buckets/_Default")
+		bucket, err := f(pa[parentID] + "/locations/global/buckets/_Default")
 		if err != nil {
 			return err
 		}
@@ -250,7 +249,7 @@ func testAccCheckLoggingBucketConfig(f bucketConfigFetcher, parent, parentId, bu
 		}
 
 		if retentionInt != bucket.RetentionDays {
-			return errors.New(fmt.Sprintf("retention days in resource didn't match API. resource: %d API: %d", retentionInt, bucket.RetentionDays))
+			return fmt.Errorf("retention days in resource didn't match API. resource: %d API: %d", retentionInt, bucket.RetentionDays)
 		}
 
 		return nil

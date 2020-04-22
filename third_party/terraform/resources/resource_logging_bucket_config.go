@@ -104,6 +104,10 @@ func resourceLoggingBucketConfigUpdate() func(*schema.ResourceData, interface{})
 		obj := make(map[string]interface{})
 
 		url, err := replaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", d.Id()))
+		if err != nil {
+			return err
+		}
+
 		obj["retentionDays"] = d.Get("retention_days")
 		obj["description"] = d.Get("description")
 
