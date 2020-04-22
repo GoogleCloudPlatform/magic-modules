@@ -115,6 +115,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # See the comment on stateNotificationConfig.exclude
         exclude: true
         name: 'http_enabled_state'
+      credentials: !ruby/object:Overrides::Terraform::PropertyOverride
+        # See the comment on stateNotificationConfig.exclude
+        exclude: true
       credentials.publicKeyCertificate: !ruby/object:Overrides::Terraform::PropertyOverride
         # See the comment on stateNotificationConfig.exclude
         exclude: true
