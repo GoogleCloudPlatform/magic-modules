@@ -27,7 +27,7 @@ function clone_repo() {
         LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/docs-examples
     elif [ "$REPO" == "ansible" ]; then
         UPSTREAM_OWNER=ansible-collections
-        GH_REPO=google
+        GH_REPO=google.cloud
         LOCAL_PATH=$PWD/../ansible
     elif [ "$REPO" == "inspec" ]; then
         UPSTREAM_OWNER=modular-magician

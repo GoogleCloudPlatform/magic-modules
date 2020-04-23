@@ -22,7 +22,7 @@ TFC_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magic
 TFC_LOCAL_PATH=$PWD/../tfc
 TFOICS_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/docs-examples
 TFOICS_LOCAL_PATH=$PWD/../tfoics
-ANSIBLE_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/google
+ANSIBLE_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/google.cloud
 ANSIBLE_LOCAL_PATH=$PWD/../ansible
 INSPEC_SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/modular-magician/inspec-gcp
 INSPEC_LOCAL_PATH=$PWD/../inspec
@@ -59,7 +59,7 @@ pushd $ANSIBLE_LOCAL_PATH
 git fetch origin $OLD_BRANCH
 if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
     SUMMARY=`git diff origin/$OLD_BRANCH origin/$NEW_BRANCH --shortstat`
-    DIFFS="${DIFFS}${NEWLINE}Ansible: [Diff](https://github.com/modular-magician/google/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
+    DIFFS="${DIFFS}${NEWLINE}Ansible: [Diff](https://github.com/modular-magician/google.cloud/compare/$OLD_BRANCH..$NEW_BRANCH) ($SUMMARY)"
 fi
 popd
 
