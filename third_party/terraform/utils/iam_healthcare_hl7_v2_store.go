@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
+
 import (
 	"fmt"
 
@@ -93,6 +92,3 @@ func (u *HealthcareHl7V2StoreIamUpdater) GetMutexKey() string {
 func (u *HealthcareHl7V2StoreIamUpdater) DescribeResource() string {
 	return fmt.Sprintf("Healthcare Hl7V2Store %q", u.resourceId)
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
