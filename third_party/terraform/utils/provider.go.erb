@@ -331,7 +331,6 @@ end     # products.each do
 				"google_folder_iam_member":                     ResourceIamMember(IamFolderSchema, NewFolderIamUpdater, FolderIdParseFunc),
 				"google_folder_iam_policy":                     ResourceIamPolicy(IamFolderSchema, NewFolderIamUpdater, FolderIdParseFunc),
 				"google_folder_organization_policy":            resourceGoogleFolderOrganizationPolicy(),
-<% unless version == 'ga' -%>
 				"google_healthcare_dataset_iam_binding":        ResourceIamBindingWithBatching(IamHealthcareDatasetSchema, NewHealthcareDatasetIamUpdater, DatasetIdParseFunc, IamBatchingEnabled),
 				"google_healthcare_dataset_iam_member":         ResourceIamMemberWithBatching(IamHealthcareDatasetSchema, NewHealthcareDatasetIamUpdater, DatasetIdParseFunc, IamBatchingEnabled),
 				"google_healthcare_dataset_iam_policy":         ResourceIamPolicy(IamHealthcareDatasetSchema, NewHealthcareDatasetIamUpdater, DatasetIdParseFunc),
@@ -344,7 +343,6 @@ end     # products.each do
 				"google_healthcare_hl7_v2_store_iam_binding":   ResourceIamBindingWithBatching(IamHealthcareHl7V2StoreSchema, NewHealthcareHl7V2StoreIamUpdater, Hl7V2StoreIdParseFunc, IamBatchingEnabled),
 				"google_healthcare_hl7_v2_store_iam_member":    ResourceIamMemberWithBatching(IamHealthcareHl7V2StoreSchema, NewHealthcareHl7V2StoreIamUpdater, Hl7V2StoreIdParseFunc, IamBatchingEnabled),
 				"google_healthcare_hl7_v2_store_iam_policy":    ResourceIamPolicy(IamHealthcareHl7V2StoreSchema, NewHealthcareHl7V2StoreIamUpdater, Hl7V2StoreIdParseFunc),
-<% end -%>
 				"google_logging_billing_account_sink":          resourceLoggingBillingAccountSink(),
 				"google_logging_billing_account_exclusion":     ResourceLoggingExclusion(BillingAccountLoggingExclusionSchema, NewBillingAccountLoggingExclusionUpdater, billingAccountLoggingExclusionIdParseFunc),
 				"google_logging_organization_sink":             resourceLoggingOrganizationSink(),

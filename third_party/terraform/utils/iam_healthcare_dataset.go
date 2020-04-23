@@ -1,8 +1,8 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
+
 import (
 	"fmt"
+
 	healthcare "google.golang.org/api/healthcare/v1beta1"
 
 	"github.com/hashicorp/errwrap"
@@ -111,6 +111,3 @@ func healthcareToResourceManagerPolicy(p *healthcare.Policy) (*cloudresourcemana
 	}
 	return out, nil
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
