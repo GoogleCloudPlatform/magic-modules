@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -128,7 +127,6 @@ func TestAccProjectIamPolicy_expandedAuditConfig(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccProjectIamPolicy_withCondition(t *testing.T) {
 	t.Parallel()
 
@@ -157,7 +155,6 @@ func TestAccProjectIamPolicy_withCondition(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func getStatePrimaryResource(s *terraform.State, res, expectedID string) (*terraform.InstanceState, error) {
 	// Get the project resource
@@ -165,7 +162,7 @@ func getStatePrimaryResource(s *terraform.State, res, expectedID string) (*terra
 	if !ok {
 		return nil, fmt.Errorf("Not found: %s", res)
 	}
-	if resource.Primary.Attributes["id"] != expectedID && expectedID != "" {
+	if expectedID != "" && !compareProjectName("", resource.Primary.Attributes["id"], expectedID, nil) {
 		return nil, fmt.Errorf("Expected project %q to match ID %q in state", resource.Primary.ID, expectedID)
 	}
 	return resource.Primary, nil
@@ -229,6 +226,21 @@ func testAccProjectExistingPolicy(pid string) resource.TestCheckFunc {
 		}
 		return nil
 	}
+}
+
+// Retrieve the existing IAM Policy for a Project
+func getProjectIamPolicy(project string, config *Config) (*cloudresourcemanager.Policy, error) {
+	p, err := config.clientResourceManager.Projects.GetIamPolicy(project,
+		&cloudresourcemanager.GetIamPolicyRequest{
+			Options: &cloudresourcemanager.GetPolicyOptions{
+				RequestedPolicyVersion: iamPolicyVersion,
+			},
+		}).Do()
+
+	if err != nil {
+		return nil, fmt.Errorf("Error retrieving IAM policy for project %q: %s", project, err)
+	}
+	return p, nil
 }
 
 func testAccProjectAssociatePolicyBasic(pid, name, org string) string {
@@ -431,7 +443,6 @@ data "google_iam_policy" "expanded" {
 `, pid, name, org)
 }
 
-<% unless version == 'ga' -%>
 func testAccProjectAssociatePolicy_withCondition(pid, name, org string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
@@ -467,4 +478,3 @@ data "google_iam_policy" "admin" {
 }
 `, pid, name, org)
 }
-<% end -%>
