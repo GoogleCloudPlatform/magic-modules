@@ -14,6 +14,9 @@
 <%   end -%>
 <% end -%>
 <%= indent(property.description.strip.gsub("\n\n", "\n"), 2) -%>
+<% if property.sensitive -%>
+  **Note**: This property is sensitive and will not be displayed in the plan.
+<% end -%>
 <% if property.is_a?(Api::Type::NestedObject) || property.is_a?(Api::Type::Map) || (property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject)) -%>
   Structure is documented below.
 <% end -%>

@@ -40,6 +40,7 @@
   tf_subcategory = (object.__product.display_name)
   terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   properties = object.all_user_properties
+  sensitive_props = object.all_nested_properties(object.root_properties).select(&:sensitive)
   # In order of preference, use TF override,
   # general defined timeouts, or default Timeouts
   timeouts = object.timeouts
@@ -81,6 +82,14 @@ To get more information about <%= object.name -%>, see:
 <%- unless object.docs.warning.nil? -%>
 
 ~> **Warning:** <%= object.docs.warning -%>
+<%- end -%>
+<%- if !sensitive_props.empty? -%>
+<%-
+  sense_props = sensitive_props.map! {|prop| "`"+prop.lineage+"`"}.to_sentence
+-%>
+
+~> **Warning:** All arguments including <%= sense_props -%> will be stored in the raw
+state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
 <%- end -%>
 
 <%#- We over-generate examples/oics buttons here; they'll all be _valid_ just not necessarily intended for this provider version.
