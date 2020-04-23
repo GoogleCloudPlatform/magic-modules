@@ -24,6 +24,7 @@ Dir.chdir(File.dirname(__FILE__))
 ENV['TZ'] = 'UTC'
 
 require 'active_support/inflector'
+require 'active_support/core_ext/array/conversions'
 require 'api/compiler'
 require 'google/logger'
 require 'optparse'

@@ -85,20 +85,11 @@ To get more information about <%= object.name -%>, see:
 <%- end -%>
 <%- if !sensitive_props.empty? -%>
 <%-
-  sense_props = sensitive_props.map! {|prop| "`"+prop.name.underscore+"`"}.uniq
-  if sense_props.length == 1
-    sense_props = sense_props[0]
-  elsif sense_props.length == 2
-    sense_props = sense_props[0]+" and "+sense_props[1]
-  else
-    sense_props = sense_props.slice(0,sense_props.length-1).join(", ") + " and " + sense_props[sense_props.length-1]
-  end
+  sense_props = sensitive_props.map! {|prop| "`"+prop.lineage+"`"}.to_sentence
 -%>
 
 ~> **Warning:** All arguments including <%= sense_props -%> will be stored in the raw
 state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
-Because the API does not return the sensitive key value,
-we cannot confirm or reverse changes to a key outside of Terraform.
 <%- end -%>
 
 <%#- We over-generate examples/oics buttons here; they'll all be _valid_ just not necessarily intended for this provider version.
