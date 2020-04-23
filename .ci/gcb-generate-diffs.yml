@@ -174,13 +174,8 @@ steps:
       args:
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/changelog-checker'
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["diff"]
-      args:
-          - $_PR_NUMBER
-
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
+      id: tpgb-test
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["diff"]
       args:
@@ -188,10 +183,17 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
+      id: tpg-test
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["diff"]
       args:
           - 'ga'
+          - $_PR_NUMBER
+
+    - name: 'gcr.io/graphite-docker-images/changelog-checker'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["tpg-test", "tpgb-test"]
+      args:
           - $_PR_NUMBER
 
 options:
