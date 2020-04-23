@@ -40,6 +40,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       {{description}}
     id_format: "{{dataset}}/fhirStores/{{name}}"
     import_format: ["{{dataset}}/fhirStores/{{name}}"]
+    # FhirStore datastores will be sweeped by the Dataset sweeper
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_fhir_store_basic"
@@ -61,6 +63,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       {{description}}
     id_format: "{{dataset}}/dicomStores/{{name}}"
     import_format: ["{{dataset}}/dicomStores/{{name}}"]
+    # DicomStore datastores will be sweeped by the Dataset sweeper
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_dicom_store_basic"
@@ -82,6 +86,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       {{description}}
     id_format: "{{dataset}}/hl7V2Stores/{{name}}"
     import_format: ["{{dataset}}/hl7V2Stores/{{name}}"]
+    # Hl7V2Store datastores will be sweeped by the Dataset sweeper
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_hl7_v2_store_basic"
