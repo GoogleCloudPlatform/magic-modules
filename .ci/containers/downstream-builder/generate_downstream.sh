@@ -100,6 +100,11 @@ else
 fi
 
 pushd $LOCAL_PATH
+
+if [ "$REPO" == "terraform" ]; then
+    make generate
+fi
+
 git config --local user.name "Modular Magician"
 git config --local user.email "magic-modules@google.com"
 git add .
