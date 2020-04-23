@@ -15,8 +15,8 @@
 <%
   dir = @target_version_name == 'ga' ? 'google' : "google-#{@target_version_name}"
 -%>
-<%  Dir["third_party/terraform/tests/*.go.erb"].each do |file_path| 
-    fname = file_path.split('/')[-1]  
+<%  Dir["third_party/terraform/tests/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
 -%>
 '<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/tests/<%= fname -%>'
 <% end -%>
