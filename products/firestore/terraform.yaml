@@ -43,7 +43,36 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       collection: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
-
+  Field: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 10
+      update_minutes: 10
+      delete_minutes: 10
+    autogen_async: true
+    # This resource is a child resource
+    skip_sweeper: true
+    import_format: ["{{name}}"]
+    description: |
+      {{description}} This resource manages single field indexes.
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firestore_field_basic"
+        primary_resource_id: "my-field"
+        # This example relies on a well-known collection having been created and
+        # Firestore being enabled on the project. We can't do that automatically
+        # so we need a pre-created project.
+        test_env_vars:
+          project_id: :FIRESTORE_PROJECT_NAME
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/field_self_link_as_name_set_project.go.erb
+      custom_delete: templates/terraform/custom_delete/firestore_field_delete.go.erb
+      encoder: templates/terraform/encoders/field.go.erb
+      post_create: templates/terraform/post_create/field.go.erb
+    properties:
+      database: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      collection: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
