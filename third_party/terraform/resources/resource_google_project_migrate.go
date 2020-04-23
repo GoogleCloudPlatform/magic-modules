@@ -45,3 +45,18 @@ func migrateGoogleProjectStateV0toV1(s *terraform.InstanceState, config *Config)
 	log.Printf("[DEBUG] Attributes after migration: %#v", s.Attributes)
 	return s, nil
 }
+
+// Retrieve the existing IAM Policy for a Project
+func getProjectIamPolicy(project string, config *Config) (*cloudresourcemanager.Policy, error) {
+	p, err := config.clientResourceManager.Projects.GetIamPolicy(project,
+		&cloudresourcemanager.GetIamPolicyRequest{
+			Options: &cloudresourcemanager.GetPolicyOptions{
+				RequestedPolicyVersion: iamPolicyVersion,
+			},
+		}).Do()
+
+	if err != nil {
+		return nil, fmt.Errorf("Error retrieving IAM policy for project %q: %s", project, err)
+	}
+	return p, nil
+}
