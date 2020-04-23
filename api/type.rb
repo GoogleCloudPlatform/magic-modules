@@ -132,9 +132,9 @@ module Api
     # The only intended purpose is to allow better error messages. Some objects
     # and at some points in the build this doesn't output a valid output.
     def lineage
-      return name.underscore if __parent.nil?
+      return name&.underscore if __parent.nil?
 
-      __parent.lineage + '.' + name.underscore
+      __parent.lineage + '.' + name&.underscore
     end
 
     def to_json(opts = nil)
