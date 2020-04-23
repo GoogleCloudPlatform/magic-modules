@@ -306,6 +306,10 @@ module Provider
         description_arr += property.item_type.properties.map\
           { |prop| markdown_format(prop, indent + 1) }
         description = description_arr.join("\n\n")
+      elsif property.is_a?(Api::Type::Enum)
+        description_arr = [description, "#{'  ' * indent}Possible values:"]
+        description_arr += property.values.map { |v| "#{'  ' * indent}* #{v}" }
+        description = description_arr.join("\n")
       end
       description
     end
