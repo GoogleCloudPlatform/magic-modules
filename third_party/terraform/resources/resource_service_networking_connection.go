@@ -210,7 +210,7 @@ func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta inte
 
 	err = computeOperationWaitTime(
 		config, op, project, "Updating Network",
-		int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+		d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
