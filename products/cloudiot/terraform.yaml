@@ -21,6 +21,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     self_link: 'projects/{{project}}/locations/{{region}}/registries/{{name}}'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/cloudiot.go.erb
+      decoder: templates/terraform/decoders/cloudiot_device_registry.erb
+      encoder: templates/terraform/encoders/cloudiot_device_registry.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/cloudiot_registry.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
