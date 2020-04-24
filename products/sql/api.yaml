@@ -654,7 +654,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'databaseVersion'
         description: |
-          The MySQL version running on your source database server: MYSQL_5_6 or MYSQL_5_7.
+          The MySQL version running on your source database server.
         required: true
         values:
           - :MYSQL_5_6
