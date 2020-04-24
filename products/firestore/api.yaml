@@ -68,8 +68,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: queryScope
         description: |
-          The scope at which a query is run. One of `"COLLECTION"` or
-          `"COLLECTION_GROUP"`. Defaults to `"COLLECTION"`.
+          The scope at which a query is run.
         default_value: :COLLECTION
         values:
           - :COLLECTION
