@@ -415,6 +415,10 @@ objects:
           - :PENDING_CREATE
           - :MAINTENANCE
           - :FAILED
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'userLabels'
+        description: |
+          User-provided labels, represented as a dictionary where each label is a single key value pair.
   - !ruby/object:Api::Resource
     name: 'Database'
     kind: 'sql#database'
