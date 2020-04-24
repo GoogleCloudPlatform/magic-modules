@@ -161,7 +161,7 @@ func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error 
 			return err
 		}
 
-		err = resourceManagerOperationWaitTime(config, opAsMap, "move folder", d.Timeout(schema.TimeoutCreate))
+		err = resourceManagerOperationWaitTime(config, opAsMap, "move folder", d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return fmt.Errorf("Error moving folder '%s' to '%s': %s", displayName, newParent, err)
 		}

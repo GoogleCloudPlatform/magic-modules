@@ -255,7 +255,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 			return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 		}
 
-		err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), d.Timeout(schema.TimeoutCreate))
+		err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -283,7 +283,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 				}
 
-				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), d.Timeout(schema.TimeoutCreate))
+				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), d.Timeout(schema.TimeoutUpdate))
 				if err != nil {
 					return err
 				}
@@ -295,7 +295,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 				}
 
-				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), d.Timeout(schema.TimeoutCreate))
+				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), d.Timeout(schema.TimeoutUpdate))
 				if err != nil {
 					return err
 				}
@@ -312,7 +312,7 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 				}
 
-				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), d.Timeout(schema.TimeoutCreate))
+				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), d.Timeout(schema.TimeoutUpdate))
 				if err != nil {
 					return err
 				}

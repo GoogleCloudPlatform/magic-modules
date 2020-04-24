@@ -318,7 +318,7 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 	d.SetId(id)
 
 	// Wait for the operation to complete
-	err = computeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", d.Timeout(schema.TimeoutUpdate))
+	err = computeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}

@@ -89,6 +89,7 @@ func resourceContainerCluster() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(40 * time.Minute),
+			Read:   schema.DefaultTimeout(40 * time.Minute),
 			Update: schema.DefaultTimeout(60 * time.Minute),
 			Delete: schema.DefaultTimeout(40 * time.Minute),
 		},
@@ -1266,7 +1267,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 			Name: operation,
 		}
 		d.Set("operation", "")
-		waitErr := containerOperationWait(config, op, project, location, "resuming GKE cluster", d.Timeout(schema.TimeoutCreate))
+		waitErr := containerOperationWait(config, op, project, location, "resuming GKE cluster", d.Timeout(schema.TimeoutRead))
 		if waitErr != nil {
 			return waitErr
 		}
