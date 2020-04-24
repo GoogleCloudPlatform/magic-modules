@@ -1959,10 +1959,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           See the [official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies#profilefeaturesupport)
           for information on what cipher suites each profile provides. If
           `CUSTOM` is used, the `custom_features` attribute **must be set**.
-          Default is `COMPATIBLE`.
       minTlsVersion: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :TLS_1_0
-        description : '{{description}} Default is `TLS_1_0`.'
       warnings: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
   Subnetwork: !ruby/object:Overrides::Terraform::ResourceOverride

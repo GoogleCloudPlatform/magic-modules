@@ -735,7 +735,6 @@ objects:
         name: 'servingStatus'
         description: |
           Current serving status of this version. Only the versions with a SERVING status create instances and can be billed.
-          Defaults to SERVING.
         default_value: :SERVING
         values:
           - :SERVING
@@ -757,7 +756,7 @@ objects:
           - !ruby/object:Api::Type::Enum
             name: 'authFailAction'
             description: |
-              Action to take when users access resources that require authentication. Defaults to "AUTH_FAIL_ACTION_REDIRECT".
+              Action to take when users access resources that require authentication.
             default_value: :AUTH_FAIL_ACTION_REDIRECT
             values:
               - :AUTH_FAIL_ACTION_REDIRECT
@@ -765,7 +764,7 @@ objects:
           - !ruby/object:Api::Type::Enum
             name: 'login'
             description: |
-              Level of login required to access this resource. Defaults to "LOGIN_OPTIONAL".
+              Level of login required to access this resource.
             default_value: :LOGIN_OPTIONAL
             values:
               - :LOGIN_OPTIONAL
@@ -986,7 +985,7 @@ objects:
           - !ruby/object:Api::Type::Enum
             name: 'rolloutStrategy'
             description: |
-              Endpoints rollout strategy. If FIXED, configId must be specified. If MANAGED, configId must be omitted. Default is "FIXED".
+              Endpoints rollout strategy. If FIXED, configId must be specified. If MANAGED, configId must be omitted.
             default_value: :FIXED
             values:
               - :FIXED

@@ -73,8 +73,7 @@ objects:
           - :NONE
           - :ALL_ANCESTORS
         description: |
-            Policy for including ancestors in the index.  Either `ALL_ANCESTORS` or `NONE`,
-            the default is `NONE`.
+            Policy for including ancestors in the index.
       - !ruby/object:Api::Type::Array
         name: 'properties'
         description: |
@@ -94,4 +93,4 @@ objects:
                 - :ASCENDING
                 - :DESCENDING
               description: |
-                 The direction the index should optimize for sorting. Possible values are ASCENDING and DESCENDING.
+                 The direction the index should optimize for sorting.

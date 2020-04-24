@@ -190,7 +190,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: version
         description: |
-          The FHIR specification version. Supported values include DSTU2, STU3 and R4. Defaults to STU3.
+          The FHIR specification version.
         required: false # TODO: Make this field required in GA.
         input: true
         default_value: :STU3
