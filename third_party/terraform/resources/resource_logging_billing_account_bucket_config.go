@@ -12,6 +12,13 @@ var loggingBillingAccountBucketConfigSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Required: true,
 		ForceNew: true,
+		StateFunc: func(val interface{}) string {
+			billingAccount := val.(string)
+			if !strings.HasPrefix(billingAccount, "billingAccount") {
+				billingAccount = "billingAccounts/" + billingAccount
+			}
+			return billingAccount
+		},
 	},
 }
 
@@ -30,5 +37,5 @@ func billingAccountBucketConfigID(d *schema.ResourceData, config *Config) (strin
 
 // Create Logging Bucket config
 func ResourceLoggingBillingAccountBucketConfig() *schema.Resource {
-	return ResourceLoggingBucketConfig(loggingBillingAccountBucketConfigSchema, billingAccountBucketConfigID)
+	return ResourceLoggingBucketConfig("billing_account", loggingBillingAccountBucketConfigSchema, billingAccountBucketConfigID)
 }

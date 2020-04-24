@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -43,14 +44,53 @@ type loggingBucketConfigIDFunc func(d *schema.ResourceData, config *Config) (str
 
 // ResourceLoggingBucketConfig creates a resource definition by merging a unique field (eg: folder) to a generic logging bucket
 // config resource. In practice the only difference between these resources is the url location.
-func ResourceLoggingBucketConfig(parentSpecificSchema map[string]*schema.Schema, iDFunc loggingBucketConfigIDFunc) *schema.Resource {
+func ResourceLoggingBucketConfig(parentType string, parentSpecificSchema map[string]*schema.Schema, iDFunc loggingBucketConfigIDFunc) *schema.Resource {
 	// func ResourceLoggingBucketConfig() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceLoggingBucketConfigAcquire(iDFunc),
 		Read:   resourceLoggingBucketConfigRead(),
 		Update: resourceLoggingBucketConfigUpdate(),
 		Delete: resourceLoggingBucketConfigDelete(),
+		Importer: &schema.ResourceImporter{
+			State: resourceLoggingBucketConfigImportState(parentType),
+		},
 		Schema: mergeSchemas(loggingBucketConfigSchema, parentSpecificSchema),
+	}
+}
+
+var loggingBucketConfigIDRegex = regexp.MustCompile("(.+)/(.+)/locations/(.+)/buckets/(.+)")
+
+func resourceLoggingBucketConfigImportState(parent string) schema.StateFunc {
+	return func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+		// loggingSinkId, err := parseLoggingSinkId()
+		parts := loggingBucketConfigIDRegex.FindStringSubmatch(d.Id())
+		if parts == nil {
+			return nil, fmt.Errorf("unable to parse logging sink id %#v", d.Id())
+		}
+
+		if len(parts) != 5 {
+			return nil, fmt.Errorf("Invalid id format. Format should be '{{parent_type}}/{{parent_id}}/locations/{{location}}/buckets/{{bucket_id}} with parent_type in %s", loggingSinkResourceTypes)
+		}
+
+		validLoggingType := false
+		for _, v := range loggingSinkResourceTypes {
+			if v == parts[1] {
+				validLoggingType = true
+				break
+			}
+		}
+		if !validLoggingType {
+			return nil, fmt.Errorf("Logging parent type %s is not valid. Valid resource types: %#v", parts[1],
+				loggingSinkResourceTypes)
+		}
+
+		d.Set(parent, parts[1]+"/"+parts[2])
+
+		d.Set("location", parts[3])
+
+		d.Set("bucket_id", parts[4])
+
+		return []*schema.ResourceData{d}, nil
 	}
 }
 

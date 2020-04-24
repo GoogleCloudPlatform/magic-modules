@@ -51,4 +51,9 @@ exported:
 
 ## Import
 
-This resource cannot be created or destroyed so "creating" the resource effectively imports the resource.
+
+This resource can be imported using the following format:
+
+```
+$ terraform import google_logging_organization_bucket_config.default organizations/{{organization}}/locations/{{location}}/buckets/{{bucket_id}}
+```

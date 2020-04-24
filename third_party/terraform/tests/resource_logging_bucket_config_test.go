@@ -10,7 +10,7 @@ import (
 	"google.golang.org/api/logging/v2"
 )
 
-func TestAccLoggingFolderBucketConfig_basic(t *testing.T) {
+func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -24,22 +24,32 @@ func TestAccLoggingFolderBucketConfig_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingFolderBucketConfig_basic(context, 30),
+				Config: testAccLoggingBucketConfigFolder_basic(context, 30),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLoggingBucketConfig(getFolderBucket, "google_folder.default", "id", "google_logging_folder_bucket_config.basic", 30),
 				),
 			},
 			{
-				Config: testAccLoggingFolderBucketConfig_basic(context, 40),
+				ResourceName:      "google_logging_folder_bucket_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccLoggingBucketConfigFolder_basic(context, 40),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLoggingBucketConfig(getFolderBucket, "google_folder.default", "id", "google_logging_folder_bucket_config.basic", 40),
 				),
+			},
+			{
+				ResourceName:      "google_logging_folder_bucket_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-func TestAccLoggingProjectBucketConfig_basic(t *testing.T) {
+func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -53,22 +63,32 @@ func TestAccLoggingProjectBucketConfig_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingProjectBucketConfig_basic(context, 30),
+				Config: testAccLoggingBucketConfigProject_basic(context, 30),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLoggingBucketConfig(getProjectBucket, "google_project.default", "id", "google_logging_project_bucket_config.basic", 30),
 				),
 			},
 			{
-				Config: testAccLoggingProjectBucketConfig_basic(context, 40),
+				ResourceName:      "google_logging_project_bucket_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccLoggingBucketConfigProject_basic(context, 40),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLoggingBucketConfig(getProjectBucket, "google_project.default", "id", "google_logging_project_bucket_config.basic", 40),
 				),
+			},
+			{
+				ResourceName:      "google_logging_project_bucket_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-func TestAccLoggingBillingAccountBucketConfig_basic(t *testing.T) {
+func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -82,22 +102,32 @@ func TestAccLoggingBillingAccountBucketConfig_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingBillingAccountBucketConfig_basic(context, 30),
+				Config: testAccLoggingBucketConfigBillingAccount_basic(context, 30),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLoggingBucketConfig(getBillingAccountBucket, "data.google_billing_account.default", "name", "google_logging_billing_account_bucket_config.basic", 30),
 				),
 			},
 			{
-				Config: testAccLoggingBillingAccountBucketConfig_basic(context, 40),
+				ResourceName:      "google_logging_billing_account_bucket_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccLoggingBucketConfigBillingAccount_basic(context, 40),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLoggingBucketConfig(getBillingAccountBucket, "data.google_billing_account.default", "name", "google_logging_billing_account_bucket_config.basic", 40),
 				),
+			},
+			{
+				ResourceName:      "google_logging_billing_account_bucket_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-func TestAccLoggingOrganizationBucketConfig_basic(t *testing.T) {
+func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -110,22 +140,32 @@ func TestAccLoggingOrganizationBucketConfig_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingOrganizationBucketConfig_basic(context, 30),
+				Config: testAccLoggingBucketConfigOrganization_basic(context, 30),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLoggingBucketConfig(getOrganizationBucket, "data.google_organization.default", "name", "google_logging_organization_bucket_config.basic", 30),
 				),
 			},
 			{
-				Config: testAccLoggingOrganizationBucketConfig_basic(context, 40),
+				ResourceName:      "google_logging_organization_bucket_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccLoggingBucketConfigOrganization_basic(context, 40),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLoggingBucketConfig(getOrganizationBucket, "data.google_organization.default", "name", "google_logging_organization_bucket_config.basic", 40),
 				),
+			},
+			{
+				ResourceName:      "google_logging_organization_bucket_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-func testAccLoggingFolderBucketConfig_basic(context map[string]interface{}, retention int) string {
+func testAccLoggingBucketConfigFolder_basic(context map[string]interface{}, retention int) string {
 	return fmt.Sprintf(Nprintf(`
 resource "google_folder" "default" {
 	display_name = "%{folder_name}"
@@ -142,7 +182,7 @@ resource "google_logging_folder_bucket_config" "basic" {
 `, context), retention, retention)
 }
 
-func testAccLoggingProjectBucketConfig_basic(context map[string]interface{}, retention int) string {
+func testAccLoggingBucketConfigProject_basic(context map[string]interface{}, retention int) string {
 	return fmt.Sprintf(Nprintf(`
 resource "google_project" "default" {
 	project_id = "%{project_name}"
@@ -160,7 +200,7 @@ resource "google_logging_project_bucket_config" "basic" {
 `, context), retention, retention)
 }
 
-func testAccLoggingBillingAccountBucketConfig_basic(context map[string]interface{}, retention int) string {
+func testAccLoggingBucketConfigBillingAccount_basic(context map[string]interface{}, retention int) string {
 	return fmt.Sprintf(Nprintf(`
 
 data "google_billing_account" "default" {
@@ -177,7 +217,7 @@ resource "google_logging_billing_account_bucket_config" "basic" {
 `, context), retention, retention)
 }
 
-func testAccLoggingOrganizationBucketConfig_basic(context map[string]interface{}, retention int) string {
+func testAccLoggingBucketConfigOrganization_basic(context map[string]interface{}, retention int) string {
 	return fmt.Sprintf(Nprintf(`
 data "google_organization" "default" {
 	organization = "%{org_id}"

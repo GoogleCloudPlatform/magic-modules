@@ -12,6 +12,13 @@ var loggingFolderBucketConfigSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Required: true,
 		ForceNew: true,
+		StateFunc: func(val interface{}) string {
+			folder := val.(string)
+			if !strings.HasPrefix(folder, "folder") {
+				folder = "folders/" + folder
+			}
+			return folder
+		},
 	},
 }
 
@@ -30,5 +37,5 @@ func folderBucketConfigID(d *schema.ResourceData, config *Config) (string, error
 
 // Create Logging Bucket config
 func ResourceLoggingFolderBucketConfig() *schema.Resource {
-	return ResourceLoggingBucketConfig(loggingFolderBucketConfigSchema, folderBucketConfigID)
+	return ResourceLoggingBucketConfig("folder", loggingFolderBucketConfigSchema, folderBucketConfigID)
 }
