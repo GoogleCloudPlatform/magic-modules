@@ -30,9 +30,10 @@ func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_logging_folder_bucket_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_logging_folder_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"folder"},
 			},
 			{
 				Config: testAccLoggingBucketConfigFolder_basic(context, 40),
@@ -41,9 +42,10 @@ func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_logging_folder_bucket_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_logging_folder_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"folder"},
 			},
 		},
 	})
@@ -69,9 +71,10 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_logging_project_bucket_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_logging_project_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
 			},
 			{
 				Config: testAccLoggingBucketConfigProject_basic(context, 40),
@@ -80,9 +83,10 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_logging_project_bucket_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_logging_project_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
 			},
 		},
 	})
@@ -108,9 +112,10 @@ func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_logging_billing_account_bucket_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_logging_billing_account_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"billing_account"},
 			},
 			{
 				Config: testAccLoggingBucketConfigBillingAccount_basic(context, 40),
@@ -119,9 +124,10 @@ func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_logging_billing_account_bucket_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_logging_billing_account_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"billing_account"},
 			},
 		},
 	})
@@ -146,9 +152,10 @@ func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_logging_organization_bucket_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_logging_organization_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"organization"},
 			},
 			{
 				Config: testAccLoggingBucketConfigOrganization_basic(context, 40),
@@ -157,9 +164,10 @@ func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_logging_organization_bucket_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_logging_organization_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"organization"},
 			},
 		},
 	})

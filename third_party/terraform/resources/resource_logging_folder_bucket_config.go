@@ -12,13 +12,6 @@ var loggingFolderBucketConfigSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Required: true,
 		ForceNew: true,
-		StateFunc: func(val interface{}) string {
-			folder := val.(string)
-			if !strings.HasPrefix(folder, "folder") {
-				folder = "folders/" + folder
-			}
-			return folder
-		},
 	},
 }
 

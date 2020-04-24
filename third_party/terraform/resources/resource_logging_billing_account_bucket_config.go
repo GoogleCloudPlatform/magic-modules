@@ -12,13 +12,6 @@ var loggingBillingAccountBucketConfigSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Required: true,
 		ForceNew: true,
-		StateFunc: func(val interface{}) string {
-			billingAccount := val.(string)
-			if !strings.HasPrefix(billingAccount, "billingAccount") {
-				billingAccount = "billingAccounts/" + billingAccount
-			}
-			return billingAccount
-		},
 	},
 }
 

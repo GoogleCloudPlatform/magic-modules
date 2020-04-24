@@ -12,13 +12,6 @@ var loggingOrganizationBucketConfigSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Required: true,
 		ForceNew: true,
-		StateFunc: func(val interface{}) string {
-			organization := val.(string)
-			if !strings.HasPrefix(organization, "organization") {
-				organization = "organizations/" + organization
-			}
-			return organization
-		},
 	},
 }
 

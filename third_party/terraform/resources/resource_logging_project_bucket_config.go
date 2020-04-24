@@ -12,13 +12,6 @@ var loggingProjectBucketConfigSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Required: true,
 		ForceNew: true,
-		StateFunc: func(val interface{}) string {
-			project := val.(string)
-			if !strings.HasPrefix(project, "project") {
-				project = "projects/" + project
-			}
-			return project
-		},
 	},
 }
 
