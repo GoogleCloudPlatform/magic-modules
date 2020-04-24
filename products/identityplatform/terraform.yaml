@@ -24,6 +24,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_test: true
   TenantDefaultSupportedIdpConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/tenants/{{tenant}}/defaultSupportedIdpConfigs/{{idp_id}}"]
+    # Child of idp Tenant resource
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "identity_platform_tenant_default_supported_idp_config_basic"
