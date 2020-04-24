@@ -395,6 +395,10 @@ objects:
               update method to make sure concurrent updates are handled properly. 
               During update, use the most recent settingsVersion value for this 
               instance and do not try to update this value.
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'userLabels'
+            description: |
+              User-provided labels, represented as a dictionary where each label is a single key value pair.
       - !ruby/object:Api::Type::String
         name: 'gceZone'
         output: true
