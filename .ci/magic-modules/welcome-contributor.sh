@@ -2,7 +2,7 @@
 
 set -x
 
-ASSIGNEE=$(shuf -n 1 <(printf "danawillow\nrambleraptor\nemilymye\nrileykarson\nSirGitsalot\nslevenick\nchrisst\nc2thorn\nndmckinley"))
+ASSIGNEE=$(shuf -n 1 <(printf "danawillow\nrambleraptor\nemilymye\nrileykarson\nSirGitsalot\nslevenick\nc2thorn\nndmckinley"))
 
 cat > comment/pr_comment << EOF
 Hello!  I am a robot who works on Magic Modules PRs.
