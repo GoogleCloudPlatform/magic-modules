@@ -1,0 +1,6 @@
+log.Printf("[DEBUG] Decoding state notification config: %q", d.Id())
+config := meta.(*Config)
+if err := d.Set("state_notification_config", flattenCloudIotDeviceRegistryStateNotificationConfig(res["stateNotificationConfig"], d, config)); err != nil {
+    return nil, fmt.Errorf("Error reading DeviceRegistry: %s", err)
+}
+return res, nil

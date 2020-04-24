@@ -23,7 +23,7 @@ func TestValidateCloudIoTDeviceRegistryId(t *testing.T) {
 		{TestName: "too long", Value: strings.Repeat("f", 260), ExpectError: true},
 	}
 
-	es := testStringValidationCases(x, validateCloudIotDeviceRegistryId)
+	es := testStringValidationCases(x, validateCloudIotDeviceRegistryID)
 	if len(es) > 0 {
 		t.Errorf("Failed to validate CloudIoT ID names: %v", es)
 	}
