@@ -204,7 +204,8 @@ module Provider
     def generate_resource_sweepers(data)
       return if data.object.skip_sweeper ||
                 data.object.custom_code.custom_delete ||
-                data.object.custom_code.pre_delete
+                data.object.custom_code.pre_delete ||
+                data.object.skip_delete
 
       target_folder = File.join(data.output_folder, folder_name(data.version))
 

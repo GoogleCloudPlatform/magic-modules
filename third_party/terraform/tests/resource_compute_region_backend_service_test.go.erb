@@ -213,7 +213,7 @@ func TestAccComputeRegionBackendService_ilbUpdateFull(t *testing.T) {
 	backendName := fmt.Sprintf("foo-%s", randString)
 	checkName := fmt.Sprintf("bar-%s", randString)
   igName := fmt.Sprintf("baz-%s", randString)
-  instanceName := fmt.Sprintf("boz-%s", randString)
+  instanceName := fmt.Sprintf("tf-test-%s", randString)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },

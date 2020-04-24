@@ -12,7 +12,7 @@
 # limitations under the License.
 --- !ruby/object:Api::Product
 name: Monitoring
-display_name: Stackdriver Monitoring
+display_name: Cloud (Stackdriver) Monitoring
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

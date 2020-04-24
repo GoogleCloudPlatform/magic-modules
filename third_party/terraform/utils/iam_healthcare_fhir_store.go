@@ -1,9 +1,9 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
+
 import (
 	"fmt"
-	healthcare "google.golang.org/api/healthcare/v1beta1"
+
+	healthcare "google.golang.org/api/healthcare/v1"
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -92,6 +92,3 @@ func (u *HealthcareFhirStoreIamUpdater) GetMutexKey() string {
 func (u *HealthcareFhirStoreIamUpdater) DescribeResource() string {
 	return fmt.Sprintf("Healthcare FhirStore %q", u.resourceId)
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>

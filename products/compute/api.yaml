@@ -94,8 +94,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'addressType'
         description: |
-          The type of address to reserve, either INTERNAL or EXTERNAL.
-          If unspecified, defaults to EXTERNAL.
+          The type of address to reserve.
         values:
           - :INTERNAL
           - :EXTERNAL
@@ -134,8 +133,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
         description: |
-          The networking tier used for configuring this address. This field can
-          take the following values: PREMIUM or STANDARD. If this field is not
+          The networking tier used for configuring this address. If this field is not
           specified, it is assumed to be PREMIUM.
         values:
           - :PREMIUM
@@ -364,8 +362,7 @@ objects:
                 name: 'utilizationTargetType'
                 description: |
                   Defines how target utilization value is expressed for a
-                  Stackdriver Monitoring metric. Either GAUGE, DELTA_PER_SECOND,
-                  or DELTA_PER_MINUTE.
+                  Stackdriver Monitoring metric.
                 values:
                   - :GAUGE
                   - :DELTA_PER_SECOND
@@ -1102,8 +1099,7 @@ objects:
         description: |
           Indicates whether the backend service will be used with internal or
           external load balancing. A backend service created for one type of
-          load balancing cannot be used with the other. Must be `EXTERNAL` or
-          `INTERNAL_SELF_MANAGED` for a global backend service. Defaults to `EXTERNAL`.
+          load balancing cannot be used with the other.
         default_value: :EXTERNAL
         # If you're modifying this value, it probably means Global ILB is now
         # an option. If that's the case, all of the documentation is based on
@@ -1420,8 +1416,7 @@ objects:
         name: 'protocol'
         description: |
           The protocol this BackendService uses to communicate with backends.
-          Possible values are HTTP, HTTPS, HTTP2, TCP, and SSL. The default is
-          HTTP. **NOTE**: HTTP2 is only valid for beta HTTP/2 load balancer
+          The default is HTTP. **NOTE**: HTTP2 is only valid for beta HTTP/2 load balancer
           types and may result in errors if used with the GA API.
         values:
           - :HTTP
@@ -1543,7 +1538,7 @@ objects:
                 - :RATE
                 - :CONNECTION
               description: |
-                Specifies the balancing mode for this backend. Defaults to CONNECTION.
+                Specifies the balancing mode for this backend.
             - !ruby/object:Api::Type::Double
               name: 'capacityScaler'
               description: |
@@ -1938,8 +1933,7 @@ objects:
         description: |
           Indicates what kind of load balancing this regional backend service
           will be used for. A backend service created for one type of load
-          balancing cannot be used with the other(s). Must be `INTERNAL` or
-          `INTERNAL_MANAGED`. Defaults to `INTERNAL`.
+          balancing cannot be used with the other(s).
         default_value: :INTERNAL
         values:
           - :INTERNAL
@@ -2246,8 +2240,7 @@ objects:
         name: 'protocol'
         description: |
           The protocol this RegionBackendService uses to communicate with backends.
-          Possible values are HTTP, HTTPS, HTTP2, SSL, TCP, and UDP. The default is
-          HTTP. **NOTE**: HTTP2 is only valid for beta HTTP/2 load balancer
+          The default is HTTP. **NOTE**: HTTP2 is only valid for beta HTTP/2 load balancer
           types and may result in errors if used with the GA API.
         # This is removed to avoid breaking terraform, as default values cannot be
         # unspecified. Providers should include this as needed via overrides
@@ -2948,13 +2941,9 @@ objects:
           The list of ALLOW rules specified by this firewall. Each rule
           specifies a protocol and port-range tuple that describes a permitted
           connection.
-        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
-        # once hashicorp/terraform-plugin-sdk#280 is fixed
-        at_least_one_of:
+        exactly_one_of:
           - allow
           - deny
-        conflicts:
-          - denied
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             # IPProtocol has to be string, instead of Enum because user can
@@ -2985,13 +2974,9 @@ objects:
         output: true
       - !ruby/object:Api::Type::Array
         name: 'denied'
-        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
-        # once hashicorp/terraform-plugin-sdk#280 is fixed
-        at_least_one_of:
+        exactly_one_of:
           - allow
           - deny
-        conflicts:
-          - allowed
         description: |
           The list of DENY rules specified by this firewall. Each rule specifies
           a protocol and port-range tuple that describes a denied connection.
@@ -3281,8 +3266,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'IPProtocol'
         description: |
-          The IP protocol to which this rule applies. Valid options are TCP,
-          UDP, ESP, AH, SCTP or ICMP.
+          The IP protocol to which this rule applies.
 
           When the load balancing scheme is INTERNAL, only TCP and UDP are
           valid.
@@ -3436,8 +3420,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
         description: |
-          The networking tier used for configuring this address. This field can
-          take the following values: PREMIUM or STANDARD. If this field is not
+          The networking tier used for configuring this address. If this field is not
           specified, it is assumed to be PREMIUM.
         values:
           - :PREMIUM
@@ -3548,8 +3531,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'ipVersion'
         description: |
-          The IP Version that will be used by this address. Valid options are
-          `IPV4` or `IPV6`. The default value is `IPV4`.
+          The IP Version that will be used by this address. The default value is `IPV4`.
         values:
           - :IPV4
           - :IPV6
@@ -3570,7 +3552,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'addressType'
         description: |
-          The type of the address to reserve, default is EXTERNAL.
+          The type of the address to reserve.
 
           * EXTERNAL indicates public/external single IP address.
           * INTERNAL indicates internal IP ranges belonging to some network.
@@ -3679,8 +3661,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'IPProtocol'
         description: |
-          The IP protocol to which this rule applies. Valid options are TCP,
-          UDP, ESP, AH, SCTP or ICMP. When the load balancing scheme is
+          The IP protocol to which this rule applies. When the load balancing scheme is
           INTERNAL_SELF_MANAGED, only TCP is valid.
         values:
           - :TCP
@@ -3693,7 +3674,6 @@ objects:
         name: 'ipVersion'
         description: |
           The IP Version that will be used by this global forwarding rule.
-          Valid options are IPV4 or IPV6.
         values:
           - :IPV4
           - :IPV6
@@ -4148,19 +4128,12 @@ objects:
           - :HTTP2
       - !ruby/object:Api::Type::NestedObject
         name: 'httpHealthCheck'
-        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
-        # once hashicorp/terraform-plugin-sdk#280 is fixed
-        at_least_one_of:
+        exactly_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
-        conflicts:
-          - httpsHealthCheck
-          - http2HealthCheck
-          - tcpHealthCheck
-          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4242,7 +4215,7 @@ objects:
                 - http_health_check.0.port_specification
               description: |
                 Specifies the type of proxy header to append before sending data to the
-                backend, either NONE or PROXY_V1. The default is NONE.
+                backend.
               values:
                 - :NONE
                 - :PROXY_V1
@@ -4278,19 +4251,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'httpsHealthCheck'
-        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
-        # once hashicorp/terraform-plugin-sdk#280 is fixed
-        at_least_one_of:
+        exactly_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
-        conflicts:
-          - httpHealthCheck
-          - http2HealthCheck
-          - tcpHealthCheck
-          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4372,7 +4338,7 @@ objects:
                 - https_health_check.0.port_specification
               description: |
                 Specifies the type of proxy header to append before sending data to the
-                backend, either NONE or PROXY_V1. The default is NONE.
+                backend.
               values:
                 - :NONE
                 - :PROXY_V1
@@ -4408,19 +4374,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'tcpHealthCheck'
-        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
-        # once hashicorp/terraform-plugin-sdk#280 is fixed
-        at_least_one_of:
+        exactly_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
-        conflicts:
-          - httpHealthCheck
-          - httpsHealthCheck
-          - http2HealthCheck
-          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -4484,7 +4443,7 @@ objects:
                 - tcp_health_check.0.port_specification
               description: |
                 Specifies the type of proxy header to append before sending data to the
-                backend, either NONE or PROXY_V1. The default is NONE.
+                backend.
               values:
                 - :NONE
                 - :PROXY_V1
@@ -4519,19 +4478,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'sslHealthCheck'
-        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
-        # once hashicorp/terraform-plugin-sdk#280 is fixed
-        at_least_one_of:
+        exactly_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
-        conflicts:
-          - httpHealthCheck
-          - httpsHealthCheck
-          - http2HealthCheck
-          - tcpHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -4595,7 +4547,7 @@ objects:
                 - ssl_health_check.0.port_specification
               description: |
                 Specifies the type of proxy header to append before sending data to the
-                backend, either NONE or PROXY_V1. The default is NONE.
+                backend.
               values:
                 - :NONE
                 - :PROXY_V1
@@ -4630,19 +4582,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'http2HealthCheck'
-        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
-        # once hashicorp/terraform-plugin-sdk#280 is fixed
-        at_least_one_of:
+        exactly_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
-        conflicts:
-          - httpHealthCheck
-          - httpsHealthCheck
-          - tcpHealthCheck
-          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4724,7 +4669,7 @@ objects:
                 - http2_health_check.0.port_specification
               description: |
                 Specifies the type of proxy header to append before sending data to the
-                backend, either NONE or PROXY_V1. The default is NONE.
+                backend.
               values:
                 - :NONE
                 - :PROXY_V1
@@ -7356,7 +7301,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'networkEndpointType'
         description: |
-          Type of network endpoints in this network endpoint group. The only supported value is GCE_VM_IP_PORT
+          Type of network endpoints in this network endpoint group.
         values:
           - :GCE_VM_IP_PORT
         default_value: :GCE_VM_IP_PORT
@@ -7515,9 +7460,7 @@ objects:
         name: 'networkEndpointType'
         required: true
         description: |
-          Type of network endpoints in this network endpoint group. Supported values are:
-            * INTERNET_IP_PORT
-            * INTERNET_FQDN_PORT
+          Type of network endpoints in this network endpoint group.
         values:
           - :INTERNET_IP_PORT
           - :INTERNET_FQDN_PORT
@@ -8322,8 +8265,7 @@ objects:
                 name: 'utilizationTargetType'
                 description: |
                   Defines how target utilization value is expressed for a
-                  Stackdriver Monitoring metric. Either GAUGE, DELTA_PER_SECOND,
-                  or DELTA_PER_MINUTE.
+                  Stackdriver Monitoring metric.
                 values:
                   - :GAUGE
                   - :DELTA_PER_SECOND
@@ -9476,35 +9418,45 @@ objects:
                       - !ruby/object:Api::Type::String
                         name: 'hostRedirect'
                         description: |
-                          The host that will be used in the redirect response instead of the one that was
-                          supplied in the request. The value must be between 1 and 255 characters.
+                          The host that will be used in the redirect response instead of the one
+                          that was supplied in the request. The value must be between 1 and 255
+                          characters.
                       - !ruby/object:Api::Type::Boolean
                         name: 'httpsRedirect'
                         default_value: false
                         description: |
-                          If set to true, the URL scheme in the redirected request is set to https. If set
-                          to false, the URL scheme of the redirected request will remain the same as that
-                          of the request. This must only be set for UrlMaps used in TargetHttpProxys.
-                          Setting this true for TargetHttpsProxy is not permitted. Defaults to false.
+                          If set to true, the URL scheme in the redirected request is set to https.
+                          If set to false, the URL scheme of the redirected request will remain the
+                          same as that of the request. This must only be set for UrlMaps used in
+                          TargetHttpProxys. Setting this true for TargetHttpsProxy is not
+                          permitted. The default is set to false.
                       - !ruby/object:Api::Type::String
                         name: 'pathRedirect'
                         description: |
-                          The path that will be used in the redirect response instead of the one that was
-                          supplied in the request. Only one of pathRedirect or prefixRedirect must be
-                          specified. The value must be between 1 and 1024 characters.
+                          The path that will be used in the redirect response instead of the one
+                          that was supplied in the request. pathRedirect cannot be supplied
+                          together with prefixRedirect. Supply one alone or neither. If neither is
+                          supplied, the path of the original request will be used for the redirect.
+                          The value must be between 1 and 1024 characters.
                       - !ruby/object:Api::Type::String
                         name: 'prefixRedirect'
                         description: |
-                          The prefix that replaces the prefixMatch specified in the HttpRouteRuleMatch,
-                          retaining the remaining portion of the URL before redirecting the request.
+                          The prefix that replaces the prefixMatch specified in the
+                          HttpRouteRuleMatch, retaining the remaining portion of the URL before
+                          redirecting the request. prefixRedirect cannot be supplied together with
+                          pathRedirect. Supply one alone or neither. If neither is supplied, the
+                          path of the original request will be used for the redirect. The value
+                          must be between 1 and 1024 characters.
                       - !ruby/object:Api::Type::Enum
                         name: 'redirectResponseCode'
                         description: |
-                          The HTTP Status code to use for this RedirectAction. Supported values are:   -
-                          MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.  -
-                          FOUND, which corresponds to 302.  - SEE_OTHER which corresponds to 303.  -
-                          TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
-                          will be retained.  - PERMANENT_REDIRECT, which corresponds to 308. In this case,
+                          The HTTP Status code to use for this RedirectAction. Supported values are:
+                          - MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+                          - FOUND, which corresponds to 302.
+                          - SEE_OTHER which corresponds to 303.
+                          - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
+                          will be retained.
+                          - PERMANENT_REDIRECT, which corresponds to 308. In this case,
                           the request method will be retained.
                         values:
                           - :FOUND
@@ -9516,9 +9468,9 @@ objects:
                         name: 'stripQuery'
                         default_value: false
                         description: |
-                          If set to true, any accompanying query portion of the original URL is removed
-                          prior to redirecting the request. If set to false, the query portion of the
-                          original URL is retained. Defaults to false.
+                          If set to true, any accompanying query portion of the original URL is
+                          removed prior to redirecting the request. If set to false, the query
+                          portion of the original URL is retained. The default is set to false.
             - !ruby/object:Api::Type::Array
               name: 'pathRules'
               description: |
@@ -9878,34 +9830,42 @@ objects:
                   - !ruby/object:Api::Type::NestedObject
                     name: 'urlRedirect'
                     description: |
-                      When a path pattern is matched, the request is redirected to a URL specified by
-                      urlRedirect. If urlRedirect is specified, service or routeAction must not be
-                      set.
+                      When a path pattern is matched, the request is redirected to a URL specified
+                      by urlRedirect. If urlRedirect is specified, service or routeAction must not
+                      be set.
                     properties:
                       - !ruby/object:Api::Type::String
                         name: 'hostRedirect'
                         description: |
-                          The host that will be used in the redirect response instead of the one that was
-                          supplied in the request. The value must be between 1 and 255 characters.
+                          The host that will be used in the redirect response instead of the one
+                          that was supplied in the request. The value must be between 1 and 255
+                          characters.
                       - !ruby/object:Api::Type::Boolean
                         name: 'httpsRedirect'
                         default_value: false
                         description: |
-                          If set to true, the URL scheme in the redirected request is set to https. If set
-                          to false, the URL scheme of the redirected request will remain the same as that
-                          of the request. This must only be set for UrlMaps used in TargetHttpProxys.
-                          Setting this true for TargetHttpsProxy is not permitted. Defaults to false.
+                          If set to true, the URL scheme in the redirected request is set to https.
+                          If set to false, the URL scheme of the redirected request will remain the
+                          same as that of the request. This must only be set for UrlMaps used in
+                          TargetHttpProxys. Setting this true for TargetHttpsProxy is not
+                          permitted. The default is set to false.
                       - !ruby/object:Api::Type::String
                         name: 'pathRedirect'
                         description: |
-                          The path that will be used in the redirect response instead of the one that was
-                          supplied in the request. Only one of pathRedirect or prefixRedirect must be
-                          specified. The value must be between 1 and 1024 characters.
+                          The path that will be used in the redirect response instead of the one
+                          that was supplied in the request. pathRedirect cannot be supplied
+                          together with prefixRedirect. Supply one alone or neither. If neither is
+                          supplied, the path of the original request will be used for the redirect.
+                          The value must be between 1 and 1024 characters.
                       - !ruby/object:Api::Type::String
                         name: 'prefixRedirect'
                         description: |
-                          The prefix that replaces the prefixMatch specified in the HttpRouteRuleMatch,
-                          retaining the remaining portion of the URL before redirecting the request.
+                          The prefix that replaces the prefixMatch specified in the
+                          HttpRouteRuleMatch, retaining the remaining portion of the URL before
+                          redirecting the request. prefixRedirect cannot be supplied together with
+                          pathRedirect. Supply one alone or neither. If neither is supplied, the
+                          path of the original request will be used for the redirect. The value
+                          must be between 1 and 1024 characters.
                       - !ruby/object:Api::Type::Enum
                         name: 'redirectResponseCode'
                         description: |
@@ -9925,7 +9885,7 @@ objects:
                           - :TEMPORARY_REDIRECT
                       - !ruby/object:Api::Type::Boolean
                         name: 'stripQuery'
-                        required: true
+                        default_value: false
                         description: |
                           If set to true, any accompanying query portion of the original URL is removed
                           prior to redirecting the request. If set to false, the query portion of the
@@ -10200,19 +10160,12 @@ objects:
           - :HTTP2
       - !ruby/object:Api::Type::NestedObject
         name: 'httpHealthCheck'
-        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
-        # once hashicorp/terraform-plugin-sdk#280 is fixed
-        at_least_one_of:
+        exactly_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
-        conflicts:
-          - httpsHealthCheck
-          - http2HealthCheck
-          - tcpHealthCheck
-          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -10294,7 +10247,7 @@ objects:
                 - http_health_check.0.port_specification
               description: |
                 Specifies the type of proxy header to append before sending data to the
-                backend, either NONE or PROXY_V1. The default is NONE.
+                backend.
               values:
                 - :NONE
                 - :PROXY_V1
@@ -10330,19 +10283,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'httpsHealthCheck'
-        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
-        # once hashicorp/terraform-plugin-sdk#280 is fixed
-        at_least_one_of:
+        exactly_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
-        conflicts:
-          - httpHealthCheck
-          - http2HealthCheck
-          - tcpHealthCheck
-          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -10424,7 +10370,7 @@ objects:
                 - https_health_check.0.port_specification
               description: |
                 Specifies the type of proxy header to append before sending data to the
-                backend, either NONE or PROXY_V1. The default is NONE.
+                backend.
               values:
                 - :NONE
                 - :PROXY_V1
@@ -10460,19 +10406,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'tcpHealthCheck'
-        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
-        # once hashicorp/terraform-plugin-sdk#280 is fixed
-        at_least_one_of:
+        exactly_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
-        conflicts:
-          - httpHealthCheck
-          - httpsHealthCheck
-          - http2HealthCheck
-          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -10536,7 +10475,7 @@ objects:
                 - tcp_health_check.0.port_specification
               description: |
                 Specifies the type of proxy header to append before sending data to the
-                backend, either NONE or PROXY_V1. The default is NONE.
+                backend.
               values:
                 - :NONE
                 - :PROXY_V1
@@ -10571,19 +10510,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'sslHealthCheck'
-        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
-        # once hashicorp/terraform-plugin-sdk#280 is fixed
-        at_least_one_of:
+        exactly_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
-        conflicts:
-          - httpHealthCheck
-          - httpsHealthCheck
-          - http2HealthCheck
-          - tcpHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -10647,7 +10579,7 @@ objects:
                 - ssl_health_check.0.port_specification
               description: |
                 Specifies the type of proxy header to append before sending data to the
-                backend, either NONE or PROXY_V1. The default is NONE.
+                backend.
               values:
                 - :NONE
                 - :PROXY_V1
@@ -10682,19 +10614,12 @@ objects:
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
         name: 'http2HealthCheck'
-        # TODO(terraform-providers/terraform-provider-google#5193): Change back to exactly_one_of
-        # once hashicorp/terraform-plugin-sdk#280 is fixed
-        at_least_one_of:
+        exactly_one_of:
           - http_health_check
           - https_health_check
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
-        conflicts:
-          - httpHealthCheck
-          - httpsHealthCheck
-          - tcpHealthCheck
-          - sslHealthCheck
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -10776,7 +10701,7 @@ objects:
                 - http2_health_check.0.port_specification
               description: |
                 Specifies the type of proxy header to append before sending data to the
-                backend, either NONE or PROXY_V1. The default is NONE.
+                backend.
               values:
                 - :NONE
                 - :PROXY_V1
@@ -10976,7 +10901,6 @@ objects:
                 description: |
                   Specifies the behavior to apply to scheduled snapshots when
                   the source disk is deleted.
-                  Valid options are KEEP_AUTO_SNAPSHOTS and APPLY_RETENTION_POLICY
                 default_value: :KEEP_AUTO_SNAPSHOTS
                 values:
                   - :KEEP_AUTO_SNAPSHOTS
@@ -11327,8 +11251,6 @@ objects:
             name: advertiseMode
             description: |
               User-specified flag to indicate which mode to use for advertisement.
-
-              Valid values of this enum field are: DEFAULT, CUSTOM
             values:
               - :DEFAULT
               - :CUSTOM
@@ -11561,8 +11483,7 @@ objects:
           - !ruby/object:Api::Type::Enum
             name: 'filter'
             description: |
-              Specifies the desired filtering of logs on this NAT. Valid
-              values are: `"ERRORS_ONLY"`, `"TRANSLATIONS_ONLY"`, `"ALL"`
+              Specifies the desired filtering of logs on this NAT.
             required: true
             values:
               - :ERRORS_ONLY
@@ -12421,8 +12342,7 @@ objects:
                         - :SCSI
                         - :NVME
                       description: |
-                        The disk interface to use for attaching this disk, one
-                        of `SCSI` or `NVME`. The default is `SCSI`.
+                        The disk interface to use for attaching this disk.
                     - !ruby/object:Api::Type::Integer
                       name: 'diskSizeGb'
                       required: true
@@ -12490,8 +12410,7 @@ objects:
         name: 'profile'
         description: |
           Profile specifies the set of SSL features that can be used by the
-          load balancer when negotiating SSL with clients. This can be one of
-          `COMPATIBLE`, `MODERN`, `RESTRICTED`, or `CUSTOM`. If using `CUSTOM`,
+          load balancer when negotiating SSL with clients. If using `CUSTOM`,
           the set of SSL features to enable must be specified in the
           `customFeatures` field.
         values:
@@ -12503,8 +12422,7 @@ objects:
         name: 'minTlsVersion'
         description: |
           The minimum version of SSL protocol that can be used by the clients
-          to establish a connection with the load balancer. This can be one of
-          `TLS_1_0`, `TLS_1_1`, `TLS_1_2`.
+          to establish a connection with the load balancer.
         values:
           - :TLS_1_0
           - :TLS_1_1
@@ -12780,7 +12698,7 @@ objects:
             description: |
               Can only be specified if VPC flow logging for this subnetwork is enabled.
               Configures whether metadata fields should be added to the reported VPC
-              flow logs. Default is `INCLUDE_ALL_METADATA`.
+              flow logs.
             values:
               - :EXCLUDE_ALL_METADATA
               - :INCLUDE_ALL_METADATA
@@ -12922,8 +12840,7 @@ objects:
           whether the load balancer will attempt to negotiate QUIC with clients
           or not. Can specify one of NONE, ENABLE, or DISABLE. If NONE is
           specified, uses the QUIC policy with no user overrides, which is
-          equivalent to DISABLE. Not specifying this field is equivalent to
-          specifying NONE.
+          equivalent to DISABLE.
         values:
           - :NONE
           - :ENABLE
@@ -13449,7 +13366,7 @@ objects:
         name: 'proxyHeader'
         description: |
           Specifies the type of proxy header to append before sending data to
-          the backend, either NONE or PROXY_V1. The default is NONE.
+          the backend.
         values:
           - :NONE
           - :PROXY_V1
@@ -13553,7 +13470,7 @@ objects:
         name: 'proxyHeader'
         description: |
           Specifies the type of proxy header to append before sending data to
-          the backend, either NONE or PROXY_V1. The default is NONE.
+          the backend.
         values:
           - :NONE
           - :PROXY_V1
@@ -14479,34 +14396,42 @@ objects:
                   - !ruby/object:Api::Type::NestedObject
                     name: 'urlRedirect'
                     description: |
-                      When a path pattern is matched, the request is redirected to a URL specified by
-                      urlRedirect. If urlRedirect is specified, service or routeAction must not be
-                      set.
+                      When a path pattern is matched, the request is redirected to a URL specified
+                      by urlRedirect. If urlRedirect is specified, service or routeAction must not
+                      be set.
                     properties:
                       - !ruby/object:Api::Type::String
                         name: 'hostRedirect'
                         description: |
-                          The host that will be used in the redirect response instead of the one that was
-                          supplied in the request. The value must be between 1 and 255 characters.
+                          The host that will be used in the redirect response instead of the one
+                          that was supplied in the request. The value must be between 1 and 255
+                          characters.
                       - !ruby/object:Api::Type::Boolean
                         name: 'httpsRedirect'
                         default_value: false
                         description: |
-                          If set to true, the URL scheme in the redirected request is set to https. If set
-                          to false, the URL scheme of the redirected request will remain the same as that
-                          of the request. This must only be set for UrlMaps used in TargetHttpProxys.
-                          Setting this true for TargetHttpsProxy is not permitted. Defaults to false.
+                          If set to true, the URL scheme in the redirected request is set to https.
+                          If set to false, the URL scheme of the redirected request will remain the
+                          same as that of the request. This must only be set for UrlMaps used in
+                          TargetHttpProxys. Setting this true for TargetHttpsProxy is not
+                          permitted. The default is set to false.
                       - !ruby/object:Api::Type::String
                         name: 'pathRedirect'
                         description: |
-                          The path that will be used in the redirect response instead of the one that was
-                          supplied in the request. Only one of pathRedirect or prefixRedirect must be
-                          specified. The value must be between 1 and 1024 characters.
+                          The path that will be used in the redirect response instead of the one
+                          that was supplied in the request. pathRedirect cannot be supplied
+                          together with prefixRedirect. Supply one alone or neither. If neither is
+                          supplied, the path of the original request will be used for the redirect.
+                          The value must be between 1 and 1024 characters.
                       - !ruby/object:Api::Type::String
                         name: 'prefixRedirect'
                         description: |
-                          The prefix that replaces the prefixMatch specified in the HttpRouteRuleMatch,
-                          retaining the remaining portion of the URL before redirecting the request.
+                          The prefix that replaces the prefixMatch specified in the
+                          HttpRouteRuleMatch, retaining the remaining portion of the URL before
+                          redirecting the request. prefixRedirect cannot be supplied together with
+                          pathRedirect. Supply one alone or neither. If neither is supplied, the
+                          path of the original request will be used for the redirect. The value
+                          must be between 1 and 1024 characters.
                       - !ruby/object:Api::Type::Enum
                         name: 'redirectResponseCode'
                         description: |
@@ -14526,11 +14451,11 @@ objects:
                           - :TEMPORARY_REDIRECT
                       - !ruby/object:Api::Type::Boolean
                         name: 'stripQuery'
-                        required: true
+                        default_value: false
                         description: |
-                          If set to true, any accompanying query portion of the original URL is removed
-                          prior to redirecting the request. If set to false, the query portion of the
-                          original URL is retained.
+                          If set to true, any accompanying query portion of the original URL is
+                          removed prior to redirecting the request. If set to false, the query
+                          portion of the original URL is retained. The default is set to false.
             - !ruby/object:Api::Type::Array
               name: 'routeRules'
               description: |
