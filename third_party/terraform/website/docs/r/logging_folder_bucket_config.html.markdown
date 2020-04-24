@@ -1,5 +1,5 @@
 ---
-subcategory: "Stackdriver Logging"
+subcategory: "Cloud (Stackdriver) Logging"
 layout: "google"
 page_title: "Google: google_logging_folder_bucket_config"
 sidebar_current: "docs-google-logging-folder-bucket-config"
@@ -13,7 +13,7 @@ Manages a folder-level logging bucket config. For more information see
 [the official logging documentation](https://cloud.google.com/logging/docs/) and
 [Storing Logs](https://cloud.google.com/logging/docs/storage).
 
-Logging buckets are automatically created for a given folder, project, organization, billingAccount and cannot be deleted. Creating a resource of this type will acquire and update the resource that already exists at the desired location. These buckets cannot be removed so deleting this resource will remove the bucket config from your terraform state but will leave the logging bucket unchanged. The buckets that are currently automatically created are "_Default" and "_Required".
+~> **Note:** Logging buckets are automatically created for a given folder, project, organization, billingAccount and cannot be deleted. Creating a resource of this type will acquire and update the resource that already exists at the desired location. These buckets cannot be removed so deleting this resource will remove the bucket config from your terraform state but will leave the logging bucket unchanged. The buckets that are currently automatically created are "_Default" and "_Required".
 
 ## Example Usage
 

@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"google.golang.org/api/logging/v2"
@@ -15,8 +14,8 @@ func TestAccLoggingFolderBucketConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(10),
-		"folder_name":   "tf-test-" + acctest.RandString(10),
+		"random_suffix": randString(t, 10),
+		"folder_name":   "tf-test-" + randString(t, 10),
 		"org_id":        getTestOrgFromEnv(t),
 	}
 
@@ -44,8 +43,8 @@ func TestAccLoggingProjectBucketConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(10),
-		"project_name":  "tf-test-" + acctest.RandString(10),
+		"random_suffix": randString(t, 10),
+		"project_name":  "tf-test-" + randString(t, 10),
 		"org_id":        getTestOrgFromEnv(t),
 	}
 
@@ -73,12 +72,10 @@ func TestAccLoggingBillingAccountBucketConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":        acctest.RandString(10),
+		"random_suffix":        randString(t, 10),
 		"billing_account_name": "billingAccounts/" + getTestBillingAccountFromEnv(t),
 		"org_id":               getTestOrgFromEnv(t),
 	}
-
-	fmt.Println(testAccLoggingBillingAccountBucketConfig_basic(context, 30))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -104,11 +101,9 @@ func TestAccLoggingOrganizationBucketConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(10),
+		"random_suffix": randString(t, 10),
 		"org_id":        getTestOrgFromEnv(t),
 	}
-
-	fmt.Println(testAccLoggingOrganizationBucketConfig_basic(context, 30))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
