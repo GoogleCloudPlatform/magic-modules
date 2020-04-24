@@ -54,11 +54,15 @@ module Provider
       end
 
       def build_property_documentation(property)
+        return if property.removed?
+
         compile_template 'templates/terraform/property_documentation.erb',
                          property: property
       end
 
       def build_nested_property_documentation(property)
+        return if property.removed?
+
         compile_template(
           'templates/terraform/nested_property_documentation.erb',
           property: property
