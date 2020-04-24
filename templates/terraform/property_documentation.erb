@@ -16,6 +16,7 @@
 <%= indent(property.description.strip.gsub("\n\n", "\n"), 2) -%>
 <% if property.is_a?(Api::Type::Enum) && !property.output -%>
 <% unless property.default_value.nil? || property.default_value == "" -%>
+
   Default value: `<%= property.default_value %>`
 <% end -%>
   Possible values are:

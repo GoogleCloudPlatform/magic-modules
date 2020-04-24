@@ -67,7 +67,7 @@
 <% enum_values_description = "" -%>
 <% if property.is_a?(Api::Type::Enum) && !property.output -%>
 <% unless property.default_value.nil? || property.default_value == "" -%>
-<% enum_values_description += "\nDefault value: \"#{property.default_value}\"." -%>
+<% enum_values_description += " Default value: \"#{property.default_value}\"" -%>
 <% end -%>
 <% enum_values_description += " Possible values: [" -%>
 <% enum_values_description += property.values.select { |v| v != "" }.map { |v| "\"#{v}\"" }.join(', ') -%>

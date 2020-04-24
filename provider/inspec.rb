@@ -308,7 +308,7 @@ module Provider
         description = description_arr.join("\n\n")
       elsif property.is_a?(Api::Type::Enum)
         description_arr = [description, "#{'  ' * indent}Possible values:"]
-        description_arr += property.values.map { |v| "#{'  ' * indent}* #{v}" }
+        description_arr += property.values.map { |v| "#{'  ' * indent + 1}* #{v}" }
         description = description_arr.join("\n")
       end
       description
