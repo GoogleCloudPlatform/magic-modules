@@ -46,6 +46,9 @@ func testSweep<%= sweeper_name -%>(region string) error {
 		return err
 	}
 
+	t := &testing.T{}
+	billingId := getTestBillingAccountFromEnv(t)
+
 	// Setup variables to replace in list template
 	d := &ResourceDataMock{
 		FieldsInSchema: map[string]interface{}{
@@ -53,6 +56,7 @@ func testSweep<%= sweeper_name -%>(region string) error {
 			"region":region,
 			"location":region,
 			"zone":"-",
+			"billing_account":billingId,
 		},
 	}
 
