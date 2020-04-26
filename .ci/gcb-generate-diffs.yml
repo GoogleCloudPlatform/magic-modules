@@ -1,5 +1,10 @@
 ---
 steps:
+    - name: 'gcr.io/graphite-docker-images/contributor-checker'
+      secretEnv: ["GITHUB_TOKEN"]
+      args:
+          - $_PR_NUMBER
+
     # The GCB / GH integration doesn't satisfy our use case perfectly.
     # It doesn't check out the merge commit, and it doesn't check out the repo
     # itself - it only gives us the actual code, not the repo. So we need
