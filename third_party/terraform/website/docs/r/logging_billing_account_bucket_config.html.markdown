@@ -18,6 +18,10 @@ Manages a billing account level logging bucket config. For more information see
 ## Example Usage
 
 ```hcl
+data "google_billing_account" "default" {
+	billing_account = "00AA00-000AAA-00AA0A"
+}
+
 resource "google_logging_billing_account_bucket_config" "basic" {
 	billing_account    = data.google_billing_account.default.billing_account
 	location  = "global"

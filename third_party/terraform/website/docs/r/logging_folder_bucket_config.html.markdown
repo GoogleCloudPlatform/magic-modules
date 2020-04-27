@@ -19,8 +19,8 @@ Manages a folder-level logging bucket config. For more information see
 
 ```hcl
 resource "google_folder" "default" {
-	display_name = "%{folder_name}"
-	parent       = "organizations/%{org_id}"
+	display_name = "some-folder-name"
+	parent       = "organizations/123456789"
 }
 
 resource "google_logging_folder_bucket_config" "basic" {

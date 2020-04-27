@@ -18,6 +18,10 @@ Manages a organization-level logging bucket config. For more information see
 ## Example Usage
 
 ```hcl
+data "google_organization" "default" {
+	organization = "123456789"
+}
+
 resource "google_logging_organization_bucket_config" "basic" {
 	organization    = data.google_organization.default.organization
 	location  = "global"

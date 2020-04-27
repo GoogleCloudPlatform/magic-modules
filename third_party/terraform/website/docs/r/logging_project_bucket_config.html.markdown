@@ -18,6 +18,12 @@ Manages a project-level logging bucket config. For more information see
 ## Example Usage
 
 ```hcl
+resource "google_project" "default" {
+	project_id = "your-project-id"
+	name       = "your-project-id"
+	org_id     = "123456789"
+}
+
 resource "google_logging_project_bucket_config" "basic" {
 	project    = google_project.default.name
 	location  = "global"
