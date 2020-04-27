@@ -14,6 +14,9 @@ It's intended as a supplement for intermediate users, covering cases that are
 unintuitive or confusing when using Terraform instead of `gcloud`/the Cloud
 Console.
 
+Additionally, you may consider using Google's [`kubernetes-engine`](https://registry.terraform.io/modules/terraform-google-modules/kubernetes-engine/google)
+module, which implements many of this practices for you.
+
 If the information on this page conflicts with recommendations available on
 `cloud.google.com`, `cloud.google.com` should be considered the correct source.
 
