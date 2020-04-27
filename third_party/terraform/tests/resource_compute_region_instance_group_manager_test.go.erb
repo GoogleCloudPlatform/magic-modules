@@ -1128,8 +1128,8 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
     min_ready_sec                = 20
   }
   stateful_disk {
-  	device_name = "stateful-disk"
-  	delete_rule = "NEVER"
+    device_name = "stateful-disk"
+    delete_rule = "NEVER"
   }
 }
 `, template, igm)
@@ -1185,12 +1185,12 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
     min_ready_sec                = 20
   }
   stateful_disk {
-  	device_name = "stateful-disk"
-  	delete_rule = "NEVER"
+    device_name = "stateful-disk"
+    delete_rule = "NEVER"
   }
   stateful_disk {
-  	device_name = "stateful-disk2"
-  	delete_rule = "NEVER"
+    device_name = "stateful-disk2"
+    delete_rule = "NEVER"
   }
 }
 `, template, igm)

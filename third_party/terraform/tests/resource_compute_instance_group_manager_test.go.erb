@@ -1120,8 +1120,8 @@ resource "google_compute_instance_group_manager" "igm-basic" {
   zone               = "us-central1-c"
   target_size        = 2
   stateful_disk {
-  	device_name = "my-stateful-disk"
-  	delete_rule = "NEVER"
+    device_name = "my-stateful-disk"
+    delete_rule = "NEVER"
   }
 }
 
@@ -1192,13 +1192,13 @@ resource "google_compute_instance_group_manager" "igm-basic" {
   zone               = "us-central1-c"
   target_size        = 2
   stateful_disk {
-  	device_name = "my-stateful-disk"
-  	delete_rule = "NEVER"
+    device_name = "my-stateful-disk"
+    delete_rule = "NEVER"
   }
 
   stateful_disk {
-  	device_name = "my-stateful-disk2"
-  	delete_rule = "ON_PERMANENT_INSTANCE_DELETION"
+    device_name = "my-stateful-disk2"
+    delete_rule = "ON_PERMANENT_INSTANCE_DELETION"
   }
 }
 
