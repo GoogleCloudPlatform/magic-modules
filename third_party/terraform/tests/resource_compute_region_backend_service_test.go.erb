@@ -202,6 +202,7 @@ func TestAccComputeRegionBackendService_ilbUpdateBasic(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccComputeRegionBackendService_ilbUpdateFull(t *testing.T) {
 	t.Parallel()
 
@@ -236,6 +237,7 @@ func TestAccComputeRegionBackendService_ilbUpdateFull(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func testAccComputeRegionBackendService_ilbBasic(serviceName, checkName string) string {
 	return fmt.Sprintf(`
@@ -296,6 +298,7 @@ resource "google_compute_health_check" "health_check" {
 `, serviceName, checkName)
 }
 
+<% unless version == 'ga' -%>
 func testAccComputeRegionBackendService_ilbFull(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
@@ -329,7 +332,9 @@ resource "google_compute_health_check" "health_check" {
 }
 `, serviceName, checkName)
 }
+<% end -%>
 
+<% unless version == 'ga' -%>
 func testAccComputeRegionBackendService_ilbUpdateFull(serviceName, igName, instanceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
@@ -424,6 +429,7 @@ resource "google_compute_health_check" "health_check" {
 }
 `, serviceName, igName, instanceName, checkName)
 }
+<% end -%>
 
 func testAccComputeRegionBackendService_basic(serviceName, checkName string) string {
 	return fmt.Sprintf(`
