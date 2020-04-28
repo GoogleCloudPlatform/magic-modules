@@ -15,6 +15,7 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Bucket: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_resource: true
+    error_retry_predicates: ["isStoragePreconditionError"]
     import_format: ["{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
