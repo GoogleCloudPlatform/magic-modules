@@ -1,0 +1,26 @@
+resource "google_sql_database_instance" "instance" {
+    provider         = google-beta
+    name             = "<%= ctx[:vars]['database_instance_name'] %>"
+    database_version = "POSTGRES_11"
+    region           = "us-central1"
+    settings {
+		tier = "db-f1-micro"
+	}
+}
+
+resource "google_sql_database" "db" {
+    provider = google-beta
+    instance = google_sql_database_instance.instance.name
+    name     = "db"
+}
+
+resource "google_bigquery_connection" "<%= ctx[:primary_resource_id] %>" {
+    provider      = google-beta
+    friendly_name = "👋"
+    description   = "a riveting description"
+    cloud_sql {
+        instance_id = google_sql_database_instance.instance.connection_name
+        database    = google_sql_database.db.name
+        type        = "POSTGRES"
+    }
+}
