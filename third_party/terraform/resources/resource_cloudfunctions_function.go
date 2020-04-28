@@ -63,7 +63,7 @@ func labelKeyValidator(val interface{}, key string) (warns []string, errs []erro
 	m := val.(map[string]interface{})
 	for k := range m {
 		if !labelKeyRegex.MatchString(k) {
-			errs = append(errs, fmt.Errorf("%q is an invlaid label key. See https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements", k))
+			errs = append(errs, fmt.Errorf("%q is an invalid label key. See https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements", k))
 		}
 	}
 	return
