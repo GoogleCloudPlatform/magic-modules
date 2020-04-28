@@ -221,6 +221,7 @@ objects:
                 properties:
                   - !ruby/object:Api::Type::Boolean
                     name: 'requireScreenLock'
+                    apiName: 'requireScreenlock'
                     description: |
                       Whether or not screenlock is required for the DevicePolicy
                       to be true. Defaults to false.
