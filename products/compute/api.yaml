@@ -1109,7 +1109,6 @@ objects:
           - :INTERNAL_SELF_MANAGED
       - !ruby/object:Api::Type::Enum
         name: 'localityLbPolicy'
-        input: true
         min_version: beta
         values:
           - :ROUND_ROBIN
@@ -1940,7 +1939,6 @@ objects:
           - :INTERNAL_MANAGED
       - !ruby/object:Api::Type::Enum
         name: 'localityLbPolicy'
-        input: true
         min_version: beta
         values:
           - :ROUND_ROBIN
