@@ -62,7 +62,8 @@ objects:
         description: |-
           The geographic location where the connection should reside.
           Cloud SQL instance must be in the same location as the connection
-          Examples: US, EU, asia-northeast1. The default value is US.
+          with following exceptions: Cloud SQL us-central1 maps to BigQuery US, Cloud SQL europe-west1 maps to BigQuery EU.
+          Examples: US, EU, asia-northeast1, us-central1, europe-west1. The default value is US.
       - !ruby/object:Api::Type::String
         name: 'friendlyName'
         description: A descriptive name for the connection
@@ -73,7 +74,7 @@ objects:
         name: 'hasCredential' 
         output: true
         description: |
-          Output only. True if the connection has credential assigned. 
+          True if the connection has credential assigned. 
       - !ruby/object:Api::Type::NestedObject
         name: cloudSql
         description: Cloud SQL properties.
