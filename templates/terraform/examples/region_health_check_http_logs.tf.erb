@@ -1,4 +1,6 @@
 resource "google_compute_region_health_check" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+
   name = "<%= ctx[:vars]['health_check_name'] %>"
 
   timeout_sec        = 1
