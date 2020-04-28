@@ -211,6 +211,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
         custom_flatten: "templates/terraform/custom_flatten/group_id_to_name.erb"
 
+  MetricDescriptor: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    # mutex: stackdriver/groups/{{project}}
+    # TODO chrisst - mutex is almost certainly needed
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "monitoring_metric_descriptor"
+        primary_resource_id: "basic"
+        vars:
+          display_name: "Test Custom Metric"
+          type: "custom.googleapis.com/terraform/test"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      # post_create: templates/terraform/post_create/metric_descriptor_wait.erb
+      # TODO chrisst - need to use a poll based wait for N repeated 200 post create
+
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.

@@ -1,0 +1,6 @@
+resource "google_monitoring_metric_descriptor" "<%= ctx[:primary_resource_id] %>" {
+  display_name = "<%= ctx[:vars]["display_name"] %>"
+  type = "<%= ctx[:vars]["type"] %>"
+  metric_kind = "GAUGE"
+  value_type = "BOOL"
+}
