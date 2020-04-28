@@ -15640,25 +15640,26 @@ objects:
             name: 'metadata'
             description: |
               Preserved metadata defined for this instance. This is a list of key->value pairs.
-          - !ruby/object:Api::Type::NestedObject
+          - !ruby/object:Api::Type::Array
             name: 'disks'
             description: |
               Preserved disks defined for this instance. Stored as key->value with the key being the device name
-            properties:
-              - !ruby/object:Api::Type::String
-                name: deviceName
-                required: true
-                description: |
-                  The name of the device to attach to this instance config
-              - !ruby/object:Api::Type::Enum
-                name: deleteRule
-                description: |
-                  A value that prescribes what should happen to the stateful disk when the VM instance is deleted.
-                  The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`.
-                  `NEVER` detatch the disk when the VM is deleted, but not delete the disk.
-                  `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
-                  deleted from the instance group.
-                values: 
-                  - :NEVER
-                  - :ON_PERMANENT_INSTANCE_DELETION
-                default: :NEVER
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: deviceName
+                  required: true
+                  description: |
+                    The name of the device to attach to this instance config
+                - !ruby/object:Api::Type::Enum
+                  name: deleteRule
+                  description: |
+                    A value that prescribes what should happen to the stateful disk when the VM instance is deleted.
+                    The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`.
+                    `NEVER` detatch the disk when the VM is deleted, but not delete the disk.
+                    `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
+                    deleted from the instance group.
+                  values: 
+                    - :NEVER
+                    - :ON_PERMANENT_INSTANCE_DELETION
+                  default_value: :NEVER

@@ -2432,17 +2432,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           template_name: "my-template"
           igm_name: "my-igm"
+    properties:
+      preservedState.disks: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/preserved_state_disks.go.erb
+        custom_expand: templates/terraform/custom_flatten/preserved_state_disks.go.erb
     virtual_fields:
       - !ruby/object:Api::Type::Enum
         name: 'minimal_action'
         description: |
-          The minimal action to perform on the instance during an update. Default is NONE
-          Possible values are:
-
-          * REPLACE
-          * RESTART
-          * REFRESH
-          * NONE
+          The minimal action to perform on the instance during an update.
         values:
           - :REPLACE
           - :RESTART
@@ -2452,13 +2450,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Api::Type::Enum
         name: 'most_disruptive_allowed_action'
         description: |
-          The minimal action to perform on the instance during an update. Default is REPLACE
-          Possible values are:
-
-          * REPLACE
-          * RESTART
-          * REFRESH
-          * NONE
+          The minimal action to perform on the instance during an update.
         values:
           - :REPLACE
           - :RESTART
