@@ -257,21 +257,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_round_robin"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_ring_hash"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_balancing_mode"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-service"
