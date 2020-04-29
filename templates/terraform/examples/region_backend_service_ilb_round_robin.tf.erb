@@ -1,6 +1,4 @@
 resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] %>" {
-  provider = "google-beta"
-
   region = "us-central1"
   name = "<%= ctx[:vars]['region_backend_service_name'] %>"
   health_checks = ["${google_compute_health_check.health_check.self_link}"]
@@ -10,8 +8,6 @@ resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] 
 }
 
 resource "google_compute_health_check" "health_check" {
-  provider = "google-beta"
-
   name               = "<%= ctx[:vars]['health_check_name'] %>"
   http_health_check {
     port = 80
