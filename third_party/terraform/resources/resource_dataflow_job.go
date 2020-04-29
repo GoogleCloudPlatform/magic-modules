@@ -152,7 +152,6 @@ func resourceDataflowJob() *schema.Resource {
 			"additional_experiments": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				ForceNew: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -171,6 +170,7 @@ func resourceDataflowJobTypeCustomizeDiff(d *schema.ResourceDiff, meta interface
 	if d.Get("type") == "JOB_TYPE_BATCH" {
 		resourceSchema := resourceDataflowJob().Schema
 		for field, fieldSchema := range resourceSchema {
+			// Each key within a map must be checked for a change
 			if fieldSchema.Type == schema.TypeMap {
 				resourceDataflowJobIterateMapForceNew(field, d)
 			} else if d.HasChange(field) {
@@ -190,31 +190,16 @@ func resourceDataflowJobCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	zone, err := getZone(d, config)
-	if err != nil {
-		return err
-	}
-
 	region, err := getRegion(d, config)
 	if err != nil {
 		return err
 	}
 
 	params := expandStringMap(d, "parameters")
-	labels := expandStringMap(d, "labels")
-	additionalExperiments := convertStringSet(d.Get("additional_experiments").(*schema.Set))
 
-	env := dataflow.RuntimeEnvironment{
-		MaxWorkers:            int64(d.Get("max_workers").(int)),
-		Network:               d.Get("network").(string),
-		ServiceAccountEmail:   d.Get("service_account_email").(string),
-		Subnetwork:            d.Get("subnetwork").(string),
-		TempLocation:          d.Get("temp_gcs_location").(string),
-		MachineType:           d.Get("machine_type").(string),
-		IpConfiguration:       d.Get("ip_configuration").(string),
-		AdditionalUserLabels:  labels,
-		Zone:                  zone,
-		AdditionalExperiments: additionalExperiments,
+	env, err := resourceDataflowJobSetupEnv(d, config)
+	if err != nil {
+		return err
 	}
 
 	request := dataflow.CreateJobFromTemplateRequest{
@@ -292,24 +277,11 @@ func resourceDataflowJobUpdateByReplacement(d *schema.ResourceData, meta interfa
 		return err
 	}
 
-	zone, err := getZone(d, config)
+	params := expandStringMap(d, "parameters")
+
+	env, err := resourceDataflowJobSetupEnv(d, config)
 	if err != nil {
 		return err
-	}
-
-	params := expandStringMap(d, "parameters")
-	labels := expandStringMap(d, "labels")
-
-	env := dataflow.RuntimeEnvironment{
-		MaxWorkers:           int64(d.Get("max_workers").(int)),
-		Network:              d.Get("network").(string),
-		ServiceAccountEmail:  d.Get("service_account_email").(string),
-		Subnetwork:           d.Get("subnetwork").(string),
-		TempLocation:         d.Get("temp_gcs_location").(string),
-		MachineType:          d.Get("machine_type").(string),
-		IpConfiguration:      d.Get("ip_configuration").(string),
-		AdditionalUserLabels: labels,
-		Zone:                 zone,
 	}
 
 	request := dataflow.LaunchTemplateParameters{
@@ -446,6 +418,31 @@ func resourceDataflowJobLaunchTemplate(config *Config, project string, region st
 		return config.clientDataflow.Projects.Templates.Launch(project, request).GcsPath(gcsPath).Do()
 	}
 	return config.clientDataflow.Projects.Locations.Templates.Launch(project, region, request).GcsPath(gcsPath).Do()
+}
+
+func resourceDataflowJobSetupEnv(d *schema.ResourceData, config *Config) (dataflow.RuntimeEnvironment, error) {
+	zone, err := getZone(d, config)
+	if err != nil {
+		return dataflow.RuntimeEnvironment{}, err
+	}
+
+	labels := expandStringMap(d, "labels")
+
+	additionalExperiments := convertStringSet(d.Get("additional_experiments").(*schema.Set))
+
+	env := dataflow.RuntimeEnvironment{
+		MaxWorkers:            int64(d.Get("max_workers").(int)),
+		Network:               d.Get("network").(string),
+		ServiceAccountEmail:   d.Get("service_account_email").(string),
+		Subnetwork:            d.Get("subnetwork").(string),
+		TempLocation:          d.Get("temp_gcs_location").(string),
+		MachineType:           d.Get("machine_type").(string),
+		IpConfiguration:       d.Get("ip_configuration").(string),
+		AdditionalUserLabels:  labels,
+		Zone:                  zone,
+		AdditionalExperiments: additionalExperiments,
+	}
+	return env, nil
 }
 
 func resourceDataflowJobIterateMapForceNew(mapKey string, d *schema.ResourceDiff) {

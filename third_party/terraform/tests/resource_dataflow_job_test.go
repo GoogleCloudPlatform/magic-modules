@@ -225,7 +225,7 @@ func TestAccDataflowJob_streamUpdate(t *testing.T) {
 			{
 				Config: testAccDataflowJob_updateStream(suffix, "google_storage_bucket.bucket2.url"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataflowJobHasUpdated(t, "google_dataflow_job.pubsub_stream", "gs://tf-test-bucket2-"+suffix),
+					testAccDataflowJobHasTempLocation(t, "google_dataflow_job.pubsub_stream", "gs://tf-test-bucket2-"+suffix),
 				),
 			},
 		},
@@ -467,7 +467,7 @@ func testAccDataflowJobHasExperiments(t *testing.T, res string, experiments []st
 	}
 }
 
-func testAccDataflowJobHasUpdated(t *testing.T, res, targetLocation string) resource.TestCheckFunc {
+func testAccDataflowJobHasTempLocation(t *testing.T, res, targetLocation string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[res]
 		if !ok {
