@@ -1,6 +1,4 @@
 resource "google_compute_region_backend_service" "default" {
-  provider = google-beta
-
   load_balancing_scheme = "INTERNAL_MANAGED"
 
   backend {
@@ -18,15 +16,11 @@ resource "google_compute_region_backend_service" "default" {
 }
 
 data "google_compute_image" "debian_image" {
-  provider = google-beta
-
   family   = "debian-9"
   project  = "debian-cloud"
 }
 
 resource "google_compute_region_instance_group_manager" "rigm" {
-  provider = google-beta
-
   region   = "us-central1"
   name     = "<%= ctx[:vars]['rigm_name'] %>"
   version {
@@ -38,8 +32,6 @@ resource "google_compute_region_instance_group_manager" "rigm" {
 }
 
 resource "google_compute_instance_template" "instance_template" {
-  provider     = google-beta
-
   name         = "template-<%= ctx[:vars]['region_backend_service_name'] %>"
   machine_type = "n1-standard-1"
 
@@ -58,8 +50,6 @@ resource "google_compute_instance_template" "instance_template" {
 }
 
 resource "google_compute_region_health_check" "default" {
-  provider = google-beta
-
   region = "us-central1"
   name   = "<%= ctx[:vars]['region_health_check_name'] %>"
   http_health_check {
@@ -68,16 +58,12 @@ resource "google_compute_region_health_check" "default" {
 }
 
 resource "google_compute_network" "default" {
-  provider = google-beta
-
   name                    = "<%= ctx[:vars]['network_name'] %>"
   auto_create_subnetworks = false
   routing_mode            = "REGIONAL"
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider = google-beta
-
   name          = "<%= ctx[:vars]['network_name'] %>-default"
   ip_cidr_range = "10.1.2.0/24"
   region        = "us-central1"

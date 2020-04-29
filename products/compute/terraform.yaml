@@ -257,21 +257,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_round_robin"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_ring_hash"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_balancing_mode"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-service"
@@ -1440,7 +1437,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       sslHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
   RegionUrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
-    min_version: 'beta'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_url_map_basic"
@@ -1883,7 +1879,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_ssl_certificate_target_https_proxies"
-        min_version: "beta"
         primary_resource_id: "default"
         vars:
           region_target_https_proxy_name: "test-proxy"
@@ -2079,7 +2074,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_value: :NONE
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   RegionTargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
-    min_version: 'beta'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_target_http_proxy_basic"
@@ -2106,7 +2100,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
   RegionTargetHttpsProxy: !ruby/object:Overrides::Terraform::ResourceOverride
-    min_version: 'beta'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_target_https_proxy_basic"
