@@ -261,6 +261,9 @@ func resourceDataflowJobRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("labels", job.Labels)
 
 	sdkPipelineOptions, err := ConvertToMap(job.Environment.SdkPipelineOptions)
+	if err != nil {
+		return err
+	}
 	optionsMap := sdkPipelineOptions["options"].(map[string]interface{})
 	d.Set("template_gcs_path", optionsMap["templateLocation"])
 	d.Set("temp_gcs_location", optionsMap["tempLocation"])

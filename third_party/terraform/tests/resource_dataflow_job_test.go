@@ -484,6 +484,9 @@ func testAccDataflowJobHasUpdated(t *testing.T, res, targetLocation string) reso
 			return fmt.Errorf("dataflow job does not exist")
 		}
 		sdkPipelineOptions, err := ConvertToMap(job.Environment.SdkPipelineOptions)
+		if err != nil {
+			return err
+		}
 		optionsMap := sdkPipelineOptions["options"].(map[string]interface{})
 
 		if optionsMap["tempLocation"] != targetLocation {
