@@ -1550,6 +1550,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntAtLeast(1)'
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
+    # Route cannot be added while a peering is on progress on the network
+    mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "route_basic"
