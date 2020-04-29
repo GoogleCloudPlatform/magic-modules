@@ -17,13 +17,18 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 		return v
 	}
 	disks := v.(map[string]interface{})
-	transformed := make([]interface{}, 0, len(l))
+	transformed := make([]interface{}, 0, len(disks))
 	for devName, deleteRuleRaw := range disks {
-		deleteRuleObj := deleteRuleRaw.(map[string]interface{})
-		deleteRule := deleteRuleObj["autoDelete"]
+		diskObj := deleteRuleRaw.(map[string]interface{})
+		source, err := getRelativePath(diskObj["source"].(string))
+		if err != nil {
+			source = diskObj["source"].(string)
+		}
 		transformed = append(transformed, map[string]interface{}{
 			"device_name": devName,
-			"delete_rule": deleteRule,
+			"delete_rule": diskObj["autoDelete"],
+			"source": source,
+			"mode": diskObj["mode"],
 		})
 	}
 	return transformed

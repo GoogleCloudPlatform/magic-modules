@@ -13,20 +13,31 @@
 	# limitations under the License.
 -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	l := v.([]interface{})
+	if v == nil {
+		return map[string]interface{}{}, nil
+	}
+	l := v.(*schema.Set).List()
 	req := make(map[string]interface{})
 	for _, raw := range l {
 		if raw == nil {
 			continue
 		}
 		original := raw.(map[string]interface{})
-		deviceName = original["device_name"]
-		deleteRuleObj := make(map[string]interface{})
-		deleteRule := original["delete_rule"]
-		if !isEmptyValue(val) {
-			deleteRuleObj["autoDelete"] = deleteRule
+		deviceName := original["device_name"].(string)
+		diskObj := make(map[string]interface{})
+		deleteRule := original["delete_rule"].(string)
+		if deleteRule != "" {
+			diskObj["autoDelete"] = deleteRule
 		}
-		req[deviceName] = deleteRuleObj
+		source := original["source"]
+		if source != "" {
+			diskObj["source"] = source
+		}
+		mode := original["mode"]
+		if source != "" {
+			diskObj["mode"] = mode
+		}
+		req[deviceName] = diskObj
 	}
 	return req, nil
 }

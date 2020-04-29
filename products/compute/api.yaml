@@ -15641,7 +15641,8 @@ objects:
             description: |
               Preserved metadata defined for this instance. This is a list of key->value pairs.
           - !ruby/object:Api::Type::Array
-            name: 'disks'
+            name: 'disk'
+            api_name: disks
             description: |
               Preserved disks defined for this instance. Stored as key->value with the key being the device name
             item_type: !ruby/object:Api::Type::NestedObject
@@ -15651,6 +15652,20 @@ objects:
                   required: true
                   description: |
                     The name of the device to attach to this instance config
+                - !ruby/object:Api::Type::String
+                  name: source
+                  description: |
+                    The URI of an existing persistent disk to attach under the specified device-name in the format
+                    `projects/project-id/zones/zone/disks/disk-name` for a zonal disk and `projects/project-id/regions/region/disks/disk-name`
+                    for a regional disk. If omitted, the stateful configuration is applied to a disk currently attached under the given device name.
+                - !ruby/object:Api::Type::Enum
+                  name: mode
+                  description: |
+                    The mode of the disk.
+                  values: 
+                    - :READ_ONLY
+                    - :READ_WRITE
+                  default_value: :READ_WRITE
                 - !ruby/object:Api::Type::Enum
                   name: deleteRule
                   description: |
