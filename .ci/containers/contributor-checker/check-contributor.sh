@@ -14,7 +14,7 @@ USER=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}" | jq .user.login)
 
 ASSIGNEE=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
-  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}" | jq .assignee.login)
+  "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/requested_reviewers" | jq .users[0].login)
 
 # This is where you add users who do not need to have an assignee chosen for
 # the.
@@ -22,7 +22,9 @@ if $(echo $USER | fgrep -wq -e ndmckinley -e danawillow -e emilymye -e erjohnso 
   echo "User is on the list, not assigning."
   exit 0
 fi
-if [ -j "$ASSIGNEE" ] ; then 
+if [ "$ASSIGNEE" == "null" ] ; then 
+  echo "Issue is not assigned."
+else
   echo "Issue is assigned, not assigning."
   exit 0
 fi
@@ -46,5 +48,5 @@ curl -H "Authorization: token ${GITHUB_TOKEN}" \
       -d "$(jq -r --arg comment "$comment" -n "{body: \$comment}")" \
       "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}/comments"
 curl -H "Authorization: token ${GITHUB_TOKEN}" \
-      -d "$(jq -r --arg assignee "$ASSIGNEE" -n "{assignees: [\$assignee]}")" \
-      "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}/assignees"
+      -d "$(jq -r --arg assignee "$ASSIGNEE" -n "{reviewers: [\$assignee], team_reviewers: []}")" \
+      "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/requested_reviewers"
