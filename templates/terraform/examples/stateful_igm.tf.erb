@@ -38,7 +38,27 @@ resource "google_compute_instance_group_manager" "igm-no-tp" {
   target_size        = 2
 }
 
-resource "google_compute_per_instance_config" "<%= ctx[:primary_resource_id] %>" {
-	instance_group_manager = google_compute_instance_group_manager.igm-no-tp.name
-	instance_name = "instance-name"
+resource "google_compute_disk" "default" {
+  name  = "test-disk-%{random_suffix}"
+  type  = "pd-ssd"
+  zone  = google_compute_instance_group_manager.igm.zone
+  image = "debian-8-jessie-v20170523"
+  physical_block_size_bytes = 4096
+}
+
+resource "google_compute_per_instance_config" "with_disk" {
+  zone = google_compute_instance_group_manager.igm.zone
+  instance_group_manager = google_compute_instance_group_manager.igm.name
+  name = "instance-1"
+  preserved_state {
+    metadata = {
+      meta = "123"
+    }
+
+    disk {
+      device_name = "my-stateful-disk"
+      source      = google_compute_disk.default.id
+      mode        = "READ_ONLY"
+    }
+  }
 }
