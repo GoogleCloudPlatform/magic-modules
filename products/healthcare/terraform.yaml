@@ -21,7 +21,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_dataset_basic"
-        skip_test: true
         primary_resource_id: "default"
         vars:
           dataset_name: "example-dataset"
@@ -41,10 +40,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       {{description}}
     id_format: "{{dataset}}/fhirStores/{{name}}"
     import_format: ["{{dataset}}/fhirStores/{{name}}"]
+    # FhirStore datastores will be sweeped by the Dataset sweeper
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_fhir_store_basic"
-        skip_test: true
         primary_resource_id: "default"
         vars:
           dataset_name: "example-dataset"
@@ -63,10 +63,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       {{description}}
     id_format: "{{dataset}}/dicomStores/{{name}}"
     import_format: ["{{dataset}}/dicomStores/{{name}}"]
+    # DicomStore datastores will be sweeped by the Dataset sweeper
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_dicom_store_basic"
-        skip_test: true
         primary_resource_id: "default"
         vars:
           dataset_name: "example-dataset"
@@ -85,18 +86,32 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       {{description}}
     id_format: "{{dataset}}/hl7V2Stores/{{name}}"
     import_format: ["{{dataset}}/hl7V2Stores/{{name}}"]
+    # Hl7V2Store datastores will be sweeped by the Dataset sweeper
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_hl7_v2_store_basic"
-        skip_test: true
         primary_resource_id: "default"
         vars:
           dataset_name: "example-dataset"
           hl7_v2_store_name: "example-hl7-v2-store"
           pubsub_topic: "hl7-v2-notifications"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "healthcare_hl7_v2_store_parser_config"
+        min_version: beta
+        primary_resource_id: "store"
+        vars:
+          dataset_name: "example-dataset"
+          hl7_v2_store_name: "example-hl7-v2-store"
     properties:
       creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      parserConfig.schema: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/healthcare_hl7_v2_store_schema.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/healthcare_hl7_v2_store_schema.erb'
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.ValidateJsonString'
       selfLink: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode

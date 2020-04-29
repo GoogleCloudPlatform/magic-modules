@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
@@ -14,12 +13,12 @@ import (
 func TestAccComputeRegionUrlMap_update_path_matcher(t *testing.T) {
 	t.Parallel()
 
-	randomSuffix := acctest.RandString(10)
+	randomSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeUrlMapDestroy,
+		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRegionUrlMap_basic1(randomSuffix),
@@ -44,12 +43,12 @@ func TestAccComputeRegionUrlMap_update_path_matcher(t *testing.T) {
 func TestAccComputeRegionUrlMap_advanced(t *testing.T) {
 	t.Parallel()
 
-	randomSuffix := acctest.RandString(10)
+	randomSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeUrlMapDestroy,
+		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRegionUrlMap_advanced1(randomSuffix),
@@ -74,12 +73,12 @@ func TestAccComputeRegionUrlMap_advanced(t *testing.T) {
 func TestAccComputeRegionUrlMap_noPathRulesWithUpdate(t *testing.T) {
 	t.Parallel()
 
-	randomSuffix := acctest.RandString(10)
+	randomSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeUrlMapDestroy,
+		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRegionUrlMap_noPathRules(randomSuffix),
@@ -104,12 +103,12 @@ func TestAccComputeRegionUrlMap_noPathRulesWithUpdate(t *testing.T) {
 func TestAccComputeRegionUrlMap_ilbPathUpdate(t *testing.T) {
 	t.Parallel()
 
-	randomSuffix := acctest.RandString(10)
+	randomSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeUrlMapDestroy,
+		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRegionUrlMap_ilbPath(randomSuffix),
@@ -134,12 +133,12 @@ func TestAccComputeRegionUrlMap_ilbPathUpdate(t *testing.T) {
 func TestAccComputeRegionUrlMap_ilbRouteUpdate(t *testing.T) {
 	t.Parallel()
 
-	randomSuffix := acctest.RandString(10)
+	randomSuffix := randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeUrlMapDestroy,
+		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRegionUrlMap_ilbRoute(randomSuffix),
@@ -151,6 +150,28 @@ func TestAccComputeRegionUrlMap_ilbRouteUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccComputeRegionUrlMap_ilbRouteUpdate(randomSuffix),
+			},
+			{
+				ResourceName:      "google_compute_region_url_map.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionUrlMap_defaultUrlRedirect(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := randString(t, 10)
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionUrlMap_defaultUrlRedirectConfig(randomSuffix),
 			},
 			{
 				ResourceName:      "google_compute_region_url_map.foobar",
@@ -822,5 +843,16 @@ resource "google_compute_region_health_check" "default" {
   }
 }
 `, randomSuffix, randomSuffix, randomSuffix, randomSuffix)
+}
+
+func testAccComputeRegionUrlMap_defaultUrlRedirectConfig(randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_url_map" "foobar" {
+  name            = "urlmap-test-%s"
+  default_url_redirect {
+    https_redirect = true
+  }
+}
+`, randomSuffix)
 }
 <% end -%>

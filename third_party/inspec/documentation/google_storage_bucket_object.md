@@ -27,5 +27,5 @@
 ### Test that a GCP storage bucket object was last updated within a certain time period
 
     describe google_storage_bucket_object(bucket: 'bucket-buvsjjcndqz',  object: 'bucket-object-pmxbiikq') do
-      its('updated_date') { should be > Time.now - 365*60*60*24*10 }
+      its('time_updated') { should be > Time.now - 365*60*60*24*10 }
     end

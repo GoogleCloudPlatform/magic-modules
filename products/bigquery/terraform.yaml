@@ -17,6 +17,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Dataset: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/datasets/{{dataset_id}}"]
     delete_url: projects/{{project}}/datasets/{{dataset_id}}?deleteContents={{delete_contents_on_destroy}}
+    # Skipping sweeper due to the abnormal delete_url
+    skip_sweeper: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_dataset_basic"
@@ -88,6 +90,67 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+  Job: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/jobs/{{job_id}}"]
+    skip_delete: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_job_query"
+        primary_resource_id: "job"
+        vars:
+          job_id: "job_query"
+          account_name: "bqowner"
+        ignore_read_extra:
+          - "etag"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_job_load"
+        primary_resource_id: "job"
+        vars:
+          job_id: "job_load"
+        ignore_read_extra:
+          - "etag"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_job_copy"
+        primary_resource_id: "job"
+        vars:
+          job_id: "job_copy"
+          account_name: "bqowner"
+          key_name: "example-key"
+          keyring_name: "example-keyring"
+        test_env_vars:
+          project: :PROJECT_NAME
+        ignore_read_extra:
+          - "etag"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_job_extract"
+        primary_resource_id: "job"
+        vars:
+          job_id: "job_extract"
+          account_name: "bqowner"
+        ignore_read_extra:
+          - "etag"
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      configuration: !ruby/object:Overrides::Terraform::PropertyOverride
+        flatten_object: true
+      configuration.load.skipLeadingRows: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(0)'
+      configuration.load.fieldDelimiter: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      configuration.load.quote: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      configuration.extract.fieldDelimiter: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      configuration.extract.destinationFormat: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      jobReference: !ruby/object:Overrides::Terraform::PropertyOverride
+        flatten_object: true
+      jobReference.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/bigquery_job.go.erb
   Table: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
 

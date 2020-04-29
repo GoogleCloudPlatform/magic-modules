@@ -136,7 +136,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	waitErr := resourceManagerOperationWaitTime(config, opAsMap, "creating folder", int(d.Timeout(schema.TimeoutCreate).Minutes()))
+	waitErr := resourceManagerOperationWaitTime(config, opAsMap, "creating folder", d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		// The resource wasn't actually created
 		d.SetId("")
@@ -150,6 +150,10 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 			return err
 		}
 	}
+
+	// Sleep for 10s, letting the billing account settle before other resources
+	// try to use this project.
+	time.Sleep(10 * time.Second)
 
 	err = resourceGoogleProjectRead(d, meta)
 	if err != nil {
@@ -433,7 +437,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *Config, projectId
 			if err != nil {
 				return errwrap.Wrapf("Error deleting firewall: {{err}}", err)
 			}
-			err = computeOperationWait(config, op, projectId, "Deleting Firewall")
+			err = computeOperationWaitTime(config, op, projectId, "Deleting Firewall", d.Timeout(schema.TimeoutCreate))
 			if err != nil {
 				return err
 			}
@@ -561,7 +565,7 @@ func doEnableServicesRequest(services []string, project string, config *Config, 
 		return errwrap.Wrapf("failed to send enable services request: {{err}}", err)
 	}
 	// Poll for the API to return
-	waitErr := serviceUsageOperationWait(config, op, project, fmt.Sprintf("Enable Project %q Services: %+v", project, services))
+	waitErr := serviceUsageOperationWait(config, op, project, fmt.Sprintf("Enable Project %q Services: %+v", project, services), timeout)
 	if waitErr != nil {
 		return waitErr
 	}

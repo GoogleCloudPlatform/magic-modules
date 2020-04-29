@@ -6,7 +6,6 @@ import (
   "fmt"
   "testing"
 
-  "github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
   "github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 <%
@@ -49,11 +48,11 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			"<%= var_name %>": <%= override %>,
 	<% end -%>
 	<% end -%>
-			"random_suffix": acctest.RandString(10),
+			"random_suffix": randString(t, 10),
 	}
 
 <% versioned_provider = !example_version.nil? && example_version != 'ga' -%>
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		<% unless versioned_provider -%>
 		Providers:    testAccProviders,
@@ -61,7 +60,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 		Providers:    testAccProvidersOiCS,
 		<% end -%>
 		<% unless object.skip_delete -%>
-		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>Destroy,
+		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>DestroyProducer(t),
 		<% end -%>
 		Steps: []resource.TestStep{
 			{
@@ -88,32 +87,34 @@ func testAcc<%= test_slug -%>(context map[string]interface{}) string {
 <%- end %>
 
 <% unless object.skip_delete -%>
-func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
-	for name, rs := range s.RootModule().Resources {
-		if rs.Type != "<%= terraform_name -%>" {
-			continue
-		}
-		if strings.HasPrefix(name, "data.") {
-			continue
+func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "<%= terraform_name -%>" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+		<% if object.custom_code.test_check_destroy -%>
+	<%= lines(compile(object.custom_code.test_check_destroy)) -%>
+		<% else -%>
+		config := googleProviderConfig(t)
+
+		url, err := replaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+		if err != nil {
+			return err
 		}
 
-	<% if object.custom_code.test_check_destroy -%>
-<%= lines(compile(object.custom_code.test_check_destroy)) -%>
-	<% else -%>
-	config := testAccProvider.Meta().(*Config)
+		_, err = sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", "", url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+		if err == nil {
+				return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
+			}
+		<% end -%>
+		}
 
-	url, err := replaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
-	if err != nil {
-		return err
+		return nil
 	}
-
-	_, err = sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", "", url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
-	if err == nil {
-			return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
-		}
-	<% end -%>
-	}
-
-	return nil
 }
-<%- end %>
+<% end -%>

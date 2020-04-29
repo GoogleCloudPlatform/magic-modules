@@ -12,7 +12,7 @@
 # limitations under the License.
 --- !ruby/object:Api::Product
 name: Monitoring
-display_name: Stackdriver Monitoring
+display_name: Cloud (Stackdriver) Monitoring
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
@@ -739,7 +739,6 @@ objects:
               The format of the content field. Presently, only the value
               "text/markdown" is supported.
 
-
   - !ruby/object:Api::Resource
     name: 'Group'
     base_url: projects/{{project}}/groups
@@ -787,7 +786,6 @@ objects:
         description: |
           The filter used to determine which monitored resources
           belong to this group.
-
 
   - !ruby/object:Api::Resource
     name: NotificationChannel
@@ -962,6 +960,140 @@ objects:
             The full name of the resource that defines this service.
             Formatted as described in
             https://cloud.google.com/apis/design/resource_names.
+
+  - !ruby/object:Api::Resource
+    name: Slo
+    base_url: projects/{{project}}/services/{{service}}/serviceLevelObjectives
+    # name = projects/{{project}}/services/{{service}}/serviceLevelObjectives/{{slo_id}}
+    self_link: "{{name}}"
+    create_url: projects/{{project}}/services/{{service}}/serviceLevelObjectives?serviceLevelObjectiveId={{slo_id}}
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A Service-Level Objective (SLO) describes the level of desired good
+      service. It consists of a service-level indicator (SLI), a performance
+      goal, and a period over which the objective is to be evaluated against
+      that goal. The SLO can use SLIs defined in a number of different manners.
+      Typical SLOs might include "99% of requests in each rolling week have
+      latency below 200 milliseconds" or "99.5% of requests in each calendar
+      month return successfully."
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Service Monitoring': 'https://cloud.google.com/monitoring/service-monitoring'
+        'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
+      api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services.serviceLevelObjectives'
+    parameters:
+    - !ruby/object:Api::Type::String
+      name: service
+      required: true
+      url_param_only: true
+      input: true
+      description: |
+        ID of the service to which this SLO belongs.
+    - !ruby/object:Api::Type::String
+      name: sloId
+      description: |
+        The id to use for this ServiceLevelObjective. If omitted, an id will be generated instead.
+      input: true
+    properties:
+    - !ruby/object:Api::Type::String
+      name: name
+      description: |
+        The full resource name for this service. The syntax is:
+        projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]/serviceLevelObjectives/[SLO_NAME]
+      output: true
+    - !ruby/object:Api::Type::String
+      name: displayName
+      description: |
+        Name used for UI elements listing this SLO.
+    - !ruby/object:Api::Type::Double
+      name: goal
+      required: true
+      description: |
+        The fraction of service that must be good in order for this objective
+        to be met. 0 < goal <= 0.999
+    - !ruby/object:Api::Type::Integer
+      name: rollingPeriodDays
+      api_name: rollingPeriod
+      exactly_one_of:
+        - rolling_period_days
+        - calendar_period
+      description: |
+        A rolling time period, semantically "in the past X days".
+        Must be between 1 to 30 days, inclusive.
+    - !ruby/object:Api::Type::Enum
+      name: calendarPeriod
+      exactly_one_of:
+        - rolling_period_days
+        - calendar_period
+      description: |
+        A calendar period, semantically "since the start of the current
+        <calendarPeriod>".
+      values:
+        - DAY
+        - WEEK
+        - FORTNIGHT
+        - MONTH
+    - !ruby/object:Api::Type::NestedObject
+      name: serviceLevelIndicator
+      description: |
+        serviceLevelIndicator (SLI) describes a good service.
+        It is used to measure and calculate the quality of the Service's
+        performance with respect to a single aspect of service quality.
+      properties:
+        - !ruby/object:Api::Type::NestedObject
+          name: basicSli
+          required: true
+          description: |
+            Basic Service-Level Indicator (SLI) on a well-known service type.
+            Performance will be computed on the basis of pre-defined metrics.
+
+            SLIs are used to measure and calculate the quality of the Service's
+            performance with respect to a single aspect of service quality.
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: method
+              description: |
+                An optional set of RPCs to which this SLI is relevant.
+                Telemetry from other methods will not be used to calculate
+                performance for this SLI. If omitted, this SLI applies to all
+                the Service's methods. For service types that don't support
+                breaking down by method, setting this field will result in an
+                error.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: location
+              description: |
+                An optional set of locations to which this SLI is relevant.
+                Telemetry from other locations will not be used to calculate
+                performance for this SLI. If omitted, this SLI applies to all
+                locations in which the Service has activity. For service types
+                that don't support breaking down by location, setting this
+                field will result in an error.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: version
+              description: |
+                 The set of API versions to which this SLI is relevant.
+                 Telemetry from other API versions will not be used to
+                 calculate performance for this SLI. If omitted,
+                 this SLI applies to all API versions. For service types
+                 that don't support breaking down by version, setting this
+                 field will result in an error.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::NestedObject
+              name: latency
+              description: |
+                Parameters for a latency threshold SLI.
+              required: true
+              properties:
+              - !ruby/object:Api::Type::String
+                required: true
+                name: threshold
+                description: |
+                  A duration string, e.g. 10s.
+                  Good service is defined to be the count of requests made to
+                  this service that return in no more than threshold.
 
   - !ruby/object:Api::Resource
     name: UptimeCheckConfig

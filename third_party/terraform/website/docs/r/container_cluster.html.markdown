@@ -9,6 +9,9 @@ description: |-
 
 # google\_container\_cluster
 
+-> See the [Using GKE with Terraform](/docs/providers/google/guides/using_gke_with_terraform.html)
+guide for more information about using GKE with Terraform.
+
 Manages a Google Kubernetes Engine (GKE) cluster. For more information see
 [the official documentation](https://cloud.google.com/container-engine/docs/clusters)
 and [the API reference](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters).
@@ -324,13 +327,16 @@ The `addons_config` block supports:
 * `cloudrun_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     The status of the CloudRun addon. It requires `istio_config` enabled. It is disabled by default.
     Set `disabled = false` to enable. This addon can only be enabled at cluster creation time.
-    
+
 * `dns_cache_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     The status of the NodeLocal DNSCache addon. It is disabled by default.
-    Set `enabled = true` to enable. 
-    
+    Set `enabled = true` to enable.
+
     **Enabling/Disabling NodeLocal DNSCache in an existing cluster is a disruptive operation.
     All cluster nodes running GKE 1.15 and higher are recreated.**
+
+* `gce_persistent_disk_csi_driver_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+    Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to disabled; set `enabled = true` to enable. 
 
 This example `addons_config` disables two addons:
 
@@ -760,6 +766,7 @@ This resource provides the following
 [Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
 
 - `create` - Default is 40 minutes.
+- `read`   - Default is 40 minutes.
 - `update` - Default is 60 minutes.
 - `delete` - Default is 40 minutes.
 

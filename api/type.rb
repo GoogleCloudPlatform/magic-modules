@@ -31,6 +31,11 @@ module Api
       # string, as providers expect a single-line one w/o a newline.
       attr_reader :deprecation_message
 
+      # Add a removed message for fields no longer supported in the API. This should
+      # be used for fields supported in one version but have been removed from
+      # a different version.
+      attr_reader :removed_message
+
       attr_reader :output # If set value will not be sent to server on sync
       attr_reader :input # If set to true value is used only on creation
 
@@ -70,6 +75,7 @@ module Api
       attr_reader :allow_empty_object
 
       attr_reader :min_version
+      attr_reader :exact_version
 
       # A list of properties that conflict with this property.
       attr_reader :conflicts
@@ -99,7 +105,9 @@ module Api
       check :description, type: ::String, required: true
       check :exclude, type: :boolean, default: false, required: true
       check :deprecation_message, type: ::String
+      check :removed_message, type: ::String
       check :min_version, type: ::String
+      check :exact_version, type: ::String
       check :output, type: :boolean
       check :required, type: :boolean
       check :send_empty_value, type: :boolean
@@ -132,9 +140,9 @@ module Api
     # The only intended purpose is to allow better error messages. Some objects
     # and at some points in the build this doesn't output a valid output.
     def lineage
-      return name if __parent.nil?
+      return name&.underscore if __parent.nil?
 
-      __parent.lineage + '.' + name
+      __parent.lineage + '.' + name&.underscore
     end
 
     def to_json(opts = nil)
@@ -258,7 +266,14 @@ module Api
       end
     end
 
+    def exact_version
+      return nil if @exact_version.nil? || @exact_version.blank?
+
+      @__resource.__product.version_obj(@exact_version)
+    end
+
     def exclude_if_not_in_version!(version)
+      @exclude ||= exact_version != version unless exact_version.nil?
       @exclude ||= version < min_version
     end
 
@@ -287,6 +302,10 @@ module Api
 
     def nested_properties?
       !nested_properties.empty?
+    end
+
+    def removed?
+      !(@removed_message.nil? || @removed_message == '')
     end
 
     def deprecated?

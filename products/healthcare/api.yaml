@@ -16,6 +16,9 @@ name: Healthcare
 display_name: Cloud Healthcare
 versions:
   - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://healthcare.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://healthcare.googleapis.com/v1beta1/
 scopes:
@@ -73,7 +76,7 @@ objects:
       guides:
         'Creating a dataset':
           'https://cloud.google.com/healthcare/docs/how-tos/datasets'
-      api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1beta1/projects.locations.datasets'
+      api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets'
   - !ruby/object:Api::Resource
     name: 'DicomStore'
     kind: "healthcare#dicomStore"
@@ -153,7 +156,7 @@ objects:
       guides:
         'Creating a DICOM store':
           'https://cloud.google.com/healthcare/docs/how-tos/dicom'
-      api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1beta1/projects.locations.datasets.dicomStores'
+      api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.dicomStores'
   - !ruby/object:Api::Resource
     name: 'FhirStore'
     kind: "healthcare#fhirStore"
@@ -187,7 +190,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: version
         description: |
-          The FHIR specification version. Supported values include DSTU2, STU3 and R4. Defaults to STU3.
+          The FHIR specification version.
         required: false # TODO: Make this field required in GA.
         input: true
         default_value: :STU3
@@ -292,7 +295,7 @@ objects:
       guides:
         'Creating a FHIR store':
           'https://cloud.google.com/healthcare/docs/how-tos/fhir'
-      api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1beta1/projects.locations.datasets.fhirStores'
+      api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.fhirStores'
   - !ruby/object:Api::Resource
     name: 'Hl7V2Store'
     kind: "healthcare#hl7V2Store"
@@ -333,6 +336,7 @@ objects:
             at_least_one_of:
               - parser_config.0.allow_null_header
               - parser_config.0.segment_terminator
+              - parser_config.0.schema
             description: |
               Determines whether messages with no header are allowed.
           - !ruby/object:Api::Type::String
@@ -340,11 +344,20 @@ objects:
             at_least_one_of:
               - parser_config.0.allow_null_header
               - parser_config.0.segment_terminator
+              - parser_config.0.schema
             description: |
               Byte(s) to be used as the segment terminator. If this is unset, '\r' will be used as segment terminator.
 
               A base64-encoded string.
-
+          - !ruby/object:Api::Type::String
+            name: schema
+            at_least_one_of:
+              - parser_config.0.allow_null_header
+              - parser_config.0.segment_terminator
+              - parser_config.0.schema
+            description: |
+              JSON encoded string for schemas used to parse messages in this
+              store if schematized parsing is desired.
       - !ruby/object:Api::Type::KeyValuePairs
         name: labels
         required: false
@@ -362,9 +375,44 @@ objects:
 
           An object containing a list of "key": value pairs.
           Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+      - !ruby/object:Api::Type::Array
+        name: notificationConfigs
+        description: |-
+          A list of notification configs. Each configuration uses a filter to determine whether to publish a
+          message (both Ingest & Create) on the corresponding notification destination. Only the message name
+          is sent as part of the notification. Supplied by the client.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: pubsubTopic
+              description: |
+                The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
+                PubsubMessage.Data will contain the resource name. PubsubMessage.MessageId is the ID of this message.
+                It is guaranteed to be unique within the topic. PubsubMessage.PublishTime is the time at which the message
+                was published. Notifications are only sent if the topic is non-empty. Topic names must be scoped to a
+                project. cloud-healthcare@system.gserviceaccount.com must have publisher permissions on the given
+                Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
 
+                If a notification cannot be published to Cloud Pub/Sub, errors will be logged to Stackdriver
+              required: true
+            - !ruby/object:Api::Type::String
+              name: filter
+              description: |
+                Restricts notifications sent for messages matching a filter. If this is empty, all messages
+                are matched. Syntax: https://cloud.google.com/appengine/docs/standard/python/search/query_strings
+
+                Fields/functions available for filtering are:
+
+                * messageType, from the MSH-9.1 field. For example, NOT messageType = "ADT".
+                * send_date or sendDate, the YYYY-MM-DD date the message was sent in the dataset's timeZone, from the MSH-7 segment. For example, send_date < "2017-01-02".
+                * sendTime, the timestamp when the message was sent, using the RFC3339 time format for comparisons, from the MSH-7 segment. For example, sendTime < "2017-01-02T00:00:00-05:00".
+                * sendFacility, the care center that the message came from, from the MSH-4 segment. For example, sendFacility = "ABC".
+                * PatientId(value, type), which matches if the message lists a patient having an ID of the given value and type in the PID-2, PID-3, or PID-4 segments. For example, PatientId("123456", "MRN").
+                * labels.x, a string value of the label with key x as set using the Message.labels map. For example, labels."priority"="high". The operator :* can be used to assert the existence of a label. For example, labels."priority":*.
       - !ruby/object:Api::Type::NestedObject
         name: notificationConfig
+        removed_message: This field has been replaced by notificationConfigs
+        exact_version: ga
         required: false
         update_url: '{{dataset}}/hl7V2Stores/{{name}}'
         properties:
@@ -378,7 +426,24 @@ objects:
               project. cloud-healthcare@system.gserviceaccount.com must have publisher permissions on the given
               Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
             required: true
-
+      - !ruby/object:Api::Type::NestedObject
+        name: notificationConfig
+        # This field is duplicated because beta and ga have different behaviors.
+        deprecation_message: This field has been replaced by notificationConfigs
+        exact_version: beta
+        required: false
+        update_url: '{{dataset}}/hl7V2Stores/{{name}}'
+        properties:
+          - !ruby/object:Api::Type::String
+            name: pubsubTopic
+            description: |
+              The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
+              PubsubMessage.Data will contain the resource name. PubsubMessage.MessageId is the ID of this message.
+              It is guaranteed to be unique within the topic. PubsubMessage.PublishTime is the time at which the message
+              was published. Notifications are only sent if the topic is non-empty. Topic names must be scoped to a
+              project. cloud-healthcare@system.gserviceaccount.com must have publisher permissions on the given
+              Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
+            required: true
       - !ruby/object:Api::Type::Time
         name: 'creationTime'
         description: |
@@ -394,4 +459,4 @@ objects:
       guides:
         'Creating a HL7v2 Store':
           'https://cloud.google.com/healthcare/docs/how-tos/hl7v2'
-      api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1beta1/projects.locations.datasets.hl7V2Stores'
+      api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.hl7V2Stores'

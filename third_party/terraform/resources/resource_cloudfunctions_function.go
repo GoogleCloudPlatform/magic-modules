@@ -1,6 +1,8 @@
 package google
 
 import (
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"google.golang.org/api/cloudfunctions/v1"
@@ -48,6 +50,23 @@ type cloudFunctionId struct {
 
 func (s *cloudFunctionId) cloudFunctionId() string {
 	return fmt.Sprintf("projects/%s/locations/%s/functions/%s", s.Project, s.Region, s.Name)
+}
+
+// matches all international lower case letters, number, underscores and dashes.
+var labelKeyRegex = regexp.MustCompile(`^[\p{Ll}0-9_-]+$`)
+
+func labelKeyValidator(val interface{}, key string) (warns []string, errs []error) {
+	if val == nil {
+		return
+	}
+
+	m := val.(map[string]interface{})
+	for k := range m {
+		if !labelKeyRegex.MatchString(k) {
+			errs = append(errs, fmt.Errorf("%q is an invalid label key. See https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements", k))
+		}
+	}
+	return
 }
 
 func (s *cloudFunctionId) locationId() string {
@@ -193,8 +212,9 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 			},
 
 			"labels": {
-				Type:     schema.TypeMap,
-				Optional: true,
+				Type:         schema.TypeMap,
+				ValidateFunc: labelKeyValidator,
+				Optional:     true,
 			},
 
 			"runtime": {
@@ -391,7 +411,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 	d.SetId(cloudFuncId.cloudFunctionId())
 
 	err = cloudFunctionsOperationWait(config, op, "Creating CloudFunctions Function",
-		int(d.Timeout(schema.TimeoutCreate).Minutes()))
+		d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}
@@ -556,7 +576,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 		}
 
 		err = cloudFunctionsOperationWait(config, op, "Updating CloudFunctions Function",
-			int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+			d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -579,7 +599,7 @@ func resourceCloudFunctionsDestroy(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 	err = cloudFunctionsOperationWait(config, op, "Deleting CloudFunctions Function",
-		int(d.Timeout(schema.TimeoutDelete).Minutes()))
+		d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return err
 	}

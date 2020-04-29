@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: AccessContextManager
-display_name: Access Context Manager
+display_name: Access Context Manager (VPC Service Controls)
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
@@ -156,7 +156,7 @@ objects:
               is granted this AccessLevel. If AND is used, each Condition in
               conditions must be satisfied for the AccessLevel to be applied. If
               OR is used, at least one Condition in conditions must be satisfied
-              for the AccessLevel to be applied. Defaults to AND if unspecified.
+              for the AccessLevel to be applied.
             default_value: :AND
             values:
               - :AND
@@ -221,6 +221,7 @@ objects:
                 properties:
                   - !ruby/object:Api::Type::Boolean
                     name: 'requireScreenLock'
+                    api_name: 'requireScreenlock'
                     description: |
                       Whether or not screenlock is required for the DevicePolicy
                       to be true. Defaults to false.

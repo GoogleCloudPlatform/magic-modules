@@ -656,6 +656,10 @@ resource "google_storage_bucket" "bucket" {
   labels = {
     "key" = "value"
   }
+
+  retention_policy {
+    retention_period = 1000
+  }
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -1214,4 +1218,37 @@ resource "google_organization_iam_custom_role" "generic_org_iam_custom_role" {
   title       = "GCP Inspec Generic Organization IAM Custom Role"
   description = "Custom role allowing to list IAM roles only"
   permissions = ["iam.roles.list"]
+}
+
+variable "security_policy" {
+  type = any
+}
+
+resource "google_compute_security_policy" "policy" {
+  project = var.gcp_project_id
+  name = var.security_policy["name"]
+
+  rule {
+    action   = var.security_policy["action"]
+    priority = var.security_policy["priority"]
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = [var.security_policy["ip_range"]]
+      }
+    }
+    description = var.security_policy["description"]
+  }
+
+  rule {
+    action   = "allow"
+    priority = "2147483647"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "default rule"
+  }
 }

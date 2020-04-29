@@ -57,8 +57,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       threadsafe: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+      # instanceClass defaults to a value based on the scaling method
       instanceClass: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true    
+        default_from_api: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_standard_app_version"

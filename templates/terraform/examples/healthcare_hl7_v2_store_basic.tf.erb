@@ -2,28 +2,20 @@ resource "google_healthcare_hl7_v2_store" "default" {
   name    = "<%= ctx[:vars]['hl7_v2_store_name'] %>"
   dataset = google_healthcare_dataset.dataset.id
 
-  parser_config {
-    allow_null_header  = false
-    segment_terminator = "Jw=="
-  }
-
-  notification_config {
+  notification_configs {
     pubsub_topic = google_pubsub_topic.topic.id
   }
 
   labels = {
     label1 = "labelvalue1"
   }
-  provider = google-beta
 }
 
 resource "google_pubsub_topic" "topic" {
   name     = "<%= ctx[:vars]['pubsub_topic']%>"
-  provider = google-beta
 }
 
 resource "google_healthcare_dataset" "dataset" {
   name     = "<%= ctx[:vars]['dataset_name'] %>"
   location = "us-central1"
-  provider = google-beta
 }

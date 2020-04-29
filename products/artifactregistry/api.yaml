@@ -1,0 +1,110 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: ArtifactRegistry
+display_name: Artifact Registry
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://artifactregistry.googleapis.com/v1beta1/
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Artifact Registry API
+    url: https://console.cloud.google.com/apis/library/artifactregistry.googleapis.com/
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Repository'
+    base_url: projects/{{project}}/locations/{{location}}/repositories
+    create_url: projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}
+    min_version: beta
+    description: A repository for storing artifacts
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/artifact-registry/docs/overview'
+      api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      parent_resource_attribute: 'repository'
+      import_format: ["projects/{{project}}/locations/{{location}}/repositories/{{repository}}", "{{repository}}"]
+    properties:
+    - !ruby/object:Api::Type::String
+      name: name
+      description: |-
+        The name of the repository, for example:
+        "projects/p1/locations/us-central1/repositories/repo1"
+      output: true
+    - !ruby/object:Api::Type::String
+      name: repository_id
+      description: |-
+        The last part of the repository name, for example:
+        "repo1"
+      required: true
+      input: true
+      url_param_only: true
+    - !ruby/object:Api::Type::String
+      name: 'location'
+      description: |
+        The name of the location this repository is located in.
+      required: true
+      input: true
+      url_param_only: true
+    - !ruby/object:Api::Type::Enum
+      name: format
+      description: |-
+        The format of packages that are stored in the repoitory.
+      values:
+        - :DOCKER
+      required: true
+      input: true
+    - !ruby/object:Api::Type::String
+      name: description
+      description: |-
+        The user-provided description of the repository.
+    - !ruby/object:Api::Type::KeyValuePairs
+      name: 'labels'
+      description: |
+        Labels with user-defined metadata.
+        This field may contain up to 64 entries. Label keys and values may be no
+        longer than 63 characters. Label keys must begin with a lowercase letter
+        and may only contain lowercase letters, numeric characters, underscores,
+        and dashes.
+    - !ruby/object:Api::Type::Time
+      name: createTime
+      description: The time when the repository was created.
+      output: true
+    - !ruby/object:Api::Type::Time
+      name: updateTime
+      description: The time when the repository was last updated.
+      output: true

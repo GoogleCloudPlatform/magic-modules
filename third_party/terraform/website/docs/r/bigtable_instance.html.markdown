@@ -1,5 +1,5 @@
 ---
-subcategory: "Bigtable"
+subcategory: "Cloud Bigtable"
 layout: "google"
 page_title: "Google: google_bigtable_instance"
 sidebar_current: "docs-google-bigtable-instance"
@@ -13,6 +13,11 @@ Creates a Google Bigtable instance. For more information see
 [the official documentation](https://cloud.google.com/bigtable/) and
 [API](https://cloud.google.com/bigtable/docs/go/reference).
 
+-> **Note**: It is strongly recommended to set `lifecycle { prevent_destroy = true }`
+on instances in order to prevent accidental data loss. See
+[Terraform docs](https://www.terraform.io/docs/configuration/resources.html#prevent_destroy)
+for more information on lifecycle parameters.
+
 
 ## Example Usage - Production Instance
 
@@ -23,8 +28,12 @@ resource "google_bigtable_instance" "production-instance" {
   cluster {
     cluster_id   = "tf-instance-cluster"
     zone         = "us-central1-b"
-    num_nodes    = 3
+    num_nodes    = 1
     storage_type = "HDD"
+  }
+
+  lifecycle {
+    prevent_destroy = true
   }
 }
 ```
@@ -40,6 +49,10 @@ resource "google_bigtable_instance" "development-instance" {
     cluster_id   = "tf-instance-cluster"
     zone         = "us-central1-b"
     storage_type = "HDD"
+  }
+
+  lifecycle {
+    prevent_destroy = true
   }
 }
 ```
@@ -73,7 +86,7 @@ cluster must have a different zone in the same region. Zones that support
 Bigtable instances are noted on the [Cloud Bigtable locations page](https://cloud.google.com/bigtable/docs/locations).
 
 * `num_nodes` - (Optional) The number of nodes in your Cloud Bigtable cluster.
-Required, with a minimum of `3` for a `PRODUCTION` instance. Must be left unset
+Required, with a minimum of `1` for a `PRODUCTION` instance. Must be left unset
 for a `DEVELOPMENT` instance.
 
 * `storage_type` - (Optional) The storage type to use. One of `"SSD"` or

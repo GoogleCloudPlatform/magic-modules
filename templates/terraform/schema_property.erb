@@ -36,7 +36,9 @@
 <% else -%>
   Optional: true,
 <% end -%>
-<% if property.deprecated? -%>
+<% if property.removed? -%>
+  Removed: "<%= property.removed_message %>",
+<% elsif property.deprecated? -%>
   Deprecated: "<%= property.deprecation_message %>",
 <% end -%>
 <% if force_new?(property, object) -%>
@@ -64,7 +66,16 @@
 <% unless property.state_func.nil? -%>
 	StateFunc: <%= property.state_func %>,
 <% end -%>
-	Description: `<%= property.description.strip.gsub("`", "'") -%>`,
+<% enum_values_description = "" -%>
+<% if property.is_a?(Api::Type::Enum) && !property.output -%>
+<% unless property.default_value.nil? || property.default_value == "" -%>
+<% enum_values_description += " Default value: \"#{property.default_value}\"" -%>
+<% end -%>
+<% enum_values_description += " Possible values: [" -%>
+<% enum_values_description += property.values.select { |v| v != "" }.map { |v| "\"#{v}\"" }.join(', ') -%>
+<% enum_values_description += "]" -%>
+<% end -%>
+	Description: `<%= property.description.strip.gsub("`", "'") + enum_values_description -%>`,
 <% if property.is_a?(Api::Type::NestedObject) -%>
   MaxItems: 1,
   Elem: &schema.Resource{

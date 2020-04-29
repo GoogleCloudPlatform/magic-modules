@@ -166,12 +166,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       keyValue: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
         ignore_read: true
-    docs: !ruby/object:Provider::Terraform::Docs
-      warning: |
-        All arguments including the key's value will be stored in the raw
-        state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
-        Because the API does not return the sensitive key value,
-        we cannot confirm or reverse changes to a key outside of Terraform.
   BackendService: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -346,12 +340,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       keyValue: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
         ignore_read: true
-    docs: !ruby/object:Provider::Terraform::Docs
-      warning: |
-        All arguments including the key's value will be stored in the raw
-        state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
-        Because the API does not return the sensitive key value,
-        we cannot confirm or reverse changes to a key outside of Terraform.
   RegionDiskResourcePolicyAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
     description: |
       Adds existing resource policies to a disk. You can only add one policy
@@ -487,11 +475,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/disk.erb
       decoder: templates/terraform/decoders/disk.erb
       resource_definition: templates/terraform/resource_definition/disk.erb
-    docs: !ruby/object:Provider::Terraform::Docs
-      warning: |
-        All arguments including the disk encryption key will be stored in the raw
-        state as plain-text.
-        [Read more about sensitive data in state](/docs/state/sensitive-data.html).
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "disk_basic"
@@ -1355,16 +1338,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       physicalBlockSizeBytes: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      diskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       encoder: templates/terraform/encoders/disk.erb
       decoder: templates/terraform/decoders/disk.erb
       resource_definition: templates/terraform/resource_definition/disk.erb
-    docs: !ruby/object:Provider::Terraform::Docs
-      warning: |
-        All arguments including the disk encryption key will be stored in the raw
-        state as plain-text.
-        [Read more about sensitive data in state](/docs/state/sensitive-data.html).
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_disk_basic"
@@ -1533,6 +1513,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "bar"
         vars:
           name: "policy"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "resource_policy_placement_policy"
+        primary_resource_id: "baz"
+        vars:
+          name: "policy"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
@@ -1565,6 +1550,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntAtLeast(1)'
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
+    # Route cannot be added while a peering is on progress on the network
+    mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "route_basic"
@@ -1738,6 +1725,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           {{description}}
           If it is not provided, the provider region is used.
+  SecurityPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
   Snapshot: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 5
@@ -1814,6 +1803,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dns_zone_name: "dnszone"
           forwarding_rule_name: "forwarding-rule"
           http_health_check_name: "http-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "managed_ssl_certificate_recreation"
+        primary_resource_id: "default"
+        min_version: beta
     description: |
       {{description}}
       For a resource where you provide the key, see the
@@ -1968,10 +1961,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           See the [official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies#profilefeaturesupport)
           for information on what cipher suites each profile provides. If
           `CUSTOM` is used, the `custom_features` attribute **must be set**.
-          Default is `COMPATIBLE`.
       minTlsVersion: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :TLS_1_0
-        description : '{{description}} Default is `TLS_1_0`.'
       warnings: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
   Subnetwork: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -2061,6 +2052,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           url_map_name: "url-map"
           backend_service_name: "backend-service"
           http_health_check_name: "http-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "target_http_proxy_https_redirect"
+        primary_resource_id: "default"
+        vars:
+          target_http_proxy_name: "test-https-redirect-proxy"
+          url_map_name: "url-map"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
@@ -2092,6 +2089,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           region_url_map_name: "url-map"
           region_backend_service_name: "backend-service"
           region_health_check_name: "http-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_target_http_proxy_https_redirect"
+        primary_resource_id: "default"
+        vars:
+          region_target_http_proxy_name: "test-https-redirect-proxy"
+          region_url_map_name: "url-map"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -2362,11 +2365,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           udp500_forwarding_rule_name: "fr-udp500"
           udp4500_forwarding_rule_name: "fr-udp4500"
           route_name: "route1"
-    docs: !ruby/object:Provider::Terraform::Docs
-      warning: |
-        All arguments including the shared secret will be stored in the raw
-        state as plain-text.
-        [Read more about sensitive data in state](/docs/state/sensitive-data.html).
     properties:
       targetVpnGateway: !ruby/object:Overrides::Terraform::PropertyOverride
         resource: 'VpnGateway'
