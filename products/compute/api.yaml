@@ -9452,11 +9452,11 @@ objects:
                           - :TEMPORARY_REDIRECT
                       - !ruby/object:Api::Type::Boolean
                         name: 'stripQuery'
-                        default_value: false
+                        required: true
                         description: |
                           If set to true, any accompanying query portion of the original URL is
                           removed prior to redirecting the request. If set to false, the query
-                          portion of the original URL is retained. The default is set to false.
+                          portion of the original URL is retained. The default value is false.
             - !ruby/object:Api::Type::Array
               name: 'pathRules'
               description: |
@@ -9871,11 +9871,11 @@ objects:
                           - :TEMPORARY_REDIRECT
                       - !ruby/object:Api::Type::Boolean
                         name: 'stripQuery'
-                        default_value: false
+                        required: true
                         description: |
                           If set to true, any accompanying query portion of the original URL is removed
                           prior to redirecting the request. If set to false, the query portion of the
-                          original URL is retained.
+                          original URL is retained. The default value is false.
             - !ruby/object:Api::Type::NestedObject
               name: 'defaultUrlRedirect'
               # TODO: add defaultRouteAction.weightedBackendService here once they are supported.
@@ -9935,11 +9935,11 @@ objects:
                     - :TEMPORARY_REDIRECT
                 - !ruby/object:Api::Type::Boolean
                   name: 'stripQuery'
-                  default_value: false
+                  required: true
                   description: |
                     If set to true, any accompanying query portion of the original URL is removed prior
                     to redirecting the request. If set to false, the query portion of the original URL is
-                    retained. The default is set to false.
+                    retained. The default value is false.
       - !ruby/object:Api::Type::Array
         name: 'tests'
         description: |
@@ -10025,11 +10025,11 @@ objects:
               - :TEMPORARY_REDIRECT
           - !ruby/object:Api::Type::Boolean
             name: 'stripQuery'
-            default_value: false
+            required: true
             description: |
               If set to true, any accompanying query portion of the original URL is removed prior
               to redirecting the request. If set to false, the query portion of the original URL is
-              retained. The default is set to false.
+              retained. The default value is false.
   - !ruby/object:Api::Resource
     name: 'RegionHealthCheck'
     kind: 'compute#healthCheck'
@@ -14437,11 +14437,11 @@ objects:
                           - :TEMPORARY_REDIRECT
                       - !ruby/object:Api::Type::Boolean
                         name: 'stripQuery'
-                        default_value: false
+                        required: true
                         description: |
                           If set to true, any accompanying query portion of the original URL is
                           removed prior to redirecting the request. If set to false, the query
-                          portion of the original URL is retained. The default is set to false.
+                          portion of the original URL is retained. The default value is false.
             - !ruby/object:Api::Type::Array
               name: 'routeRules'
               description: |
@@ -15116,11 +15116,11 @@ objects:
                           - :TEMPORARY_REDIRECT
                       - !ruby/object:Api::Type::Boolean
                         name: 'stripQuery'
-                        default_value: false
+                        required: true
                         description: |
                           If set to true, any accompanying query portion of the original URL is removed
                           prior to redirecting the request. If set to false, the query portion of the
-                          original URL is retained. Defaults to false.
+                          original URL is retained. The default value is false.
             - !ruby/object:Api::Type::NestedObject
               name: 'defaultUrlRedirect'
               # TODO: add defaultRouteAction.weightedBackendService here once they are supported.
