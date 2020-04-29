@@ -1,7 +1,6 @@
 <% autogen_exception -%>
 package google
 
-<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"testing"
@@ -176,4 +175,3 @@ resource "google_compute_region_url_map" "foobar2" {
 }
 `, target, backend, hc, urlmap1, urlmap2)
 }
-<% end -%>

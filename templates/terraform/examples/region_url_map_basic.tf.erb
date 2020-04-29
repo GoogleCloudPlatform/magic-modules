@@ -1,6 +1,4 @@
 resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
-
   region = "us-central1"
 
   name        = "<%= ctx[:vars]['region_url_map_name'] %>"
@@ -36,8 +34,6 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_compute_region_backend_service" "login" {
-  provider = google-beta
-
   region = "us-central1"
 
   name        = "<%= ctx[:vars]['login_region_backend_service_name'] %>"
@@ -48,8 +44,6 @@ resource "google_compute_region_backend_service" "login" {
 }
 
 resource "google_compute_region_backend_service" "home" {
-  provider = google-beta
-
   region = "us-central1"
 
   name        = "<%= ctx[:vars]['home_region_backend_service_name'] %>"
@@ -60,8 +54,6 @@ resource "google_compute_region_backend_service" "home" {
 }
 
 resource "google_compute_region_health_check" "default" {
-  provider = google-beta
-
   region = "us-central1"
 
   name               = "<%= ctx[:vars]['region_health_check_name'] %>"

@@ -501,7 +501,6 @@ func TestAccComputeBackendService_withMaxConnectionsPerEndpoint(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeBackendService_withCustomHeaders(t *testing.T) {
 	t.Parallel()
 
@@ -532,9 +531,7 @@ func TestAccComputeBackendService_withCustomHeaders(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccComputeBackendService_internalLoadBalancing(t *testing.T) {
 	t.Parallel()
 
@@ -560,9 +557,7 @@ func TestAccComputeBackendService_internalLoadBalancing(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccComputeBackendService_withLogConfig(t *testing.T) {
 	t.Parallel()
 
@@ -593,9 +588,7 @@ func TestAccComputeBackendService_withLogConfig(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
-<% unless version == 'ga' -%>
 func TestAccComputeBackendService_trafficDirectorUpdateBasic(t *testing.T) {
 	t.Parallel()
 
@@ -626,7 +619,6 @@ func TestAccComputeBackendService_trafficDirectorUpdateBasic(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func TestAccComputeBackendService_trafficDirectorUpdateFull(t *testing.T) {
@@ -661,7 +653,6 @@ func TestAccComputeBackendService_trafficDirectorUpdateFull(t *testing.T) {
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
 func testAccComputeBackendService_trafficDirectorBasic(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
@@ -694,9 +685,7 @@ resource "google_compute_health_check" "health_check" {
 }
 `, serviceName, checkName)
 }
-<% end -%>
 
-<% unless version == 'ga' -%>
 func testAccComputeBackendService_trafficDirectorUpdateBasic(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
@@ -720,7 +709,6 @@ resource "google_compute_health_check" "health_check" {
 }
 `, serviceName, checkName)
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func testAccComputeBackendService_trafficDirectorFull(serviceName, checkName string) string {
@@ -1384,7 +1372,6 @@ resource "google_compute_health_check" "default" {
 `, service, maxRate, instance, neg, network, network, check)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeBackendService_withCustomHeaders(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
@@ -1402,9 +1389,7 @@ resource "google_compute_http_health_check" "zero" {
 }
 `, serviceName, checkName)
 }
-<% end -%>
 
-<% unless version == 'ga' -%>
 <%# This test is for import functionality. It can be removed and added to examples when this goes GA %>
 func testAccComputeBackendService_internalLoadBalancing(fr, proxy, backend, hc, urlmap string) string {
 	return fmt.Sprintf(`
@@ -1502,9 +1487,7 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, fr, proxy, backend, hc, urlmap)
 }
-<% end -%>
 
-<% unless version == 'ga' -%>
 func testAccComputeBackendService_withLogConfig(serviceName, checkName string, sampleRate float64) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
@@ -1525,4 +1508,3 @@ resource "google_compute_http_health_check" "zero" {
 }
 `, serviceName, sampleRate, checkName)
 }
-<% end -%>
