@@ -1,5 +1,7 @@
 <% autogen_exception -%>
 package google
+
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"testing"
@@ -238,3 +240,4 @@ func testAccComputePerInstanceConfigListNames(t *testing.T, igmId string) (map[s
 	}
 	return instanceConfigs, nil
 }
+<% end -%>
