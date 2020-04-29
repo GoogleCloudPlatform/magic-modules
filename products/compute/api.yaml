@@ -15654,10 +15654,11 @@ objects:
                     The name of the device to attach to this instance config
                 - !ruby/object:Api::Type::String
                   name: source
+                  required: true
                   description: |
                     The URI of an existing persistent disk to attach under the specified device-name in the format
                     `projects/project-id/zones/zone/disks/disk-name` for a zonal disk and `projects/project-id/regions/region/disks/disk-name`
-                    for a regional disk. If omitted, the stateful configuration is applied to a disk currently attached under the given device name.
+                    for a regional disk.
                 - !ruby/object:Api::Type::Enum
                   name: mode
                   description: |
