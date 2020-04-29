@@ -14,7 +14,7 @@ USER=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
 
 # This is where you add users who do not need to have an assignee chosen for
 # the.
-if $(echo $USER | fgrep -wq -e ndmckinley -e danawillow -e emilymye -e erjohnso -e geojaz -e megan07 -e paddcarver -e rambleraptor -e SirGitsalot -e slevenick -e c2thorn); then
+if $(echo $USER | fgrep -wq -e ndmckinley -e danawillow -e emilymye -e erjohnso -e geojaz -e megan07 -e paddycarver -e rambleraptor -e SirGitsalot -e slevenick -e c2thorn -e rileykarson); then
   echo "User is on the list, not assigning."
 else
 
