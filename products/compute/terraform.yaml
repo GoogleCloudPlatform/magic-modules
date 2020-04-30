@@ -208,6 +208,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
       cdnPolicy.cacheKeyPolicy.queryStringBlacklist: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+      consistentHash:  !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       connectionDraining: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       connectionDraining.drainingTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -302,6 +304,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: connection_draining_timeout_sec
         default_value: 0
         send_empty_value: true
+      consistentHash:  !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       healthChecks: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: 'selfLinkRelativePathHash'
