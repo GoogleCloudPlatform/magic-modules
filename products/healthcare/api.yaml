@@ -187,11 +187,25 @@ objects:
           ** Changing this property may recreate the FHIR store (removing all data) **
         required: true
         input: true
+      # Version is duplicated because it is optional in beta but required in GA.
       - !ruby/object:Api::Type::Enum
         name: version
         description: |
           The FHIR specification version.
-        required: false # TODO: Make this field required in GA.
+        exact_version: beta
+        required: false
+        input: true
+        default_value: :STU3
+        values:
+          - :DSTU2
+          - :STU3
+          - :R4
+      - !ruby/object:Api::Type::Enum
+        name: version
+        description: |
+          The FHIR specification version.
+        exact_version: ga
+        required: true
         input: true
         default_value: :STU3
         values:
