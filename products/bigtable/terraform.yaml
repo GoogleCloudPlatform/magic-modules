@@ -31,6 +31,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           allow_destroy: "false"
         test_vars_overrides:
           allow_destroy: "true"
+        oics_vars_overrides:
+          allow_destroy: "true"
         ignore_read_extra:
           - "ignore_warnings"
       - !ruby/object:Provider::Terraform::Examples
@@ -41,6 +43,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           app_profile_name: "bt-profile"
           allow_destroy: "false"
         test_vars_overrides:
+          allow_destroy: "true"
+        oics_vars_overrides:
           allow_destroy: "true"
         ignore_read_extra:
           - "ignore_warnings"
