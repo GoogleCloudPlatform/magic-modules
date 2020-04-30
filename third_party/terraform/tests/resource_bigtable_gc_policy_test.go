@@ -136,6 +136,7 @@ resource "google_bigtable_instance" "instance" {
   }
 
   instance_type = "DEVELOPMENT"
+  allow_destroy = "true"
 }
 
 resource "google_bigtable_table" "table" {
@@ -170,6 +171,7 @@ resource "google_bigtable_instance" "instance" {
   }
 
   instance_type = "DEVELOPMENT"
+  allow_destroy = "true"
 }
 
 resource "google_bigtable_table" "table" {

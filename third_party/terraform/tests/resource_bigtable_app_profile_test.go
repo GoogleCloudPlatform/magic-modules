@@ -49,6 +49,8 @@ resource "google_bigtable_instance" "instance" {
     num_nodes    = 3
     storage_type = "HDD"
   }
+
+  allow_destroy = true
 }
 
 resource "google_bigtable_app_profile" "ap" {
@@ -71,6 +73,8 @@ resource "google_bigtable_instance" "instance" {
     num_nodes    = 3
     storage_type = "HDD"
   }
+
+  allow_destroy = true
 }
 
 resource "google_bigtable_app_profile" "ap" {

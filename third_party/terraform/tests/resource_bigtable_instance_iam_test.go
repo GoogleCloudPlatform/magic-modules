@@ -209,5 +209,7 @@ resource "google_bigtable_instance" "instance" {
       zone         = "us-central1-b"
       storage_type = "HDD"
     }
+
+    allow_destroy = true
 }
 `

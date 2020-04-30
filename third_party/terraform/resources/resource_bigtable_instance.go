@@ -82,6 +82,11 @@ func resourceBigtableInstance() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"DEVELOPMENT", "PRODUCTION"}, false),
 			},
 
+			"allow_destroy": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+
 			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -235,6 +240,9 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceBigtableInstanceDestroy(d *schema.ResourceData, meta interface{}) error {
+	if !d.Get("allow_destroy").(bool) {
+		return fmt.Errorf("cannot destroy instance without setting allow_destroy=true and running `terraform apply`")
+	}
 	config := meta.(*Config)
 	ctx := context.Background()
 
