@@ -207,7 +207,6 @@ objects:
         exact_version: ga
         required: true
         input: true
-        default_value: :STU3
         values:
           - :DSTU2
           - :STU3
