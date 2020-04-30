@@ -9874,7 +9874,7 @@ objects:
                         description: |
                           If set to true, any accompanying query portion of the original URL is removed
                           prior to redirecting the request. If set to false, the query portion of the
-                          original URL is retained. The default value is false.
+                          original URL is retained.
             - !ruby/object:Api::Type::NestedObject
               name: 'defaultUrlRedirect'
               # TODO: add defaultRouteAction.weightedBackendService here once they are supported.
