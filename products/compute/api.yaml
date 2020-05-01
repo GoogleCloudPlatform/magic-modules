@@ -738,10 +738,10 @@ objects:
         description: |
           Settings controlling the volume of connections to a backend service. This field
           is applicable only when the load_balancing_scheme is set to INTERNAL_SELF_MANAGED.
-        min_version: beta
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'connectTimeout'
+            min_version: beta
             at_least_one_of:
               - circuit_breakers.0.connect_timeout
               - circuit_breakers.0.max_requests_per_connection
@@ -842,7 +842,6 @@ objects:
           hashing. This field only applies if the load_balancing_scheme is set to
           INTERNAL_SELF_MANAGED. This field is only applicable when locality_lb_policy is
           set to MAGLEV or RING_HASH.
-        min_version: beta
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'httpCookie'
@@ -1036,7 +1035,6 @@ objects:
         output: true
       - !ruby/object:Api::Type::Array
         name: 'customRequestHeaders'
-        min_version: beta
         item_type: Api::Type::String
         description: |
           Headers that the HTTP/S load balancer should add to proxied
@@ -1109,7 +1107,6 @@ objects:
           - :INTERNAL_SELF_MANAGED
       - !ruby/object:Api::Type::Enum
         name: 'localityLbPolicy'
-        min_version: beta
         values:
           - :ROUND_ROBIN
           - :LEAST_REQUEST
@@ -1161,7 +1158,6 @@ objects:
           character, which cannot be a dash.
       - !ruby/object:Api::Type::NestedObject
         name: 'outlierDetection'
-        min_version: beta
         description: |
           Settings controlling eviction of unhealthy hosts from the load balancing pool.
           This field is applicable only when the load_balancing_scheme is set
@@ -1451,7 +1447,6 @@ objects:
           failed request. Default is 30 seconds. Valid range is [1, 86400].
       - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
-        min_version: beta
         description: |
           This field denotes the logging options for the load balancer traffic served by this backend service.
           If logging is enabled, logs will be exported to Stackdriver.
@@ -1515,7 +1510,6 @@ objects:
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'affinityCookieTtlSec'
-        min_version: beta
         description: |
           Lifetime of cookies in seconds if session_affinity is
           GENERATED_COOKIE. If set to 0, the cookie is non-persistent and lasts
@@ -1562,7 +1556,6 @@ objects:
               description: |
                 This field designates whether this is a failover backend. More
                 than one failover backend can be configured for a given RegionBackendService.
-              min_version: beta
             - !ruby/object:Api::Type::String
               name: 'group'
               required: true
@@ -1657,10 +1650,10 @@ objects:
           Settings controlling the volume of connections to a backend service. This field
           is applicable only when the `load_balancing_scheme` is set to INTERNAL_MANAGED
           and the `protocol` is set to HTTP, HTTPS, or HTTP2.
-        min_version: beta
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'connectTimeout'
+            min_version: beta
             at_least_one_of:
               - circuit_breakers.0.connect_timeout
               - circuit_breakers.0.max_requests_per_connection
@@ -1763,7 +1756,6 @@ objects:
             * `load_balancing_scheme` is set to INTERNAL_MANAGED
             * `protocol` is set to HTTP, HTTPS, or HTTP2
             * `locality_lb_policy` is set to MAGLEV or RING_HASH
-        min_version: beta
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'httpCookie'
@@ -1861,7 +1853,6 @@ objects:
           An optional description of this resource.
       - !ruby/object:Api::Type::NestedObject
         name: 'failoverPolicy'
-        min_version: beta
         description: |
           Policy for failovers.
         properties:
@@ -1939,7 +1930,6 @@ objects:
           - :INTERNAL_MANAGED
       - !ruby/object:Api::Type::Enum
         name: 'localityLbPolicy'
-        min_version: beta
         values:
           - :ROUND_ROBIN
           - :LEAST_REQUEST
@@ -1991,7 +1981,6 @@ objects:
           character, which cannot be a dash.
       - !ruby/object:Api::Type::NestedObject
         name: 'outlierDetection'
-        min_version: beta
         description: |
           Settings controlling eviction of unhealthy hosts from the load balancing pool.
           This field is applicable only when the `load_balancing_scheme` is set
@@ -2270,7 +2259,6 @@ objects:
           failed request. Default is 30 seconds. Valid range is [1, 86400].
       - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
-        min_version: beta
         description: |
           This field denotes the logging options for the load balancer traffic served by this backend service.
           If logging is enabled, logs will be exported to Stackdriver.
@@ -8438,7 +8426,7 @@ objects:
       guides:
         'Adding or Resizing Regional Persistent Disks':
           'https://cloud.google.com/compute/docs/disks/regional-persistent-disk'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionDisks'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionDisks'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -9468,7 +9456,7 @@ objects:
                         description: |
                           If set to true, any accompanying query portion of the original URL is
                           removed prior to redirecting the request. If set to false, the query
-                          portion of the original URL is retained. The default is set to false.
+                          portion of the original URL is retained. The default value is false.
             - !ruby/object:Api::Type::Array
               name: 'pathRules'
               description: |
@@ -9883,7 +9871,6 @@ objects:
                           - :TEMPORARY_REDIRECT
                       - !ruby/object:Api::Type::Boolean
                         name: 'stripQuery'
-                        default_value: false
                         description: |
                           If set to true, any accompanying query portion of the original URL is removed
                           prior to redirecting the request. If set to false, the query portion of the
@@ -9947,11 +9934,10 @@ objects:
                     - :TEMPORARY_REDIRECT
                 - !ruby/object:Api::Type::Boolean
                   name: 'stripQuery'
-                  default_value: false
                   description: |
                     If set to true, any accompanying query portion of the original URL is removed prior
                     to redirecting the request. If set to false, the query portion of the original URL is
-                    retained. The default is set to false.
+                    retained.
       - !ruby/object:Api::Type::Array
         name: 'tests'
         description: |
@@ -10037,11 +10023,10 @@ objects:
               - :TEMPORARY_REDIRECT
           - !ruby/object:Api::Type::Boolean
             name: 'stripQuery'
-            default_value: false
             description: |
               If set to true, any accompanying query portion of the original URL is removed prior
               to redirecting the request. If set to false, the query portion of the original URL is
-              retained. The default is set to false.
+              retained.
   - !ruby/object:Api::Resource
     name: 'RegionHealthCheck'
     kind: 'compute#healthCheck'
@@ -10051,7 +10036,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/health-checks'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionHealthChecks'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionHealthChecks'
     description: |
       Health Checks determine whether instances are responsive and able to do work.
       They are an important part of a comprehensive load balancing configuration,
@@ -12896,7 +12881,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionTargetHttpProxies'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionTargetHttpProxies'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -12970,7 +12955,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionTargetHttpsProxies'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionTargetHttpsProxies'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -14449,11 +14434,10 @@ objects:
                           - :TEMPORARY_REDIRECT
                       - !ruby/object:Api::Type::Boolean
                         name: 'stripQuery'
-                        default_value: false
                         description: |
                           If set to true, any accompanying query portion of the original URL is
                           removed prior to redirecting the request. If set to false, the query
-                          portion of the original URL is retained. The default is set to false.
+                          portion of the original URL is retained.
             - !ruby/object:Api::Type::Array
               name: 'routeRules'
               description: |
@@ -15192,11 +15176,10 @@ objects:
                     - :TEMPORARY_REDIRECT
                 - !ruby/object:Api::Type::Boolean
                   name: 'stripQuery'
-                  default_value: false
                   description: |
                     If set to true, any accompanying query portion of the original URL is removed prior
                     to redirecting the request. If set to false, the query portion of the original URL is
-                    retained. The default is set to false.
+                    retained.
       - !ruby/object:Api::Type::Array
         name: 'tests'
         description: |
@@ -15285,7 +15268,6 @@ objects:
               - :TEMPORARY_REDIRECT
           - !ruby/object:Api::Type::Boolean
             name: 'stripQuery'
-            default_value: false
             description: |
               If set to true, any accompanying query portion of the original URL is removed prior
               to redirecting the request. If set to false, the query portion of the original URL is

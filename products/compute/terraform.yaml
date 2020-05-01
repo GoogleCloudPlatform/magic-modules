@@ -257,21 +257,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_round_robin"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_ring_hash"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_balancing_mode"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-service"
@@ -1440,7 +1437,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       sslHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
   RegionUrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
-    min_version: 'beta'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_url_map_basic"
@@ -1501,6 +1497,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
       tests: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "test"
+      pathMatchers.defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      pathMatchers.pathRules.urlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
   ResourcePolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1713,6 +1718,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           router_name: "my-router"
           peer_name: "my-router-peer"
     properties:
+      advertiseMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateRFC1035Name(2, 63)'
@@ -1883,7 +1890,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_ssl_certificate_target_https_proxies"
-        min_version: "beta"
         primary_resource_id: "default"
         vars:
           region_target_https_proxy_name: "test-proxy"
@@ -2079,7 +2085,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_value: :NONE
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   RegionTargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
-    min_version: 'beta'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_target_http_proxy_basic"
@@ -2106,7 +2111,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
   RegionTargetHttpsProxy: !ruby/object:Overrides::Terraform::ResourceOverride
-    min_version: 'beta'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_target_https_proxy_basic"
@@ -2338,6 +2342,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: The backend service or backend bucket link that should be matched by this test.
       tests: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "test"
+      pathMatchers.defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      pathMatchers.pathRules.urlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
   VpnTunnel: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples

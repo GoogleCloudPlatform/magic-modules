@@ -32,7 +32,6 @@ func TestAccContainerNodePool_basic(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerNodePool_nodeLocations(t *testing.T) {
 	t.Parallel()
 
@@ -56,7 +55,6 @@ func TestAccContainerNodePool_nodeLocations(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerNodePool_maxPodsPerNode(t *testing.T) {
 	t.Parallel()
@@ -785,7 +783,6 @@ resource "google_container_node_pool" "np" {
 `, cluster, np)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerNodePool_nodeLocations(cluster, np, network string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -843,7 +840,6 @@ resource "google_container_node_pool" "np" {
 }
 `, network, cluster, np)
 }
-<% end -%>
 
 func testAccContainerNodePool_maxPodsPerNode(cluster, np, network string) string {
 	return fmt.Sprintf(`
