@@ -1,8 +1,8 @@
 package google
 
 import (
-	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -59,7 +59,7 @@ func dataSourceGoogleIamTestablePermissions() *schema.Resource {
 
 func dataSourceGoogleIamTestablePermissionsRead(d *schema.ResourceData, meta interface{}) (err error) {
 	config := meta.(*Config)
-	body := make(map[string]interface{}, 0)
+	body := make(map[string]interface{})
 	body["pageSize"] = 500
 	permissions := make([]map[string]interface{}, 0)
 	custom_support_level := d.Get("custom_support_level").(string)
@@ -109,7 +109,7 @@ func flattenTestablePermissionsList(v interface{}, custom_support_level string, 
 		p := raw.(map[string]interface{})
 
 		if _, ok := p["name"]; ok {
-			csl := true
+			var csl bool
 			if custom_support_level == "SUPPORTED" {
 				csl = p["customRolesSupportLevel"] == nil || p["customRolesSupportLevel"] == "SUPPORTED"
 			} else {
@@ -134,7 +134,7 @@ func flattenTestablePermissionsList(v interface{}, custom_support_level string, 
 func validatePermissionCustomSupport(val string) error {
 	allowed := []string{"NOT_SUPPORTED", "SUPPORTED", "TESTING"}
 	if !sliceContainsString(allowed, val) {
-		return errors.New("custom_support_level must be one of \"NOT_SUPPORTED\", \"SUPPORTED\", \"TESTING\"")
+		return fmt.Errorf("custom_support_level must be one of %s", strings.Join(allowed, ", "))
 	}
 	return nil
 }
@@ -142,7 +142,7 @@ func validatePermissionCustomSupport(val string) error {
 func validatePermissionStage(val string) error {
 	allowed := []string{"ALPHA", "BETA", "GA", "DEPRECATED"}
 	if !sliceContainsString(allowed, val) {
-		return errors.New("stage must be one of \"ALPHA\", \"BETA\", \"GA\", \"DEPRECATED\"")
+		return fmt.Errorf("stage must be one of %s", strings.Join(allowed, ", "))
 	}
 	return nil
 }

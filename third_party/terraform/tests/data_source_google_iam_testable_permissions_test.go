@@ -1,7 +1,6 @@
 package google
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"testing"
@@ -62,19 +61,19 @@ func testAccCheckGoogleIamTestablePermissionsMeta(project string, n string, expe
 		}
 		expectedId := fmt.Sprintf("//cloudresourcemanager.googleapis.com/projects/%s", project)
 		if rs.Primary.ID != expectedId {
-			return errors.New("perms data source ID not set.")
+			return fmt.Errorf("perms data source ID not set.")
 		}
 		attrs := rs.Primary.Attributes
 		count, ok := attrs["permissions.#"]
 		if !ok {
-			return errors.New("can't find 'permsissions' attribute")
+			return fmt.Errorf("can't find 'permsissions' attribute")
 		}
 		permCount, err := strconv.Atoi(count)
 		if err != nil {
 			return err
 		}
 		if permCount < 2 {
-			return errors.New("count should be greater than 2")
+			return fmt.Errorf("count should be greater than 2")
 		}
 		foundStage := false
 		foundSupport := false
@@ -94,11 +93,11 @@ func testAccCheckGoogleIamTestablePermissionsMeta(project string, n string, expe
 		}
 
 		if foundSupport {
-			return errors.New(fmt.Sprintf("Could not find stage %s in output", expectedStage))
+			return fmt.Errorf("Could not find stage %s in output", expectedStage)
 		}
 		if foundStage {
-			return errors.New(fmt.Sprintf("Could not find custom_support_level %s in output", expectedSupportLevel))
+			return fmt.Errorf("Could not find custom_support_level %s in output", expectedSupportLevel)
 		}
-		return errors.New("Unable to find customeSupportLevel or stage")
+		return fmt.Errorf("Unable to find customeSupportLevel or stage")
 	}
 }
