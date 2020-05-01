@@ -1,6 +1,6 @@
 <!-- AUTOCHANGELOG for Downstream PRs.
 
-Please select one of the following "release-note:" headings
+Please select one of the following "release-note:" headings:
     - release-note:enhancement
     - release-note:bug
     - release-note:note
