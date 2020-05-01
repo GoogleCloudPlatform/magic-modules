@@ -1718,6 +1718,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           router_name: "my-router"
           peer_name: "my-router-peer"
     properties:
+      advertiseMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateRFC1035Name(2, 63)'
