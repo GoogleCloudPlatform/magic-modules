@@ -52,7 +52,7 @@ resource "google_compute_per_instance_config" "with_disk" {
   name = "instance-1"
   preserved_state {
     metadata = {
-      meta = "123"
+      foo = "bar"
     }
 
     disk {

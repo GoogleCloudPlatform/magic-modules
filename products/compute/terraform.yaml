@@ -1258,7 +1258,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
   PerInstanceConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{zone}}/{{instance_group_manager}}/{{name}}"
-    mutex: networkEndpoint/{{project}}/{{zone}}/{{instance_group_manager}}
+    mutex: instangeGroupManager/{{project}}/{{zone}}/{{instance_group_manager}}
     # Fine-grained resources don't actually exist as standalone GCP resource
     # in Cloud Asset Inventory
     exclude_validator: true
@@ -1293,7 +1293,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Api::Type::Enum
         name: 'most_disruptive_allowed_action'
         description: |
-          The minimal action to perform on the instance during an update.
+          The most disruptive action to perform on the instance during an update.
         values:
           - :REPLACE
           - :RESTART
