@@ -1497,6 +1497,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
       tests: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "test"
+      pathMatchers.defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      pathMatchers.pathRules.urlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
   ResourcePolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -2331,6 +2340,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: The backend service or backend bucket link that should be matched by this test.
       tests: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "test"
+      pathMatchers.defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      pathMatchers.pathRules.urlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
   VpnTunnel: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples

@@ -263,6 +263,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The source snapshot used to create this disk. You can provide this as
           a partial or full URL to the resource.
+  RegionUrlMap: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      pathMatchers.defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Ansible::PropertyOverride
+        default_value: false
+      defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Ansible::PropertyOverride
+        default_value: false
+      pathMatchers.pathRules.urlRedirect.stripQuery: !ruby/object:Overrides::Ansible::PropertyOverride
+        default_value: false
   Reservation: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       specificReservation.instanceProperties.minCpuPlatform: !ruby/object:Overrides::Ansible::PropertyOverride
@@ -333,6 +341,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   SecurityPolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  UrlMap: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      pathMatchers.defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Ansible::PropertyOverride
+        default_value: false
+      defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Ansible::PropertyOverride
+        default_value: false
+      pathMatchers.pathRules.urlRedirect.stripQuery: !ruby/object:Overrides::Ansible::PropertyOverride
+        default_value: false
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
