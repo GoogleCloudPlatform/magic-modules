@@ -1,1 +1,0 @@
-{{if eq "new-resource" .Type}}**New Resource:** {{else if eq "new-datasource" .Type}}**New Data Source:** {{ end }}{{.Text }} ([#{{- .PRNumber -}}]({{- .PRURL -}}))
