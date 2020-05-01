@@ -58,9 +58,10 @@ func TestAccComputePerInstanceConfig_statefulBasic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				ResourceName:      "google_compute_per_instance_config.with_disks",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_per_instance_config.with_disks",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"most_disruptive_allowed_action", "minimal_action"},
 			},
 			{
 				ResourceName:      "google_compute_per_instance_config.add2",
@@ -127,6 +128,8 @@ resource "google_compute_per_instance_config" "with_disks" {
 	zone = google_compute_instance_group_manager.igm.zone
 	instance_group_manager = google_compute_instance_group_manager.igm.name
 	name = "%{config_name3}"
+	most_disruptive_allowed_action = "REFRESH"
+	minimal_action = "REFRESH"
 	preserved_state {
 		metadata = {
 			meta = "123"

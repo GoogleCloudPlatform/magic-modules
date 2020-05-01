@@ -1284,6 +1284,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'minimal_action'
         description: |
           The minimal action to perform on the instance during an update.
+          Default is `NONE`. Possible values are:
+          * REPLACE
+          * RESTART
+          * REFRESH
+          * NONE
         values:
           - :REPLACE
           - :RESTART
@@ -1294,6 +1299,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'most_disruptive_allowed_action'
         description: |
           The most disruptive action to perform on the instance during an update.
+          Default is `REPLACE`. Possible values are:
+          * REPLACE
+          * RESTART
+          * REFRESH
+          * NONE
         values:
           - :REPLACE
           - :RESTART
