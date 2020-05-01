@@ -783,6 +783,7 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	pid := getTestProjectFromEnv()
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:	  func() { testAccPreCheck(t) },
@@ -801,6 +802,14 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 				ImportState:			 true,
 				ImportStateVerify:		 true,
 				ImportStateVerifyIgnore: []string{"min_master_version"},
+			},
+			{
+				Config: testAccContainerCluster_updateWorkloadMetadataConfig(pid, clusterName, "SECURE"),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_workload_identity_config",
+				ImportState:         true,
+				ImportStateVerify:   true,
 			},
 		},
 	})
@@ -1465,6 +1474,7 @@ func TestAccContainerCluster_sharedVpc(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 	t.Parallel()
@@ -1479,14 +1489,6 @@ func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withWorkloadIdentityConfigEnabled(pid, clusterName),
-			},
-			{
-				ResourceName:        "google_container_cluster.with_workload_identity_config",
-				ImportState:         true,
-				ImportStateVerify:   true,
-			},
-			{
-				Config: testAccContainerCluster_updateWorkloadMetadataConfig(pid, clusterName, "SECURE"),
 			},
 			{
 				ResourceName:        "google_container_cluster.with_workload_identity_config",
@@ -1511,8 +1513,9 @@ func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
 			},
 		},
 	})
-
 }
+
+<% unless version.nil? || version == 'ga' -%>
 
 func TestAccContainerCluster_withBinaryAuthorization(t *testing.T) {
 	t.Parallel()
@@ -3511,6 +3514,7 @@ resource "google_container_cluster" "shared_vpc_cluster" {
 }
 `, projectName, org, billingId, projectName, org, billingId, suffix, suffix, name)
 }
+<% end -%>
 
 func testAccContainerCluster_withWorkloadIdentityConfigEnabled(projectID string, clusterName string) string {
 	return fmt.Sprintf(`
@@ -3552,6 +3556,7 @@ resource "google_container_cluster" "with_workload_identity_config" {
 `, projectID, clusterName, workloadIdentityConfig)
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func testAccContainerCluster_withBinaryAuthorization(clusterName string, enabled bool) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_binary_authorization" {

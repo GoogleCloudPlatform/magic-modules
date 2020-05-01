@@ -194,6 +194,7 @@ func TestAccContainerNodePool_withWorkloadMetadataConfig(t *testing.T) {
 		},
 	})
 }
+<% end %>
 
 func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 	t.Parallel()
@@ -223,6 +224,7 @@ func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 	})
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
@@ -1200,6 +1202,7 @@ resource "google_container_node_pool" "with_workload_metadata_config" {
 }
 `, cluster, np)
 }
+<% end -%>
 
 func testAccContainerNodePool_withWorkloadMetadataConfig_gkeMetadataServer(projectID, cluster, np string) string {
 	return fmt.Sprintf(`
@@ -1242,6 +1245,7 @@ resource "google_container_node_pool" "with_workload_metadata_config" {
 }
 
 
+<% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_withSandboxConfig(cluster, np string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
