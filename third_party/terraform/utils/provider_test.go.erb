@@ -157,6 +157,12 @@ func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.Resour
 		if r.Body == nil {
 			return defaultMatch
 		}
+		contentType := r.Header.Get("Content-Type")
+		// If body contains media, don't try to compare
+		if strings.Contains(contentType, "multipart/related") {
+			return defaultMatch
+		}
+
 		var b bytes.Buffer
 		if _, err := b.ReadFrom(r.Body); err != nil {
 			log.Printf("[DEBUG] Failed to read request body from cassette: %v", err)
