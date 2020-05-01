@@ -910,6 +910,11 @@ resource "google_service_account" "spanner_service_account" {
   display_name = "${var.gcp_service_account_display_name}-sp"
 }
 
+resource "google_service_account_key" "userkey" {
+  service_account_id = google_service_account.spanner_service_account.name
+  public_key_type    = "TYPE_X509_PEM_FILE"
+}
+
 resource "google_spanner_instance" "spanner_instance" {
   project      = var.gcp_project_id
   config       = var.spannerinstance["config"]
