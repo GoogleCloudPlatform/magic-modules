@@ -75,6 +75,7 @@ type Config struct {
 	PollInterval time.Duration
 
 	client           *http.Client
+	wrappedBigQueryClient *http.Client
 	wrappedPubsubClient *http.Client
 	context          context.Context
 	terraformVersion string
@@ -436,6 +437,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	bigQueryClientBasePath := c.BigQueryBasePath
 	log.Printf("[INFO] Instantiating Google Cloud BigQuery client for path %s", bigQueryClientBasePath)
 	wrappedBigQueryClient := ClientWithAdditionalRetries(client, retryTransport, iamMemberMissing)
+	c.wrappedBigQueryClient = wrappedBigQueryClient
 	c.clientBigQuery, err = bigquery.NewService(ctx, option.WithHTTPClient(wrappedBigQueryClient))
 	if err != nil {
 		return err

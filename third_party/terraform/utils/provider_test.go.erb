@@ -174,6 +174,7 @@ func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.Resour
 	})
 	config.client.Transport = rec
 	config.wrappedPubsubClient.Transport = rec
+	config.wrappedBigQueryClient.Transport = rec
 	configs[testName] = config
 	return config, err
 }
