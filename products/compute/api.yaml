@@ -8032,13 +8032,13 @@ objects:
       across instance group manager operations and can define stateful disks or metadata that are unique to the instance.
       This resource works with regional instance group managers.
     create_verb: :POST
-    create_url: projects/{{project}}/region/{{region}}/instanceGroupManagers/{{instance_group_manager}}/createInstances
+    create_url: projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{instance_group_manager}}/createInstances
     update_verb: :POST
-    update_url: projects/{{project}}/region/{{region}}/instanceGroupManagers/{{instance_group_manager}}/updatePerInstanceConfigs
+    update_url: projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{instance_group_manager}}/updatePerInstanceConfigs
     delete_verb: :POST
-    delete_url: projects/{{project}}/region/{{region}}/instanceGroupManagers/{{instance_group_manager}}/deletePerInstanceConfigs
+    delete_url: projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{instance_group_manager}}/deletePerInstanceConfigs
     read_verb: :POST
-    self_link: projects/{{project}}/region/{{region}}/instanceGroupManagers/{{instance_group_manager}}/listPerInstanceConfigs
+    self_link: projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{instance_group_manager}}/listPerInstanceConfigs
     identity:
       - name
     nested_query: !ruby/object:Api::Resource::NestedQuery
@@ -8052,7 +8052,7 @@ objects:
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
         path: 'name'
-        base_url: 'projects/{{project}}/region/{{region}}/operations/{{op_id}}'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 15
@@ -8100,7 +8100,7 @@ objects:
         name: 'preservedState'
         description: 'The preserved state for this instance.'
         update_verb: :POST
-        update_url: 'projects/{{project}}/region/{{region}}/instanceGroupManagers/{{instance_group_manager}}/updatePerInstanceConfigs'
+        update_url: 'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{instance_group_manager}}/updatePerInstanceConfigs'
         properties:
           - !ruby/object:Api::Type::KeyValuePairs
             name: 'metadata'

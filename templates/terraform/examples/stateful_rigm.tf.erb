@@ -24,7 +24,7 @@ resource "google_compute_instance_template" "igm-basic" {
   }
 }
 
-resource "google_compute_region_instance_group_manager" "igm-no-tp" {
+resource "google_compute_region_instance_group_manager" "rigm" {
   description = "Terraform test instance group manager"
   name        = "<%= ctx[:vars]['igm_name'] %>"
 
@@ -33,22 +33,22 @@ resource "google_compute_region_instance_group_manager" "igm-no-tp" {
     instance_template = google_compute_instance_template.igm-basic.self_link
   }
 
-  base_instance_name = "igm-no-tp"
+  base_instance_name = "rigm"
   region             = "us-central1"
   target_size        = 2
 }
 
-resource "google_region_compute_disk" "default" {
-  name   = "test-disk-%{random_suffix}"
-  type   = "pd-ssd"
-  region = google_compute_instance_group_manager.igm.region
-  image  = "debian-8-jessie-v20170523"
+resource "google_compute_disk" "default" {
+  name  = "test-disk-%{random_suffix}"
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+  image = "debian-8-jessie-v20170523"
   physical_block_size_bytes = 4096
 }
 
 resource "google_compute_region_per_instance_config" "with_disk" {
   region = google_compute_instance_group_manager.igm.region
-  instance_group_manager = google_compute_instance_group_manager.igm.name
+  instance_group_manager = google_compute_region_instance_group_manager.rigm.name
   name = "instance-1"
   preserved_state {
     metadata = {
