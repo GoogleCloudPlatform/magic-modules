@@ -265,8 +265,8 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
-
 <% unless version == 'ga' -%>
+
 			"stateful_disk": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -286,7 +286,6 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
-
 <% end -%>
 		},
 	}

@@ -96,7 +96,7 @@ module Overrides
         check :id_format, type: String
         check :examples, item_type: Provider::Terraform::Examples, type: Array, default: []
         check :virtual_fields,
-              item_type: Provider::Terraform::VirtualFields,
+              item_type: Api::Type,
               type: Array,
               default: []
 
