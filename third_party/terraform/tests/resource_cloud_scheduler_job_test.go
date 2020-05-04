@@ -1,6 +1,4 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"reflect"
@@ -95,6 +93,3 @@ func TestCloudScheduler_FlattenHttpHeaders(t *testing.T) {
 		}
 	}
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
