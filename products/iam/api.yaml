@@ -97,6 +97,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'ServiceAccountKey'
     base_url: projects/{{project}}/serviceAccounts/{{service_account}}/keys
+    collection_url_key: 'keys'
     description: |
       A service account in the Identity and Access Management API.
     parameters:
