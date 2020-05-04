@@ -77,6 +77,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         ignore_read: true
+      retryConfig.retryCount: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      retryConfig.maxRetryDuration: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      retryConfig.minBackoffDuration: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      retryConfig.maxBackoffDuration: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      retryConfig.maxDoublings: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
