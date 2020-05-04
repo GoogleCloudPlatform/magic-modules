@@ -35,12 +35,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         required: false
     virtual_fields:
-      - !ruby/object:Provider::Terraform::VirtualFields
+      - !ruby/object:Api::Type::Boolean
         name: 'noop_on_destroy'
+        default_value: false
         description: |
           If set to `true`, the application version will not be deleted.
-      - !ruby/object:Provider::Terraform::VirtualFields
+      - !ruby/object:Api::Type::Boolean
         name: 'delete_service_on_destroy'
+        default_value: false
         description: |
           If set to `true`, the service will be deleted if it is the last version.    
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -81,12 +83,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         required: false
     virtual_fields:
-      - !ruby/object:Provider::Terraform::VirtualFields
+      - !ruby/object:Api::Type::Boolean
         name: 'noop_on_destroy'
+        default_value: false
         description: |
           If set to `true`, the application version will not be deleted.
-      - !ruby/object:Provider::Terraform::VirtualFields
+      - !ruby/object:Api::Type::Boolean
         name: 'delete_service_on_destroy'
+        default_value: false
         description: |
           If set to `true`, the service will be deleted if it is the last version.    
     custom_code: !ruby/object:Provider::Terraform::CustomCode

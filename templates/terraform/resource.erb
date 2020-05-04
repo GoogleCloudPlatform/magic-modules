@@ -91,9 +91,9 @@ func resource<%= resource_name -%>() *schema.Resource {
 <%-     unless object.virtual_fields.empty? -%>
 <%-       object.virtual_fields.each do |field| -%>
             "<%= field.name -%>": {
-              Type:     schema.TypeBool,
+              Type: <%= tf_type(field) -%>,
               Optional: true,
-              Default:  false,
+              Default:  <%= go_literal(field.default_value) -%>,
             },
 <%        end -%>
 <%      end -%>
@@ -447,7 +447,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
   // Explicitly set virtual fields to default values if unset
 <%-   object.virtual_fields.each do |field| -%>
     if _, ok := d.GetOk("<%= field.name -%>"); !ok {
-      d.Set("<%= field.name -%>", false)
+      d.Set("<%= field.name -%>", <%= go_literal(field.default_value) -%>)
     }
 <%    end -%>
 <%  end -%>
@@ -836,7 +836,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <%-  unless object.virtual_fields.empty? -%>
     // Explicitly set virtual fields to default values on import
   <%-  object.virtual_fields.each do |field| -%>
-    d.Set("<%= field.name %>", false)
+    d.Set("<%= field.name %>", <%= go_literal(field.default_value) -%>)
   <%   end -%>
 <%   end -%>
 <%= lines(compile(object.custom_code.post_import)) if object.custom_code.post_import -%>
