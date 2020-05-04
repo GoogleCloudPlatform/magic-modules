@@ -337,6 +337,9 @@ The `addons_config` block supports:
 
 * `gce_persistent_disk_csi_driver_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to disabled; set `enabled = true` to enable. 
+    
+* `kalm_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+Whether this cluster should enable the Google Compute Engine Application Delibery (KALM) addon. Defaults to disabled; set `enabled = true` to enable.
 
 This example `addons_config` disables two addons:
 
