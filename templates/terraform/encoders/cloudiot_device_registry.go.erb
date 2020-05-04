@@ -1,9 +1,27 @@
-log.Printf("[DEBUG] Encoding state notification config for updates: %q", d.Id())
 config := meta.(*Config)
+
+log.Printf("[DEBUG] Encoding state notification config: %q", d.Id())
 stateNotificationConfigProp, err := expandCloudIotDeviceRegistryStateNotificationConfig(d.Get("state_notification_config"), d, config)
 if err != nil {
     return nil, err
 } else if v, ok := d.GetOkExists("state_notification_config"); !isEmptyValue(reflect.ValueOf(stateNotificationConfigProp)) && (ok || !reflect.DeepEqual(v, stateNotificationConfigProp)) {
     obj["stateNotificationConfig"] = stateNotificationConfigProp
 }
+
+log.Printf("[DEBUG] Encoding HTTP config: %q", d.Id())
+httpConfigProp, err := expandCloudIotDeviceRegistryHttpConfig(d.Get("http_config"), d, config)
+if err != nil {
+    return nil, err
+} else if v, ok := d.GetOkExists("http_config"); !isEmptyValue(reflect.ValueOf(httpConfigProp)) && (ok || !reflect.DeepEqual(v, httpConfigProp)) {
+    obj["httpConfig"] = httpConfigProp
+}
+
+log.Printf("[DEBUG] Encoding MQTT config: %q", d.Id())
+mqttConfigProp, err := expandCloudIotDeviceRegistryMqttConfig(d.Get("mqtt_config"), d, config)
+if err != nil {
+    return nil, err
+} else if v, ok := d.GetOkExists("mqtt_config"); !isEmptyValue(reflect.ValueOf(mqttConfigProp)) && (ok || !reflect.DeepEqual(v, mqttConfigProp)) {
+    obj["mqttConfig"] = mqttConfigProp
+}
+
 return obj, nil
