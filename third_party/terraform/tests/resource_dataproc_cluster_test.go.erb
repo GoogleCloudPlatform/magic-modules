@@ -1267,12 +1267,10 @@ resource "google_dataproc_cluster" "with_labels" {
 func testAccDataprocCluster_withEndpointConfig(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_endpoint_config" {
-	name                  = "dproc-cluster-test-%s"
+	name                  = "tf-test-%s"
 	region                = "us-central1"
 
 	cluster_config {
-		gce_cluster_config {}
-		
 		endpoint_config {
 			enable_http_port_access = "true"
 		}
