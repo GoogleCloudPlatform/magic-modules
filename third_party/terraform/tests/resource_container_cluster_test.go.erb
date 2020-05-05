@@ -3392,6 +3392,20 @@ resource "google_container_cluster" "with_private_cluster" {
 }
 `, containerNetName, clusterName)
 }
+
+func testAccContainerCluster_withShieldedNodes(clusterName string, enabled bool) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_shielded_nodes" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  enable_shielded_nodes = %v
+}
+`, clusterName, enabled)
+}
+
+
 <% unless version.nil? || version == 'ga' -%>
 func testAccContainerCluster_sharedVpc(org, billingId, projectName, name string, suffix string) string {
 	return fmt.Sprintf(`
@@ -3546,18 +3560,6 @@ resource "google_container_cluster" "with_binary_authorization" {
   initial_node_count = 1
 
   enable_binary_authorization = %v
-}
-`, clusterName, enabled)
-}
-
-func testAccContainerCluster_withShieldedNodes(clusterName string, enabled bool) string {
-	return fmt.Sprintf(`
-resource "google_container_cluster" "with_shielded_nodes" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 1
-
-  enable_shielded_nodes = %v
 }
 `, clusterName, enabled)
 }
