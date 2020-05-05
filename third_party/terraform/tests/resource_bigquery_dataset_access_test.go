@@ -112,7 +112,7 @@ func TestAccBigQueryDatasetAccess_predefinedRole(t *testing.T) {
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
 
 	expected1 := map[string]interface{}{
-		"role":   "EDITOR",
+		"role":   "WRITER",
 		"domain": "google.com",
 	}
 
