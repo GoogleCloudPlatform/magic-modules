@@ -1362,6 +1362,36 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaults(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withShieldedNodes(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:	  func() { testAccPreCheck(t) },
+		Providers:	  testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withShieldedNodes(clusterName, true),
+			},
+			{
+				ResourceName:		 "google_container_cluster.with_shielded_nodes",
+				ImportState:		 true,
+				ImportStateVerify:	 true,
+			},
+			{
+				Config: testAccContainerCluster_withShieldedNodes(clusterName, false),
+			},
+			{
+				ResourceName:		 "google_container_cluster.with_shielded_nodes",
+				ImportState:		 true,
+				ImportStateVerify:	 true,
+			},
+		},
+	})
+}
+
 <% unless version == 'ga' -%>
 func TestAccContainerCluster_withAutoscalingProfile(t *testing.T) {
 	t.Parallel()
@@ -1507,36 +1537,6 @@ func TestAccContainerCluster_withBinaryAuthorization(t *testing.T) {
 			},
 			{
 				ResourceName:		 "google_container_cluster.with_binary_authorization",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
-			},
-		},
-	})
-}
-
-func TestAccContainerCluster_withShieldedNodes(t *testing.T) {
-	t.Parallel()
-
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:	  func() { testAccPreCheck(t) },
-		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_withShieldedNodes(clusterName, true),
-			},
-			{
-				ResourceName:		 "google_container_cluster.with_shielded_nodes",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
-			},
-			{
-				Config: testAccContainerCluster_withShieldedNodes(clusterName, false),
-			},
-			{
-				ResourceName:		 "google_container_cluster.with_shielded_nodes",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
 			},
