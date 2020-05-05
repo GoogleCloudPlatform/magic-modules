@@ -1425,6 +1425,9 @@ resource "google_container_node_pool" "np_with_node_config_scope_alias" {
 `, cluster, np)
 }
 
+<%#  Re-enable this test when there is more than one acceptable node pool version
+     for the current master version.
+
 func testAccContainerNodePool_version(cluster, np string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -1472,6 +1475,7 @@ resource "google_container_node_pool" "np" {
 }
 `, cluster, np)
 }
+%>
 
 func testAccContainerNodePool_012_ConfigModeAttr1(cluster, np string) string {
 	return fmt.Sprintf(`
