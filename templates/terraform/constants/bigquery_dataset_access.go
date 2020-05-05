@@ -1,6 +1,6 @@
 var bigqueryAccessRoleToPrimitiveMap =  map[string]string {
     "roles/bigquery.dataOwner": "OWNER",
-    "roles/bigquery.dataEditor": "EDITOR",
+    "roles/bigquery.dataEditor": "WRITER",
     "roles/bigquery.dataViewer": "VIEWER",
 }
 
