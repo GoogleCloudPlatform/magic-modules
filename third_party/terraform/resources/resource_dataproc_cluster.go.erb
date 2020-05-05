@@ -549,20 +549,24 @@ by Dataproc`,
 							},
 						},
 						"endpoint_config": {
-							Type:     schema.TypeList,
-							Optional: true,
-							MaxItems: 1,
-							AtLeastOneOf:     clusterConfigKeys,
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							MaxItems:     1,
+							AtLeastOneOf: clusterConfigKeys,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"enable_http_port_access": {
 										Type:     schema.TypeBool,
-										Optional: true,
+										Required: true,
 										ForceNew: true,
+									},
+									"http_ports": {
+										Type:     schema.TypeMap,
+										Computed: true,
 									},
 								},
 							},
-						},
 <% end -%>
 					},
 				},
@@ -807,6 +811,7 @@ func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.Clus
 	if cfg, ok := configOptions(d, "cluster_config.0.lifecycle_config"); ok {
 		conf.LifecycleConfig = expandLifecycleConfig(cfg)
 	}
+
 	if cfg, ok := configOptions(d, "cluster_config.0.endpoint_config"); ok {
 		conf.EndpointConfig = expandEndpointConfig(cfg)
 	}
@@ -1344,6 +1349,7 @@ func flattenEndpointConfig(d *schema.ResourceData, ec *dataproc.EndpointConfig) 
 
 	data := map[string]interface{}{
 		"enable_http_port_access": ec.EnableHttpPortAccess,
+		"http_ports":              ec.HttpPorts,
 	}
 
 	return []map[string]interface{}{data}

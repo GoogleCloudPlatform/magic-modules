@@ -588,7 +588,7 @@ cluster_config {
 
 - - -
 
-The `endpoint_config` block (Optional, Beta) supports:
+The `endpoint_config` block (Optional, Computed, Beta) supports:
 
 ```hcl
 cluster_config {
@@ -598,7 +598,8 @@ cluster_config {
 }
 ```
 
-* `enable_http_port_access` - (Optional) The flag to enable http access to specific ports on the cluster from external sources (aka Component Gateway). Defaults to false.
+* `enable_http_port_access` - (Optional) The flag to enable http access to specific ports
+  on the cluster from external sources (aka Component Gateway). Defaults to false.
 
 ## Attributes Reference
 
@@ -623,6 +624,9 @@ exported:
 
 * `cluster_config.0.lifecycle_config.0.idle_start_time` - Time when the cluster became idle
   (most recent job finished) and became eligible for deletion due to idleness.
+
+* `cluster_config.0.endpoint_config.0.http_ports` - The map of port descriptions to URLs. Will only be populated if
+  `enable_http_port_access` is true.
 
 ## Timeouts
 
