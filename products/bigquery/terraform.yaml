@@ -91,6 +91,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+      role: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'resourceBigQueryDatasetAccessRoleDiffSuppress'
+        custom_expand: "templates/terraform/custom_expand/bigquery_access_role.go.erb"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/bigquery_dataset_access.go
   Job: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/jobs/{{job_id}}"]
     skip_delete: true
