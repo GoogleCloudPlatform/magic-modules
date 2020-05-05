@@ -439,13 +439,11 @@ func resourceContainerCluster() *schema.Resource {
 				Default:  false,
 			},
 
-<% unless version == 'ga' -%>
 			"enable_shielded_nodes": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-<% end -%>
 
 			"authenticator_groups_config": {
 				Type:     schema.TypeList,
@@ -1069,11 +1067,11 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			Enabled:         d.Get("enable_binary_authorization").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
-<% unless version == 'ga' -%>
 		ShieldedNodes: &containerBeta.ShieldedNodes{
 			Enabled:         d.Get("enable_shielded_nodes").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
+<% unless version == 'ga' -%>
 		ReleaseChannel:          expandReleaseChannel(d.Get("release_channel")),
 		EnableTpu:               d.Get("enable_tpu").(bool),
 		NetworkConfig: &containerBeta.NetworkConfig{
@@ -1333,10 +1331,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 	d.Set("enable_binary_authorization", cluster.BinaryAuthorization != nil && cluster.BinaryAuthorization.Enabled)
-<% unless version == 'ga' -%>
 	if cluster.ShieldedNodes != nil {
 		d.Set("enable_shielded_nodes", cluster.ShieldedNodes.Enabled)
 	}
+<% unless version == 'ga' -%>
 	d.Set("enable_tpu", cluster.EnableTpu)
 	d.Set("tpu_ipv4_cidr_block", cluster.TpuIpv4CidrBlock)
 
@@ -1524,7 +1522,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		d.SetPartial("enable_binary_authorization")
 	}
 
-<% unless version == 'ga' -%>
 	if d.HasChange("enable_shielded_nodes") {
 		enabled := d.Get("enable_shielded_nodes").(bool)
 		req := &containerBeta.UpdateClusterRequest{
@@ -1546,6 +1543,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		d.SetPartial("enable_shielded_nodes")
 	}
+<% unless version == 'ga' -%>
 
 	if d.HasChange("enable_intranode_visibility") {
 		enabled := d.Get("enable_intranode_visibility").(bool)
