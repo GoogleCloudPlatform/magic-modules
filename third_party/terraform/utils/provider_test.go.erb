@@ -180,11 +180,11 @@ func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.Resour
 		// JSON might be the same, but reordered. Try parsing json and comparing
 		if strings.Contains(contentType, "application/json") {
 			var reqJson, cassetteJson interface{}
-			if err := json.Unmarshal(byte[]{reqBody}, &reqJson); err != nil {
+			if err := json.Unmarshal([]byte(reqBody), &reqJson); err != nil {
         log.Printf("[DEBUG] Failed to unmarshall request json: %v", err)
         return false
     	}
-    	if err := json.Unmarshal(byte[]{i.Body}, &cassetteJson); err != nil {
+    	if err := json.Unmarshal([]byte(i.Body), &cassetteJson); err != nil {
         log.Printf("[DEBUG] Failed to unmarshall cassette json: %v", err)
         return false
     	}
