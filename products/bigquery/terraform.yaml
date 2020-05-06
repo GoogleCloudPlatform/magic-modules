@@ -92,7 +92,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       role: !ruby/object:Overrides::Terraform::PropertyOverride
+        # Bigquery allows for two different formats for specific roles
+        # (IAM vs "primitive" format), but will return the primative role in API
+        # responses. We identify this fine-grained resource from a list
+        # of DatasetAccess objects by comparing role, and we must use the same
+        # format when comparing.
         diff_suppress_func: 'resourceBigQueryDatasetAccessRoleDiffSuppress'
+        # This custom expand makes sure we are correctly
+        # converting IAM roles set in state to their primitive equivalents
+        # before comparison.
         custom_expand: "templates/terraform/custom_expand/bigquery_access_role.go.erb"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/bigquery_dataset_access.go
