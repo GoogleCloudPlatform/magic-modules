@@ -77,6 +77,7 @@ resource "google_cloudiot_registry" "%s" {
   name     = "%s"
 
   depends_on = [
+    google_pubsub_topic.default-devicestatus,
     google_pubsub_topic.default-telemetry,
     google_pubsub_topic.additional-telemetry
   ]
@@ -102,8 +103,6 @@ resource "google_cloudiot_registry" "%s" {
   http_config = {
     http_enabled_state = "HTTP_DISABLED"
   }
-
-  log_level = "INFO"
 
   credentials {
     public_key_certificate = {
