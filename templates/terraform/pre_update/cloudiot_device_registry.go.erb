@@ -24,7 +24,7 @@ if d.HasChange("credentials") {
 	updateMask = append(updateMask, "credentials")
 }
 
-log.Printf("[DEBUG] updateMask a adding extra schema entries %q: %v", d.Id(), updateMask)
+log.Printf("[DEBUG] updateMask after adding extra schema entries %q: %v", d.Id(), updateMask)
 
 // Refreshing updateMask after adding extra schema entries
 url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})

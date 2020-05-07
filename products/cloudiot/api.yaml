@@ -113,7 +113,6 @@ objects:
               - :HTTP_ENABLED
               - :HTTP_DISABLED
       - !ruby/object:Api::Type::Enum
-        send_empty_value: true
         name: 'logLevel'
         description: |
           The default logging verbosity for activity from devices in this
