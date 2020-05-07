@@ -100,23 +100,25 @@ module Provider
                              force_new?(property.parent, resource))))
     end
 
-    # Returns the property for a given Terraform field path (e.g.
+    # Returns an updated path for a given Terraform field path (e.g.
     # 'a_field', 'parent_field.0.child_name'). Returns nil if the property
-    # is not included in the resource's properties.
-    def property_for_schema_path(schema_path, resource)
+    # is not included in the resource's properties and removes keys that have
+    # been flattened
+    # TODO(emilymye): Change format of input for
+    # xactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
+    # convert to snake in this method
+    def get_property_schema_path(schema_path, resource)
       nested_props = resource.properties
       prop = nil
-
-      schema_path.split('.').each_with_index do |pname, i|
-        next if i.odd?
-
-        pname = pname.camelize(:lower)
-        prop = nested_props.find { |p| p.name == pname }
-        break if prop.nil?
+      path_tkns = schema_path.split('.0.').map do |pname|
+        camel_pname = pname.camelize(:lower)
+        prop = nested_props.find { |p| p.name == camel_pname }
+        return nil if prop.nil?
 
         nested_props = prop.nested_properties || []
+        prop.flatten_object ? nil : pname
       end
-      prop
+      path_tkns.compact.join('.0.')
     end
 
     # Transforms a format string with field markers to a regex string with
