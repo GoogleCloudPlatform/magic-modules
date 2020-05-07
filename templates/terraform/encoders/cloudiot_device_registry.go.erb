@@ -26,6 +26,14 @@ if err != nil {
     obj["mqttConfig"] = mqttConfigProp
 }
 
+log.Printf("[DEBUG] Encoding credentials: %q", d.Id())
+credentialsProp, err := expandCloudIotDeviceRegistryCredentials(d.Get("credentials"), d, config)
+if err != nil {
+    return nil, err
+} else if v, ok := d.GetOkExists("credentials"); !isEmptyValue(reflect.ValueOf(credentialsProp)) && (ok || !reflect.DeepEqual(v, credentialsProp)) {
+    obj["credentials"] = credentialsProp
+}
+
 log.Printf("[DEBUG] Resource data after encoding extra schema entries %q: %#v", d.Id(), obj)
 
 return obj, nil
