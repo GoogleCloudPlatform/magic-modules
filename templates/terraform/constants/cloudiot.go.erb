@@ -1,18 +1,18 @@
-func expandCloudIotDeviceRegistryHttpConfig(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudIotDeviceRegistryHTTPConfig(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
     original := v.(map[string]interface{})
     transformed := make(map[string]interface{})
 
-    transformedHttpEnabledState, err := expandCloudIotDeviceRegistryHttpEnabledState(original["http_enabled_state"], d, config)
+    transformedHTTPEnabledState, err := expandCloudIotDeviceRegistryHTTPEnabledState(original["http_enabled_state"], d, config)
     if err != nil {
         return nil, err
-    } else if val := reflect.ValueOf(transformedHttpEnabledState); val.IsValid() && !isEmptyValue(val) {
-        transformed["httpEnabledState"] = transformedHttpEnabledState
+    } else if val := reflect.ValueOf(transformedHTTPEnabledState); val.IsValid() && !isEmptyValue(val) {
+        transformed["httpEnabledState"] = transformedHTTPEnabledState
     }
 
     return transformed, nil
 }
 
-func expandCloudIotDeviceRegistryHttpEnabledState(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+func expandCloudIotDeviceRegistryHTTPEnabledState(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
     return v, nil
 }
 
@@ -52,7 +52,7 @@ func expandCloudIotDeviceRegistryStateNotificationConfigPubsubTopicName(v interf
     return v, nil
 }
 
-func flattenCloudIotDeviceRegistryHttpConfig(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenCloudIotDeviceRegistryHTTPConfig(v interface{}, d *schema.ResourceData, config *Config) interface{} {
     if v == nil {
         return v
     }
@@ -60,13 +60,13 @@ func flattenCloudIotDeviceRegistryHttpConfig(v interface{}, d *schema.ResourceDa
     original := v.(map[string]interface{})
     transformed := make(map[string]interface{})
 
-    transformedHttpEnabledState := flattenCloudIotDeviceRegistryHttpConfigHttpEnabledState(original["httpEnabledState"], d, config)
-    transformed["http_enabled_state"] = transformedHttpEnabledState
+    transformedHTTPEnabledState := flattenCloudIotDeviceRegistryHTTPConfigHTTPEnabledState(original["httpEnabledState"], d, config)
+    transformed["http_enabled_state"] = transformedHTTPEnabledState
 
     return transformed
 }
 
-func flattenCloudIotDeviceRegistryHttpConfigHttpEnabledState(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+func flattenCloudIotDeviceRegistryHTTPConfigHTTPEnabledState(v interface{}, d *schema.ResourceData, config *Config) interface{} {
     return v
 }
 

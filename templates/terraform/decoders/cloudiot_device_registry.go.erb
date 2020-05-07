@@ -4,15 +4,18 @@ log.Printf("[DEBUG] Decoding state notification config: %q", d.Id())
 if err := d.Set("state_notification_config", flattenCloudIotDeviceRegistryStateNotificationConfig(res["stateNotificationConfig"], d, config)); err != nil {
     return nil, fmt.Errorf("Error reading DeviceRegistry: %s", err)
 }
+log.Printf("[DEBUG] State notification config after decoding: %v", d.Get("state_notification_config"))
 
 log.Printf("[DEBUG] Decoding HTTP config: %q", d.Id())
-if err := d.Set("http_config", flattenCloudIotDeviceRegistryHttpConfig(res["httpConfig"], d, config)); err != nil {
+if err := d.Set("http_config", flattenCloudIotDeviceRegistryHTTPConfig(res["httpConfig"], d, config)); err != nil {
     return nil, fmt.Errorf("Error reading DeviceRegistry: %s", err)
 }
+log.Printf("[DEBUG] HTTP config after decoding: %v", d.Get("http_config"))
 
 log.Printf("[DEBUG] Decoding MQTT config: %q", d.Id())
 if err := d.Set("mqtt_config", flattenCloudIotDeviceRegistryMqttConfig(res["mqttConfig"], d, config)); err != nil {
     return nil, fmt.Errorf("Error reading DeviceRegistry: %s", err)
 }
+log.Printf("[DEBUG] MQTT config after decoding: %v", d.Get("mqtt_config"))
 
 return res, nil

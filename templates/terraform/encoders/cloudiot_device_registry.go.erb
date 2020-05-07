@@ -1,5 +1,7 @@
 config := meta.(*Config)
 
+log.Printf("[DEBUG] Resource data before encoding extra schema entries %q: %#v", d.Id(), obj)
+
 log.Printf("[DEBUG] Encoding state notification config: %q", d.Id())
 stateNotificationConfigProp, err := expandCloudIotDeviceRegistryStateNotificationConfig(d.Get("state_notification_config"), d, config)
 if err != nil {
@@ -9,7 +11,7 @@ if err != nil {
 }
 
 log.Printf("[DEBUG] Encoding HTTP config: %q", d.Id())
-httpConfigProp, err := expandCloudIotDeviceRegistryHttpConfig(d.Get("http_config"), d, config)
+httpConfigProp, err := expandCloudIotDeviceRegistryHTTPConfig(d.Get("http_config"), d, config)
 if err != nil {
     return nil, err
 } else if v, ok := d.GetOkExists("http_config"); !isEmptyValue(reflect.ValueOf(httpConfigProp)) && (ok || !reflect.DeepEqual(v, httpConfigProp)) {
@@ -23,5 +25,7 @@ if err != nil {
 } else if v, ok := d.GetOkExists("mqtt_config"); !isEmptyValue(reflect.ValueOf(mqttConfigProp)) && (ok || !reflect.DeepEqual(v, mqttConfigProp)) {
     obj["mqttConfig"] = mqttConfigProp
 }
+
+log.Printf("[DEBUG] Resource data after encoding extra schema entries %q: %#v", d.Id(), obj)
 
 return obj, nil

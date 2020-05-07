@@ -24,6 +24,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: templates/terraform/decoders/cloudiot_device_registry.go.erb
       encoder: templates/terraform/encoders/cloudiot_device_registry.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/cloudiot_device_registry.go.erb
+      pre_update: templates/terraform/pre_update/cloudiot_device_registry.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudiot_device_registry_basic"
