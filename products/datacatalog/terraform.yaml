@@ -13,6 +13,28 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  EntryGroup: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_catalog_entry_group_basic"
+        primary_resource_id: "basic_entry_group"
+        vars:
+          entry_group_id: "my_group"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_catalog_entry_group_full"
+        primary_resource_id: "basic_entry_group"
+        vars:
+          entry_group_id: "my_group"
+    properties:
+      entryGroupId: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[A-z_][A-z0-9_]{0,63}$'
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+        required: false
+        default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
   TagTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples

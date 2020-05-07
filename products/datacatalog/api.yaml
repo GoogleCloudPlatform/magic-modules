@@ -25,6 +25,48 @@ apis_required:
     url: https://console.cloud.google.com/apis/library/datacatalog.googleapis.com
 objects:
   - !ruby/object:Api::Resource
+    name: EntryGroup
+    base_url: projects/{{project}}/locations/{{region}}/entryGroups
+    create_url: projects/{{project}}/locations/{{region}}/entryGroups?entryGroupId={{entry_group_id}}
+    self_link: "{{name}}"
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      An EntryGroup resource represents a logical grouping of zero or more Data Catalog Entry resources.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': https://cloud.google.com/data-catalog/docs
+      api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        url_param_only: true
+        input: true
+        description: |
+          EntryGroup location region.
+      - !ruby/object:Api::Type::String
+        name: entryGroupId
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The id of the entry group to create. The id must begin with a letter or underscore,
+          contain only English letters, numbers and underscores, and be at most 64 characters.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          The resource name of the entry group in URL format. Example: projects/{project}/locations/{location}/entryGroups/{entryGroupId}
+        output: true
+      - !ruby/object:Api::Type::String
+        name: displayName
+        description: |
+          A short name to identify the entry group, for example, "analytics data - jan 2011".
+      - !ruby/object:Api::Type::String
+        name: description
+        description: |
+          Entry group description, which can consist of several sentences or paragraphs that describe entry group contents.
+  - !ruby/object:Api::Resource
     name: TagTemplate
     base_url: projects/{{project}}/locations/{{region}}/tagTemplates
     self_link: "{{name}}"
