@@ -80,7 +80,7 @@ func expandCloudIotDeviceRegistryCredentialsPublicKeyCertificate(v interface{}, 
     original := v.(map[string]interface{})
     transformed := make(map[string]interface{})
 
-    transformedFormat, err := expandCloudIotDeviceRegistryPublicKeyCertificateFormat(original["subfolder_matches"], d, config)
+    transformedFormat, err := expandCloudIotDeviceRegistryPublicKeyCertificateFormat(original["format"], d, config)
     if err != nil {
         return nil, err
     } else if val := reflect.ValueOf(transformedFormat); val.IsValid() && !isEmptyValue(val) {
