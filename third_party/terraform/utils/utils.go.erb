@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"sort"
 	"strings"
 	"time"
 
@@ -226,6 +227,7 @@ func stringSliceFromGolangSet(sset map[string]struct{}) []string {
 	for s := range sset {
 		ls = append(ls, s)
 	}
+	sort.Strings(ls)
 
 	return ls
 }
