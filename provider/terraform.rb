@@ -179,13 +179,11 @@ module Provider
     # per resource. The resource.erb template forms the basis of a single
     # GCP Resource on Terraform.
     def generate_resource(data)
-      target_folder = File.join(data.output_folder, folder_name(data.version))
-
       name = data.object.name.underscore
       product_name = data.product.name.underscore
-      filepath = File.join(target_folder, "resource_#{product_name}_#{name}.go")
 
-      data.generate('templates/terraform/resource.erb', filepath, self)
+      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+      data.generate('/templates/terraform/resource.erb', "#{folder_name(data.version)}/resource_#{product_name}_#{name}.go", self)
       generate_documentation(data)
     end
 
@@ -210,20 +208,14 @@ module Provider
                 end
                     .empty?
 
-      target_folder = File.join(data.output_folder, folder_name(data.version))
-
       name = data.object.name.underscore
       product_name = data.product.name.underscore
-      filepath =
-        File.join(
-          target_folder,
-          "resource_#{product_name}_#{name}_generated_test.go"
-        )
 
       data.product = data.product.name
       data.resource_name = data.object.name.camelize(:upper)
+      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
       data.generate('templates/terraform/examples/base_configs/test_file.go.erb',
-                    filepath, self)
+                    "#{folder_name(data.version)}/resource_#{product_name}_#{name}_generated_test.go", self)
     end
 
     def generate_resource_sweepers(data)
@@ -232,20 +224,14 @@ module Provider
                 data.object.custom_code.pre_delete ||
                 data.object.skip_delete
 
-      target_folder = File.join(data.output_folder, folder_name(data.version))
-
       name = data.object.name.underscore
       product_name = data.product.name.underscore
-      filepath =
-        File.join(
-          target_folder,
-          "resource_#{product_name}_#{name}_sweeper_test.go"
-        )
 
       data.product = data.product.name
       data.resource_name = data.object.name.camelize(:upper)
+      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
       data.generate('templates/terraform/sweeper_file.go.erb',
-                    filepath, self)
+                    "#{folder_name(data.version)}/resource_#{product_name}_#{name}_sweeper_test.go", self)
     end
 
     def generate_operation(output_folder, _types)
@@ -253,34 +239,29 @@ module Provider
 
       product_name = @api.name.underscore
       data = build_object_data(@api.objects.first, output_folder, @target_version_name)
-      target_folder = File.join(data.output_folder, folder_name(data.version))
 
       data.object = @api.objects.select(&:autogen_async).first
       data.async = data.object.async
+      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
       data.generate('templates/terraform/operation.go.erb',
-                    File.join(target_folder,
-                              "#{product_name}_operation.go"),
+                    "#{folder_name(data.version)}/#{product_name}_operation.go",
                     self)
     end
 
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
     def generate_iam_policy(data)
-      target_folder = File.join(data.output_folder, folder_name(data.version))
-
       name = data.object.name.underscore
       product_name = data.product.name.underscore
-      filepath = File.join(target_folder, "iam_#{product_name}_#{name}.go")
 
-      data.generate('templates/terraform/iam_policy.go.erb', filepath, self)
+      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+      data.generate('templates/terraform/iam_policy.go.erb', "#{folder_name(data.version)}/iam_#{product_name}_#{name}.go", self)
 
       # Only generate test if testable examples exist.
       unless data.object.examples.reject(&:skip_test).empty?
-        generated_test_name = "iam_#{product_name}_#{name}_generated_test.go"
-        filepath = File.join(target_folder, generated_test_name)
         data.generate(
           'templates/terraform/examples/base_configs/iam_test_file.go.erb',
-          filepath,
+          "#{folder_name(data.version)}/iam_#{product_name}_#{name}_generated_test.go",
           self
         )
       end

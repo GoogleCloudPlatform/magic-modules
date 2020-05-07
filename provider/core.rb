@@ -92,7 +92,11 @@ module Provider
       generate_datasources(output_folder, types) \
         unless @config.datasources.nil?
 
+      FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+      $pwd = Dir.pwd
+      Dir.chdir output_folder
       generate_operation(output_folder, types)
+      Dir.chdir $pwd
 
       # Write a file with the final version of the api, after overrides
       # have been applied.
@@ -182,13 +186,16 @@ module Provider
     end
 
     def compile_file_list(output_folder, files, file_template)
+      FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+      $pwd = Dir.pwd
+      Dir.chdir output_folder
       files.map do |target, source|
         Thread.new do
           Google::LOGGER.debug "Compiling #{source} => #{target}"
-          target_file = File.join(output_folder, target)
-          file_template.generate(source, target_file, self)
+          file_template.generate(source, target, self)
         end
       end.map(&:join)
+      Dir.chdir $pwd
     end
 
     def generate_objects(output_folder, types)
@@ -216,20 +223,27 @@ module Provider
 
     def generate_object(object, output_folder, version_name)
       data = build_object_data(object, output_folder, version_name)
+      $pwd = Dir.pwd
       unless object.exclude_resource
+        FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+        Dir.chdir output_folder
         Google::LOGGER.debug "Generating #{object.name} resource"
         generate_resource data.clone
         Google::LOGGER.debug "Generating #{object.name} tests"
         generate_resource_tests data.clone
         generate_resource_sweepers data.clone
         generate_resource_files data.clone
+        Dir.chdir $pwd
       end
 
       # if iam_policy is not defined or excluded, don't generate it
       return if object.iam_policy.nil? || object.iam_policy.exclude
 
+      FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+      Dir.chdir output_folder
       Google::LOGGER.debug "Generating #{object.name} IAM policy"
       generate_iam_policy data.clone
+      Dir.chdir $pwd
     end
 
     # Generate files at a per-resource basis.

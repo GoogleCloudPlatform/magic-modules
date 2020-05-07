@@ -151,7 +151,10 @@ module Compile
     # Refer to Compile::Core.compile for full details about the compilation
     # process.
     def compile_file(ctx, source)
-      compile_string(ctx, File.read(source))
+      if !$pwd
+        $pwd = Dir.pwd
+      end
+      compile_string(ctx, File.read($pwd+"/"+source))
     rescue StandardError => e
       puts "Error compiling file: #{source}"
       raise e
@@ -260,7 +263,10 @@ module Compile
     end
 
     def get_helper_file(file, remove_copyright_notice = true)
-      content = IO.read(file)
+      if !$pwd
+        $pwd = Dir.pwd
+      end
+      content = IO.read($pwd+"/"+file)
       remove_copyright_notice ? strip_copyright_notice(content) : content
     end
 
