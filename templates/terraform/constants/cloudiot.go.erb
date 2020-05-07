@@ -106,39 +106,49 @@ func expandCloudIotDeviceRegistryPublicKeyCertificateCertificate(v interface{}, 
 }
 
 func flattenCloudIotDeviceRegistryCredentials(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+	log.Printf("[DEBUG] Flattening device resitry credentials: %q", d.Id())
 	if v == nil {
+		log.Printf("[DEBUG] The credentials array is nil: %q", d.Id())
 		return v
 	}
 	l := v.([]interface{})
 	transformed := make([]interface{}, 0, len(l))
 	for _, raw := range l {
-		original := raw.(map[string]interface{})
+        original := raw.(map[string]interface{})
+        log.Printf("[DEBUG] Original credential: %+v", original)
 		if len(original) < 1 {
-			// Do not include empty json objects coming back from the api
+			log.Printf("[DEBUG] Excluding empty credential that the API returned. %q", d.Id())
 			continue
 		}
+		log.Printf("[DEBUG] Credentials array before appending a new credential: %+v", transformed)
 		transformed = append(transformed, map[string]interface{}{
-			"public_key_certificate": flattenCloudIotDeviceRegistryCredentialsPublicKeyCertificate(original["public_key_certificate"], d, config),
+			"public_key_certificate": flattenCloudIotDeviceRegistryCredentialsPublicKeyCertificate(original["publicKeyCertificate"], d, config),
 		})
+		log.Printf("[DEBUG] Credentials array after appending a new credential: %+v", transformed)
 	}
 	return transformed
 }
 
 func flattenCloudIotDeviceRegistryCredentialsPublicKeyCertificate(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-    if v == nil {
-        return v
-    }
+	log.Printf("[DEBUG] Flattening device resitry credentials public key certificate: %q", d.Id())
+	if v == nil {
+		log.Printf("[DEBUG] The public key certificate is nil: %q", d.Id())
+		return v
+	}
 
-    original := v.(map[string]interface{})
-    transformed := make(map[string]interface{})
+	original := v.(map[string]interface{})
+	log.Printf("[DEBUG] Original public key certificate: %+v", original)
+	transformed := make(map[string]interface{})
 
-    transformedPublicKeyCertificateFormat := flattenCloudIotDeviceRegistryPublicKeyCertificateFormat(original["format"], d, config)
-    transformed["format"] = transformedPublicKeyCertificateFormat
+	transformedPublicKeyCertificateFormat := flattenCloudIotDeviceRegistryPublicKeyCertificateFormat(original["format"], d, config)
+	transformed["format"] = transformedPublicKeyCertificateFormat
 
-    transformedPublicKeyCertificateCertificate := flattenCloudIotDeviceRegistryPublicKeyCertificateCertificate(original["certificate"], d, config)
-    transformed["certificate"] = transformedPublicKeyCertificateCertificate
+	transformedPublicKeyCertificateCertificate := flattenCloudIotDeviceRegistryPublicKeyCertificateCertificate(original["certificate"], d, config)
+	transformed["certificate"] = transformedPublicKeyCertificateCertificate
 
-    return transformed
+	log.Printf("[DEBUG] Transformed public key certificate: %+v", transformed)
+
+	return transformed
 }
 
 func flattenCloudIotDeviceRegistryPublicKeyCertificateFormat(v interface{}, d *schema.ResourceData, config *Config) interface{} {
