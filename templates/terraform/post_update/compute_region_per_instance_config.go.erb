@@ -19,7 +19,7 @@ if mostDisruptiveAction != "" {
 }
 obj["mostDisruptiveActionAllowed"] = mostDisruptiveAction
 
-url, err = replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{instance_group_manager}}/applyUpdatesToInstances")
+url, err = replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/applyUpdatesToInstances")
 if err != nil {
 	return err
 }

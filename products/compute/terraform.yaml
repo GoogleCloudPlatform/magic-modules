@@ -1313,8 +1313,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pre_delete: templates/terraform/pre_delete/compute_per_instance_config.go.erb
       post_update: templates/terraform/post_update/compute_per_instance_config.go.erb
   RegionPerInstanceConfig: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{project}}/{{region}}/{{instance_group_manager}}/{{name}}"
-    mutex: instangeGroupManager/{{project}}/{{region}}/{{instance_group_manager}}
+    id_format: "{{project}}/{{region}}/{{region_instance_group_manager}}/{{name}}"
+    mutex: instangeGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}
     # Fine-grained resources don't actually exist as standalone GCP resource
     # in Cloud Asset Inventory
     exclude_validator: true

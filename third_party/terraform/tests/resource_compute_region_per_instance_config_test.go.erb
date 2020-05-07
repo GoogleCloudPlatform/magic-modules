@@ -85,7 +85,7 @@ func testAccComputeRegionPerInstanceConfig_statefulBasic(context map[string]inte
 	return Nprintf(`
 resource "google_compute_region_per_instance_config" "default" {
 	region = google_compute_region_instance_group_manager.rigm.region
-	instance_group_manager = google_compute_region_instance_group_manager.rigm.name
+	region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
 	name = "%{config_name}"
 	preserved_state {
 		metadata = {
@@ -100,7 +100,7 @@ func testAccComputeRegionPerInstanceConfig_statefulModified(context map[string]i
 	return Nprintf(`
 resource "google_compute_region_per_instance_config" "default" {
 	region = google_compute_region_instance_group_manager.rigm.region
-	instance_group_manager = google_compute_region_instance_group_manager.rigm.name
+	region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
 	name = "%{config_name2}"
 	preserved_state {
 		metadata = {
@@ -115,7 +115,7 @@ func testAccComputeRegionPerInstanceConfig_statefulAdditional(context map[string
 	return Nprintf(`
 resource "google_compute_region_per_instance_config" "default" {
 	region = google_compute_region_instance_group_manager.rigm.region
-	instance_group_manager = google_compute_region_instance_group_manager.rigm.name
+	region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
 	name = "%{config_name2}"
 	preserved_state {
 		metadata = {
@@ -126,7 +126,7 @@ resource "google_compute_region_per_instance_config" "default" {
 
 resource "google_compute_region_per_instance_config" "with_disks" {
 	region = google_compute_region_instance_group_manager.rigm.region
-	instance_group_manager = google_compute_region_instance_group_manager.rigm.name
+	region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
 	name = "%{config_name3}"
 	most_disruptive_allowed_action = "REFRESH"
 	minimal_action = "REFRESH"
@@ -154,7 +154,7 @@ resource "google_compute_region_per_instance_config" "with_disks" {
 
 resource "google_compute_region_per_instance_config" "add2" {
 	region = google_compute_region_instance_group_manager.rigm.region
-	instance_group_manager = google_compute_region_instance_group_manager.rigm.name
+	region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
 	name = "%{config_name4}"
 	preserved_state {
 		metadata = {
