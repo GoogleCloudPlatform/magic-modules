@@ -22,6 +22,6 @@ log.Printf("[DEBUG] Decoding credentials: %q", d.Id())
 if err := d.Set("credentials", flattenCloudIotDeviceRegistryCredentials(res["credentials"], d, config)); err != nil {
     return nil, fmt.Errorf("Error reading DeviceRegistry: %s", err)
 }
-log.Printf("[DEBUG] MQTT config after decoding: %v", d.Get("credentials"))
+log.Printf("[DEBUG] credentials after decoding: %v", d.Get("credentials"))
 
 return res, nil
