@@ -186,6 +186,7 @@ func flattenCloudIotDeviceRegistryMqttConfigMqttEnabledState(v interface{}, d *s
 }
 
 func flattenCloudIotDeviceRegistryStateNotificationConfig(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+    log.Printf("[DEBUG] Flattening state notification config: %+v", v)
     if v == nil {
         return v
     }
@@ -195,7 +196,7 @@ func flattenCloudIotDeviceRegistryStateNotificationConfig(v interface{}, d *sche
 
     transformedPubsubTopicName := flattenCloudIotDeviceRegistryStateNotificationConfigPubsubTopicName(original["pubsubTopicName"], d, config)
     if val := reflect.ValueOf(transformedPubsubTopicName); val.IsValid() && !isEmptyValue(val) {
-        log.Printf("[DEBUG] pubsub topic name is not null: %v", d.Get("mqtt_config"))
+        log.Printf("[DEBUG] pubsub topic name is not null: %v", d.Get("pubsub_topic_name"))
         transformed["pubsub_topic_name"] = transformedPubsubTopicName
     }
 

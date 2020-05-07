@@ -14,6 +14,7 @@ resource "google_cloudiot_registry" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['cloudiot_registry_name'] %>"
 
   depends_on = [
+    google_pubsub_topic.default-devicestatus,
     google_pubsub_topic.default-telemetry,
     google_pubsub_topic.additional-telemetry
   ]
