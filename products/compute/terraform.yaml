@@ -278,6 +278,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/region_backend_service.go.erb
       encoder: templates/terraform/encoders/region_backend_service.go.erb
+      decoder: templates/terraform/decoders/region_backend_service.go.erb
       resource_definition: 'templates/terraform/resource_definition/region_backend_service.go.erb'
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
