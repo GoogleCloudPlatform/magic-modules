@@ -11,6 +11,7 @@ func TestAccCloudIoTRegistry_update(t *testing.T) {
 	t.Parallel()
 
 	registryName := fmt.Sprintf("psregistry-test-%s", randString(t, 10))
+	resourceName := fmt.Sprintf("google_cloudiot_registry.%s", registryName)
 	deviceStatus := fmt.Sprintf("psregistry-test-devicestatus-%s", randString(t, 10))
 	defaultTelemetry := fmt.Sprintf("psregistry-test-telemetry-%s", randString(t, 10))
 	additionalTelemetry := fmt.Sprintf("psregistry-additional-test-telemetry-%s", randString(t, 10))
@@ -24,7 +25,7 @@ func TestAccCloudIoTRegistry_update(t *testing.T) {
 				Config: testAccCloudIoTRegistryBasic(registryName),
 			},
 			{
-				ResourceName:      "google_cloudiot_registry.device_registry",
+				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -32,7 +33,7 @@ func TestAccCloudIoTRegistry_update(t *testing.T) {
 				Config: testAccCloudIoTRegistryExtended(registryName, deviceStatus, defaultTelemetry, additionalTelemetry),
 			},
 			{
-				ResourceName:      "google_cloudiot_registry.device_registry",
+				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -40,7 +41,7 @@ func TestAccCloudIoTRegistry_update(t *testing.T) {
 				Config: testAccCloudIoTRegistryBasic(registryName),
 			},
 			{
-				ResourceName:      "google_cloudiot_registry.device_registry",
+				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
