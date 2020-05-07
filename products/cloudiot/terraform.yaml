@@ -74,17 +74,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           The region in which the created registry should reside.
           If it is not provided, the provider region is used.
       logLevel: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: 'log_level'
         diff_suppress_func: 'emptyOrDefaultStringSuppress("")'
       eventNotificationConfigs: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: 'event_notification_configs'
         default_from_api: true
       eventNotificationConfigs.subfolderMatches: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: 'subfolder_matches'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateCloudIotDeviceRegistrySubfolderMatch'
       eventNotificationConfigs.pubsubTopicName: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: 'pubsub_topic_name'
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       stateNotificationConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         # Excluding this because the original (manually-generated) implementation
@@ -97,18 +93,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       stateNotificationConfig.pubsubTopicName: !ruby/object:Overrides::Terraform::PropertyOverride
         # See the comment on stateNotificationConfig.exclude
         exclude: true
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
       mqttConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         # See the comment on stateNotificationConfig.exclude
         exclude: true
-        default_from_api: true
       mqttConfig.mqttEnabledState: !ruby/object:Overrides::Terraform::PropertyOverride
         # See the comment on stateNotificationConfig.exclude
         exclude: true
       httpConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         # See the comment on stateNotificationConfig.exclude
         exclude: true
-        default_from_api: true
       httpConfig.httpEnabledState: !ruby/object:Overrides::Terraform::PropertyOverride
         # See the comment on stateNotificationConfig.exclude
         exclude: true
