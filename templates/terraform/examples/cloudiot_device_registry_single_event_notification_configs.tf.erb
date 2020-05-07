@@ -1,21 +1,5 @@
-resource "google_project_service" "cloud-iot-apis" {
-  service = "cloudiot.googleapis.com"
-
-  disable_dependent_services = true
-}
-
-resource "google_project_service" "pubsub-apis" {
-  service = "pubsub.googleapis.com"
-
-  disable_dependent_services = true
-}
-
 resource "google_pubsub_topic" "default-telemetry" {
   name = "<%= ctx[:vars]['cloudiot_device_telemetry_topic_name'] %>"
-
-  depends_on = [
-    google_project_service.pubsub-apis
-  ]
 }
 
 resource "google_cloudiot_registry" "<%= ctx[:primary_resource_id] %>" {

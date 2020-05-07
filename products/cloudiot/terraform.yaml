@@ -24,7 +24,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: templates/terraform/decoders/cloudiot_device_registry.go.erb
       encoder: templates/terraform/encoders/cloudiot_device_registry.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/cloudiot_device_registry.go.erb
-      update_encoder: templates/terraform/update_encoder/cloudiot_device_registry.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudiot_device_registry_basic"
@@ -94,47 +93,30 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # ready to introduce this breaking change, remove this "exclude" directive
         # along with the corresponding custom schema element.
         exclude: true
-        name: 'state_notification_config'
       stateNotificationConfig.pubsubTopicName: !ruby/object:Overrides::Terraform::PropertyOverride
         # See the comment on stateNotificationConfig.exclude
         exclude: true
-        name: 'pubsub_topic_name'
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       mqttConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         # See the comment on stateNotificationConfig.exclude
         exclude: true
-        name: 'mqtt_config'
         default_from_api: true
       mqttConfig.mqttEnabledState: !ruby/object:Overrides::Terraform::PropertyOverride
         # See the comment on stateNotificationConfig.exclude
         exclude: true
-        name: 'mqtt_enabled_state'
       httpConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         # See the comment on stateNotificationConfig.exclude
         exclude: true
-        name: 'http_config'
         default_from_api: true
       httpConfig.httpEnabledState: !ruby/object:Overrides::Terraform::PropertyOverride
         # See the comment on stateNotificationConfig.exclude
         exclude: true
-        name: 'http_enabled_state'
       credentials: !ruby/object:Overrides::Terraform::PropertyOverride
         # See the comment on stateNotificationConfig.exclude
         exclude: true
       credentials.publicKeyCertificate: !ruby/object:Overrides::Terraform::PropertyOverride
         # See the comment on stateNotificationConfig.exclude
         exclude: true
-        name: 'public_key_certificate'
-      credentials.publicKeyCertificate.x509Details: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: 'x509_details'
-      credentials.publicKeyCertificate.x509Details.startTime: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: 'start_time'
-      credentials.publicKeyCertificate.x509Details.expiryTime: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: 'expiry_time'
-      credentials.publicKeyCertificate.x509Details.signatureAlgorithm: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: 'signature_algorithm'
-      credentials.publicKeyCertificate.x509Details.publicKeyType: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: 'public_key_type'
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

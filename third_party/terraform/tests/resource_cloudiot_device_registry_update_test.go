@@ -4,34 +4,35 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccCloudIoTRegistry_update(t *testing.T) {
 	t.Parallel()
 
-	registryName := fmt.Sprintf("psregistry-test-%s", acctest.RandString(10))
+	registryName := fmt.Sprintf("psregistry-test-%s", randString(t, 10))
+	deviceStatus := fmt.Sprintf("psregistry-test-devicestatus-%s", randString(t, 10))
+	defaultTelemetry := fmt.Sprintf("psregistry-test-telemetry-%s", randString(t, 10))
+	additionalTelemetry := fmt.Sprintf("psregistry-additional-test-telemetry-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCloudIoTRegistryDestroy,
+		CheckDestroy: testAccCheckCloudIotDeviceRegistryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudIoTRegistryBasic(registryName),
 			},
 			{
-				ResourceName:      "google_cloudiot_registry.foobar",
+				ResourceName:      "google_cloudiot_registry.device_registry",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccCloudIoTRegistryExtended(registryName),
+				Config: testAccCloudIoTRegistryExtended(registryName, deviceStatus, defaultTelemetry, additionalTelemetry),
 			},
 			{
-				ResourceName:      "google_cloudiot_registry.foobar",
+				ResourceName:      "google_cloudiot_registry.device_registry",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -39,26 +40,12 @@ func TestAccCloudIoTRegistry_update(t *testing.T) {
 				Config: testAccCloudIoTRegistryBasic(registryName),
 			},
 			{
-				ResourceName:      "google_cloudiot_registry.foobar",
+				ResourceName:      "google_cloudiot_registry.device_registry",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 		},
 	})
-}
-
-func testAccCheckCloudIoTRegistryDestroy(s *terraform.State) error {
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_cloudiot_registry" {
-			continue
-		}
-		config := testAccProvider.Meta().(*Config)
-		registry, _ := config.clientCloudIoT.Projects.Locations.Registries.Get(rs.Primary.ID).Do()
-		if registry != nil {
-			return fmt.Errorf("Registry still present")
-		}
-	}
-	return nil
 }
 
 func testAccCloudIoTRegistryBasic(registryName string) string {
@@ -80,43 +67,19 @@ resource "google_cloudiot_registry" "%s" {
 `, registryName, registryName)
 }
 
-func testAccCloudIoTRegistryExtended(registryName string) string {
+func testAccCloudIoTRegistryExtended(registryName string, deviceStatus string, defaultTelemetry string, additionalTelemetry string) string {
 	return fmt.Sprintf(`
-
-resource "google_project_service" "cloud-iot-apis" {
-  service = "cloudiot.googleapis.com"
-
-  disable_dependent_services = true
-}
-
-resource "google_project_service" "pubsub-apis" {
-  service = "pubsub.googleapis.com"
-
-  disable_dependent_services = true
-}
 
 resource "google_pubsub_topic" "default-devicestatus" {
   name = "psregistry-test-devicestatus-%s"
-
-  depends_on = [
-    google_project_service.pubsub-apis
-  ]
 }
 
 resource "google_pubsub_topic" "default-telemetry" {
   name = "psregistry-test-telemetry-%s"
-
-  depends_on = [
-    google_project_service.pubsub-apis
-  ]
 }
 
 resource "google_pubsub_topic" "additional-telemetry" {
   name = "psregistry-additional-test-telemetry-%s"
-
-  depends_on = [
-    google_project_service.pubsub-apis
-  ]
 }
 
 resource "google_cloudiot_registry" "%s" {
@@ -158,5 +121,5 @@ resource "google_cloudiot_registry" "%s" {
     }
   }
 }
-`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10), registryName, registryName)
+`, deviceStatus, defaultTelemetry, additionalTelemetry, registryName, registryName)
 }

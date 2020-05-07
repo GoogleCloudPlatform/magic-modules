@@ -38,7 +38,7 @@ func expandCloudIotDeviceRegistryStateNotificationConfig(v interface{}, d Terraf
     original := v.(map[string]interface{})
     transformed := make(map[string]interface{})
 
-    transformedPubsubTopicName, err := expandCloudIotDeviceRegistryEventNotificationConfigsPubsubTopicName(original["pubsub_topic_name"], d, config)
+    transformedPubsubTopicName, err := expandCloudIotDeviceRegistryStateNotificationConfigPubsubTopicName(original["pubsub_topic_name"], d, config)
     if err != nil {
         return nil, err
     } else if val := reflect.ValueOf(transformedPubsubTopicName); val.IsValid() && !isEmptyValue(val) {
