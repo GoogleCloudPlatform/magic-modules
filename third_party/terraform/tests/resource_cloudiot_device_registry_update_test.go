@@ -51,18 +51,8 @@ func TestAccCloudIoTRegistry_update(t *testing.T) {
 func testAccCloudIoTRegistryBasic(registryName string) string {
 	return fmt.Sprintf(`
 
-resource "google_project_service" "cloud-iot-apis" {
-  service = "cloudiot.googleapis.com"
-
-  disable_dependent_services = true
-}
-
 resource "google_cloudiot_registry" "%s" {
   name = "%s"
-
-  depends_on = [
-    google_project_service.cloud-iot-apis
-  ]
 }
 `, registryName, registryName)
 }
