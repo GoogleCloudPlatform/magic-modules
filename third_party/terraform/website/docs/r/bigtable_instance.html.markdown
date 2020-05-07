@@ -99,7 +99,7 @@ for a `DEVELOPMENT` instance.
 
 ## Attributes Reference
 
-Only the arguments listed above are exposed as attributes.
+* id - an identifier for the resource with format projects/{{project}}/instances/{{name}}
 
 ## Import
 

@@ -39,7 +39,7 @@ resource "google_bigtable_instance" "instance" {
 
 resource "google_bigtable_table" "table" {
   name          = "tf-table"
-  instance_name = google_bigtable_instance.instance.name
+  instance_name = google_bigtable_instance.instance.id
   split_keys    = ["a", "b", "c"]
 
   lifecycle {
@@ -72,6 +72,8 @@ to delete/recreate the entire `google_bigtable_table` resource.
 * `family` - (Optional) The name of the column family.
 
 ## Attributes Reference
+
+* id - an identifier for the resource with format projects/{{project}}/instances/{{instance}}/tables/{{name}}
 
 Only the arguments listed above are exposed as attributes.
 
