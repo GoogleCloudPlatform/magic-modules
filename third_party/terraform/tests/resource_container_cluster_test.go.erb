@@ -807,7 +807,7 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 				Config: testAccContainerCluster_updateWorkloadMetadataConfig(pid, clusterName, "SECURE"),
 			},
 			{
-				ResourceName:        "google_container_cluster.with_workload_identity_config",
+				ResourceName:        "google_container_cluster.with_workload_metadata_config",
 				ImportState:         true,
 				ImportStateVerify:   true,
 			},
@@ -2642,7 +2642,7 @@ data "google_project" "project" {
   project_id = "%s"
 }
 
-resource "google_container_cluster" "with_workload_identity_config" {
+resource "google_container_cluster" "with_workload_metadata_config" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
