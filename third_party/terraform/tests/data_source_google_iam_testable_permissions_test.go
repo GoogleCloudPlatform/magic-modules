@@ -49,6 +49,23 @@ func TestAccDataSourceGoogleIamTestablePermissions_basic(t *testing.T) {
 					),
 				),
 			},
+			{
+				Config: fmt.Sprintf(`
+			 data "google_iam_testable_permissions" "perms" {
+				full_resource_name   = "//cloudresourcemanager.googleapis.com/projects/%s"
+				custom_support_level = "not_supported"
+				stage                = "beta"
+			}
+		`, project),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleIamTestablePermissionsMeta(
+						project,
+						"data.google_iam_testable_permissions.perms",
+						"BETA",
+						"NOT_SUPPORTED",
+					),
+				),
+			},
 		},
 	})
 }

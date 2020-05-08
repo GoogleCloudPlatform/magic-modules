@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func dataSourceGoogleIamTestablePermissions() *schema.Resource {
@@ -16,14 +17,16 @@ func dataSourceGoogleIamTestablePermissions() *schema.Resource {
 				Required: true,
 			},
 			"custom_support_level": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "SUPPORTED",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "SUPPORTED",
+				ValidateFunc: validation.StringInSlice([]string{"NOT_SUPPORTED", "SUPPORTED", "TESTING"}, true),
 			},
 			"stage": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "GA",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "GA",
+				ValidateFunc: validation.StringInSlice([]string{"ALPHA", "BETA", "GA", "DEPRECATED"}, true),
 			},
 			"permissions": {
 				Type:     schema.TypeList,
@@ -62,15 +65,9 @@ func dataSourceGoogleIamTestablePermissionsRead(d *schema.ResourceData, meta int
 	body := make(map[string]interface{})
 	body["pageSize"] = 500
 	permissions := make([]map[string]interface{}, 0)
-	custom_support_level := d.Get("custom_support_level").(string)
-	if err = validatePermissionCustomSupport(custom_support_level); err != nil {
-		return err
-	}
 
-	stage := d.Get("stage").(string)
-	if err = validatePermissionStage(stage); err != nil {
-		return err
-	}
+	custom_support_level := strings.ToUpper(d.Get("custom_support_level").(string))
+	stage := strings.ToUpper(d.Get("stage").(string))
 
 	for {
 		url := "https://iam.googleapis.com/v1/permissions:queryTestablePermissions"
@@ -129,29 +126,4 @@ func flattenTestablePermissionsList(v interface{}, custom_support_level string, 
 	}
 
 	return permissions
-}
-
-func validatePermissionCustomSupport(val string) error {
-	allowed := []string{"NOT_SUPPORTED", "SUPPORTED", "TESTING"}
-	if !sliceContainsString(allowed, val) {
-		return fmt.Errorf("custom_support_level must be one of %s", strings.Join(allowed, ", "))
-	}
-	return nil
-}
-
-func validatePermissionStage(val string) error {
-	allowed := []string{"ALPHA", "BETA", "GA", "DEPRECATED"}
-	if !sliceContainsString(allowed, val) {
-		return fmt.Errorf("stage must be one of %s", strings.Join(allowed, ", "))
-	}
-	return nil
-}
-
-func sliceContainsString(slice []string, str string) bool {
-	for _, s := range slice {
-		if s == str {
-			return true
-		}
-	}
-	return false
 }
