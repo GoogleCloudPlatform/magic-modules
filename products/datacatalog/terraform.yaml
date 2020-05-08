@@ -37,6 +37,30 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
+  Entry: !ruby/object:Overrides::Terraform::ResourceOverride
+    supports_indirect_user_project_override: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_catalog_entry_basic"
+        primary_resource_id: "basic_entry"
+        vars:
+          entry_id: "my_group"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_catalog_entry_fileset"
+        primary_resource_id: "basic_entry"
+        vars:
+          entry_id: "my_entry"
+    properties:
+      linkedResource: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      userSpecifiedSystem: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[A-z_][A-z0-9_]{0,63}$'
+      userSpecifiedType: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[A-z_][A-z0-9_]{0,63}$'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
   # TagTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
   #   examples:
   #     - !ruby/object:Provider::Terraform::Examples
