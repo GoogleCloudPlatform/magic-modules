@@ -258,6 +258,7 @@ func vcrTest(t *testing.T, c resource.TestCase) {
 
 // Retrieves a unique test name used for writing files
 // replaces all `/` characters that would cause filepath issues
+// This matters during tests that dispatch multiple tests, for example TestAccLoggingFolderExclusion
 func vcrFileName(name string) string {
 	return strings.ReplaceAll(name, "/", "_")
 }
