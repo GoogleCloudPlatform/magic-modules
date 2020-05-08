@@ -37,6 +37,12 @@ objects:
       guides:
         'Official Documentation': https://cloud.google.com/data-catalog/docs
       api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_attribute: 'entry_group'
+      import_format: ["projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}", "{{entry_group}}"]
+      base_url: projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}
     parameters:
       - !ruby/object:Api::Type::String
         name: region
