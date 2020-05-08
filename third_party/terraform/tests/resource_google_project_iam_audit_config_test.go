@@ -80,6 +80,7 @@ func TestAccProjectIamAuditConfig_multiple(t *testing.T) {
 
 // Test that multiple IAM audit configs can be applied to a project all at once
 func TestAccProjectIamAuditConfig_multipleAtOnce(t *testing.T) {
+	skipIfVcr(t)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
@@ -150,6 +151,7 @@ func TestAccProjectIamAuditConfig_update(t *testing.T) {
 
 // Test that an IAM audit config can be removed from a project
 func TestAccProjectIamAuditConfig_remove(t *testing.T) {
+	skipIfVcr()
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
