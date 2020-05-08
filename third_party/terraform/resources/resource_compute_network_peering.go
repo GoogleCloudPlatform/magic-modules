@@ -1,10 +1,11 @@
-<% autogen_exception -%>
 package google
 
 import (
 	"fmt"
 	"log"
 	"sort"
+	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"google.golang.org/api/compute/v1"
@@ -65,20 +66,33 @@ func resourceComputeNetworkPeering() *schema.Resource {
 				Default:  false,
 			},
 
+			"export_subnet_routes_with_public_ip": {
+				Type:     schema.TypeBool,
+				ForceNew: true,
+				Optional: true,
+				Default:  true,
+			},
+
+			"import_subnet_routes_with_public_ip": {
+				Type:     schema.TypeBool,
+				ForceNew: true,
+				Optional: true,
+			},
+
 			"state": {
-				Type:             schema.TypeString,
-				Computed:         true,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 
 			"state_details": {
-				Type:             schema.TypeString,
-				Computed:         true,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 
 			"auto_create_routes": {
-				Type:      schema.TypeBool,
-				Optional:  true,
-				Removed:   "auto_create_routes has been removed because it's redundant and not user-configurable. It can safely be removed from your config",
+				Type:     schema.TypeBool,
+				Optional: true,
+				Removed:  "auto_create_routes has been removed because it's redundant and not user-configurable. It can safely be removed from your config",
 				Computed: true,
 			},
 		},
@@ -147,6 +161,8 @@ func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{})
 	d.Set("name", peering.Name)
 	d.Set("import_custom_routes", peering.ImportCustomRoutes)
 	d.Set("export_custom_routes", peering.ExportCustomRoutes)
+	d.Set("import_subnet_routes_with_public_ip", peering.ImportSubnetRoutesWithPublicIp)
+	d.Set("export_subnet_routes_with_public_ip", peering.ExportSubnetRoutesWithPublicIp)
 	d.Set("state", peering.State)
 	d.Set("state_details", peering.StateDetails)
 
@@ -206,11 +222,14 @@ func findPeeringFromNetwork(network *compute.Network, peeringName string) *compu
 }
 func expandNetworkPeering(d *schema.ResourceData) *compute.NetworkPeering {
 	return &compute.NetworkPeering{
-		ExchangeSubnetRoutes: true,
-		Name:	                d.Get("name").(string),
-		Network:              d.Get("peer_network").(string),
-		ExportCustomRoutes:   d.Get("export_custom_routes").(bool),
-		ImportCustomRoutes:   d.Get("import_custom_routes").(bool),
+		ExchangeSubnetRoutes:           true,
+		Name:                           d.Get("name").(string),
+		Network:                        d.Get("peer_network").(string),
+		ExportCustomRoutes:             d.Get("export_custom_routes").(bool),
+		ImportCustomRoutes:             d.Get("import_custom_routes").(bool),
+		ExportSubnetRoutesWithPublicIp: d.Get("export_subnet_routes_with_public_ip").(bool),
+		ImportSubnetRoutesWithPublicIp: d.Get("import_subnet_routes_with_public_ip").(bool),
+		ForceSendFields:                []string{"ExportSubnetRoutesWithPublicIp"},
 	}
 }
 
