@@ -204,3 +204,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         override_name: "zone_id"
   PerInstanceConfig: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  RegionPerInstanceConfig: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
