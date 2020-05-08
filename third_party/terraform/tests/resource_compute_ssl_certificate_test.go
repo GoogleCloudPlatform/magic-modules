@@ -9,6 +9,7 @@ import (
 )
 
 func TestAccComputeSslCertificate_no_name(t *testing.T) {
+	skipIfVcr(t)
 	t.Parallel()
 
 	vcrTest(t, resource.TestCase{

@@ -151,7 +151,7 @@ func TestAccProjectIamAuditConfig_update(t *testing.T) {
 
 // Test that an IAM audit config can be removed from a project
 func TestAccProjectIamAuditConfig_remove(t *testing.T) {
-	skipIfVcr()
+	skipIfVcr(t)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)

@@ -65,6 +65,7 @@ func TestAccProjectService_basic(t *testing.T) {
 }
 
 func TestAccProjectService_disableDependentServices(t *testing.T) {
+	skipIfVcr(t)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
