@@ -55,7 +55,8 @@ module Provider
       end
 
       # This variable is used in ansible/resource.erb
-      ctx.local_variable_set('file_relative', relative_path(@output_folder+"/"+path, @output_folder).to_s)
+      ctx.local_variable_set('file_relative',
+        relative_path(@output_folder + '/' + path, @output_folder).to_s)
 
       Google::LOGGER.debug "Generating #{path}"
       File.open(path, 'w') { |f| f.puts compile_file(ctx, template) }
@@ -65,7 +66,7 @@ module Provider
       # stays specific to the file each thred represents.
       raise "#{path} missing autogen" unless Thread.current[:autogen]
 
-      old_file_chmod_mode = File.stat($pwd+"/"+template).mode
+      old_file_chmod_mode = File.stat($pwd + '/' + template).mode
       FileUtils.chmod(old_file_chmod_mode, path)
 
       format_output_file(path)
