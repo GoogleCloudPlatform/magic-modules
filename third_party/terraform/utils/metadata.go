@@ -104,7 +104,7 @@ func expandComputeMetadata(m map[string]interface{}) []*compute.MetadataItems {
 	metadata := make([]*compute.MetadataItems, len(m))
 	var keys []string
 	for key := range m {
-		keys = append(keys, k)
+		keys = append(keys, key)
 	}
 	sort.Strings(keys)
 	// Append new metadata to existing metadata
