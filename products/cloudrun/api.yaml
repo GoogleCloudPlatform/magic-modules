@@ -18,6 +18,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://{{location}}-run.googleapis.com/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://{{location}}-run.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
@@ -260,6 +263,11 @@ objects:
       Is required when creating resources. Name is primarily intended
       for creation idempotence and configuration definition. Cannot be updated.
       More info: http://kubernetes.io/docs/user-guide/identifiers#names
+  - !ruby/object:Api::Type::String
+    name: vpc_connector
+    description: The VPC connector the cloud run instance will use
+    required: false
+    min_version: beta
   - !ruby/object:Api::Type::String
     name: apiVersion
     description: The API version for this call such as "serving.knative.dev/v1alpha1".
