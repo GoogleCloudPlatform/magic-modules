@@ -16,7 +16,7 @@ display_name: Cloud (Stackdriver) Monitoring
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://monitoring.googleapis.com/v3/
+    base_url: https://monitoring.googleapis.com/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -26,8 +26,8 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'AlertPolicy'
-    base_url: projects/{{project}}/alertPolicies
-    self_link: "{{name}}"
+    base_url: v3/projects/{{project}}/alertPolicies
+    self_link: "v3/{{name}}"
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -741,8 +741,8 @@ objects:
 
   - !ruby/object:Api::Resource
     name: 'Group'
-    base_url: projects/{{project}}/groups
-    self_link: "{{name}}"
+    base_url: v3/projects/{{project}}/groups
+    self_link: "v3/{{name}}"
     update_verb: :PUT
     description: |
       The description of a dynamic collection of monitored resources. Each group
@@ -789,8 +789,8 @@ objects:
 
   - !ruby/object:Api::Resource
     name: NotificationChannel
-    base_url: projects/{{project}}/notificationChannels
-    self_link: "{{name}}"
+    base_url: v3/projects/{{project}}/notificationChannels
+    self_link: "v3/{{name}}"
     update_verb: :PATCH
     description: |
       A NotificationChannel is a medium through which an alert is delivered
@@ -916,9 +916,9 @@ objects:
 
   - !ruby/object:Api::Resource
     name: Service
-    base_url: projects/{{project}}/services
-    create_url: projects/{{project}}/services?serviceId={{service_id}}
-    self_link: "{{name}}"
+    base_url: v3/projects/{{project}}/services
+    create_url: v3/projects/{{project}}/services?serviceId={{service_id}}
+    self_link: "v3/{{name}}"
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -963,10 +963,10 @@ objects:
 
   - !ruby/object:Api::Resource
     name: Slo
-    base_url: projects/{{project}}/services/{{service}}/serviceLevelObjectives
+    base_url: v3/projects/{{project}}/services/{{service}}/serviceLevelObjectives
     # name = projects/{{project}}/services/{{service}}/serviceLevelObjectives/{{slo_id}}
-    self_link: "{{name}}"
-    create_url: projects/{{project}}/services/{{service}}/serviceLevelObjectives?serviceLevelObjectiveId={{slo_id}}
+    self_link: "v3/{{name}}"
+    create_url: v3/projects/{{project}}/services/{{service}}/serviceLevelObjectives?serviceLevelObjectiveId={{slo_id}}
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -1104,8 +1104,8 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/monitoring/uptime-checks/'
       api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.uptimeCheckConfigs'
-    base_url: projects/{{project}}/uptimeCheckConfigs
-    self_link: "{{name}}"
+    base_url: v3/projects/{{project}}/uptimeCheckConfigs
+    self_link: "v3/{{name}}"
     description: This message configures which resources and services to monitor for
       availability.
     properties:
