@@ -903,6 +903,7 @@ func TestAccComputeInstance_subnet_custom(t *testing.T) {
 }
 
 func TestAccComputeInstance_subnet_xpn(t *testing.T) {
+	skipIfVcr(t)
 	t.Parallel()
 
 	var instance compute.Instance
