@@ -107,13 +107,14 @@ module Provider
       mask_groups = []
       properties.each do |prop|
         if prop.flatten_object
-          mask_groups += get_property_update_masks_groups(prop.properties,
-                                          mask_prefix: "#{prop.api_name}.")
+          mask_groups += get_property_update_masks_groups(
+            prop.properties, mask_prefix: "#{prop.api_name}."
+          )
         elsif prop.update_mask_fields
-         mask_groups << [prop.name.underscore, prop.update_mask_fields]
+          mask_groups << [prop.name.underscore, prop.update_mask_fields]
         else
-         mask_groups << [prop.name.underscore, [mask_prefix + prop.api_name]]
-       end
+          mask_groups << [prop.name.underscore, [mask_prefix + prop.api_name]]
+        end
       end
       mask_groups
     end
