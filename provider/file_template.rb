@@ -56,7 +56,7 @@ module Provider
 
       # This variable is used in ansible/resource.erb
       ctx.local_variable_set('file_relative',
-        relative_path(@output_folder + '/' + path, @output_folder).to_s)
+                             relative_path(@output_folder + '/' + path, @output_folder).to_s)
 
       Google::LOGGER.debug "Generating #{path}"
       File.open(path, 'w') { |f| f.puts compile_file(ctx, template) }

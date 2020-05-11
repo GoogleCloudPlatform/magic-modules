@@ -183,7 +183,9 @@ module Provider
       product_name = data.product.name.underscore
 
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
-      data.generate('/templates/terraform/resource.erb', "#{folder_name(data.version)}/resource_#{product_name}_#{name}.go", self)
+      data.generate('/templates/terraform/resource.erb',
+                    "#{folder_name(data.version)}/resource_#{product_name}_#{name}.go",
+                    self)
       generate_documentation(data)
     end
 
