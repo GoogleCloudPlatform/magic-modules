@@ -217,7 +217,8 @@ module Provider
       data.resource_name = data.object.name.camelize(:upper)
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
       data.generate('templates/terraform/examples/base_configs/test_file.go.erb',
-                    "#{folder_name(data.version)}/resource_#{product_name}_#{name}_generated_test.go", self)
+                    "#{folder_name(data.version)}/resource_#{product_name}_#{name}_generated_test.go",
+                    self)
     end
 
     def generate_resource_sweepers(data)
@@ -233,7 +234,8 @@ module Provider
       data.resource_name = data.object.name.camelize(:upper)
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
       data.generate('templates/terraform/sweeper_file.go.erb',
-                    "#{folder_name(data.version)}/resource_#{product_name}_#{name}_sweeper_test.go", self)
+                    "#{folder_name(data.version)}/resource_#{product_name}_#{name}_sweeper_test.go",
+                    self)
     end
 
     def generate_operation(output_folder, _types)
@@ -257,7 +259,9 @@ module Provider
       product_name = data.product.name.underscore
 
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
-      data.generate('templates/terraform/iam_policy.go.erb', "#{folder_name(data.version)}/iam_#{product_name}_#{name}.go", self)
+      data.generate('templates/terraform/iam_policy.go.erb',
+                    "#{folder_name(data.version)}/iam_#{product_name}_#{name}.go",
+                    self)
 
       # Only generate test if testable examples exist.
       unless data.object.examples.reject(&:skip_test).empty?
