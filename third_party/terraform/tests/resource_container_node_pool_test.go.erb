@@ -568,11 +568,13 @@ func TestAccContainerNodePool_resize(t *testing.T) {
 	})
 }
 
-<%#  Re-enable this test when there is more than one acceptable node pool version
-     for the current master version.
 
 func TestAccContainerNodePool_version(t *testing.T) {
 	t.Parallel()
+
+	// Re-enable this test when there is more than one acceptable node pool version
+	// for the current master version
+	t.Skip()
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
@@ -609,7 +611,6 @@ func TestAccContainerNodePool_version(t *testing.T) {
 		},
 	})
 }
-%>
 
 func TestAccContainerNodePool_regionalClusters(t *testing.T) {
 	t.Parallel()
@@ -1425,9 +1426,6 @@ resource "google_container_node_pool" "np_with_node_config_scope_alias" {
 `, cluster, np)
 }
 
-<%#  Re-enable this test when there is more than one acceptable node pool version
-     for the current master version.
-
 func testAccContainerNodePool_version(cluster, np string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -1475,7 +1473,6 @@ resource "google_container_node_pool" "np" {
 }
 `, cluster, np)
 }
-%>
 
 func testAccContainerNodePool_012_ConfigModeAttr1(cluster, np string) string {
 	return fmt.Sprintf(`
