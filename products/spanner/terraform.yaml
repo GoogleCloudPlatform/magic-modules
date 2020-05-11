@@ -26,6 +26,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "spanner_database_basic"
         primary_resource_id: "database"
+        skip_vcr: true
         vars:
           database_name: "my-database"
     properties:
@@ -55,6 +56,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "spanner_instance_basic"
         primary_resource_id: "example"
+        skip_vcr: true
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |

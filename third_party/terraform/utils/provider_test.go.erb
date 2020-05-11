@@ -80,11 +80,18 @@ var billingAccountEnvVars = []string{
 }
 
 var configs map[string]*Config
-var sources map[string]rand.Source
+
+// A source for a given VCR test with the value that seeded it
+type VcrSource struct {
+	seed int64
+	source rand.Source
+}
+
+var sources map[string]VcrSource
 
 func init() {
 	configs = make(map[string]*Config)
-	sources = make(map[string]rand.Source)
+	sources = make(map[string]VcrSource)
 	testAccProvider = Provider().(*schema.Provider)
 	testAccRandomProvider = random.Provider().(*schema.Provider)
 	<% if version == 'ga' -%>
@@ -203,9 +210,19 @@ func getCachedConfig(d *schema.ResourceData, configureFunc func(d *schema.Resour
 func closeRecorder(t *testing.T) {
 	if config, ok := configs[t.Name()]; ok {
 		// We did not cache the config if it does not use VCR
-		err := config.client.Transport.(*recorder.Recorder).Stop()
-		if err != nil {
-			t.Error(err)
+		if !t.Failed() && isVcrEnabled() {
+			// If a test succeeds, write new seed/yaml to files
+			err := config.client.Transport.(*recorder.Recorder).Stop()
+			if err != nil {
+				t.Error(err)
+			}
+			envPath := os.Getenv("VCR_PATH")
+			if vcrSource, ok := sources[t.Name()]; ok {
+				err = writeSeedToFile(vcrSource.seed, vcrSeedFile(envPath, t.Name()))
+				if err != nil {
+					t.Error(err)
+				}
+			}
 		}
 		// Clean up test config
 		delete(configs, t.Name())
@@ -259,6 +276,10 @@ func vcrTest(t *testing.T, c resource.TestCase) {
 // Retrieves a unique test name used for writing files
 // replaces all `/` characters that would cause filepath issues
 // This matters during tests that dispatch multiple tests, for example TestAccLoggingFolderExclusion
+func vcrSeedFile(path, name string) string {
+	return filepath.Join(path, fmt.Sprintf("%s.seed", vcrFileName(name)))
+}
+
 func vcrFileName(name string) string {
 	return strings.ReplaceAll(name, "/", "_")
 }
@@ -266,29 +287,26 @@ func vcrFileName(name string) string {
 // Produces a rand.Source for VCR testing based on the given mode.
 // In RECORDING mode, generates a new seed and saves it to a file, using the seed for the source
 // In REPLAYING mode, reads a seed from a file and creates a source from it
-func vcrSource(t *testing.T, path, mode string) (rand.Source, error) {
+func vcrSource(t *testing.T, path, mode string) (*VcrSource, error) {
 	if s, ok := sources[t.Name()]; ok {
-		return s, nil
+		return &s, nil
 	}
-	fileName := filepath.Join(path, fmt.Sprintf("%s.seed", vcrFileName(t.Name())))
 	switch mode {
 	case "RECORDING":
 		seed := rand.Int63()
 		s := rand.NewSource(seed)
-		err := writeSeedToFile(seed, fileName)
-		if err != nil {
-			return nil, err
-		}
-		sources[t.Name()] = s
-		return s, nil
+		vcrSource := VcrSource{seed: seed, source: s}
+		sources[t.Name()] = vcrSource
+		return &vcrSource, nil
 	case "REPLAYING":
-		seed, err := readSeedFromFile(fileName)
+		seed, err := readSeedFromFile(vcrSeedFile(path, t.Name()))
 		if err != nil {
 			return nil, err
 		}
 		s := rand.NewSource(seed)
-		sources[t.Name()] = s
-		return s, nil
+		vcrSource := VcrSource{seed: seed, source: s}
+		sources[t.Name()] = vcrSource
+		return &vcrSource, nil
 	default:
 		log.Printf("[DEBUG] No valid environment var set for VCR_MODE, expected RECORDING or REPLAYING, skipping VCR. VCR_MODE: %s", mode)
 		return nil, errors.New("No valid VCR_MODE set")
@@ -338,7 +356,7 @@ func randString(t *testing.T, length int) string {
 		t.Fatal(err)
 	}
 
-	r := rand.New(s)
+	r := rand.New(s.source)
 	result := make([]byte, length)
 	set := "abcdefghijklmnopqrstuvwxyz012346789"
 	for i := 0; i < length; i++ {
@@ -359,7 +377,7 @@ func randInt(t *testing.T) int {
 		t.Fatal(err)
 	}
 
-	return rand.New(s).Int()
+	return rand.New(s.source).Int()
 }
 
 func TestProvider(t *testing.T) {

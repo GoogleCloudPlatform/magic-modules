@@ -177,6 +177,7 @@ func TestAccFolderIamBinding_update(t *testing.T) {
 
 // Test that an IAM binding can be removed from a folder
 func TestAccFolderIamBinding_remove(t *testing.T) {
+	skipIfVcr(t)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
