@@ -1403,7 +1403,21 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		d.SetPartial("deletion_protection")
 	}
 
-	needToStopInstanceBeforeUpdating := scopesChange || d.HasChange("service_account.0.email") || d.HasChange("machine_type") || d.HasChange("min_cpu_platform") || d.HasChange("enable_display") || (d.HasChange("attached_disk.source") && d.Get("attached_disk.rebbot_on_source_change").(bool))
+	needTorebootInstanceForAttachedDisk := false
+	attachedDisksCount := d.Get("attached_disk.#").(int)
+
+	for i := 0; i < attachedDisksCount; i++ {
+		v, ok := d.Get(fmt.Sprintf("attached_disk.%d.reboot_on_source_change", i)).(bool)
+		if !ok {
+			v = false
+		}
+		needTorebootInstanceForAttachedDisk = d.HasChange(fmt.Sprintf("attached_disk.%d.source", i)) && v
+		if needTorebootInstanceForAttachedDisk {
+			break
+		}
+	}
+
+	needToStopInstanceBeforeUpdating := scopesChange || d.HasChange("service_account.0.email") || d.HasChange("machine_type") || d.HasChange("min_cpu_platform") || d.HasChange("enable_display") || needTorebootInstanceForAttachedDisk
 
 	if d.HasChange("desired_status") && !needToStopInstanceBeforeUpdating {
 		desiredStatus := d.Get("desired_status").(string)

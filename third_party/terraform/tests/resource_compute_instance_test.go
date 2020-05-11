@@ -497,7 +497,7 @@ func TestAccComputeInstance_attachedDisk_rebootOnSourceChange(t *testing.T) {
 					testAccCheckComputeInstanceDisk(&instance, diskName2, false, false),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"attached_disk.0.reboot_on_source_change"}),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"attached_disk.0.reboot_on_source_change", "allow_stopping_for_update"}),
 		},
 	})
 }
@@ -3284,9 +3284,12 @@ resource "google_compute_instance" "foobar" {
 
   network_interface {
     network = "default"
-  }
+	}
+	
+	allow_stopping_for_update = %v
+
 }
-`, disk, instance, rebootOnSourceChange)
+`, disk, instance, rebootOnSourceChange, rebootOnSourceChange)
 }
 
 func testAccComputeInstance_attachedDisk_modeRo(disk, instance string) string {
