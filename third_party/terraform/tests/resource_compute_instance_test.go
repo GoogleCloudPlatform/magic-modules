@@ -456,7 +456,7 @@ func TestAccComputeInstance_attachedDisk_sourceUrl(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_attachedDisk_sourceUrl(diskName, instanceName),
+				Config: testAccComputeInstance_attachedDisk_sourceUrl(diskName, instanceName, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -464,6 +464,40 @@ func TestAccComputeInstance_attachedDisk_sourceUrl(t *testing.T) {
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+		},
+	})
+}
+
+func TestAccComputeInstance_attachedDisk_rebootOnSourceChange(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", randString(t, 10))
+	var diskName1 = fmt.Sprintf("tf-testd-%s", randString(t, 10))
+	var diskName2 = fmt.Sprintf("tf-testd-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_attachedDisk_sourceUrl(diskName1, instanceName, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceDisk(&instance, diskName1, false, false),
+				),
+			},
+			{
+				Config: testAccComputeInstance_attachedDisk_sourceUrl(diskName2, instanceName, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceDisk(&instance, diskName2, false, false),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"attached_disk.0.reboot_on_source_change"}),
 		},
 	})
 }
@@ -3218,7 +3252,7 @@ resource "google_compute_instance" "foobar" {
 `, disk, instance)
 }
 
-func testAccComputeInstance_attachedDisk_sourceUrl(disk, instance string) string {
+func testAccComputeInstance_attachedDisk_sourceUrl(disk, instance string, rebootOnSourceChange bool) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-9"
@@ -3244,14 +3278,15 @@ resource "google_compute_instance" "foobar" {
   }
 
   attached_disk {
-    source = google_compute_disk.foobar.self_link
+		source = google_compute_disk.foobar.self_link
+		reboot_on_source_change = %v
   }
 
   network_interface {
     network = "default"
   }
 }
-`, disk, instance)
+`, disk, instance, rebootOnSourceChange)
 }
 
 func testAccComputeInstance_attachedDisk_modeRo(disk, instance string) string {

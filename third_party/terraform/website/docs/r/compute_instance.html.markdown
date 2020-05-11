@@ -223,6 +223,10 @@ The `attached_disk` block supports:
 
 * `source` - (Required) The name or self_link of the disk to attach to this instance.
 
+* `reboot_on_source_change` - (Optional) When set to true and if, and only if, the source 
+    has changed, then the instance gets rebooted. Default value is `false`.
+    **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.   
+
 * `device_name` - (Optional) Name with which the attached disk will be accessible
     under `/dev/disk/by-id/google-*`
 

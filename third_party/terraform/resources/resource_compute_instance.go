@@ -305,6 +305,12 @@ func resourceComputeInstance() *schema.Resource {
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
 						},
 
+						"reboot_on_source_change": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+
 						"device_name": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -964,9 +970,10 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 			}
 			adIndex, inConfig := attachedDiskSources[sourceLink]
 			di := map[string]interface{}{
-				"source":      ConvertSelfLinkToV1(disk.Source),
-				"device_name": disk.DeviceName,
-				"mode":        disk.Mode,
+				"source":                  ConvertSelfLinkToV1(disk.Source),
+				"device_name":             disk.DeviceName,
+				"mode":                    disk.Mode,
+				"reboot_on_source_change": d.Get(fmt.Sprintf("attached_disk.%d.reboot_on_source_change", adIndex)),
 			}
 			if key := disk.DiskEncryptionKey; key != nil {
 				if inConfig {
@@ -1396,7 +1403,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		d.SetPartial("deletion_protection")
 	}
 
-	needToStopInstanceBeforeUpdating := scopesChange || d.HasChange("service_account.0.email") || d.HasChange("machine_type") || d.HasChange("min_cpu_platform") || d.HasChange("enable_display")
+	needToStopInstanceBeforeUpdating := scopesChange || d.HasChange("service_account.0.email") || d.HasChange("machine_type") || d.HasChange("min_cpu_platform") || d.HasChange("enable_display") || (d.HasChange("attached_disk.source") && d.Get("attached_disk.rebbot_on_source_change").(bool))
 
 	if d.HasChange("desired_status") && !needToStopInstanceBeforeUpdating {
 		desiredStatus := d.Get("desired_status").(string)
