@@ -12,7 +12,7 @@ resource "google_compute_region_backend_service" "default" {
   protocol    = "HTTP"
   timeout_sec = 10
 
-  health_checks = [google_compute_region_health_check.default.self_link]
+  health_checks = [google_compute_region_health_check.default.id]
 }
 
 data "google_compute_image" "debian_image" {
@@ -36,8 +36,8 @@ resource "google_compute_instance_template" "instance_template" {
   machine_type = "n1-standard-1"
 
   network_interface {
-    network    = google_compute_network.default.self_link
-    subnetwork = google_compute_subnetwork.default.self_link
+    network    = google_compute_network.default.id
+    subnetwork = google_compute_subnetwork.default.id
   }
 
   disk {
@@ -67,5 +67,5 @@ resource "google_compute_subnetwork" "default" {
   name          = "<%= ctx[:vars]['network_name'] %>-default"
   ip_cidr_range = "10.1.2.0/24"
   region        = "us-central1"
-  network       = google_compute_network.default.self_link
+  network       = google_compute_network.default.id
 }

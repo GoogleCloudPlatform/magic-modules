@@ -6,7 +6,7 @@ resource "google_compute_subnetwork" "network-for-l7lb" {
   region        = "us-central1"
   purpose       = "INTERNAL_HTTPS_LOAD_BALANCER"
   role          = "ACTIVE"
-  network       = google_compute_network.custom-test.self_link
+  network       = google_compute_network.custom-test.id
 }
 
 resource "google_compute_network" "custom-test" {
