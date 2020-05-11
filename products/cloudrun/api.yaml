@@ -266,7 +266,6 @@ objects:
   - !ruby/object:Api::Type::String
     name: vpc_connector
     description: The VPC connector the cloud run instance will use
-    required: false
     min_version: beta
   - !ruby/object:Api::Type::String
     name: apiVersion
