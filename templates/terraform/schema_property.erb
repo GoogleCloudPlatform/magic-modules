@@ -157,13 +157,13 @@
 <% end -%>
 <% unless property.conflicting().empty? -%>
 <% conflicting_props = property.conflicting().map(&:name).map(&:underscore) -%>
-    ConflictsWith: <%= go_literal(conflicting_props.reject {|sp| property_for_schema_path(sp, object).nil? }) -%>,
+    ConflictsWith: <%= go_literal(conflicting_props.map {|sp| get_property_schema_path(sp, object) }.compact) -%>,
 <% end -%>
 <% unless property.at_least_one_of_list().empty? -%>
-    AtLeastOneOf: <%= go_literal(property.at_least_one_of_list.reject {|sp| property_for_schema_path(sp, object).nil? }) -%>,
+    AtLeastOneOf: <%= go_literal(property.at_least_one_of_list.map {|sp| get_property_schema_path(sp, object) }.compact) -%>,
 <% end -%>
 <% unless property.exactly_one_of_list().empty? -%>
-    ExactlyOneOf: <%= go_literal(property.exactly_one_of_list.reject {|sp| property_for_schema_path(sp, object).nil? }) -%>,
+    ExactlyOneOf: <%= go_literal(property.exactly_one_of_list.map {|sp| get_property_schema_path(sp, object) }.compact) -%>,
 <% end -%>
 },
 <% else -%>
