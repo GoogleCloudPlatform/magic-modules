@@ -239,6 +239,7 @@ module Provider
         path = File.join(target_folder,
                          "plugins/modules/#{name}.py")
         data.generate(
+          Dir.pwd,
           data.object.template || 'templates/ansible/resource.erb',
           path,
           self
@@ -260,6 +261,7 @@ module Provider
         path = File.join(target_folder,
                          "tests/integration/targets/#{name}/tasks/main.yml")
         data.generate(
+          Dir.pwd,
           'templates/ansible/tests_main.erb',
           path,
           self
@@ -270,6 +272,7 @@ module Provider
           path = File.join(target_folder,
                            "tests/integration/targets/#{name}/tasks/#{t.name}.yml")
           data.generate(
+            Dir.pwd,
             t.path,
             path,
             self
@@ -280,6 +283,7 @@ module Provider
         path = File.join(target_folder,
                          "tests/integration/targets/#{name}/defaults/main.yml")
         data.generate(
+          Dir.pwd,
           'templates/ansible/integration_test_variables.erb',
           path,
           self
@@ -293,7 +297,8 @@ module Provider
       def compile_datasource(data)
         target_folder = data.output_folder
         name = module_name(data.object)
-        data.generate('templates/ansible/facts.erb',
+        data.generate(Dir.pwd,
+                      'templates/ansible/facts.erb',
                       File.join(target_folder,
                                 "plugins/modules/#{name}_info.py"),
                       self)
