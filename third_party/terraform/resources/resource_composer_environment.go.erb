@@ -50,6 +50,9 @@ var (
 		"config.0.node_config",
 		"config.0.software_config",
 		"config.0.private_environment_config",
+<% unless version == "ga" -%>
+		"config.0.web_server_network_access_control",
+<% end -%>
 	}
 
 )
@@ -295,6 +298,37 @@ func resourceComposerEnvironment() *schema.Resource {
 								},
 							},
 						},
+<% unless version == "ga" -%>
+						"web_server_network_access_control": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							MaxItems:     1,
+							ForceNew:     true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"allowed_ip_ranges": {
+										Type:         schema.TypeList,
+										Required:     true,
+										ForceNew:     true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"value": {
+													Type:     schema.TypeString,
+													Required: true,
+													ForceNew: true,
+												},
+												"description": {
+													Type:     schema.TypeString,
+													Optional: true,
+													ForceNew: true,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+<% end -%>
 						"airflow_uri": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -514,6 +548,18 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 			d.SetPartial("config")
 		}
+
+		if d.HasChange("config.0.web_server_network_access_control") {
+			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
+			if config != nil {
+				patchObj.Config.NodeCount = config.NodeCount
+			}
+			err = resourceComposerEnvironmentPatchField("config.nodeCount", patchObj, d, tfConfig)
+			if err != nil {
+				return err
+			}
+			d.SetPartial("config")
+		}
 	}
 
 	if d.HasChange("labels") {
@@ -630,10 +676,34 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 	transformed["node_config"] = flattenComposerEnvironmentConfigNodeConfig(envCfg.NodeConfig)
 	transformed["software_config"] = flattenComposerEnvironmentConfigSoftwareConfig(envCfg.SoftwareConfig)
 	transformed["private_environment_config"] = flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg.PrivateEnvironmentConfig)
+<% unless version == "ga" -%>
+	transformed["web_server_network_access_control"] = flattenComposerEnvironmentConfigWebServerNetworkAccessControl(envCfg.WebServerNetworkAccessControl)
+<% end -%>
 
 	return []interface{}{transformed}
 }
 
+<% unless version == "ga" -%>
+func flattenComposerEnvironmentConfigWebServerNetworkAccessControl(accessControl *composer.WebServerNetworkAccessControl) interface{} {
+	if accessControl == nil || accessControl.AllowedIpRanges == nil {
+		return nil
+	}
+
+	transformed := make([]interface{}, len(accessControl.AllowedIpRanges))
+	for _, ipRange := range accessControl.AllowedIpRanges {
+		ipRangeTransformed := make(map[string]interface{})
+		ipRangeTransformed["value"] = ipRange.Value
+		ipRangeTransformed["description"] = ipRange.Description
+		transformed = append(transformed, ipRangeTransformed)
+	}
+
+	webServerNetworkAccessControl := make(map[string]interface{})
+	webServerNetworkAccessControl["allowed_ip_ranges"] = transformed
+
+	return []interface{}{webServerNetworkAccessControl}
+}
+
+<% end -%>
 func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.PrivateEnvironmentConfig) interface{} {
 	if envCfg == nil {
 		return nil
@@ -738,6 +808,14 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 	}
 	transformed.PrivateEnvironmentConfig = transformedPrivateEnvironmentConfig
 
+<% unless version == "ga" -%>
+	transformedWebServerNetworkAccessControl, err := expandComposerEnvironmentConfigWebServerNetworkAccessControl(original["web_server_network_access_control"], d, config)
+	if err != nil {
+		return nil, err
+	}
+	transformed.WebServerNetworkAccessControl = transformedWebServerNetworkAccessControl
+
+<% end -%>
 	return transformed, nil
 }
 
@@ -748,6 +826,37 @@ func expandComposerEnvironmentConfigNodeCount(v interface{}, d *schema.ResourceD
 	return int64(v.(int)), nil
 }
 
+<% unless version == "ga" -%>
+func expandComposerEnvironmentConfigWebServerNetworkAccessControl(v interface{}, d *schema.ResourceData, config *Config) (*composer.WebServerNetworkAccessControl, error) {
+	l := v.([]interface{})
+	if len(l) == 0 {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+
+	allowedIpRangesRaw := original["allowed_ip_ranges"].([]interface{})
+	if len(allowedIpRangesRaw) == 0 {
+		return nil, nil
+	}
+
+	transformed := &composer.WebServerNetworkAccessControl{}
+	allowedIpRanges := make([]*composer.AllowedIpRange, len(original))
+
+	for _, originalIpRange := range allowedIpRangesRaw {
+		originalRangeRaw := originalIpRange.(map[string]interface{})
+		transformedRange := &composer.AllowedIpRange{Value: originalRangeRaw["value"].(string)}
+		if v, ok := originalRangeRaw["description"]; ok {
+			transformedRange.Description = v.(string)
+		}
+		allowedIpRanges = append(allowedIpRanges, transformedRange)
+	}
+
+	transformed.AllowedIpRanges = allowedIpRanges
+	return transformed, nil
+}
+
+<% end -%>
 func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *schema.ResourceData, config *Config) (*composer.PrivateEnvironmentConfig, error) {
 	l := v.([]interface{})
 	if len(l) == 0 {
