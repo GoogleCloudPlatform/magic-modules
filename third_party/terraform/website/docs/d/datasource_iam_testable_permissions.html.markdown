@@ -16,6 +16,7 @@ Retrieve a list of testable permissions for a resource. Testable permissions mea
 ```hcl
 data "google_iam_testable_permissions" "perms" {
 	full_resource_name = "//cloudresourcemanager.googleapis.com/projects/my-project"
+	stages             = ["GA", "BETA"]
 }
 ```
 
@@ -24,7 +25,7 @@ data "google_iam_testable_permissions" "perms" {
 The following arguments are supported:
 
 * `full_resource_name` - (Required) See [full resource name documentation](https://cloud.google.com/apis/design/resource_names#full_resource_name) for more detail.
-* `stage` - (Optional) The release stage of the permission in the output. Can be one of `"ALPHA"`, `"BETA"`, `"GA"`, `"DEPRECATED"`. Default is `"GA"`.
+* `stages` - (Optional) The acceptable release stages of the permission in the output. Note that `BETA` does not include permissions in `GA`, but you can specify both with `["GA", "BETA"]` for example. Can be a list of `"ALPHA"`, `"BETA"`, `"GA"`, `"DEPRECATED"`. Default is `["GA"]`.
 * `custom_support_level` - (Optional) The level of support for custom roles. Can be one of `"NOT_SUPPORTED"`, `"SUPPORTED"`, `"TESTING"`. Default is `"SUPPORTED"`
 
 ## Attributes Reference

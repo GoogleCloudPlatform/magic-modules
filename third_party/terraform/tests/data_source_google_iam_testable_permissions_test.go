@@ -27,7 +27,23 @@ func TestAccDataSourceGoogleIamTestablePermissions_basic(t *testing.T) {
 					testAccCheckGoogleIamTestablePermissionsMeta(
 						project,
 						"data.google_iam_testable_permissions.perms",
-						"GA",
+						[]string{"GA"},
+						"",
+					),
+				),
+			},
+			{
+				Config: fmt.Sprintf(`
+			 data "google_iam_testable_permissions" "perms" {
+				full_resource_name = "//cloudresourcemanager.googleapis.com/projects/%s"
+				stages = ["GA"]
+			}
+		`, project),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleIamTestablePermissionsMeta(
+						project,
+						"data.google_iam_testable_permissions.perms",
+						[]string{"GA"},
 						"",
 					),
 				),
@@ -37,14 +53,14 @@ func TestAccDataSourceGoogleIamTestablePermissions_basic(t *testing.T) {
 			 data "google_iam_testable_permissions" "perms" {
 				full_resource_name   = "//cloudresourcemanager.googleapis.com/projects/%s"
 				custom_support_level = "NOT_SUPPORTED"
-				stage                = "BETA"
+				stages               = ["BETA"]
 			}
 		`, project),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleIamTestablePermissionsMeta(
 						project,
 						"data.google_iam_testable_permissions.perms",
-						"BETA",
+						[]string{"BETA"},
 						"NOT_SUPPORTED",
 					),
 				),
@@ -54,15 +70,31 @@ func TestAccDataSourceGoogleIamTestablePermissions_basic(t *testing.T) {
 			 data "google_iam_testable_permissions" "perms" {
 				full_resource_name   = "//cloudresourcemanager.googleapis.com/projects/%s"
 				custom_support_level = "not_supported"
-				stage                = "beta"
+				stages               = ["beta"]
 			}
 		`, project),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleIamTestablePermissionsMeta(
 						project,
 						"data.google_iam_testable_permissions.perms",
-						"BETA",
+						[]string{"BETA"},
 						"NOT_SUPPORTED",
+					),
+				),
+			},
+			{
+				Config: fmt.Sprintf(`
+			 data "google_iam_testable_permissions" "perms" {
+				full_resource_name   = "//cloudresourcemanager.googleapis.com/projects/%s"
+				stages               = ["ga", "beta"]
+			}
+		`, project),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleIamTestablePermissionsMeta(
+						project,
+						"data.google_iam_testable_permissions.perms",
+						[]string{"GA", "BETA"},
+						"",
 					),
 				),
 			},
@@ -70,7 +102,7 @@ func TestAccDataSourceGoogleIamTestablePermissions_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckGoogleIamTestablePermissionsMeta(project string, n string, expectedStage string, expectedSupportLevel string) resource.TestCheckFunc {
+func testAccCheckGoogleIamTestablePermissionsMeta(project string, n string, expectedStages []string, expectedSupportLevel string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -92,29 +124,31 @@ func testAccCheckGoogleIamTestablePermissionsMeta(project string, n string, expe
 		if permCount < 2 {
 			return fmt.Errorf("count should be greater than 2")
 		}
-		foundStage := false
+		foundStageCounter := len(expectedStages)
 		foundSupport := false
 
 		for i := 0; i < permCount; i++ {
-			stageKey := "permissions." + strconv.Itoa(i) + ".stage"
-			supportKey := "permissions." + strconv.Itoa(i) + ".custom_support_level"
-			if attrs[stageKey] == expectedStage {
-				foundStage = true
-			}
-			if attrs[supportKey] == expectedSupportLevel {
-				foundSupport = true
-			}
-			if foundSupport && foundStage {
-				return nil
+			for s := 0; s < len(expectedStages); s++ {
+				stageKey := "permissions." + strconv.Itoa(i) + ".stage"
+				supportKey := "permissions." + strconv.Itoa(i) + ".custom_support_level"
+				if stringInSlice(expectedStages, attrs[stageKey]) {
+					foundStageCounter -= 1
+				}
+				if attrs[supportKey] == expectedSupportLevel {
+					foundSupport = true
+				}
+				if foundSupport && foundStageCounter == 0 {
+					return nil
+				}
 			}
 		}
 
-		if foundSupport {
-			return fmt.Errorf("Could not find stage %s in output", expectedStage)
+		if foundSupport { // This means we didn't find a stage
+			return fmt.Errorf("Could not find stages %v in output", expectedStages)
 		}
-		if foundStage {
+		if foundStageCounter == 0 { // This meads we didn't fins a custom_support_level
 			return fmt.Errorf("Could not find custom_support_level %s in output", expectedSupportLevel)
 		}
-		return fmt.Errorf("Unable to find customeSupportLevel or stage")
+		return fmt.Errorf("Unable to find customSupportLevel or stages in output")
 	}
 }

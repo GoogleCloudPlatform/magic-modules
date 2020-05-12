@@ -16,17 +16,19 @@ func dataSourceGoogleIamTestablePermissions() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"stages": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{"ALPHA", "BETA", "GA", "DEPRECATED"}, true),
+				},
+			},
 			"custom_support_level": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "SUPPORTED",
 				ValidateFunc: validation.StringInSlice([]string{"NOT_SUPPORTED", "SUPPORTED", "TESTING"}, true),
-			},
-			"stage": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "GA",
-				ValidateFunc: validation.StringInSlice([]string{"ALPHA", "BETA", "GA", "DEPRECATED"}, true),
 			},
 			"permissions": {
 				Type:     schema.TypeList,
@@ -67,8 +69,14 @@ func dataSourceGoogleIamTestablePermissionsRead(d *schema.ResourceData, meta int
 	permissions := make([]map[string]interface{}, 0)
 
 	custom_support_level := strings.ToUpper(d.Get("custom_support_level").(string))
-	stage := strings.ToUpper(d.Get("stage").(string))
-
+	stages := []string{}
+	for _, e := range d.Get("stages").([]interface{}) {
+		stages = append(stages, strings.ToUpper(e.(string)))
+	}
+	if len(stages) == 0 {
+		// Since schema.TypeLists cannot specify defaults, we'll specify it here
+		stages = append(stages, "GA")
+	}
 	for {
 		url := "https://iam.googleapis.com/v1/permissions:queryTestablePermissions"
 		body["fullResourceName"] = d.Get("full_resource_name").(string)
@@ -77,7 +85,7 @@ func dataSourceGoogleIamTestablePermissionsRead(d *schema.ResourceData, meta int
 			return fmt.Errorf("Error retrieving permissions: %s", err)
 		}
 
-		pagePermissions := flattenTestablePermissionsList(res["permissions"], custom_support_level, stage)
+		pagePermissions := flattenTestablePermissionsList(res["permissions"], custom_support_level, stages)
 		permissions = append(permissions, pagePermissions...)
 		pToken, ok := res["nextPageToken"]
 		if ok && pToken != nil && pToken.(string) != "" {
@@ -95,7 +103,7 @@ func dataSourceGoogleIamTestablePermissionsRead(d *schema.ResourceData, meta int
 	return nil
 }
 
-func flattenTestablePermissionsList(v interface{}, custom_support_level string, stage string) []map[string]interface{} {
+func flattenTestablePermissionsList(v interface{}, custom_support_level string, stages []string) []map[string]interface{} {
 	if v == nil {
 		return make([]map[string]interface{}, 0)
 	}
@@ -112,8 +120,7 @@ func flattenTestablePermissionsList(v interface{}, custom_support_level string, 
 			} else {
 				csl = p["customRolesSupportLevel"] == custom_support_level
 			}
-
-			if csl && p["stage"] == stage {
+			if csl && p["stage"] != nil && stringInSlice(stages, p["stage"].(string)) {
 				permissions = append(permissions, map[string]interface{}{
 					"name":                 p["name"],
 					"title":                p["title"],
