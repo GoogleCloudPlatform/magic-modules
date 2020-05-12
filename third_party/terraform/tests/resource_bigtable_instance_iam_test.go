@@ -210,6 +210,6 @@ resource "google_bigtable_instance" "instance" {
       storage_type = "HDD"
     }
 
-    allow_destroy = true
+    deletion_protection = false
 }
 `

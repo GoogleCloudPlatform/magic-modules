@@ -7,7 +7,7 @@ resource "google_bigtable_instance" "instance" {
     storage_type = "HDD"
   }
 
-  allow_destroy  = "<%= ctx[:vars]['allow_destroy'] %>"
+  deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
 }
 
 resource "google_bigtable_app_profile" "ap" {

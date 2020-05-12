@@ -28,11 +28,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           instance_name: "bt-instance"
           app_profile_name: "bt-profile"
-          allow_destroy: "false"
+          deletion_protection: "true"
         test_vars_overrides:
-          allow_destroy: "true"
+          deletion_protection: "false"
         oics_vars_overrides:
-          allow_destroy: "true"
+          deletion_protection: "false"
         ignore_read_extra:
           - "ignore_warnings"
       - !ruby/object:Provider::Terraform::Examples
@@ -41,11 +41,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           instance_name: "bt-instance"
           app_profile_name: "bt-profile"
-          allow_destroy: "false"
+          deletion_protection: "true"
         test_vars_overrides:
-          allow_destroy: "true"
+          deletion_protection: "false"
         oics_vars_overrides:
-          allow_destroy: "true"
+          deletion_protection: "false"
         ignore_read_extra:
           - "ignore_warnings"
     properties:

@@ -50,7 +50,7 @@ resource "google_bigtable_instance" "instance" {
     storage_type = "HDD"
   }
 
-  allow_destroy = true
+  deletion_protection = false
 }
 
 resource "google_bigtable_app_profile" "ap" {
@@ -74,7 +74,7 @@ resource "google_bigtable_instance" "instance" {
     storage_type = "HDD"
   }
 
-  allow_destroy = true
+  deletion_protection = false
 }
 
 resource "google_bigtable_app_profile" "ap" {
