@@ -102,6 +102,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project: :PROJECT_NAME
         ignore_read_extra:
           - "autogenerate_revision_name"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_traffic_split"
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_service_name: "cloudrun-srv"
+        test_env_vars:
+          project: :PROJECT_NAME
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'autogenerate_revision_name'
