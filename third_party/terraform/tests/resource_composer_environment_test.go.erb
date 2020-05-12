@@ -442,6 +442,9 @@ resource "google_composer_environment" "test" {
     }
     private_environment_config {
       enable_private_endpoint = true
+      cloud_sql_ipv4_cidr_block = "10.0.0.0/24"
+      web_server_ipv4_cidr_block = "172.16.0.0/24"
+      master_ipv4_cidr_block = "192.168.0.0/24"
     }
     web_server_network_access_control {
       allowed_ip_range {
@@ -490,10 +493,13 @@ resource "google_composer_environment" "test" {
     }
     private_environment_config {
       enable_private_endpoint = true
+      cloud_sql_ipv4_cidr_block = "10.0.0.0/24"
+      web_server_ipv4_cidr_block = "172.16.0.0/24"
+      master_ipv4_cidr_block = "192.168.0.0/24"
     }
     web_server_network_access_control {
       allowed_ip_range {
-        value = "8.8.8.8/2"
+        value = "10.2.0.0/16"
         description = "Updated range"
       }
       allowed_ip_range {

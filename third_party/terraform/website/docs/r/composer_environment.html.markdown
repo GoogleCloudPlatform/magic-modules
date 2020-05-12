@@ -170,7 +170,7 @@ The `config` block supports:
   The configuration used for the Private IP Cloud Composer environment. Structure is documented below.
 
 * `web_server_network_access_control` -
-  (Optional)
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
   The network-level access control policy for the Airflow web server. If unspecified, no network-level access restrictions will be applied.
 
 
@@ -305,6 +305,14 @@ The `private_environment_config` block supports:
   internal load balancer virtual IP. This range must not overlap with any other ranges
   in use within the cluster's network.
   If left blank, the default value of '172.16.0.0/28' is used.
+
+* `cloud_sql_ipv4_cidr_block` -
+  (Optional)
+  The CIDR block from which IP range in tenant project will be reserved for Cloud SQL. Needs to be disjoint from `web_server_ipv4_cidr_block`
+
+* `web_server_ipv4_cidr_block` -
+  (Optional)
+  The CIDR block from which IP range for web server will be reserved. Needs to be disjoint from `master_ipv4_cidr_block` and `cloud_sql_ipv4_cidr_block`.
 
 The `web_server_network_access_control` supports:
 
