@@ -188,7 +188,15 @@ func TestAccComposerEnvironment_privateWithWebServerControl(t *testing.T) {
 		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComposerEnvironment_private(envName, network, subnetwork),
+				Config: testAccComposerEnvironment_privateWithWebServerControl(envName, network, subnetwork),
+			},
+			{
+				ResourceName:      "google_composer_environment.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComposerEnvironment_privateWithWebServerControlUpdated(envName, network, subnetwork),
 			},
 			{
 				ResourceName:      "google_composer_environment.test",
@@ -207,7 +215,7 @@ func TestAccComposerEnvironment_privateWithWebServerControl(t *testing.T) {
 			{
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
-				Config:             testAccComposerEnvironment_private(envName, network, subnetwork),
+				Config:             testAccComposerEnvironment_privateWithWebServerControlUpdated(envName, network, subnetwork),
 				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
@@ -436,12 +444,62 @@ resource "google_composer_environment" "test" {
       enable_private_endpoint = true
     }
     web_server_network_access_control {
-    	allowed_ip_ranges = [
-    		{
-    			value = "192.168.0.1"
-    			description = "my range"
-    		}
-    	]
+      allowed_ip_range {
+        value = "192.168.0.1"
+        description = "my range1"
+      }
+      allowed_ip_range {
+        value = "192.162.0.0"
+      }
+  	}
+  }
+}
+
+// use a separate network to avoid conflicts with other tests running in parallel
+// that use the default network/subnet
+resource "google_compute_network" "test" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "test" {
+  name                     = "%s"
+  ip_cidr_range            = "10.2.0.0/16"
+  region                   = "us-central1"
+  network                  = google_compute_network.test.self_link
+  private_ip_google_access = true
+}
+`, name, network, subnetwork)
+}
+
+func testAccComposerEnvironment_privateWithWebServerControlUpdated(name, network, subnetwork string) string {
+	return fmt.Sprintf(`
+resource "google_composer_environment" "test" {
+  name   = "%s"
+  region = "us-central1"
+
+  config {
+    node_config {
+      network    = google_compute_network.test.self_link
+      subnetwork = google_compute_subnetwork.test.self_link
+      zone       = "us-central1-a"
+      ip_allocation_policy {
+        use_ip_aliases          = true
+        cluster_ipv4_cidr_block = "10.0.0.0/16"
+      }
+    }
+    private_environment_config {
+      enable_private_endpoint = true
+    }
+    web_server_network_access_control {
+      allowed_ip_range {
+        value = "8.8.8.8/2"
+        description = "Updated range"
+      }
+      allowed_ip_range {
+        value = "192.162.0.0"
+        description = "my range2"
+      }
   	}
   }
 }
