@@ -20,6 +20,7 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
 
   traffic {
     percent       = 75
+    # This revision needs to already exist
     revision_name = "<%= ctx[:vars]['cloud_run_service_name'] %>-blue"
   }
 }

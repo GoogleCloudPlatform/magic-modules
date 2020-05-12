@@ -104,6 +104,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "autogenerate_revision_name"
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_traffic_split"
+        skip_test: true
         primary_resource_id: "default"
         primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:
