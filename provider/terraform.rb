@@ -137,7 +137,11 @@ module Provider
         nested_props = prop.nested_properties || []
         prop.flatten_object ? nil : pname.underscore
       end
-      path_tkns.compact.join('.0.')
+      if path_tkns.empty? || path_tkns[-1].nil?
+        nil
+      else
+        path_tkns.compact.join('.0.')
+      end
     end
 
     # Transforms a format string with field markers to a regex string with
