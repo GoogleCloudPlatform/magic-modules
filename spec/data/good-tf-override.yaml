@@ -12,13 +12,12 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Provider::ResourceOverrides
-  AnotherResource: !ruby/object:Provider::Terraform::ResourceOverride
-    description: '{{description}} bar'
+overrides: !ruby/object:Overrides::ResourceOverrides
+  ResourceWithTerraformOverride: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
-      property1: !ruby/object:Provider::Terraform::PropertyOverride
-        description: 'foo'
-      nested-property.property1: !ruby/object:Provider::Terraform::PropertyOverride
-        description: 'bar'
-      array-property.property1: !ruby/object:Provider::Terraform::PropertyOverride
-        description: 'baz'
+      objectTwoFlattened: !ruby/object:Overrides::Terraform::PropertyOverride
+        flatten_object: true
+      objectTwoFlattened.objectTwoNestedObject: !ruby/object:Overrides::Terraform::PropertyOverride
+        update_mask_fields:
+          - 'overrideFoo'
+          - 'nested.overrideBar'
