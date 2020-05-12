@@ -50,7 +50,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           cloudiot_registry_name: "cloudiot-registry"
           cloudiot_device_status_topic_name: "default-devicestatus"
           cloudiot_device_telemetry_topic_name: "default-telemetry"
-          cloudiot_additional_device_telemetry_topic_name: "additional-telemetr"
+          cloudiot_additional_device_telemetry_topic_name: "additional-telemetry"
           cloudiot_subfolder_matches_additional_device_telemetry_topic: "test/path"
         test_env_vars:
           project: :PROJECT_NAME

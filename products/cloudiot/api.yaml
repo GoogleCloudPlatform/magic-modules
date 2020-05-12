@@ -120,8 +120,6 @@ objects:
           example, if the LogLevel is ERROR, only events that terminate in
           errors will be logged. LogLevel is inclusive; enabling INFO logging
           will also enable ERROR logging.
-
-          The field allows `NONE`, `ERROR`, `INFO`, `DEBUG`.
         values:
           - :NONE
           - :ERROR
