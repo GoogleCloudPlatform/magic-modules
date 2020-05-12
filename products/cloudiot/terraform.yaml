@@ -74,7 +74,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           The region in which the created registry should reside.
           If it is not provided, the provider region is used.
       logLevel: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'emptyOrDefaultStringSuppress("")'
+        diff_suppress_func: 'emptyOrDefaultStringSuppress("NONE")'
       eventNotificationConfigs: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       eventNotificationConfigs.subfolderMatches: !ruby/object:Overrides::Terraform::PropertyOverride

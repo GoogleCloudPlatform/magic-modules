@@ -114,6 +114,7 @@ objects:
               - :HTTP_DISABLED
       - !ruby/object:Api::Type::Enum
         name: 'logLevel'
+        default_value: :NONE
         description: |
           The default logging verbosity for activity from devices in this
           registry. Specifies which events should be written to logs. For

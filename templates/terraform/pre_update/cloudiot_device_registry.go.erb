@@ -2,20 +2,20 @@ log.Printf("[DEBUG] updateMask before adding extra schema entries %q: %v", d.Id(
 
 log.Printf("[DEBUG] Pre-update on state notification config: %q", d.Id())
 if d.HasChange("state_notification_config") {
-	log.Printf("[DEBUG] %q state_notification_config.pubsub_topic_name has a change. Adding it to the update mask", d.Id())
-	updateMask = append(updateMask, "state_notification_config.pubsub_topic_name")
+	log.Printf("[DEBUG] %q stateNotificationConfig.pubsubTopicName has a change. Adding it to the update mask", d.Id())
+	updateMask = append(updateMask, "stateNotificationConfig.pubsubTopicName")
 }
 
 log.Printf("[DEBUG] Pre-update on MQTT config: %q", d.Id())
 if d.HasChange("mqtt_config") {
-	log.Printf("[DEBUG] %q mqtt_config.mqtt_enabled_state has a change. Adding it to the update mask", d.Id())
-	updateMask = append(updateMask, "mqtt_config.mqtt_enabled_state")
+	log.Printf("[DEBUG] %q mqttConfig.mqttEnabledState has a change. Adding it to the update mask", d.Id())
+	updateMask = append(updateMask, "mqttConfig.mqttEnabledState")
 }
 
 log.Printf("[DEBUG] Pre-update on HTTP config: %q", d.Id())
 if d.HasChange("http_config") {
-	log.Printf("[DEBUG] %q http_config.http_enabled_state has a change. Adding it to the update mask", d.Id())
-	updateMask = append(updateMask, "http_config.http_enabled_state")
+	log.Printf("[DEBUG] %q httpConfig.httpEnabledState has a change. Adding it to the update mask", d.Id())
+	updateMask = append(updateMask, "httpConfig.httpEnabledState")
 }
 
 log.Printf("[DEBUG] Pre-update on credentials: %q", d.Id())
