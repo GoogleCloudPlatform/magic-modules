@@ -1052,6 +1052,9 @@ objects:
 
             SLIs are used to measure and calculate the quality of the Service's
             performance with respect to a single aspect of service quality.
+
+            Exactly one of the following must be set:
+            `basic_sli`, `request_based_sli`
           properties:
             - !ruby/object:Api::Type::Array
               name: method
@@ -1109,6 +1112,8 @@ objects:
             A SLI describes a good service.
             It is used to measure and calculate the quality of the Service's
             performance with respect to a single aspect of service quality.
+            Exactly one of the following must be set:
+            `basic_sli`, `request_based_sli`
           # If adding properties to requestBasedSli, remember to add to the
           # custom updateMask fields in property overrides.
           properties:
@@ -1123,6 +1128,8 @@ objects:
               Must specify exactly two of good, bad, and total service filters.
               The relationship good_service + bad_service = total_service
               will be assumed.
+
+              Exactly one of `distribution_cut` or `good_total_ratio` can be set.
             properties:
             - !ruby/object:Api::Type::String
               name: goodServiceFilter
@@ -1132,12 +1139,12 @@ objects:
                 - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.total_service_filter
               description: |
                  A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
-                 quantifying good service provided. Exactly two of
-                 good, bad, or total service filter must be defined (where
-                 good + bad = total is assumed)
-
+                 quantifying good service provided.
                  Must have ValueType = DOUBLE or ValueType = INT64 and
                  must have MetricKind = DELTA or MetricKind = CUMULATIVE.
+
+                 Exactly two of `good_service_filter`,`bad_service_filter`,`total_service_filter`
+                 must be set (good + bad = total is assumed).
             - !ruby/object:Api::Type::String
               name: badServiceFilter
               at_least_one_of:
@@ -1148,12 +1155,13 @@ objects:
                  A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
                  quantifying bad service provided, either demanded service that
                  was not provided or demanded service that was of inadequate
-                 quality. Exactly two of
-                 good, bad, or total service filter must be defined (where
-                 good + bad = total is assumed)
+                 quality.
 
                  Must have ValueType = DOUBLE or ValueType = INT64 and
                  must have MetricKind = DELTA or MetricKind = CUMULATIVE.
+
+                 Exactly two of `good_service_filter`,`bad_service_filter`,`total_service_filter`
+                 must be set (good + bad = total is assumed).
             - !ruby/object:Api::Type::String
               name: totalServiceFilter
               at_least_one_of:
@@ -1162,12 +1170,13 @@ objects:
                 - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.total_service_filter
               description: |
                  A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
-                 quantifying total demanded service. Exactly two of
-                 good, bad, or total service filter must be defined (where
-                 good + bad = total is assumed)
+                 quantifying total demanded service.
 
                  Must have ValueType = DOUBLE or ValueType = INT64 and
                  must have MetricKind = DELTA or MetricKind = CUMULATIVE.
+
+                 Exactly two of `good_service_filter`,`bad_service_filter`,`total_service_filter`
+                 must be set (good + bad = total is assumed).
           - !ruby/object:Api::Type::NestedObject
             name: distributionCut
             exactly_one_of:
@@ -1179,6 +1188,8 @@ objects:
               total count of all values aggregated in the Distribution.
               Defines a distribution TimeSeries filter and thresholds used for
               measuring good service and total service.
+
+              Exactly one of `distribution_cut` or `good_total_ratio` can be set.
             properties:
             - !ruby/object:Api::Type::String
               name: distributionFilter
