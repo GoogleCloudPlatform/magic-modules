@@ -226,7 +226,7 @@ module Compile
       end
     end
 
-    def autogen_notice(lang, pwd=Dir.pwd)
+    def autogen_notice(lang, pwd)
       Thread.current[:autogen] = true
       comment_block(compile(pwd + '/templates/autogen_notice.erb').split("\n"), lang)
     end

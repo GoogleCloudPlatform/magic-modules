@@ -31,7 +31,7 @@ describe Provider::Terraform do
 
     before do
       allow_open 'spec/data/good-file.yaml'
-      allow_open Dir.pwd + '/spec/data/terraform-config.yaml'
+      allow_open 'spec/data/terraform-config.yaml'
       product.validate
       config.validate
     end

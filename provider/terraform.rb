@@ -217,10 +217,12 @@ module Provider
       data.product = data.product.name
       data.resource_name = data.object.name.camelize(:upper)
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
-      data.generate(pwd,
-                    'templates/terraform/examples/base_configs/test_file.go.erb',
-                    "#{folder_name(data.version)}/resource_#{product_name}_#{name}_generated_test.go",
-                    self)
+      data.generate(
+        pwd,
+        'templates/terraform/examples/base_configs/test_file.go.erb',
+        "#{folder_name(data.version)}/resource_#{product_name}_#{name}_generated_test.go",
+        self
+      )
     end
 
     def generate_resource_sweepers(pwd, data)

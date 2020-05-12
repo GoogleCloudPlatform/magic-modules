@@ -19,16 +19,16 @@ module Provider
     module SubTemplate
       def build_schema_property(property, object, pwd)
         compile_template pwd + '/templates/terraform/schema_property.erb',
-                        property: property,
-                        object: object,
-                        pwd: pwd
+                         property: property,
+                         object: object,
+                         pwd: pwd
       end
 
       def build_subresource_schema(property, object, pwd)
         compile_template pwd + '/templates/terraform/schema_subresource.erb',
-                        property: property,
-                        object: object,
-                        pwd: pwd
+                         property: property,
+                         object: object,
+                         pwd: pwd
       end
 
       # Transforms a Cloud API representation of a property into a Terraform
