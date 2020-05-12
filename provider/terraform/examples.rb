@@ -81,6 +81,10 @@ module Provider
       #       }
       attr_reader :test_vars_overrides
 
+      # Hash to provider custom override values for generating oics config
+      # See test_vars_overrides for more details
+      attr_reader :oics_vars_overrides
+
       # The version name of of the example's version if it's different than the
       # resource version, eg. `beta`
       #
@@ -193,10 +197,14 @@ module Provider
 
       def config_example
         @vars ||= []
+        @oics_vars_overrides ||= {}
+
+        rand_vars = vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h
+
         # Examples with test_env_vars are skipped elsewhere
         body = lines(compile_file(
                        {
-                         vars: vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h,
+                         vars: rand_vars.merge(oics_vars_overrides),
                          primary_resource_id: primary_resource_id
                        },
                        config_path
