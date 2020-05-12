@@ -140,6 +140,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "appeng_slo"
         vars:
           slo_id: "ae-slo"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "monitoring_slo_request_based"
+        primary_resource_id: "request_based_slo"
+        test_env_vars:
+          project: :PROJECT_NAME
+        vars:
+          service_id: "custom-srv"
+          slo_id: "consumed-api-slo"
     properties:
       rollingPeriodDays: !ruby/object:Overrides::Terraform::PropertyOverride
         api_name: rollingPeriod
@@ -164,6 +172,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
       serviceLevelIndicator.basicSli.version: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+      serviceLevelIndicator.requestBasedSli: !ruby/object:Overrides::Terraform::PropertyOverride
+        # Force update all nested fields to allow for unsetting values.
+        update_mask_fields:
+          - "serviceLevelIndicator.requestBased.goodTotalRatio.badServiceFilter"
+          - "serviceLevelIndicator.requestBased.goodTotalRatio.goodServiceFilter"
+          - "serviceLevelIndicator.requestBased.goodTotalRatio.totalServiceFilter"
+          - "serviceLevelIndicator.requestBased.distributionCut.range.min"
+          - "serviceLevelIndicator.requestBased.distributionCut.range.max"
+          - "serviceLevelIndicator.requestBased.distributionCut.distributionFilter"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/monitoring_slo.go.erb
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
