@@ -233,20 +233,20 @@ module Provider
         ex
       end
 
-      def generate_resource(data)
+      def generate_resource(pwd, data)
         target_folder = data.output_folder
         name = module_name(data.object)
         path = File.join(target_folder,
                          "plugins/modules/#{name}.py")
         data.generate(
-          Dir.pwd,
+          pwd,
           data.object.template || 'templates/ansible/resource.erb',
           path,
           self
         )
       end
 
-      def generate_resource_tests(data)
+      def generate_resource_tests(pwd, data)
         prod_name = data.object.name.underscore
         path = ["products/#{data.product.api_name}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
@@ -261,7 +261,7 @@ module Provider
         path = File.join(target_folder,
                          "tests/integration/targets/#{name}/tasks/main.yml")
         data.generate(
-          Dir.pwd,
+          pwd,
           'templates/ansible/tests_main.erb',
           path,
           self
@@ -272,7 +272,7 @@ module Provider
           path = File.join(target_folder,
                            "tests/integration/targets/#{name}/tasks/#{t.name}.yml")
           data.generate(
-            Dir.pwd,
+            pwd,
             t.path,
             path,
             self
@@ -283,22 +283,21 @@ module Provider
         path = File.join(target_folder,
                          "tests/integration/targets/#{name}/defaults/main.yml")
         data.generate(
-          Dir.pwd,
+          pwd,
           'templates/ansible/integration_test_variables.erb',
           path,
           self
         )
       end
 
-      def generate_resource_sweepers(data)
+      def generate_resource_sweepers(pwd, data)
         # No generated sweepers for this provider
       end
 
       def compile_datasource(data)
         target_folder = data.output_folder
         name = module_name(data.object)
-        data.generate(Dir.pwd,
-                      'templates/ansible/facts.erb',
+        data.generate('templates/ansible/facts.erb',
                       File.join(target_folder,
                                 "plugins/modules/#{name}_info.py"),
                       self)
@@ -349,7 +348,7 @@ module Provider
     # Generates files on a per-resource basis.
     # All paths are allowed a '%s' where the module name
     # will be added.
-    def generate_resource_files(data)
+    def generate_resource_files(pwd, data)
       return unless @config&.files&.resource
 
       files = @config.files.resource
