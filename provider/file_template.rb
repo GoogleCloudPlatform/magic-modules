@@ -35,7 +35,7 @@ module Provider
     #
     # Once the file's contents are written, set the proper [chmod] mode and
     # format the file with a language-appropriate formatter.
-    def generate(template, path, provider)
+    def generate(pwd, template, path, provider)
       # If we've modified a file since starting an MM run, it's a reasonable
       # assumption that it was this run that modified it.
       if File.exist?(path) && File.mtime(path) > @env[:start_time]
@@ -57,16 +57,17 @@ module Provider
       # This variable is used in ansible/resource.erb
       ctx.local_variable_set('file_relative',
                              relative_path(@output_folder + '/' + path, @output_folder).to_s)
+      ctx.local_variable_set('pwd', pwd)
 
       Google::LOGGER.debug "Generating #{path}"
-      File.open(path, 'w') { |f| f.puts compile_file(ctx, template) }
+      File.open(path, 'w') { |f| f.puts compile_file(ctx, pwd + '/' + template) }
 
       # Files are often generated in parallel.
       # We can use thread-local variables to ensure that autogen checking
       # stays specific to the file each thred represents.
       raise "#{path} missing autogen" unless Thread.current[:autogen]
 
-      old_file_chmod_mode = File.stat($pwd + '/' + template).mode
+      old_file_chmod_mode = File.stat(pwd + '/' + template).mode
       FileUtils.chmod(old_file_chmod_mode, path)
 
       format_output_file(path)

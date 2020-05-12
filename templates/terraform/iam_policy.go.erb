@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 -%>
-<%= lines(autogen_notice :go) -%>
+<%= lines(autogen_notice(:go, pwd=pwd)) -%>
 package google
 
 import (
@@ -57,7 +57,7 @@ var <%= resource_name -%>IamSchema = map[string]*schema.Schema{
 }
 
 <% unless object.iam_policy.custom_diff_suppress.nil? -%>
-<%= lines(compile(object.iam_policy.custom_diff_suppress)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.custom_diff_suppress)) -%>
 <% end -%>
 
 type <%= resource_name -%>IamUpdater struct {

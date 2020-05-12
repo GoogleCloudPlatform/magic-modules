@@ -178,18 +178,19 @@ module Provider
     # This function uses the resource.erb template to create one file
     # per resource. The resource.erb template forms the basis of a single
     # GCP Resource on Terraform.
-    def generate_resource(data)
+    def generate_resource(pwd, data)
       name = data.object.name.underscore
       product_name = data.product.name.underscore
 
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
-      data.generate('/templates/terraform/resource.erb',
+      data.generate(pwd,
+                    '/templates/terraform/resource.erb',
                     "#{folder_name(data.version)}/resource_#{product_name}_#{name}.go",
                     self)
-      generate_documentation(data)
+      generate_documentation(pwd, data)
     end
 
-    def generate_documentation(data)
+    def generate_documentation(pwd, data)
       target_folder = data.output_folder
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
@@ -198,10 +199,10 @@ module Provider
 
       filepath =
         File.join(target_folder, "#{product_name}_#{name}.html.markdown")
-      data.generate('templates/terraform/resource.html.markdown.erb', filepath, self)
+      data.generate(pwd, 'templates/terraform/resource.html.markdown.erb', filepath, self)
     end
 
-    def generate_resource_tests(data)
+    def generate_resource_tests(pwd, data)
       return if data.object.examples
                     .reject(&:skip_test)
                     .reject do |e|
@@ -216,12 +217,13 @@ module Provider
       data.product = data.product.name
       data.resource_name = data.object.name.camelize(:upper)
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
-      data.generate('templates/terraform/examples/base_configs/test_file.go.erb',
+      data.generate(pwd,
+                    'templates/terraform/examples/base_configs/test_file.go.erb',
                     "#{folder_name(data.version)}/resource_#{product_name}_#{name}_generated_test.go",
                     self)
     end
 
-    def generate_resource_sweepers(data)
+    def generate_resource_sweepers(pwd, data)
       return if data.object.skip_sweeper ||
                 data.object.custom_code.custom_delete ||
                 data.object.custom_code.pre_delete ||
@@ -233,12 +235,13 @@ module Provider
       data.product = data.product.name
       data.resource_name = data.object.name.camelize(:upper)
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
-      data.generate('templates/terraform/sweeper_file.go.erb',
+      data.generate(pwd,
+                    'templates/terraform/sweeper_file.go.erb',
                     "#{folder_name(data.version)}/resource_#{product_name}_#{name}_sweeper_test.go",
                     self)
     end
 
-    def generate_operation(output_folder, _types)
+    def generate_operation(pwd, output_folder, _types)
       return if @api.objects.select(&:autogen_async).empty?
 
       product_name = @api.name.underscore
@@ -247,35 +250,38 @@ module Provider
       data.object = @api.objects.select(&:autogen_async).first
       data.async = data.object.async
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
-      data.generate('templates/terraform/operation.go.erb',
+      data.generate(pwd,
+                    'templates/terraform/operation.go.erb',
                     "#{folder_name(data.version)}/#{product_name}_operation.go",
                     self)
     end
 
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
-    def generate_iam_policy(data)
+    def generate_iam_policy(pwd, data)
       name = data.object.name.underscore
       product_name = data.product.name.underscore
 
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
-      data.generate('templates/terraform/iam_policy.go.erb',
+      data.generate(pwd,
+                    'templates/terraform/iam_policy.go.erb',
                     "#{folder_name(data.version)}/iam_#{product_name}_#{name}.go",
                     self)
 
       # Only generate test if testable examples exist.
       unless data.object.examples.reject(&:skip_test).empty?
         data.generate(
+          pwd,
           'templates/terraform/examples/base_configs/iam_test_file.go.erb',
           "#{folder_name(data.version)}/iam_#{product_name}_#{name}_generated_test.go",
           self
         )
       end
 
-      generate_iam_documentation(data)
+      generate_iam_documentation(pwd, data)
     end
 
-    def generate_iam_documentation(data)
+    def generate_iam_documentation(pwd, data)
       target_folder = data.output_folder
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
@@ -284,7 +290,7 @@ module Provider
 
       filepath =
         File.join(target_folder, "#{product_name}_#{name}_iam.html.markdown")
-      data.generate('templates/terraform/resource_iam.html.markdown.erb', filepath, self)
+      data.generate(pwd, 'templates/terraform/resource_iam.html.markdown.erb', filepath, self)
     end
 
     def build_object_data(object, output_folder, version)

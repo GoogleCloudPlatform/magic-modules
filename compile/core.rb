@@ -151,8 +151,7 @@ module Compile
     # Refer to Compile::Core.compile for full details about the compilation
     # process.
     def compile_file(ctx, source)
-      $pwd ||= Dir.pwd
-      compile_string(ctx, File.read($pwd + '/' + source))
+      compile_string(ctx, File.read(source))
     rescue StandardError => e
       puts "Error compiling file: #{source}"
       raise e
@@ -227,9 +226,9 @@ module Compile
       end
     end
 
-    def autogen_notice(lang)
+    def autogen_notice(lang, pwd=Dir.pwd)
       Thread.current[:autogen] = true
-      comment_block(compile('templates/autogen_notice.erb').split("\n"), lang)
+      comment_block(compile(pwd + '/templates/autogen_notice.erb').split("\n"), lang)
     end
 
     def autogen_exception
@@ -261,8 +260,7 @@ module Compile
     end
 
     def get_helper_file(file, remove_copyright_notice = true)
-      $pwd ||= Dir.pwd
-      content = IO.read($pwd + '/' + file)
+      content = IO.read(file)
       remove_copyright_notice ? strip_copyright_notice(content) : content
     end
 

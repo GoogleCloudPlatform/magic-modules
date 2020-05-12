@@ -93,10 +93,10 @@ module Provider
         unless @config.datasources.nil?
 
       FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
-      $pwd = Dir.pwd
+      pwd = Dir.pwd
       Dir.chdir output_folder
-      generate_operation(output_folder, types)
-      Dir.chdir $pwd
+      generate_operation(pwd, output_folder, types)
+      Dir.chdir pwd
 
       # Write a file with the final version of the api, after overrides
       # have been applied.
@@ -187,15 +187,15 @@ module Provider
 
     def compile_file_list(output_folder, files, file_template)
       FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
-      $pwd = Dir.pwd
+      pwd = Dir.pwd
       Dir.chdir output_folder
       files.map do |target, source|
         Thread.new do
           Google::LOGGER.debug "Compiling #{source} => #{target}"
-          file_template.generate(source, target, self)
+          file_template.generate(pwd, source, target, self)
         end
       end.map(&:join)
-      Dir.chdir $pwd
+      Dir.chdir pwd
     end
 
     def generate_objects(output_folder, types)
@@ -223,17 +223,17 @@ module Provider
 
     def generate_object(object, output_folder, version_name)
       data = build_object_data(object, output_folder, version_name)
-      $pwd = Dir.pwd
+      pwd = Dir.pwd
       unless object.exclude_resource
         FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
         Dir.chdir output_folder
         Google::LOGGER.debug "Generating #{object.name} resource"
-        generate_resource data.clone
+        generate_resource(pwd, data.clone)
         Google::LOGGER.debug "Generating #{object.name} tests"
-        generate_resource_tests data.clone
-        generate_resource_sweepers data.clone
-        generate_resource_files data.clone
-        Dir.chdir $pwd
+        generate_resource_tests(pwd, data.clone)
+        generate_resource_sweepers(pwd, data.clone)
+        generate_resource_files(pwd, data.clone)
+        Dir.chdir pwd
       end
 
       # if iam_policy is not defined or excluded, don't generate it
@@ -242,12 +242,12 @@ module Provider
       FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
       Dir.chdir output_folder
       Google::LOGGER.debug "Generating #{object.name} IAM policy"
-      generate_iam_policy data.clone
-      Dir.chdir $pwd
+      generate_iam_policy(pwd, data.clone)
+      Dir.chdir pwd
     end
 
     # Generate files at a per-resource basis.
-    def generate_resource_files(data) end
+    def generate_resource_files(pwd, data) end
 
     def generate_datasources(output_folder, types)
       # We need to apply overrides for datasources
@@ -343,7 +343,7 @@ module Provider
       url_part
     end
 
-    def generate_iam_policy(data) end
+    def generate_iam_policy(pwd, data) end
 
     # TODO(nelsonjr): Review all object interfaces and move to private methods
     # that should not be exposed outside the object hierarchy.

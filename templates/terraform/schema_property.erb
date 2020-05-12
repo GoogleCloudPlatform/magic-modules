@@ -14,7 +14,7 @@
 -%>
 <% if property.flatten_object -%>
 	<% order_properties(property.properties).each do |prop| -%>
-		<%= lines(build_schema_property(prop, object)) -%>
+		<%= lines(build_schema_property(prop, object, pwd=pwd)) -%>
 	<% end -%>
 <% elsif tf_types.include?(property.class) -%>
 "<%= property.name.underscore -%>": {
@@ -81,7 +81,7 @@
   Elem: &schema.Resource{
     Schema: map[string]*schema.Schema{
       <% order_properties(property.properties).each do |prop| -%>
-        <%= lines(build_schema_property(prop, object)) -%>
+        <%= lines(build_schema_property(prop, object, pwd=pwd)) -%>
       <% end -%>
     },
   },
@@ -99,7 +99,7 @@
       Elem: &schema.Resource{
         Schema: map[string]*schema.Schema{
           <% order_properties(property.item_type.properties).each do |prop| -%>
-            <%= lines(build_schema_property(prop, object)) -%>
+            <%= lines(build_schema_property(prop, object, pwd=pwd)) -%>
           <% end -%>
         },
       },
@@ -141,7 +141,7 @@
 				<% end -%>
 			},
 			<% order_properties(property.value_type.properties).each do |prop| -%>
-				<%= lines(build_schema_property(prop, object)) -%>
+				<%= lines(build_schema_property(prop, object, pwd=pwd)) -%>
 			<% end -%>
 		},
 	},
