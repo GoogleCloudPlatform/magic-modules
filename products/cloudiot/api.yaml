@@ -25,6 +25,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'DeviceRegistry'
     base_url: 'projects/{{project}}/locations/{{region}}/registries'
+    self_link: 'projects/{{project}}/locations/{{region}}/registries/{{name}}'
     update_verb: :PATCH
     update_mask: true
     description: |

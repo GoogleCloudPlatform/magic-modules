@@ -76,12 +76,6 @@ resource "google_pubsub_topic" "additional-telemetry" {
 resource "google_cloudiot_registry" "%s" {
   name     = "%s"
 
-  depends_on = [
-    google_pubsub_topic.default-devicestatus,
-    google_pubsub_topic.default-telemetry,
-    google_pubsub_topic.additional-telemetry
-  ]
-
   event_notification_configs {
     pubsub_topic_name = google_pubsub_topic.additional-telemetry.id
     subfolder_matches = "test/directory"

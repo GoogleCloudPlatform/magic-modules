@@ -5,10 +5,6 @@ resource "google_pubsub_topic" "default-telemetry" {
 resource "google_cloudiot_registry" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['cloudiot_registry_name'] %>"
 
-  depends_on = [
-    google_pubsub_topic.default-telemetry,
-  ]
-
   event_notification_configs {
     pubsub_topic_name = google_pubsub_topic.default-telemetry.id
     subfolder_matches = ""
