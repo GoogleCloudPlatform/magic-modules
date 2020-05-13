@@ -437,14 +437,15 @@ resource "google_composer_environment" "test" {
       zone       = "us-central1-a"
       ip_allocation_policy {
         use_ip_aliases          = true
-        cluster_ipv4_cidr_block = "10.0.0.0/16"
+        cluster_ipv4_cidr_block = "10.56.0.0/14"
+        services_ipv4_cidr_block = "10.122.0.0/20"
       }
     }
     private_environment_config {
-      enable_private_endpoint = true
-      cloud_sql_ipv4_cidr_block = "10.0.0.0/24"
-      web_server_ipv4_cidr_block = "172.16.0.0/24"
-      master_ipv4_cidr_block = "192.168.0.0/24"
+      enable_private_endpoint = false
+      web_server_ipv4_cidr_block = "172.30.240.0/24"
+      cloud_sql_ipv4_cidr_block = "10.32.0.0/12"
+      master_ipv4_cidr_block =  "172.17.50.0/28"
     }
     web_server_network_access_control {
       allowed_ip_range {
@@ -452,7 +453,7 @@ resource "google_composer_environment" "test" {
         description = "my range1"
       }
       allowed_ip_range {
-        value = "192.162.0.0"
+        value = "0.0.0.0/0"
       }
   	}
   }
@@ -488,23 +489,23 @@ resource "google_composer_environment" "test" {
       zone       = "us-central1-a"
       ip_allocation_policy {
         use_ip_aliases          = true
-        cluster_ipv4_cidr_block = "10.0.0.0/16"
+        cluster_ipv4_cidr_block = "10.56.0.0/14"
+        services_ipv4_cidr_block = "10.122.0.0/20"
       }
     }
     private_environment_config {
-      enable_private_endpoint = true
-      cloud_sql_ipv4_cidr_block = "10.0.0.0/24"
-      web_server_ipv4_cidr_block = "172.16.0.0/24"
-      master_ipv4_cidr_block = "192.168.0.0/24"
+      enable_private_endpoint = false
+      web_server_ipv4_cidr_block = "172.30.240.0/24"
+      cloud_sql_ipv4_cidr_block = "10.32.0.0/12"
+      master_ipv4_cidr_block =  "172.17.50.0/28"
     }
     web_server_network_access_control {
       allowed_ip_range {
-        value = "10.2.0.0/16"
-        description = "Updated range"
+        value = "192.168.0.1"
+        description = "my range1"
       }
       allowed_ip_range {
-        value = "192.162.0.0"
-        description = "my range2"
+        value = "0.0.0.0/0"
       }
   	}
   }

@@ -321,7 +321,6 @@ func resourceComposerEnvironment() *schema.Resource {
 											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
 										},
 										ForceNew: true,
-										Default:  "172.16.0.0/28",
 									},
 									"cloud_sql_ipv4_cidr_block": {
 										Type:         schema.TypeString,
@@ -333,7 +332,6 @@ func resourceComposerEnvironment() *schema.Resource {
 											"config.0.private_environment_config.0.web_server_ipv4_cidr_block",
 										},
 										ForceNew: true,
-										Default:  "172.16.0.0/28",
 									},
 								},
 							},
@@ -342,6 +340,7 @@ func resourceComposerEnvironment() *schema.Resource {
 						"web_server_network_access_control": {
 							Type:     schema.TypeList,
 							Optional: true,
+							Computed: true,
 							MaxItems: 1,
 							Elem:     &schema.Resource{
 								Schema: map[string]*schema.Schema{
