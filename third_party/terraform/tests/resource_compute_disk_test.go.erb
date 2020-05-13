@@ -378,6 +378,7 @@ func TestAccComputeDisk_deleteDetach(t *testing.T) {
 }
 
 func TestAccComputeDisk_deleteDetachIGM(t *testing.T) {
+	// Randomness in instance template
 	skipIfVcr(t)
 	t.Parallel()
 

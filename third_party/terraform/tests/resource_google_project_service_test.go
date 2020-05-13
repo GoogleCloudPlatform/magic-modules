@@ -65,6 +65,7 @@ func TestAccProjectService_basic(t *testing.T) {
 }
 
 func TestAccProjectService_disableDependentServices(t *testing.T) {
+	// Multiple fine-grained resources
 	skipIfVcr(t)
 	t.Parallel()
 

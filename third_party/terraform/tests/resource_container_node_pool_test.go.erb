@@ -81,7 +81,7 @@ func TestAccContainerNodePool_maxPodsPerNode(t *testing.T) {
 }
 
 func TestAccContainerNodePool_namePrefix(t *testing.T) {
-	// Computed name within terraform
+	// Randomness
 	skipIfVcr(t)
 	t.Parallel()
 
@@ -106,7 +106,7 @@ func TestAccContainerNodePool_namePrefix(t *testing.T) {
 }
 
 func TestAccContainerNodePool_noName(t *testing.T) {
-	// Computed name within terraform
+	// Randomness
 	skipIfVcr(t)
 	t.Parallel()
 

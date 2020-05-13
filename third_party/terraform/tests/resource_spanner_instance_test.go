@@ -72,6 +72,7 @@ func TestAccSpannerInstance_basic(t *testing.T) {
 }
 
 func TestAccSpannerInstance_basicWithAutogenName(t *testing.T) {
+	// Randomness
 	skipIfVcr(t)
 	t.Parallel()
 
@@ -97,6 +98,7 @@ func TestAccSpannerInstance_basicWithAutogenName(t *testing.T) {
 }
 
 func TestAccSpannerInstance_update(t *testing.T) {
+	// Randomness
 	skipIfVcr(t)
 	t.Parallel()
 

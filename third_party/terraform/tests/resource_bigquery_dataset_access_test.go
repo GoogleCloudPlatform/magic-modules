@@ -69,6 +69,7 @@ func TestAccBigQueryDatasetAccess_view(t *testing.T) {
 }
 
 func TestAccBigQueryDatasetAccess_multiple(t *testing.T) {
+	// Multiple fine-grained resources
 	skipIfVcr(t)
 	t.Parallel()
 

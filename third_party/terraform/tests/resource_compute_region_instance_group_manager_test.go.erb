@@ -99,6 +99,7 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 }
 
 func TestAccRegionInstanceGroupManager_updateLifecycle(t *testing.T) {
+	// Randomness in instance template
 	skipIfVcr(t)
 	t.Parallel()
 
@@ -132,6 +133,7 @@ func TestAccRegionInstanceGroupManager_updateLifecycle(t *testing.T) {
 }
 
 func TestAccRegionInstanceGroupManager_rollingUpdatePolicy(t *testing.T) {
+	// Randomness in instance template
 	skipIfVcr(t)
 	t.Parallel()
 
@@ -168,6 +170,7 @@ func TestAccRegionInstanceGroupManager_rollingUpdatePolicy(t *testing.T) {
 }
 
 func TestAccRegionInstanceGroupManager_separateRegions(t *testing.T) {
+	// Randomness in instance template
 	skipIfVcr(t)
 	t.Parallel()
 

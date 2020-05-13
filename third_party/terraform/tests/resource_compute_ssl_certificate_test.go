@@ -9,6 +9,7 @@ import (
 )
 
 func TestAccComputeSslCertificate_no_name(t *testing.T) {
+	// Randomness
 	skipIfVcr(t)
 	t.Parallel()
 

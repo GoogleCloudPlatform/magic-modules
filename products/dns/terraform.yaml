@@ -19,6 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
         primary_resource_id: "example-zone"
+        # Randomness from random provider
         skip_vcr: true
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_private"

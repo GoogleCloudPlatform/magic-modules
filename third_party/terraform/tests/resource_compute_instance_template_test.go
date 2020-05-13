@@ -511,6 +511,7 @@ func TestAccComputeInstanceTemplate_subnet_custom(t *testing.T) {
 }
 
 func TestAccComputeInstanceTemplate_subnet_xpn(t *testing.T) {
+	// Randomness
 	skipIfVcr(t)
 	t.Parallel()
 
@@ -820,6 +821,7 @@ func TestAccComputeInstanceTemplate_invalidDiskType(t *testing.T) {
 }
 
 func TestAccComputeInstanceTemplate_imageResourceTest(t *testing.T) {
+	// Multiple fine-grained resources
 	skipIfVcr(t)
 	t.Parallel()
 	diskName := "tf-test-disk-" + randString(t, 10)
