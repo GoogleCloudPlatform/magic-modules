@@ -1,3 +1,3 @@
-gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
-route = attribute('route', default: <%= JSON.pretty_generate(grab_attributes['route']) -%>, description: 'Compute route description')
-gcp_network_name = attribute(:gcp_network_name, default: '<%= external_attribute('gcp_network_name') -%>', description: 'GCP network name')
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute(pwd, 'gcp_project_id') -%>', description: 'The GCP project identifier.')
+route = attribute('route', default: <%= JSON.pretty_generate(grab_attributes(pwd)['route']) -%>, description: 'Compute route description')
+gcp_network_name = attribute(:gcp_network_name, default: '<%= external_attribute(pwd, 'gcp_network_name') -%>', description: 'GCP network name')

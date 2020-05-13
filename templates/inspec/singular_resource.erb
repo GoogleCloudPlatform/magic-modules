@@ -14,9 +14,9 @@
 -%>
 # frozen_string_literal: false
 
-<%= lines(autogen_notice :ruby) -%>
+<%= lines(autogen_notice(:ruby, pwd)) -%>
 <%
-  require 'google/string_utils'
+  require pwd + '/google/string_utils'
 
 
   inside_indent = 8
@@ -39,7 +39,7 @@ class <%= object.__product.name.camelize(:upper) -%><%= object.name -%> < GcpRes
 <% end -%>
 
 <% if !object.singular_custom_constructor.nil? -%>
-<%= indent(compile(object.singular_custom_constructor), 2) -%>
+<%= indent(compile(pwd + '/' + object.singular_custom_constructor), 2) -%>
 
 <% elsif object.nested_query.nil? -%>
   def initialize(params)
@@ -100,12 +100,12 @@ best_guess_identifier = extract_identifiers(individual_url).last
   end
 <% unless object&.additional_functions.nil? -%>
 
-<%= lines(indent(compile(object.additional_functions), 2)) -%>
+<%= lines(indent(compile(pwd + '/' + object.additional_functions), 2)) -%>
 <% end -%>
 
   private
 
-<%= compile('templates/inspec/product_url.erb') -%>
+<%= compile(pwd + '/templates/inspec/product_url.erb') -%>
 
 <% url = object.self_link || object.base_url + '/{{name}}' -%>
 <% url_params = extract_identifiers(individual_url) -%>
