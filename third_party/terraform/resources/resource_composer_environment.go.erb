@@ -348,7 +348,8 @@ func resourceComposerEnvironment() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"allowed_ip_range": {
 										Type:     schema.TypeSet,
-										Required: true,
+										Computed: true,
+										Optional: true,
 										Elem: allowedIpRangesConfig,
 									},
 								},
