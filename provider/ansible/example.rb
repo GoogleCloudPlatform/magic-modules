@@ -229,7 +229,7 @@ module Provider
       attr_reader :reason
       def validate() end
 
-      def build_task(_state, _object, pwd)
+      def build_task(_state, _object, _pwd)
         ''
       end
     end

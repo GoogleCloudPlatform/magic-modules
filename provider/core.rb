@@ -185,7 +185,7 @@ module Provider
       compile_file_list(output_folder, files, file_template)
     end
 
-    def compile_file_list(output_folder, files, file_template, pwd=Dir.pwd)
+    def compile_file_list(output_folder, files, file_template, pwd = Dir.pwd)
       FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
       Dir.chdir output_folder
       files.map do |target, source|
@@ -281,7 +281,7 @@ module Provider
       compile_datasource(pwd, data.clone)
     end
 
-    def build_object_data(pwd, object, output_folder, version)
+    def build_object_data(_pwd, object, output_folder, version)
       ProductFileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
     end
 

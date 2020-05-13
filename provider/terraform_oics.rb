@@ -37,33 +37,25 @@ module Provider
 
         data.example = example
 
-        data.generate(
-          pwd,
-          'templates/terraform/examples/base_configs/example_file.tf.erb',
-          File.join(target_folder, 'main.tf'),
-          self
-        )
+        data.generate(pwd,
+                      'templates/terraform/examples/base_configs/example_file.tf.erb',
+                      File.join(target_folder, 'main.tf'),
+                      self)
 
-        data.generate(
-          pwd,
-          'templates/terraform/examples/base_configs/tutorial.md.erb',
-          File.join(target_folder, 'tutorial.md'),
-          self
-        )
+        data.generate(pwd,
+                      'templates/terraform/examples/base_configs/tutorial.md.erb',
+                      File.join(target_folder, 'tutorial.md'),
+                      self)
 
-        data.generate(
-          pwd,
-          'templates/terraform/examples/base_configs/example_backing_file.tf.erb',
-          File.join(target_folder, 'backing_file.tf'),
-          self
-        )
+        data.generate(pwd,
+                      'templates/terraform/examples/base_configs/example_backing_file.tf.erb',
+                      File.join(target_folder, 'backing_file.tf'),
+                      self)
 
-        data.generate(
-          pwd,
-          'templates/terraform/examples/static/motd',
-          File.join(target_folder, 'motd'),
-          self
-        )
+        data.generate(pwd,
+                      'templates/terraform/examples/static/motd',
+                      File.join(target_folder, 'motd'),
+                      self)
       end
     end
 

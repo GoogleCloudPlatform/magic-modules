@@ -295,7 +295,7 @@ module Provider
       data.generate(pwd, 'templates/terraform/resource_iam.html.markdown.erb', filepath, self)
     end
 
-    def build_object_data(pwd, object, output_folder, version)
+    def build_object_data(_pwd, object, output_folder, version)
       TerraformProductFileTemplate.file_for_resource(
         output_folder,
         object,
