@@ -163,7 +163,7 @@ module Provider
       end
     end
 
-    def build_object_data(object, output_folder, version)
+    def build_object_data(pwd, object, output_folder, version)
       InspecProductFileTemplate.file_for_resource(
         output_folder,
         object,

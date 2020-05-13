@@ -46,10 +46,11 @@ module Provider
         )
       end
 
-      def compile_datasource(data)
+      def compile_datasource(pwd, data)
         target_folder = data.output_folder
         name = module_name(data.object)
-        data.generate('templates/ansible/facts.erb',
+        data.generate(pwd,
+                      'templates/ansible/facts.erb',
                       File.join(target_folder,
                                 "lib/ansible/modules/cloud/google/#{name}_info.py"),
                       self)

@@ -89,12 +89,12 @@ module Provider
       compile_product_files(output_folder) \
         unless @config.files.nil? || @config.files.compile.nil?
 
-      generate_datasources(output_folder, types) \
-        unless @config.datasources.nil?
-
       FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
       pwd = Dir.pwd
       Dir.chdir output_folder
+      generate_datasources(pwd, output_folder, types) \
+        unless @config.datasources.nil?
+
       generate_operation(pwd, output_folder, types)
       Dir.chdir pwd
 
@@ -185,9 +185,8 @@ module Provider
       compile_file_list(output_folder, files, file_template)
     end
 
-    def compile_file_list(output_folder, files, file_template)
+    def compile_file_list(output_folder, files, file_template, pwd=Dir.pwd)
       FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
-      pwd = Dir.pwd
       Dir.chdir output_folder
       files.map do |target, source|
         Thread.new do
@@ -222,8 +221,8 @@ module Provider
     end
 
     def generate_object(object, output_folder, version_name)
-      data = build_object_data(object, output_folder, version_name)
       pwd = Dir.pwd
+      data = build_object_data(pwd, object, output_folder, version_name)
       unless object.exclude_resource
         FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
         Dir.chdir output_folder
@@ -249,7 +248,7 @@ module Provider
     # Generate files at a per-resource basis.
     def generate_resource_files(pwd, data) end
 
-    def generate_datasources(output_folder, types)
+    def generate_datasources(pwd, output_folder, types)
       # We need to apply overrides for datasources
       @api = Overrides::Runner.build(@api, @config.datasources,
                                      @config.resource_override,
@@ -271,18 +270,18 @@ module Provider
             "Excluding #{object.name} datasource per API version"
           )
         else
-          generate_datasource object, output_folder
+          generate_datasource(pwd, object, output_folder)
         end
       end
     end
 
-    def generate_datasource(object, output_folder)
-      data = build_object_data(object, output_folder, @target_version_name)
+    def generate_datasource(pwd, object, output_folder)
+      data = build_object_data(pwd, object, output_folder, @target_version_name)
 
-      compile_datasource data.clone
+      compile_datasource(pwd, data.clone)
     end
 
-    def build_object_data(object, output_folder, version)
+    def build_object_data(pwd, object, output_folder, version)
       ProductFileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
     end
 

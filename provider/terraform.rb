@@ -247,7 +247,7 @@ module Provider
       return if @api.objects.select(&:autogen_async).empty?
 
       product_name = @api.name.underscore
-      data = build_object_data(@api.objects.first, output_folder, @target_version_name)
+      data = build_object_data(pwd, @api.objects.first, output_folder, @target_version_name)
 
       data.object = @api.objects.select(&:autogen_async).first
       data.async = data.object.async
@@ -295,7 +295,7 @@ module Provider
       data.generate(pwd, 'templates/terraform/resource_iam.html.markdown.erb', filepath, self)
     end
 
-    def build_object_data(object, output_folder, version)
+    def build_object_data(pwd, object, output_folder, version)
       TerraformProductFileTemplate.file_for_resource(
         output_folder,
         object,
