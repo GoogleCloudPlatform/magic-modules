@@ -55,6 +55,7 @@ var (
 <% end -%>
 	}
 
+<% unless version == "ga" -%>
 	allowedIpRangesConfig = &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"value": {
@@ -67,6 +68,7 @@ var (
 			},
 		},
 	}
+<% end -%>
 )
 
 func resourceComposerEnvironment() *schema.Resource {
