@@ -34,12 +34,13 @@ module Provider
         'ansible.module_utils.gcp_utils'
       end
 
-      def generate_resource(data)
+      def generate_resource(pwd, data)
         target_folder = data.output_folder
         name = module_name(data.object)
         path = File.join(target_folder,
                          "lib/ansible/modules/cloud/google/#{name}.py")
         data.generate(
+          pwd,
           data.object.template || 'templates/ansible/resource.erb',
           path,
           self
@@ -65,7 +66,7 @@ module Provider
         File.symlink "#{name}_info.py", deprecated_facts_path
       end
 
-      def generate_resource_tests(data)
+      def generate_resource_tests(pwd, data)
         prod_name = data.object.name.underscore
         path = ["products/#{data.product.api_name}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
@@ -80,6 +81,7 @@ module Provider
         path = File.join(target_folder,
                          "test/integration/targets/#{name}/tasks/main.yml")
         data.generate(
+          pwd,
           'templates/ansible/tests_main.erb',
           path,
           self
@@ -90,6 +92,7 @@ module Provider
           path = File.join(target_folder,
                            "test/integration/targets/#{name}/tasks/#{t.name}.yml")
           data.generate(
+            pwd,
             t.path,
             path,
             self
@@ -97,7 +100,7 @@ module Provider
         end
       end
 
-      def generate_resource_sweepers(data) end
+      def generate_resource_sweepers(pwd, data) end
 
       def compile_common_files(_arg1, _arg2, _arg3) end
 
@@ -116,7 +119,7 @@ module Provider
         copy_file_list(output_folder, files)
       end
 
-      def generate_resource_files(data)
+      def generate_resource_files(pwd, data)
         return unless @config&.files&.resource
 
         files = @config.files.resource
@@ -133,7 +136,7 @@ module Provider
           data.version,
           build_env
         )
-        compile_file_list(data.output_folder, files, file_template)
+        compile_file_list(data.output_folder, files, file_template, pwd)
       end
     end
   end
