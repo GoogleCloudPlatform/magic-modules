@@ -1,4 +1,4 @@
-<% folder = grab_attributes['folder'] -%>
+<% folder = grab_attributes(pwd)['folder'] -%>
 describe.one do
   google_resourcemanager_folders(parent: <%= doc_generation ? "'organizations/12345'" : "\"organizations/\#{gcp_organization_id}\"" -%>).display_names.each do |display_name|
     describe display_name do

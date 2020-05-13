@@ -1,6 +1,6 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% gcp_cloud_function_region = "#{external_attribute('gcp_cloud_function_region', doc_generation)}" -%>
-<% cloudfunction = grab_attributes['cloudfunction'] -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% gcp_cloud_function_region = "#{external_attribute(pwd, 'gcp_cloud_function_region', doc_generation)}" -%>
+<% cloudfunction = grab_attributes(pwd)['cloudfunction'] -%>
 describe google_cloudfunctions_cloud_functions(project: <%= gcp_project_id -%>, location: <%= gcp_cloud_function_region -%>) do
   its('descriptions') { should include <%= doc_generation ? "'#{cloudfunction['description']}'" : "cloudfunction['description']" -%> }
   its('entry_points') { should include <%= doc_generation ? "'#{cloudfunction['entry_point']}'" : "cloudfunction['entry_point']" -%> }

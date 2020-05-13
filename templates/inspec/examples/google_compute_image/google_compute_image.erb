@@ -1,5 +1,5 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% compute_image = grab_attributes['compute_image'] -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% compute_image = grab_attributes(pwd)['compute_image'] -%>
 describe google_compute_image(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{compute_image['name']}'" : "compute_image['name']" -%>) do
   it { should exist }
   its('disk_size_gb') { should cmp 3 }

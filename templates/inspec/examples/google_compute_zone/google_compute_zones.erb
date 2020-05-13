@@ -1,4 +1,4 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
 google_compute_zones(project: <%= gcp_project_id -%>).zone_names.each do |zone_name|
   describe google_compute_zone(project: <%= gcp_project_id -%>, name: zone_name) do
     it { should exist }

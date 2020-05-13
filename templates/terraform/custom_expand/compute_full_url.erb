@@ -16,7 +16,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
   if v == nil || v.(string) == "" {
     return "", nil
   }
-  f, err := <%= build_expand_resource_ref('v.(string)', property) %>
+  f, err := <%= build_expand_resource_ref('v.(string)', property, pwd) %>
   if err != nil {
     return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: %s", err)
   }
