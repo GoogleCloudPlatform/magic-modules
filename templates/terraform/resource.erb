@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 -%>
-<%= lines(autogen_notice(:go, pwd=pwd)) -%>
+<%= lines(autogen_notice(:go, pwd)) -%>
 
 package google
 
@@ -86,7 +86,7 @@ func resource<%= resource_name -%>() *schema.Resource {
 
         Schema: map[string]*schema.Schema{
 <%      order_properties(properties).each do |prop| -%>
-<%=       lines(build_schema_property(prop, object, pwd=pwd)) -%>
+<%=       lines(build_schema_property(prop, object, pwd)) -%>
 <%      end -%>
 <%-     unless object.virtual_fields.empty? -%>
 <%-       object.virtual_fields.each do |field| -%>
@@ -117,7 +117,7 @@ func resource<%= resource_name -%>() *schema.Resource {
 }
 
 <% properties.each do |prop| -%>
-<%= lines(build_subresource_schema(prop, object, pwd=pwd), 1) -%>
+<%= lines(build_subresource_schema(prop, object, pwd), 1) -%>
 <% end -%>
 
 <% object.settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
@@ -848,11 +848,11 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 
 <%- nested_prefix = object.nested_query ? "Nested" : "" -%>
 <% object.gettable_properties.reject(&:ignore_read).each do |prop| -%>
-<%= lines(build_flatten_method(nested_prefix+resource_name, prop, object, pwd=pwd), 1) -%>
+<%= lines(build_flatten_method(nested_prefix+resource_name, prop, object, pwd), 1) -%>
 <% end -%>
 
 <% object.settable_properties.each do |prop| -%>
-<%= lines(build_expand_method(nested_prefix+resource_name, prop, object, pwd=pwd), 1) -%>
+<%= lines(build_expand_method(nested_prefix+resource_name, prop, object, pwd), 1) -%>
 <% end -%>
 
 <% if object.custom_code.encoder -%>

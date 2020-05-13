@@ -1,5 +1,5 @@
-<% gcp_organization_id = "#{external_attribute('gcp_organization_id', doc_generation)}" -%>
-<% gcp_organization_iam_custom_role_id = "#{external_attribute('gcp_organization_iam_custom_role_id', doc_generation)}" -%>
+<% gcp_organization_id = "#{external_attribute(pwd, 'gcp_organization_id', doc_generation)}" -%>
+<% gcp_organization_iam_custom_role_id = "#{external_attribute(pwd, 'gcp_organization_iam_custom_role_id', doc_generation)}" -%>
 describe google_iam_organization_custom_roles(org_id: <%= gcp_organization_id -%>) do
   its('names') { should include "organizations/<%= doc_generation ? "123456" : "\#{gcp_organization_id}" -%>/roles/<%= doc_generation ? "role-id" : "\#{gcp_organization_iam_custom_role_id}" -%>" }
 end

@@ -132,7 +132,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 }
 <% if property.nested_properties? -%>
   <% property.nested_properties.each do |prop| -%>
-    <%= lines(build_flatten_method(prefix + titlelize_property(property), prop, object, pwd=pwd), 1) -%>
+    <%= lines(build_flatten_method(prefix + titlelize_property(property), prop, object, pwd), 1) -%>
   <% end -%>
 <% end -%>
 <% else -%>

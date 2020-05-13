@@ -48,7 +48,7 @@
   timeouts ||= Api::Timeouts.new
 -%>
 ---
-<%= lines(autogen_notice(:yaml, pwd=pwd)) -%>
+<%= lines(autogen_notice(:yaml, pwd)) -%>
 subcategory: "<%= tf_subcategory -%>"
 layout: "google"
 page_title: "Google: <%= terraform_name -%>"
@@ -114,11 +114,11 @@ state as plain-text. [Read more about sensitive data in state](/docs/state/sensi
 The following arguments are supported:
 
 <% object.root_properties.select(&:required).each do |prop| -%>
-<%= lines(build_property_documentation(prop, pwd=pwd)) -%>
+<%= lines(build_property_documentation(prop, pwd)) -%>
 <% end -%>
 
 <% properties.select(&:required).each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop, pwd=pwd)) -%>
+<%= lines(build_nested_property_documentation(prop, pwd)) -%>
 <% end -%>
 <%- unless object.docs.required_properties.nil? -%>
 <%= "\n" + object.docs.required_properties -%>
@@ -127,7 +127,7 @@ The following arguments are supported:
 - - -
 
 <% object.root_properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%=    lines(build_property_documentation(prop, pwd=pwd)) -%>
+<%=    lines(build_property_documentation(prop, pwd)) -%>
 <% end -%>
 <% if object.base_url.include?("{{project}}") || (object.create_url && object.create_url.include?('{{project}}'))-%>
 <%# The following new line allow for project to be bullet-formatted properly. -%>
@@ -145,7 +145,7 @@ The following arguments are supported:
 <%= "\n" + object.docs.optional_properties -%>
 <% end -%>
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop, pwd=pwd)) -%>
+<%= lines(build_nested_property_documentation(prop, pwd)) -%>
 <% end -%>
 
 ## Attributes Reference
@@ -154,14 +154,14 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `id` - an identifier for the resource with format `<%= id_format(object) %>`
 <% object.root_properties.select(&:output).each do |prop| -%>
-<%= lines(build_property_documentation(prop, pwd=pwd)) -%>
+<%= lines(build_property_documentation(prop, pwd)) -%>
 <% end -%>
 <% if object.has_self_link -%>
 * `self_link` - The URI of the created resource.
 <% end -%>
 
 <% properties.select(&:output).each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop, pwd=pwd)) -%>
+<%= lines(build_nested_property_documentation(prop, pwd)) -%>
 <% end -%>
 <%- unless object.docs.attributes.nil? -%>
 <%= "\n" + object.docs.attributes -%>

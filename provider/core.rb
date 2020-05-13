@@ -111,7 +111,7 @@ module Provider
       end
     end
 
-    def generate_operation(output_folder, types); end
+    def generate_operation(pwd, output_folder, types); end
 
     def copy_files(output_folder)
       copy_file_list(output_folder, @config.files.copy)

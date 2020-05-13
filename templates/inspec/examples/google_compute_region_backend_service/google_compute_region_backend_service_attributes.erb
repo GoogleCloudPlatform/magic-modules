@@ -1,3 +1,3 @@
-gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
-gcp_location = attribute(:gcp_location, default: '<%= external_attribute('gcp_location') -%>', description: 'The GCP project region.')
-region_backend_service = attribute('region_backend_service', default: <%= JSON.pretty_generate(grab_attributes['region_backend_service']) -%>, description: 'Backend service definition')
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute(pwd, 'gcp_project_id') -%>', description: 'The GCP project identifier.')
+gcp_location = attribute(:gcp_location, default: '<%= external_attribute(pwd, 'gcp_location') -%>', description: 'The GCP project region.')
+region_backend_service = attribute('region_backend_service', default: <%= JSON.pretty_generate(grab_attributes(pwd)['region_backend_service']) -%>, description: 'Backend service definition')

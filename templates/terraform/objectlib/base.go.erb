@@ -1,4 +1,4 @@
-<%= lines(autogen_notice(:go, pwd=pwd)) -%>
+<%= lines(autogen_notice(:go, pwd)) -%>
 
 package google
 
@@ -66,6 +66,6 @@ func resource<%= resource_name -%>Encoder(d TerraformResourceData, meta interfac
 <% end -%>
 
 <% object.settable_properties.each do |prop| -%>
-<%= lines(build_expand_method(resource_name, prop, object, pwd=pwd), 1) -%>
+<%= lines(build_expand_method(resource_name, prop, object, pwd), 1) -%>
 <% end -%>
 

@@ -181,7 +181,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 <%   property.nested_properties.each do |prop| -%>
 <%# Map is a map from {key -> object} in the API, but Terraform can't represent that
 so we treat the key as a property of the object in Terraform schema. %>
-<%=    lines(build_expand_method(prefix + titlelize_property(property), prop, object, pwd=pwd), 1) -%>
+<%=    lines(build_expand_method(prefix + titlelize_property(property), prop, object, pwd), 1) -%>
 <%   end -%>
 <% end -%>
 
