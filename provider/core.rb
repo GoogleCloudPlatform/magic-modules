@@ -89,10 +89,14 @@ module Provider
       compile_product_files(output_folder) \
         unless @config.files.nil? || @config.files.compile.nil?
 
-      generate_datasources(output_folder, types) \
+      FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+      pwd = Dir.pwd
+      Dir.chdir output_folder
+      generate_datasources(pwd, output_folder, types) \
         unless @config.datasources.nil?
 
-      generate_operation(output_folder, types)
+      generate_operation(pwd, output_folder, types)
+      Dir.chdir pwd
 
       # Write a file with the final version of the api, after overrides
       # have been applied.
@@ -107,7 +111,7 @@ module Provider
       end
     end
 
-    def generate_operation(output_folder, types); end
+    def generate_operation(pwd, output_folder, types); end
 
     def copy_files(output_folder)
       copy_file_list(output_folder, @config.files.copy)
@@ -181,14 +185,16 @@ module Provider
       compile_file_list(output_folder, files, file_template)
     end
 
-    def compile_file_list(output_folder, files, file_template)
+    def compile_file_list(output_folder, files, file_template, pwd = Dir.pwd)
+      FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+      Dir.chdir output_folder
       files.map do |target, source|
         Thread.new do
           Google::LOGGER.debug "Compiling #{source} => #{target}"
-          target_file = File.join(output_folder, target)
-          file_template.generate(source, target_file, self)
+          file_template.generate(pwd, source, target, self)
         end
       end.map(&:join)
+      Dir.chdir pwd
     end
 
     def generate_objects(output_folder, types)
@@ -215,27 +221,34 @@ module Provider
     end
 
     def generate_object(object, output_folder, version_name)
-      data = build_object_data(object, output_folder, version_name)
+      pwd = Dir.pwd
+      data = build_object_data(pwd, object, output_folder, version_name)
       unless object.exclude_resource
+        FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+        Dir.chdir output_folder
         Google::LOGGER.debug "Generating #{object.name} resource"
-        generate_resource data.clone
+        generate_resource(pwd, data.clone)
         Google::LOGGER.debug "Generating #{object.name} tests"
-        generate_resource_tests data.clone
-        generate_resource_sweepers data.clone
-        generate_resource_files data.clone
+        generate_resource_tests(pwd, data.clone)
+        generate_resource_sweepers(pwd, data.clone)
+        generate_resource_files(pwd, data.clone)
+        Dir.chdir pwd
       end
 
       # if iam_policy is not defined or excluded, don't generate it
       return if object.iam_policy.nil? || object.iam_policy.exclude
 
+      FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
+      Dir.chdir output_folder
       Google::LOGGER.debug "Generating #{object.name} IAM policy"
-      generate_iam_policy data.clone
+      generate_iam_policy(pwd, data.clone)
+      Dir.chdir pwd
     end
 
     # Generate files at a per-resource basis.
-    def generate_resource_files(data) end
+    def generate_resource_files(pwd, data) end
 
-    def generate_datasources(output_folder, types)
+    def generate_datasources(pwd, output_folder, types)
       # We need to apply overrides for datasources
       @api = Overrides::Runner.build(@api, @config.datasources,
                                      @config.resource_override,
@@ -257,18 +270,18 @@ module Provider
             "Excluding #{object.name} datasource per API version"
           )
         else
-          generate_datasource object, output_folder
+          generate_datasource(pwd, object, output_folder)
         end
       end
     end
 
-    def generate_datasource(object, output_folder)
-      data = build_object_data(object, output_folder, @target_version_name)
+    def generate_datasource(pwd, object, output_folder)
+      data = build_object_data(pwd, object, output_folder, @target_version_name)
 
-      compile_datasource data.clone
+      compile_datasource(pwd, data.clone)
     end
 
-    def build_object_data(object, output_folder, version)
+    def build_object_data(_pwd, object, output_folder, version)
       ProductFileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
     end
 
@@ -329,7 +342,7 @@ module Provider
       url_part
     end
 
-    def generate_iam_policy(data) end
+    def generate_iam_policy(pwd, data) end
 
     # TODO(nelsonjr): Review all object interfaces and move to private methods
     # that should not be exposed outside the object hierarchy.

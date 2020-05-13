@@ -30,17 +30,17 @@ This resource has beta fields available. To retrieve these fields, include `beta
 <% end -%>
 ## Examples
 ```
-<%= compile("templates/inspec/examples/#{resource_name(object, product)}/#{resource_underscored_name}.erb") -%>
+<%= compile(pwd + "/templates/inspec/examples/#{resource_name(object, product)}/#{resource_underscored_name}.erb") -%>
 
 ```
 <% if object.singular_extra_examples && !plural -%>
 
-<%= compile(object.singular_extra_examples) -%>
+<%= compile(pwd + '/' + object.singular_extra_examples) -%>
 
 <% end -%>
 <% if object.plural_extra_examples && plural -%>
 
-<%= compile(object.plural_extra_examples) -%>
+<%= compile(pwd + '/' + object.plural_extra_examples) -%>
 
 <% end -%>
 

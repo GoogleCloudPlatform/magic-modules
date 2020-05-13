@@ -1,4 +1,4 @@
-<%= lines(autogen_notice :go) -%>
+<%= lines(autogen_notice(:go, pwd)) -%>
 
 package google
 
@@ -10,7 +10,7 @@ package google
     asset_name_template = '//' + product_ns.downcase + '.googleapis.com/' + (!object.self_link.nil? && !object.self_link.empty? ? object.self_link : object.base_url + '/{{name}}')
 %>
 
-<%= lines(compile(object.custom_code.constants)) if object.custom_code.constants -%>
+<%= lines(compile(pwd + '/' + object.custom_code.constants)) if object.custom_code.constants -%>
 
 func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) (Asset, error) {
     name, err := assetName(d, config, "<%= asset_name_template -%>")
@@ -61,11 +61,11 @@ func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *Config) 
 
 <% if object.custom_code.encoder -%>
 func resource<%= resource_name -%>Encoder(d TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-<%= lines(compile(object.custom_code.encoder)) -%>
+<%= lines(compile(pwd + '/' + object.custom_code.encoder)) -%>
 }
 <% end -%>
 
 <% object.settable_properties.each do |prop| -%>
-<%= lines(build_expand_method(resource_name, prop, object), 1) -%>
+<%= lines(build_expand_method(resource_name, prop, object, pwd), 1) -%>
 <% end -%>
 

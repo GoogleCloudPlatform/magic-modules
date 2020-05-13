@@ -1,2 +1,2 @@
-gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
-backend_service = attribute('backend_service', default: <%= JSON.pretty_generate(grab_attributes['backend_service']) -%>, description: 'Backend service definition')
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute(pwd, 'gcp_project_id') -%>', description: 'The GCP project identifier.')
+backend_service = attribute('backend_service', default: <%= JSON.pretty_generate(grab_attributes(pwd)['backend_service']) -%>, description: 'Backend service definition')

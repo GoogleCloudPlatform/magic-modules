@@ -1,5 +1,5 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute(pwd, 'gcp_location', doc_generation)}" -%>
 describe google_compute_region(project: <%= gcp_project_id -%>, name: <%= gcp_location -%>) do
   it { should exist }
   it { should be_up }

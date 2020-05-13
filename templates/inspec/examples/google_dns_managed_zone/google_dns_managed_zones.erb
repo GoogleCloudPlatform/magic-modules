@@ -1,6 +1,6 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% gcp_dns_zone_name = "#{external_attribute('gcp_dns_zone_name', doc_generation)}" -%>
-<% dns_managed_zone = grab_attributes['dns_managed_zone'] -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% gcp_dns_zone_name = "#{external_attribute(pwd, 'gcp_dns_zone_name', doc_generation)}" -%>
+<% dns_managed_zone = grab_attributes(pwd)['dns_managed_zone'] -%>
 describe google_dns_managed_zones(project: <%= gcp_project_id -%>) do
   it { should exist }
   its('zone_names') { should include <%= doc_generation ? "'#{dns_managed_zone['name']}'" : "dns_managed_zone['name']" -%> }

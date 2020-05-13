@@ -119,7 +119,7 @@ module Provider
       # Defaults to `templates/terraform/examples/{{name}}.tf.erb`
       attr_reader :config_path
 
-      def config_documentation
+      def config_documentation(pwd)
         docs_defaults = {
           PROJECT_NAME: 'my-project-name',
           FIRESTORE_PROJECT_NAME: 'my-project-name',
@@ -139,26 +139,26 @@ module Provider
                          test_env_vars: test_env_vars.map { |k, v| [k, docs_defaults[v]] }.to_h,
                          primary_resource_id: primary_resource_id
                        },
-                       config_path
+                       pwd + '/' + config_path
                      ))
         lines(compile_file(
                 { content: body },
-                'templates/terraform/examples/base_configs/documentation.tf.erb'
+                pwd + '/templates/terraform/examples/base_configs/documentation.tf.erb'
               ))
       end
 
-      def config_test
-        body = config_test_body
+      def config_test(pwd)
+        body = config_test_body(pwd)
         lines(compile_file(
                 {
                   content: body
                 },
-                'templates/terraform/examples/base_configs/test_body.go.erb'
+                pwd + '/templates/terraform/examples/base_configs/test_body.go.erb'
               ))
       end
 
       # rubocop:disable Style/FormatStringToken
-      def config_test_body
+      def config_test_body(pwd)
         @vars ||= {}
         @test_env_vars ||= {}
         @test_vars_overrides ||= {}
@@ -189,13 +189,13 @@ module Provider
                          test_env_vars: test_env_vars.map { |k, _| [k, "%{#{k}}"] }.to_h,
                          primary_resource_id: primary_resource_id
                        },
-                       config_path
+                       pwd + '/' + config_path
                      ))
 
         substitute_test_paths body
       end
 
-      def config_example
+      def config_example(pwd)
         @vars ||= []
         @oics_vars_overrides ||= {}
 
@@ -207,7 +207,7 @@ module Provider
                          vars: rand_vars.merge(oics_vars_overrides),
                          primary_resource_id: primary_resource_id
                        },
-                       config_path
+                       pwd + '/' + config_path
                      ))
 
         substitute_example_paths body

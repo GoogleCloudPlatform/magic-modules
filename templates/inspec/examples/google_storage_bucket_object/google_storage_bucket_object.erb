@@ -1,8 +1,8 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% gcp_storage_bucket_object = "#{external_attribute('gcp_storage_bucket_object', doc_generation)}" -%>
-<% gcp_service_account_display_name = "#{external_attribute('gcp_service_account_display_name', doc_generation)}" -%>
-<% gcp_storage_bucket_object_name = "#{external_attribute('gcp_storage_bucket_object_name', doc_generation)}" -%>
-<% gcp_enable_privileged_resources = "#{external_attribute('gcp_enable_privileged_resources', doc_generation)}" -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% gcp_storage_bucket_object = "#{external_attribute(pwd, 'gcp_storage_bucket_object', doc_generation)}" -%>
+<% gcp_service_account_display_name = "#{external_attribute(pwd, 'gcp_service_account_display_name', doc_generation)}" -%>
+<% gcp_storage_bucket_object_name = "#{external_attribute(pwd, 'gcp_storage_bucket_object_name', doc_generation)}" -%>
+<% gcp_enable_privileged_resources = "#{external_attribute(pwd, 'gcp_enable_privileged_resources', doc_generation)}" -%>
 describe google_storage_bucket_object(bucket: <%= gcp_storage_bucket_object -%>, object: <%= gcp_storage_bucket_object_name -%>) do
   it { should exist }
   its('size.to_i') { should be > 0 }
