@@ -47,7 +47,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - This module does not create any node pools (including default). Please use
         the M(gcp_container_node_pool) module to create node pools.
     transport: !ruby/object:Overrides::Ansible::Transport
-      encoder: encode_request
+      encoders:
+        - encode_request
     properties:
       locations: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ['nodeLocations']
@@ -66,7 +67,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - 'products/container/helpers/python/kubectl.py'
   NodePool: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
-      encoder: encode_request
+      encoders:
+        - encode_request
     provider_helpers:
       - 'products/container/helpers/python/provider_node_pool.py'
     properties:

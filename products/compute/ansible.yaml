@@ -101,7 +101,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     provider_helpers:
       - 'products/compute/helpers/python/provider_firewall.py'
     transport: !ruby/object:Overrides::Ansible::Transport
-      encoder: encode_request
+      encoders:
+        - encode_request
     tests: !ruby/object:Provider::Ansible::Tests
       tests:
         - !ruby/object:Provider::Ansible::Test
@@ -222,8 +223,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - 'products/compute/helpers/python/instancegroup_instances.py'
   Instance: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
-      encoder: encode_request
-      decoder: decode_response
+      encoders:
+        - encode_request
+      decoders:
+        - decode_response
     hidden:
       - deletion_protection_update
       - shielded_instance_config_update
@@ -253,8 +256,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           SSH already configured
   InstanceTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
-      encoder: encode_request
-      decoder: decode_response
+      encoders:
+        - encode_request
+      decoders:
+        - decode_response
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance_template.py'
       - 'products/compute/helpers/python/instance_metadata.py'
@@ -302,8 +307,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
   TargetPool: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
-      encoder: encode_request
-      decoder: decode_response
+      encoders:
+        - encode_request
+      decoders:
+        - decode_response
     provider_helpers:
       - 'products/compute/helpers/python/provider_target_pool.py'
   TargetVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride

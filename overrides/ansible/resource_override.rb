@@ -19,16 +19,42 @@ require 'provider/ansible/tests'
 module Overrides
   module Ansible
     # Allows overriding snowflake transport requests
+    # Each one of these takes in a filename or a function name.
+    # If filename, each file should contain one Python file.
     class Transport < Api::Object
-      attr_reader :encoder
-      attr_reader :decoder
+      include Compile::Core
+
+      attr_reader :encoders
+      attr_reader :decoders
       attr_reader :remove_nones_post_encoder
 
       def validate
         super
-        check :encoder, type: ::String
-        check :decoder, type: ::String
+        check :encoders, type: ::Array, default: [], item_type: ::String
+        check :decoders, type: ::Array, default: [], item_type: ::String
         check :remove_nones_post_encoder, type: :boolean, default: true
+      end
+
+      def encoder_functions
+        function_names(@encoders)
+      end
+
+      def decoder_functions
+        function_names(@decoders)
+      end
+
+      private
+
+      # Given an array of files that contain a single function and function names,
+      # return the list of function names
+      def function_names(array)
+        array.map do |e|
+          if File.file?(e)
+            compile(e).match(/def ([a-zA-Z_]*)\([a-zA-Z_]*, [a-zA-Z_]*\)/)[1]
+          else
+            e
+          end
+        end
       end
     end
 
@@ -69,7 +95,8 @@ module Overrides
         check :imports, type: ::Array, default: [], item_type: String
         check :notes, type: ::Array, item_type: String
         check :provider_helpers, type: ::Array, default: [], item_type: String
-        check :transport, type: Transport
+        check :return_if_object, type: ::String
+        check :transport, type: Transport, default: Transport.new
         check :template, type: ::String
         check :update, type: ::String
         check :unwrap_resource, type: :boolean, default: false

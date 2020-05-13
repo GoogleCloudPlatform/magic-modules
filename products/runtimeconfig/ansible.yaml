@@ -24,7 +24,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     provider_helpers:
       - 'products/runtimeconfig/helpers/ansible/variable_delete_config.py'
     transport: !ruby/object:Overrides::Ansible::Transport
-      encoder: encode_request
+      encoders:
+        - encode_request
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>
