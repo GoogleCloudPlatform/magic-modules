@@ -24,6 +24,41 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/cloudiot_device_registry.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/cloudiot_device_registry.go.erb
       pre_update: templates/terraform/pre_update/cloudiot_device_registry.go.erb
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |+
+        * `state_notification_config` - A PubSub topic to publish device state updates.
+          The structure is documented below.
+
+        * `mqtt_config` - Activate or deactivate MQTT.
+          The structure is documented below.
+
+        * `http_config` - Activate or deactivate HTTP.
+          The structure is documented below.
+
+        * `credentials` - List of public key certificates to authenticate devices.
+          The structure is documented below.
+
+        The `state_notification_config` block supports:
+
+        * `pubsub_topic_name` - PubSub topic name to publish device state updates.
+
+        The `mqtt_config` block supports:
+
+        * `mqtt_enabled_state` - The field allows `MQTT_ENABLED` or `MQTT_DISABLED`.
+
+        The `http_config` block supports:
+
+        * `http_enabled_state` - The field allows `HTTP_ENABLED` or `HTTP_DISABLED`.
+
+        The `credentials` block supports:
+
+        * `public_key_certificate` - A public key certificate format and data.
+
+        The `public_key_certificate` block supports:
+
+        * `format` - The field allows only `X509_CERTIFICATE_PEM`.
+
+        * `certificate` - The certificate data.
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudiot_device_registry_basic"
