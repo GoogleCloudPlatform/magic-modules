@@ -191,7 +191,7 @@ module Provider
         substitute_test_paths body
       end
 
-      def config_example
+      def config_example(pwd)
         @vars ||= []
         # Examples with test_env_vars are skipped elsewhere
         body = lines(compile_file(
@@ -199,7 +199,7 @@ module Provider
                          vars: vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h,
                          primary_resource_id: primary_resource_id
                        },
-                       config_path
+                       pwd + '/' + config_path
                      ))
 
         substitute_example_paths body
