@@ -153,14 +153,12 @@ func TestAccComposerEnvironment_private(t *testing.T) {
 				ResourceName:      "google_composer_environment.test",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"config.0.web_server_network_access_control"},
 			},
 			{
 				ResourceName:      "google_composer_environment.test",
 				ImportState:       true,
 				ImportStateId:     fmt.Sprintf("projects/%s/locations/%s/environments/%s", getTestProjectFromEnv(), "us-central1", envName),
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"config.0.web_server_network_access_control"},
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
 			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
