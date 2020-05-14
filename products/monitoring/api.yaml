@@ -1249,7 +1249,7 @@ objects:
             Exactly one of the following must be set:
             `basic_sli`, `request_based_sli`, `windows_based_sli`
           properties:
-            # NOTE: If adding properties to requestBasedSli, remember to add to the
+            # NOTE: If adding properties to windowsBasedSli, remember to add to the
             # custom updateMask fields in property overrides.
             - !ruby/object:Api::Type::String
               name: windowPeriod
