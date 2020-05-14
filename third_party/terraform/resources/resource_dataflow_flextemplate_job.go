@@ -267,32 +267,13 @@ func resourceDataflowFlexTemplateJobGetJob(config *Config, project string, regio
 // }
 
 func buildLaunchFlexTemplateRequest(d *schema.ResourceData, config *Config) (dataflow.LaunchFlexTemplateRequest, error) {
-	// zone, err := getZone(d, config)
-	// if err != nil {
-	// 	return dataflow.RuntimeEnvironment{}, err
-	// }
-
-	// parameters := convertStringSet(d.Get("parameters").(*schema.Set))
-
 	lft := dataflow.LaunchFlexTemplateRequest{
 		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
 			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
 			JobName:              d.Get("name").(string),
-			Parameters:           d.Get("parameters").(map[string]string),
+			Parameters:           convertStringMap(d, "parameters"),
 		},
 	}
 
 	return lft, nil
 }
-
-// func resourceDataflowFlexTemplateJobIterateMapForceNew(mapKey string, d *schema.ResourceDiff) {
-// 	obj := d.Get(mapKey).(map[string]interface{})
-// 	for k := range obj {
-// 		entrySchemaKey := mapKey + "." + k
-// 		if d.HasChange(entrySchemaKey) {
-// 			// ForceNew must be called on the parent map to trigger
-// 			d.ForceNew(mapKey)
-// 			break
-// 		}
-// 	}
-// }
