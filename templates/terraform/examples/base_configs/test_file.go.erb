@@ -39,6 +39,9 @@ object.examples
 -%>
 
 func TestAcc<%= test_slug -%>(t *testing.T) {
+<% if example.skip_vcr -%>
+	skipIfVcr(t)
+<% end -%>
   t.Parallel()
 
 	context := map[string]interface{} {
