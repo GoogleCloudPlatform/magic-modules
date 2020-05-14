@@ -119,6 +119,12 @@ module Provider
       # Defaults to `templates/terraform/examples/{{name}}.tf.erb`
       attr_reader :config_path
 
+      # If the example should be skipped during VCR testing.
+      # This is the case when something about the resource or config causes VCR to fail for example
+      # a resource with a unique identifier generated within the resource via resource.UniqueId()
+      # Or a config with two fine grained resources that have a race condition during create
+      attr_reader :skip_vcr
+
       def config_documentation(pwd)
         docs_defaults = {
           PROJECT_NAME: 'my-project-name',
@@ -262,6 +268,7 @@ module Provider
         check :primary_resource_name, type: String
         check :skip_test, type: TrueClass
         check :config_path, type: String, default: "templates/terraform/examples/#{name}.tf.erb"
+        check :skip_vcr, type: TrueClass
       end
     end
   end
