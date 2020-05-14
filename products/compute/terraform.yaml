@@ -1961,14 +1961,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_basic"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
         ignore_read_extra:
           - "name_prefix"
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_random_provider"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_target_https_proxies"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
         vars:
           target_https_proxy_name: "test-proxy"
           url_map_name: "url-map"
@@ -2006,14 +2012,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "region_ssl_certificate_basic"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
         ignore_read_extra:
           - "name_prefix"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_ssl_certificate_random_provider"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
       - !ruby/object:Provider::Terraform::Examples
         name: "region_ssl_certificate_target_https_proxies"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
         vars:
           region_target_https_proxy_name: "test-proxy"
           region_url_map_name: "url-map"
