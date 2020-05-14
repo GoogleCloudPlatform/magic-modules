@@ -15,9 +15,9 @@ import (
 
 func resourceDataflowFlexTemplateJob() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDataflowFlexTemplateJobCreate,
+		Create: resourceDataflowFlexTemplateJobLaunchTemplate,
 		Read:   resourceDataflowFlexTemplateJobRead,
-		Update: resourceDataflowFlexTemplateJobUpdateByReplacement,
+		// Update: resourceDataflowFlexTemplateJobUpdateByReplacement,
 		Delete: resourceDataflowFlexTemplateJobDelete,
 		// CustomizeDiff: customdiff.All(
 		// 	resourceDataflowJobTypeCustomizeDiff,
@@ -238,8 +238,7 @@ func resourceDataflowFlexTemplateJobMapRequestedState(policy string) (string, er
 	}
 }
 
-func resourceDataflowFlexTemplateJobCreateJob(config *Config, project string, region string, request *dataflow.LaunchFlexTemplateRequest) (*dataflow.Job, error) {
-
+func resourceDataflowFlexTemplateJobLaunchTemplate(config *Config, project string, region string, request *dataflow.LaunchFlexTemplateRequest) (*dataflow.Job, error) {
 	response, err := config.clientDataflow.Projects.Locations.FlexTemplates.Launch(project, region, request).Do()
 	if err != nil {
 		return nil, err
@@ -252,6 +251,8 @@ func resourceDataflowFlexTemplateJobGetJob(config *Config, project string, regio
 	return config.clientDataflow.Projects.Locations.Jobs.Get(project, region, id).View("JOB_VIEW_ALL").Do()
 }
 
+// Streaming jobs cannot be updated:
+// https://cloud.google.com/dataflow/docs/guides/templates/using-flex-templates#limitations
 // func resourceDataflowFlexTemplateJobUpdateJob(config *Config, project string, region string, id string, job *dataflow.Job) (*dataflow.Job, error) {
 // 	if region == "" {
 // 		return config.clientDataflow.Projects.Jobs.Update(project, id, job).Do()
@@ -259,21 +260,12 @@ func resourceDataflowFlexTemplateJobGetJob(config *Config, project string, regio
 // 	return config.clientDataflow.Projects.Locations.Jobs.Update(project, region, id, job).Do()
 // }
 
-// func resourceDataflowFlexTemplateJobLaunchTemplate(config *Config, project string, region string, gcsPath string, request *dataflow.LaunchTemplateParameters) (*dataflow.LaunchTemplateResponse, error) {
-// 	if region == "" {
-// 		return config.clientDataflow.Projects.Templates.Launch(project, request).GcsPath(gcsPath).Do()
-// 	}
-// 	return config.clientDataflow.Projects.Locations.Templates.Launch(project, region, request).GcsPath(gcsPath).Do()
-// }
-
-func buildLaunchFlexTemplateRequest(d *schema.ResourceData, config *Config) (dataflow.LaunchFlexTemplateRequest, error) {
-	lft := dataflow.LaunchFlexTemplateRequest{
+func buildLaunchFlexTemplateRequest(d *schema.ResourceData, config *Config) dataflow.LaunchFlexTemplateRequest {
+	return dataflow.LaunchFlexTemplateRequest{
 		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
 			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
 			JobName:              d.Get("name").(string),
 			Parameters:           convertStringMap(d, "parameters"),
 		},
 	}
-
-	return lft, nil
 }
