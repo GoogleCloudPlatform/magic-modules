@@ -1,0 +1,183 @@
+<% autogen_exception -%>
+<% unless version == 'ga' -%>
+package google
+
+import (
+	"fmt"
+	"log"
+	"strings"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	dataflow "google.golang.org/api/dataflow/v1b3"
+	"google.golang.org/api/googleapi"
+)
+
+func resourceDataflowFlexTemplateJob() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceDataflowFlexTemplateJobCreate,
+		Read:   resourceDataflowFlexTemplateJobRead,
+		Update: resourceDataflowFlexTemplateJobUpdateByReplacement,
+		Delete: resourceDataflowJobDelete,
+		Schema: map[string]*schema.Schema{
+
+			"container_spec_gcs_path": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Required: true,
+			},
+
+			"job_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"labels": {
+				Type:             schema.TypeMap,
+				Optional:         true,
+				DiffSuppressFunc: resourceDataflowJobLabelDiffSuppress,
+			},
+
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+
+			"on_delete": {
+				Type:         schema.TypeString,
+				ValidateFunc: validation.StringInSlice([]string{"cancel", "drain"}, false),
+				Optional:     true,
+				Default:      "drain",
+			},
+
+			"parameters": {
+				Type:     schema.TypeMap,
+				ForceNew: true,
+				Optional: true,
+			},
+
+			"project": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				// ForceNew applies to both stream and batch jobs
+				ForceNew: true,
+			},
+
+			"state": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	}
+}
+
+func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+
+	project, err := getProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	region, err := getRegion(d, config)
+	if err != nil {
+		return err
+	}
+
+	request := buildLaunchFlexTemplateRequest(d, config)
+
+	job, err := resourceDataflowFlexTemplateJobLaunchTemplate(config, project, region, &request)
+	if err != nil {
+		return err
+	}
+	d.SetId(job.Id)
+
+	return resourceDataflowFlexTemplateJobRead(d, meta)
+}
+
+func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+
+	project, err := getProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	region, err := getRegion(d, config)
+	if err != nil {
+		return err
+	}
+
+	id := d.Id()
+
+	job, err := resourceDataflowJobGetJob(config, project, region, id)
+	if err != nil {
+		return handleNotFoundError(err, d, fmt.Sprintf("Dataflow job %s", id))
+	}
+
+	d.Set("state", job.CurrentState)
+	d.Set("name", job.Name)
+	d.Set("project", project)
+	d.Set("labels", job.Labels)
+
+	if _, ok := dataflowTerminalStatesMap[job.CurrentState]; ok {
+		log.Printf("[DEBUG] Removing resource '%s' because it is in state %s.\n", job.Name, job.CurrentState)
+		d.SetId("")
+		return nil
+	}
+	d.SetId(job.Id)
+
+	return nil
+}
+
+// resourceDataflowFlexTemplateJobUpdateByReplacement updates a Flex Template job by replacement.
+func resourceDataflowFlexTemplateJobUpdateByReplacement(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+
+	project, err := getProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	region, err := getRegion(d, config)
+	if err != nil {
+		return err
+	}
+
+	request := buildLaunchFlexTemplateRequest(d, config)
+
+	var job *dataflow.Job
+	err = retryTimeDuration(func() (updateErr error) {
+		job, updateErr = resourceDataflowFlexTemplateJobLaunchTemplate(config, project, region, &request)
+		return updateErr
+	}, time.Minute*time.Duration(5), isDataflowJobUpdateRetryableError)
+	if err != nil {
+		return err
+	}
+	d.SetId(job.Id)
+	return resourceDataflowJobRead(d, meta)
+}
+
+// resourceDataflowFlexTemplateJobLaunchTemplate Launches a Flex Template Job
+func resourceDataflowFlexTemplateJobLaunchTemplate(config *Config, project string, region string, request *dataflow.LaunchFlexTemplateRequest) (*dataflow.Job, error) {
+	response, err := config.clientDataflow.Projects.Locations.FlexTemplates.Launch(project, region, request).Do()
+	if err != nil {
+		return nil, err
+	}
+	return response.Job, nil
+}
+
+func buildLaunchFlexTemplateRequest(d *schema.ResourceData, config *Config) dataflow.LaunchFlexTemplateRequest {
+	return dataflow.LaunchFlexTemplateRequest{
+		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
+			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
+			JobName:              d.Get("name").(string),
+			Parameters:           expandStringMap(d, "parameters"),
+		},
+	}
+}
+<% end -%>
