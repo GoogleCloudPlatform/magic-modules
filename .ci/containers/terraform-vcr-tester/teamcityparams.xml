@@ -1,0 +1,8 @@
+<build>
+    <buildType id="GoogleCloud_ProviderGoogleCloudMmUpstreamVcr"/>
+    <properties>
+    	<property name="TEST_PATTERN" value="TestAccPubsubTopic_updateREST"/>
+    	<property name="BRANCH_NAME" value="refs/heads/auto-pr-{{PR_NUMBER}}"/>
+    </properties>
+    <comment><text>Magician triggered PR</text></comment>
+</build>
