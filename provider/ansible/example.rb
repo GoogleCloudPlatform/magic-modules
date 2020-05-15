@@ -229,7 +229,7 @@ module Provider
       attr_reader :reason
       def validate() end
 
-      def build_task(_state, _object)
+      def build_task(_state, _object, _pwd)
         ''
       end
     end
@@ -262,9 +262,9 @@ module Provider
         true
       end
 
-      def build_task(_state, object)
+      def build_task(_state, object, pwd)
         @parameters = build_parameters(object)
-        compile 'templates/ansible/verifiers/facts.yaml.erb'
+        compile(pwd + '/templates/ansible/verifiers/facts.yaml.erb')
       end
 
       private

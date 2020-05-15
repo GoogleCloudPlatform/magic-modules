@@ -1,6 +1,6 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% gcp_kube_cluster_name = "#{external_attribute('gcp_kube_cluster_name', doc_generation)}" -%>
-<% gcp_kube_cluster_zone = "#{external_attribute('gcp_kube_cluster_zone', doc_generation)}" -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% gcp_kube_cluster_name = "#{external_attribute(pwd, 'gcp_kube_cluster_name', doc_generation)}" -%>
+<% gcp_kube_cluster_zone = "#{external_attribute(pwd, 'gcp_kube_cluster_zone', doc_generation)}" -%>
 describe google_container_clusters(project: <%= gcp_project_id -%>, location: <%= gcp_kube_cluster_zone -%>) do
   its('cluster_names') { should include <%= gcp_kube_cluster_name -%> }
 end

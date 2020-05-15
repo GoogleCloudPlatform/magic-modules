@@ -146,8 +146,32 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
         vars:
-          service_id: "custom-srv"
+          service_id: "custom-srv-request-slos"
           slo_id: "consumed-api-slo"
+      - !ruby/object:Provider::Terraform::Examples
+        name: 'monitoring_slo_windows_based_good_bad_metric_filter'
+        primary_resource_id: "windows_based"
+        vars:
+          service_id: "custom-srv-windows-slos"
+          slo_id: "good-bad-metric-filter"
+      - !ruby/object:Provider::Terraform::Examples
+        name: 'monitoring_slo_windows_based_metric_mean'
+        primary_resource_id: "windows_based"
+        vars:
+          service_id: "custom-srv-windows-slos"
+          slo_id: "metric-mean-range"
+      - !ruby/object:Provider::Terraform::Examples
+        name: 'monitoring_slo_windows_based_metric_sum'
+        primary_resource_id: "windows_based"
+        vars:
+          service_id: "custom-srv-windows-slos"
+          slo_id: "metric-sum-range"
+      - !ruby/object:Provider::Terraform::Examples
+        name: 'monitoring_slo_windows_based_ratio_threshold'
+        primary_resource_id: "windows_based"
+        vars:
+          service_id: "custom-srv-windows-slos"
+          slo_id: "ratio-threshold"
     properties:
       rollingPeriodDays: !ruby/object:Overrides::Terraform::PropertyOverride
         api_name: rollingPeriod
@@ -178,9 +202,31 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "serviceLevelIndicator.requestBased.goodTotalRatio.badServiceFilter"
           - "serviceLevelIndicator.requestBased.goodTotalRatio.goodServiceFilter"
           - "serviceLevelIndicator.requestBased.goodTotalRatio.totalServiceFilter"
-          - "serviceLevelIndicator.requestBased.distributionCut.range.min"
-          - "serviceLevelIndicator.requestBased.distributionCut.range.max"
+          - "serviceLevelIndicator.requestBased.distributionCut.range"
           - "serviceLevelIndicator.requestBased.distributionCut.distributionFilter"
+      serviceLevelIndicator.windowsBasedSli: !ruby/object:Overrides::Terraform::PropertyOverride
+        # Force update nested fields to allow for unsetting values.
+        update_mask_fields:
+          - "serviceLevelIndicator.windowsBased.windowPeriod"
+          - "serviceLevelIndicator.windowsBased.goodBadMetricFilter"
+          - "serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.threshold"
+          - "serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.performance.goodTotalRatio.badServiceFilter"
+          - "serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.performance.goodTotalRatio.goodServiceFilter"
+          - "serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.performance.goodTotalRatio.totalServiceFilter"
+          - "serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.performance.distributionCut.range"
+          - "serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.performance.distributionCut.distributionFilter"
+          - "serviceLevelIndicator.windowsBased.goodTotalRatioThreshold.basicSliPerformance"
+          - "serviceLevelIndicator.windowsBased.metricMeanInRange.timeSeries"
+          - "serviceLevelIndicator.windowsBased.metricMeanInRange.range"
+          - "serviceLevelIndicator.windowsBased.metricSumInRange.timeSeries"
+          - "serviceLevelIndicator.windowsBased.metricSumInRange.range"
+      serviceLevelIndicator.windowsBasedSli.goodTotalRatioThreshold.basicSliPerformance.method: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      serviceLevelIndicator.windowsBasedSli.goodTotalRatioThreshold.basicSliPerformance.location: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      serviceLevelIndicator.windowsBasedSli.goodTotalRatioThreshold.basicSliPerformance.version: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/monitoring_slo.go.erb
       custom_import: templates/terraform/custom_import/self_link_as_name.erb

@@ -1,6 +1,6 @@
-<% record_set = grab_attributes['record_set'] -%>
-<% managed_zone = grab_attributes['managed_zone'] -%>
-describe google_dns_resource_record_sets(project: <%= "#{external_attribute('gcp_project_id', doc_generation)}" -%>, name: <%= doc_generation ? "'#{record_set['name']}'" : "record_set['name']" -%>, managed_zone: <%= doc_generation ? "'#{managed_zone['name']}'" : "managed_zone['name']" -%>) do
+<% record_set = grab_attributes(pwd)['record_set'] -%>
+<% managed_zone = grab_attributes(pwd)['managed_zone'] -%>
+describe google_dns_resource_record_sets(project: <%= "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>, name: <%= doc_generation ? "'#{record_set['name']}'" : "record_set['name']" -%>, managed_zone: <%= doc_generation ? "'#{managed_zone['name']}'" : "managed_zone['name']" -%>) do
   its('count') { should eq 3 }
   its('types') { should include <%= doc_generation ? "'#{record_set['type']}'" : "record_set['type']" -%> }
   its('ttls') { should include <%= doc_generation ? "'#{record_set['ttl']}'" : "record_set['ttl']" -%> }

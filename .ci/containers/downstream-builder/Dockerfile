@@ -9,8 +9,7 @@ RUN go get github.com/github/hub
 RUN ssh-keyscan github.com >> /known_hosts
 RUN echo "UserKnownHostsFile /known_hosts" >> /etc/ssh/ssh_config
 
-ENV GOFLAGS "-mod=vendor"
-ENV GO111MODULE "off"
+ENV GO111MODULE "on"
 
 # Install Ruby from source.
 RUN apt-get update
