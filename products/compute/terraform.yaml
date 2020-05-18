@@ -1680,6 +1680,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
     # Route cannot be added while a peering is on progress on the network
     mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
+    error_retry_predicates: ["isPeeringOperationInProgress"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "route_basic"
