@@ -83,17 +83,6 @@ func clusterSchemaNodeConfig() *schema.Schema {
 	return nodeConfigSch
 }
 
-func changeFieldSchemaToForceNew(sch *schema.Schema) {
-	sch.ForceNew = true
-	if sch.Type == schema.TypeList {
-		if nestedR, ok := sch.Elem.(*schema.Resource); ok {
-			for _, nestedSch := range nestedR.Schema {
-				changeFieldSchemaToForceNew(nestedSch)
-			}
-		}
-	}
-}
-
 func rfc5545RecurrenceDiffSuppress(k, o, n string, d *schema.ResourceData) bool {
 	// This diff gets applied in the cloud console if you specify
 	// "FREQ=DAILY" in your config and add a maintenance exclusion.
