@@ -175,6 +175,12 @@ The `condition` block supports:
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
+* `id` - an identifier for the resource google_service_account_iam_policy with format `projects/{{project}}/serviceAccounts/{{email}}`
+
+* `id` - an identifier for the resource google_service_account_iam_binding  with format `projects/{{project}}/serviceAccounts/{{email}}/roles/{{role}}`
+
+* `id` - an identifier for the resource google_service_account_iam_member with format `projects/{{project}}/serviceAccounts/{{email}}/roles/{{role}}/user:jane@example.com`
+
 * `etag` - (Computed) The etag of the service account IAM policy.
 
 ## Import

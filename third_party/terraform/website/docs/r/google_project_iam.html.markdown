@@ -211,6 +211,12 @@ The `condition` block supports:
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
+* `id` - an identifier for the resource google_project_iam_member with format `projects/{{project}}/roles/{{role}}/user:foo@example.com`
+
+* `id` - an identifier for the resource google_project_iam_binding with format `projects/{{project}}//roles/{{role}}`
+
+* `id` - an identifier for the resource google_project_iam_policy with format `projects/{{project}}`
+
 * `etag` - (Computed) The etag of the project's IAM policy.
 
 

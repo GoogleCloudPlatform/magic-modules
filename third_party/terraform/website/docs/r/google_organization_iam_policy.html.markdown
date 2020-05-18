@@ -53,6 +53,12 @@ The following arguments are supported:
     the IAM policy that will be applied to the organization. This policy overrides any existing
     policy applied to the organization.
 
+## Attributes Reference
+
+In addition to the arguments listed above, the following computed attributes are exported:
+
+* `id` - an identifier for the resource with format `{{organization}}`
+
 ## Import
 
 ```
