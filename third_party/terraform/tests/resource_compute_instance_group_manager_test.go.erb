@@ -275,7 +275,7 @@ func TestAccInstanceGroupManager_stateful(t *testing.T) {
 	igm := fmt.Sprintf("igm-test-%s", randString(t, 10))
 	hck := fmt.Sprintf("igm-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckInstanceGroupManagerDestroyProducer(t),
