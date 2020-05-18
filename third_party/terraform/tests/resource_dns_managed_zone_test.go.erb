@@ -120,7 +120,6 @@ func TestAccDNSManagedZone_dnssec_empty(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
 func TestAccDNSManagedZone_privateForwardingUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -150,7 +149,6 @@ func TestAccDNSManagedZone_privateForwardingUpdate(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 <% unless version.nil? || version == 'ga' -%>
 func TestAccDNSManagedZone_reverseLookup(t *testing.T) {
@@ -288,7 +286,6 @@ resource "google_compute_network" "network-3" {
 `, suffix, first_network, second_network, suffix, suffix, suffix)
 }
 
-<% unless version.nil? || version == 'ga' -%>
 func testAccDnsManagedZone_privateForwardingUpdate(suffix, first_nameserver, second_nameserver, first_forwarding_path, second_forwarding_path string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "private" {
@@ -320,7 +317,6 @@ resource "google_compute_network" "network-1" {
 }
 `, suffix, first_nameserver, first_forwarding_path, second_nameserver, second_forwarding_path, suffix)
 }
-<% end -%>
 
 <% unless version.nil? || version == 'ga' -%>
 func testAccDnsManagedZone_reverseLookup(suffix string) string {
