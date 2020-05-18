@@ -16,7 +16,11 @@ name: SecretManager
 display_name: Secret Manager
 versions:
   - !ruby/object:Api::Product::Version
+    name: ga
     base_url: https://secretmanager.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://secretmanager.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
