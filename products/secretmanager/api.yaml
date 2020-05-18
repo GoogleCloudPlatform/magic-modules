@@ -16,8 +16,7 @@ name: SecretManager
 display_name: Secret Manager
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://secretmanager.googleapis.com/v1beta1/
+    base_url: https://secretmanager.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -27,7 +26,6 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: Secret
-    min_version: beta
     self_link: projects/{{project}}/secrets/{{secret_id}}
     base_url: projects/{{project}}/secrets
     create_url: projects/{{project}}/secrets?secretId={{secret_id}}
@@ -38,7 +36,7 @@ objects:
       method_name_separator: ':'
       exclude: false
     references: !ruby/object:Api::Resource::ReferenceLinks
-      api: 'https://cloud.google.com/secret-manager/docs/reference/rest/v1beta1/projects.secrets'
+      api: 'https://cloud.google.com/secret-manager/docs/reference/rest/v1/projects.secrets'
     description: |
       A Secret is a logical secret whose value and versions can be accessed.
     parameters:
@@ -114,7 +112,6 @@ objects:
                         The canonical IDs of the location to replicate data. For example: "us-east1".
   - !ruby/object:Api::Resource
     name: SecretVersion
-    min_version: beta
     base_url: '{{name}}'
     self_link: '{{name}}'
     create_url: '{{secret}}:addVersion'
