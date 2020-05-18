@@ -169,8 +169,13 @@ The `condition` block supports:
   
 ## Attributes Reference
 
-In addition to the arguments listed above, the following computed attributes are
-exported:
+In addition to the arguments listed above, the following computed attributes are exported:
+
+* `id` - an identifier for the resource google_kms_crypto_key_iam_member with format `projects/{{project}}/locations/{{location}}/keyRings/{{key-ring-name}}/cryptoKeys/{{key-name}}/roles/{{role}}/user:foo@example.com`
+
+* `id` - an identifier for the resource google_kms_crypto_key_iam_binding with format `projects/sunedward-1-autotest/locations/{{location}}/keyRings/{{key-ring-name}}/cryptoKeys/{{key-name}}/roles/{{role}}`
+
+* `id` - an identifier for the resource google_kms_crypto_key_iam_policy with format `projects/sunedward-1-autotest/locations/{{location}}/keyRings/{{key-ring-name}}/cryptoKeys/{{key-name}}`
 
 * `etag` - (Computed) The etag of the project's IAM policy.
 
