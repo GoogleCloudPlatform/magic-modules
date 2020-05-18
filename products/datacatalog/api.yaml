@@ -131,6 +131,12 @@ objects:
         name: description
         description: |
           Entry description, which can consist of several sentences or paragraphs that describe entry contents.
+      - !ruby/object:Api::Type::String
+        # This is a string instead of a NestedObject because schemas contain ColumnSchemas, which can contain nested ColumnSchemas.
+        # We'll have people provide the json blob for the schema instead.
+        name: schema
+        description: |
+          Schema of the entry (e.g. BigQuery, GoogleSQL, Avro schema). An entry might not have any schema attached to it.
       - !ruby/object:Api::Type::Enum
         name: type
         description: |

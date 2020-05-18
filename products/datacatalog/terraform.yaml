@@ -14,6 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   EntryGroup: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "data_catalog_entry_group_basic"
@@ -36,23 +37,38 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      custom_import: templates/terraform/custom_import/data_catalog_entry_group.go.erb
   Entry: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["{{name}}"]
     supports_indirect_user_project_override: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "data_catalog_entry_basic"
         primary_resource_id: "basic_entry"
         vars:
-          entry_id: "my_group"
+          entry_id: "my_entry"
+          entry_group_id: "my_group"
       - !ruby/object:Provider::Terraform::Examples
         name: "data_catalog_entry_fileset"
         primary_resource_id: "basic_entry"
         vars:
           entry_id: "my_entry"
+          entry_group_id: "my_group"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_catalog_entry_full"
+        primary_resource_id: "basic_entry"
+        vars:
+          entry_id: "my_entry"
+          entry_group_id: "my_group"
     properties:
       linkedResource: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      schema: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.ValidateJsonString'
       userSpecifiedSystem: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^[A-z_][A-z0-9_]{0,63}$'
@@ -60,7 +76,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^[A-z_][A-z0-9_]{0,63}$'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      custom_import: templates/terraform/custom_import/data_catalog_entry.go.erb
   # TagTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
   #   examples:
   #     - !ruby/object:Provider::Terraform::Examples
