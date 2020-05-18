@@ -1,5 +1,6 @@
 FROM alpine
 
+RUN apk add --no-cache bash
 RUN apk add --no-cache curl
 RUN apk add --no-cache jq
 
