@@ -42,28 +42,24 @@ func resourceBigtableInstance() *schema.Resource {
 		// ----------------------------------------------------------------------
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: `The name (also called Instance Id in the Cloud Console) of the Cloud Bigtable instance.`,
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 
 			"cluster": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Computed:    true,
-				Description: `A block of cluster configuration options. This can be specified 1 or 2 times.`,
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"cluster_id": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: `The ID of the Cloud Bigtable cluster.`,
+							Type:     schema.TypeString,
+							Required: true,
 						},
 						"zone": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: `The zone to create the Cloud Bigtable cluster in. Each cluster must have a different zone in the same region. Zones that support Bigtable instances are noted on the Cloud Bigtable locations page.`,
+							Type:     schema.TypeString,
+							Required: true,
 						},
 						"num_nodes": {
 							Type:     schema.TypeInt,
@@ -72,23 +68,20 @@ func resourceBigtableInstance() *schema.Resource {
 							// so mark as computed.
 							Computed:     true,
 							ValidateFunc: validation.IntAtLeast(1),
-							Description:  `The number of nodes in your Cloud Bigtable cluster. Required, with a minimum of 1 for a PRODUCTION instance. Must be left unset for a DEVELOPMENT instance.`,
 						},
 						"storage_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Default:      "SSD",
 							ValidateFunc: validation.StringInSlice([]string{"SSD", "HDD"}, false),
-							Description:  `The storage type to use. One of "SSD" or "HDD". Defaults to "SSD".`,
 						},
 					},
 				},
 			},
 			"display_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: `The human-readable display name of the Bigtable instance. Defaults to the instance name.`,
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
 			},
 
 			"instance_type": {
@@ -96,22 +89,19 @@ func resourceBigtableInstance() *schema.Resource {
 				Optional:     true,
 				Default:      "PRODUCTION",
 				ValidateFunc: validation.StringInSlice([]string{"DEVELOPMENT", "PRODUCTION"}, false),
-				Description:  `The instance type to create. One of "DEVELOPMENT" or "PRODUCTION". Defaults to "PRODUCTION".`,
 			},
 
 			"deletion_protection": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     true,
-				Description: `Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a terraform destroy or terraform apply that would delete the instance will fail.`,
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
 			},
 
 			"project": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				ForceNew:    true,
-				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
 			},
 		},
 	}

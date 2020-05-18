@@ -1,6 +1,4 @@
 resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
-
   name        = "<%= ctx[:vars]['zone_name'] %>"
   dns_name    = "peering.example.com."
   description = "Example private DNS peering zone"
@@ -21,20 +19,12 @@ resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_compute_network" "network-source" {
-  provider = google-beta
-
   name                    = "<%= ctx[:vars]['network_source_name'] %>"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_network" "network-target" {
-  provider = google-beta
-
   name                    = "<%= ctx[:vars]['network_target_name'] %>"
   auto_create_subnetworks = false
 }
 
-provider "google-beta" {
-  region = "us-central1"
-  zone   = "us-central1-a"
-}
