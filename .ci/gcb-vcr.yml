@@ -7,9 +7,6 @@ steps:
           - $_PR_NUMBER
 
 secrets:
-    - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/github-token
-      secretEnv:
-          GITHUB_TOKEN: CiQADkR4NnCVXo1OLSWFuPX7eSiifaOfQVzSYmKi2jZdVbKlfYMSUQBfF82vNAgpvSVyhzM8JsQaP6Oky0SAdoR5fPED5cU3qxsCB9wArmdGcgQoRzP7S6jEWHRcvxv/xauznjkJQMWCORzcbUbk6T7k80bdo2mpqw==
     - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/teamcity-token
       secretEnv:
           TEAMCITY_TOKEN: CiQAth83aZ/jRV0fGJIe6n1gIpVVWpLRfAdyK7+JdWTtpcJ75gUSkwEASc1NF0rpeqYgSujkdQzz3PnSzCqKRnfAPzHEQ8peW07dXuVgOGLIiIk493U00A+YJ7F/r0lUOLJQ/tjdFqgjFsaYF2jA12/yDo9xbnXht9p/0HaYMTs1LlEHpSSmteVXmYtw1Anhi4k3/owwkXqk9lN2wExiZCokoQi5CLcSo6WSfL3Bi2fNBiPEPvufZGuwqfY=
