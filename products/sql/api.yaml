@@ -419,6 +419,22 @@ objects:
           - :PENDING_CREATE
           - :MAINTENANCE
           - :FAILED
+      - !ruby/object:Api::Type::NestedObject
+        name: 'diskEncryptionConfiguration'
+        description: 'Disk encyption settings'
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyName'
+            description: |
+              The KMS key used to encrypt the Cloud SQL instance
+      - !ruby/object:Api::Type::NestedObject
+        name: 'diskEncryptionStatus'
+        description: 'Disk encyption status'
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyVersionName'
+            description: |
+              The KMS key version used to encrypt the Cloud SQL instance
   - !ruby/object:Api::Resource
     name: 'Database'
     kind: 'sql#database'
