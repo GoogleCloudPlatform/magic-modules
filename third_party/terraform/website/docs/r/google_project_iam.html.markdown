@@ -209,7 +209,7 @@ exported:
 
 * `id` - an identifier for the resource google_project_iam_member with format `projects/{{project}}/roles/{{role}}/user:foo@example.com`
 
-* `id` - an identifier for the resource google_project_iam_binding with format `projects/{{project}}//roles/{{role}}`
+* `id` - an identifier for the resource google_project_iam_binding with format `projects/{{project}}/roles/{{role}}`
 
 * `id` - an identifier for the resource google_project_iam_policy with format `projects/{{project}}`
 
@@ -244,4 +244,3 @@ terraform import google_project_iam_audit_config.my_project "your-project-id foo
 
 -> **Custom Roles**: If you're importing a IAM resource with a custom role, make sure to use the
  full name of the custom role, e.g. `[projects/my-project|organizations/my-org]/roles/my-custom-role`.
-
