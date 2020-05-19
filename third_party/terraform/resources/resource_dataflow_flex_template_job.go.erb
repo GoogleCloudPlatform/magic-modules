@@ -15,6 +15,7 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
+// resourceDataflowFlexTemplateJob defines the schema for Dataflow FlexTemplate jobs.
 func resourceDataflowFlexTemplateJob() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDataflowFlexTemplateJobCreate,
@@ -75,6 +76,7 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 	}
 }
 
+// resourceDataflowFlexTemplateJobCreate creates a Flex Template Job from TF code.
 func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
@@ -99,6 +101,7 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 	return resourceDataflowFlexTemplateJobRead(d, meta)
 }
 
+// resourceDataflowFlexTemplateJobRead reads a Flex Template Job resource.
 func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
@@ -162,7 +165,7 @@ func resourceDataflowFlexTemplateJobUpdateByReplacement(d *schema.ResourceData, 
 	return resourceDataflowJobRead(d, meta)
 }
 
-// resourceDataflowFlexTemplateJobLaunchTemplate Launches a Flex Template Job
+// resourceDataflowFlexTemplateJobLaunchTemplate Launches a Flex Template Job.
 func resourceDataflowFlexTemplateJobLaunchTemplate(config *Config, project string, region string, request *dataflow.LaunchFlexTemplateRequest) (*dataflow.Job, error) {
 	response, err := config.clientDataflow.Projects.Locations.FlexTemplates.Launch(project, region, request).Do()
 	if err != nil {
@@ -171,6 +174,7 @@ func resourceDataflowFlexTemplateJobLaunchTemplate(config *Config, project strin
 	return response.Job, nil
 }
 
+// buildLaunchFlexTemplateRequest builds a LaunchFlexTemplateRequest from TF.
 func buildLaunchFlexTemplateRequest(d *schema.ResourceData, config *Config) dataflow.LaunchFlexTemplateRequest {
 	return dataflow.LaunchFlexTemplateRequest{
 		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
