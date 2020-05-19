@@ -227,9 +227,7 @@ objects:
                   values:
                   - :default
                   - :private
-        min_version: beta
       - !ruby/object:Api::Type::NestedObject
-        min_version: beta
         name: 'peeringConfig'
         description: |
           The presence of this field indicates that DNS Peering is enabled for this
