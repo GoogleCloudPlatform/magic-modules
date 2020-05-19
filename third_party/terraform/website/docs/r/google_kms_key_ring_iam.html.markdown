@@ -180,7 +180,7 @@ exported:
 
 * `id` - an identifier for the resource google_kms_key_ring_iam_member with format `projects/{{project}}/locations/{{location}}/keyRings/{{key-ring-name}}/roles/{{role}}/user:foo@example.com`
 
-* `id` - an identifier for the resource google_kms_key_ring_iam_binding with format `projects/{{pproject}}/locations/{{location}}/keyRings/{{key-ring-name}}/roles/{{role}}`
+* `id` - an identifier for the resource google_kms_key_ring_iam_binding with format `projects/{{project}}/locations/{{location}}/keyRings/{{key-ring-name}}/roles/{{role}}`
 
 * `id` - an identifier for the resource google_kms_key_ring_iam_policy with format `projects/{{pproject}}/locations/{{location}}/keyRings/{{key-ring-name}}`
 
