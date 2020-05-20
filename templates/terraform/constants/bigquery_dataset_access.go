@@ -1,7 +1,7 @@
 var bigqueryAccessRoleToPrimitiveMap =  map[string]string {
     "roles/bigquery.dataOwner": "OWNER",
     "roles/bigquery.dataEditor": "WRITER",
-    "roles/bigquery.dataViewer": "VIEWER",
+    "roles/bigquery.dataViewer": "READER",
 }
 
 func resourceBigQueryDatasetAccessRoleDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
