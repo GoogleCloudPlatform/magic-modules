@@ -51,7 +51,7 @@ The `audit_log_config` block supports:
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
-* `id` - an identifier for the resource with format `{{organization}}/audit_config/{{service}}`
+* `id` - an identifier for the resource with format `{{org_id}}/audit_config/{{service}}`
 
 ## Import
 IAM audit config imports use the identifier of the resource in question and the service, e.g.
