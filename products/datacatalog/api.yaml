@@ -1,0 +1,178 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: DataCatalog
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://datacatalog.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Google Cloud Data Catalog API
+    url: https://console.cloud.google.com/apis/library/datacatalog.googleapis.com
+objects:
+  - !ruby/object:Api::Resource
+    name: EntryGroup
+    base_url: projects/{{project}}/locations/{{region}}/entryGroups
+    create_url: projects/{{project}}/locations/{{region}}/entryGroups?entryGroupId={{entry_group_id}}
+    self_link: "{{name}}"
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      An EntryGroup resource represents a logical grouping of zero or more Data Catalog Entry resources.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': https://cloud.google.com/data-catalog/docs
+      api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_attribute: 'entry_group'
+      import_format: ["projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}", "{{entry_group}}"]
+      base_url: projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        url_param_only: true
+        input: true
+        description: |
+          EntryGroup location region.
+      - !ruby/object:Api::Type::String
+        name: entryGroupId
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The id of the entry group to create. The id must begin with a letter or underscore,
+          contain only English letters, numbers and underscores, and be at most 64 characters.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          The resource name of the entry group in URL format. Example: projects/{project}/locations/{location}/entryGroups/{entryGroupId}
+        output: true
+      - !ruby/object:Api::Type::String
+        name: displayName
+        description: |
+          A short name to identify the entry group, for example, "analytics data - jan 2011".
+      - !ruby/object:Api::Type::String
+        name: description
+        description: |
+          Entry group description, which can consist of several sentences or paragraphs that describe entry group contents.
+
+# Blocked on b/155304495
+#   - !ruby/object:Api::Resource
+#     name: TagTemplate
+#     base_url: projects/{{project}}/locations/{{region}}/tagTemplates
+#     self_link: "{{name}}"
+#     create_url: projects/{{project}}/locations/{{region}}/tagTemplates?tagTemplateId={{tag_template_id}}
+#     update_verb: :PATCH
+#     update_mask: true
+#     description: |
+#       A tag template defines a tag, which can have one or more typed fields.
+#       The template is used to create and attach the tag to GCP resources.
+#     references: !ruby/object:Api::Resource::ReferenceLinks
+#       guides:
+#         'Official Documentation': https://cloud.google.com/data-catalog/docs
+#       api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.tagTemplates
+#     parameters:
+#       - !ruby/object:Api::Type::String
+#         name: region
+#         url_param_only: true
+#         input: true
+#         description: |
+#           Template location region.
+#       - !ruby/object:Api::Type::String
+#         name: tagTemplateId
+#         required: true
+#         url_param_only: true
+#         input: true
+#         description: |
+#           The id of the tag template to create.
+#     properties:
+#       - !ruby/object:Api::Type::String
+#         name: name
+#         description: |
+#           The resource name of the tag template in URL format. Example: projects/{project_id}/locations/{location}/tagTemplates/{tagTemplateId}
+#         output: true
+#       - !ruby/object:Api::Type::String
+#         name: displayName
+#         description: |
+#          The display name for this template.
+#       - !ruby/object:Api::Type::Map
+#         name: fields
+#         description: |
+#           Map of tag template field IDs to the settings for the field. This map is an exhaustive list of the allowed fields. This map must contain at least one field and at most 500 fields.
+#         required: true
+#         key_name: field_id
+#         value_type: !ruby/object:Api::Type::NestedObject
+#           name: field
+#           properties:
+#             - !ruby/object:Api::Type::String
+#               name: name
+#               description: |
+#                 The resource name of the tag template field in URL format. Example: projects/{project_id}/locations/{location}/tagTemplates/{tagTemplateId}/fields/{field}
+#               output: true
+#             - !ruby/object:Api::Type::String
+#               name: displayName
+#               description: |
+#                The display name for this field.
+#             - !ruby/object:Api::Type::NestedObject
+#               name: type
+#               description: |
+#                 The type of value this tag field can contain.
+#               required: true
+#               properties:
+#                 - !ruby/object:Api::Type::Enum
+#                   name: primitiveType
+#                   description: |
+#                     Represents primitive types - string, bool etc.
+#                   values:
+#                     - :DOUBLE
+#                     - :STRING
+#                     - :BOOL
+#                     - :TIMESTAMP
+#                 - !ruby/object:Api::Type::NestedObject
+#                   name: enumType
+#                   description: |
+#                     Represents an enum type.
+#                   properties:
+#                     - !ruby/object:Api::Type::Array
+#                       name: allowedValues
+#                       description: |
+#                         The set of allowed values for this enum. The display names of the
+#                         values must be case-insensitively unique within this set. Currently,
+#                         enum values can only be added to the list of allowed values. Deletion
+#                         and renaming of enum values are not supported.
+#                         Can have up to 500 allowed values.
+#                       required: true
+#                       item_type: !ruby/object:Api::Type::NestedObject
+#                         properties:
+#                           - !ruby/object:Api::Type::String
+#                             name: displayName
+#                             description: |
+#                               The display name of the enum value.
+#                             required: true
+#             - !ruby/object:Api::Type::Boolean
+#               name: isRequired
+#               description: |
+#                 Whether this is a required field. Defaults to false.
+#             - !ruby/object:Api::Type::Integer
+#               name: order
+#               description: |
+#                 The order of this field with respect to other fields in this tag template.
+#                 A higher value indicates a more important field. The value can be negative.
+#                 Multiple fields can have the same order, and field orders within a tag do not have to be sequential.
