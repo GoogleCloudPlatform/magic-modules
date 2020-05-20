@@ -1,18 +1,15 @@
 <% autogen_exception -%>
-<% unless version == 'ga' -%>
 package google
+<% unless version == 'ga' -%>
 
 import (
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	dataflow "google.golang.org/api/dataflow/v1b3"
-	"google.golang.org/api/googleapi"
 )
 
 // resourceDataflowFlexTemplateJob defines the schema for Dataflow FlexTemplate jobs.
@@ -30,17 +27,6 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Required: true,
 			},
 
-			"job_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"labels": {
-				Type:             schema.TypeMap,
-				Optional:         true,
-				DiffSuppressFunc: resourceDataflowJobLabelDiffSuppress,
-			},
-
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -52,6 +38,12 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"cancel", "drain"}, false),
 				Optional:     true,
 				Default:      "drain",
+			},
+
+			"labels": {
+				Type:             schema.TypeMap,
+				Optional:         true,
+				DiffSuppressFunc: resourceDataflowJobLabelDiffSuppress,
 			},
 
 			"parameters": {
@@ -66,6 +58,11 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Computed: true,
 				// ForceNew applies to both stream and batch jobs
 				ForceNew: true,
+			},
+
+			"job_id": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 
 			"state": {
@@ -90,13 +87,20 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	request := buildLaunchFlexTemplateRequest(d, config)
-
-	job, err := resourceDataflowFlexTemplateJobLaunchTemplate(config, project, region, &request)
+	request := dataflow.LaunchFlexTemplateRequest{
+		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
+			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
+			JobName:              d.Get("name").(string),
+			Parameters:           expandStringMap(d, "parameters"),
+		},
+	}
+	response, err := config.clientDataflow.Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
 	if err != nil {
 		return err
 	}
+	job := response.Job
 	d.SetId(job.Id)
+	d.Set("job_id", job.Id)
 
 	return resourceDataflowFlexTemplateJobRead(d, meta)
 }
@@ -115,11 +119,11 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	id := d.Id()
+	jobId := d.Id()
 
-	job, err := resourceDataflowJobGetJob(config, project, region, id)
+	job, err := resourceDataflowJobGetJob(config, project, region, jobId)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Dataflow job %s", id))
+		return handleNotFoundError(err, d, fmt.Sprintf("Dataflow job %s", jobId))
 	}
 
 	d.Set("state", job.CurrentState)
@@ -133,6 +137,7 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 		return nil
 	}
 	d.SetId(job.Id)
+	d.Set("job_id", job.Id)
 
 	return nil
 }
@@ -151,37 +156,28 @@ func resourceDataflowFlexTemplateJobUpdateByReplacement(d *schema.ResourceData, 
 		return err
 	}
 
-	request := buildLaunchFlexTemplateRequest(d, config)
-
-	var job *dataflow.Job
-	err = retryTimeDuration(func() (updateErr error) {
-		job, updateErr = resourceDataflowFlexTemplateJobLaunchTemplate(config, project, region, &request)
-		return updateErr
-	}, time.Minute*time.Duration(5), isDataflowJobUpdateRetryableError)
-	if err != nil {
-		return err
-	}
-	d.SetId(job.Id)
-	return resourceDataflowJobRead(d, meta)
-}
-
-// resourceDataflowFlexTemplateJobLaunchTemplate Launches a Flex Template Job.
-func resourceDataflowFlexTemplateJobLaunchTemplate(config *Config, project string, region string, request *dataflow.LaunchFlexTemplateRequest) (*dataflow.Job, error) {
-	response, err := config.clientDataflow.Projects.Locations.FlexTemplates.Launch(project, region, request).Do()
-	if err != nil {
-		return nil, err
-	}
-	return response.Job, nil
-}
-
-// buildLaunchFlexTemplateRequest builds a LaunchFlexTemplateRequest from TF.
-func buildLaunchFlexTemplateRequest(d *schema.ResourceData, config *Config) dataflow.LaunchFlexTemplateRequest {
-	return dataflow.LaunchFlexTemplateRequest{
+	request := dataflow.LaunchFlexTemplateRequest{
 		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
 			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
 			JobName:              d.Get("name").(string),
 			Parameters:           expandStringMap(d, "parameters"),
 		},
 	}
+	var job *dataflow.Job
+	err = retryTimeDuration(func() (updateErr error) {
+		response, err := config.clientDataflow.Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
+		if err != nil {
+			return err
+		}
+		job = response.Job
+		return updateErr
+	}, time.Minute*time.Duration(5), isDataflowJobUpdateRetryableError)
+	if err != nil {
+		return err
+	}
+	d.SetId(job.Id)
+	d.Set("job_id", job.Id)
+
+	return resourceDataflowJobRead(d, meta)
 }
 <% end -%>

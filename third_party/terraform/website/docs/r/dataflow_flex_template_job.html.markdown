@@ -52,6 +52,7 @@ The following arguments are supported:
 * `project` - (Optional) The project in which the resource belongs. If it is not provided, the provider project is used.
 
 ## Attributes Reference
+In addition to the arguments listed above, the following computed attributes are exported:
 
 * `job_id` - The unique ID of this job.
 * `type` - The type of this job, selected from the [JobType enum](https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.jobs#Job.JobType)
