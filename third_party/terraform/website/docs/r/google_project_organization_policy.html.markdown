@@ -127,8 +127,6 @@ The `restore_policy` block supports:
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
-* `id` - an identifier for the resource with format `projects/{{project}}:constraints/{{constraint}}`
-
 * `etag` - (Computed) The etag of the organization policy. `etag` is used for optimistic concurrency control as a way to help prevent simultaneous updates of a policy from overwriting each other.
 
 * `update_time` - (Computed) The timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds, representing when the variable was last updated. Example: "2016-10-09T12:33:37.578138407Z".
