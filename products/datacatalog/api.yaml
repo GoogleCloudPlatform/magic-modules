@@ -136,7 +136,10 @@ objects:
         # We'll have people provide the json blob for the schema instead.
         name: schema
         description: |
-          Schema of the entry (e.g. BigQuery, GoogleSQL, Avro schema). An entry might not have any schema attached to it.
+          Schema of the entry (e.g. BigQuery, GoogleSQL, Avro schema), as a json string. An entry might not have any schema
+          attached to it. See
+          https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups.entries#schema
+          for what fields this schema can contain.
       - !ruby/object:Api::Type::Enum
         name: type
         description: |
@@ -192,22 +195,23 @@ objects:
               * gs://another_bucket/a.txt: matches gs://another_bucket/a.txt
             required: true
             item_type: Api::Type::String
-          - !ruby/object:Api::Type::NestedObject
+          - !ruby/object:Api::Type::Array
             name: sampleGcsFileSpecs
             description: |
               Sample files contained in this fileset, not all files contained in this fileset are represented here.
             output: true
-            properties:
-              - !ruby/object:Api::Type::String
-                name: filePath
-                description: |
-                  The full file path
-                output: true
-              - !ruby/object:Api::Type::Integer
-                name: sizeBytes
-                description: |
-                  The size of the file, in bytes.
-                output: true
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: filePath
+                  description: |
+                    The full file path
+                  output: true
+                - !ruby/object:Api::Type::Integer
+                  name: sizeBytes
+                  description: |
+                    The size of the file, in bytes.
+                  output: true
       - !ruby/object:Api::Type::NestedObject
         name: bigqueryTableSpec
         description: |
