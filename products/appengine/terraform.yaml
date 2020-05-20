@@ -28,6 +28,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
   StandardAppVersion: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
+    id_format: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
     mutex: "apps/{{project}}"
     error_retry_predicates: ["isAppEngineRetryableError"]
     parameters:
