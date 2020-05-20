@@ -89,8 +89,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   DiskResourcePolicyAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  Disk: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
+  Firewall: !ruby/object:Overrides::Ansible::ResourceOverride
+    imports:
+      - re
+    provider_helpers:
+      - 'products/compute/helpers/python/provider_firewall.py'
+    transport: !ruby/object:Overrides::Ansible::Transport
+      encoder: encode_request
+    tests: !ruby/object:Provider::Ansible::Tests
+      tests:
+        - !ruby/object:Provider::Ansible::Test
+          name: 'update'
+          path: products/compute/tests/ansible/firewall_update.yaml
+    properties:
+      network: !ruby/object:Overrides::Ansible::PropertyOverride
+        default_value:
+          selfLink: global/networks/default
   ForwardingRule: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       IPAddress:  !ruby/object:Overrides::Ansible::PropertyOverride
@@ -201,7 +215,36 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     provider_helpers:
       - 'products/compute/helpers/python/instancegroup_instances.py'
   Instance: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
+    transport: !ruby/object:Overrides::Ansible::Transport
+      encoder: encode_request
+      decoder: decode_response
+    hidden:
+      - deletion_protection_update
+      - shielded_instance_config_update
+    custom_code: !ruby/object:Provider::Ansible::CustomCode
+      post_action: |
+        if fetch:
+            instance = InstancePower(module, fetch.get('status'))
+            instance.run()
+            if module.params.get('status'):
+                fetch.update({'status': module.params['status']})
+    provider_helpers:
+      - 'products/compute/helpers/python/provider_instance.py'
+      - 'products/compute/helpers/python/instance_metadata.py'
+      - 'products/compute/helpers/python/instance_start.py'
+      - 'products/compute/helpers/python/instance_update_methods.py'
+    properties:
+      disks.licenses: !ruby/object:Overrides::Ansible::PropertyOverride
+        exclude: true
+      canIpForward: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ["ip_forward"]
+      disks.initializeParams.sourceImage: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ["image", "image_family"]
+      networkInterfaces.network: !ruby/object:Overrides::Ansible::PropertyOverride
+        description: |
+          Specifies the title of an existing network. Not setting the network
+          title will select the default network interface, which could have
+          SSH already configured
   InstanceTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
