@@ -15,6 +15,13 @@
 legacy_name: bigquery
 overrides: !ruby/object:Overrides::ResourceOverrides
   Connection: !ruby/object:Overrides::Terraform::ResourceOverride
+    properties:
+      cloudSql: !ruby/object:Overrides::Terraform::PropertyOverride
+        properties:
+          credential: !ruby/object:Overrides::Terraform::PropertyOverride
+            properties:
+              password: !ruby/object:Overrides::Terraform::PropertyOverride
+                sensitive: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     examples:
@@ -30,6 +37,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "connection"
         vars:
           database_instance_name: "my-database-instance"
+          username: "user"
           connection_id: "my-connection"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
