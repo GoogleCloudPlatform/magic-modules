@@ -225,7 +225,8 @@ objects:
     update_url: 'apps/{{project}}/services/{{service}}/versions'
     update_verb: :POST
     update_mask: false
-    self_link: 'apps/{{project}}/services/{{service}}/versions/{{version_id}}'
+    create_url: 'apps/{{project}}/services/{{service}}/versions'
+    self_link: 'apps/{{project}}/services/{{service}}/versions/{{version_id}}?view=FULL'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
