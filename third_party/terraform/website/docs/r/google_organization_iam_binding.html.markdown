@@ -50,8 +50,6 @@ The following arguments are supported:
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
-* `id` - an identifier for the resource with format `{{organization}}/roles/{{role}}`
-
 * `etag` - (Computed) The etag of the organization's IAM policy.
 
 ## Import
