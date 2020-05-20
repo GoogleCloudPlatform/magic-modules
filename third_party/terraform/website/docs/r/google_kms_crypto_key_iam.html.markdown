@@ -169,7 +169,8 @@ The `condition` block supports:
   
 ## Attributes Reference
 
-In addition to the arguments listed above, the following computed attributes are exported:
+In addition to the arguments listed above, the following computed attributes are
+exported:
 
 * `etag` - (Computed) The etag of the project's IAM policy.
 
