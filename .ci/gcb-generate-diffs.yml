@@ -197,7 +197,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/terraform-vcr-tester'
       id: tpg-vcr-test
-      secretEnv: ["TEAMCITY_TOKEN"]
+      secretEnv: ["TEAMCITY_TOKEN", "GITHUB_TOKEN"]
       waitFor: ["diff"]
       args:
           - $_PR_NUMBER
