@@ -367,7 +367,6 @@ module Provider
     end
 
     def copy_common_files(output_folder, provider_name = 'ansible')
-      super(output_folder, provider_name)
     end
 
     def module_utils_import_path
