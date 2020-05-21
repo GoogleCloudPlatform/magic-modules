@@ -273,106 +273,107 @@ objects:
               Total number of shards.
             output: true
 
-# Blocked on b/155304495
-#   - !ruby/object:Api::Resource
-#     name: TagTemplate
-#     base_url: projects/{{project}}/locations/{{region}}/tagTemplates
-#     self_link: "{{name}}"
-#     create_url: projects/{{project}}/locations/{{region}}/tagTemplates?tagTemplateId={{tag_template_id}}
-#     update_verb: :PATCH
-#     update_mask: true
-#     description: |
-#       A tag template defines a tag, which can have one or more typed fields.
-#       The template is used to create and attach the tag to GCP resources.
-#     references: !ruby/object:Api::Resource::ReferenceLinks
-#       guides:
-#         'Official Documentation': https://cloud.google.com/data-catalog/docs
-#       api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.tagTemplates
-#     parameters:
-#       - !ruby/object:Api::Type::String
-#         name: region
-#         url_param_only: true
-#         input: true
-#         description: |
-#           Template location region.
-#       - !ruby/object:Api::Type::String
-#         name: tagTemplateId
-#         required: true
-#         url_param_only: true
-#         input: true
-#         description: |
-#           The id of the tag template to create.
-#     properties:
-#       - !ruby/object:Api::Type::String
-#         name: name
-#         description: |
-#           The resource name of the tag template in URL format. Example: projects/{project_id}/locations/{location}/tagTemplates/{tagTemplateId}
-#         output: true
-#       - !ruby/object:Api::Type::String
-#         name: displayName
-#         description: |
-#          The display name for this template.
-#       - !ruby/object:Api::Type::Map
-#         name: fields
-#         description: |
-#           Map of tag template field IDs to the settings for the field. This map is an exhaustive list of the allowed fields. This map must contain at least one field and at most 500 fields.
-#         required: true
-#         key_name: field_id
-#         value_type: !ruby/object:Api::Type::NestedObject
-#           name: field
-#           properties:
-#             - !ruby/object:Api::Type::String
-#               name: name
-#               description: |
-#                 The resource name of the tag template field in URL format. Example: projects/{project_id}/locations/{location}/tagTemplates/{tagTemplateId}/fields/{field}
-#               output: true
-#             - !ruby/object:Api::Type::String
-#               name: displayName
-#               description: |
-#                The display name for this field.
-#             - !ruby/object:Api::Type::NestedObject
-#               name: type
-#               description: |
-#                 The type of value this tag field can contain.
-#               required: true
-#               properties:
-#                 - !ruby/object:Api::Type::Enum
-#                   name: primitiveType
-#                   description: |
-#                     Represents primitive types - string, bool etc.
-#                   values:
-#                     - :DOUBLE
-#                     - :STRING
-#                     - :BOOL
-#                     - :TIMESTAMP
-#                 - !ruby/object:Api::Type::NestedObject
-#                   name: enumType
-#                   description: |
-#                     Represents an enum type.
-#                   properties:
-#                     - !ruby/object:Api::Type::Array
-#                       name: allowedValues
-#                       description: |
-#                         The set of allowed values for this enum. The display names of the
-#                         values must be case-insensitively unique within this set. Currently,
-#                         enum values can only be added to the list of allowed values. Deletion
-#                         and renaming of enum values are not supported.
-#                         Can have up to 500 allowed values.
-#                       required: true
-#                       item_type: !ruby/object:Api::Type::NestedObject
-#                         properties:
-#                           - !ruby/object:Api::Type::String
-#                             name: displayName
-#                             description: |
-#                               The display name of the enum value.
-#                             required: true
-#             - !ruby/object:Api::Type::Boolean
-#               name: isRequired
-#               description: |
-#                 Whether this is a required field. Defaults to false.
-#             - !ruby/object:Api::Type::Integer
-#               name: order
-#               description: |
-#                 The order of this field with respect to other fields in this tag template.
-#                 A higher value indicates a more important field. The value can be negative.
-#                 Multiple fields can have the same order, and field orders within a tag do not have to be sequential.
+  - !ruby/object:Api::Resource
+    name: TagTemplate
+    base_url: projects/{{project}}/locations/{{region}}/tagTemplates
+    self_link: "{{name}}"
+    create_url: projects/{{project}}/locations/{{region}}/tagTemplates?tagTemplateId={{tag_template_id}}
+    delete_url: "{{name}}?force=true"
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A tag template defines a tag, which can have one or more typed fields.
+      The template is used to create and attach the tag to GCP resources.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': https://cloud.google.com/data-catalog/docs
+      api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.tagTemplates
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        url_param_only: true
+        input: true
+        description: |
+          Template location region.
+      - !ruby/object:Api::Type::String
+        name: tagTemplateId
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The id of the tag template to create.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          The resource name of the tag template in URL format. Example: projects/{project_id}/locations/{location}/tagTemplates/{tagTemplateId}
+        output: true
+      - !ruby/object:Api::Type::String
+        name: displayName
+        description: |
+         The display name for this template.
+      - !ruby/object:Api::Type::Map
+        name: fields
+        description: |
+          Map of tag template field IDs to the settings for the field. This map is an exhaustive list of the allowed fields. This map must contain at least one field and at most 500 fields.
+        required: true
+        input: true  # TODO(danawillow): update logic
+        key_name: field_id
+        value_type: !ruby/object:Api::Type::NestedObject
+          name: field
+          properties:
+            - !ruby/object:Api::Type::String
+              name: name
+              description: |
+                The resource name of the tag template field in URL format. Example: projects/{project_id}/locations/{location}/tagTemplates/{tagTemplateId}/fields/{field}
+              output: true
+            - !ruby/object:Api::Type::String
+              name: displayName
+              description: |
+               The display name for this field.
+            - !ruby/object:Api::Type::NestedObject
+              name: type
+              description: |
+                The type of value this tag field can contain.
+              required: true
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: primitiveType
+                  description: |
+                    Represents primitive types - string, bool etc.
+                  values:
+                    - :DOUBLE
+                    - :STRING
+                    - :BOOL
+                    - :TIMESTAMP
+                - !ruby/object:Api::Type::NestedObject
+                  name: enumType
+                  description: |
+                    Represents an enum type.
+                  properties:
+                    - !ruby/object:Api::Type::Array
+                      name: allowedValues
+                      description: |
+                        The set of allowed values for this enum. The display names of the
+                        values must be case-insensitively unique within this set. Currently,
+                        enum values can only be added to the list of allowed values. Deletion
+                        and renaming of enum values are not supported.
+                        Can have up to 500 allowed values.
+                      required: true
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: displayName
+                            description: |
+                              The display name of the enum value.
+                            required: true
+            - !ruby/object:Api::Type::Boolean
+              name: isRequired
+              description: |
+                Whether this is a required field. Defaults to false.
+            - !ruby/object:Api::Type::Integer
+              name: order
+              description: |
+                The order of this field with respect to other fields in this tag template.
+                A higher value indicates a more important field. The value can be negative.
+                Multiple fields can have the same order, and field orders within a tag do not have to be sequential.
