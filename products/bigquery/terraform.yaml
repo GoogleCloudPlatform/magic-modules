@@ -117,12 +117,31 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "etag"
       - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_job_query_table_reference"
+        primary_resource_id: "job"
+        vars:
+          job_id: "job_query"
+          account_name: "bqowner"
+        ignore_read_extra:
+          - "etag"
+          - "query.0.default_dataset.0.dataset_id"
+          - "query.0.destination_table.0.table_id"
+      - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_load"
         primary_resource_id: "job"
         vars:
           job_id: "job_load"
         ignore_read_extra:
           - "etag"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_job_load_table_reference"
+        primary_resource_id: "job"
+        vars:
+          job_id: "job_load"
+        ignore_read_extra:
+          - "etag"
+          - "load.0.destination_table.0.table_id"
+        skip_docs: true  # there are a lot of examples for this resource, so omitting some that are similar to others
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_copy"
         primary_resource_id: "job"
@@ -136,6 +155,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read_extra:
           - "etag"
       - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_job_copy_table_reference"
+        primary_resource_id: "job"
+        vars:
+          job_id: "job_copy"
+          account_name: "bqowner"
+          key_name: "example-key"
+          keyring_name: "example-keyring"
+        test_env_vars:
+          project: :PROJECT_NAME
+        ignore_read_extra:
+          - "etag"
+          - "copy.0.destination_table.0.table_id"
+          - "copy.0.source_tables.0.table_id"
+          - "copy.0.source_tables.1.table_id"
+        skip_docs: true  # there are a lot of examples for this resource, so omitting some that are similar to others
+      - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_extract"
         primary_resource_id: "job"
         vars:
@@ -143,11 +178,60 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           account_name: "bqowner"
         ignore_read_extra:
           - "etag"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_job_extract_table_reference"
+        primary_resource_id: "job"
+        vars:
+          job_id: "job_extract"
+          account_name: "bqowner"
+        ignore_read_extra:
+          - "etag"
+          - "extract.0.source_table.0.table_id"
+        skip_docs: true  # there are a lot of examples for this resource, so omitting some that are similar to others
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       configuration: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
+      configuration.copy.destinationTable: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_copy_destinationtable.go.erb'
+      configuration.copy.destinationTable.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      configuration.copy.destinationTable.datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      configuration.copy.destinationTable.tableId: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
+          or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
+      configuration.copy.sourceTables: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref_array.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_copy_sourcetables.go.erb'
+      configuration.copy.sourceTables.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      configuration.copy.sourceTables.datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      configuration.copy.sourceTables.tableId: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
+          or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
+      configuration.load.destinationTable: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_load_destinationtable.go.erb'
+      configuration.load.destinationTable.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      configuration.load.destinationTable.datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      configuration.load.destinationTable.tableId: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
+          or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
       configuration.load.skipLeadingRows: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntAtLeast(0)'
@@ -159,11 +243,48 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       configuration.extract.destinationFormat: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      configuration.extract.sourceTable: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_extract_sourcetable.go.erb'
+      configuration.extract.sourceTable.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      configuration.extract.sourceTable.datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      configuration.extract.sourceTable.tableId: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
+          or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
+      configuration.query.destinationTable: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_query_destinationtable.go.erb'
+      configuration.query.destinationTable.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      configuration.query.destinationTable.datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      configuration.query.destinationTable.tableId: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
+          or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
+      configuration.query.defaultDataset: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/bigquery_dataset_ref.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_ref.go.erb'
+      configuration.query.defaultDataset.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      configuration.query.defaultDataset.datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          The dataset. Can be specified `{{dataset_id}}` if `project_id` is also set,
+          or of the form `projects/{{project}}/datasets/{{dataset_id}}` if not.
       jobReference: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       jobReference.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/bigquery_job.go
       encoder: templates/terraform/encoders/bigquery_job.go.erb
   Table: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true

@@ -22,7 +22,7 @@ func TestAccFolderIamMember_basic(t *testing.T) {
 			{
 				Config: testAccFolderIamBasic(org, fname),
 				Check: resource.ComposeTestCheckFunc(
-					testAccFolderExistingPolicy(org, fname),
+					testAccFolderExistingPolicy(t, org, fname),
 				),
 			},
 			// Apply an IAM binding
@@ -41,6 +41,7 @@ func TestAccFolderIamMember_basic(t *testing.T) {
 
 // Test that multiple IAM bindings can be applied to a folder
 func TestAccFolderIamMember_multiple(t *testing.T) {
+	skipIfVcr(t)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
@@ -53,7 +54,7 @@ func TestAccFolderIamMember_multiple(t *testing.T) {
 			{
 				Config: testAccFolderIamBasic(org, fname),
 				Check: resource.ComposeTestCheckFunc(
-					testAccFolderExistingPolicy(org, fname),
+					testAccFolderExistingPolicy(t, org, fname),
 				),
 			},
 			// Apply an IAM binding
@@ -82,6 +83,7 @@ func TestAccFolderIamMember_multiple(t *testing.T) {
 
 // Test that an IAM binding can be removed from a folder
 func TestAccFolderIamMember_remove(t *testing.T) {
+	skipIfVcr(t)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
@@ -94,7 +96,7 @@ func TestAccFolderIamMember_remove(t *testing.T) {
 			{
 				Config: testAccFolderIamBasic(org, fname),
 				Check: resource.ComposeTestCheckFunc(
-					testAccFolderExistingPolicy(org, fname),
+					testAccFolderExistingPolicy(t, org, fname),
 				),
 			},
 			// Apply multiple IAM bindings
@@ -111,7 +113,7 @@ func TestAccFolderIamMember_remove(t *testing.T) {
 			{
 				Config: testAccFolderIamBasic(org, fname),
 				Check: resource.ComposeTestCheckFunc(
-					testAccFolderExistingPolicy(org, fname),
+					testAccFolderExistingPolicy(t, org, fname),
 				),
 			},
 		},

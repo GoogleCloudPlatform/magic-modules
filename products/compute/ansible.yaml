@@ -57,6 +57,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   PerInstanceConfig: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  RegionPerInstanceConfig: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
   Autoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
@@ -354,6 +356,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   PerInstanceConfig: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionPerInstanceConfig: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
   resource:

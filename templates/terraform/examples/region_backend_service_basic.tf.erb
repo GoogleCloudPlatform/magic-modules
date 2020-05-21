@@ -1,7 +1,7 @@
 resource "google_compute_region_backend_service" "<%= ctx[:primary_resource_id] %>" {
   name                            = "<%= ctx[:vars]['region_backend_service_name'] %>"
   region                          = "us-central1"
-  health_checks                   = [google_compute_health_check.default.self_link]
+  health_checks                   = [google_compute_health_check.default.id]
   connection_draining_timeout_sec = 10
   session_affinity                = "CLIENT_IP"
 }

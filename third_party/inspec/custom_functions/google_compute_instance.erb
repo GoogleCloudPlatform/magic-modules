@@ -82,19 +82,19 @@ end
 
 def metadata_keys
   return [] if !defined?(@metadata) || @metadata.nil?
-  @metadata.item[:items].map { |m| m[:key] }
+  @metadata['items']&.map { |m| m['key'] }
 end
 
 def metadata_values
   return [] if !defined?(@metadata) || @metadata.nil?
-  @metadata.item[:items].map { |m| m[:value] }
+  @metadata['items']&.map { |m| m['value'] }
 end
 
 def metadata_value_by_key(metadata_key)
   return [] if !defined?(@metadata) || @metadata.nil?
-  @metadata.item[:items].each do |item|
-    if item[:key] == metadata_key
-      return item[:value]
+  @metadata['items']&.each do |item|
+    if item['key'] == metadata_key
+      return item['value']
     end
   end
   []

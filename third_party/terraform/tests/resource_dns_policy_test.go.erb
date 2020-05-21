@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-<% unless version.nil? || version == 'ga' -%>
 func TestAccDNSPolicy_update(t *testing.T) {
 	t.Parallel()
 
@@ -67,4 +66,3 @@ resource "google_compute_network" "network-2" {
 }
 `, suffix, forwarding, nameserver, network, suffix, suffix)
 }
-<% end -%>

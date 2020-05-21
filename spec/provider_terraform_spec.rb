@@ -23,11 +23,14 @@ end
 describe Provider::Terraform do
   context 'good file product' do
     let(:product) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
-    let(:config) do
-      Provider::Config.parse('spec/data/terraform-config.yaml', product)[1]
-    end
+    let(:parsed) { Provider::Config.parse('spec/data/terraform-config.yaml', product) }
+    let(:config) { parsed[1] }
+    let(:override_product) { parsed[0] }
     let(:provider) { Provider::Terraform.new(config, product, 'ga', Time.now) }
     let(:resource) { product.objects[0] }
+    let(:override_resource) do
+      override_product.objects.find { |o| o.name == 'ResourceWithTerraformOverride' }
+    end
 
     before do
       allow_open 'spec/data/good-file.yaml'
@@ -136,6 +139,94 @@ describe Provider::Terraform do
             update_id: nil,
             fingerprint_name: nil
           } => [putUrl2]
+        )
+      end
+    end
+
+    describe '#get_property_update_masks_groups' do
+      subject do
+        provider.get_property_update_masks_groups(override_resource.properties)
+      end
+
+      it do
+        is_expected.to eq(
+          [
+            ['string_one', ['stringOne']],
+            ['object_one', ['objectOne']],
+            ['object_two_string', ['overrideFoo', 'nested.overrideBar']],
+            [
+              'object_two_nested_object', [
+                'objectTwoFlattened.objectTwoNestedObject'
+              ]
+            ]
+          ]
+        )
+      end
+    end
+
+    describe '#get_property_schema_path nonexistant' do
+      let(:test_paths) do
+        [
+          'not_a_field',
+          'object_one.0.not_a_field',
+          'object_one.0.object_one_nested_object.0.not_a_field'
+        ]
+      end
+      subject do
+        test_paths.map do |test_path|
+          provider.get_property_schema_path(test_path, override_resource)
+        end
+      end
+
+      it do
+        is_expected.to eq([nil] * test_paths.size)
+      end
+    end
+
+    describe '#get_property_schema_path no changes' do
+      let(:test_paths) do
+        [
+          'string_one',
+          'object_one',
+          'object_one.0.object_one_string'
+        ]
+      end
+      subject do
+        test_paths.map do |test_path|
+          provider.get_property_schema_path(test_path, override_resource)
+        end
+      end
+
+      it do
+        is_expected.to eq(test_paths)
+      end
+    end
+
+    describe '#get_property_schema_path flattened objects' do
+      let(:test_paths) do
+        [
+          'object_one.0.object_one_flattened_object',
+          'object_one.0.object_one_flattened_object.0.object_one_nested_nested_integer',
+          'object_two_flattened.0.object_two_string',
+          'object_two_flattened.0.object_two_nested_object',
+          'object_two_flattened.0.object_two_nested_object.0.object_two_nested_nested_string'
+        ]
+      end
+      subject do
+        test_paths.map do |test_path|
+          provider.get_property_schema_path(test_path, override_resource)
+        end
+      end
+
+      it do
+        is_expected.to eq(
+          [
+            nil,
+            'object_one.0.object_one_nested_nested_integer',
+            'object_two_string',
+            'object_two_nested_object',
+            'object_two_nested_object.0.object_two_nested_nested_string'
+          ]
         )
       end
     end

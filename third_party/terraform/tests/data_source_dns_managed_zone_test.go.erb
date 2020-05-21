@@ -24,9 +24,9 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 					map[string]struct{}{
 						"dnssec_config.#":             {},
 						"private_visibility_config.#": {},
-<% unless version == "ga" -%>
 						"peering_config.#":            {},
 						"forwarding_config.#":         {},
+<% unless version == "ga" -%>
 						"reverse_lookup":         {},
 <% end -%>
 					},

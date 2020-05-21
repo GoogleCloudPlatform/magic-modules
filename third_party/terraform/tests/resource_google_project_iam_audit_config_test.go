@@ -32,7 +32,7 @@ func TestAccProjectIamAuditConfig_basic(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM audit config
@@ -61,7 +61,7 @@ func TestAccProjectIamAuditConfig_multiple(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM audit config
@@ -80,6 +80,8 @@ func TestAccProjectIamAuditConfig_multiple(t *testing.T) {
 
 // Test that multiple IAM audit configs can be applied to a project all at once
 func TestAccProjectIamAuditConfig_multipleAtOnce(t *testing.T) {
+	// Multiple fine-grained resources
+	skipIfVcr(t)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
@@ -95,7 +97,7 @@ func TestAccProjectIamAuditConfig_multipleAtOnce(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM audit config
@@ -124,7 +126,7 @@ func TestAccProjectIamAuditConfig_update(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM audit config
@@ -150,6 +152,8 @@ func TestAccProjectIamAuditConfig_update(t *testing.T) {
 
 // Test that an IAM audit config can be removed from a project
 func TestAccProjectIamAuditConfig_remove(t *testing.T) {
+	// Multiple fine-grained resources
+	skipIfVcr(t)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
@@ -165,7 +169,7 @@ func TestAccProjectIamAuditConfig_remove(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply multiple IAM audit configs
@@ -179,7 +183,7 @@ func TestAccProjectIamAuditConfig_remove(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 		},
@@ -204,7 +208,7 @@ func TestAccProjectIamAuditConfig_addFirstExemptMember(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply IAM audit config with no members
@@ -240,7 +244,7 @@ func TestAccProjectIamAuditConfig_removeLastExemptMember(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply IAM audit config with member
@@ -276,7 +280,7 @@ func TestAccProjectIamAuditConfig_updateNoExemptMembers(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply IAM audit config with DATA_READ

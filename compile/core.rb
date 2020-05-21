@@ -226,9 +226,9 @@ module Compile
       end
     end
 
-    def autogen_notice(lang)
+    def autogen_notice(lang, pwd)
       Thread.current[:autogen] = true
-      comment_block(compile('templates/autogen_notice.erb').split("\n"), lang)
+      comment_block(compile(pwd + '/templates/autogen_notice.erb').split("\n"), lang)
     end
 
     def autogen_exception

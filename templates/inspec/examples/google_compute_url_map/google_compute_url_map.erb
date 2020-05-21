@@ -1,14 +1,14 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% url_map = grab_attributes['url_map'] -%>
-<% backend_service = grab_attributes['backend_service'] -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% url_map = grab_attributes(pwd)['url_map'] -%>
+<% backend_service = grab_attributes(pwd)['backend_service'] -%>
 describe google_compute_url_map(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{url_map['name']}'" : "url_map['name']" -%>) do
   it { should exist }
   its('description') { should eq <%= doc_generation ? "'#{url_map['description']}'" : "url_map['description']" -%> }
-  its('default_service') { should match /\/<%= "#{grab_attributes['backend_service']['name']}" -%>$/ }
+  its('default_service') { should match /\/<%= "#{grab_attributes(pwd)['backend_service']['name']}" -%>$/ }
   its('host_rules.count') { should eq 1 }
   its('host_rules.first.hosts') { should include <%= doc_generation ? "'#{url_map['host_rule_host']}'" : "url_map['host_rule_host']" -%> }
   its('path_matchers.count') { should eq 1 }
-  its('path_matchers.first.default_service') { should match /\/<%= "#{grab_attributes['backend_service']['name']}" -%>$/ }
+  its('path_matchers.first.default_service') { should match /\/<%= "#{grab_attributes(pwd)['backend_service']['name']}" -%>$/ }
   its('tests.count') { should eq 1 }
   its('tests.first.host') { should eq <%= doc_generation ? "'#{url_map['test_host']}'" : "url_map['test_host']" -%> }
   its('tests.first.path') { should eq <%= doc_generation ? "'#{url_map['test_path']}'" : "url_map['test_path']" -%> }

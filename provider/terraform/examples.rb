@@ -81,6 +81,10 @@ module Provider
       #       }
       attr_reader :test_vars_overrides
 
+      # Hash to provider custom override values for generating oics config
+      # See test_vars_overrides for more details
+      attr_reader :oics_vars_overrides
+
       # The version name of of the example's version if it's different than the
       # resource version, eg. `beta`
       #
@@ -107,6 +111,9 @@ module Provider
       # Whether to skip generating tests for this resource
       attr_reader :skip_test
 
+      # Whether to skip generating docs for this example
+      attr_reader :skip_docs
+
       # The name of the primary resource for use in IAM tests. IAM tests need
       # a reference to the primary resource to create IAM policies for
       attr_reader :primary_resource_name
@@ -115,7 +122,13 @@ module Provider
       # Defaults to `templates/terraform/examples/{{name}}.tf.erb`
       attr_reader :config_path
 
-      def config_documentation
+      # If the example should be skipped during VCR testing.
+      # This is the case when something about the resource or config causes VCR to fail for example
+      # a resource with a unique identifier generated within the resource via resource.UniqueId()
+      # Or a config with two fine grained resources that have a race condition during create
+      attr_reader :skip_vcr
+
+      def config_documentation(pwd)
         docs_defaults = {
           PROJECT_NAME: 'my-project-name',
           FIRESTORE_PROJECT_NAME: 'my-project-name',
@@ -135,26 +148,26 @@ module Provider
                          test_env_vars: test_env_vars.map { |k, v| [k, docs_defaults[v]] }.to_h,
                          primary_resource_id: primary_resource_id
                        },
-                       config_path
+                       pwd + '/' + config_path
                      ))
         lines(compile_file(
                 { content: body },
-                'templates/terraform/examples/base_configs/documentation.tf.erb'
+                pwd + '/templates/terraform/examples/base_configs/documentation.tf.erb'
               ))
       end
 
-      def config_test
-        body = config_test_body
+      def config_test(pwd)
+        body = config_test_body(pwd)
         lines(compile_file(
                 {
                   content: body
                 },
-                'templates/terraform/examples/base_configs/test_body.go.erb'
+                pwd + '/templates/terraform/examples/base_configs/test_body.go.erb'
               ))
       end
 
       # rubocop:disable Style/FormatStringToken
-      def config_test_body
+      def config_test_body(pwd)
         @vars ||= {}
         @test_env_vars ||= {}
         @test_vars_overrides ||= {}
@@ -185,21 +198,25 @@ module Provider
                          test_env_vars: test_env_vars.map { |k, _| [k, "%{#{k}}"] }.to_h,
                          primary_resource_id: primary_resource_id
                        },
-                       config_path
+                       pwd + '/' + config_path
                      ))
 
         substitute_test_paths body
       end
 
-      def config_example
+      def config_example(pwd)
         @vars ||= []
+        @oics_vars_overrides ||= {}
+
+        rand_vars = vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h
+
         # Examples with test_env_vars are skipped elsewhere
         body = lines(compile_file(
                        {
-                         vars: vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h,
+                         vars: rand_vars.merge(oics_vars_overrides),
                          primary_resource_id: primary_resource_id
                        },
-                       config_path
+                       pwd + '/' + config_path
                      ))
 
         substitute_example_paths body
@@ -253,7 +270,9 @@ module Provider
         check :ignore_read_extra, type: Array, item_type: String, default: []
         check :primary_resource_name, type: String
         check :skip_test, type: TrueClass
+        check :skip_docs, type: TrueClass
         check :config_path, type: String, default: "templates/terraform/examples/#{name}.tf.erb"
+        check :skip_vcr, type: TrueClass
       end
     end
   end

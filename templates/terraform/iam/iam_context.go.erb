@@ -7,7 +7,7 @@ context := map[string]interface{}{
 <% unless object.iam_policy.test_project_name.nil? -%>
 	"project_id" : fmt.Sprintf("<%= object.iam_policy.test_project_name -%>%s", randString(t, 10)),
 <% end -%>
-<%= lines(compile('templates/terraform/env_var_context.go.erb')) -%>
+<%= lines(compile(pwd + '/templates/terraform/env_var_context.go.erb')) -%>
 <% unless example.test_vars_overrides.nil? -%>
 <% example.test_vars_overrides.each do |var_name, override| -%>
 	"<%= var_name %>": <%= override %>,
