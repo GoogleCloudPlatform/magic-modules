@@ -8,6 +8,8 @@ import (
 )
 
 func TestAccBigtableAppProfile_update(t *testing.T) {
+	// bigtable does not use the shared HTTP client
+	skipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
