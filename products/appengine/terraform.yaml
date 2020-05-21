@@ -60,6 +60,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       threadsafe: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+      handlers: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       # instanceClass defaults to a value based on the scaling method
       instanceClass: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -77,6 +79,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
   FlexibleAppVersion: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
+    id_format: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
     mutex: "apps/{{project}}"
     error_retry_predicates: ["isAppEngineRetryableError"]
     parameters:
@@ -121,6 +124,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       # runtimeApiVersion defaults to a runtime-specific value
       runtimeApiVersion: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      handlers: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
