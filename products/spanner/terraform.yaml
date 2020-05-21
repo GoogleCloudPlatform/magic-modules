@@ -17,6 +17,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     # This resource is a child resource
     skip_sweeper: true
+    id_format: "{{instance}}/{{name}}"
     import_format:
       - "projects/{{project}}/instances/{{instance}}/databases/{{name}}"
       - "instances/{{instance}}/databases/{{name}}"
