@@ -939,6 +939,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "instance_group_named_port_gke"
         primary_resource_id: "my_port"
+        # Multiple fine-grained resources
+        skip_vcr: true
         vars:
           network_name: "container-network"
           subnetwork_name: "container-subnetwork"
