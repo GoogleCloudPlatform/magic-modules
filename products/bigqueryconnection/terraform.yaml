@@ -21,7 +21,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           credential: !ruby/object:Overrides::Terraform::PropertyOverride
             ignore_read: true
             properties:
+              username: !ruby/object:Overrides::Terraform::PropertyOverride
+                ignore_read: true
               password: !ruby/object:Overrides::Terraform::PropertyOverride
+                ignore_read: true
                 sensitive: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
