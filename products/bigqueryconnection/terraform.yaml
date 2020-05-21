@@ -19,6 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       cloudSql: !ruby/object:Overrides::Terraform::PropertyOverride
         properties:
           credential: !ruby/object:Overrides::Terraform::PropertyOverride
+            ignore_read: true
             properties:
               password: !ruby/object:Overrides::Terraform::PropertyOverride
                 sensitive: true
