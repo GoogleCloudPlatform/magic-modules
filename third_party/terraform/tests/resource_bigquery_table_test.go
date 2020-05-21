@@ -594,8 +594,6 @@ resource "google_bigquery_table" "test" {
 `, datasetID, bucketName, objectName, content, tableID, format, quoteChar)
 }
 
-
-
 func testAccBigQueryTableFromSheet(context map[string]interface{}) string {
 	return Nprintf(`
 	resource "google_bigquery_table" "table" {

@@ -162,8 +162,8 @@ func resourceBigQueryTable() *schema.Resource {
 									// Range: [Optional] Range of a sheet to query from. Only used when non-empty.
 									// Typical format: !:
 									"range": {
-										Type:         schema.TypeString,
-										Optional:     true,
+										Type:     schema.TypeString,
+										Optional: true,
 										AtLeastOneOf: []string{
 											"external_data_configuration.0.google_sheets_options.0.skip_leading_rows",
 											"external_data_configuration.0.google_sheets_options.0.range",
@@ -172,8 +172,8 @@ func resourceBigQueryTable() *schema.Resource {
 									// SkipLeadingRows: [Optional] The number of rows at the top
 									// of the sheet that BigQuery will skip when reading the data.
 									"skip_leading_rows": {
-										Type:         schema.TypeInt,
-										Optional:     true,
+										Type:     schema.TypeInt,
+										Optional: true,
 										AtLeastOneOf: []string{
 											"external_data_configuration.0.google_sheets_options.0.skip_leading_rows",
 											"external_data_configuration.0.google_sheets_options.0.range",
@@ -333,7 +333,7 @@ func resourceBigQueryTable() *schema.Resource {
 
 			// RangePartitioning: [Optional] If specified, configures range-based
 			// partitioning for this table.
-			"range_partitioning": &schema.Schema{
+			"range_partitioning": {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
@@ -348,7 +348,7 @@ func resourceBigQueryTable() *schema.Resource {
 						},
 
 						// Range: [Required] Information required to partition based on ranges.
-						"range": &schema.Schema{
+						"range": {
 							Type:     schema.TypeList,
 							Required: true,
 							MaxItems: 1,
@@ -380,7 +380,7 @@ func resourceBigQueryTable() *schema.Resource {
 
 			// Clustering: [Optional] Specifies column names to use for data clustering.  Up to four
 			// top-level columns are allowed, and should be specified in descending priority order.
-			"clustering": &schema.Schema{
+			"clustering": {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
