@@ -47,6 +47,7 @@ func TestAccDataflowJob_basic(t *testing.T) {
 func TestAccDataflowJob_withRegion(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
+	skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -71,6 +72,7 @@ func TestAccDataflowJob_withRegion(t *testing.T) {
 func TestAccDataflowJob_withServiceAccount(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
+	skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -97,6 +99,7 @@ func TestAccDataflowJob_withServiceAccount(t *testing.T) {
 func TestAccDataflowJob_withNetwork(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
+	skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -123,6 +126,7 @@ func TestAccDataflowJob_withNetwork(t *testing.T) {
 func TestAccDataflowJob_withSubnetwork(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
+	skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -150,6 +154,7 @@ func TestAccDataflowJob_withSubnetwork(t *testing.T) {
 func TestAccDataflowJob_withLabels(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
+	skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -177,6 +182,7 @@ func TestAccDataflowJob_withLabels(t *testing.T) {
 func TestAccDataflowJob_withIpConfig(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
+	skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -201,6 +207,7 @@ func TestAccDataflowJob_withIpConfig(t *testing.T) {
 func TestAccDataflowJobWithAdditionalExperiments(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
+	skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -227,6 +234,7 @@ func TestAccDataflowJobWithAdditionalExperiments(t *testing.T) {
 func TestAccDataflowJob_streamUpdate(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
+	skipIfVcr(t)
 	t.Parallel()
 
 	suffix := randString(t, 10)
