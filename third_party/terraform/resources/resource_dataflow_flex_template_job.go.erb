@@ -12,8 +12,8 @@ import (
 	dataflow "google.golang.org/api/dataflow/v1b3"
 )
 
-// NOTE: resource_dataflow_flex_template currently does not support updating existing jobs. 
-// Changing any non-computed field will result in the job being deleted (according to its 
+// NOTE: resource_dataflow_flex_template currently does not support updating existing jobs.
+// Changing any non-computed field will result in the job being deleted (according to its
 // on_delete policy) and recreated with the updated parameters.
 
 // resourceDataflowFlexTemplateJob defines the schema for Dataflow FlexTemplate jobs.
@@ -22,6 +22,8 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 		Create: resourceDataflowFlexTemplateJobCreate,
 		Read:   resourceDataflowFlexTemplateJobRead,
 		// Update: resourceDataflowFlexTemplateJobUpdateByReplacement,
+		// Note: resourceDataflowJobDelete is borrowed from dataflow_job to maintain
+		// same cancel/drain on_delete behavior.
 		Delete: resourceDataflowJobDelete,
 		Schema: map[string]*schema.Schema{
 
@@ -60,6 +62,7 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				// ForceNew applies to both stream and batch jobs
 				ForceNew: true,
 			},
 
