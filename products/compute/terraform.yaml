@@ -311,6 +311,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       protocol: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      portName: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       sessionAffinity: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -982,6 +984,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       candidateSubnets: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+      edgeAvailabilityDomain: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/interconnect_attachment.go.erb
       post_create: templates/terraform/post_create/interconnect_attachment.go.erb
@@ -1678,6 +1682,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
     # Route cannot be added while a peering is on progress on the network
     mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
+    error_retry_predicates: ["isPeeringOperationInProgress"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "route_basic"
@@ -1959,14 +1964,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_basic"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
         ignore_read_extra:
           - "name_prefix"
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_random_provider"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_target_https_proxies"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
         vars:
           target_https_proxy_name: "test-proxy"
           url_map_name: "url-map"
@@ -2004,14 +2015,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "region_ssl_certificate_basic"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
         ignore_read_extra:
           - "name_prefix"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_ssl_certificate_random_provider"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
       - !ruby/object:Provider::Terraform::Examples
         name: "region_ssl_certificate_target_https_proxies"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
         vars:
           region_target_https_proxy_name: "test-proxy"
           region_url_map_name: "url-map"

@@ -1,7 +1,7 @@
 resource "google_compute_interconnect_attachment" "<%= ctx[:primary_resource_id] %>" {
   name         = "<%= ctx[:vars]['interconnect_attachment_name'] %>"
   interconnect = "my-interconnect-id"
-  router       = google_compute_router.foobar.self_link
+  router       = google_compute_router.foobar.id
 }
 
 resource "google_compute_router" "foobar" {

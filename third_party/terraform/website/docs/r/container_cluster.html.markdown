@@ -140,7 +140,7 @@ in this cluster in CIDR notation (e.g. `10.96.0.0/14`). Leave blank to have one
 automatically chosen or specify a `/14` block in `10.0.0.0/8`. This field will
 only work for routes-based clusters, where `ip_allocation_policy` is not defined.
 
-* `cluster_autoscaling` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `cluster_autoscaling` - (Optional)
 Per-cluster configuration of Node Auto-Provisioning with Cluster Autoscaler to
 automatically adjust the size of the cluster and create/delete node pools based
 on the current needs of the cluster's workload. See the
@@ -271,9 +271,16 @@ clusters with private nodes. Structure is documented below.
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
-* `release_channel` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration options for the
-    [Release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels)
-    feature, which provide more control over automatic upgrades of your GKE clusters. Structure is documented below.
+* `release_channel` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+Configuration options for the [Release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels)
+feature, which provide more control over automatic upgrades of your GKE clusters.
+When updating this field, GKE imposes specific version requirements. See
+[Migrating between release channels](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels#migrating_between_release_channels)
+for more details; the `google_container_engine_versions` datasource can provide
+the default version for a channel. Note that removing the `release_channel`
+field from your config will cause Terraform to stop managing your cluster's
+release channel, but will not unenroll it. Instead, use the `"UNSPECIFIED"`
+channel. Structure is documented below.
 
 * `remove_default_node_pool` - (Optional) If `true`, deletes the default node
     pool upon cluster creation. If you're using `google_container_node_pool`
@@ -338,8 +345,11 @@ The `addons_config` block supports:
 * `gce_persistent_disk_csi_driver_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to disabled; set `enabled = true` to enable. 
 
-* `kalm_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
-    Configuration for the KALM addon, which manages the lifecycle of k8s. It is disabled by default; Set `enabled = true` to enable. 
+* `kalm_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/ provider_versions.html)).
+    Configuration for the KALM addon, which manages the lifecycle of k8s. It is disabled by default; Set `enabled = true` to enable.
+
+*  `config_connector_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+    The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
 
 This example `addons_config` disables two addons:
 
@@ -397,6 +407,11 @@ for a list of types.
 * `maximum` - (Optional) Maximum amount of the resource in the cluster.
 
 The `auto_provisioning_defaults` block supports:
+
+* `min_cpu_platform` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+Minimum CPU platform to be used for NAP created node pools. The instance may be scheduled on the
+specified or newer CPU platform. Applicable values are the friendly names of CPU platforms, such
+as "Intel Haswell" or "Intel Sandy Bridge".
 
 * `oauth_scopes` - (Optional) Scopes that are used by NAP when creating node pools.
 
@@ -729,6 +744,8 @@ The `vertical_pod_autoscaling` block supports:
 
 In addition to the arguments listed above, the following computed attributes are
 exported:
+
+* `id` - an identifier for the resource with format `projects/{{project}}/locations/{{zone}}/clusters/{{name}}`
 
 * `endpoint` - The IP address of this cluster's Kubernetes master.
 

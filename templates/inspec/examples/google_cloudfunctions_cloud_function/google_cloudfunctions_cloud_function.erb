@@ -1,11 +1,11 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% gcp_cloud_function_region = "#{external_attribute('gcp_cloud_function_region', doc_generation)}" -%>
-<% cloudfunction = grab_attributes['cloudfunction'] -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% gcp_cloud_function_region = "#{external_attribute(pwd, 'gcp_cloud_function_region', doc_generation)}" -%>
+<% cloudfunction = grab_attributes(pwd)['cloudfunction'] -%>
 describe google_cloudfunctions_cloud_function(project: <%= gcp_project_id -%>, location: <%= gcp_cloud_function_region -%>, name: <%= doc_generation ? "'#{cloudfunction['name']}'" : "cloudfunction['name']" -%>) do
   it { should exist }
   its('description') { should eq <%= doc_generation ? "'#{cloudfunction['description']}'" : "cloudfunction['description']" -%> }
   its('available_memory_mb') { should eq <%= doc_generation ? "'#{cloudfunction['available_memory_mb']}'" : "cloudfunction['available_memory_mb']" -%> }
-  its('https_trigger.url') { should match /\/<%= "#{grab_attributes['cloudfunction']['name']}" -%>$/ }
+  its('https_trigger.url') { should match /\/<%= "#{grab_attributes(pwd)['cloudfunction']['name']}" -%>$/ }
   its('entry_point') { should eq <%= doc_generation ? "'#{cloudfunction['entry_point']}'" : "cloudfunction['entry_point']" -%> }
   its('environment_variables') { should include('MY_ENV_VAR' => <%= doc_generation ? "'#{cloudfunction['env_var_value']}'" : "cloudfunction['env_var_value']" -%>) }
 end

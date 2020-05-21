@@ -1,2 +1,2 @@
-gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
-global_forwarding_rule = attribute('global_forwarding_rule', default: <%= JSON.pretty_generate(grab_attributes['global_forwarding_rule']) -%>, description: 'Compute global forwarding rule definition')
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute(pwd, 'gcp_project_id') -%>', description: 'The GCP project identifier.')
+global_forwarding_rule = attribute('global_forwarding_rule', default: <%= JSON.pretty_generate(grab_attributes(pwd)['global_forwarding_rule']) -%>, description: 'Compute global forwarding rule definition')

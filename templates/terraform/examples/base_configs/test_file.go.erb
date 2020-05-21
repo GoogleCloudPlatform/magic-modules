@@ -1,4 +1,4 @@
-<%= lines(autogen_notice :go) -%>
+<%= lines(autogen_notice(:go, pwd)) -%>
 
 package google
 
@@ -39,10 +39,13 @@ object.examples
 -%>
 
 func TestAcc<%= test_slug -%>(t *testing.T) {
+<% if example.skip_vcr -%>
+	skipIfVcr(t)
+<% end -%>
   t.Parallel()
 
 	context := map[string]interface{} {
-<%= lines(indent(compile('templates/terraform/env_var_context.go.erb'), 4)) -%>
+<%= lines(indent(compile(pwd + '/templates/terraform/env_var_context.go.erb'), 4)) -%>
 	<% unless example.test_vars_overrides.nil? -%>
 	<% example.test_vars_overrides.each do |var_name, override| -%>
 			"<%= var_name %>": <%= override %>,
@@ -82,7 +85,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 }
 
 func testAcc<%= test_slug -%>(context map[string]interface{}) string {
-<%= example.config_test -%>
+<%= example.config_test(pwd) -%>
 }
 <%- end %>
 
@@ -98,7 +101,7 @@ func testAccCheck<%= resource_name -%>DestroyProducer(t *testing.T) func(s *terr
 			}
 
 		<% if object.custom_code.test_check_destroy -%>
-	<%= lines(compile(object.custom_code.test_check_destroy)) -%>
+	<%= lines(compile(pwd + '/' + object.custom_code.test_check_destroy)) -%>
 		<% else -%>
 		config := googleProviderConfig(t)
 

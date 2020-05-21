@@ -1,5 +1,5 @@
-<% gcp_organization_id = "#{external_attribute('gcp_organization_id', doc_generation)}" -%>
-<% org_sink = grab_attributes['org_sink'] -%>
+<% gcp_organization_id = "#{external_attribute(pwd, 'gcp_organization_id', doc_generation)}" -%>
+<% org_sink = grab_attributes(pwd)['org_sink'] -%>
 describe google_logging_organization_log_sink(organization: <%= gcp_organization_id -%>, name: <%= doc_generation ? "'#{org_sink['name']}'" : "org_sink['name']" -%>) do
   it { should exist }
   its('filter') { should cmp <%= doc_generation ? "'#{org_sink['filter']}'" : "org_sink['filter']" -%> }

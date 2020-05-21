@@ -1,0 +1,33 @@
+resource "google_monitoring_custom_service" "customsrv" {
+  service_id = "<%= ctx[:vars]['service_id'] %>"
+  display_name = "My Custom Service"
+}
+
+resource "google_monitoring_slo" "<%= ctx[:primary_resource_id] %>" {
+  service = google_monitoring_custom_service.customsrv.service_id
+  display_name = "Terraform Test SLO with window based SLI"
+
+  goal = 0.9
+  rolling_period_days = 20
+
+  windows_based_sli {
+    window_period = "100s"
+
+    good_total_ratio_threshold {
+      threshold = 0.1
+      performance {
+        distribution_cut {
+          distribution_filter = join(" AND ", [
+            "metric.type=\"serviceruntime.googleapis.com/api/request_latencies\"",
+            "resource.type=\"consumed_api\"",
+          ])
+
+          range {
+            min = 1
+            max = 9
+          }
+        }
+      }
+    }
+  }
+}

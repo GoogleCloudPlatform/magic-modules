@@ -181,6 +181,7 @@ func Provider() terraform.ResourceProvider {
 			"google_dns_managed_zone":                          dataSourceDnsManagedZone(),
 			"google_iam_policy":                                dataSourceGoogleIamPolicy(),
 			"google_iam_role":                                  dataSourceGoogleIamRole(),
+			"google_iam_testable_permissions":                  dataSourceGoogleIamTestablePermissions(),
 			"google_kms_crypto_key":                            dataSourceGoogleKmsCryptoKey(),
 			"google_kms_crypto_key_version":                    dataSourceGoogleKmsCryptoKeyVersion(),
 			"google_kms_key_ring":                              dataSourceGoogleKmsKeyRing(),
@@ -200,9 +201,7 @@ func Provider() terraform.ResourceProvider {
 			"google_project":                                   dataSourceGoogleProject(),
 			"google_projects":                                  dataSourceGoogleProjects(),
 			"google_project_organization_policy":               dataSourceGoogleProjectOrganizationPolicy(),
-			<% unless version == 'ga' -%>
 			"google_secret_manager_secret_version":              dataSourceSecretManagerSecretVersion(),
-			<% end -%>
 			"google_service_account":                           dataSourceGoogleServiceAccount(),
 			"google_service_account_access_token":              dataSourceGoogleServiceAccountAccessToken(),
 			"google_service_account_key":                       dataSourceGoogleServiceAccountKey(),
@@ -361,6 +360,7 @@ end     # products.each do
 				"google_kms_crypto_key_iam_binding":            ResourceIamBinding(IamKmsCryptoKeySchema, NewKmsCryptoKeyIamUpdater, CryptoIdParseFunc),
 				"google_kms_crypto_key_iam_member":             ResourceIamMember(IamKmsCryptoKeySchema, NewKmsCryptoKeyIamUpdater, CryptoIdParseFunc),
 				"google_kms_crypto_key_iam_policy":             ResourceIamPolicy(IamKmsCryptoKeySchema, NewKmsCryptoKeyIamUpdater, CryptoIdParseFunc),
+				"google_monitoring_dashboard":                  resourceMonitoringDashboard(),
 				"google_service_networking_connection":         resourceServiceNetworkingConnection(),
 				"google_spanner_instance_iam_binding":          ResourceIamBinding(IamSpannerInstanceSchema, NewSpannerInstanceIamUpdater, SpannerInstanceIdParseFunc),
 				"google_spanner_instance_iam_member":           ResourceIamMember(IamSpannerInstanceSchema, NewSpannerInstanceIamUpdater, SpannerInstanceIdParseFunc),

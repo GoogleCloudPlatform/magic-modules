@@ -1,6 +1,6 @@
 resource "google_compute_target_instance" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['target_name'] %>"
-  instance = google_compute_instance.target-vm.self_link
+  instance = google_compute_instance.target-vm.id
 }
 
 data "google_compute_image" "vmimage" {

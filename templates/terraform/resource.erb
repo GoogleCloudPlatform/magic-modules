@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 -%>
-<%= lines(autogen_notice :go) -%>
+<%= lines(autogen_notice(:go, pwd)) -%>
 
 package google
 
-<%= lines(compile(object.custom_code.constants)) if object.custom_code.constants -%>
+<%= lines(compile(pwd + '/' + object.custom_code.constants)) if object.custom_code.constants -%>
 
 <%
     resource_name = product_ns + object.name
@@ -82,11 +82,11 @@ func resource<%= resource_name -%>() *schema.Resource {
 <%        end -%>
 <%      end -%>
 
-<%=     lines(compile(object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
+<%=     lines(compile(pwd + '/' + object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
 
         Schema: map[string]*schema.Schema{
 <%      order_properties(properties).each do |prop| -%>
-<%=       lines(build_schema_property(prop, object)) -%>
+<%=       lines(build_schema_property(prop, object, pwd)) -%>
 <%      end -%>
 <%-     unless object.virtual_fields.empty? -%>
 <%-       object.virtual_fields.each do |field| -%>
@@ -97,7 +97,7 @@ func resource<%= resource_name -%>() *schema.Resource {
             },
 <%        end -%>
 <%      end -%>
-<%=     lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
+<%=     lines(compile(pwd + '/' + object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
 <%      if has_project -%>
             "project": {
                 Type:     schema.TypeString,
@@ -117,13 +117,13 @@ func resource<%= resource_name -%>() *schema.Resource {
 }
 
 <% properties.each do |prop| -%>
-<%= lines(build_subresource_schema(prop, object), 1) -%>
+<%= lines(build_subresource_schema(prop, object, pwd), 1) -%>
 <% end -%>
 
 <% object.settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
 func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(diff *schema.ResourceDiff, meta interface{}) error {
 <%=
-    compile_template('templates/terraform/unordered_list_customize_diff.erb',
+    compile_template(pwd + '/templates/terraform/unordered_list_customize_diff.erb',
                      prop: prop,
                      resource_name: resource_name)
 -%>
@@ -132,7 +132,7 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 
 func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
 <%  if object.custom_code.custom_create -%>
-    <%= lines(compile(object.custom_code.custom_create))  -%>
+    <%= lines(compile(pwd + '/' + object.custom_code.custom_create))  -%>
 <%  else  -%>
     config := meta.(*Config)
 
@@ -315,7 +315,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
     log.Printf("[DEBUG] Finished creating <%= object.name -%> %q: %#v", d.Id(), res)
 
-<%= lines(compile(object.custom_code.post_create)) if object.custom_code.post_create -%>
+<%= lines(compile(pwd + '/' + object.custom_code.post_create)) if object.custom_code.post_create -%>
 
     return resource<%= resource_name -%>Read(d, meta)
 <%  end # if custom_create  -%>
@@ -325,7 +325,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interface{}) PollReadFunc {
     return func() (map[string]interface{}, error) {
 <%    if object.async.custom_poll_read -%>
-<%= lines(compile(object.async.custom_poll_read)) -%>
+<%= lines(compile(pwd + '/' + object.async.custom_poll_read)) -%>
 <%    else -%>
         config := meta.(*Config)
 
@@ -681,8 +681,8 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     }
 
     log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
-<%= lines(compile('templates/terraform/update_mask.erb')) if object.update_mask -%>
-<%= lines(compile(object.custom_code.pre_update)) if object.custom_code.pre_update -%>
+<%= lines(compile(pwd + '/templates/terraform/update_mask.erb')) if object.update_mask -%>
+<%= lines(compile(pwd + '/' + object.custom_code.pre_update)) if object.custom_code.pre_update -%>
 <%  if object.nested_query&.modify_by_patch -%>
 <%# Keep this after mutex - patch request data relies on current resource state %>
     obj, err = resource<%= resource_name -%>PatchUpdateEncoder(d, meta, obj)
@@ -728,7 +728,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%  end -%>
 <%  end # if object.input -%>
 
-<%= lines(compile(object.custom_code.post_update)) if object.custom_code.post_update -%>
+<%= lines(compile(pwd + '/' + object.custom_code.post_update)) if object.custom_code.post_update -%>
     return resource<%= resource_name -%>Read(d, meta)
 }
 <% end # if updatable? -%>
@@ -742,7 +742,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
     return nil
 <% elsif object.custom_code.custom_delete -%>
-<%= lines(compile(object.custom_code.custom_delete)) -%>
+<%= lines(compile(pwd + '/' + object.custom_code.custom_delete)) -%>
 <% else -%>
     config := meta.(*Config)
 
@@ -769,7 +769,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
 <%# If the deletion of the object requires sending a request body, the custom code will set 'obj' -%>
     var obj map[string]interface{}
-<%= lines(compile(object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
+<%= lines(compile(pwd + '/' + object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
 <%  if object.nested_query&.modify_by_patch -%>
 <%# Keep this after mutex - patch request data relies on current resource state %>
     obj, err = resource<%= resource_name -%>PatchDeleteEncoder(d, meta, obj)
@@ -815,7 +815,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <% unless object.exclude_import -%>
 func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 <% if object.custom_code.custom_import -%>
-<%= lines(compile(object.custom_code.custom_import)) -%>
+<%= lines(compile(pwd + '/' + object.custom_code.custom_import)) -%>
 <% else -%>
     config := meta.(*Config)
     if err := parseImportId([]string{
@@ -839,7 +839,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
     d.Set("<%= field.name %>", <%= go_literal(field.default_value) -%>)
   <%   end -%>
 <%   end -%>
-<%= lines(compile(object.custom_code.post_import)) if object.custom_code.post_import -%>
+<%= lines(compile(pwd + '/' + object.custom_code.post_import)) if object.custom_code.post_import -%>
 
     return []*schema.ResourceData{d}, nil
 <% end -%>
@@ -848,27 +848,27 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 
 <%- nested_prefix = object.nested_query ? "Nested" : "" -%>
 <% object.gettable_properties.reject(&:ignore_read).each do |prop| -%>
-<%= lines(build_flatten_method(nested_prefix+resource_name, prop, object), 1) -%>
+<%= lines(build_flatten_method(nested_prefix+resource_name, prop, object, pwd), 1) -%>
 <% end -%>
 
 <% object.settable_properties.each do |prop| -%>
-<%= lines(build_expand_method(nested_prefix+resource_name, prop, object), 1) -%>
+<%= lines(build_expand_method(nested_prefix+resource_name, prop, object, pwd), 1) -%>
 <% end -%>
 
 <% if object.custom_code.encoder -%>
 func resource<%= resource_name -%>Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-<%= lines(compile(object.custom_code.encoder)) -%>
+<%= lines(compile(pwd + '/' + object.custom_code.encoder)) -%>
 }
 <% end -%>
 
 <% if object.custom_code.update_encoder-%>
 func resource<%= resource_name -%>UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-<%= lines(compile(object.custom_code.update_encoder)) -%>
+<%= lines(compile(pwd + '/' + object.custom_code.update_encoder)) -%>
 }
 <% end -%>
 
 <%  if object.nested_query -%>
-<%= compile_template('templates/terraform/nested_query.go.erb',
+<%= compile_template(pwd + '/templates/terraform/nested_query.go.erb',
                  object: object,
                  settable_properties: object.settable_properties,
                  resource_name: resource_name) -%>
@@ -876,17 +876,17 @@ func resource<%= resource_name -%>UpdateEncoder(d *schema.ResourceData, meta int
 
 <% if object.custom_code.decoder -%>
 func resource<%= resource_name -%>Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
-<%= lines(compile(object.custom_code.decoder)) -%>
+<%= lines(compile(pwd + '/' + object.custom_code.decoder)) -%>
 }
 <% end -%>
 
 <% if object.custom_code.post_create_failure -%>
 func resource<%= resource_name -%>PostCreateFailure(d *schema.ResourceData, meta interface{}) {
-<%= lines(compile(object.custom_code.post_create_failure)) -%>
+<%= lines(compile(pwd + '/' + object.custom_code.post_create_failure)) -%>
 }
 <% end -%>
 
 <% if object.schema_version -%>
-<%= lines(compile("templates/terraform/state_migrations/#{product_ns.underscore}_#{object.name.underscore}.go.erb")) -%>
+<%= lines(compile(pwd + "/templates/terraform/state_migrations/#{product_ns.underscore}_#{object.name.underscore}.go.erb")) -%>
 <%  end -%>
 

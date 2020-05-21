@@ -1,6 +1,6 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
-<% gcp_kms_key_ring_policy_name = "#{external_attribute('gcp_kms_key_ring_policy_name', doc_generation)}" -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute(pwd, 'gcp_location', doc_generation)}" -%>
+<% gcp_kms_key_ring_policy_name = "#{external_attribute(pwd, 'gcp_kms_key_ring_policy_name', doc_generation)}" -%>
 describe google_kms_key_rings(project: <%= gcp_project_id -%>, location: <%= gcp_location -%>) do
   its('key_ring_names'){ should include <%= gcp_kms_key_ring_policy_name -%> }
 end

@@ -1,7 +1,7 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
-<% gcp_kms_key_ring_policy_name = "#{external_attribute('gcp_kms_key_ring_policy_name', doc_generation)}" -%>
-<% gcp_kms_crypto_key_name_policy = "#{external_attribute('gcp_kms_crypto_key_name_policy', doc_generation)}" -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute(pwd, 'gcp_location', doc_generation)}" -%>
+<% gcp_kms_key_ring_policy_name = "#{external_attribute(pwd, 'gcp_kms_key_ring_policy_name', doc_generation)}" -%>
+<% gcp_kms_crypto_key_name_policy = "#{external_attribute(pwd, 'gcp_kms_crypto_key_name_policy', doc_generation)}" -%>
 describe google_kms_crypto_key(project: <%= gcp_project_id -%>, location: <%= gcp_location -%>, key_ring_name: <%= gcp_kms_key_ring_policy_name -%>, name: <%= gcp_kms_crypto_key_name_policy -%>) do
   it { should exist }
   its('crypto_key_name') { should cmp <%= gcp_kms_crypto_key_name_policy -%> }
