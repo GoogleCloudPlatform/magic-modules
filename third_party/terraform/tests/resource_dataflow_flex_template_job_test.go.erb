@@ -54,6 +54,7 @@ resource "google_dataflow_flex_template_job" "big_data" {
 
 func flexTemplateContent() string {
 	return `
+<<EOF
 {
 	"name": "Streaming Beam SQL",
 	"description": "An Apache Beam streaming pipeline that reads JSON encoded messages from Pub/Sub, uses Beam SQL to transform the message data, and writes the results to a BigQuery",
@@ -77,6 +78,7 @@ func flexTemplateContent() string {
 		}
 	]
 }
+EOF
 `
 }
 <% end -%>
