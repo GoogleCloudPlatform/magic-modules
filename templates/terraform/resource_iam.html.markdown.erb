@@ -262,7 +262,7 @@ Any variables not passed in the import command will be taken from the provider c
 
 IAM member imports use space-delimited identifiers: the resource in question, the role, and the member identity, e.g.
 ```
-$ terraform import <% if object.min_version.name == 'beta' %>-provider=google-beta <% end -%><%= resource_ns_iam -%>_member.editor "<%= id_format(object).gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%> jane@example.com"
+$ terraform import <% if object.min_version.name == 'beta' %>-provider=google-beta <% end -%><%= resource_ns_iam -%>_member.editor "<%= all_formats.first.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%> jane@example.com"
 ```
 
 IAM binding imports use space-delimited identifiers: the resource in question and the role, e.g.
