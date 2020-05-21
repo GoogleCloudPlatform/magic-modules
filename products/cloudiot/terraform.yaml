@@ -1,0 +1,154 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+legacy_name: "cloudiot"
+overrides: !ruby/object:Overrides::ResourceOverrides
+  DeviceRegistry: !ruby/object:Overrides::Terraform::ResourceOverride
+    legacy_name: "google_cloudiot_registry"
+    import_format: ["{{project}}/locations/{{region}}/registries/{{name}}"]
+    id_format: "projects/{{project}}/locations/{{region}}/registries/{{name}}"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/cloudiot.go.erb
+      decoder: templates/terraform/decoders/cloudiot_device_registry.go.erb
+      encoder: templates/terraform/encoders/cloudiot_device_registry.go.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/cloudiot_device_registry.go.erb
+      pre_update: templates/terraform/pre_update/cloudiot_device_registry.go.erb
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |+
+        * `state_notification_config` - A PubSub topic to publish device state updates.
+          The structure is documented below.
+
+        * `mqtt_config` - Activate or deactivate MQTT.
+          The structure is documented below.
+
+        * `http_config` - Activate or deactivate HTTP.
+          The structure is documented below.
+
+        * `credentials` - List of public key certificates to authenticate devices.
+          The structure is documented below.
+
+        The `state_notification_config` block supports:
+
+        * `pubsub_topic_name` - PubSub topic name to publish device state updates.
+
+        The `mqtt_config` block supports:
+
+        * `mqtt_enabled_state` - The field allows `MQTT_ENABLED` or `MQTT_DISABLED`.
+
+        The `http_config` block supports:
+
+        * `http_enabled_state` - The field allows `HTTP_ENABLED` or `HTTP_DISABLED`.
+
+        The `credentials` block supports:
+
+        * `public_key_certificate` - A public key certificate format and data.
+
+        The `public_key_certificate` block supports:
+
+        * `format` - The field allows only `X509_CERTIFICATE_PEM`.
+
+        * `certificate` - The certificate data.
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudiot_device_registry_basic"
+        primary_resource_id: "test-registry"
+        vars:
+          cloudiot_registry_name: "cloudiot-registry"
+        test_env_vars:
+          project: :PROJECT_NAME
+          region: :REGION
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudiot_device_registry_single_event_notification_configs"
+        primary_resource_id: "test-registry"
+        vars:
+          cloudiot_registry_name: "cloudiot-registry"
+          cloudiot_device_telemetry_topic_name: "default-telemetry"
+        test_env_vars:
+          project: :PROJECT_NAME
+          region: :REGION
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudiot_device_registry_full"
+        primary_resource_id: "test-registry"
+        vars:
+          cloudiot_registry_name: "cloudiot-registry"
+          cloudiot_device_status_topic_name: "default-devicestatus"
+          cloudiot_device_telemetry_topic_name: "default-telemetry"
+          cloudiot_additional_device_telemetry_topic_name: "additional-telemetry"
+          cloudiot_subfolder_matches_additional_device_telemetry_topic: "test/path"
+        test_env_vars:
+          project: :PROJECT_NAME
+          region: :REGION
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        name: 'name'
+        description: |
+          A unique name for the resource, required by device registry.
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateCloudIotDeviceRegistryID'
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        # We don't need this field, because it has the same format as the ID
+        exclude: true
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+        required: false
+        default_from_api: true
+        description: |
+          The region in which the created registry should reside.
+          If it is not provided, the provider region is used.
+      logLevel: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'emptyOrDefaultStringSuppress("NONE")'
+      eventNotificationConfigs: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      eventNotificationConfigs.subfolderMatches: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateCloudIotDeviceRegistrySubfolderMatch'
+      eventNotificationConfigs.pubsubTopicName: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      stateNotificationConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        # Excluding this because the original (manually-generated) implementation
+        # wrongly set this to be a Map, instead of a NestedObject. To avoid breaking
+        # changes, we observe that behaviour by excluding this field and adding a
+        # corresponding custom element (of type Map) to the schema. When we're
+        # ready to introduce this breaking change, remove this "exclude" directive
+        # along with the corresponding custom schema element.
+        exclude: true
+      stateNotificationConfig.pubsubTopicName: !ruby/object:Overrides::Terraform::PropertyOverride
+        # See the comment on stateNotificationConfig.exclude
+        exclude: true
+      mqttConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        # See the comment on stateNotificationConfig.exclude
+        exclude: true
+      mqttConfig.mqttEnabledState: !ruby/object:Overrides::Terraform::PropertyOverride
+        # See the comment on stateNotificationConfig.exclude
+        exclude: true
+      httpConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        # See the comment on stateNotificationConfig.exclude
+        exclude: true
+      httpConfig.httpEnabledState: !ruby/object:Overrides::Terraform::PropertyOverride
+        # See the comment on stateNotificationConfig.exclude
+        exclude: true
+      credentials: !ruby/object:Overrides::Terraform::PropertyOverride
+        # See the comment on stateNotificationConfig.exclude
+        exclude: true
+      credentials.publicKeyCertificate: !ruby/object:Overrides::Terraform::PropertyOverride
+        # See the comment on stateNotificationConfig.exclude
+        exclude: true
+
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

@@ -135,7 +135,6 @@ func Provider() terraform.ResourceProvider {
 			IAMCustomEndpointEntryKey:                    IAMCustomEndpointEntry,
 			ServiceNetworkingCustomEndpointEntryKey:      ServiceNetworkingCustomEndpointEntry,
 			ServiceUsageCustomEndpointEntryKey:           ServiceUsageCustomEndpointEntry,
-			CloudIoTCustomEndpointEntryKey:               CloudIoTCustomEndpointEntry,
 			StorageTransferCustomEndpointEntryKey:        StorageTransferCustomEndpointEntry,
 			BigtableAdminCustomEndpointEntryKey:          BigtableAdminCustomEndpointEntry,
 		},
@@ -293,7 +292,6 @@ end     # products.each do
 				"google_billing_account_iam_member":            ResourceIamMember(IamBillingAccountSchema, NewBillingAccountIamUpdater, BillingAccountIdParseFunc),
 				"google_billing_account_iam_policy":            ResourceIamPolicy(IamBillingAccountSchema, NewBillingAccountIamUpdater, BillingAccountIdParseFunc),
 				"google_cloudfunctions_function":               resourceCloudFunctionsFunction(),
-				"google_cloudiot_registry":                     resourceCloudIoTRegistry(),
 				"google_composer_environment":                  resourceComposerEnvironment(),
 				"google_compute_attached_disk":                 resourceComputeAttachedDisk(),
 				"google_compute_instance":                      resourceComputeInstance(),
@@ -465,7 +463,6 @@ func providerConfigure(d *schema.ResourceData, p *schema.Provider, terraformVers
 	config.IAMBasePath = d.Get(IAMCustomEndpointEntryKey).(string)
 	config.ServiceNetworkingBasePath = d.Get(ServiceNetworkingCustomEndpointEntryKey).(string)
 	config.ServiceUsageBasePath = d.Get(ServiceUsageCustomEndpointEntryKey).(string)
-	config.CloudIoTBasePath = d.Get(CloudIoTCustomEndpointEntryKey).(string)
 	config.StorageTransferBasePath = d.Get(StorageTransferCustomEndpointEntryKey).(string)
 	config.BigtableAdminBasePath = d.Get(BigtableAdminCustomEndpointEntryKey).(string)
 

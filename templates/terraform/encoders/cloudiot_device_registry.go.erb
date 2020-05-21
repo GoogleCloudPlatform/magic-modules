@@ -1,0 +1,43 @@
+config := meta.(*Config)
+
+log.Printf("[DEBUG] Resource data before encoding extra schema entries %q: %#v", d.Id(), obj)
+
+log.Printf("[DEBUG] Encoding state notification config: %q", d.Id())
+stateNotificationConfigProp, err := expandCloudIotDeviceRegistryStateNotificationConfig(d.Get("state_notification_config"), d, config)
+if err != nil {
+    return nil, err
+} else if v, ok := d.GetOkExists("state_notification_config"); !isEmptyValue(reflect.ValueOf(stateNotificationConfigProp)) && (ok || !reflect.DeepEqual(v, stateNotificationConfigProp)) {
+    log.Printf("[DEBUG] Encoding %q. Setting stateNotificationConfig: %#v", d.Id(), stateNotificationConfigProp)
+    obj["stateNotificationConfig"] = stateNotificationConfigProp
+}
+
+log.Printf("[DEBUG] Encoding HTTP config: %q", d.Id())
+httpConfigProp, err := expandCloudIotDeviceRegistryHTTPConfig(d.Get("http_config"), d, config)
+if err != nil {
+    return nil, err
+} else if v, ok := d.GetOkExists("http_config"); !isEmptyValue(reflect.ValueOf(httpConfigProp)) && (ok || !reflect.DeepEqual(v, httpConfigProp)) {
+    log.Printf("[DEBUG] Encoding %q. Setting httpConfig: %#v", d.Id(), httpConfigProp)
+    obj["httpConfig"] = httpConfigProp
+}
+
+log.Printf("[DEBUG] Encoding MQTT config: %q", d.Id())
+mqttConfigProp, err := expandCloudIotDeviceRegistryMqttConfig(d.Get("mqtt_config"), d, config)
+if err != nil {
+    return nil, err
+} else if v, ok := d.GetOkExists("mqtt_config"); !isEmptyValue(reflect.ValueOf(mqttConfigProp)) && (ok || !reflect.DeepEqual(v, mqttConfigProp)) {
+    log.Printf("[DEBUG] Encoding %q. Setting mqttConfig: %#v", d.Id(), mqttConfigProp)
+    obj["mqttConfig"] = mqttConfigProp
+}
+
+log.Printf("[DEBUG] Encoding credentials: %q", d.Id())
+credentialsProp, err := expandCloudIotDeviceRegistryCredentials(d.Get("credentials"), d, config)
+if err != nil {
+    return nil, err
+} else if v, ok := d.GetOkExists("credentials"); !isEmptyValue(reflect.ValueOf(credentialsProp)) && (ok || !reflect.DeepEqual(v, credentialsProp)) {
+    log.Printf("[DEBUG] Encoding %q. Setting credentials: %#v", d.Id(), credentialsProp)
+    obj["credentials"] = credentialsProp
+}
+
+log.Printf("[DEBUG] Resource data after encoding extra schema entries %q: %#v", d.Id(), obj)
+
+return obj, nil
