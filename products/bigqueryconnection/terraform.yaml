@@ -32,6 +32,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "connection"
         vars:
           database_instance_name: "my-database-instance"
+          username: "user"
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta
         name: "bigquery_connection_full"
