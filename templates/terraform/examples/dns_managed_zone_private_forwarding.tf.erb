@@ -1,5 +1,4 @@
 resource "google_dns_managed_zone" "<%= ctx[:primary_resource_id] %>" {
-  provider    = google-beta
   name        = "<%= ctx[:vars]['zone_name'] %>"
   dns_name    = "private.example.com."
   description = "Example private DNS zone"
