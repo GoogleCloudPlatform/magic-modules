@@ -12,19 +12,23 @@ import (
 	dataflow "google.golang.org/api/dataflow/v1b3"
 )
 
+// NOTE: resource_dataflow_flex_template currently does not support updating existing jobs. 
+// Changing any non-computed field will result in the job being deleted (according to its 
+// on_delete policy) and recreated with the updated parameters.
+
 // resourceDataflowFlexTemplateJob defines the schema for Dataflow FlexTemplate jobs.
 func resourceDataflowFlexTemplateJob() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDataflowFlexTemplateJobCreate,
 		Read:   resourceDataflowFlexTemplateJobRead,
-		Update: resourceDataflowFlexTemplateJobUpdateByReplacement,
+		// Update: resourceDataflowFlexTemplateJobUpdateByReplacement,
 		Delete: resourceDataflowJobDelete,
 		Schema: map[string]*schema.Schema{
 
 			"container_spec_gcs_path": {
 				Type:     schema.TypeString,
-				ForceNew: true,
 				Required: true,
+				ForceNew: true,
 			},
 
 			"name": {
@@ -48,15 +52,14 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 
 			"parameters": {
 				Type:     schema.TypeMap,
-				ForceNew: true,
 				Optional: true,
+				ForceNew: true,
 			},
 
 			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				// ForceNew applies to both stream and batch jobs
 				ForceNew: true,
 			},
 
@@ -142,42 +145,7 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	return nil
 }
 
-// resourceDataflowFlexTemplateJobUpdateByReplacement updates a Flex Template job by replacement.
-func resourceDataflowFlexTemplateJobUpdateByReplacement(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+// resourceDataflowFlexTemplateJobUpdateByReplacement will be the method for updating Flex-Template jobs
+// See NOTE above.
 
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-
-	region, err := getRegion(d, config)
-	if err != nil {
-		return err
-	}
-
-	request := dataflow.LaunchFlexTemplateRequest{
-		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
-			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
-			JobName:              d.Get("name").(string),
-			Parameters:           expandStringMap(d, "parameters"),
-		},
-	}
-	var job *dataflow.Job
-	err = retryTimeDuration(func() (updateErr error) {
-		response, err := config.clientDataflow.Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
-		if err != nil {
-			return err
-		}
-		job = response.Job
-		return updateErr
-	}, time.Minute*time.Duration(5), isDataflowJobUpdateRetryableError)
-	if err != nil {
-		return err
-	}
-	d.SetId(job.Id)
-	d.Set("job_id", job.Id)
-
-	return resourceDataflowJobRead(d, meta)
-}
 <% end -%>
