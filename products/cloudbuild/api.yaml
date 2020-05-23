@@ -198,6 +198,10 @@ objects:
                 values:
                   - :COMMENTS_DISABLED
                   - :COMMENTS_ENABLED
+              - !ruby/object:Api::Type::Boolean
+                name: 'invertRegex'
+                description: |
+                  If true, branches that do NOT match the git_ref will trigger a build.
           - !ruby/object:Api::Type::NestedObject
             name: 'push'
             description: |
@@ -213,6 +217,10 @@ objects:
                 exactly_one_of:
                   - github.0.push.0.branch
                   - github.0.push.0.tag
+              - !ruby/object:Api::Type::Boolean
+                name: 'invertRegex'
+                description: |
+                  When true, only trigger a build if the revision regex does NOT match the given ref regex.
               - !ruby/object:Api::Type::String
                 name: 'tag'
                 description: |
