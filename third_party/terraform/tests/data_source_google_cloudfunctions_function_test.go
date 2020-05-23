@@ -51,9 +51,8 @@ resource "google_cloudfunctions_function" "function_http" {
   runtime               = "nodejs8"
   description           = "test function"
   available_memory_mb   = 128
-  source_archive_bucket = google_storage_bucket.bucket.name
-  source_archive_object = google_storage_bucket_object.archive.name
-  trigger_http          = true
+  source_archive_url    = "gs://${google_storage_bucket_object.archive.bucket}/${google_storage_bucket_object.archive.output_name}"
+  https_trigger         = {}
   timeout               = 61
   entry_point           = "helloGET"
 }

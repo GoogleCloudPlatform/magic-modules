@@ -14,31 +14,62 @@
 --- !ruby/object:Provider::Terraform::Config
 legacy_name: 'cloudfunctions'
 overrides: !ruby/object:Overrides::ResourceOverrides
-  CloudFunction: !ruby/object:Overrides::Terraform::ResourceOverride
-    legacy_name: 'google_cloudfunctions_function'
-    id_format: 'projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}'
-    base_url: projects/{{project}}/locations/{{region}}/functions
-    import_format: ["projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}"]
-    exclude_resource: true
+  Function: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 5
+      update_minutes: 5
+      delete_minutes: 5
+    autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "cloudfunctions_cloud_function"
+        name: "cloudfunctions_public_function"
         primary_resource_id: "function"
         primary_resource_name: "fmt.Sprintf(\"tf-test-my-function%s\", context[\"random_suffix\"])"
         vars:
-          function_name: "my-function"
-          bucket_name: "cloudfunctions-function-example-bucket"
-          zip_path: "path/to/index.zip"
+          function_name: "function-test"
+          bucket_name: "test-bucket"
+          zip_path: "./path/to/zip/file/which/contains/code"
+        test_vars_overrides:
+          zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudfunctions_single_user"
+        primary_resource_id: "function"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-function%s\", context[\"random_suffix\"])"
+        vars:
+          function_name: "function-test"
+          bucket_name: "test-bucket"
+          zip_path: "./path/to/zip/file/which/contains/code"
         test_vars_overrides:
           zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
     properties:
-      location: !ruby/object:Overrides::Terraform::PropertyOverride
-        name: 'region'
+      availableMemoryMb: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      eventTrigger.failurePolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/cloudfunction_event_trigger_failure_policy.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/cloudfunction_event_trigger_failure_policy.go.erb'
+      eventTrigger.resource: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/cloudfunction_event_trigger_resource.go.erb'
+        diff_suppress_func: 'compareSelfLinkOrResourceNameWithMultipleParts'
+      eventTrigger.service: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateResourceCloudFunctionsFunctionName'
+        custom_expand: 'templates/terraform/custom_expand/cloudfunction_id.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/cloudfunction_id.go.erb'
+      timeout: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/int_to_seconds.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/seconds_to_int.go.erb'
+      vpcConnector: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
     iam_policy: !ruby/object:Api::Resource::IamPolicy
-      parent_resource_attribute: 'cloud_function'
+      parent_resource_attribute: 'function'
       method_name_separator: ':'
       exclude: false
-
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/cloudfunctions_function.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

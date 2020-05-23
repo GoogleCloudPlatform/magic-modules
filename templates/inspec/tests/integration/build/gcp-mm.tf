@@ -591,9 +591,8 @@ resource "google_cloudfunctions_function" "function" {
   name                  = var.cloudfunction["name"]
   description           = var.cloudfunction["description"]
   available_memory_mb   = var.cloudfunction["available_memory_mb"]
-  source_archive_bucket = google_storage_bucket.generic-storage-bucket.name
-  source_archive_object = google_storage_bucket_object.archive.name
-  trigger_http          = var.cloudfunction["trigger_http"]
+  source_archive_url    = "gs://${google_storage_bucket_object.archive.bucket}/${google_storage_bucket_object.archive.output_name}"
+  https_trigger         = var.cloudfunction["https_trigger"]
   timeout               = var.cloudfunction["timeout"]
   entry_point           = var.cloudfunction["entry_point"]
   runtime               = "nodejs8"

@@ -23,25 +23,14 @@ func dataSourceGoogleCloudFunctionsFunction() *schema.Resource {
 func dataSourceGoogleCloudFunctionsFunctionRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	project, err := getProject(d, config)
+    id, err := getCloudFunctionIdFromConfig(d, config)
 	if err != nil {
 		return err
 	}
 
-	region, err := getRegion(d, config)
-	if err != nil {
-		return err
-	}
+	d.SetId(id)
 
-	cloudFuncId := &cloudFunctionId{
-		Project: project,
-		Region:  region,
-		Name:    d.Get("name").(string),
-	}
-
-	d.SetId(cloudFuncId.cloudFunctionId())
-
-	err = resourceCloudFunctionsRead(d, meta)
+	err = resourceCloudFunctionsFunctionRead(d, meta)
 	if err != nil {
 		return err
 	}

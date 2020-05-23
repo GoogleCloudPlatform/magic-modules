@@ -70,51 +70,6 @@ func TestCloudFunctionsFunction_nameValidator(t *testing.T) {
 	}
 }
 
-func TestValidLabelKeys(t *testing.T) {
-	testCases := []struct {
-		labelKey string
-		valid    bool
-	}{
-		{
-			"test-label", true,
-		},
-		{
-			"test_label", true,
-		},
-		{
-			"MixedCase", false,
-		},
-		{
-			"number-09-dash", true,
-		},
-		{
-			"", false,
-		},
-		{
-			"test-label", true,
-		},
-		{
-			"mixed*symbol", false,
-		},
-		{
-			"intérnätional", true,
-		},
-	}
-
-	for _, tc := range testCases {
-		labels := make(map[string]interface{})
-		labels[tc.labelKey] = "test value"
-
-		_, errs := labelKeyValidator(labels, "")
-		if tc.valid && len(errs) > 0 {
-			t.Errorf("Validation failure, key: '%s' should be valid but actual errors were %q", tc.labelKey, errs)
-		}
-		if !tc.valid && len(errs) < 1 {
-			t.Errorf("Validation failure, key: '%s' should fail but actual errors were %q", tc.labelKey, errs)
-		}
-	}
-}
-
 func TestAccCloudFunctionsFunction_basic(t *testing.T) {
 	t.Parallel()
 
@@ -153,7 +108,7 @@ func TestAccCloudFunctionsFunction_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(funcResourceName,
 						"entry_point", "helloGET"),
 					resource.TestCheckResourceAttr(funcResourceName,
-						"trigger_http", "true"),
+						"trigger_http", "{}"),
 					testAccCloudFunctionsFunctionHasLabel("my-label", "my-label-value", &function),
 					testAccCloudFunctionsFunctionHasEnvironmentVariable("TEST_ENV_VARIABLE",
 						"test-env-variable-value", &function),
@@ -404,34 +359,6 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 	})
 }
 
-func testAccCheckCloudFunctionsFunctionDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
-
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_cloudfunctions_function" {
-				continue
-			}
-
-			name := rs.Primary.Attributes["name"]
-			project := rs.Primary.Attributes["project"]
-			region := rs.Primary.Attributes["region"]
-			cloudFuncId := &cloudFunctionId{
-				Project: project,
-				Region:  region,
-				Name:    name,
-			}
-			_, err := config.clientCloudFunctions.Projects.Locations.Functions.Get(cloudFuncId.cloudFunctionId()).Do()
-			if err == nil {
-				return fmt.Errorf("Function still exists")
-			}
-
-		}
-
-		return nil
-	}
-}
-
 func testAccCloudFunctionsFunctionExists(t *testing.T, n string, function *cloudfunctions.CloudFunction) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -594,9 +521,8 @@ resource "google_cloudfunctions_function" "function" {
   runtime               = "nodejs8"
   description           = "test function"
   available_memory_mb   = 128
-  source_archive_bucket = google_storage_bucket.bucket.name
-  source_archive_object = google_storage_bucket_object.archive.name
-  trigger_http          = true
+  source_archive_url    = "gs://${google_storage_bucket_object.archive.bucket}/${google_storage_bucket_object.archive.output_name}"
+  https_trigger         = {}
   timeout               = 61
   entry_point           = "helloGET"
   ingress_settings      = "ALLOW_INTERNAL_ONLY"
@@ -627,9 +553,8 @@ resource "google_cloudfunctions_function" "function" {
   name                  = "%s"
   description           = "test function updated"
   available_memory_mb   = 256
-  source_archive_bucket = google_storage_bucket.bucket.name
-  source_archive_object = google_storage_bucket_object.archive.name
-  trigger_http          = true
+  source_archive_url    = "gs://${google_storage_bucket_object.archive.bucket}/${google_storage_bucket_object.archive.output_name}"
+  https_trigger         = {}
   runtime               = "nodejs8"
   timeout               = 91
   entry_point           = "helloGET"
@@ -668,8 +593,7 @@ resource "google_cloudfunctions_function" "function" {
   name                  = "%s"
   runtime               = "nodejs8"
   available_memory_mb   = 128
-  source_archive_bucket = google_storage_bucket.bucket.name
-  source_archive_object = google_storage_bucket_object.archive.name
+  source_archive_url    = "gs://${google_storage_bucket_object.archive.bucket}/${google_storage_bucket_object.archive.output_name}"
   timeout               = 61
   entry_point           = "helloPubSub"
   event_trigger {
@@ -703,8 +627,7 @@ resource "google_cloudfunctions_function" "function" {
   name                  = "%s"
   runtime               = "nodejs8"
   available_memory_mb   = 128
-  source_archive_bucket = google_storage_bucket.bucket.name
-  source_archive_object = google_storage_bucket_object.archive.name
+  source_archive_url    = "gs://${google_storage_bucket_object.archive.bucket}/${google_storage_bucket_object.archive.output_name}"
   timeout               = 61
   entry_point           = "helloGCS"
   event_trigger {
@@ -735,8 +658,7 @@ resource "google_cloudfunctions_function" "function" {
   name                  = "%s"
   runtime               = "nodejs8"
   available_memory_mb   = 128
-  source_archive_bucket = google_storage_bucket.bucket.name
-  source_archive_object = google_storage_bucket_object.archive.name
+  source_archive_url    = "gs://${google_storage_bucket_object.archive.bucket}/${google_storage_bucket_object.archive.output_name}"
   timeout               = 61
   entry_point           = "helloGCS"
   event_trigger {
@@ -764,8 +686,7 @@ resource "google_cloudfunctions_function" "function" {
   name                  = "%s"
   runtime               = "nodejs8"
   available_memory_mb   = 128
-  source_archive_bucket = google_storage_bucket.bucket.name
-  source_archive_object = google_storage_bucket_object.archive.name
+  source_archive_url    = "gs://${google_storage_bucket_object.archive.bucket}/${google_storage_bucket_object.archive.output_name}"
   timeout               = 61
   entry_point           = "helloFirestore"
   event_trigger {
@@ -790,14 +711,14 @@ resource "google_cloudfunctions_function" "function" {
     url = "https://source.developers.google.com/projects/%s/repos/cloudfunctions-test-do-not-delete/moveable-aliases/master/paths/"
   }
 
-  trigger_http = true
-  entry_point  = "helloGET"
+  https_trigger = {}
+  entry_point   = "helloGET"
 }
 `, functionName, project)
 }
 
 func testAccCloudFunctionsFunction_serviceAccountEmail(functionName, bucketName, zipFilePath string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name = "%s"
 }
@@ -815,13 +736,12 @@ resource "google_cloudfunctions_function" "function" {
   name    = "%s"
   runtime = "nodejs8"
 
-  source_archive_bucket = google_storage_bucket.bucket.name
-  source_archive_object = google_storage_bucket_object.archive.name
+  source_archive_url    = "gs://${google_storage_bucket_object.archive.bucket}/${google_storage_bucket_object.archive.output_name}"
 
   service_account_email = data.google_compute_default_service_account.default.email
 
-  trigger_http = true
-  entry_point  = "helloGET"
+  https_trigger = {}
+  entry_point   = "helloGET"
 }
 `, bucketName, zipFilePath, functionName)
 }
@@ -862,9 +782,8 @@ resource "google_cloudfunctions_function" "function" {
 
   description           = "test function"
   available_memory_mb   = 128
-  source_archive_bucket = google_storage_bucket.bucket.name
-  source_archive_object = google_storage_bucket_object.archive.name
-  trigger_http          = true
+  source_archive_url    = "gs://${google_storage_bucket_object.archive.bucket}/${google_storage_bucket_object.archive.output_name}"
+  https_trigger         = {}
   timeout               = 61
   entry_point           = "helloGET"
   labels = {

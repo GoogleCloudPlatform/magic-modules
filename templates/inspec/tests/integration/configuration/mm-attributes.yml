@@ -206,7 +206,7 @@ cloudfunction:
   name: inspec-gcp-function
   description: A description of the function
   available_memory_mb: 128
-  trigger_http: true
+  https_trigger: nil
   timeout: 60
   entry_point: hello
   env_var_value: val1

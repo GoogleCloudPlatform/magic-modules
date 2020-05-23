@@ -1,0 +1,57 @@
+<%- # the license inside this block applies to this file
+	# Copyright 2020 Google Inc.
+	# Licensed under the Apache License, Version 2.0 (the "License");
+	# you may not use this file except in compliance with the License.
+	# You may obtain a copy of the License at
+	#
+	#     http://www.apache.org/licenses/LICENSE-2.0
+	#
+	# Unless required by applicable law or agreed to in writing, software
+	# distributed under the License is distributed on an "AS IS" BASIS,
+	# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	# See the License for the specific language governing permissions and
+	# limitations under the License.
+-%>
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	project, err := getProject(d, config)
+	if err != nil {
+		return nil, err
+	}
+
+	res, ok := d.GetOk("event_trigger.0.event_type")
+	if !ok {
+		return nil, fmt.Errorf("%s: required field is not set", "event_type")
+	}
+	eventType := res.(string)
+
+	resource := v.(string)
+
+	// if resource starts with "projects/", we can reasonably assume it's a
+	// partial URI. Otherwise, it's a shortname. Construct a partial URI based
+	// on the event type if so.
+	if !strings.HasPrefix(resource, "projects/") {
+		shape := ""
+		switch {
+		case strings.HasPrefix(eventType, "google.storage.object."):
+			shape = "projects/%s/buckets/%s"
+		case strings.HasPrefix(eventType, "google.pubsub.topic."):
+			shape = "projects/%s/topics/%s"
+		// Legacy style triggers
+		case strings.HasPrefix(eventType, "providers/cloud.storage/eventTypes/"):
+			// Note that this is an uncommon way to refer to buckets; normally,
+			// you'd use to the global URL of the bucket and not the project
+			// scoped one.
+			shape = "projects/%s/buckets/%s"
+		case strings.HasPrefix(eventType, "providers/cloud.pubsub/eventTypes/"):
+			shape = "projects/%s/topics/%s"
+		case strings.HasPrefix(eventType, "providers/cloud.firestore/eventTypes/"):
+			// Firestore doesn't not yet support multiple databases, so "(default)" is assumed.
+			// https://cloud.google.com/functions/docs/calling/cloud-firestore#deploying_your_function
+			shape = "projects/%s/databases/(default)/documents/%s"
+		}
+
+		resource = fmt.Sprintf(shape, project, resource)
+	}
+
+	return resource, nil
+}
