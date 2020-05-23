@@ -79,6 +79,7 @@ func resourceComputeInstance() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				MaxItems: 1,
+				Description: `The boot disk for the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"auto_delete": {
@@ -87,6 +88,7 @@ func resourceComputeInstance() *schema.Resource {
 							AtLeastOneOf: bootDiskKeys,
 							Default:      true,
 							ForceNew:     true,
+							Description: `Whether the disk will be auto-deleted when the instance is deleted.`,
 						},
 
 						"device_name": {
@@ -95,6 +97,7 @@ func resourceComputeInstance() *schema.Resource {
 							AtLeastOneOf: bootDiskKeys,
 							Computed:     true,
 							ForceNew:     true,
+							Description: `Name with which attached disk will be accessible under /dev/disk/by-id/`,
 						},
 
 						"disk_encryption_key_raw": {
@@ -104,11 +107,13 @@ func resourceComputeInstance() *schema.Resource {
 							ForceNew:      true,
 							ConflictsWith: []string{"boot_disk.0.kms_key_self_link"},
 							Sensitive:     true,
+							Description: `A 256-bit customer-supplied encryption key, encoded in RFC 4648 base64 to encrypt this disk. Only one of kms_key_self_link and disk_encryption_key_raw may be set.`,
 						},
 
 						"disk_encryption_key_sha256": {
 							Type:     schema.TypeString,
 							Computed: true,
+							Description: `The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied encryption key that protects this resource.`,
 						},
 
 						"kms_key_self_link": {
@@ -119,6 +124,7 @@ func resourceComputeInstance() *schema.Resource {
 							ConflictsWith:    []string{"boot_disk.0.disk_encryption_key_raw"},
 							DiffSuppressFunc: compareSelfLinkRelativePaths,
 							Computed:         true,
+							Description: `The self_link of the encryption key that is stored in Google Cloud KMS to encrypt this disk. Only one of kms_key_self_link and disk_encryption_key_raw may be set.`,
 						},
 
 						"initialize_params": {
@@ -128,6 +134,7 @@ func resourceComputeInstance() *schema.Resource {
 							Computed:     true,
 							ForceNew:     true,
 							MaxItems:     1,
+							Description: `Parameters with which a disk was created alongside the instance.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"size": {
@@ -137,6 +144,7 @@ func resourceComputeInstance() *schema.Resource {
 										Computed:     true,
 										ForceNew:     true,
 										ValidateFunc: validation.IntAtLeast(1),
+										Description: `The size of the image in gigabytes.`,
 									},
 
 									"type": {
@@ -146,6 +154,7 @@ func resourceComputeInstance() *schema.Resource {
 										Computed:     true,
 										ForceNew:     true,
 										ValidateFunc: validation.StringInSlice([]string{"pd-standard", "pd-ssd"}, false),
+										Description: `The GCE disk type. One of pd-standard or pd-ssd.`,
 									},
 
 									"image": {
@@ -155,6 +164,7 @@ func resourceComputeInstance() *schema.Resource {
 										Computed:         true,
 										ForceNew:         true,
 										DiffSuppressFunc: diskImageDiffSuppress,
+										Description: `The image from which this disk was initialised.`,
 									},
 
 									"labels": {
@@ -163,6 +173,7 @@ func resourceComputeInstance() *schema.Resource {
 										AtLeastOneOf: initializeParamsKeys,
 										Computed:     true,
 										ForceNew:     true,
+										Description: `A set of key/value label pairs assigned to the disk.`,
 									},
 								},
 							},
@@ -175,6 +186,7 @@ func resourceComputeInstance() *schema.Resource {
 							ForceNew:     true,
 							Default:      "READ_WRITE",
 							ValidateFunc: validation.StringInSlice([]string{"READ_WRITE", "READ_ONLY"}, false),
+							Description: `Read/write mode for the disk. One of "READ_ONLY" or "READ_WRITE".`,
 						},
 
 						"source": {
@@ -185,6 +197,7 @@ func resourceComputeInstance() *schema.Resource {
 							ForceNew:         true,
 							ConflictsWith:    []string{"boot_disk.initialize_params"},
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							Description: `The name or self_link of the disk attached to this instance.`,
 						},
 					},
 				},
@@ -193,18 +206,21 @@ func resourceComputeInstance() *schema.Resource {
 			"machine_type": {
 				Type:     schema.TypeString,
 				Required: true,
+				Description: `The machine type to create.`,
 			},
 
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				Description: `The name of the instance. One of name or self_link must be provided.`,
 			},
 
 			"network_interface": {
 				Type:     schema.TypeList,
 				Required: true,
 				ForceNew: true,
+				Description: `The networks attached to the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"network": {
@@ -213,6 +229,7 @@ func resourceComputeInstance() *schema.Resource {
 							Computed:         true,
 							ForceNew:         true,
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							Description: `The name or self_link of the network attached to this interface.`,
 						},
 
 						"subnetwork": {
@@ -221,6 +238,7 @@ func resourceComputeInstance() *schema.Resource {
 							Computed:         true,
 							ForceNew:         true,
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							Description: `The name or self_link of the subnetwork attached to this interface.`,
 						},
 
 						"subnetwork_project": {
@@ -228,6 +246,7 @@ func resourceComputeInstance() *schema.Resource {
 							Optional: true,
 							Computed: true,
 							ForceNew: true,
+							Description: `The project in which the subnetwork belongs.`,
 						},
 
 						"network_ip": {
@@ -235,22 +254,26 @@ func resourceComputeInstance() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 							Computed: true,
+							Description: `The private IP address assigned to the instance.`,
 						},
 
 						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
+							Description: `The name of the interface`,
 						},
 
 						"access_config": {
 							Type:     schema.TypeList,
 							Optional: true,
+							Description: `Access configurations, i.e. IPs via which this instance can be accessed via the Internet.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"nat_ip": {
 										Type:     schema.TypeString,
 										Optional: true,
 										Computed: true,
+										Description: `The IP address that is be 1:1 mapped to the instance's network ip.`,
 									},
 
 									"network_tier": {
@@ -258,11 +281,13 @@ func resourceComputeInstance() *schema.Resource {
 										Optional:     true,
 										Computed:     true,
 										ValidateFunc: validation.StringInSlice([]string{"PREMIUM", "STANDARD"}, false),
+										Description: `The networking tier used for configuring this instance. One of PREMIUM or STANDARD.`,
 									},
 
 									"public_ptr_domain_name": {
 										Type:     schema.TypeString,
 										Optional: true,
+										Description: `The DNS domain name for the public PTR record.`,
 									},
 								},
 							},
@@ -271,16 +296,19 @@ func resourceComputeInstance() *schema.Resource {
 						"alias_ip_range": {
 							Type:     schema.TypeList,
 							Optional: true,
+							Description: `An array of alias IP ranges for this network interface.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"ip_cidr_range": {
 										Type:             schema.TypeString,
 										Required:         true,
 										DiffSuppressFunc: ipCidrRangeDiffSuppress,
+										Description: `The IP CIDR range represented by this alias IP range.`,
 									},
 									"subnetwork_range_name": {
 										Type:     schema.TypeString,
 										Optional: true,
+										Description: `The subnetwork secondary range name specifying the secondary range from which to allocate the IP CIDR range for this alias IP range.`,
 									},
 								},
 							},
@@ -292,23 +320,27 @@ func resourceComputeInstance() *schema.Resource {
 			"allow_stopping_for_update": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: `If true, allows Terraform to stop the instance to update its properties. If you try to update a property that requires stopping the instance without setting this field, the update will fail.`,
 			},
 
 			"attached_disk": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Description: `List of disks attached to the instance`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"source": {
 							Type:             schema.TypeString,
 							Required:         true,
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							Description: `The name or self_link of the disk attached to this instance.`,
 						},
 
 						"device_name": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
+							Description: `Name with which the attached disk is accessible under /dev/disk/by-id/`,
 						},
 
 						"mode": {
@@ -316,12 +348,14 @@ func resourceComputeInstance() *schema.Resource {
 							Optional:     true,
 							Default:      "READ_WRITE",
 							ValidateFunc: validation.StringInSlice([]string{"READ_WRITE", "READ_ONLY"}, false),
+							Description: `Read/write mode for the disk. One of "READ_ONLY" or "READ_WRITE".`,
 						},
 
 						"disk_encryption_key_raw": {
 							Type:      schema.TypeString,
 							Optional:  true,
 							Sensitive: true,
+							Description: `A 256-bit customer-supplied encryption key, encoded in RFC 4648 base64 to encrypt this disk. Only one of kms_key_self_link and disk_encryption_key_raw may be set.`,
 						},
 
 						"kms_key_self_link": {
@@ -329,11 +363,13 @@ func resourceComputeInstance() *schema.Resource {
 							Optional:         true,
 							DiffSuppressFunc: compareSelfLinkRelativePaths,
 							Computed:         true,
+							Description: `The self_link of the encryption key that is stored in Google Cloud KMS to encrypt this disk. Only one of kms_key_self_link and disk_encryption_key_raw may be set.`,
 						},
 
 						"disk_encryption_key_sha256": {
 							Type:     schema.TypeString,
 							Computed: true,
+							Description: `The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied encryption key that protects this resource.`,
 						},
 					},
 				},
@@ -344,23 +380,27 @@ func resourceComputeInstance() *schema.Resource {
 				Optional: true,
 				Default:  false,
 				ForceNew: true,
+				Description: `Whether sending and receiving of packets with non-matching source or destination IPs is allowed.`,
 			},
 
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Description: `A brief description of the resource.`,
 			},
 
 			"deletion_protection": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
+				Description: `Whether deletion protection is enabled on this instance.`,
 			},
 
 			"enable_display": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: `Whether the instance has virtual displays enabled.`,
 			},
 
 			"guest_accelerator": {
@@ -369,18 +409,21 @@ func resourceComputeInstance() *schema.Resource {
 				Computed:   true,
 				ForceNew:   true,
 				ConfigMode: schema.SchemaConfigModeAttr,
+				Description: `List of the type and count of accelerator cards attached to the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"count": {
 							Type:     schema.TypeInt,
 							Required: true,
 							ForceNew: true,
+							Description: `The number of the guest accelerator cards exposed to this instance.`,
 						},
 						"type": {
 							Type:             schema.TypeString,
 							Required:         true,
 							ForceNew:         true,
 							DiffSuppressFunc: compareSelfLinkOrResourceName,
+							Description: `The accelerator type resource exposed to this instance. E.g. nvidia-tesla-k80.`,
 						},
 					},
 				},
@@ -390,24 +433,28 @@ func resourceComputeInstance() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				Description: `A set of key/value label pairs assigned to the instance.`,
 			},
 
 			"metadata": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				Description: `Metadata key/value pairs made available within the instance.`,
 			},
 
 			"metadata_startup_script": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Description: `Metadata startup scripts made available within the instance.`,
 			},
 
 			"min_cpu_platform": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				Description: `The minimum CPU platform specified for the VM instance.`,
 			},
 
 			"project": {
@@ -415,6 +462,7 @@ func resourceComputeInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
+				Description: `The ID of the project in which the resource belongs. If self_link is provided, this value is ignored. If neither self_link nor project are provided, the provider project is used.`,
 			},
 
 			"scheduling": {
@@ -422,6 +470,7 @@ func resourceComputeInstance() *schema.Resource {
 				MaxItems: 1,
 				Optional: true,
 				Computed: true,
+				Description: `The scheduling strategy being used by the instance.`,
 				Elem: &schema.Resource{
 					// !!! IMPORTANT !!!
 					// We have a custom diff function for the scheduling block due to issues with Terraform's
@@ -433,6 +482,7 @@ func resourceComputeInstance() *schema.Resource {
 							Optional:     true,
 							Computed:     true,
 							AtLeastOneOf: schedulingKeys,
+							Description: `Describes maintenance behavior for the instance. One of MIGRATE or TERMINATE,`,
 						},
 
 						"automatic_restart": {
@@ -440,6 +490,7 @@ func resourceComputeInstance() *schema.Resource {
 							Optional:     true,
 							AtLeastOneOf: schedulingKeys,
 							Default:      true,
+							Description: `Specifies if the instance should be restarted if it was terminated by Compute Engine (not a user).`,
 						},
 
 						"preemptible": {
@@ -448,6 +499,7 @@ func resourceComputeInstance() *schema.Resource {
 							Default:      false,
 							AtLeastOneOf: schedulingKeys,
 							ForceNew:     true,
+							Description: `Whether the instance is preemptible.`,
 						},
 
 						"node_affinities": {
@@ -457,6 +509,7 @@ func resourceComputeInstance() *schema.Resource {
 							ForceNew:         true,
 							Elem:             instanceSchedulingNodeAffinitiesElemSchema(),
 							DiffSuppressFunc: emptyOrDefaultStringSuppress(""),
+							Description: `Specifies node affinities or anti-affinities to determine which sole-tenant nodes your instances and managed instance groups will use as host systems.`,
 						},
 					},
 				},
@@ -466,12 +519,14 @@ func resourceComputeInstance() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
+				Description: `The scratch disks attached to the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"interface": {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"SCSI", "NVME"}, false),
+							Description: `The disk interface used for attaching this disk. One of SCSI or NVME.`,
 						},
 					},
 				},
@@ -481,17 +536,20 @@ func resourceComputeInstance() *schema.Resource {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Description: `The service account to attach to the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"email": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
+							Description: `The service account e-mail address.`,
 						},
 
 						"scopes": {
 							Type:     schema.TypeSet,
 							Required: true,
+							Description: `A list of service scopes.`,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 								StateFunc: func(v interface{}) string {
@@ -512,6 +570,7 @@ func resourceComputeInstance() *schema.Resource {
 				// image being used, the field needs to be marked as Computed.
 				Computed:         true,
 				DiffSuppressFunc: emptyOrDefaultStringSuppress(""),
+				Description: `The shielded vm config being used by the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enable_secure_boot": {
@@ -519,6 +578,7 @@ func resourceComputeInstance() *schema.Resource {
 							Optional:     true,
 							AtLeastOneOf: shieldedInstanceConfigKeys,
 							Default:      false,
+							Description: `Whether secure boot is enabled for the instance.`,
 						},
 
 						"enable_vtpm": {
@@ -526,6 +586,7 @@ func resourceComputeInstance() *schema.Resource {
 							Optional:     true,
 							AtLeastOneOf: shieldedInstanceConfigKeys,
 							Default:      true,
+							Description: `Whether the instance uses vTPM.`,
 						},
 
 						"enable_integrity_monitoring": {
@@ -533,6 +594,7 @@ func resourceComputeInstance() *schema.Resource {
 							Optional:     true,
 							AtLeastOneOf: shieldedInstanceConfigKeys,
 							Default:      true,
+							Description: `Whether integrity monitoring is enabled for the instance.`,
 						},
 					},
 				},
@@ -542,16 +604,19 @@ func resourceComputeInstance() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"RUNNING", "TERMINATED"}, false),
+				Description: `Desired status of the instance. Either "RUNNING" or "TERMINATED".`,
 			},
 			"current_status": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Description: `Current status of the instance.`,
 			},
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
+				Description: `The list of tags attached to the instance.`,
 			},
 
 			"zone": {
@@ -559,42 +624,50 @@ func resourceComputeInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
+				Description: `The zone of the instance. If self_link is provided, this value is ignored. If neither self_link nor zone are provided, the provider zone is used.`,
 			},
 
 			"cpu_platform": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Description: `The CPU platform used by this instance.`,
 			},
 
 			"instance_id": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Description: `The server-assigned unique identifier of this instance.`,
 			},
 
 			"label_fingerprint": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Description: `The unique fingerprint of the labels.`,
 			},
 
 			"metadata_fingerprint": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Description: `The unique fingerprint of the metadata.`,
 			},
 
 			"self_link": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Description: `The URI of the created resource.`,
 			},
 
 			"tags_fingerprint": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Description: `The unique fingerprint of the tags.`,
 			},
 
 			"hostname": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Description: `A custom hostname for the instance. Must be a fully qualified DNS name and RFC-1035-valid. Valid format is a series of labels 1-63 characters long matching the regular expression [a-z]([-a-z0-9]*[a-z0-9]), concatenated with periods. The entire hostname must not exceed 253 characters. Changing this forces a new resource to be created.`,
 			},
 
 			"resource_policies": {
@@ -604,6 +677,7 @@ func resourceComputeInstance() *schema.Resource {
 				Optional:         true,
 				ForceNew:         true,
 				MaxItems:         1,
+				Description: `A list of short names or self_links of resource policies to attach to the instance. Modifying this list will cause the instance to recreate. Currently a max of 1 resource policy is supported.`,
 			},
 		},
 		CustomizeDiff: customdiff.All(
