@@ -145,11 +145,16 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 				Optional: true,
 			},
 
+			"source_upload_url": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"source_repository": {
 				Type:          schema.TypeList,
 				Optional:      true,
 				MaxItems:      1,
-				ConflictsWith: []string{"source_archive_bucket", "source_archive_object"},
+				ConflictsWith: []string{"source_archive_bucket", "source_archive_object", "source_upload_url"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"url": {
@@ -341,11 +346,13 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 	sourceRepos := d.Get("source_repository").([]interface{})
 	if len(sourceRepos) > 0 {
 		function.SourceRepository = expandSourceRepository(sourceRepos)
+	} else if v, ok := d.GetOk("source_upload_url"); ok {
+		function.SourceRepository = v
 	} else {
 		sourceArchiveBucket := d.Get("source_archive_bucket").(string)
 		sourceArchiveObj := d.Get("source_archive_object").(string)
 		if sourceArchiveBucket == "" || sourceArchiveObj == "" {
-			return fmt.Errorf("either source_repository or both of source_archive_bucket+source_archive_object must be set")
+			return fmt.Errorf("either source_repository, source_upload_url or both of source_archive_bucket+source_archive_object must be set")
 		}
 		function.SourceArchiveUrl = fmt.Sprintf("gs://%v/%v", sourceArchiveBucket, sourceArchiveObj)
 	}
