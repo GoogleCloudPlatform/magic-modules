@@ -19,4 +19,21 @@ resource "google_cloudfunctions_function" "<%= ctx[:primary_resource_id] %>" {
   trigger_http          = true
   timeout               = 60
   entry_point           = "helloGET"
+  labels = {
+    my-label = "my-label-value"
+  }
+
+  environment_variables = {
+    MY_ENV_VAR = "my-env-var-value"
+  }
+}
+
+# IAM entry for a single user to invoke the function
+resource "google_cloudfunctions_function_iam_member" "invoker" {
+  project        = google_cloudfunctions_function.<%= ctx[:primary_resource_id] %>.project
+  region         = google_cloudfunctions_function.<%= ctx[:primary_resource_id] %>.region
+  cloud_function = google_cloudfunctions_function.<%= ctx[:primary_resource_id] %>.name
+
+  role   = "roles/cloudfunctions.invoker"
+  member = "user:myFunctionInvoker@example.com"
 }

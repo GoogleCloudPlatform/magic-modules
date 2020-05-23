@@ -1,0 +1,31 @@
+resource "google_storage_bucket" "bucket" {
+  name = "<%= ctx[:vars]['bucket_name'] %>"
+}
+
+resource "google_storage_bucket_object" "archive" {
+  name   = "index.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "<%= ctx[:vars]['zip_path'] %>"
+}
+
+resource "google_cloudfunctions_function" "<%= ctx[:primary_resource_id] %>" {
+  name        = "<%= ctx[:vars]['function_name'] %>"
+  description = "My function"
+  runtime     = "nodejs10"
+
+  available_memory_mb   = 128
+  source_archive_bucket = google_storage_bucket.bucket.name
+  source_archive_object = google_storage_bucket_object.archive.name
+  trigger_http          = true
+  entry_point           = "helloGET"
+}
+
+# IAM entry for all users to invoke the function
+resource "google_cloudfunctions_function_iam_member" "invoker" {
+  project        = google_cloudfunctions_function.<%= ctx[:primary_resource_id] %>.project
+  region         = google_cloudfunctions_function.<%= ctx[:primary_resource_id] %>.region
+  cloud_function = google_cloudfunctions_function.<%= ctx[:primary_resource_id] %>.name
+
+  role   = "roles/cloudfunctions.invoker"
+  member = "allUsers"
+}

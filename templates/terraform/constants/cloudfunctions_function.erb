@@ -1,0 +1,22 @@
+type cloudFunctionId struct {
+	Project string
+	Region  string
+	Name    string
+}
+
+func (s *cloudFunctionId) cloudFunctionId() string {
+	return fmt.Sprintf("projects/%s/locations/%s/functions/%s", s.Project, s.Region, s.Name)
+}
+
+// Differs from validateGcpName because Cloud Functions allow capital letters
+// at start/end
+func validateResourceCloudFunctionsFunctionName(v interface{}, k string) (ws []string, errors []error) {
+	re := `^(?:[a-zA-Z](?:[-_a-zA-Z0-9]{0,61}[a-zA-Z0-9])?)$`
+	return validateRegexp(re)(v, k)
+}
+
+// based on compareSelfLinkOrResourceName, but less reusable and allows multi-/
+// strings in the new state (config) part
+func compareSelfLinkOrResourceNameWithMultipleParts(_, old, new string, _ *schema.ResourceData) bool {
+	return strings.HasSuffix(old, new)
+}

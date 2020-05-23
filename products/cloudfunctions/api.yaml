@@ -26,7 +26,7 @@ apis_required:
     url: https://console.cloud.google.com/apis/library/cloudfunctions.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
-    name: 'CloudFunction'
+    name: 'Function'
     base_url: projects/{{project}}/locations/{{location}}/functions
     create_verb: :POST
     description: |
@@ -53,7 +53,6 @@ objects:
     parameters:
       - !ruby/object:Api::Type::String
         name: 'location'
-        required: true
         description: The location of this cloud function.
         # This is not a real API field.
         # This is a more user-centric way for users to specify
@@ -82,7 +81,7 @@ objects:
           Status of the function deployment.
         values:
           - :CLOUD_FUNCTION_STATUS_UNSPECIFIED
-          - :ACTOVE
+          - :ACTIVE
           - :OFFLINE
           - :DEPLOY_IN_PROGRESS
           - :DELETE_IN_PROGRESS
@@ -94,12 +93,13 @@ objects:
           Defaults to the resource name suffix, if not specified. For backward
           compatibility, if function with given name is not found, then the system
           will try to use function named "function". For Node.js this is name of a
-          function exported by the module specified in source_location.
+          function exported by the module specified in `source_location`.
       - !ruby/object:Api::Type::String
         name: 'runtime'
         description: |
-          The runtime in which the function is going to run. If empty,
-          defaults to Node.js 6.
+          The runtime in which to run the function. Required when deploying a new
+          function, optional when updating an existing function. For a complete
+          list of possible choices, see the [gcloud command reference](https://cloud.google.com/sdk/gcloud/reference/functions/deploy#--runtime).
       - !ruby/object:Api::Type::String
         name: 'timeout'
         description: |
@@ -108,11 +108,12 @@ objects:
           period. Defaults to 60 seconds.
       - !ruby/object:Api::Type::Integer
         name: 'availableMemoryMb'
-        description: 'The amount of memory in MB available for a function.'
+        description: 'The amount of memory in MB available for a function. Defaults to 256MB.'
       - !ruby/object:Api::Type::String
         name: 'serviceAccountEmail'
-        output: true
-        description: 'The email of the service account for this function.'
+        description: |
+          The email of the function's service account. If empty, defaults to
+          `{project_id}@appspot.gserviceaccount.com`.
       - !ruby/object:Api::Type::String
         name: 'updateTime'
         output: true
@@ -126,27 +127,63 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
-          A set of key/value label pairs associated with this Cloud Function.
+          Labels associated with this Cloud Function.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'environmentVariables'
         description: |
           Environment variables that shall be available during function execution.
+      - !ruby/object:Api::Type::String
+        name: 'network'
+        description: |
+          The VPC Network that this cloud function can connect to. It can be either
+          the fully-qualified URI, or the short name of the network resource. If the
+          short network name is used, the network must belong to the same project.
+          Otherwise, it must belong to a project within the same organization.
+          The format of this field is either `projects/{project}/global/networks/{network}`
+          or `{network}`, where {project} is a project id where the network is defined,
+          and {network} is the short name of the network.
+
+          This field is mutually exclusive with `vpcConnector` and will be replaced by it.
+        conflicts:
+          - vpcConnector
+      - !ruby/object:Api::Type::Integer
+        name: 'maxInstances'
+        description: |
+          The limit on the maximum number of function instances that may coexist at a given time.
+      - !ruby/object:Api::Type::String
+        name: 'vpcConnector'
+        description: |
+          The VPC Network Connector that this cloud function can connect to. It can be
+          either the fully-qualified URI, or the short name of the network connector
+          resource. The format of this field is `projects/*/locations/*/connectors/*`
+
+          This field is mutually exclusive with `network` field and will eventually replace it.
+        conflicts:
+          - network
+      - !ruby/object:Api::Type::Enum
+        name: 'vpcConnectorEgressSettings'
+        description: |
+          The egress settings for the connector, controlling what traffic is diverted through it.
+        values:
+          - :VPC_CONNECTOR_EGRESS_SETTINGS_UNSPECIFIED
+          - :PRIVATE_RANGES_ONLY
+          - :ALL_TRAFFIC
+      - !ruby/object:Api::Type::Enum
+        name: 'ingressSettings'
+        description: |
+          The ingress settings for the function, controlling what traffic can reach it.
+        values:
+          - :INGRESS_SETTINGS_UNSPECIFIED
+          - :ALLOW_ALL
+          - :ALLOW_INTERNAL_ONLY
       - !ruby/object:Api::Type::String
         name: 'sourceArchiveUrl'
         description: |
           The Google Cloud Storage URL, starting with gs://, pointing to the zip
           archive which contains the function.
         exactly_one_of:
-          - source_repository
           - source_archive_url
-          - source_upload_url
-      - !ruby/object:Api::Type::String
-        name: 'sourceUploadUrl'
-        description: |
-          The Google Cloud Storage signed URL used for source uploading.
-        exactly_one_of:
           - source_repository
-          - source_archive_url
           - source_upload_url
       - !ruby/object:Api::Type::NestedObject
         name: 'sourceRepository'
@@ -168,6 +205,14 @@ objects:
             description: |
               The URL pointing to the hosted repository where the function were defined
               at the time of deployment.
+      - !ruby/object:Api::Type::String
+        name: 'sourceUploadUrl'
+        description: |
+          The Google Cloud Storage signed URL used for source uploading.
+        exactly_one_of:
+          - source_repository
+          - source_archive_url
+          - source_upload_url
       - !ruby/object:Api::Type::NestedObject
         name: 'httpsTrigger'
         description: |
@@ -177,10 +222,13 @@ objects:
             name: 'url'
             output: true
             description: 'The deployed url for the function.'
+        exactly_one_of:
+          - https_trigger
+          - event_trigger
       - !ruby/object:Api::Type::NestedObject
         name: 'eventTrigger'
         description: |
-          An HTTPS endpoint type of source that can be triggered via URL.
+          A source that fires events in response to a condition in another service.
         properties:
           - !ruby/object:Api::Type::String
             name: 'eventType'
@@ -199,3 +247,13 @@ objects:
             name: 'service'
             description: |
               The hostname of the service that should be observed.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'failurePolicy'
+            description: |
+              Specifies policy for failed executions.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'retry'
+                required: true
+                description: |
+                  Whether the function should be retried on failure. Defaults to `false`.
