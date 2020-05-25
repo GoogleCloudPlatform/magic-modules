@@ -29,8 +29,10 @@ objects:
     base_url: projects/{{project}}/notes?noteId={{name}}
     self_link: projects/{{project}}/notes/{{name}}
     update_verb: :PATCH
+    update_mask: true
     description: |
-      Provides a detailed description of a Note.
+      A Container Analysis note is a high-level piece of metadata that 
+      describes a type of analysis that can be done for a resource.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/container-analysis/'
@@ -42,6 +44,61 @@ objects:
           The name of the note.
         required: true
         input: true
+      - !ruby/object:Api::Type::String
+        name: shortDescription
+        description: |
+          A one sentence description of the note.
+      - !ruby/object:Api::Type::String
+        name: longDescription
+        description: |
+          A detailed description of the note
+      - !ruby/object:Api::Type::Enum
+        name: 'kind'
+        description: |
+          The type of any
+        values:
+          - NOTE_KIND_UNSPECIFIED
+          - VULNERABILITY
+          - BUILD
+          - IMAGE
+          - PACKAGE
+          - DEPLOYMENT
+          - DISCOVERY
+          - ATTESTATION
+          - UPGRADE
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: relatedUrl
+        description: |
+          URLs associated with this note and related metadata.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: url
+              description: |
+                Specific URL associated with the resource.
+              required: true
+            - !ruby/object:Api::Type::String
+              name: label
+              description: |
+                Label to describe usage of the URL
+      - !ruby/object:Api::Type::Time
+        name: expirationTime
+        description: |
+          Time of expiration for this note. Leave empty if note does not expire.
+      - !ruby/object:Api::Type::Time
+        name: createTime
+        description: The time this note was created.
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: updateTime
+        description: The time this note was last updated.
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: relatedNoteNames
+        description: |
+          Names of other notes related to this note.
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: attestationAuthority
         description: |
