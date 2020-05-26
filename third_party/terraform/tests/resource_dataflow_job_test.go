@@ -285,6 +285,7 @@ func TestAccDataflowJob_virtualUpdate(t *testing.T) {
 				Config: testAccDataflowJob_virtualUpdate(suffix, "cancel"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowCheckId(t, "google_dataflow_job.pubsub_stream", &id),
+					resource.TestCheckResourceAttr("google_dataflow_job.pubsub_stream", "on_delete", "cancel"),
 				),
 			},
 		},
