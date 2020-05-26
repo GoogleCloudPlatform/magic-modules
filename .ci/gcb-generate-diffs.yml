@@ -217,4 +217,4 @@ secrets:
           GITHUB_TOKEN: CiQADkR4NnCVXo1OLSWFuPX7eSiifaOfQVzSYmKi2jZdVbKlfYMSUQBfF82vNAgpvSVyhzM8JsQaP6Oky0SAdoR5fPED5cU3qxsCB9wArmdGcgQoRzP7S6jEWHRcvxv/xauznjkJQMWCORzcbUbk6T7k80bdo2mpqw==
     - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/teamcity-token
       secretEnv:
-          TEAMCITY_TOKEN: CiQAth83aZ/jRV0fGJIe6n1gIpVVWpLRfAdyK7+JdWTtpcJ75gUSkwEASc1NF0rpeqYgSujkdQzz3PnSzCqKRnfAPzHEQ8peW07dXuVgOGLIiIk493U00A+YJ7F/r0lUOLJQ/tjdFqgjFsaYF2jA12/yDo9xbnXht9p/0HaYMTs1LlEHpSSmteVXmYtw1Anhi4k3/owwkXqk9lN2wExiZCokoQi5CLcSo6WSfL3Bi2fNBiPEPvufZGuwqfY=
+          TEAMCITY_TOKEN: CiQAth83aSgKrb5ASI5XwE+yv62KbNtNG+O9gKXJzoflm65H7fESkwEASc1NF0oM3pHb5cUBAHcXZqFjEJrF4eGowPycUpKDmEncuQQSkm8v+dswSNXTXnX2C/reLpw9uGTw7G+K1kqA0sVrzYG3sTdDf/IcS//uloAerUff2wVIlV5rxV357PMkBl5dGyybnKMybgrXGl+CcW9PDLAwqfELWrr5zTSHy799dAhJZi1Wb5KbImmvvU5Z46g=
