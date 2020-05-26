@@ -325,6 +325,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   MachineType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  MachineImage: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   NetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   GlobalNetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
