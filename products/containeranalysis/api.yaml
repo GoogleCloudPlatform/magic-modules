@@ -31,11 +31,12 @@ objects:
     update_verb: :PATCH
     update_mask: true
     description: |
-      A Container Analysis note is a high-level piece of metadata that 
+      A Container Analysis note is a high-level piece of metadata that
       describes a type of analysis that can be done for a resource.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/container-analysis/'
+        'Creating Attestations (Occurrences)': 'https://cloud.google.com/binary-authorization/docs/making-attestations'
       api: 'https://cloud.google.com/container-analysis/api/reference/rest/'
     properties:
       - !ruby/object:Api::Type::String
@@ -132,3 +133,113 @@ objects:
                   The human readable name of this Attestation Authority, for
                   example "qa".
                 required: true
+
+  - !ruby/object:Api::Resource
+    name: 'Occurrence'
+    base_url: projects/{{project}}/occurrences
+    self_link: projects/{{project}}/occurrences/{{name}}
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      An occurrence is an instance of a Note, or type of analysis that
+      can be done for a resource.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/container-analysis/'
+      api: 'https://cloud.google.com/container-analysis/api/reference/rest/'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          The name of the occurrence.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: resourceUri
+        description: |
+          Required. Immutable. A URI that represents the resource for which
+          the occurrence applies. For example,
+          https://gcr.io/project/image@sha256:123abc for a Docker image.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: noteName
+        description: |
+          The analysis note associated with this occurrence, in the form of
+          projects/[PROVIDER_ID]/notes/[NOTE_ID]. This field can be used as a
+          filter in list requests.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: kind
+        description: |
+          The note kind which explicitly denotes which of the occurrence
+          details are specified. This field can be used as a filter in list
+          requests.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: remediation
+        description: |
+          A description of actions that can be taken to remedy the note.
+      - !ruby/object:Api::Type::Time
+        name: createTime
+        description: The time when the repository was created.
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: updateTime
+        description: The time when the repository was last updated.
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: attestation
+        description: |
+          Occurrence that represents a single "attestation". The authenticity
+          of an attestation can be verified using the attached signature.
+          If the verifier trusts the public key of the signer, then verifying
+          the signature is sufficient to establish trust. In this circumstance,
+          the authority to which this attestation is attached is primarily
+          useful for lookup (how to find this attestation if you already
+          know the authority and artifact to be verified) and intent (for
+          which authority this attestation was intended to sign.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: serializedPayload
+            description: |
+              The serialized payload that is verified by one or
+              more signatures. A base64-encoded string.
+            required: true
+          - !ruby/object:Api::Type::Array
+            name: signatures
+            description: |
+              One or more signatures over serializedPayload.
+              Verifier implementations should consider this attestation
+              message verified if at least one signature verifies
+              serializedPayload. See Signature in common.proto for more
+              details on signature structure and verification.
+            required: true
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: signature
+                  description: |
+                    The content of the signature, an opaque bytestring.
+                    The payload that this signature verifies MUST be
+                    unambiguously provided with the Signature during
+                    verification. A wrapper message might provide the
+                    payload explicitly. Alternatively, a message might
+                    have a canonical serialization that can always be
+                    unambiguously computed to derive the payload.
+                - !ruby/object:Api::Type::String
+                  name: publicKeyId
+                  required: true
+                  description: |
+                    The identifier for the public key that verifies this
+                    signature. The publicKeyId MUST be an RFC3986 conformant
+                    URI. * When possible, the publicKeyId SHOULD be an
+                    immutable reference, such as a cryptographic digest.
+                    Examples of valid publicKeyIds:
+
+                    * OpenPGP V4 public key fingerprint. See https://www.iana.org/assignments/uri-schemes/prov/openpgp4fpr
+                      for more details on this scheme.
+                        * `openpgp4fpr:74FAF3B861BDA0870C7B6DEF607E48D2A663AEEA`
+                    * RFC6920 digest-named SubjectPublicKeyInfo (digest of the DER serialization):
+                        * "ni:///sha-256;cD9o9Cq6LG3jD0iKXqEi_vdjJGecm_iXkbqVoScViaU"

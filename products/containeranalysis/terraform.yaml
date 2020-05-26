@@ -14,10 +14,10 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Note: !ruby/object:Overrides::Terraform::ResourceOverride
+    mutex: "projects/{{project}}/notes/{{name}}"
     id_format: "projects/{{project}}/notes/{{name}}"
     import_format: ["projects/{{project}}/notes/{{name}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      # pre_update: 'templates/terraform/pre_update/containeranalysis_note.erb'
       encoder: templates/terraform/encoders/containeranalysis_attestation_field_name.go.erb
       decoder: templates/terraform/decoders/containeranalysis_attestation_field_name.go.erb
     examples:
@@ -37,6 +37,29 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       relatedUrl: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       relatedNoteNames: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+  Occurrence: !ruby/object:Overrides::Terraform::ResourceOverride
+    # "projects/{{project}}/notes/{{name}}"
+    mutex: "{{note_name}}"
+    id_format: "projects/{{project}}/occurrences/{{name}}"
+    import_format: ["projects/{{project}}/occurrences/{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "container_analysis_occurrence_kms"
+        # Occurrence requires custom logic for signing payloads.
+        skip_test: true
+        primary_resource_id: "occurrence"
+        vars:
+          note_name: "attestation-note"
+          attestor: "attestor"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/containeranalysis_occurrence.go.erb
+      update_encoder: templates/terraform/update_encoder/containeranalysis_occurrence.go.erb
+      decoder: templates/terraform/decoders/containeranalysis_occurrence.go.erb
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      attestation.signatures: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
 
 # This is for copying files over
