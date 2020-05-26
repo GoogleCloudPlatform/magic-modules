@@ -363,8 +363,6 @@ func testAccDataflowSetId(t *testing.T, resource string, id *string) resource.Te
 			return fmt.Errorf("resource %q not in state", resource)
 		}
 
-		// copyID := rs.Primary.ID
-		// *id = copyID
 		*id = rs.Primary.ID
 		return nil
 	}
