@@ -56,7 +56,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'kind'
         description: |
-          The type of any
+          The type of analysis this note describes
         values:
           - NOTE_KIND_UNSPECIFIED
           - VULNERABILITY
@@ -165,7 +165,7 @@ objects:
         name: noteName
         description: |
           The analysis note associated with this occurrence, in the form of
-          projects/[PROVIDER_ID]/notes/[NOTE_ID]. This field can be used as a
+          projects/[PROJECT]/notes/[NOTE_ID]. This field can be used as a
           filter in list requests.
         required: true
         input: true
@@ -233,10 +233,10 @@ objects:
                   required: true
                   description: |
                     The identifier for the public key that verifies this
-                    signature. The publicKeyId MUST be an RFC3986 conformant
-                    URI. * When possible, the publicKeyId SHOULD be an
+                    signature. MUST be an RFC3986 conformant
+                    URI. * When possible, the key id should be an
                     immutable reference, such as a cryptographic digest.
-                    Examples of valid publicKeyIds:
+                    Examples of valid values:
 
                     * OpenPGP V4 public key fingerprint. See https://www.iana.org/assignments/uri-schemes/prov/openpgp4fpr
                       for more details on this scheme.
