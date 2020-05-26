@@ -421,10 +421,6 @@ objects:
         description: |
           The display name of the tag template.
         output: true
-      - !ruby/object:Api::Type::String
-        name: description
-        description: |
-          Entry description, which can consist of several sentences or paragraphs that describe entry contents.
       - !ruby/object:Api::Type::Map
         name: fields
         description: |
@@ -479,5 +475,5 @@ objects:
           Resources like Entry can have schemas associated with them. This scope allows users to attach tags to an
           individual column based on that schema.
 
-          For attaching a tag to a nested column, use . to separate the column names. Example:
-          outer_column.inner_column
+          For attaching a tag to a nested column, use `.` to separate the column names. Example:
+          `outer_column.inner_column`

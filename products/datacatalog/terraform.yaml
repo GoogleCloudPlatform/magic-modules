@@ -133,7 +133,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           tag_template_id: "my_template"
       - !ruby/object:Provider::Terraform::Examples
         name: "data_catalog_entry_tag_full"
-        primary_resource_id: "basic_entry_tag_full"
+        primary_resource_id: "basic_tag"
         vars:
           entry_group_id: "my_entry_group"
           entry_id: "my_entry"
