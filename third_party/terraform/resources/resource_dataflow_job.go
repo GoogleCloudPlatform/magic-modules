@@ -171,12 +171,12 @@ func resourceDataflowJobTypeCustomizeDiff(d *schema.ResourceDiff, meta interface
 	// All non-virtual fields are ForceNew for batch jobs
 	if d.Get("type") == "JOB_TYPE_BATCH" {
 		resourceSchema := resourceDataflowJob().Schema
-		for field, fieldSchema := range resourceSchema {
+		for field := range resourceSchema {
 			if field == "on_delete" {
 				continue
 			}
-			// Each key within a map must be checked for a change
-			if fieldSchema.Type == schema.TypeMap {
+			// Labels map will likely have suppressed changes, so we check each key instead of the parent field
+			if field == "labels" {
 				resourceDataflowJobIterateMapForceNew(field, d)
 			} else if d.HasChange(field) {
 				d.ForceNew(field)
@@ -483,13 +483,13 @@ func resourceDataflowJobIsVirtualUpdate(d *schema.ResourceData) bool {
 	if d.HasChange("on_delete") {
 		// Check if other fields have changes, which would require an actual update request
 		resourceSchema := resourceDataflowJob().Schema
-		for field, fieldSchema := range resourceSchema {
+		for field := range resourceSchema {
 			if field == "on_delete" {
 				continue
 			}
-			// Each key within a map must be checked for a change
-			if (fieldSchema.Type == schema.TypeMap && resourceDataflowJobIterateMapHasChange(field, d)) ||
-				(fieldSchema.Type != schema.TypeMap && d.HasChange(field)) {
+			// Labels map will likely have suppressed changes, so we check each key instead of the parent field
+			if (field == "labels" && resourceDataflowJobIterateMapHasChange(field, d)) ||
+				(field != "labels" && d.HasChange(field)) {
 				return false
 			}
 		}
