@@ -266,6 +266,8 @@ func TestAccDataflowJob_virtualUpdate(t *testing.T) {
 	t.Parallel()
 
 	suffix := randString(t, 10)
+
+	// If the update is virtual-only, the ID should remain the same after updating.
 	var id string
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
