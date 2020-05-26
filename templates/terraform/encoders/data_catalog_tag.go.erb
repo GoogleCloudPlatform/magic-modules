@@ -34,6 +34,9 @@
 	}
 
 	template, err := sendRequest(config, "GET", project, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("Error listing Tags: %s", err)
+	}
 	templateFields := template["fields"]
 
 	for fieldName := range fields {
