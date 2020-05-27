@@ -16,13 +16,10 @@ legacy_name: bigquery
 overrides: !ruby/object:Overrides::ResourceOverrides
   Connection: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
-      cloudSql: !ruby/object:Overrides::Terraform::PropertyOverride
-        properties:
-          credential: !ruby/object:Overrides::Terraform::PropertyOverride
-            custom_flatten: 'templates/terraform/custom_flatten/bigquery_connection_flatten.go.erb'
-            properties:
-              password: !ruby/object:Overrides::Terraform::PropertyOverride
-                sensitive: true
+      cloudSql.credential: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/bigquery_connection_flatten.go.erb'
+      cloudSql.credential.password: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     examples:
