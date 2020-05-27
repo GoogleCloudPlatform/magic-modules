@@ -12,3 +12,4 @@
 # limitations under the License.
 # These files contains code that needs to be compiled before being delivered to
 # the final module tree structure:
+'CONTRIBUTING.md': 'templates/ansible/CONTRIBUTING.md.erb'
