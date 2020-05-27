@@ -19,7 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       cloudSql: !ruby/object:Overrides::Terraform::PropertyOverride
         properties:
           credential: !ruby/object:Overrides::Terraform::PropertyOverride
-            custom_flatten: 'templates/terraform/custom_flatten/bigquery_connection_flatten.erb'
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_connection_flatten.go.erb'
             properties:
               password: !ruby/object:Overrides::Terraform::PropertyOverride
                 sensitive: true
