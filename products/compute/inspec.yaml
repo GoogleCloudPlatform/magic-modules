@@ -93,6 +93,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   MachineType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  MachineImage: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   ManagedSslCertificate: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Network: !ruby/object:Overrides::Inspec::ResourceOverride
