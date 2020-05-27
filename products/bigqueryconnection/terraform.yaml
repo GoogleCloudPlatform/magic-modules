@@ -17,15 +17,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Connection: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       cloudSql: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
         properties:
           credential: !ruby/object:Overrides::Terraform::PropertyOverride
-            ignore_read: true
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_connection_flatten.erb'
             properties:
-              username: !ruby/object:Overrides::Terraform::PropertyOverride
-                ignore_read: true
               password: !ruby/object:Overrides::Terraform::PropertyOverride
-                ignore_read: true
                 sensitive: true
     id_format: "{{name}}"
     import_format: ["{{name}}"]
