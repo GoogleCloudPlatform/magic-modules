@@ -13,9 +13,6 @@
 	# limitations under the License.
 -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-	if v == nil {
-		return nil
-	}
 	return []interface{}{
 		map[string]interface{}{
 			"username": d.Get("cloud_sql.0.credential.0.username"),
