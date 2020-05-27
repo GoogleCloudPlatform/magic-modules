@@ -6937,6 +6937,7 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/machine-images'
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/machineImages'
+    min_version: beta
 
     properties:
       - !ruby/object:Api::Type::String
