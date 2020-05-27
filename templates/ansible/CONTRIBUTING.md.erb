@@ -20,7 +20,7 @@ Please make a PR to Magic Modules to alter these modules
   prod[:definitions].objects.each do |obj|
   next if obj.exclude || obj.not_in_version?(prod[:definitions].version_obj_or_closest(version))
 -%>
-  * <%= module_name(obj) -%>
-  * <%= module_name(obj) -%>_info
+* <%= module_name(obj) %>
+* <%= module_name(obj) -%>_info
 <% end -%>
 <% end -%>
