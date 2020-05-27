@@ -18,8 +18,8 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	}
 	return []interface{}{
 		map[string]interface{}{
-			"username": d.Get("cloud_sql.0.credentials.0.username"),
-			"password": d.Get("cloud_sql.0.credentials.0.password"),
+			"username": d.Get("cloud_sql.0.credential.0.username"),
+			"password": d.Get("cloud_sql.0.credential.0.password"),
 		},
 	}
 }
