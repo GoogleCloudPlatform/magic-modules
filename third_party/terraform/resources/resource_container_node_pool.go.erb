@@ -396,7 +396,7 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 	defer mutexKV.Unlock(nodePoolInfo.lockKey())
 
 
-	timeout := d.Timeout(schema.TimeoutCreate)
+	timeout := d.Timeout(schema.TimeoutDelete)
 	startTime := time.Now()
 
 	var operation *containerBeta.Operation
