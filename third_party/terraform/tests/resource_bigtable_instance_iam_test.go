@@ -8,7 +8,7 @@ import (
 )
 
 func TestAccBigtableInstanceIamBinding(t *testing.T) {
-	// bigtable does not use the shared HTTP client
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
 
@@ -53,7 +53,7 @@ func TestAccBigtableInstanceIamBinding(t *testing.T) {
 }
 
 func TestAccBigtableInstanceIamMember(t *testing.T) {
-	// bigtable does not use the shared HTTP client
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
 
@@ -93,7 +93,7 @@ func TestAccBigtableInstanceIamMember(t *testing.T) {
 }
 
 func TestAccBigtableInstanceIamPolicy(t *testing.T) {
-	// bigtable does not use the shared HTTP client
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
 

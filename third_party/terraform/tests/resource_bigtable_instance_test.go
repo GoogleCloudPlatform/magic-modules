@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccBigtableInstance_basic(t *testing.T) {
-	// bigtable does not use the shared HTTP client
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
 
@@ -49,7 +49,7 @@ func TestAccBigtableInstance_basic(t *testing.T) {
 }
 
 func TestAccBigtableInstance_cluster(t *testing.T) {
-	// bigtable does not use the shared HTTP client
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
 
@@ -105,7 +105,7 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 }
 
 func TestAccBigtableInstance_development(t *testing.T) {
-	// bigtable does not use the shared HTTP client
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
 
@@ -130,7 +130,7 @@ func TestAccBigtableInstance_development(t *testing.T) {
 }
 
 func TestAccBigtableInstance_allowDestroy(t *testing.T) {
-	// bigtable does not use the shared HTTP client
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
 

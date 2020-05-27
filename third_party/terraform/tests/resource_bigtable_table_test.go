@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccBigtableTable_basic(t *testing.T) {
-	// bigtable does not use the shared HTTP client
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
 
@@ -35,7 +35,7 @@ func TestAccBigtableTable_basic(t *testing.T) {
 }
 
 func TestAccBigtableTable_splitKeys(t *testing.T) {
-	// bigtable does not use the shared HTTP client
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
 
@@ -61,7 +61,7 @@ func TestAccBigtableTable_splitKeys(t *testing.T) {
 }
 
 func TestAccBigtableTable_family(t *testing.T) {
-	// bigtable does not use the shared HTTP client
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
 
@@ -87,7 +87,7 @@ func TestAccBigtableTable_family(t *testing.T) {
 }
 
 func TestAccBigtableTable_familyMany(t *testing.T) {
-	// bigtable does not use the shared HTTP client
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
 
@@ -113,7 +113,7 @@ func TestAccBigtableTable_familyMany(t *testing.T) {
 }
 
 func TestAccBigtableTable_familyUpdate(t *testing.T) {
-	// bigtable does not use the shared HTTP client
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	skipIfVcr(t)
 	t.Parallel()
 
