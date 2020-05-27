@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -6,12 +7,21 @@ import (
 	"time"
 
 	"google.golang.org/api/compute/v1"
+	computeBeta "google.golang.org/api/compute/v0.beta"
 )
 
 type ComputeOperationWaiter struct {
+<% if version == 'ga' -%>
 	Service *compute.Service
 	Op      *compute.Operation
+<% else -%>
+	Service *computeBeta.Service
+	Op      *computeBeta.Operation
+<% end -%>
 	Project string
+<% unless version == 'ga' -%>
+	Parent  string
+<% end -%>
 }
 
 func (w *ComputeOperationWaiter) State() string {
@@ -42,7 +52,11 @@ func (w *ComputeOperationWaiter) IsRetryable(err error) bool {
 
 func (w *ComputeOperationWaiter) SetOp(op interface{}) error {
 	var ok bool
+<% if version == 'ga' -%>
 	w.Op, ok = op.(*compute.Operation)
+<% else -%>
+	w.Op, ok = op.(*computeBeta.Operation)
+<% end -%>
 	if !ok {
 		return fmt.Errorf("Unable to set operation. Bad type!")
 	}
@@ -59,6 +73,10 @@ func (w *ComputeOperationWaiter) QueryOp() (interface{}, error) {
 	} else if w.Op.Region != "" {
 		region := GetResourceNameFromSelfLink(w.Op.Region)
 		return w.Service.RegionOperations.Get(w.Project, region, w.Op.Name).Do()
+<% unless version == 'ga' -%>
+	} else if w.Parent != "" {
+		return w.Service.GlobalOrganizationOperations.Get(w.Op.Name).ParentId(w.Parent).Do()
+<% end -%>
 	}
 	return w.Service.GlobalOperations.Get(w.Project, w.Op.Name).Do()
 }
@@ -80,14 +98,22 @@ func (w *ComputeOperationWaiter) TargetStates() []string {
 }
 
 func computeOperationWaitTime(config *Config, res interface{}, project, activity string, timeout time.Duration) error {
+<% if version == 'ga' -%>
 	op := &compute.Operation{}
+<% else -%>
+	op := &computeBeta.Operation{}
+<% end -%>
 	err := Convert(res, op)
 	if err != nil {
 		return err
 	}
 
 	w := &ComputeOperationWaiter{
+<% if version == 'ga' -%>
 		Service: config.clientCompute,
+<% else -%>
+		Service: config.clientComputeBeta,
+<% end -%>
 		Op:      op,
 		Project: project,
 	}
@@ -98,9 +124,34 @@ func computeOperationWaitTime(config *Config, res interface{}, project, activity
 	return OperationWait(w, activity, timeout, config.PollInterval)
 }
 
+<% unless version == 'ga' -%>
+func computeOrgOperationWaitTime(config *Config, res interface{}, parent, activity string, timeout time.Duration) error {
+	op := &computeBeta.Operation{}
+	err := Convert(res, op)
+	if err != nil {
+		return err
+	}
+
+	w := &ComputeOperationWaiter{
+		Service: config.clientComputeBeta,
+		Op:      op,
+		Parent:  parent,
+	}
+
+	if err := w.SetOp(op); err != nil {
+		return err
+	}
+	return OperationWait(w, activity, timeout, config.PollInterval)
+}
+
+<% end -%>
 // ComputeOperationError wraps compute.OperationError and implements the
 // error interface so it can be returned.
+<% if version == 'ga' -%>
 type ComputeOperationError compute.OperationError
+<% else -%>
+type ComputeOperationError computeBeta.OperationError
+<% end -%>
 
 func (e ComputeOperationError) Error() string {
 	var buf bytes.Buffer
