@@ -78,6 +78,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/data_catalog_entry.go.erb
   TagTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["{{name}}"]
+    skip_sweeper: true  # no list endpoint plus variables in delete URL
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "data_catalog_tag_template_basic"
