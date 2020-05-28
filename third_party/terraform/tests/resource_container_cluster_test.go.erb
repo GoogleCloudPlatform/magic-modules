@@ -2723,31 +2723,6 @@ resource "google_container_cluster" "with_workload_metadata_config" {
 `, clusterName)
 }
 
-func testAccContainerCluster_updateWorkloadMetadataConfig(projectID string, clusterName string, workloadMetadataConfig string) string {
-	return fmt.Sprintf(`
-data "google_project" "project" {
-  project_id = "%s"
-}
-
-resource "google_container_cluster" "with_workload_identity_config" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 1
-
-  node_config {
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
-    ]
-
-    workload_metadata_config {
-      node_metadata = "%s"
-    }
-  }
-}
-`, projectID, clusterName, workloadMetadataConfig)
-}
-
 func testAccContainerCluster_withSandboxConfig(clusterName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
