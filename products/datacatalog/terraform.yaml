@@ -84,6 +84,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "basic_tag_template"
         vars:
           tag_template_id: "my_template"
+          force_delete: "false"
+        test_vars_overrides:
+          force_delete: "true"
+        oics_vars_overrides:
+          force_delete: "true"
     properties:
       tagTemplateId: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation

@@ -278,7 +278,7 @@ objects:
     base_url: projects/{{project}}/locations/{{region}}/tagTemplates
     self_link: "{{name}}"
     create_url: projects/{{project}}/locations/{{region}}/tagTemplates?tagTemplateId={{tag_template_id}}
-    delete_url: "{{name}}?force=true"
+    delete_url: "{{name}}?force={{force_delete}}"
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -302,6 +302,11 @@ objects:
         input: true
         description: |
           The id of the tag template to create.
+      - !ruby/object:Api::Type::Boolean
+        name: forceDelete
+        url_param_only: true
+        description: |
+          This confirms the deletion of any possible tags using this template. Must be set to true in order to delete the tag template.
     properties:
       - !ruby/object:Api::Type::String
         name: name
