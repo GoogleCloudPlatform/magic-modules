@@ -104,6 +104,43 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: "templates/terraform/custom_expand/bigquery_access_role.go.erb"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/bigquery_dataset_access.go
+  DatasetIamMember: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude_import: true # no unique way to specify
+    skip_sweeper: true  # covered by Dataset sweeper
+    exclude_validator: true
+    mutex: "{{dataset_id}}"
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_access_basic_user"
+        skip_test: true  # not importable
+        primary_resource_id: "access"
+        vars:
+          dataset_id: "example_dataset"
+          account_name: "bqowner"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_dataset_access_view"
+        skip_test: true  # not importable
+        primary_resource_id: "access"
+        vars:
+          dataset_id: "example_dataset"
+          dataset_id2: "example_dataset2"
+          table_id: "example_table"
+    properties:
+      datasetId: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      role: !ruby/object:Overrides::Terraform::PropertyOverride
+        # Bigquery allows for two different formats for specific roles
+        # (IAM vs "primitive" format), but will return the primative role in API
+        # responses. We identify this fine-grained resource from a list
+        # of DatasetAccess objects by comparing role, and we must use the same
+        # format when comparing.
+        diff_suppress_func: 'resourceBigQueryDatasetAccessRoleDiffSuppress'
+        # This custom expand makes sure we are correctly
+        # converting IAM roles set in state to their primitive equivalents
+        # before comparison.
+        custom_expand: "templates/terraform/custom_expand/bigquery_access_role.go.erb"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/bigquery_dataset_iam_member.go.erb
   Job: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/jobs/{{job_id}}"]
     skip_delete: true

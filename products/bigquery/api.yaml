@@ -384,6 +384,61 @@ objects:
               is 1,024 characters.
             required: true
   - !ruby/object:Api::Resource
+    name: 'DatasetIamMember'
+    input: true
+    base_url: projects/{{project}}/datasets/{{dataset_id}}
+    self_link: projects/{{project}}/datasets/{{dataset_id}}
+    create_verb: :PATCH
+    delete_verb: :PATCH
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys:
+        - access
+      modify_by_patch: true
+    identity:
+      - role
+      - member
+    description: |
+      Gives dataset access for a single entity. This resource is intended to be used in cases where
+      it is not possible to compile a full list of access blocks to include in a
+      `google_bigquery_dataset` resource, to enable them to be added separately.
+
+      ~> **Note:** If this resource is used alongside a `google_bigquery_dataset` resource, the
+      dataset resource must either have no defined `access` blocks or a `lifecycle` block with
+      `ignore_changes = [access]` so they don't fight over which accesses should be on the dataset.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Controlling access to datasets': 'https://cloud.google.com/bigquery/docs/dataset-access-controls'
+      api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'datasetId'
+        description: |
+          A unique ID for this dataset, without the project name. The ID
+          must contain only letters (a-z, A-Z), numbers (0-9), or
+          underscores (_). The maximum length is 1,024 characters.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'member'
+        required: true
+        description: |
+          Describes the rights granted to the user specified by the other
+          member of the access object. Primitive, Predefined and custom
+          roles are supported. Predefined roles that have equivalent
+          primitive roles are swapped by the API to their Primitive
+          counterparts, and will show a diff post-create. See
+          [official docs](https://cloud.google.com/bigquery/docs/access-control).
+      - !ruby/object:Api::Type::String
+        name: 'role'
+        required: true
+        description: |
+          Describes the rights granted to the user specified by the other
+          member of the access object. Primitive, Predefined and custom
+          roles are supported. Predefined roles that have equivalent
+          primitive roles are swapped by the API to their Primitive
+          counterparts, and will show a diff post-create. See
+          [official docs](https://cloud.google.com/bigquery/docs/access-control).
+
+  - !ruby/object:Api::Resource
     name: 'Job'
     kind: 'bigquery#job'
     base_url: projects/{{project}}/jobs
