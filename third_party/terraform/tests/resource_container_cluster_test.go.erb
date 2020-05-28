@@ -1413,6 +1413,49 @@ func TestAccContainerCluster_withShieldedNodes(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	pid := getTestProjectFromEnv()
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withWorkloadIdentityConfigEnabled(pid, clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_workload_identity_config",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
+			},
+			{
+				Config: testAccContainerCluster_updateWorkloadIdentityConfig(pid, clusterName, false),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_workload_identity_config",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
+			},
+			{
+				Config: testAccContainerCluster_updateWorkloadIdentityConfig(pid, clusterName, true),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_workload_identity_config",
+				ImportState:         true,
+				ImportStateVerify:   true,
+				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
+			},
+		},
+	})
+
+}
+
 <% unless version == 'ga' -%>
 // consider merging this test with TestAccContainerCluster_nodeAutoprovisioningDefaults
 // once the feature is GA
@@ -1522,53 +1565,6 @@ func TestAccContainerCluster_sharedVpc(t *testing.T) {
 	})
 }
 
-func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
-	t.Parallel()
-
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
-	pid := getTestProjectFromEnv()
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_withWorkloadIdentityConfigEnabled(pid, clusterName),
-			},
-			{
-				ResourceName:        "google_container_cluster.with_workload_identity_config",
-				ImportState:         true,
-				ImportStateVerify:   true,
-			},
-			{
-				Config: testAccContainerCluster_updateWorkloadMetadataConfig(pid, clusterName, "SECURE"),
-			},
-			{
-				ResourceName:        "google_container_cluster.with_workload_identity_config",
-				ImportState:         true,
-				ImportStateVerify:   true,
-			},
-			{
-				Config: testAccContainerCluster_updateWorkloadIdentityConfig(pid, clusterName, false),
-			},
-			{
-				ResourceName:        "google_container_cluster.with_workload_identity_config",
-				ImportState:         true,
-				ImportStateVerify:   true,
-			},
-			{
-				Config: testAccContainerCluster_updateWorkloadIdentityConfig(pid, clusterName, true),
-			},
-			{
-				ResourceName:        "google_container_cluster.with_workload_identity_config",
-				ImportState:         true,
-				ImportStateVerify:   true,
-			},
-		},
-	})
-
-}
 
 func TestAccContainerCluster_withBinaryAuthorization(t *testing.T) {
 	t.Parallel()
@@ -2028,11 +2024,9 @@ resource "google_container_cluster" "primary" {
 
   min_master_version = "latest"
 
-<% unless version == 'ga' -%>
   workload_identity_config {
     identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
   }
-<% end -%>
 
   addons_config {
     http_load_balancing {
@@ -2083,11 +2077,9 @@ resource "google_container_cluster" "primary" {
 
   min_master_version = "latest"
 
-<% unless version == 'ga' -%>
   workload_identity_config {
     identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
   }
-<% end -%>
 
   addons_config {
     http_load_balancing {
@@ -3542,6 +3534,55 @@ resource "google_container_cluster" "with_shielded_nodes" {
 `, clusterName, enabled)
 }
 
+func testAccContainerCluster_withWorkloadIdentityConfigEnabled(projectID string, clusterName string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_container_cluster" "with_workload_identity_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  workload_identity_config {
+    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+  remove_default_node_pool = true
+
+}
+`, projectID, clusterName)
+}
+
+func testAccContainerCluster_updateWorkloadIdentityConfig(projectID string, clusterName string, enable bool) string {
+	workloadIdentityConfig := ""
+	if enable {
+		workloadIdentityConfig = `
+			workload_identity_config {
+			identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+		}`
+        } else {
+		workloadIdentityConfig = `
+			workload_identity_config {
+			identity_namespace = ""
+		}`
+        }
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_container_cluster" "with_workload_identity_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  remove_default_node_pool = true
+  %s
+}
+`, projectID, clusterName, workloadIdentityConfig)
+}
+
+
 
 <% unless version.nil? || version == 'ga' -%>
 func testAccContainerCluster_sharedVpc(org, billingId, projectName, name string, suffix string) string {
@@ -3647,46 +3688,6 @@ resource "google_container_cluster" "shared_vpc_cluster" {
   ]
 }
 `, projectName, org, billingId, projectName, org, billingId, suffix, suffix, name)
-}
-
-func testAccContainerCluster_withWorkloadIdentityConfigEnabled(projectID string, clusterName string) string {
-	return fmt.Sprintf(`
-data "google_project" "project" {
-  project_id = "%s"
-}
-
-resource "google_container_cluster" "with_workload_identity_config" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 1
-
-  workload_identity_config {
-    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
-  }
-}
-`, projectID, clusterName)
-}
-
-func testAccContainerCluster_updateWorkloadIdentityConfig(projectID string, clusterName string, enable bool) string {
-	workloadIdentityConfig := ""
-	if enable {
-		workloadIdentityConfig = `
-			workload_identity_config {
-			identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
-		}`
-	}
-	return fmt.Sprintf(`
-data "google_project" "project" {
-  project_id = "%s"
-}
-
-resource "google_container_cluster" "with_workload_identity_config" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 1
-  %s
-}
-`, projectID, clusterName, workloadIdentityConfig)
 }
 
 func testAccContainerCluster_withBinaryAuthorization(clusterName string, enabled bool) string {
