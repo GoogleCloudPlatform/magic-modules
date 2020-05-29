@@ -13,11 +13,11 @@ set +e
 URL=echo $(cat build.json | jq .webUrl)
 ret=$?
 if [ $ret -ne 0 ]; then
+  echo "Auth failed"
+else
 	comment="I have triggered VCR tests based on this PR's diffs. See the results here: $URL"
 
 	curl -H "Authorization: token ${GITHUB_TOKEN}" \
 	      -d "$(jq -r --arg comment "$comment" -n "{body: \$comment}")" \
 	      "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}/comments"
-else
-  echo "Auth failed"
 fi
