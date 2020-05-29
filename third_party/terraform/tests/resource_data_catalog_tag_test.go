@@ -10,6 +10,7 @@ func TestAccDataCatalogTag_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"force_delete":  true,
 		"random_suffix": randString(t, 10),
 	}
 
@@ -99,6 +100,8 @@ resource "google_data_catalog_tag_template" "tag_template" {
       }
     }
   }
+
+  force_delete = "%{force_delete}"
 }
 
 resource "google_data_catalog_tag" "basic_tag" {

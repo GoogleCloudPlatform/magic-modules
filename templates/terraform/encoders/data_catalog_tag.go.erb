@@ -13,7 +13,7 @@
 	# limitations under the License.
 -%>
 	// The Data Catalog Tag resource includes a map for fields where the key
-	// value is the name of the field and the value is dependent on the type
+	// is the name of the field and the value is dependent on the type
 	// of the field in the tag template. Depending on that type, a different
 	// attribute needs to be populated here, but only one of these attributes
 	// can be sent, so if an attribute is not set, we need to delete it from
@@ -35,7 +35,7 @@
 
 	template, err := sendRequest(config, "GET", project, url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Error listing Tags: %s", err)
+		return nil, fmt.Errorf("Error listing Tag Templates: %s", err)
 	}
 	templateFields := template["fields"]
 

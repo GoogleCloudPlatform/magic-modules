@@ -123,6 +123,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           entry_group_id: "my_entry_group"
           entry_id: "my_entry"
           tag_template_id: "my_template"
+          force_delete: "false"
+        test_vars_overrides:
+          force_delete: "true"
+        oics_vars_overrides:
+          force_delete: "true"
       - !ruby/object:Provider::Terraform::Examples
         name: "data_catalog_entry_group_tag"
         primary_resource_id: "entry_group_tag"
@@ -131,6 +136,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           first_entry: "first_entry"
           second_entry: "second_entry"
           tag_template_id: "my_template"
+          force_delete: "false"
+        test_vars_overrides:
+          force_delete: "true"
+        oics_vars_overrides:
+          force_delete: "true"
       - !ruby/object:Provider::Terraform::Examples
         name: "data_catalog_entry_tag_full"
         primary_resource_id: "basic_tag"
@@ -138,6 +148,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           entry_group_id: "my_entry_group"
           entry_id: "my_entry"
           tag_template_id: "my_template"
+          force_delete: "false"
+        test_vars_overrides:
+          force_delete: "true"
+        oics_vars_overrides:
+          force_delete: "true"
     properties:
       # Changing the name here so when mm generates methods like `flattenDataCatalogTagTemplateDisplayName`
       # this doesn't conflict with tag template's display name methods
@@ -153,7 +168,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: templates/terraform/custom_flatten/data_catalog_tag.go.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/data_catalog_tag.go.erb
-      decoder: templates/terraform/decoders/data_catalog_tag.go.erb
       custom_import: templates/terraform/custom_import/data_catalog_tag.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

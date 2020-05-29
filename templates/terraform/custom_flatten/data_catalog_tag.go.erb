@@ -24,18 +24,11 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 			"field_name": k,
 			"display_name": flattenDataCatalogTagFieldsDisplayName(original["displayName"], d, config),
 			"order": flattenDataCatalogTagFieldsOrder(original["order"], d, config),
-		}
-
-		if original["doubleValue"] != nil {
-			transformedTag["double_value"] = original["doubleValue"]
-		} else if original["stringValue"] != nil {
-			transformedTag["string_value"] = original["stringValue"]
-		} else if original["boolValue"] != nil {
-			transformedTag["bool_value"] = original["boolValue"]
-		} else if original["timestampValue"] != nil {
-			transformedTag["timestamp_value"] = original["timestampValue"]
-		} else if original["enumValue"] != nil {
-			transformedTag["enum_value"] = original["enumValue"].(map[string]interface{})["displayName"]
+			"bool_value": original["boolValue"],
+			"double_value": original["doubleValue"],
+			"string_value": original["stringValue"],
+			"timestamp_value": original["timestampValue"],
+			"enum_value": flattenDataCatalogTagFieldsEnumValue(original["enumValue"], d, config),
 		}
 
 		transformed = append(transformed, transformedTag)
@@ -49,4 +42,12 @@ func flattenDataCatalogTagFieldsDisplayName(v interface{}, d *schema.ResourceDat
 
 func flattenDataCatalogTagFieldsOrder(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	return v
+}
+
+func flattenDataCatalogTagFieldsEnumValue(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	return v.(map[string]interface{})["displayName"]
 }

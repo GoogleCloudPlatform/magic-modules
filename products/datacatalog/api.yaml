@@ -307,7 +307,7 @@ objects:
         description: |
           This confirms the deletion of any possible tags using this template. Must be set to true in order to delete the tag template.
           The resource name of the tag template in URL format. Example: projects/{project_id}/locations/{location}/tagTemplates/{tagTemplateId}
-        output: true
+    properties:
       - !ruby/object:Api::Type::String
         name: displayName
         description: |
@@ -386,6 +386,9 @@ objects:
     update_mask: true
     self_link: '{{parent}}/tags'
     delete_url: '{{name}}'
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys:
+        - tags
     description: |
       Tags are used to attach custom metadata to Data Catalog resources. Tags conform to the specifications within their tag template.
 
@@ -397,6 +400,8 @@ objects:
     parameters:
       - !ruby/object:Api::Type::String
         name: parent
+        url_param_only: true
+        description: |
           The name of the parent this tag is attached to. This can be the name of an entry or an entry group. If an entry group, the tag will be attached to
           all entries in that group.
     properties:
