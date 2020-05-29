@@ -37,4 +37,6 @@ resource "google_data_catalog_tag_template" "<%= ctx[:primary_resource_id] %>" {
       }
     }
   }
+
+  force_delete = "<%= ctx[:vars]['force_delete'] %>"
 }
