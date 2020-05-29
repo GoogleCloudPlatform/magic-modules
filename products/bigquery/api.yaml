@@ -32,7 +32,7 @@ objects:
     self_link: projects/{{project}}/datasets/{{dataset_id}}
     has_self_link: true
     description: |
-      Datasets allow you to organize and control access to your tables.
+      Datasets allow you to organize and control access to your tables.a
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Datasets Intro': 'https://cloud.google.com/bigquery/docs/datasets-intro'
