@@ -84,7 +84,7 @@ resource "google_app_engine_standard_app_version" "foo" {
     }
   }
 
-  inbound_services = ["INBOUND_SERVICE_WARMUP"]
+  inbound_services = ["INBOUND_SERVICE_WARMUP", "INBOUND_SERVICE_MAIL"]
 
   env_variables = {
     port = "8000"
