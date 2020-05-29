@@ -903,6 +903,19 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+			"workload_identity_config": {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"identity_namespace": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
 
 <% unless version == 'ga' -%>
 			"release_channel": {
@@ -917,20 +930,6 @@ func resourceContainerCluster() *schema.Resource {
 							Required:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"UNSPECIFIED", "RAPID", "REGULAR", "STABLE"}, false),
 							DiffSuppressFunc: emptyOrDefaultStringSuppress("UNSPECIFIED"),
-						},
-					},
-				},
-			},
-
-			"workload_identity_config": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"identity_namespace": {
-							Type:     schema.TypeString,
-							Required: true,
 						},
 					},
 				},
@@ -1208,10 +1207,11 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.DatabaseEncryption = expandDatabaseEncryption(v)
 	}
 
+<% end -%>
+
 	if v, ok := d.GetOk("workload_identity_config"); ok {
 		cluster.WorkloadIdentityConfig = expandWorkloadIdentityConfig(v)
 	}
-<% end -%>
 
 	if v, ok := d.GetOk("resource_usage_export_config"); ok {
 		cluster.ResourceUsageExportConfig = expandResourceUsageExportConfig(v)
@@ -1425,10 +1425,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-<% unless version == 'ga' -%>
 	if err := d.Set("workload_identity_config", flattenWorkloadIdentityConfig(cluster.WorkloadIdentityConfig)); err != nil {
 		return err
 	}
+<% unless version == 'ga' -%>
 
 	if err := d.Set("pod_security_policy_config", flattenPodSecurityPolicyConfig(cluster.PodSecurityPolicyConfig)); err != nil {
 		return err
@@ -2010,6 +2010,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		d.SetPartial("pod_security_policy_config")
 	}
+<% end -%>
 
 	if d.HasChange("workload_identity_config") {
 		// Because GKE uses a non-RESTful update function, when removing the
@@ -2039,7 +2040,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		d.SetPartial("workload_identity_config")
 	}
-<% end -%>
 
 	if d.HasChange("resource_labels") {
 		resourceLabels := d.Get("resource_labels").(map[string]interface{})
@@ -2639,6 +2639,7 @@ func expandDatabaseEncryption(configured interface{}) *containerBeta.DatabaseEnc
 	}
 }
 
+<% end -%>
 func expandWorkloadIdentityConfig(configured interface{}) *containerBeta.WorkloadIdentityConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -2649,7 +2650,6 @@ func expandWorkloadIdentityConfig(configured interface{}) *containerBeta.Workloa
 		IdentityNamespace: config["identity_namespace"].(string),
 	}
 }
-<% end -%>
 
 func expandPodSecurityPolicyConfig(configured interface{}) *containerBeta.PodSecurityPolicyConfig {
 <% unless version == 'ga' -%>
@@ -2872,6 +2872,7 @@ func flattenReleaseChannel(c *containerBeta.ReleaseChannel) []map[string]interfa
 	return result
 }
 
+<% end -%>
 func flattenWorkloadIdentityConfig(c *containerBeta.WorkloadIdentityConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -2882,7 +2883,6 @@ func flattenWorkloadIdentityConfig(c *containerBeta.WorkloadIdentityConfig) []ma
 		},
 	}
 }
-<% end -%>
 
 func flattenIPAllocationPolicy(c *containerBeta.Cluster, d *schema.ResourceData, config *Config) []map[string]interface{} {
 	// If IP aliasing isn't enabled, none of the values in this block can be set.
