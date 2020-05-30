@@ -1,0 +1,51 @@
+resource "google_binary_authorization_attestor" "attestor" {
+  name = "<%= ctx[:vars]["attestor"] %>"
+  attestation_authority_note {
+    note_reference = google_container_analysis_note.note.name
+    public_keys {
+      id = data.google_kms_crypto_key_version.version.id
+      pkix_public_key {
+        public_key_pem      = data.google_kms_crypto_key_version.version.public_key[0].pem
+        signature_algorithm = data.google_kms_crypto_key_version.version.public_key[0].algorithm
+      }
+    }
+  }
+}
+
+resource "google_container_analysis_note" "note" {
+  name = "<%= ctx[:vars]["note_name"] %>"
+  attestation_authority {
+    hint {
+      human_readable_name = "Attestor Note"
+    }
+  }
+}
+
+data "google_kms_key_ring" "keyring" {
+  name = "my-key-ring"
+  location = "global"
+}
+
+data "google_kms_crypto_key" "crypto-key" {
+  name     = "my-key"
+  key_ring = data.google_kms_key_ring.keyring.self_link
+}
+
+data "google_kms_crypto_key_version" "version" {
+  crypto_key = data.google_kms_crypto_key.crypto-key.self_link
+}
+
+resource "google_container_analysis_occurrence" "<%= ctx[:primary_resource_id] %>" {
+  resource_uri = "gcr.io/my-project/my-image"
+  note_name = google_container_analysis_note.note.id
+
+  // See "Creating Attestations" Guide for expected
+  // payload and signature formats.
+  attestation {
+    serialized_payload = filebase64("path/to/my/payload.json")
+    signatures {
+      public_key_id = data.google_kms_crypto_key_version.version.id
+      serialized_payload = filebase64("path/to/my/payload.json.sig")
+    }
+  }
+}

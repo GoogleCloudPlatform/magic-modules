@@ -60,8 +60,15 @@ If you are making changes to the containers, your changes will not apply until t
 
 Pausing the pipeline is done in the cloud console, by setting the downstream-builder trigger to disabled.  You can find that trigger [here](https://console.cloud.google.com/cloud-build/triggers/edit/f80a7496-b2f4-4980-a706-c5425a52045b?project=graphite-docker-images)
 
-## Design choices & tradeoffs
-* The downstreams share some setup code in common - especially TPG and TPGB.  We violated the DRY principle by writing separate workflows for each repo.  In practice, this has substantially reduced the amount of code - the coordination layer above the two repos was larger than the code saved by combining them.  We also increase speed, since each Action runs separately.
+
+## Dependency change handbook:
+If someone (often a bot) creates a PR which updates Gemfile or Gemfile.lock, they will not be able to generate diffs.  This is because bundler doesn't allow you to run a binary unless your installed gems exactly match the Gemfile.lock, and since we have to run generation before and after the change, there is no possible container that will satisfy all requirements.
+
+The best approach is
+* Build the `downstream-generator` container locally, with the new Gemfile and Gemfile.lock.  This will involve hand-modifying the Dockerfile to use the local Gemfile/Gemfile.lock instead of wget from this repo's `master` branch.  You don't need to check in those changes.
+* When that container is built, and while nothing else is running in GCB (wait, if you need to), push the container to GCR, and as soon as possible afterwards, merge the dependency-changing PR.
+
+## Historical Note: Design choices & tradeoffs
 * The downstream push doesn't wait for checks on its PRs against downstreams.  This may inconvenience some existing workflows which rely on the downstream PR checks.  This ensures that merge conflicts never come into play, since the downstreams never have dangling PRs, but it requires some up-front work to get those checks into the differ.  If a new check is introduced into the downstream Travis, we will need to introduce it into the terraform-tester container.
 * The downstream push is disconnected from the output of the differ (but runs the same code).  This means that the diff which is approved isn't guaranteed to be applied *exactly*, if for instance magic modules' behavior changes on master between diff generation and downstream push.  This is also intended to avoid merge conflicts by, effectively, rebasing each commit on top of master before final generation is done.
     * Imagine the following situation: PR A and PR B are opened simultaneously. PR A changes the copyright date in each file to 2020. PR B adds a new resource. PR A is merged seconds before PR B, so they are picked up in the same push-downstream run.  The commit from PR B will produce a new file with the 2020 copyright date, even though the diff said 2019, since PR A was merged first.

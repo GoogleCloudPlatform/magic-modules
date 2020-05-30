@@ -107,6 +107,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Job: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/jobs/{{job_id}}"]
     skip_delete: true
+    async: !ruby/object:Provider::Terraform::PollAsync
+      check_response_func: PollCheckForExistence
+      actions: ['create']
+      operation: !ruby/object:Api::Async::Operation
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 4
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_query"
@@ -206,6 +212,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
           or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
       configuration.copy.sourceTables: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref_array.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_copy_sourcetables.go.erb'
@@ -219,6 +226,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
           or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
       configuration.load.destinationTable: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_load_destinationtable.go.erb'
@@ -232,6 +240,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
           or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
       configuration.load.skipLeadingRows: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntAtLeast(0)'
@@ -256,6 +265,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
           or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
       configuration.query.destinationTable: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bigquery_table_ref.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/bigquery_table_ref_query_destinationtable.go.erb'
@@ -269,6 +279,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The table. Can be specified `{{table_id}}` if `project_id` and `dataset_id` are also set,
           or of the form `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}` if not.
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
       configuration.query.defaultDataset: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bigquery_dataset_ref.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_ref.go.erb'
@@ -279,6 +290,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The dataset. Can be specified `{{dataset_id}}` if `project_id` is also set,
           or of the form `projects/{{project}}/datasets/{{dataset_id}}` if not.
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
       jobReference: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       jobReference.projectId: !ruby/object:Overrides::Terraform::PropertyOverride

@@ -939,6 +939,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "instance_group_named_port_gke"
         primary_resource_id: "my_port"
+        # Multiple fine-grained resources
+        skip_vcr: true
         vars:
           network_name: "container-network"
           subnetwork_name: "container-subnetwork"
@@ -992,6 +994,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pre_delete: templates/terraform/pre_delete/interconnect_attachment.go.erb
   License: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
+  MachineImage: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "machine_image_basic"
+        primary_resource_id: "image"
+        vars:
+          vm_name: "vm"
+          image_name: "image"
+
   MachineType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Network: !ruby/object:Overrides::Terraform::ResourceOverride

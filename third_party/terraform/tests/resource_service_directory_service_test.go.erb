@@ -18,7 +18,7 @@ func TestAccServiceDirectoryService_serviceDirectoryServiceUpdateExample(t *test
 	location := "us-central1"
 	testId := fmt.Sprintf("tf-test-example-service%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckServiceDirectoryServiceDestroyProducer(t),

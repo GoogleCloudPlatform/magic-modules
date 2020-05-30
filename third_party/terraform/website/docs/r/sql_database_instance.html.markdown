@@ -138,13 +138,13 @@ resource "google_compute_global_address" "private_ip_address" {
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
-  network       = google_compute_network.private_network.self_link
+  network       = google_compute_network.private_network.id
 }
 
 resource "google_service_networking_connection" "private_vpc_connection" {
   provider = google-beta
 
-  network                 = google_compute_network.private_network.self_link
+  network                 = google_compute_network.private_network.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
 }
@@ -165,7 +165,7 @@ resource "google_sql_database_instance" "instance" {
     tier = "db-f1-micro"
     ip_configuration {
       ipv4_enabled    = false
-      private_network = google_compute_network.private_network.self_link
+      private_network = google_compute_network.private_network.id
     }
   }
 }
@@ -194,7 +194,7 @@ The following arguments are supported:
 
 * `database_version` - (Optional, Default: `MYSQL_5_6`) The MySQL, PostgreSQL or
 SQL Server (beta) version to use. Supported values include `MYSQL_5_6`,
-`MYSQL_5_7`, `POSTGRES_9_6`,`POSTGRES_11`, `SQLSERVER_2017_STANDARD`,
+`MYSQL_5_7`, `POSTGRES_9_6`,`POSTGRES_10`, `POSTGRES_11`, `POSTGRES_12`, `SQLSERVER_2017_STANDARD`,
 `SQLSERVER_2017_ENTERPRISE`, `SQLSERVER_2017_EXPRESS`, `SQLSERVER_2017_WEB`.
 [Database Version Policies](https://cloud.google.com/sql/docs/sqlserver/db-versions)
 includes an up-to-date reference of supported versions.

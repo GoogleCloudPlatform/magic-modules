@@ -88,6 +88,19 @@ objects:
             name: 'database'
             description: Database name. 
             required: true
+          - !ruby/object:Api::Type::NestedObject
+            name: credential
+            description: Cloud SQL properties.
+            required: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: username
+                description: Username for database.
+                required: true
+              - !ruby/object:Api::Type::String
+                name: password
+                description: Password for database.
+                required: true
           - !ruby/object:Api::Type::Enum
             name: 'type'
             description: Type of the Cloud SQL database.
