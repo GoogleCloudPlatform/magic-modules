@@ -416,6 +416,48 @@ func TestAccContainerCluster_withInvalidReleaseChannel(t *testing.T) {
 		},
 	})
 }
+
+func TestAccContainerCluster_withTelemetryEnabled(t *testing.T) {
+	t.Parallel()
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withTelemetryEnabled(clusterName, "ENABLED"),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_cluster_telemetry",
+				ImportStateIdPrefix:     "us-central1-a/",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
+			},
+			{
+				Config: testAccContainerCluster_withTelemetryEnabled(clusterName, "DISABLED"),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_cluster_telemetry",
+				ImportStateIdPrefix:     "us-central1-a/",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
+			},
+			{
+				Config: testAccContainerCluster_withTelemetryEnabledForSystemOnlyMetrics(clusterName, "SYSTEM_ONLY"),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_cluster_telemetry",
+				ImportStateIdPrefix:     "us-central1-a/",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
+			},
+		},
+	})
+}
 <% end -%>
 
 func TestAccContainerCluster_withMasterAuthorizedNetworksConfig(t *testing.T) {
@@ -2239,6 +2281,35 @@ resource "google_container_cluster" "with_release_channel" {
   min_master_version = data.google_container_engine_versions.central1a.release_channel_default_version["%s"]
 }
 `, clusterName, channel)
+}
+
+func testAccContainerCluster_withTelemetryEnabled(clusterName string, telemetry_type string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_cluster_telemetry" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  cluster_telemetry {
+	type = "%s"
+  }
+}
+`, clusterName, telemetry_type)
+}
+
+func testAccContainerCluster_withTelemetryEnabledForSystemOnlyMetrics(clusterName string, telemetry_type string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_cluster_telemetry" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = "1.15"
+
+  cluster_telemetry {
+	type = "%s"
+  }
+}
+`, clusterName, telemetry_type)
 }
 <% end -%>
 
