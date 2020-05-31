@@ -310,7 +310,7 @@ subnetwork in which the cluster's instances are launched.
 
 * `cluster_telemetry` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
    Telemetry integration for the cluster. set `type = disable` to disable monitoring and logging.
-   set `type = system_only` (Only system components are monitored and logged) available only gke version 1.15 and later.
+   set `type = system_only` (Only system components are monitored and logged) available only on gke version 1.15 and later.
 
 The `addons_config` block supports:
 
