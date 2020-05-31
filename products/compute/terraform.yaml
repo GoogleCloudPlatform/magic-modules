@@ -994,6 +994,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pre_delete: templates/terraform/pre_delete/interconnect_attachment.go.erb
   License: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
+  MachineImage: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "machine_image_basic"
+        primary_resource_id: "image"
+        vars:
+          vm_name: "vm"
+          image_name: "image"
+
   MachineType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Network: !ruby/object:Overrides::Terraform::ResourceOverride

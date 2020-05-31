@@ -77,29 +77,41 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           regex: '^[A-z_][A-z0-9_]{0,63}$'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/data_catalog_entry.go.erb
-  # TagTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
-  #   examples:
-  #     - !ruby/object:Provider::Terraform::Examples
-  #       name: "data_catalog_tag_template_basic"
-  #       primary_resource_id: "basic_tag_template"
-  #       vars:
-  #         tag_template_id: "my-template"
-  #   properties:
-  #     fields: !ruby/object:Overrides::Terraform::PropertyOverride
-  #       description: |
-  #         Set of tag template field IDs and the settings for the field. This set is an exhaustive list of the allowed fields. This set must contain at least one field and at most 500 fields.
-  #     fields.type.enumType: !ruby/object:Overrides::Terraform::PropertyOverride
-  #       description: |
-  #         {{description}} Exactly one of `primitive_type` or `enum_type` must be set
-  #     fields.type.enumType.allowedValues: !ruby/object:Overrides::Terraform::PropertyOverride
-  #       is_set: true
-  #     fields.type.primitiveType: !ruby/object:Overrides::Terraform::PropertyOverride
-  #       description: |
-  #         {{description}} Exactly one of `primitive_type` or `enum_type` must be set
-  #     region: !ruby/object:Overrides::Terraform::PropertyOverride
-  #       ignore_read: true
-  #       required: false
-  #       default_from_api: true
+  TagTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["{{name}}"]
+    skip_sweeper: true  # no list endpoint plus variables in delete URL
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_catalog_tag_template_basic"
+        primary_resource_id: "basic_tag_template"
+        vars:
+          tag_template_id: "my_template"
+          force_delete: "false"
+        test_vars_overrides:
+          force_delete: "true"
+        oics_vars_overrides:
+          force_delete: "true"
+    properties:
+      tagTemplateId: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[a-z_][a-z0-9_]{0,63}$'
+      fields: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Set of tag template field IDs and the settings for the field. This set is an exhaustive list of the allowed fields. This set must contain at least one field and at most 500 fields.
+      fields.type.enumType: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}} Exactly one of `primitive_type` or `enum_type` must be set
+      fields.type.enumType.allowedValues: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      fields.type.primitiveType: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}} Exactly one of `primitive_type` or `enum_type` must be set
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+        required: false
+        default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/data_catalog_tag_template.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

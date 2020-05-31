@@ -6924,6 +6924,36 @@ objects:
           The IEEE 802.1Q VLAN tag for this attachment, in the range 2-4094. When
           using PARTNER type this will be managed upstream.
   - !ruby/object:Api::Resource
+    name: 'MachineImage'
+    kind: 'compute#machineImage'
+    base_url: projects/{{project}}/global/machineImages
+    collection_url_key: 'items'
+    has_self_link: true
+    description: |
+      Represents a MachineImage resource. Machine images store all the configuration,
+      metadata, permissions, and data from one or more disks required to create a
+      Virtual machine (VM) instance.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/compute/docs/machine-images'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/machineImages'
+    min_version: beta
+
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: 'Name of the resource.'
+        required: true
+      - !ruby/object:Api::Type::String
+        name: description
+        description: 'A text description of the resource.'
+      - !ruby/object:Api::Type::ResourceRef
+        name: sourceInstance
+        description: 'The source instance used to create the machine image. You can provide this as a partial or full URL to the resource.'
+        resource: 'Instance'
+        imports: 'selfLink'
+        required: true
+  - !ruby/object:Api::Resource
     name: 'MachineType'
     kind: 'compute#machineType'
     base_url: projects/{{project}}/zones/{{zone}}/machineTypes

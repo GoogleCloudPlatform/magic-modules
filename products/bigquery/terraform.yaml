@@ -107,6 +107,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Job: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/jobs/{{job_id}}"]
     skip_delete: true
+    async: !ruby/object:Provider::Terraform::PollAsync
+      check_response_func: PollCheckForExistence
+      actions: ['create']
+      operation: !ruby/object:Api::Async::Operation
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 4
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "bigquery_job_query"
