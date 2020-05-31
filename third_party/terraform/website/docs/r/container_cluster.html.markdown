@@ -308,6 +308,10 @@ subnetwork in which the cluster's instances are launched.
 * `enable_intranode_visibility` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
     Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.
 
+* `cluster_telemetry` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+   Telemetry integration for the cluster. set `type = disable` to disable monitoring and logging.
+   set `type = system_only` (Only system components are monitored and logged) available only gke version 1.15 and later.
+
 The `addons_config` block supports:
 
 * `horizontal_pod_autoscaling` - (Optional) The status of the Horizontal Pod Autoscaling
