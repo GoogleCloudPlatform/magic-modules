@@ -89,6 +89,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           and apply an incorrect update to the resource. If you encounter this issue, remove all `networks`
           blocks in an update and then apply another update adding all of them back simultaneously.
       privateVisibilityConfig.networks.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/network_full_url.erb'
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       forwardingConfig.targetNameServers: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
@@ -114,6 +115,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       visibility: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'caseDiffSuppress'
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
+      peeringConfig.targetNetwork.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: templates/terraform/custom_expand/network_full_url.erb
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
       reverseLookup: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/object_to_bool.go.erb
         custom_expand: templates/terraform/custom_expand/bool_to_object.go.erb
