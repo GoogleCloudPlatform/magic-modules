@@ -117,6 +117,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
       peeringConfig.targetNetwork.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/network_full_url.erb
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
       reverseLookup: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/object_to_bool.go.erb
         custom_expand: templates/terraform/custom_expand/bool_to_object.go.erb
