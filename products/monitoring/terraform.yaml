@@ -16,7 +16,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: alertPolicy/{{project}}
-    error_retry_predicates: ["isMonitoringRetryableError"]
+    error_retry_predicates: ["isMonitoringConcurrentEditError"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         # skipping tests because the API is full of race conditions
@@ -35,7 +35,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: stackdriver/groups/{{project}}
-    error_retry_predicates: ["isMonitoringRetryableError"]
+    error_retry_predicates: ["isMonitoringConcurrentEditError"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_group_basic"
@@ -59,7 +59,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: stackdriver/notifications/{{project}}
-    error_retry_predicates: ["isMonitoringRetryableError"]
+    error_retry_predicates: ["isMonitoringConcurrentEditError"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "notification_channel_basic"
@@ -111,7 +111,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     legacy_name: 'google_monitoring_custom_service'
     id_format: "{{name}}"
     import_format: ["{{name}}"]
-    error_retry_predicates: ["isMonitoringRetryableError"]
+    error_retry_predicates: ["isMonitoringConcurrentEditError"]
     properties:
       serviceId: !ruby/object:Overrides::Terraform::PropertyOverride
         api_name: 'name'
@@ -235,7 +235,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   UptimeCheckConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
-    error_retry_predicates: ["isMonitoringRetryableError"]
+    error_retry_predicates: ["isMonitoringConcurrentEditError"]
+    mutex: stackdriver/groups/{{project}}
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "uptime_check_config_http"
