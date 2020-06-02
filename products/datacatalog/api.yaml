@@ -311,6 +311,7 @@ objects:
         name: name
         description: |
           The resource name of the tag template in URL format. Example: projects/{project_id}/locations/{location}/tagTemplates/{tagTemplateId}
+        output: true
       - !ruby/object:Api::Type::String
         name: displayName
         description: |

@@ -160,6 +160,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: template_displayname
       fields.enum_value: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
+        # because `fields` is a set, the current generated expand code can't properly retrieve
+        # enum_value by d.Get("enum_value") without knowing the set id, however, the value
+        # `v` is the correct value and passed to expand, so this custom expand will use
+        # that as the correct `enum_value.display_name` value
         custom_expand: templates/terraform/custom_expand/data_catalog_tag.go.erb
       fields.enum_value.display_name: !ruby/object:Overrides::Terraform::PropertyOverride
         name: enum_value
@@ -167,7 +171,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       fields: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/data_catalog_tag.go.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      encoder: templates/terraform/encoders/data_catalog_tag.go.erb
       custom_import: templates/terraform/custom_import/data_catalog_tag.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
