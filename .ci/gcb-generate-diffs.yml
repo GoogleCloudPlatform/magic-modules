@@ -214,7 +214,7 @@ options:
 secrets:
     - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/github-token
       secretEnv:
-          GITHUB_TOKEN: CiQADkR4NnCVXo1OLSWFuPX7eSiifaOfQVzSYmKi2jZdVbKlfYMSUQBfF82vNAgpvSVyhzM8JsQaP6Oky0SAdoR5fPED5cU3qxsCB9wArmdGcgQoRzP7S6jEWHRcvxv/xauznjkJQMWCORzcbUbk6T7k80bdo2mpqw==
+          GITHUB_TOKEN: CiQADkR4NrPx8e3P2M6dtHzNtZ/LD/y6FDugCSgXXVljF3wQrNcSUQBfF82vmPCFte0HdueOkZaYl3mqCOIr9PEHk23kYYN49BAmbQd5qeDJEKl0VK2IL0V0Ehz0gGkFVINYIKoaQEhLNUDZIbVfn8aqtNyrSsy/2Q==
     - kmsKeyName: projects/graphite-docker-images/locations/global/keyRings/token-keyring/cryptoKeys/teamcity-token
       secretEnv:
           TEAMCITY_TOKEN: CiQAth83aSgKrb5ASI5XwE+yv62KbNtNG+O9gKXJzoflm65H7fESkwEASc1NF0oM3pHb5cUBAHcXZqFjEJrF4eGowPycUpKDmEncuQQSkm8v+dswSNXTXnX2C/reLpw9uGTw7G+K1kqA0sVrzYG3sTdDf/IcS//uloAerUff2wVIlV5rxV357PMkBl5dGyybnKMybgrXGl+CcW9PDLAwqfELWrr5zTSHy799dAhJZi1Wb5KbImmvvU5Z46g=
