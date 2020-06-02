@@ -457,6 +457,11 @@ objects:
             required: true
             description: |
               The format should be a shell command that can be fed to bash -c.
+      - !ruby/object:Api::Type::Array
+        name: 'inboundServices'
+        description: |
+          Before an application can receive email or XMPP messages, the application must be configured to enable the service.
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'instanceClass'
         description: |

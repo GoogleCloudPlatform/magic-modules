@@ -65,6 +65,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       # instanceClass defaults to a value based on the scaling method
       instanceClass: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      inboundServices: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_standard_app_version"
@@ -127,6 +129,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       handlers: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      inboundServices: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_flexible_app_version"
