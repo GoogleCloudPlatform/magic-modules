@@ -2695,6 +2695,17 @@ func expandDatabaseEncryption(configured interface{}) *containerBeta.DatabaseEnc
 	}
 }
 
+func expandClusterTelemetry(configured interface{}) *containerBeta.ClusterTelemetry {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &containerBeta.ClusterTelemetry{
+		Type: config["type"].(string),
+	}
+}
+
 <% end -%>
 func expandWorkloadIdentityConfig(configured interface{}) *containerBeta.WorkloadIdentityConfig {
 	l := configured.([]interface{})
@@ -2706,21 +2717,6 @@ func expandWorkloadIdentityConfig(configured interface{}) *containerBeta.Workloa
 		IdentityNamespace: config["identity_namespace"].(string),
 	}
 }
-<<<<<<< HEAD
-=======
-
-func expandClusterTelemetry(configured interface{}) *containerBeta.ClusterTelemetry {
-	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil
-	}
-	config := l[0].(map[string]interface{})
-	return &containerBeta.ClusterTelemetry{
-		Type: config["type"].(string),
-	}
-}
-<% end -%>
->>>>>>> abff5b84837e8713f18735d105d0c9daed28fb8b
 
 func expandPodSecurityPolicyConfig(configured interface{}) *containerBeta.PodSecurityPolicyConfig {
 <% unless version == 'ga' -%>
@@ -2943,6 +2939,16 @@ func flattenReleaseChannel(c *containerBeta.ReleaseChannel) []map[string]interfa
 	return result
 }
 
+func flattenClusterTelemetry(c *containerBeta.ClusterTelemetry) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"type": c.Type,
+		})
+	} 
+	return result
+}
+
 <% end -%>
 func flattenWorkloadIdentityConfig(c *containerBeta.WorkloadIdentityConfig) []map[string]interface{} {
 	if c == nil {
@@ -2954,20 +2960,6 @@ func flattenWorkloadIdentityConfig(c *containerBeta.WorkloadIdentityConfig) []ma
 		},
 	}
 }
-<<<<<<< HEAD
-=======
-
-func flattenClusterTelemetry(c *containerBeta.ClusterTelemetry) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"type": c.Type,
-		})
-	} 
-	return result
-}
-<% end -%>
->>>>>>> abff5b84837e8713f18735d105d0c9daed28fb8b
 
 func flattenIPAllocationPolicy(c *containerBeta.Cluster, d *schema.ResourceData, config *Config) []map[string]interface{} {
 	// If IP aliasing isn't enabled, none of the values in this block can be set.
