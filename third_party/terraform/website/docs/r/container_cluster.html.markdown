@@ -268,6 +268,10 @@ region are guaranteed to support the same version.
 * `private_cluster_config` - (Optional) Configuration for [private clusters](https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters),
 clusters with private nodes. Structure is documented below.
 
+* `cluster_telemetry` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for
+   [ClusterTelemetry](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#Cluster.ClusterTelemetry) feature,
+   Structure is documented below.
+
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
@@ -308,8 +312,9 @@ subnetwork in which the cluster's instances are launched.
 * `enable_intranode_visibility` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
     Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.
 
-* `cluster_telemetry` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
-   Telemetry integration for the cluster. set `type = disable` to disable monitoring and logging.
+The `cluster_telemetry` blocks supports
+
+* `type` - Telemetry integration for the cluster. set `type = disable` to disable monitoring and logging.   
    set `type = system_only` (Only system components are monitored and logged) available only on gke version 1.15 and later.
 
 The `addons_config` block supports:
