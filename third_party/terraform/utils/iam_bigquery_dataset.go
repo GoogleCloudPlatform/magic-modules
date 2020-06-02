@@ -81,31 +81,63 @@ func accessToPolicy(access map[string]interface{}) (*cloudresourcemanager.Policy
 	return nil
 }
 
-func policyToAccess(policy *cloudresourcemanager.Policy) map[string]interface{} {
+func policyToAccess(policy *cloudresourcemanager.Policy) ([]map[string]interface{}, error) {
 	res := make([]map[string]interface{}, 0)
 	for _, binding := policy.Bindings {
 		for _, member := binding.Members {
 			access := map[string]int{
     		"role": binding.Role,
 			}
-			memberType, member := accessMemberToIam(member)
+			memberType, member, err := iamMemberToAccess(member)
+			if err != nil {
+				return nil, err
+			}
 			access[memberType] = member
 			res = append(res, access)
 		}
 	}
 
-	return nil
+	return res, nil
 }
 
-func accessMemberToIam(member string) (string, string) {
+func iamMemberToAccess(member string) (string, string, error) {
 	pieces = strings.SplitN(member, ":", 2)
 	if len(pieces) > 1 {
-		pieces[1] = strings.ToLower(pieces[1])
+		switch pieces[0] {
+		case "group":
+			return "groupByEmail", pieces[1], nil
+		case: "domain":
+			return "domain", pieces[1], nil
+		case: "user"
+			return "userByEmail", pieces[1], nil
+		case: "serviceAccount"
+			return "userByEmail", pieces[1], nil
+		default:
+			return "", "", error.New(fmt.Sprintf("Failed to parse BigQuery Dataset IAM member type: %s", member))
+		}
 	}
-	if 
+	return "specialGroup", member, nil
 }
 
 func (u *BigqueryDatasetIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
+	url, err := replaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}")
+	if err != nil {
+		return err
+	}
+
+	access, err := policyToAccess(policy)
+	if err != nil {
+		return err
+	}
+	obj := map[string]interface{}{
+		"access": access,
+	}
+
+	res, err := sendRequestWithTimeout(config, "PATCH", project, url, obj, d.Timeout(schema.TimeoutCreate))
+	if err != nil {
+		return fmt.Errorf("Error creating DatasetAccess: %s", err)
+	}
+
 	bigtablePolicy, err := resourceManagerToBigtablePolicy(policy)
 	if err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
