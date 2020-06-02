@@ -2283,7 +2283,7 @@ resource "google_container_cluster" "with_cluster_telemetry" {
   initial_node_count = 1
 
   cluster_telemetry {
-	type = "%s"
+    type = "%s"
   }
 }
 `, clusterName, telemetry_type)
@@ -2298,7 +2298,7 @@ resource "google_container_cluster" "with_cluster_telemetry" {
   min_master_version = "1.15"
 
   cluster_telemetry {
-	type = "%s"
+    type = "%s"
   }
 }
 `, clusterName, telemetry_type)
