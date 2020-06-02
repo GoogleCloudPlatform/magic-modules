@@ -29,6 +29,16 @@ else
   exit 0
 fi
 
+# If there is already somebody reviewing the code, we do not need to assign any reviewer.
+# This person will not appear as a requested_reviewer, but they will appear as the user of the first review.
+ASSIGNEE=$(curl -H 'Authorization: token ea48e8665505b29e1ed550d1ae64f264eccd29a0' https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/3585/reviews | jq '.[0].user.login')
+if [ "$ASSIGNEE" == "null" ] ; then 
+  echo "No reviews on this issue."
+else
+  echo "Issue is reviewed, not assigning."
+  exit 0
+fi
+
 # This is where you add people to the random-assignee rotation.  This list
 # might not equal the list above.
 ASSIGNEE=$(shuf -n 1 <(printf "danawillow\nrambleraptor\nemilymye\nrileykarson\nSirGitsalot\nslevenick\nc2thorn\nndmckinley"))
