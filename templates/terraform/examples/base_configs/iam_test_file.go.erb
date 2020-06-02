@@ -121,9 +121,13 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 	t.Parallel()
 
+<% unless object.iam_policy.admin_iam_role.nil? -%>
+	// This may skip test, so do it first
+	sa := getTestServiceAccountFromEnv(t)
+<% end -%>
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 <% unless object.iam_policy.admin_iam_role.nil? -%>
-	context["service_account"] = getTestServiceAccountFromEnv(t)
+	context["service_account"] = sa
 <% end -%>
 
 	vcrTest(t, resource.TestCase{
@@ -292,9 +296,13 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *t
 func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) {
 	t.Parallel()
 
+<% unless object.iam_policy.admin_iam_role.nil? -%>
+	// This may skip test, so do it first
+	sa := getTestServiceAccountFromEnv(t)
+<% end -%>
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 <% unless object.iam_policy.admin_iam_role.nil? -%>
-	context["service_account"] = getTestServiceAccountFromEnv(t)
+	context["service_account"] = sa
 <% end -%>
 
 	vcrTest(t, resource.TestCase{
