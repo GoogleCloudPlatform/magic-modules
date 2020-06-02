@@ -1,0 +1,10 @@
+resource "google_memcache_instance" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]["instance_name"] %>"
+  region = "us-central1"
+
+  node_config {
+    cpu_count      = 1
+    memory_size_mb = 256
+  }
+  node_count = 1
+}

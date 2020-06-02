@@ -1,0 +1,146 @@
+# Copyright 2018 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Memcache
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://file.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: True
+    allowed:
+      - True
+      - False
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Instance'
+    create_url:  projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}
+    self_link: projects/{{project}}/locations/{{region}}/instances/{{name}}
+    base_url:  projects/{{project}}/locations/{{region}}/instances
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A Google Cloud Memcache instance.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/memcache/docs/creating-instances'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'region'
+        description: |
+          The name of the Memcache region of the instance.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource name of the instance.
+        required: true
+        url_param_only: true
+        pattern: projects/{{project}}/locations/{{region}}/instances/{{name}}
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          A user-visible name for the instance.
+      - !ruby/object:Api::Type::String
+        name: 'state'
+        description: |
+          The instance state - short description.
+        output: true
+        exclude: true
+      - !ruby/object:Api::Type::Array
+        name: 'instanceMessages'
+        description: |
+          Additional information about the instance state, if available.
+        output: true
+        exclude: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'code'
+              description: An error code.
+            - !ruby/object:Api::Type::String
+              name: 'message'
+              description: The message to be displayed to a user.
+      - !ruby/object:Api::Type::Time
+        name: 'createTime'
+        description: Creation timestamp in RFC3339 text format.
+        output: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Resource labels to represent user-provided metadata.
+      - !ruby/object:Api::Type::Array
+        name: 'zones'
+        description: |
+                Zones where memcache nodes should be provisioned.  If not
+                provided, all zones will be used.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::String
+        name: 'authorizedNetwork'
+        description: |
+          The full name of the GCE network to connect the instance to.  If not provided,
+          'default' will be used.
+      - !ruby/object:Api::Type::Integer
+        name: nodeCount
+        description: |
+          Number of nodes in the memcache instance.
+        required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: nodeConfig
+        description: |
+          Configuration for memcache nodes.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: cpuCount
+            description: |
+              Number of CPUs per node.
+            required: true
+          - !ruby/object:Api::Type::Integer
+            name: memorySizeMb
+            description: |
+              Memory size in Mibibytes for each memcache node.
+            required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: memcacheParameters
+        description: |
+          User-specified parameters for this memcache instance.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: id
+            output: true
+            description: |
+              This is a unique ID associated with this set of parameters.
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: params
+            description: |
+              User-defined set of parameters to use in the memcache process.
