@@ -12902,7 +12902,7 @@ objects:
         resource: 'Region'
         imports: 'name'
         description: |
-          URL of the GCP region for this subnetwork.
+          The GCP region for this subnetwork.
         required: true
         input: true
       - !ruby/object:Api::Type::NestedObject
