@@ -60,7 +60,6 @@ objects:
          The list of all languages supported by this agent (except for the defaultLanguageCode).
       - !ruby/object:Api::Type::String
         name: 'timeZone'
-        input: true
         description: |
          The time zone of this agent from the [time zone database](https://www.iana.org/time-zones), e.g., America/New_York,
          Europe/Paris.
