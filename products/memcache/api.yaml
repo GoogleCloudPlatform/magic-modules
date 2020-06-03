@@ -17,9 +17,6 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://memcache.googleapis.com/v1beta2/
-  - !ruby/object:Api::Product::Version
-    name: ga
-    base_url: https://memcache.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 async: !ruby/object:Api::OpAsync

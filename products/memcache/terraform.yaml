@@ -21,6 +21,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
         name: "memcache_instance_basic"
         primary_resource_id: "instance"
         vars:
