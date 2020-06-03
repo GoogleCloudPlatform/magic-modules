@@ -5,7 +5,7 @@ resource "google_memcache_instance" "<%= ctx[:primary_resource_id] %>" {
 
   node_config {
     cpu_count      = 1
-    memory_size_mb = 256
+    memory_size_mb = 1024
   }
   node_count = 1
 }
