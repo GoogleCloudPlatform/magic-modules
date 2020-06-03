@@ -23,7 +23,7 @@ resource "google_memcache_instance" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name = "<%= ctx[:vars]["instance_name"] %>"
   region = "us-central1"
-  authorized_network = google_compute_network.network.id
+  authorized_network = google_service_networking_connection.private_service_connection.network
 
   node_config {
     cpu_count      = 1
