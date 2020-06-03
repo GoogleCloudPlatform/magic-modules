@@ -29,8 +29,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      displayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      zones: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
