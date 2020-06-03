@@ -1,0 +1,207 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: NetworkManagement
+display_name: NetworkManagement
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://networkmanagement.googleapis.com/v1/
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Network Management API
+    url: https://console.cloud.google.com/apis/library/networkmanagement.googleapis.com/
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+objects:
+  - !ruby/object:Api::Resource
+    name: 'ConnectivityTest'
+    base_url: projects/{{project}}/locations/global/connectivityTests
+    create_url: projects/{{project}}/locations/global/connectivityTests?testId={{name}}
+    update_verb: :PATCH
+    update_mask: true
+    description: A repository for storing artifacts
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/network-intelligence-center/docs'
+      api: 'https://cloud.google.com/network-intelligence-center/docs/connectivity-tests/reference/networkmanagement/rest/v1/projects.locations.global.connectivityTests'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: true
+      method_name_separator: ':'
+      parent_resource_attribute: 'connectivityTest'
+      import_format: ["projects/{{project}}/locations/global/connectivityTests/{{connectivityTest}}", "{{connectivityTest}}"]
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |-
+          Unique name for the connectivity test.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: description
+        description: |-
+          The user-supplied description of the Connectivity Test.
+          Maximum of 512 characters.
+      - !ruby/object:Api::Type::NestedObject
+          name: 'source'
+          required: true
+          description: |
+            Required. Source specification of the Connectivity Test.
+
+            You can use a combination of source IP address, virtual machine
+            (VM) instance, or Compute Engine network to uniquely identify the
+            source location.
+
+            Examples: If the source IP address is an internal IP address within
+            a Google Cloud Virtual Private Cloud (VPC) network, then you must
+            also specify the VPC network. Otherwise, specify the VM instance,
+            which already contains its internal IP address and VPC network
+            information.
+
+            If the source of the test is within an on-premises network, then
+            you must provide the destination VPC network.
+
+            If the source endpoint is a Compute Engine VM instance with multiple
+            network interfaces, the instance itself is not sufficient to
+            identify the endpoint. So, you must also specify the source IP
+            address or VPC network.
+
+            A reachability analysis proceeds even if the source location is
+            ambiguous. However, the test result may include endpoints that
+            you don't intend to test.
+          properties:
+            - !ruby/object:Api::Type::String
+              name: ipAddress
+              description: |-
+                The IP address of the endpoint, which can be an external or
+                internal IP. An IPv6 address is only allowed when the test's
+                destination is a global load balancer VIP.
+            - !ruby/object:Api::Type::Integer
+              name: port
+              description: |-
+                The IP protocol port of the endpoint. Only applicable when
+                protocol is TCP or UDP.
+            - !ruby/object:Api::Type::String
+              name: instance
+              description: |-
+                A Compute Engine instance URI.
+            - !ruby/object:Api::Type::String
+              name: network
+              description: |-
+                A Compute Engine network URI.
+            - !ruby/object:Api::Type::Enum
+              name: networkType
+              description: |-
+                Type of the network where the endpoint is located.
+              values:
+                - :GCP_NETWORK
+                - :NON_GCP_NETWORK
+            - !ruby/object:Api::Type::String
+              name: projectId
+              description: |-
+                Project ID where the endpoint is located. The Project ID can be
+                derived from the URI if you provide a VM instance or network URI.
+                The following are two cases where you must provide the project ID:
+                1. Only the IP address is specified, and the IP address is within
+                a GCP project. 2. When you are using Shared VPC and the IP address
+                that you provide is from the service project. In this case, the
+                network that the IP address resides in is defined in the host
+                project.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'destination'
+        required: true
+        description: |
+          Required. Destination specification of the Connectivity Test.
+
+          You can use a combination of destination IP address, Compute
+          Engine VM instance, or VPC network to uniquely identify the
+          destination location.
+
+          Even if the destination IP address is not unique, the source IP
+          location is unique. Usually, the analysis can infer the destination
+          endpoint from route information.
+
+          If the destination you specify is a VM instance and the instance has
+          multiple network interfaces, then you must also specify either a
+          destination IP address or VPC network to identify the destination
+          interface.
+
+          A reachability analysis proceeds even if the destination location
+          is ambiguous. However, the result can include endpoints that you
+          don't intend to test.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: ipAddress
+            description: |-
+              The IP address of the endpoint, which can be an external or
+              internal IP. An IPv6 address is only allowed when the test's
+              destination is a global load balancer VIP.
+          - !ruby/object:Api::Type::Integer
+            name: port
+            description: |-
+              The IP protocol port of the endpoint. Only applicable when
+              protocol is TCP or UDP.
+          - !ruby/object:Api::Type::String
+            name: instance
+            description: |-
+              A Compute Engine instance URI.
+          - !ruby/object:Api::Type::String
+            name: network
+            description: |-
+              A Compute Engine network URI.
+          - !ruby/object:Api::Type::String
+            name: projectId
+            description: |-
+              Project ID where the endpoint is located. The Project ID can be
+              derived from the URI if you provide a VM instance or network URI.
+              The following are two cases where you must provide the project ID:
+              1. Only the IP address is specified, and the IP address is within
+              a GCP project. 2. When you are using Shared VPC and the IP address
+              that you provide is from the service project. In this case, the
+              network that the IP address resides in is defined in the host
+              project.
+      - !ruby/object:Api::Type::String
+        name: protocol
+        description: |-
+          IP Protocol of the test. When not provided, "TCP" is assumed.
+        default_value: "TCP"
+      - !ruby/object:Api::Type::Array
+        name: relatedProjects
+        description: |-
+          Other projects that may be relevant for reachability analysis.
+          This is applicable to scenarios where a test can cross project
+          boundaries.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Resource labels to represent user-provided metadata.
