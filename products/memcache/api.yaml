@@ -65,6 +65,7 @@ objects:
         description: |
           The resource name of the instance.
         required: true
+        input: true
         url_param_only: true
         pattern: projects/{{project}}/locations/{{region}}/instances/{{name}}
       - !ruby/object:Api::Type::String
@@ -97,21 +98,25 @@ objects:
         output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
+        input: true
         description: |
           Resource labels to represent user-provided metadata.
       - !ruby/object:Api::Type::Array
         name: 'zones'
+        input: true
         description: |
                 Zones where memcache nodes should be provisioned.  If not
                 provided, all zones will be used.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'authorizedNetwork'
+        input: true
         description: |
           The full name of the GCE network to connect the instance to.  If not provided,
           'default' will be used.
       - !ruby/object:Api::Type::Integer
         name: nodeCount
+        input: true
         description: |
           Number of nodes in the memcache instance.
         required: true
@@ -120,6 +125,7 @@ objects:
         description: |
           Configuration for memcache nodes.
         required: true
+        input: true
         properties:
           - !ruby/object:Api::Type::Integer
             name: cpuCount
@@ -129,12 +135,13 @@ objects:
           - !ruby/object:Api::Type::Integer
             name: memorySizeMb
             description: |
-              Memory size in Mibibytes for each memcache node.
+              Memory size in Mebibytes for each memcache node.
             required: true
       - !ruby/object:Api::Type::NestedObject
         name: memcacheParameters
         description: |
           User-specified parameters for this memcache instance.
+        input: true
         properties:
           - !ruby/object:Api::Type::String
             name: id
