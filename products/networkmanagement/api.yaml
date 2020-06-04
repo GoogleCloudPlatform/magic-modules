@@ -48,7 +48,10 @@ objects:
     create_url: projects/{{project}}/locations/global/connectivityTests?testId={{name}}
     update_verb: :PATCH
     update_mask: true
-    description: A repository for storing artifacts
+    description: |
+      A connectivity test are a static analysis of your resource configurations
+      that enables you to evaluate connectivity to and from Google Cloud
+      resources in your Virtual Private Cloud (VPC) network.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
