@@ -14043,7 +14043,6 @@ objects:
         output: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'defaultService'
-        # TODO: add defaultRouteAction.weightedBackendService here once they are supported.
         exactly_one_of:
           - default_service
           - default_url_redirect
@@ -14202,11 +14201,14 @@ objects:
           properties:
             - !ruby/object:Api::Type::ResourceRef
               name: 'defaultService'
-              # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
+              # TODO: (mbang) won't work for array path matchers yet, uncomment here and remove conflicts once they are supported.
+              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # exactly_one_of:
               #   - path_matchers.0.default_service
               #   - path_matchers.0.default_url_redirect
               #   - path_matchers.0.default_route_action.0.weighted_backend_services
+              conflicts:
+                - defaultUrlRedirect
               resource: 'BackendService'
               imports: 'selfLink'
               description: |
@@ -15402,12 +15404,14 @@ objects:
                           original URL is retained. Defaults to false.
             - !ruby/object:Api::Type::NestedObject
               name: 'defaultUrlRedirect'
-              # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
+              # TODO: (mbang) won't work for array path matchers yet, uncomment here and remove conflicts once they are supported.
+              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # exactly_one_of:
               #   - path_matchers.0.default_service
               #   - path_matchers.0.default_url_redirect
-              #   - path_matchers.0.default_route_action.0.weighted_backend_services
+              #   - path_matchers.0.default_route_action
               conflicts:
+                - defaultService
                 - defaultRouteAction
               description: |
                 When none of the specified hostRules match, the request is redirected to a URL specified
@@ -15481,9 +15485,9 @@ objects:
                 - !ruby/object:Api::Type::Array
                   name: 'weightedBackendServices'
                   # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
+                  # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   # exactly_one_of:
                   #   - path_matchers.0.default_service
-                  #   - path_matchers.0.default_url_redirect
                   #   - path_matchers.0.default_route_action.0.weighted_backend_services
                   description: |
                     A list of weighted backend services to send traffic to when a route match occurs.
@@ -15806,13 +15810,10 @@ objects:
                 Expected BackendService resource the given URL should be mapped to.
       - !ruby/object:Api::Type::NestedObject
         name: 'defaultUrlRedirect'
-        # TODO: add defaultRouteAction.weightedBackendService here once they are supported.
         exactly_one_of:
           - default_service
           - default_url_redirect
-          - default_route_action.0.weighted_backend_services
-        conflicts:
-          - defaultRouteAction
+          - default_route_action
         description: |
           When none of the specified hostRules match, the request is redirected to a URL specified
           by defaultUrlRedirect. If defaultUrlRedirect is specified, defaultService or
@@ -15887,7 +15888,6 @@ objects:
             exactly_one_of:
               - default_service
               - default_route_action.0.weighted_backend_services
-              - default_url_redirect
             description: |
               A list of weighted backend services to send traffic to when a route match occurs.
               The weights determine the fraction of traffic that flows to their corresponding backend service.
