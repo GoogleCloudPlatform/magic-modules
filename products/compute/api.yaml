@@ -12966,14 +12966,24 @@ objects:
             values:
               - :EXCLUDE_ALL_METADATA
               - :INCLUDE_ALL_METADATA
+              - :CUSTOM_METADATA
             default_value: :INCLUDE_ALL_METADATA
+          - !ruby/object:Api::Type::Array
+            name: 'metadataFields'
+            description: |
+              Can only be specified if VPC flow logs for this subnetwork is enabled and "metadata" was set to CUSTOM_METADATA.
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::String
+            name: 'filterExpr'
+            description: |
+              Can only be specified if VPC flow logs for this subnetwork is enabled. Export filter used to define which VPC flow logs should be logged.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Private Google Access':
           'https://cloud.google.com/vpc/docs/configure-private-google-access'
         'Cloud Networking':
           'https://cloud.google.com/vpc/docs/using-vpc'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/subnetworks'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/subnetworks'
   - !ruby/object:Api::Resource
     name: 'TargetHttpProxy'
     kind: 'compute#targetHttpProxy'
