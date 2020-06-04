@@ -43,12 +43,10 @@ func TestAccMemcacheInstance_update(t *testing.T) {
 func testAccMemcacheInstance_update(prefix, name string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "network" {
-  provider = google-beta
   name = "tf-test%s"
 }
 
 resource "google_compute_global_address" "service_range" {
-  provider = google-beta
   name          = "tf-test%s"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
@@ -57,14 +55,12 @@ resource "google_compute_global_address" "service_range" {
 }
 
 resource "google_service_networking_connection" "private_service_connection" {
-  provider = google-beta
   network                 = google_compute_network.network.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.service_range.name]
 }
 
 resource "google_memcache_instance" "test" {
-  provider = google-beta
   name = "%s"
   region = "us-central1"
   authorized_network = google_service_networking_connection.private_service_connection.network
@@ -81,12 +77,10 @@ resource "google_memcache_instance" "test" {
 func testAccMemcacheInstance_update2(prefix, name string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "network" {
-  provider = google-beta
   name = "tf-test%s"
 }
 
 resource "google_compute_global_address" "service_range" {
-  provider = google-beta
   name          = "tf-test%s"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
@@ -95,14 +89,12 @@ resource "google_compute_global_address" "service_range" {
 }
 
 resource "google_service_networking_connection" "private_service_connection" {
-  provider = google-beta
   network                 = google_compute_network.network.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.service_range.name]
 }
 
 resource "google_memcache_instance" "test" {
-  provider = google-beta
   name = "%s"
   region = "us-central1"
   authorized_network = google_service_networking_connection.private_service_connection.network
