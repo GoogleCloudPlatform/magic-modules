@@ -116,7 +116,6 @@ objects:
           'default' will be used.
       - !ruby/object:Api::Type::Integer
         name: nodeCount
-        input: true
         description: |
           Number of nodes in the memcache instance.
         required: true
