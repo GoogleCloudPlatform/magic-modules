@@ -12,7 +12,7 @@ import (
 func TestAccMemcacheInstance_update(t *testing.T) {
 	t.Parallel()
 
-	prefix := fmt.Sprintf("%d", RandInt(t))
+	prefix := fmt.Sprintf("%d", randInt(t))
 	name := fmt.Sprintf("tf-test-%s", prefix)
 
 	vcrTest(t, resource.TestCase{
