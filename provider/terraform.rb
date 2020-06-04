@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2020 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -179,7 +179,7 @@ module Provider
     # per resource. The resource.erb template forms the basis of a single
     # GCP Resource on Terraform.
     def generate_resource(pwd, data)
-      name = data.object.name.underscore
+      name = data.object.filename_override || data.object.name.underscore
       product_name = data.product.name.underscore
 
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
@@ -194,7 +194,7 @@ module Provider
       target_folder = data.output_folder
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
-      name = data.object.name.underscore
+      name = data.object.filename_override || data.object.name.underscore
       product_name = @config.legacy_name || data.product.name.underscore
 
       filepath =
@@ -211,7 +211,7 @@ module Provider
                 end
                     .empty?
 
-      name = data.object.name.underscore
+      name = data.object.filename_override || data.object.name.underscore
       product_name = data.product.name.underscore
 
       data.product = data.product.name
@@ -231,7 +231,7 @@ module Provider
                 data.object.custom_code.pre_delete ||
                 data.object.skip_delete
 
-      name = data.object.name.underscore
+      name = data.object.filename_override || data.object.name.underscore
       product_name = data.product.name.underscore
 
       data.product = data.product.name
@@ -261,7 +261,7 @@ module Provider
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
     def generate_iam_policy(pwd, data)
-      name = data.object.name.underscore
+      name = data.object.filename_override || data.object.name.underscore
       product_name = data.product.name.underscore
 
       FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
@@ -287,7 +287,7 @@ module Provider
       target_folder = data.output_folder
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
-      name = data.object.name.underscore
+      name = data.object.filename_override || data.object.name.underscore
       product_name = @config.legacy_name || data.product.name.underscore
 
       filepath =
