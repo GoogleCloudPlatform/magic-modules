@@ -446,7 +446,7 @@ func TestAccContainerCluster_withTelemetryEnabled(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
 			{
-				Config: testAccContainerCluster_withTelemetryEnabledForSystemOnlyMetrics(clusterName, "SYSTEM_ONLY"),
+				Config: testAccContainerCluster_withTelemetryEnabled(clusterName, "SYSTEM_ONLY"),
 			},
 			{
 				ResourceName:            "google_container_cluster.with_cluster_telemetry",
@@ -2275,21 +2275,7 @@ resource "google_container_cluster" "with_release_channel" {
 `, clusterName, channel)
 }
 
-func testAccContainerCluster_withTelemetryEnabled(clusterName string, telemetry_type string) string {
-	return fmt.Sprintf(`
-resource "google_container_cluster" "with_cluster_telemetry" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 1
-
-  cluster_telemetry {
-    type = "%s"
-  }
-}
-`, clusterName, telemetry_type)
-}
-
-func testAccContainerCluster_withTelemetryEnabledForSystemOnlyMetrics(clusterName string, telemetry_type string) string {
+func testAccContainerCluster_withTelemetryEnabled(clusterName string, telemetryType string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_cluster_telemetry" {
   name               = "%s"
@@ -2301,7 +2287,7 @@ resource "google_container_cluster" "with_cluster_telemetry" {
     type = "%s"
   }
 }
-`, clusterName, telemetry_type)
+`, clusterName, telemetryType)
 }
 <% end -%>
 
