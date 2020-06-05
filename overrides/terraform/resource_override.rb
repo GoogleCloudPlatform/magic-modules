@@ -24,6 +24,13 @@ module Overrides
     class ResourceOverride < Overrides::ResourceOverride
       def self.attributes
         [
+          # If non-empty, overrides the full filename prefix
+          # i.e. google/resource_product_{{resource_filename_override}}.go
+          # i.e. google/resource_product_{{resource_filename_override}}_test.go
+          # Note this doesn't override the actual resource name
+          # use :legacy_name instead.
+          :filename_override,
+
           # If non-empty, overrides the full given resource name.
           # i.e. 'google_project' for resourcemanager.Project
           # Use Provider::Terraform::Config.legacy_name to override just
@@ -92,6 +99,7 @@ module Overrides
 
         @examples ||= []
 
+        check :filename_override, type: String
         check :legacy_name, type: String
         check :id_format, type: String
         check :examples, item_type: Provider::Terraform::Examples, type: Array, default: []

@@ -2167,7 +2167,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validateIpCidrRange'
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
-        input: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       purpose: !ruby/object:Overrides::Terraform::PropertyOverride

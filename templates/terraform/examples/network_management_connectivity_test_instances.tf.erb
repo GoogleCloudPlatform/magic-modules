@@ -1,0 +1,55 @@
+resource "google_network_management_connectivity_test" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['primary_resource_name'] %>"
+  source {
+    instance = google_compute_instance.source.id
+  }
+
+  destination {
+    instance = google_compute_instance.destination.id
+  }
+
+  protocol = "TCP"
+}
+
+resource "google_compute_instance" "source" {
+  name = "<%= ctx[:vars]['source_instance'] %>"
+  machine_type = "n1-standard-1"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.debian_9.self_link
+    }
+  }
+
+  network_interface {
+    network = google_compute_network.vpc.id
+    access_config {
+    }
+  }
+}
+
+resource "google_compute_instance" "destination" {
+  name = "<%= ctx[:vars]['dest_instance'] %>"
+  machine_type = "n1-standard-1"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.debian_9.self_link
+    }
+  }
+
+  network_interface {
+    network = google_compute_network.vpc.id
+    access_config {
+    }
+  }
+}
+
+resource "google_compute_network" "vpc" {
+  name = "<%= ctx[:vars]['network_name'] %>"
+}
+
+data "google_compute_image" "debian_9" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
