@@ -149,6 +149,9 @@ func policyToAccess(policy *cloudresourcemanager.Policy) ([]map[string]interface
 		if binding.Condition != nil {
 			return nil, errors.New("IAM conditions not allowed on BigQuery Dataset IAM")
 		}
+		if fullRole, ok := bigqueryAccessPrimitiveToRoleMap[binding.Role]; ok {
+			return nil, fmt.Errorf("BigQuery Dataset legacy role %s is not allowed when using google_bigquery_dataset_iam resources. Please use the full form: %s", binding.Role, fullRole)
+		}
 		for _, member := range binding.Members {
 			access := map[string]interface{}{
 				"role": binding.Role,
