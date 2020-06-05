@@ -98,7 +98,6 @@ objects:
         output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
-        input: true
         description: |
           Resource labels to represent user-provided metadata.
       - !ruby/object:Api::Type::Array
