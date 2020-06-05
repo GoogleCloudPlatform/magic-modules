@@ -178,7 +178,7 @@ func iamMemberToAccess(member string) (string, string, error) {
 		case "serviceAccount":
 			return "userByEmail", pieces[1], nil
 		default:
-			return "", "", errors.New(fmt.Sprintf("Failed to parse BigQuery Dataset IAM member type: %s", member))
+			return "", "", fmt.Errorf("Failed to parse BigQuery Dataset IAM member type: %s", member)
 		}
 	}
 	if member == "projectOwners" || member == "projectReaders" || member == "projectWriters" || member == "allAuthenticatedUsers" {
@@ -204,7 +204,7 @@ func accessToIamMember(access map[string]interface{}) (string, error) {
 	}
 	if _, ok := access["view"]; ok {
 		// view does not map to an IAM member, use access instead
-		return "", errors.New(fmt.Sprintf("Failed to convert BigQuery Dataset access to IAM member. To use views with a dataset, please use dataset_access"))
+		return "", fmt.Errorf("Failed to convert BigQuery Dataset access to IAM member. To use views with a dataset, please use dataset_access")
 	}
 	if member, ok := access["userByEmail"]; ok {
 		// service accounts have "gservice" in their email. This is best guess due to lost information
@@ -213,7 +213,7 @@ func accessToIamMember(access map[string]interface{}) (string, error) {
 		}
 		return fmt.Sprintf("user:%s", member.(string)), nil
 	}
-	return "", errors.New(fmt.Sprintf("Failed to identify IAM member from BigQuery Dataset access: %v", access))
+	return "", fmt.Errorf("Failed to identify IAM member from BigQuery Dataset access: %v", access)
 }
 
 func (u *BigqueryDatasetIamUpdater) GetResourceId() string {
