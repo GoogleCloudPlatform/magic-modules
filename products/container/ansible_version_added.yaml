@@ -137,6 +137,8 @@
       :version_added: '2.9'
     :tpuIpv4CidrBlock:
       :version_added: '2.9'
+    :initialClusterVersion:
+      :version_added: '2.10'
     :masterAuthorizedNetworksConfig:
       :version_added: '2.10'
       :enabled:
@@ -147,6 +149,10 @@
           :version_added: '2.10'
         :cidrBlock:
           :version_added: '2.10'
+    :binaryAuthorization:
+      :version_added: '2.10'
+      :enabled:
+        :version_added: '2.10'
     :location:
       :version_added: '2.8'
     :kubectlPath:
