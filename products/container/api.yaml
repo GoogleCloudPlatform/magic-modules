@@ -576,7 +576,6 @@ objects:
           The software version of the master endpoint and kubelets used in the
           cluster when it was first created. The version can be upgraded over
           time.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'currentMasterVersion'
         description: 'The current software version of the master endpoint.'
