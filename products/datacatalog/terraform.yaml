@@ -112,6 +112,65 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/data_catalog_tag_template.go.erb
+  Tag: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["{{name}}"]
+    id_format: "{{name}}"
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_catalog_entry_tag_basic"
+        primary_resource_id: "basic_tag"
+        vars:
+          entry_group_id: "my_entry_group"
+          entry_id: "my_entry"
+          tag_template_id: "my_template"
+          force_delete: "false"
+        test_vars_overrides:
+          force_delete: "true"
+        oics_vars_overrides:
+          force_delete: "true"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_catalog_entry_group_tag"
+        primary_resource_id: "entry_group_tag"
+        vars:
+          entry_group_id: "my_entry_group"
+          first_entry: "first_entry"
+          second_entry: "second_entry"
+          tag_template_id: "my_template"
+          force_delete: "false"
+        test_vars_overrides:
+          force_delete: "true"
+        oics_vars_overrides:
+          force_delete: "true"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_catalog_entry_tag_full"
+        primary_resource_id: "basic_tag"
+        vars:
+          entry_group_id: "my_entry_group"
+          entry_id: "my_entry"
+          tag_template_id: "my_template"
+          force_delete: "false"
+        test_vars_overrides:
+          force_delete: "true"
+        oics_vars_overrides:
+          force_delete: "true"
+    properties:
+      # Changing the name here so when mm generates methods like `flattenDataCatalogTagTemplateDisplayName`
+      # this doesn't conflict with tag template's display name methods
+      templateDisplayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: template_displayname
+      fields.enumValue: !ruby/object:Overrides::Terraform::PropertyOverride
+        flatten_object: true
+        # because `fields` is a set, the current generated expand code can't properly retrieve
+        # enum_value by d.Get("enum_value") without knowing the set id, however, the value
+        # `v` is the correct value and passed to expand, so this custom expand will use
+        # that as the correct `enum_value.display_name` value
+        custom_expand: templates/terraform/custom_expand/data_catalog_tag.go.erb
+        custom_flatten: templates/terraform/custom_flatten/data_catalog_tag.go.erb
+      fields.enumValue.displayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: enum_value
+        required: false
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/data_catalog_tag.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

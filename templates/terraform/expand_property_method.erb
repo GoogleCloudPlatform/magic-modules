@@ -36,8 +36,14 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
     transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= Google::StringUtils.underscore(prop.name) -%>"], d, config)
     if err != nil {
       return nil, err
+    <%       if prop.send_empty_value -%>
+    } else {
+      transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
+    <%       else -%>
+    } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !isEmptyValue(val) {
+      transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
+    <%       end -%>
     }
-    transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
 
 <%     end -%>
 
