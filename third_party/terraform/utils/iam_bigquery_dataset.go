@@ -168,7 +168,10 @@ func policyToAccess(policy *cloudresourcemanager.Policy) ([]map[string]interface
 	return res, nil
 }
 
-func iamMemberToAccess(member string) (string, string, error) {
+// Returns the member access type and member for an IAM member.
+// Dataset access uses different member types to identify groups, domains, etc.
+// these types are used as keys in the access JSON payload
+func iamMemberToAccess(member string) (memberType, member string, err error) {
 	pieces := strings.SplitN(member, ":", 2)
 	if len(pieces) > 1 {
 		switch pieces[0] {

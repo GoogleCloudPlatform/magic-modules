@@ -28,9 +28,9 @@ Three different resources help you manage your IAM policy for BigQuery dataset. 
 ## google\bigquery\_dataset\_iam\_policy
 
 ```hcl
-data "google_iam_policy" "admin" {
+data "google_iam_policy" "owner" {
   binding {
-    role = "roles/editor"
+    role = "roles/dataOwner"
 
     members = [
       "user:jane@example.com",
@@ -40,16 +40,16 @@ data "google_iam_policy" "admin" {
 
 resource "google_bigquery_dataset_iam_policy" "dataset" {
   dataset_id  = "your-dataset-id"
-  policy_data = data.google_iam_policy.admin.policy_data
+  policy_data = data.google_iam_policy.owner.policy_data
 }
 ```
 
 ## google\_bigquery\_dataset\_iam\_binding
 
 ```hcl
-resource "google_bigquery_dataset_iam_binding" "dataset" {
+resource "google_bigquery_dataset_iam_binding" "reader" {
   dataset_id = "your-dataset-id"
-  role       = "roles/editor"
+  role       = "roles/bigquery.dataViewer"
 
   members = [
     "user:jane@example.com",
@@ -60,9 +60,9 @@ resource "google_bigquery_dataset_iam_binding" "dataset" {
 ## google\_bigquery\_dataset\_iam\_member
 
 ```hcl
-resource "google_bigquery_dataset_iam_member" "dataset" {
+resource "google_bigquery_dataset_iam_member" "editor" {
   dataset_id = "your-dataset-id"
-  role       = "roles/editor"
+  role       = "roles/bigquery.dataEditor"
   member     = "user:jane@example.com"
 }
 ```
