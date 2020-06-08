@@ -15404,12 +15404,12 @@ objects:
                           original URL is retained. Defaults to false.
             - !ruby/object:Api::Type::NestedObject
               name: 'defaultUrlRedirect'
-              # TODO: (mbang) won't work for array path matchers yet, uncomment here and remove conflicts once they are supported.
+              # TODO: (mbang) won't work for array path matchers yet, uncomment here and remove defaultService conflict once they are supported.
               # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # exactly_one_of:
               #   - path_matchers.0.default_service
               #   - path_matchers.0.default_url_redirect
-              #   - path_matchers.0.default_route_action
+              #   - path_matchers.0.default_route_action.0.weighted_backend_services
               conflicts:
                 - defaultService
                 - defaultRouteAction
@@ -15488,6 +15488,7 @@ objects:
                   # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   # exactly_one_of:
                   #   - path_matchers.0.default_service
+                  #   - path_matchers.0.default_url_redirect
                   #   - path_matchers.0.default_route_action.0.weighted_backend_services
                   description: |
                     A list of weighted backend services to send traffic to when a route match occurs.
@@ -15813,7 +15814,9 @@ objects:
         exactly_one_of:
           - default_service
           - default_url_redirect
-          - default_route_action
+          - default_route_action.0.weighted_backend_services
+        conflicts:
+          - defaultRouteAction
         description: |
           When none of the specified hostRules match, the request is redirected to a URL specified
           by defaultUrlRedirect. If defaultUrlRedirect is specified, defaultService or
@@ -15887,6 +15890,7 @@ objects:
             name: 'weightedBackendServices'
             exactly_one_of:
               - default_service
+              - default_url_redirect
               - default_route_action.0.weighted_backend_services
             description: |
               A list of weighted backend services to send traffic to when a route match occurs.
