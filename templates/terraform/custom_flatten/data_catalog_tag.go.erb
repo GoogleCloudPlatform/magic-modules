@@ -14,38 +14,6 @@
 -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	if v == nil {
-		return v
-	}
-	l := v.(map[string]interface{})
-	transformed := make([]interface{}, 0, len(l))
-	for k, raw := range l {
-		original := raw.(map[string]interface{})
-		transformedTag := map[string]interface{}{
-			"field_name": k,
-			"display_name": flattenDataCatalogTagFieldsDisplayName(original["displayName"], d, config),
-			"order": flattenDataCatalogTagFieldsOrder(original["order"], d, config),
-			"bool_value": original["boolValue"],
-			"double_value": original["doubleValue"],
-			"string_value": original["stringValue"],
-			"timestamp_value": original["timestampValue"],
-			"enum_value": flattenDataCatalogTagFieldsEnumValue(original["enumValue"], d, config),
-		}
-
-		transformed = append(transformed, transformedTag)
-	}
-	return transformed
-}
-
-func flattenDataCatalogTagFieldsDisplayName(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-	return v
-}
-
-func flattenDataCatalogTagFieldsOrder(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-	return v
-}
-
-func flattenDataCatalogTagFieldsEnumValue(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-	if v == nil {
 		return nil
 	}
 

@@ -453,28 +453,28 @@ objects:
                 within a tag do not have to be sequential.
               output: true
             - !ruby/object:Api::Type::Double
-              name: double_value
+              name: doubleValue
               description: |
                 Holds the value for a tag field with double type.
             - !ruby/object:Api::Type::String
-              name: string_value
+              name: stringValue
               description: |
                 Holds the value for a tag field with string type.
             - !ruby/object:Api::Type::Boolean
-              name: bool_value
+              name: boolValue
               description: |
                 Holds the value for a tag field with boolean type.
             - !ruby/object:Api::Type::String
-              name: timestamp_value
+              name: timestampValue
               description: |
                 Holds the value for a tag field with timestamp type.
             - !ruby/object:Api::Type::NestedObject
-              name: enum_value
+              name: enumValue
               description: |
                 Holds the value for a tag field with enum type. This value must be one of the allowed values in the definition of this enum.
               properties:
                 - !ruby/object:Api::Type::String
-                  name: display_name
+                  name: displayName
                   description: |
                     The display name of the enum value.
                   required: true

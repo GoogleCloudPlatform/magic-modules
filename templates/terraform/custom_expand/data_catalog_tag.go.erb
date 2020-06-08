@@ -17,7 +17,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 	// v is the value we want from the config
 	transformed := make(map[string]interface{})
 	if val := reflect.ValueOf(v); val.IsValid() && !isEmptyValue(val) {
-		transformed["display_name"] = v
+		transformed["displayName"] = v
 	}
 
 	return transformed, nil
