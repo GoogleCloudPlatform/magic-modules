@@ -314,7 +314,7 @@ subnetwork in which the cluster's instances are launched.
 
 The `cluster_telemetry` blocks supports
 
-* `type` - Telemetry integration for the cluster. Supported Values (`ENABLE, DISABLE, SYSTEM_ONLY`);
+* `type` - Telemetry integration for the cluster. Supported values (`ENABLE, DISABLE, SYSTEM_ONLY`);
    `SYSTEM_ONLY` (Only system components are monitored and logged) is only available in GKE versions 1.15 and later.
 
 The `addons_config` block supports:
