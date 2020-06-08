@@ -269,7 +269,7 @@ region are guaranteed to support the same version.
 clusters with private nodes. Structure is documented below.
 
 * `cluster_telemetry` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for
-   [ClusterTelemetry](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#Cluster.ClusterTelemetry) feature,
+   [ClusterTelemetry](https://cloud.google.com/monitoring/kubernetes-engine/installing#controlling_the_collection_of_application_logs) feature,
    Structure is documented below.
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
