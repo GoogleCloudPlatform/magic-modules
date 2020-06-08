@@ -354,6 +354,7 @@ objects:
                         - :ANALYTICS
                     - !ruby/object:Api::Type::Integer
                       name: recursiveStructureDepth
+                      required: true
                       description: |
                         The depth for all recursive structures in the output analytics schema. For example, concept in the CodeSystem
                         resource is a recursive structure; when the depth is 2, the CodeSystem table will have a column called
