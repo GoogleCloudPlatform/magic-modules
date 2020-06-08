@@ -50,6 +50,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dataset_name: "example-dataset"
           fhir_store_name: "example-fhir-store"
           pubsub_topic: "fhir-notifications"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "healthcare_fhir_store_streaming_config"
+        primary_resource_id: "default"
+        vars:
+          dataset_name: "example-dataset"
+          fhir_store_name: "example-fhir-store"
+          pubsub_topic: "fhir-notifications"
+          bq_dataset_name: "bq_example_dataset"
     properties:
       creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
