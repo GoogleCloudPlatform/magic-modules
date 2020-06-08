@@ -12971,7 +12971,7 @@ objects:
           - !ruby/object:Api::Type::Array
             name: 'metadataFields'
             description: |
-              Can only be specified if VPC flow logs for this subnetwork is enabled and "metadata" was set to CUSTOM_METADATA.
+              Can only be specified if VPC flow logs for this subnetwork is enabled and "metadata" is set to CUSTOM_METADATA.
             item_type: Api::Type::String
           - !ruby/object:Api::Type::String
             name: 'filterExpr'

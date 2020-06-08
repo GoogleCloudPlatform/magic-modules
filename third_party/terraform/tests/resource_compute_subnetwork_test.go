@@ -604,12 +604,12 @@ resource "google_compute_subnetwork" "network-with-flow-logs" {
   log_config {
     aggregation_interval = "INTERVAL_30_SEC"
     flow_sampling        = 0.8
-	metadata             = "CUSTOM_METADATA"
-	metadata_fields      = [
-		"src_gke_details",
-		"dest_gke_details",
-	]
-	filter_expr          = "inIpRange(connection.src_ip, '10.0.0.0/8')"
+    metadata             = "CUSTOM_METADATA"
+    metadata_fields      = [
+        "src_gke_details",
+        "dest_gke_details",
+    ]
+    filter_expr          = "inIpRange(connection.src_ip, '10.0.0.0/8')"
   }
 }
 `, cnName, subnetworkName)
