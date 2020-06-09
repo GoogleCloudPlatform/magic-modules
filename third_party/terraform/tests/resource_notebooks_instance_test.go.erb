@@ -1,0 +1,77 @@
+<% autogen_exception -%>
+package google
+
+<% unless version == 'ga' %>
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+)
+
+func TestAccNotebooksInstance_update(t *testing.T) {
+	t.Parallel()
+
+	prefix := fmt.Sprintf("%d", randInt(t))
+	name := fmt.Sprintf("tf-test-%s", prefix)
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckNotebooksInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNotebooksInstance_update(prefix, name),
+			},
+			{
+				ResourceName:      "google_notebooks_instance.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccNotebooksInstance_update_gpu(prefix, name),
+			},
+			{
+				ResourceName:      "google_notebooks_instance.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccNotebooksInstance_update(prefix, name string) string {
+	return fmt.Sprintf(`
+
+resource "google_notebooks_instance" "test" {
+  name = "%s"
+  location = "us-west1-a"
+  vm_image {
+    project      = "deeplearning-platform-release"
+    image_family = "tf2-ent-latest-cpu"
+  }
+  node_count = 1
+}
+`, prefix, name)
+}
+
+
+func testAccMemcacheInstance_update_gpu(prefix, name string) string {
+	return fmt.Sprintf(`
+
+resource "google_memcache_instance" "test" {
+  name = "%s"
+  location = "us-west1-a"
+  vm_image {
+    project      = "deeplearning-platform-release"
+    image_family = "tf2-ent-latest-gpu"
+  }
+  accelerator_config {
+    type = "NVIDIA_TESLA_T4"
+    core_count = 1
+  }
+  node_count = 2
+}
+`, prefix, name)
+}
+<% end -%>
