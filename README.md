@@ -182,8 +182,8 @@ often minor differences- the naming of a field, or whether it's required or not.
 You can find them under the folder for a product, with the name `{{tool}}.yaml`.
 For example, Ansible's overrides for Cloud SQL are present at `products/sql/ansible.yaml`
 
-You can find a full reference for each tool under `provider/{{tool}}/resource_override.rb`
-and `provider/{{tool}}/property_override.rb`, as well as some other tool-specific
+You can find a full reference for each tool under `overrides/{{tool}}/resource_override.rb`
+and `overrides/{{tool}}/property_override.rb`, as well as some other tool-specific
 functionality.
 
 #### Making changes to handwritten files
