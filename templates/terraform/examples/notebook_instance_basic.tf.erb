@@ -5,7 +5,7 @@ resource "google_notebooks_instance" "<%= ctx[:primary_resource_id] %>" {
 
   vm_image {
     project      = "deeplearning-platform-release"
-    image_family = "tf2-latest-cpu"
+    image_family = "tf2-latest-gpu"
   }
   
   accelerator_config {
