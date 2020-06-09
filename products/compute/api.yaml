@@ -12976,7 +12976,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'filterExpr'
             description: |
-              Can only be specified if VPC flow logs for this subnetwork is enabled. Export filter used to define which VPC flow logs should be logged.
+              Export filter used to define which VPC flow logs should be logged.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Private Google Access':

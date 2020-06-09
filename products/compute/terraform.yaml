@@ -2162,6 +2162,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.erb'
       logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      logConfig.metadataFields: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
       ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'

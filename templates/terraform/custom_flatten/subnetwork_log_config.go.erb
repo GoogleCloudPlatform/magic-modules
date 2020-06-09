@@ -30,5 +30,8 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	transformed["flow_sampling"] = original["flowSampling"]
 	transformed["aggregation_interval"] = original["aggregationInterval"]
 	transformed["metadata"] = original["metadata"]
+	transformed["metadata_fields"] = original["metadataFields"]
+	transformed["filter_expr"] = original["filterExpr"]
+	
 	return []interface{}{transformed}
 }
