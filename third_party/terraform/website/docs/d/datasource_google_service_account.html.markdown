@@ -63,3 +63,7 @@ exported:
 * `name` - The fully-qualified name of the service account.
 
 * `display_name` - The display name for the service account.
+
+* `description` - The description for the service account.
+
+* `oauth2_client_id` - The OAuth2 client id for the service account.

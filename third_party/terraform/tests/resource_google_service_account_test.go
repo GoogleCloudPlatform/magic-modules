@@ -16,8 +16,8 @@ func TestAccServiceAccount_basic(t *testing.T) {
 	uniqueId := ""
 	displayName := "Terraform Test"
 	displayName2 := "Terraform Test Update"
-	desc := "test description"
-	desc2 := ""
+	description1 := ""
+	description2 := "Terraform Test service account"
 	project := getTestProjectFromEnv()
 	expectedEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountId, project)
 	vcrTest(t, resource.TestCase{
@@ -26,7 +26,7 @@ func TestAccServiceAccount_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// The first step creates a basic service account
 			{
-				Config: testAccServiceAccountBasic(accountId, displayName, desc),
+				Config: testAccServiceAccountBasic(accountId, displayName, description1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_service_account.acceptance", "project", project),
@@ -52,7 +52,7 @@ func TestAccServiceAccount_basic(t *testing.T) {
 			},
 			// The second step updates the service account
 			{
-				Config: testAccServiceAccountBasic(accountId, displayName2, desc2),
+				Config: testAccServiceAccountBasic(accountId, displayName2, description2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_service_account.acceptance", "project", project),
@@ -67,7 +67,7 @@ func TestAccServiceAccount_basic(t *testing.T) {
 			// The third step explicitly adds the same default project to the service account configuration
 			// and ensure the service account is not recreated by comparing the value of its unique_id with the one from the previous step
 			{
-				Config: testAccServiceAccountWithProject(project, accountId, displayName2),
+				Config: testAccServiceAccountWithProject(project, accountId, displayName2, description2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_service_account.acceptance", "project", project),
@@ -91,23 +91,23 @@ func testAccStoreServiceAccountUniqueId(uniqueId *string) resource.TestCheckFunc
 	}
 }
 
-func testAccServiceAccountBasic(account, name, desc string) string {
+func testAccServiceAccountBasic(account, name, description string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "acceptance" {
   account_id   = "%v"
   display_name = "%v"
   description  = "%v"
 }
-`, account, name, desc)
+`, account, name, description)
 }
 
-func testAccServiceAccountWithProject(project, account, name string) string {
+func testAccServiceAccountWithProject(project, account, name, description string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "acceptance" {
   project      = "%v"
   account_id   = "%v"
   display_name = "%v"
-  description  = "foo"
+  description  = "%v"
 }
-`, project, account, name)
+`, project, account, name, description)
 }

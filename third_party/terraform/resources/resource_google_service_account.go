@@ -42,13 +42,18 @@ func resourceGoogleServiceAccount() *schema.Resource {
 				ValidateFunc: validateRFC1035Name(6, 30),
 			},
 			"display_name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(0, 100),
 			},
 			"description": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(0, 256),
+			},
+			"oauth2_client_id": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"project": {
 				Type:     schema.TypeString,
@@ -115,6 +120,7 @@ func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) 
 	d.Set("name", sa.Name)
 	d.Set("display_name", sa.DisplayName)
 	d.Set("description", sa.Description)
+	d.Set("oauth2_client_id", sa.Oauth2ClientId)
 	return nil
 }
 
@@ -131,29 +137,44 @@ func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}
 
 func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+
 	sa, err := config.clientIAM.Projects.ServiceAccounts.Get(d.Id()).Do()
 	if err != nil {
 		return fmt.Errorf("Error retrieving service account %q: %s", d.Id(), err)
 	}
+
+	serviceAccount := &iam.ServiceAccount{
+		Etag: sa.Etag,
+	}
 	updateMask := make([]string, 0)
+
 	if d.HasChange("description") {
+		if v, ok := d.GetOk("description"); ok {
+			serviceAccount.Description = v.(string)
+		}
 		updateMask = append(updateMask, "description")
 	}
+
 	if d.HasChange("display_name") {
+		if v, ok := d.GetOk("display_name"); ok {
+			serviceAccount.DisplayName = v.(string)
+		}
 		updateMask = append(updateMask, "display_name")
 	}
+
+	if len(updateMask) == 0 {
+		return nil
+	}
+
 	_, err = config.clientIAM.Projects.ServiceAccounts.Patch(d.Id(),
 		&iam.PatchServiceAccountRequest{
-			UpdateMask: strings.Join(updateMask, ","),
-			ServiceAccount: &iam.ServiceAccount{
-				DisplayName: d.Get("display_name").(string),
-				Description: d.Get("description").(string),
-				Etag:        sa.Etag,
-			},
+			ServiceAccount: serviceAccount,
+			UpdateMask:     strings.Join(updateMask, ","),
 		}).Do()
 	if err != nil {
-		return err
+		return fmt.Errorf("Error updating service account %q: %s", d.Id(), err)
 	}
+
 	// API tends to be asynchronous
 	time.Sleep(time.Second)
 
