@@ -1627,6 +1627,7 @@ objects:
           name: matcher
           description: The type of content matcher that will be applied to the server output,
             compared to the content string when the check is run.
+          default_value: :CONTAINS_STRING
           values:
             - :CONTAINS_STRING
             - :NOT_CONTAINS_STRING
