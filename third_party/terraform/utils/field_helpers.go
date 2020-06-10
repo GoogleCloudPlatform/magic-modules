@@ -350,11 +350,11 @@ func getRegionFromSchema(regionSchemaField, zoneSchemaField string, d TerraformR
 	// the region if so. Otherwise, return as it's a region.
 	if regionSchemaField == zoneSchemaField {
 		if v, ok := d.GetOk(regionSchemaField); ok {
-			if isZone(v) {
-				return getRegionFromZone(v), nil
+			if isZone(v.(string)) {
+				return getRegionFromZone(v.(string)), nil
 			}
 
-			return v, nil
+			return v.(string), nil
 		}
 	}
 
