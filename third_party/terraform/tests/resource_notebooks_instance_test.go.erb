@@ -21,7 +21,7 @@ func TestAccNotebooksInstance_update(t *testing.T) {
 		CheckDestroy: testAccCheckNotebooksInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNotebooksInstance_update(prefix, name),
+				Config: testAccNotebooksInstance_update(name),
 			},
 			{
 				ResourceName:      "google_notebooks_instance.test",
@@ -29,7 +29,7 @@ func TestAccNotebooksInstance_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccNotebooksInstance_update_gpu(prefix, name),
+				Config: testAccNotebooksInstance_update_gpu(name),
 			},
 			{
 				ResourceName:      "google_notebooks_instance.test",
@@ -40,7 +40,7 @@ func TestAccNotebooksInstance_update(t *testing.T) {
 	})
 }
 
-func testAccNotebooksInstance_update(prefix, name string) string {
+func testAccNotebooksInstance_update(name string) string {
 	return fmt.Sprintf(`
 
 resource "google_notebooks_instance" "test" {
@@ -52,11 +52,11 @@ resource "google_notebooks_instance" "test" {
   }
   node_count = 1
 }
-`, prefix, name)
+`, name)
 }
 
 
-func testAccNotebooksInstance_update_gpu(prefix, name string) string {
+func testAccNotebooksInstance_update_gpu(name string) string {
 	return fmt.Sprintf(`
 
 resource "google_notebooks_instance" "test" {
@@ -72,6 +72,6 @@ resource "google_notebooks_instance" "test" {
   }
   node_count = 2
 }
-`, prefix, name)
+`,name)
 }
 <% end -%>
