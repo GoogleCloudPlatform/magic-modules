@@ -664,7 +664,7 @@ subnet. See [Private Cluster Limitations](https://cloud.google.com/kubernetes-en
 for more details. This field only applies to private clusters, when
 `enable_private_nodes` is `true`.
 
-* `master_global_access_config` (Optional) - Controls cluster master global
+* `master_global_access_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - Controls cluster master global
 access settings. If unset, Terraform will no longer manage this field and will
 not modify the previously-set value. Structure is documented below.
 
