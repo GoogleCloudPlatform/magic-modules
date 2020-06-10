@@ -102,8 +102,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'imageFamily'
             description: |
-                Use this VM image family to find the image; the newest image in this family will be used.
-        required: true
+                Use this VM image family to find the image; the newest image in this family will be used.        
       - !ruby/object:Api::Type::NestedObject
         name: 'containerImage'
         exactly_one_of:
@@ -122,7 +121,6 @@ objects:
             name: 'tag'
             description: |
                 The tag of the container image. If not specified, this defaults to the latest tag. 
-        required: true
   # Notebooks Instance
   - !ruby/object:Api::Resource
     name: 'Instance'
@@ -346,7 +344,6 @@ objects:
             name: 'imageFamily'
             description: |
                 Use this VM image family to find the image; the newest image in this family will be used.
-        required: true
       - !ruby/object:Api::Type::NestedObject
         name: 'containerImage'
         exactly_one_of:
@@ -365,4 +362,3 @@ objects:
             name: 'tag'
             description: |
                 The tag of the container image. If not specified, this defaults to the latest tag.
-        required: true
