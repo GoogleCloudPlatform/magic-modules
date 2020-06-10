@@ -58,6 +58,11 @@ objects:
         name: 'description'
         description: |
           Human-readable description of the trigger.
+      - !ruby/object:Api::Type::Array
+        name: 'tags'
+        item_type: Api::Type::String
+        description: |
+          Tags for annotation of a BuildTrigger
       - !ruby/object:Api::Type::Boolean
         name: 'disabled'
         description: |
