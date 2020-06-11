@@ -21,7 +21,7 @@ func TestAccNotebooksEnvironment_update(t *testing.T) {
     CheckDestroy: testAccCheckNotebooksEnvironmentDestroyProducer(t),
     Steps: []resource.TestStep{
       {
-        Config: TestAccNotebooksEnvironment_update(name),
+        Config: testAccNotebooksEnvironment_update(name),
       },
       {
         ResourceName:      "google_notebooks_environment.test",
@@ -32,7 +32,7 @@ func TestAccNotebooksEnvironment_update(t *testing.T) {
   })
 }
 
-func TestAccNotebooksEnvironment_update(name string) string {
+func testAccNotebooksEnvironment_update(name string) string {
   return fmt.Sprintf(`
 
 resource "google_notebooks_environment" "test" {
