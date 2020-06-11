@@ -233,6 +233,93 @@ objects:
         description: |
           Contents of the build template. Either a filename or build template must be provided.
         properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'source'
+            description: |
+              The location of the source files to build.
+            properties:
+              - !ruby/object:Api::Type::NestedObject
+                name: 'storageSource'
+                exactly_one_of:
+                  - storageSource
+                  - repoSource
+                description: |
+                  Location of the source in an archive file in Google Cloud Storage.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'bucket'
+                    description: |
+                      Google Cloud Storage bucket containing the source.
+                  - !ruby/object:Api::Type::String
+                    name: 'object'
+                    description: |
+                      Google Cloud Storage object containing the source.
+                      This object must be a gzipped archive file (.tar.gz) containing source to build.
+                  - !ruby/object:Api::Type::String
+                    name: 'generation'
+                    description: |
+                      Google Cloud Storage generation for the object. 
+                      If the generation is omitted, the latest generation will be used
+              - !ruby/object:Api::Type::NestedObject
+                name: 'repoSource'
+                exactly_one_of:
+                  - storageSource
+                  - repoSource
+                description: |
+                  Location of the source in a Google Cloud Source Repository.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'projectId'
+                    description: |
+                      ID of the project that owns the Cloud Source Repository. 
+                      If omitted, the project ID requesting the build is assumed.
+                  - !ruby/object:Api::Type::String
+                    name: 'repoName'
+                    required: true
+                    description: |
+                      Name of the Cloud Source Repository.
+                  - !ruby/object:Api::Type::String
+                    name: 'dir'
+                    description: |
+                      Directory, relative to the source root, in which to run the build.
+                      This must be a relative path. If a step's dir is specified and is an absolute path, 
+                      this value is ignored for that step's execution.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'invertRegex'
+                    description: |
+                      Only trigger a build if the revision regex does NOT match the revision regex.
+                  - !ruby/object:Api::Type::KeyValuePairs
+                    name: 'substitutions'
+                    description: |
+                      Substitutions to use in a triggered build. Should only be used with triggers.run
+                  - !ruby/object:Api::Type::String
+                    name: 'branchName'
+                    exactly_one_of:
+                      - branchName
+                      - tagName
+                      - commitSha
+                    description: |
+                      Regex matching branches to build.
+                      The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
+                      described at https://github.com/google/re2/wiki/Syntax
+                  - !ruby/object:Api::Type::String
+                    name: 'tagName'
+                    exactly_one_of:
+                      - branchName
+                      - tagName
+                      - commitSha
+                    description: |
+                      Regex matching tags to build.
+                      The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
+                      described at https://github.com/google/re2/wiki/Syntax
+                  - !ruby/object:Api::Type::String
+                    name: 'commitSha'
+                    exactly_one_of:
+                      - branchName
+                      - tagName
+                      - commitSha
+                    description: |
+                      Explicit commit SHA to build.
           - !ruby/object:Api::Type::Array
             name: 'tags'
             item_type: Api::Type::String
@@ -246,6 +333,22 @@ objects:
               The images are pushed using the builder service account's credentials.
               The digests of the pushed images will be stored in the Build resource's results field.
               If any of the images fail to be pushed, the build status is marked FAILURE.
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'substitutions'
+            description: |
+              Substitutions data for Build resource.
+          - !ruby/object:Api::Type::String
+            name: 'queueTtl'
+            description: |
+              TTL in queue for this build. If provided and the build is enqueued longer than this value, 
+              the build will expire and the build status will be EXPIRED.
+              The TTL starts ticking from createTime.
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+          - !ruby/object:Api::Type::String
+            name: 'logsBucket'
+            description: |
+              Google Cloud Storage bucket where logs should be written. 
+              Logs file names will be of the format ${logsBucket}/log-${build_id}.txt.
           - !ruby/object:Api::Type::String
             name: 'timeout'
             description: |
@@ -255,6 +358,24 @@ objects:
               The expected format is the number of seconds followed by s.
               Default time is ten minutes (600s).
             default_value: '600s'
+          - !ruby/object:Api::Type::Array
+            name: 'secrets'
+            description: |
+              Secrets to decrypt using Cloud Key Management Service.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'kmsKeyName'
+                  required: true
+                  description: |
+                    Cloud KMS key name to use to decrypt these envs.
+                - !ruby/object:Api::Type::KeyValuePairs
+                  name: 'secretEnv'
+                  description: |
+                    Map of environment variable name to its encrypted value.
+                    Secret environment variables must be unique across all of a build's secrets, 
+                    and must be used by at least one build step. Values can be at most 64 KB in size. 
+                    There can be at most 100 secret values across all of a build's secrets.
           - !ruby/object:Api::Type::Array
             name: 'steps'
             required: true
