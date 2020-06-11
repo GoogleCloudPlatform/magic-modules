@@ -26,8 +26,8 @@ apis_required:
     url: https://console.cloud.google.com/apis/api/notebooks.googleapis.com
 async: !ruby/object:Api::OpAsync
     operation: !ruby/object:Api::OpAsync::Operation
+      base_url: '{{op_id}}'
       path: 'name'
-      base_url: 'projects/{{project}}/locations/{{location}}/operations/{{op_id}}'
       wait_ms: 1000
     result: !ruby/object:Api::OpAsync::Result
       path: 'response'
