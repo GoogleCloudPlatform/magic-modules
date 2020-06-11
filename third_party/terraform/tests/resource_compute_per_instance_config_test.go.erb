@@ -73,7 +73,6 @@ func TestAccComputePerInstanceConfig_statefulBasic(t *testing.T) {
 				Config: testAccComputePerInstanceConfig_igm(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputePerInstanceConfigDestroyed(t, igmId, context["config_name2"].(string)),
-					testAccCheckComputePerInstanceConfigDestroyed(t, igmId, context["config_name3"].(string)),
 					testAccCheckComputePerInstanceConfigDestroyed(t, igmId, context["config_name4"].(string)),
 				),
 			},
@@ -87,6 +86,7 @@ resource "google_compute_per_instance_config" "default" {
 	zone = google_compute_instance_group_manager.igm.zone
 	instance_group_manager = google_compute_instance_group_manager.igm.name
 	name = "%{config_name}"
+	remove_instance_state_on_destroy = true
 	preserved_state {
 		metadata = {
 			asdf = "asdf"
@@ -102,6 +102,7 @@ resource "google_compute_per_instance_config" "default" {
 	zone = google_compute_instance_group_manager.igm.zone
 	instance_group_manager = google_compute_instance_group_manager.igm.name
 	name = "%{config_name2}"
+	remove_instance_state_on_destroy = true
 	preserved_state {
 		metadata = {
 			asdf = "asdf"
@@ -117,6 +118,7 @@ resource "google_compute_per_instance_config" "default" {
 	zone = google_compute_instance_group_manager.igm.zone
 	instance_group_manager = google_compute_instance_group_manager.igm.name
 	name = "%{config_name2}"
+	remove_instance_state_on_destroy = true
 	preserved_state {
 		metadata = {
 			asdf = "asdf"
@@ -156,6 +158,7 @@ resource "google_compute_per_instance_config" "add2" {
 	zone = google_compute_instance_group_manager.igm.zone
 	instance_group_manager = google_compute_instance_group_manager.igm.name
 	name = "%{config_name4}"
+	remove_instance_state_on_destroy = true
 	preserved_state {
 		metadata = {
 			foo = "abc"

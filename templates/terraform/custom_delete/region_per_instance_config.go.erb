@@ -1,0 +1,69 @@
+	config := meta.(*Config)
+
+	project, err := getProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	lockName, err := replaceVars(d, config, "instangeGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}")
+	if err != nil {
+		return err
+	}
+	mutexKV.Lock(lockName)
+	defer mutexKV.Unlock(lockName)
+
+	url, err := replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/deletePerInstanceConfigs")
+	if err != nil {
+		return err
+	}
+
+	var obj map[string]interface{}
+	obj = map[string]interface{}{
+		"names": [1]string{d.Get("name").(string)},
+	}
+	log.Printf("[DEBUG] Deleting RegionPerInstanceConfig %q", d.Id())
+
+	res, err := sendRequestWithTimeout(config, "POST", project, url, obj, d.Timeout(schema.TimeoutDelete))
+	if err != nil {
+		return handleNotFoundError(err, d, "RegionPerInstanceConfig")
+	}
+
+	err = computeOperationWaitTime(
+		config, res, project, "Deleting RegionPerInstanceConfig",
+		d.Timeout(schema.TimeoutDelete))
+
+	if err != nil {
+		return err
+	}
+
+	// Potentially delete the state managed by this config
+	if d.Get("remove_instance_state_on_destroy").(bool) {
+		// Instance name in applyUpdatesToInstances request must include region
+		instanceName, err := replaceVars(d, config, "regoins/{{region}}/instances/{{name}}")
+		if err != nil {
+			return err
+		}
+
+		obj = make(map[string]interface{})
+		obj["instances"] = []string{instanceName}
+
+		// Updates must be applied to the instance after deleting the PerInstanceConfig
+		url, err = replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/applyUpdatesToInstances")
+		if err != nil {
+			return err
+		}
+
+		log.Printf("[DEBUG] Applying updates to PerInstanceConfig %q: %#v", d.Id(), obj)
+		res, err = sendRequestWithTimeout(config, "POST", project, url, obj, d.Timeout(schema.TimeoutUpdate))
+
+		if err != nil {
+			return fmt.Errorf("Error updating PerInstanceConfig %q: %s", d.Id(), err)
+		}
+
+		err = computeOperationWaitTime(
+			config, res, project, "Applying update to PerInstanceConfig",
+			d.Timeout(schema.TimeoutUpdate))
+	}
+
+	log.Printf("[DEBUG] Finished deleting RegionPerInstanceConfig %q: %#v", d.Id(), res)
+	return nil

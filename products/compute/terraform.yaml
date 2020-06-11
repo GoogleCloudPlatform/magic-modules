@@ -1323,11 +1323,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - :REFRESH
           - :NONE
         default_value: :REPLACE
+      - !ruby/object:Api::Type::Boolean
+        name: 'remove_instance_state_on_destroy'
+        description: |
+          When true, deleting this config will immediately remove any specified state from the underlying instance.
+          When false, deleting this config will *not* immediately remove any state from the underlying instance.
+          State will be removed on the next instance recreation or update.
+        default_value: false
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/compute_per_instance_config.go.erb
       update_encoder: templates/terraform/update_encoder/compute_per_instance_config.go.erb
       pre_delete: templates/terraform/pre_delete/compute_per_instance_config.go.erb
       post_update: templates/terraform/post_update/compute_per_instance_config.go.erb
+      custom_delete: templates/terraform/custom_delete/per_instance_config.go.erb
   RegionPerInstanceConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{region}}/{{region_instance_group_manager}}/{{name}}"
     mutex: instangeGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}
@@ -1387,7 +1395,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       update_encoder: templates/terraform/update_encoder/compute_per_instance_config.go.erb
       pre_delete: templates/terraform/pre_delete/compute_per_instance_config.go.erb
       post_update: templates/terraform/post_update/compute_region_per_instance_config.go.erb
-
+      custom_delete: templates/terraform/custom_delete/region_per_instance_config.go.erb
   ProjectInfo: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Terraform::ResourceOverride
