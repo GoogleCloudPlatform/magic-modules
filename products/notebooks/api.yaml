@@ -68,6 +68,13 @@ objects:
         url_param_only: true
         pattern: projects/{{project}}/locations/{{location}}/environments/{{name}}
       - !ruby/object:Api::Type::String
+        name: 'location'
+        description: |
+          Location of Instance
+        required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
         name: 'displayName'
         description: |
             Display name of this environment for the UI.

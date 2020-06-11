@@ -35,6 +35,7 @@ func testAccNotebooksEnvironment_create(name string) string {
 
 resource "google_notebooks_environment" "test" {
   name = "%s"
+  location = "us-west1-a"
   container_image {
     repository = "gcr.io/deeplearning-platform-release/base-cpu"
   }  

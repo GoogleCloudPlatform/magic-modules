@@ -7,11 +7,6 @@ resource "google_notebooks_instance" "<%= ctx[:primary_resource_id] %>" {
     project      = "deeplearning-platform-release"
     image_family = "tf2-latest-gpu"
   }
-  
-  accelerator_config {
-    type = "NVIDIA_TESLA_T4"
-    core_count = 1
-  }
   install_gpu_driver = true
 
 }
