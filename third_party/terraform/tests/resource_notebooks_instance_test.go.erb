@@ -46,11 +46,11 @@ func testAccNotebooksInstance_update(name string) string {
 resource "google_notebooks_instance" "test" {
   name = "%s"
   location = "us-west1-a"
+  machine_type = "n1-standard-1"
   vm_image {
     project      = "deeplearning-platform-release"
     image_family = "tf2-ent-latest-cpu"
-  }
-  node_count = 1
+  }  
 }
 `, name)
 }
@@ -62,6 +62,7 @@ func testAccNotebooksInstance_update_gpu(name string) string {
 resource "google_notebooks_instance" "test" {
   name = "%s"
   location = "us-west1-a"
+  machine_type = "n1-standard-1"
   vm_image {
     project      = "deeplearning-platform-release"
     image_family = "tf2-ent-latest-gpu"
@@ -69,8 +70,7 @@ resource "google_notebooks_instance" "test" {
   accelerator_config {
     type = "NVIDIA_TESLA_T4"
     core_count = 1
-  }
-  node_count = 2
+  }  
 }
 `,name)
 }
