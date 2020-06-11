@@ -152,6 +152,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       spec.template.spec.containerConcurrency: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      spec.template.spec.timeoutSeconds: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       spec.template.spec.containers: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       spec.template.spec.containers.resources: !ruby/object:Overrides::Terraform::PropertyOverride
