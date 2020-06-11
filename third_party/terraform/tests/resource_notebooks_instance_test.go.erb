@@ -16,7 +16,6 @@ func TestAccNotebooksInstance_create(t *testing.T) {
 	name := fmt.Sprintf("tf-test-%s", prefix)
 
 	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{

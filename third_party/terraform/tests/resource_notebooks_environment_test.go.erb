@@ -16,7 +16,6 @@ func TestAccNotebooksEnvironment_create(t *testing.T) {
   name := fmt.Sprintf("tf-env-test-%s", prefix)
 
   vcrTest(t, resource.TestCase{
-    PreCheck:     func() { testAccPreCheck(t) },
     Providers:    testAccProviders,
     Steps: []resource.TestStep{
       {
@@ -36,9 +35,8 @@ func testAccNotebooksEnvironment_create(name string) string {
 
 resource "google_notebooks_environment" "test" {
   name = "%s"
-  location = "us-west1-a" 
   container_image {
-    name = "gcr.io/deeplearning-platform-release/base-cpu"
+    repository = "gcr.io/deeplearning-platform-release/base-cpu"
   }  
 }
 `, name)
