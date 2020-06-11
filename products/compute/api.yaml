@@ -122,6 +122,7 @@ objects:
         required: true
       - !ruby/object:Api::Type::Enum
         name: purpose
+        exact_version: ga
         description: |
           The purpose of this resource, which can be one of the following values:
 
@@ -130,6 +131,17 @@ objects:
           This should only be set when using an Internal address.
         values:
           - :GCE_ENDPOINT
+      - !ruby/object:Api::Type::Enum
+        name: purpose
+        exact_version: beta
+        description: |
+          The purpose of this resource, which can be one of the following values:
+          - GCE_ENDPOINT for addresses that are used by VM instances, alias IP ranges, internal load balancers, and similar resources.
+          This should only be set when using an Internal address.
+          - SHARED_LOADBALANCER_VIP for address that can be used by multiple internal load balancers
+        values:
+          - :GCE_ENDPOINT
+          - :SHARED_LOADBALANCER_VIP
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
         description: |
