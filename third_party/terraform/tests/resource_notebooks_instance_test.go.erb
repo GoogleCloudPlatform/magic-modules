@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-func TestAccNotebooksInstance_update(t *testing.T) {
+func TestAccNotebooksInstance_create(t *testing.T) {
 	t.Parallel()
 
 	prefix := fmt.Sprintf("%d", randInt(t))
@@ -18,10 +18,9 @@ func TestAccNotebooksInstance_update(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNotebooksInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNotebooksInstance_update(name),
+				Config: testAccNotebooksInstance_create(name),
 			},
 			{
 				ResourceName:      "google_notebooks_instance.test",
@@ -32,7 +31,7 @@ func TestAccNotebooksInstance_update(t *testing.T) {
 	})
 }
 
-func testAccNotebooksInstance_update(name string) string {
+func testAccNotebooksInstance_create(name string) string {
 	return fmt.Sprintf(`
 
 resource "google_notebooks_instance" "test" {
