@@ -47,8 +47,8 @@ objects:
     name: 'Environment'
     min_version: beta
     base_url: projects/{{project}}/locations/{{location}}/environments
-    self_link: projects/{{project}}/locations/{{location}}/environments/{{name}}
     create_url: projects/{{project}}/locations/{{location}}/environments?environmentId={{name}}
+    self_link: projects/{{project}}/locations/{{location}}/environments/{{name}}
     create_verb: :POST
     description: |
       A Cloud AI Platform Notebook environment.
@@ -63,7 +63,10 @@ objects:
         description: |
             The name specified for the Environment instance.
             Format: projects/{project_id}/locations/{location}/environments/{environmentId}
-        output: true
+        required: true
+        input: true
+        url_param_only: true
+        pattern: projects/{{project}}/locations/{{location}}/environments/{{name}}
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: |

@@ -28,14 +28,6 @@ func TestAccNotebooksInstance_update(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				Config: testAccNotebooksInstance_update_gpu(name),
-			},
-			{
-				ResourceName:      "google_notebooks_instance.test",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 		},
 	})
 }
@@ -55,23 +47,4 @@ resource "google_notebooks_instance" "test" {
 `, name)
 }
 
-
-func testAccNotebooksInstance_update_gpu(name string) string {
-	return fmt.Sprintf(`
-
-resource "google_notebooks_instance" "test" {
-  name = "%s"
-  location = "us-west1-a"
-  machine_type = "n1-standard-1"
-  vm_image {
-    project      = "deeplearning-platform-release"
-    image_family = "tf2-ent-latest-gpu"
-  }
-  accelerator_config {
-    type = "NVIDIA_TESLA_T4"
-    core_count = 1
-  }  
-}
-`,name)
-}
 <% end -%>

@@ -1,0 +1,48 @@
+<% autogen_exception -%>
+package google
+
+<% unless version == 'ga' %>
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+)
+
+func TestAccNotebooksEnvironment_update(t *testing.T) {
+  t.Parallel()
+
+  prefix := fmt.Sprintf("%d", randInt(t))
+  name := fmt.Sprintf("tf-env-test-%s", prefix)
+
+  vcrTest(t, resource.TestCase{
+    PreCheck:     func() { testAccPreCheck(t) },
+    Providers:    testAccProviders,
+    CheckDestroy: testAccCheckNotebooksEnvironmentDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: TestAccNotebooksEnvironment_update(name),
+      },
+      {
+        ResourceName:      "google_notebooks_environment.test",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
+}
+
+func TestAccNotebooksEnvironment_update(name string) string {
+  return fmt.Sprintf(`
+
+resource "google_notebooks_environment" "test" {
+  name = "%s"
+  location = "us-west1-a" 
+  container_image {
+    name = "gcr.io/deeplearning-platform-release/base-cpu"
+  }  
+}
+`, name)
+}
+
+<% end -%>
