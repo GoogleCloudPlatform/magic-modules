@@ -45,13 +45,13 @@ objects:
   # Notebooks Environment         
   - !ruby/object:Api::Resource
     name: 'Environment'
+    description: |
+        A Cloud AI Platform Notebook environment.
     min_version: beta
     base_url: projects/{{project}}/locations/{{location}}/environments
     create_url: projects/{{project}}/locations/{{location}}/environments?environmentId={{name}}
     self_link: projects/{{project}}/locations/{{location}}/environments/{{name}}
-    create_verb: :POST
-    description: |
-      A Cloud AI Platform Notebook environment.
+    create_verb: :POST    
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -67,12 +67,13 @@ objects:
         input: true
         url_param_only: true
         pattern: projects/{{project}}/locations/{{location}}/environments/{{name}}
-      - !ruby/object:Api::Type::ResourceRef
+            - !ruby/object:Api::Type::String
         name: 'location'
-        resource: 'Location'
-        imports: 'name'
-        description: 'A reference to the location where the machine resides.'
-        required: true
+        description: |
+          Location of Instance
+        input: true
+        required: true        
+        url_param_only: true
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: |
@@ -133,6 +134,8 @@ objects:
   # Notebooks Instance
   - !ruby/object:Api::Resource
     name: 'Instance'
+    description: |
+        A Cloud AI Platform Notebook instance.
     min_version: beta
     base_url: projects/{{project}}/locations/{{location}}/instances
     create_url: projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}
@@ -140,20 +143,19 @@ objects:
     create_verb: :POST
     update_verb: :PATCH
     update_mask: true
-    description: |
-      A Cloud AI Platform Notebook instance.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
           'https://cloud.google.com/ai-platform-notebooks'
       api: 'https://cloud.google.com/ai-platform/notebooks/docs/reference/rest'
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::String
         name: 'location'
-        resource: 'Location'
-        imports: 'name'
-        description: 'A reference to the location where the machine resides.'
-        required: true
+        description: |
+          Location of Instance
+        input: true
+        required: true        
+        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -368,12 +370,19 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'tag'
             description: |
-                The tag of the container image. If not specified, this defaults to the latest tag.
+                The tag of the container image. If not specified, this defaults to the latest tag.  
   # Notebooks Location (Compute Zone)
-  - !ruby/object:Api::Resource
-    name: 'Location'   
-    readonly: true
+  - !ruby/object:Api::Resource    
+    name: 'Location'
     description: 'Represents a Location resource.'
+    base_url: projects/{{project}}/locations/
+    self_link: projects/{{project}}/locations/{{name}}
+    readonly: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/ai-platform-notebooks'
+      api: 'https://cloud.google.com/ai-platform/notebooks/docs/reference/rest'
     properties:      
       - !ruby/object:Api::Type::String
         name: 'name'
