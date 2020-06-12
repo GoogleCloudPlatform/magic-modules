@@ -371,11 +371,10 @@ objects:
                 The tag of the container image. If not specified, this defaults to the latest tag.
   # Notebooks Location (Compute Zone)
   - !ruby/object:Api::Resource
-    name: 'Location'
-    kind: 'compute#zone'    
+    name: 'Location'   
     readonly: true
     description: 'Represents a Location resource.'
     properties:      
       - !ruby/object:Api::Type::String
         name: 'name'
-        description: 'Name of the resource.'
+        description: 'Name of the location resource.'
