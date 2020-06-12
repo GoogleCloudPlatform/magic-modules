@@ -32,7 +32,7 @@ async: !ruby/object:Api::OpAsync
     result: !ruby/object:Api::OpAsync::Result
       path: 'response'
       resource_inside_response: true
-    status: !ruby/object:Api::OpAsync::Status        
+    status: !ruby/object:Api::OpAsync::Status
       path: 'done'
       complete: True
       allowed:
@@ -369,16 +369,13 @@ objects:
             name: 'tag'
             description: |
                 The tag of the container image. If not specified, this defaults to the latest tag.
-  # Compute Zone (Location)
+  # Notebooks Location (Compute Zone)
   - !ruby/object:Api::Resource
     name: 'Location'
-    kind: 'compute#zone'
-    base_url: projects/{{project}}/locations
-    collection_url_key: 'items'
-    has_self_link: true
+    kind: 'compute#zone'    
     readonly: true
     description: 'Represents a Location resource.'
     properties:      
       - !ruby/object:Api::Type::String
         name: 'name'
-        description: 'Name of the resource.'                
+        description: 'Name of the resource.'
