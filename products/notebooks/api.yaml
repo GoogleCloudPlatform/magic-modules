@@ -67,13 +67,12 @@ objects:
         input: true
         url_param_only: true
         pattern: projects/{{project}}/locations/{{location}}/environments/{{name}}
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: 'location'
-        description: |
-          Location of Instance
+        resource: 'Location'
+        imports: 'name'
+        description: 'A reference to the location where the machine resides.'
         required: true
-        input: true
-        url_param_only: true
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: |
@@ -131,268 +130,6 @@ objects:
             name: 'tag'
             description: |
                 The tag of the container image. If not specified, this defaults to the latest tag. 
-  # Machine Type
-  - !ruby/object:Api::Resource
-    name: 'MachineType'
-    kind: 'compute#machineType'
-    base_url: projects/{{project}}/zones/{{zone}}/machineTypes
-    collection_url_key: 'items'
-    has_self_link: true
-    readonly: true
-    description: |
-      Represents a MachineType resource. Machine types determine the virtualized
-      hardware specifications of your virtual machine instances, such as the
-      amount of memory or number of virtual CPUs.
-    properties:
-      - !ruby/object:Api::Type::Time
-        name: 'creationTimestamp'
-        description: 'Creation timestamp in RFC3339 text format.'
-        output: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'deprecated'
-        description: 'The deprecation status associated with this machine type.'
-        properties:
-          - !ruby/object:Api::Type::Time
-            name: 'deleted'
-            description: |
-              An optional RFC3339 timestamp on or after which the state of this
-              resource is intended to change to DELETED. This is only
-              informational and the status will not change unless the client
-              explicitly changes it.
-            output: true
-          - !ruby/object:Api::Type::Time
-            name: 'deprecated'
-            description: |
-              An optional RFC3339 timestamp on or after which the state of this
-              resource is intended to change to DEPRECATED. This is only
-              informational and the status will not change unless the client
-              explicitly changes it.
-            output: true
-          - !ruby/object:Api::Type::Time
-            name: 'obsolete'
-            description: |
-              An optional RFC3339 timestamp on or after which the state of this
-              resource is intended to change to OBSOLETE. This is only
-              informational and the status will not change unless the client
-              explicitly changes it.
-            output: true
-          - !ruby/object:Api::Type::String
-            name: 'replacement'
-            description: |
-              The URL of the suggested replacement for a deprecated resource.
-              The suggested replacement resource must be the same kind of
-              resource as the deprecated resource.
-            output: true
-          - !ruby/object:Api::Type::Enum
-            name: 'state'
-            description: |
-              The deprecation state of this resource. This can be DEPRECATED,
-              OBSOLETE, or DELETED. Operations which create a new resource
-              using a DEPRECATED resource will return successfully, but with a
-              warning indicating the deprecated resource and recommending its
-              replacement. Operations which use OBSOLETE or DELETED resources
-              will be rejected and result in an error.
-            values:
-              - :DEPRECATED
-              - :OBSOLETE
-              - :DELETED
-            output: true
-        output: true
-      - !ruby/object:Api::Type::String
-        name: 'description'
-        description: 'An optional textual description of the resource.'
-        output: true
-      - !ruby/object:Api::Type::Integer
-        name: 'guestCpus'
-        description: |
-          The number of virtual CPUs that are available to the instance.
-        output: true
-      - !ruby/object:Api::Type::Integer
-        name: 'id'
-        description: 'The unique identifier for the resource.'
-        output: true
-      - !ruby/object:Api::Type::Boolean
-        name: 'isSharedCpu'
-        description: |
-          Whether this machine type has a shared CPU. See Shared-core machine
-          types for more information.
-        output: true
-      - !ruby/object:Api::Type::Integer
-        name: 'maximumPersistentDisks'
-        description: 'Maximum persistent disks allowed.'
-        output: true
-      - !ruby/object:Api::Type::Integer
-        name: 'maximumPersistentDisksSizeGb'
-        description: 'Maximum total persistent disks size (GB) allowed.'
-        output: true
-      - !ruby/object:Api::Type::Integer
-        name: 'memoryMb'
-        description: |
-          The amount of physical memory available to the instance, defined in
-          MB.
-        output: true
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        description: 'Name of the resource.'
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'zone'
-        resource: 'Zone'
-        imports: 'name'
-        description: 'The zone the machine type is defined.'
-        required: true
-  # Region
-  - !ruby/object:Api::Resource
-    name: 'Region'
-    kind: 'compute#region'
-    base_url: projects/{{project}}/regions
-    collection_url_key: 'items'
-    has_self_link: true
-    readonly: true
-    description: |
-      Represents a Region resource. A region is a specific geographical
-      location where you can run your resources. Each region has one or more
-      zones
-    properties:
-      - !ruby/object:Api::Type::Time
-        name: 'creationTimestamp'
-        description: 'Creation timestamp in RFC3339 text format.'
-        output: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'deprecated'
-        description: 'The deprecation state of this resource.'
-        output: true
-        properties:
-          - !ruby/object:Api::Type::Time
-            name: 'deleted'
-            description: |
-              An optional RFC3339 timestamp on or after which the deprecation state
-              of this resource will be changed to DELETED.
-          - !ruby/object:Api::Type::Time
-            name: 'deprecated'
-            description: |
-              An optional RFC3339 timestamp on or after which the deprecation state
-              of this resource will be changed to DEPRECATED.
-            output: true
-          - !ruby/object:Api::Type::Time
-            name: 'obsolete'
-            description: |
-              An optional RFC3339 timestamp on or after which the deprecation state
-              of this resource will be changed to OBSOLETE.
-            output: true
-          - !ruby/object:Api::Type::String
-            name: 'replacement'
-            description: |
-              The URL of the suggested replacement for a deprecated resource. The
-              suggested replacement resource must be the same kind of resource as
-              the deprecated resource.
-            output: true
-          - !ruby/object:Api::Type::Enum
-            name: 'state'
-            description: |
-              The deprecation state of this resource. This can be DEPRECATED,
-              OBSOLETE, or DELETED. Operations which create a new resource using a
-              DEPRECATED resource will return successfully, but with a warning
-              indicating the deprecated resource and recommending its replacement.
-              Operations which use OBSOLETE or DELETED resources will be rejected
-              and result in an error.
-            values:
-              - :DEPRECATED
-              - :OBSOLETE
-              - :DELETED
-            output: true
-  # Zone
-  - !ruby/object:Api::Resource
-    name: 'Zone'
-    kind: 'compute#zone'
-    base_url: projects/{{project}}/zones
-    collection_url_key: 'items'
-    has_self_link: true
-    readonly: true
-    description: 'Represents a Zone resource.'
-    properties:
-      - !ruby/object:Api::Type::Time
-        name: 'creationTimestamp'
-        description: 'Creation timestamp in RFC3339 text format.'
-        output: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'deprecated'
-        description: 'The deprecation status associated with this machine type.'
-        properties:
-          - !ruby/object:Api::Type::Time
-            name: 'deleted'
-            description: |
-              An optional RFC3339 timestamp on or after which the state of this
-              resource is intended to change to DELETED. This is only
-              informational and the status will not change unless the client
-              explicitly changes it.
-            output: true
-          - !ruby/object:Api::Type::Time
-            name: 'deprecated'
-            description: |
-              An optional RFC3339 timestamp on or after which the state of this
-              resource is intended to change to DEPRECATED. This is only
-              informational and the status will not change unless the client
-              explicitly changes it.
-            output: true
-          - !ruby/object:Api::Type::Time
-            name: 'obsolete'
-            description: |
-              An optional RFC3339 timestamp on or after which the state of this
-              resource is intended to change to OBSOLETE. This is only
-              informational and the status will not change unless the client
-              explicitly changes it.
-            output: true
-          - !ruby/object:Api::Type::String
-            name: 'replacement'
-            description: |
-              The URL of the suggested replacement for a deprecated resource.
-              The suggested replacement resource must be the same kind of
-              resource as the deprecated resource.
-            output: true
-          - !ruby/object:Api::Type::Enum
-            name: 'state'
-            description: |
-              The deprecation state of this resource. This can be DEPRECATED,
-              OBSOLETE, or DELETED. Operations which create a new resource
-              using a DEPRECATED resource will return successfully, but with a
-              warning indicating the deprecated resource and recommending its
-              replacement. Operations which use OBSOLETE or DELETED resources
-              will be rejected and result in an error.
-            values:
-              - :DEPRECATED
-              - :OBSOLETE
-              - :DELETED
-            output: true
-        output: true
-      - !ruby/object:Api::Type::String
-        name: 'description'
-        description: 'An optional textual description of the resource.'
-        output: true
-      - !ruby/object:Api::Type::Integer
-        name: 'id'
-        description: 'The unique identifier for the resource.'
-        output: true
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        description: 'Name of the resource.'
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'region'
-        resource: 'Region'
-        imports: 'selfLink'
-        description: 'The region where the zone is located.'
-        output: true
-      - !ruby/object:Api::Type::Enum
-        name: 'status'
-        description: 'The status of the zone.'
-        values:
-          - :UP
-          - :DOWN
-        output: true
-      - !ruby/object:Api::Type::Array
-        name: 'availableCpuPlatforms'
-        description: 'The available CPU platforms in this zone'
-        item_type: Api::Type::String
-        output: true
   # Notebooks Instance
   - !ruby/object:Api::Resource
     name: 'Instance'
@@ -411,13 +148,12 @@ objects:
           'https://cloud.google.com/ai-platform-notebooks'
       api: 'https://cloud.google.com/ai-platform/notebooks/docs/reference/rest'
     parameters:
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: 'location'
-        description: |
-          Location of Instance
+        resource: 'Location'
+        imports: 'name'
+        description: 'A reference to the location where the machine resides.'
         required: true
-        input: true
-        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -427,6 +163,10 @@ objects:
         input: true
         url_param_only: true
         pattern: projects/{{project}}/locations/{{location}}/instances/{{name}}
+      - !ruby/object:Api::Type::String
+        name: 'machineType'        
+        description: |
+            The Compute Engine machine type of this instance.
       - !ruby/object:Api::Type::String
         name: 'postStartupScript'
         description: |
@@ -453,13 +193,7 @@ objects:
             Google Cloud services. You can use any service account within 
             the same project, but you must have the service account user 
             permission to use the instance. If not specified, 
-            the Compute Engine default service account is used.
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'machineType'
-        resource: 'MachineType'
-        imports: 'selfLink'
-        description: |
-            The Compute Engine machine type of this instance.
+            the Compute Engine default service account is used.      
       - !ruby/object:Api::Type::Array
         name: 'acceleratorConfig'
         description: |
@@ -635,3 +369,16 @@ objects:
             name: 'tag'
             description: |
                 The tag of the container image. If not specified, this defaults to the latest tag.
+  # Compute Zone (Location)
+  - !ruby/object:Api::Resource
+    name: 'Location'
+    kind: 'compute#zone'
+    base_url: projects/{{project}}/locations
+    collection_url_key: 'items'
+    has_self_link: true
+    readonly: true
+    description: 'Represents a Location resource.'
+    properties:      
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the resource.'                
