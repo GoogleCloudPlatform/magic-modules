@@ -395,7 +395,6 @@ objects:
     kind: 'compute#zone'
     base_url: projects/{{project}}/locations
     collection_url_key: 'items'
-    has_self_link: true
     readonly: true
     description: 'Represents a Location resource.'
     properties:      
