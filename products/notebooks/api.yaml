@@ -73,7 +73,6 @@ objects:
         imports: 'name'
         description: 'A reference to the zone where the machine resides.'
         required: true
-        url_param_only: true
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: |
@@ -155,7 +154,6 @@ objects:
         imports: 'name'
         description: 'A reference to the zone where the machine resides.'
         required: true
-        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

@@ -13,6 +13,12 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Environment: !ruby/object:Overrides::Terraform::ResourceOverride
+    properties:
+      location: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb 
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 20
@@ -26,9 +32,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "instance"
         vars:
           instance_name: "test-instance"
+    parameters:
+      location: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'         
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
