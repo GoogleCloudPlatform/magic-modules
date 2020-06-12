@@ -67,13 +67,12 @@ objects:
         input: true
         url_param_only: true
         pattern: projects/{{project}}/locations/{{location}}/environments/{{name}}
-            - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: 'location'
-        description: |
-          Location of Instance
-        input: true
-        required: true        
-        url_param_only: true
+        resource: 'Location'
+        imports: 'name'
+        description: 'A reference to the zone where the machine resides.'
+        required: true
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: |
@@ -149,13 +148,12 @@ objects:
           'https://cloud.google.com/ai-platform-notebooks'
       api: 'https://cloud.google.com/ai-platform/notebooks/docs/reference/rest'
     parameters:
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: 'location'
-        description: |
-          Location of Instance
-        input: true
-        required: true        
-        url_param_only: true
+        resource: 'Location'
+        imports: 'name'
+        description: 'A reference to the zone where the machine resides.'
+        required: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -165,10 +163,11 @@ objects:
         input: true
         url_param_only: true
         pattern: projects/{{project}}/locations/{{location}}/instances/{{name}}
-      - !ruby/object:Api::Type::String
-        name: 'machineType'        
-        description: |
-            The Compute Engine machine type of this instance.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'machineType'
+        resource: 'MachineType'
+        imports: 'selfLink'
+        description: 'A reference to a machine type which defines VM kind.'
       - !ruby/object:Api::Type::String
         name: 'postStartupScript'
         description: |
@@ -344,7 +343,7 @@ objects:
             description: |
                 The name of the Google Cloud project that this VM image belongs to. 
                 Format: projects/{project_id}
-            required: true                
+            required: true
           - !ruby/object:Api::Type::String
             name: 'imageName'
             description: |
@@ -366,24 +365,40 @@ objects:
             description: |
                The path to the container image repository. 
                For example: gcr.io/{project_id}/{imageName}
-            required: true                
+            required: true
           - !ruby/object:Api::Type::String
             name: 'tag'
             description: |
-                The tag of the container image. If not specified, this defaults to the latest tag.  
-  # Notebooks Location (Compute Zone)
-  - !ruby/object:Api::Resource    
+                The tag of the container image. If not specified, this defaults to the latest tag.
+  # Machine Type
+  - !ruby/object:Api::Resource
+    name: 'MachineType'
+    kind: 'compute#machineType'
+    base_url: projects/{{project}}/zones/{{zone}}/machineTypes
+    has_self_link: true
+    description: |
+      Represents a MachineType resource. Machine types determine the virtualized
+      hardware specifications of your virtual machine instances, such as the
+      amount of memory or number of virtual CPUs.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the resource.'
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'zone'
+        resource: 'Location'
+        imports: 'name'
+        description: 'The zone the machine type is defined.' 
+  # Compute Zone (Location)
+  - !ruby/object:Api::Resource
     name: 'Location'
-    description: 'Represents a Location resource.'
-    base_url: projects/{{project}}/locations/
-    self_link: projects/{{project}}/locations/{{name}}
+    kind: 'compute#zone'
+    base_url: projects/{{project}}/locations
+    collection_url_key: 'items'
+    has_self_link: true
     readonly: true
-    references: !ruby/object:Api::Resource::ReferenceLinks
-      guides:
-        'Official Documentation':
-          'https://cloud.google.com/ai-platform-notebooks'
-      api: 'https://cloud.google.com/ai-platform/notebooks/docs/reference/rest'
+    description: 'Represents a Location resource.'
     properties:      
       - !ruby/object:Api::Type::String
         name: 'name'
-        description: 'Name of the location resource.'
+        description: 'Name of the resource.'
