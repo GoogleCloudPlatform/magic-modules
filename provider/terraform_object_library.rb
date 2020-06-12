@@ -116,7 +116,7 @@ module Provider
                        ['google/compute_shared_operation.go',
                         'third_party/terraform/utils/compute_shared_operation.go'],
                        ['google/compute_instance_helpers.go',
-                        'third_party/terraform/utils/compute_instance_helpers.go'],
+                        'third_party/terraform/utils/compute_instance_helpers.go.erb'],
                        ['google/convert.go',
                         'third_party/terraform/utils/convert.go'],
                        ['google/metadata.go',
