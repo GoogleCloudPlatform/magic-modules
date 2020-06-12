@@ -384,6 +384,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: 'Name of the resource.'
+        url_param_only: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
         resource: 'Location'
@@ -401,3 +402,4 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: 'Name of the resource.'
+        url_param_only: true
