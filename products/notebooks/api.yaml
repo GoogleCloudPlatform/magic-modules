@@ -73,6 +73,7 @@ objects:
         imports: 'name'
         description: 'A reference to the zone where the machine resides.'
         required: true
+        url_param_only: true
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: |
@@ -154,6 +155,7 @@ objects:
         imports: 'name'
         description: 'A reference to the zone where the machine resides.'
         required: true
+        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -168,6 +170,7 @@ objects:
         resource: 'MachineType'
         imports: 'selfLink'
         description: 'A reference to a machine type which defines VM kind.'
+        url_param_only: true
       - !ruby/object:Api::Type::String
         name: 'postStartupScript'
         description: |
@@ -384,7 +387,6 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: 'Name of the resource.'
-        url_param_only: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
         resource: 'Location'
@@ -402,4 +404,3 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: 'Name of the resource.'
-        url_param_only: true
