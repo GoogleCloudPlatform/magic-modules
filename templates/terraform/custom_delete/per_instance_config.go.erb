@@ -5,7 +5,7 @@
 		return err
 	}
 
-	lockName, err := replaceVars(d, config, "instangeGroupManager/{{project}}/{{zone}}/{{instance_group_manager}}")
+	lockName, err := replaceVars(d, config, "instanceGroupManager/{{project}}/{{zone}}/{{instance_group_manager}}")
 	if err != nil {
 		return err
 	}
@@ -57,12 +57,21 @@
 		res, err = sendRequestWithTimeout(config, "POST", project, url, obj, d.Timeout(schema.TimeoutUpdate))
 
 		if err != nil {
-			return fmt.Errorf("Error updating PerInstanceConfig %q: %s", d.Id(), err)
+			return fmt.Errorf("Error deleting PerInstanceConfig %q: %s", d.Id(), err)
 		}
 
 		err = computeOperationWaitTime(
 			config, res, project, "Applying update to PerInstanceConfig",
 			d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return fmt.Errorf("Error deleting PerInstanceConfig %q: %s", d.Id(), err)
+		}
+
+		// PerInstanceConfig goes into "DELETING" state while the instance is actually deleted
+		err = PollingWaitTime(resourceComputePerInstanceConfigPollRead(d, meta), PollCheckInstanceConfigDeleted, "Deleting PerInstanceConfig", d.Timeout(schema.TimeoutDelete))
+		if err != nil {
+			return fmt.Errorf("Error waiting for delete on PerInstanceConfig %q: %s", d.Id(), err)
+		}		
 	}
 
 	log.Printf("[DEBUG] Finished deleting PerInstanceConfig %q: %#v", d.Id(), res)
