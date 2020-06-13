@@ -69,9 +69,10 @@ objects:
         pattern: projects/{{project}}/locations/{{location}}/environments/{{name}}
       - !ruby/object:Api::Type::ResourceRef
         name: 'location'
+        description: 'A reference to the zone where the machine resides.'
         resource: 'Location'
         imports: 'name'
-        description: 'A reference to the zone where the machine resides.'
+        input: true
         required: true
       - !ruby/object:Api::Type::String
         name: 'displayName'
@@ -150,9 +151,10 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'location'
+        description: 'A reference to the zone where the machine resides.'
         resource: 'Location'
         imports: 'name'
-        description: 'A reference to the zone where the machine resides.'
+        input: true
         required: true
     properties:
       - !ruby/object:Api::Type::String
