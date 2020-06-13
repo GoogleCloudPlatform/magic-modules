@@ -32,11 +32,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "instance"
         vars:
           instance_name: "test-instance"
-    parameters:
-      location: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
-        custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
-        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
