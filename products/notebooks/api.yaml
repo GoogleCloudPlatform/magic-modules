@@ -156,7 +156,6 @@ objects:
         imports: 'name'
         required: true
         input: true
-        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
