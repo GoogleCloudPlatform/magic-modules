@@ -1,3 +1,5 @@
+// <% autogen_exception -%>
+
 package google
 
 import (
@@ -42,6 +44,9 @@ var (
 		"scheduling.0.automatic_restart",
 		"scheduling.0.preemptible",
 		"scheduling.0.node_affinities",
+<% unless version == 'ga' -%>
+		"scheduling.0.min_node_cpus",
+<% end -%>
 	}
 
 	shieldedInstanceConfigKeys = []string{
@@ -458,6 +463,13 @@ func resourceComputeInstance() *schema.Resource {
 							Elem:             instanceSchedulingNodeAffinitiesElemSchema(),
 							DiffSuppressFunc: emptyOrDefaultStringSuppress(""),
 						},
+<% unless version == 'ga' -%>
+						"min_node_cpus": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							AtLeastOneOf:     schedulingKeys,
+						},
+<% end -%>
 					},
 				},
 			},

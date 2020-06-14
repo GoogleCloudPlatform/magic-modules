@@ -416,6 +416,48 @@ func TestAccContainerCluster_withInvalidReleaseChannel(t *testing.T) {
 		},
 	})
 }
+
+func TestAccContainerCluster_withTelemetryEnabled(t *testing.T) {
+	t.Parallel()
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withTelemetryEnabled(clusterName, "ENABLED"),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_cluster_telemetry",
+				ImportStateIdPrefix:     "us-central1-a/",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
+			},
+			{
+				Config: testAccContainerCluster_withTelemetryEnabled(clusterName, "DISABLED"),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_cluster_telemetry",
+				ImportStateIdPrefix:     "us-central1-a/",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
+			},
+			{
+				Config: testAccContainerCluster_withTelemetryEnabled(clusterName, "SYSTEM_ONLY"),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_cluster_telemetry",
+				ImportStateIdPrefix:     "us-central1-a/",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
+			},
+		},
+	})
+}
 <% end -%>
 
 func TestAccContainerCluster_withMasterAuthorizedNetworksConfig(t *testing.T) {
@@ -2232,6 +2274,21 @@ resource "google_container_cluster" "with_release_channel" {
 }
 `, clusterName, channel)
 }
+
+func testAccContainerCluster_withTelemetryEnabled(clusterName string, telemetryType string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_cluster_telemetry" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = "1.15"
+
+  cluster_telemetry {
+    type = "%s"
+  }
+}
+`, clusterName, telemetryType)
+}
 <% end -%>
 
 func testAccContainerCluster_removeNetworkPolicy(clusterName string) string {
@@ -3486,6 +3543,11 @@ resource "google_container_cluster" "with_private_cluster" {
     enable_private_endpoint = true
     enable_private_nodes    = true
     master_ipv4_cidr_block  = "10.42.0.0/28"
+<% unless version == 'ga' -%>
+    master_global_access_config {
+      enabled = true
+    }
+<% end -%>
   }
   master_authorized_networks_config {
   }

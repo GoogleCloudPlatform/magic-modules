@@ -268,6 +268,10 @@ region are guaranteed to support the same version.
 * `private_cluster_config` - (Optional) Configuration for [private clusters](https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters),
 clusters with private nodes. Structure is documented below.
 
+* `cluster_telemetry` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for
+   [ClusterTelemetry](https://cloud.google.com/monitoring/kubernetes-engine/installing#controlling_the_collection_of_application_logs) feature,
+   Structure is documented below.
+
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
@@ -307,6 +311,11 @@ subnetwork in which the cluster's instances are launched.
 
 * `enable_intranode_visibility` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
     Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.
+
+The `cluster_telemetry` blocks supports
+
+* `type` - Telemetry integration for the cluster. Supported values (`ENABLE, DISABLE, SYSTEM_ONLY`);
+   `SYSTEM_ONLY` (Only system components are monitored and logged) is only available in GKE versions 1.15 and later.
 
 The `addons_config` block supports:
 
@@ -655,6 +664,10 @@ subnet. See [Private Cluster Limitations](https://cloud.google.com/kubernetes-en
 for more details. This field only applies to private clusters, when
 `enable_private_nodes` is `true`.
 
+* `master_global_access_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - Controls cluster master global
+access settings. If unset, Terraform will no longer manage this field and will
+not modify the previously-set value. Structure is documented below.
+
 In addition, the `private_cluster_config` allows access to the following read-only fields:
 
 * `peering_name` - The name of the peering between this cluster and the Google owned VPC.
@@ -666,6 +679,11 @@ In addition, the `private_cluster_config` allows access to the following read-on
 !> The Google provider is unable to validate certain configurations of
 `private_cluster_config` when `enable_private_nodes` is `false`. It's
 recommended that you omit the block entirely if the field is not set to `true`.
+
+The `private_cluster_config.master_global_access_config` block supports:
+
+* `enabled` (Optional) - Whether the cluster master is accessible globally or
+not.
 
 The `sandbox_config` block supports:
 

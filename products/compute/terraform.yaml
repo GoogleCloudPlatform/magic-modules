@@ -2499,6 +2499,40 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pathMatchers.pathRules.urlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
         required: true
         description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      pathMatchers.defaultRouteAction.weightedBackendServices.weight: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0, 1000)'
+      pathMatchers.defaultRouteAction.timeout: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      pathMatchers.defaultRouteAction.retryPolicy.numRetries: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(1)'
+      pathMatchers.defaultRouteAction.faultInjectionPolicy.delay.percentage: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.FloatBetween(0, 100)'
+      pathMatchers.defaultRouteAction.faultInjectionPolicy.abort.httpStatus: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(200, 599)'
+      pathMatchers.defaultRouteAction.faultInjectionPolicy.abort.percentage: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.FloatBetween(0, 100)'
+      defaultRouteAction.weightedBackendServices.weight: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0, 1000)'
+      defaultRouteAction.timeout: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      defaultRouteAction.retryPolicy.numRetries: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(1)'
+      defaultRouteAction.faultInjectionPolicy.delay.percentage: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.FloatBetween(0, 100)'
+      defaultRouteAction.faultInjectionPolicy.abort.httpStatus: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(200, 599)'
+      defaultRouteAction.faultInjectionPolicy.abort.percentage: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.FloatBetween(0, 100)'
   VpnTunnel: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples

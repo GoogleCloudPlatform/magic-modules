@@ -383,6 +383,7 @@ objects:
               A-Z), numbers (0-9), or underscores (_). The maximum length
               is 1,024 characters.
             required: true
+
   - !ruby/object:Api::Resource
     name: 'Job'
     kind: 'bigquery#job'
