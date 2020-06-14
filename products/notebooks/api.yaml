@@ -379,6 +379,7 @@ objects:
     kind: 'compute#machineType'
     base_url: projects/{{project}}/zones/{{zone}}/machineTypes
     has_self_link: true
+    readonly: true
     description: |
       Represents a MachineType resource. Machine types determine the virtualized
       hardware specifications of your virtual machine instances, such as the
@@ -398,9 +399,10 @@ objects:
     kind: 'compute#zone'
     base_url: projects/{{project}}/locations
     collection_url_key: 'items'
+    has_self_link: true
     readonly: true
     description: 'Represents a Location resource.'
-    properties:      
+    properties:
       - !ruby/object:Api::Type::String
         name: 'name'
-        description: 'Name of the resource.'
+        description: 'Name of the Location resource.'

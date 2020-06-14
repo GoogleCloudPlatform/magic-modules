@@ -18,7 +18,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       location: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
-        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb 
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
+        name: "notebook_environment_basic"
+        primary_resource_id: "environment"
+        vars:
+          environment_name: "test-environment"
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 20
@@ -37,8 +44,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       machineType: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
-        custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+  Location: !ruby/object:Overrides::Terraform::ResourceOverride
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride        
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb        
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

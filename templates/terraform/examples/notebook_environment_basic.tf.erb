@@ -2,6 +2,7 @@ resource "google_notebooks_environment" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name = "<%= ctx[:vars]["environment_name"] %>"
   location = "us-west1-a"
+  
   container_image {
     repository = "gcr.io/deeplearning-platform-release/base-cpu"
   } 
