@@ -39,7 +39,7 @@ resource "google_notebooks_instance" "test" {
   machine_type = "n1-standard-1"
   vm_image {
     project      = "deeplearning-platform-release"
-    image_family = "tf2-ent-latest-cpu"
+    image_family = "tf2-ent-latest-gpu"
   }  
 }
 `, name)

@@ -153,9 +153,10 @@ objects:
         name: 'location'
         description: 'A reference to the zone where the machine resides.'
         resource: 'Location'
-        imports: 'name'
+        imports: 'selfLink'
         required: true
         input: true
+        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -165,12 +166,13 @@ objects:
         input: true
         url_param_only: true
         pattern: projects/{{project}}/locations/{{location}}/instances/{{name}}
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::String
         name: 'machineType'
-        resource: 'MachineType'
-        imports: 'selfLink'
-        description: 'A reference to a machine type which defines VM kind.'
-        url_param_only: true
+        description: |
+            A reference to a machine type which defines VM kind.
+        required: true
+        input: true
+        pattern: projects/{{project}}/zones/{{location}}/machineTypes/{{name}}
       - !ruby/object:Api::Type::String
         name: 'postStartupScript'
         description: |
@@ -373,26 +375,6 @@ objects:
             name: 'tag'
             description: |
                 The tag of the container image. If not specified, this defaults to the latest tag.
-  # Machine Type
-  - !ruby/object:Api::Resource
-    name: 'MachineType'
-    kind: 'compute#machineType'
-    base_url: projects/{{project}}/zones/{{zone}}/machineTypes
-    has_self_link: true
-    readonly: true
-    description: |
-      Represents a MachineType resource. Machine types determine the virtualized
-      hardware specifications of your virtual machine instances, such as the
-      amount of memory or number of virtual CPUs.
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        description: 'Name of the resource.'
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'zone'
-        resource: 'Location'
-        imports: 'name'
-        description: 'The zone the machine type is defined.' 
   # Compute Zone (Location)
   - !ruby/object:Api::Resource
     name: 'Location'
