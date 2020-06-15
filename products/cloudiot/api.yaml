@@ -192,3 +192,220 @@ objects:
                       output: true
                       description: |
                         The type of public key in the certificate.
+  - !ruby/object:Api::Resource
+    name: 'Device'
+    base_url: 'projects/{{project}}/locations/{{region}}/registries/{{registry}}/devices'
+    self_link: 'projects/{{project}}/locations/{{region}}/registries/{{registry}}/devices/{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A Google Cloud IoT Core device.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/iot/docs/'
+      api: 'https://cloud.google.com/iot/docs/reference/cloudiot/rest/'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        input: true
+        url_param_only: true
+        required: true
+        description: |
+          The region of this Device.
+      - !ruby/object:Api::Type::String
+        name: registry
+        input: true
+        url_param_only: true
+        required: true
+        description: |
+          The name of the device registry where this device should be created.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        input: true
+        required: true
+        description: |
+          The unique identifier for the device. For example,
+          `Device0`.
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource path name. For example,
+          `projects/example-proj/locations/us-central1/registries/my-registry/devices/device0`.
+      - !ruby/object:Api::Type::String
+        name: 'numId'
+        output: true
+        description: |
+          A server-defined unique numeric ID for the device.
+          This is a more compact way to identify devices, and it is globally unique.
+      - !ruby/object:Api::Type::Array
+        name: 'credentials'
+        description: |
+          The credentials used to authenticate this device.
+        max_size: 3
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Time
+              name: 'expirationTime'
+              allow_empty_object: true
+              description: |
+                The time at which this credential becomes invalid.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'publicKey'
+              description: |
+                A public key used to verify the signature of JSON Web Tokens (JWTs).
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: 'format'
+                  description: |
+                    The format of the key.
+                  values:
+                    - :RSA_PEM
+                    - :RSA_X509_PEM
+                    - :ES256_PEM
+                    - :ES256_X509_PEM
+                - !ruby/object:Api::Type::String
+                    name: 'key'
+                    description: |
+                      The key data.
+      - !ruby/object:Api::Type::Time
+        name: 'lastHeartbeatTime'
+        output: true
+        description: |
+          The last time an MQTT PINGREQ was received.
+      - !ruby/object:Api::Type::Time
+        name: 'lastEventTime'
+        output: true
+        description: |
+          The last time a telemetry event was received.
+      - !ruby/object:Api::Type::Time
+        name: 'lastStateTime'
+        output: true
+        description: |
+          The last time a state event was received.
+      - !ruby/object:Api::Type::Time
+        name: 'lastConfigAckTime'
+        output: true
+        description: |
+          The last time a cloud-to-device config version acknowledgment was received from the device.
+      - !ruby/object:Api::Type::Time
+        name: 'lastConfigSendTime'
+        output: true
+        description: |
+           The last time a cloud-to-device config version was sent to the device.
+      - !ruby/object:Api::Type::Boolean
+        name: 'blocked'
+        description: |
+           If a device is blocked, connections or requests from this device will fail.
+      - !ruby/object:Api::Type::Time
+        name: 'lastErrorTime'
+        output: true
+        description: |
+           The time the most recent error occurred, such as a failure to publish to Cloud Pub/Sub.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'lastErrorStatus'
+        output: true
+        description: |
+          The error message of the most recent error, such as a failure to publish to Cloud Pub/Sub.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'number'
+            description: |
+              The status code, which should be an enum value of google.rpc.Code.
+          - !ruby/object:Api::Type::String
+            name: 'message'
+            description: |
+              A developer-facing error message, which should be in English.
+          - !ruby/object:Api::Type::Array
+            name: 'details'
+            description: |
+              A list of messages that carry the error details.
+            item_type: Api::Type::KeyValuePairs
+      - !ruby/object:Api::Type::NestedObject
+        name: 'config'
+        description: |
+          The most recent device configuration, which is eventually sent from Cloud IoT Core to the device.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'version'
+            output: true
+            description: |
+              The version of this update.
+          - !ruby/object:Api::Type::String
+            name: 'cloudUpdateTime'
+            output: true
+            description: |
+              The time at which this configuration version was updated in Cloud IoT Core.
+          - !ruby/object:Api::Type::String
+            name: 'deviceAckTime'
+            output: true
+            description: |
+              The time at which Cloud IoT Core received the acknowledgment from the device,
+              indicating that the device has received this configuration version.
+          - !ruby/object:Api::Type::String
+            name: 'binaryData'
+            description: |
+              The device configuration data.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'state'
+        output: true
+        description: |
+          The state most recently received from the device.
+        properties:
+          - !ruby/object:Api::Type::Time
+            name: 'updateTime'
+            output: true
+            description: |
+              The time at which this state version was updated in Cloud IoT Core.
+          - !ruby/object:Api::Type::String
+            name: 'binaryData'
+            description: |
+              The device state data.
+      - !ruby/object:Api::Type::Enum
+        name: 'logLevel'
+        default_value: :NONE
+        description: |
+          The logging verbosity for device activity.
+        values:
+          - :NONE
+          - :ERROR
+          - :INFO
+          - :DEBUG
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'metadata'
+        description: |
+          The metadata key-value pairs assigned to the device.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'gatewayConfig'
+        description: |
+          Gateway-related configuration and state.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'gatewayType'
+            default_value: :NON_GATEWAY
+            description: |
+              Indicates whether the device is a gateway.
+            values:
+              - :GATEWAY
+              - :NON_GATEWAY
+          - !ruby/object:Api::Type::Enum
+            name: 'gatewayAuthMethod'
+            default_value: :NON_GATEWAY
+            description: |
+              Indicates whether the device is a gateway.
+            values:
+              - :GATEWAY_AUTH_METHOD_UNSPECIFIED
+              - :ASSOCIATION_ONLY
+              - :DEVICE_AUTH_TOKEN_ONLY
+              - :ASSOCIATION_AND_DEVICE_AUTH_TOKEN
+          - !ruby/object:Api::Type::String
+            name: 'lastAccessedGatewayId'
+            output: true
+            description: |
+              The ID of the gateway the device accessed most recently.
+          - !ruby/object:Api::Type::Time
+            name: 'lastAccessedGatewayTime'
+            output: true
+            description: |
+              The most recent time at which the device accessed the gateway specified in last_accessed_gateway.

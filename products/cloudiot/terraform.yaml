@@ -145,7 +145,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       credentials.publicKeyCertificate: !ruby/object:Overrides::Terraform::PropertyOverride
         # See the comment on stateNotificationConfig.exclude
         exclude: true
-
+  Device: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "projects/{{project}}/locations/{{region}}/registries/{{registry}}/devices/{{name}}"
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        name: 'name'
+        description: |
+          A unique name for the resource.
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        # We don't need this field, because it has the same format as the ID
+        exclude: true
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+        required: false
+        default_from_api: true
+        description: |
+          The region in which the created device should reside.
+          If it is not provided, the provider region is used.
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
