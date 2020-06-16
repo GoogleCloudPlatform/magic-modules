@@ -300,7 +300,7 @@ objects:
         name: 'custom'
         description: |
           Custom access level conditions are set using the Cloud Common Expression Language to represent the necessary conditions for the level to apply to a request. 
-          See CEL spec at: https://github.com/google/cel-spec
+          See CEL spec at: https://github.com/google/cel-spec.
         conflicts:
           - basic  
         properties:
@@ -308,8 +308,9 @@ objects:
             name: 'expr'
             required: true
             description: |
-              Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression language. 
-              The syntax and semantics of CEL are documented at https://github.com/google/cel-spec.
+              Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression language.
+              This page details the objects and attributes that are used to the build the CEL expressions for 
+              custom access levels - https://cloud.google.com/access-context-manager/docs/custom-access-level-spec.
             properties:
             - !ruby/object:Api::Type::String
               name: 'expression'
