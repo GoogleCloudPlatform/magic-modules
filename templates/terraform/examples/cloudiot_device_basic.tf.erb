@@ -1,0 +1,8 @@
+resource "google_cloudiot_registry" "test-device-registry" {
+  name     = "test-device-registry"
+}
+
+resource "google_cloudiot_device" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloudiot_device_name'] %>"
+  registry = google_cloudiot_registry.test-device-registry.id
+}

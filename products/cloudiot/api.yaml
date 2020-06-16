@@ -194,8 +194,8 @@ objects:
                         The type of public key in the certificate.
   - !ruby/object:Api::Resource
     name: 'Device'
-    base_url: 'projects/{{project}}/locations/{{region}}/registries/{{registry}}/devices'
-    self_link: 'projects/{{project}}/locations/{{region}}/registries/{{registry}}/devices/{{name}}'
+    base_url: '{{registry}}/devices'
+    self_link: '{{registry}}/devices/{{name}}'
     update_verb: :PATCH
     update_mask: true
     description: |

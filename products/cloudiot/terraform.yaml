@@ -146,7 +146,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # See the comment on stateNotificationConfig.exclude
         exclude: true
   Device: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "projects/{{project}}/locations/{{region}}/registries/{{registry}}/devices/{{name}}"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         required: true
@@ -163,6 +162,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The region in which the created device should reside.
           If it is not provided, the provider region is used.
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudiot_device_basic"
+        primary_resource_id: "test-device"
+        vars:
+          cloudiot_device_name: "cloudiot-device"
+        test_env_vars:
+          project: :PROJECT_NAME
+          region: :REGION
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
