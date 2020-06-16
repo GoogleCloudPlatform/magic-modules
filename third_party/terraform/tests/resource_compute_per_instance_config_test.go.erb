@@ -85,6 +85,42 @@ func TestAccComputePerInstanceConfig_statefulBasic(t *testing.T) {
 	})
 }
 
+func TestAccComputePerInstanceConfig_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+		"config_name" : fmt.Sprintf("instance-%s", randString(t, 10)),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				// Create one config
+				Config: testAccComputePerInstanceConfig_statefulBasic(context),
+			},
+			{
+				ResourceName:      "google_compute_per_instance_config.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
+			},
+			{
+				// Update an existing config
+				Config: testAccComputePerInstanceConfig_update(context),
+			},
+			{
+				ResourceName:      "google_compute_per_instance_config.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
+			},
+		},
+	})
+}
+
 func testAccComputePerInstanceConfig_statefulBasic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_compute_per_instance_config" "default" {
@@ -95,6 +131,23 @@ resource "google_compute_per_instance_config" "default" {
 	preserved_state {
 		metadata = {
 			asdf = "asdf"
+		}
+	}
+}
+`, context) + testAccComputePerInstanceConfig_igm(context)
+}
+
+func testAccComputePerInstanceConfig_update(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_per_instance_config" "default" {
+	zone = google_compute_instance_group_manager.igm.zone
+	instance_group_manager = google_compute_instance_group_manager.igm.name
+	name = "%{config_name}"
+	remove_instance_state_on_destroy = true
+	preserved_state {
+		metadata = {
+			asdf = "asdf"
+			update = "12345"
 		}
 	}
 }

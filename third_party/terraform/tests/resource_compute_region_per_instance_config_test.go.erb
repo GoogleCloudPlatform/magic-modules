@@ -85,6 +85,42 @@ func TestAccComputeRegionPerInstanceConfig_statefulBasic(t *testing.T) {
 	})
 }
 
+func TestAccComputeRegionPerInstanceConfig_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+		"config_name" : fmt.Sprintf("instance-%s", randString(t, 10)),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				// Create one config
+				Config: testAccComputeRegionPerInstanceConfig_statefulBasic(context),
+			},
+			{
+				ResourceName:      "google_compute_region_per_instance_config.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
+			},
+			{
+				// Update an existing config
+				Config: testAccComputeRegionPerInstanceConfig_update(context),
+			},
+			{
+				ResourceName:      "google_compute_region_per_instance_config.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
+			},
+		},
+	})
+}
+
 func testAccComputeRegionPerInstanceConfig_statefulBasic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_compute_region_per_instance_config" "default" {
@@ -95,6 +131,23 @@ resource "google_compute_region_per_instance_config" "default" {
 	preserved_state {
 		metadata = {
 			asdf = "asdf"
+		}
+	}
+}
+`, context) + testAccComputeRegionPerInstanceConfig_rigm(context)
+}
+
+func testAccComputeRegionPerInstanceConfig_update(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_region_per_instance_config" "default" {
+	region = google_compute_region_instance_group_manager.rigm.region
+	region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
+	name = "%{config_name}"
+	remove_instance_state_on_destroy = true
+	preserved_state {
+		metadata = {
+			asdf = "foo"
+			updated = "12345"
 		}
 	}
 }
