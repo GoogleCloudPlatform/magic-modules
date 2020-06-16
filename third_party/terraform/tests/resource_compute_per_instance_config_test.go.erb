@@ -76,7 +76,7 @@ func TestAccComputePerInstanceConfig_statefulBasic(t *testing.T) {
 				// delete all configs
 				Config: testAccComputePerInstanceConfig_igm(context),
 				Check: resource.ComposeTestCheckFunc(
-					// Config with remove_instance_state_on_destroy = false won't be destroyed (config2)
+					// Config with remove_instance_state_on_destroy = false won't be destroyed (config4)
 					testAccCheckComputePerInstanceConfigDestroyed(t, igmId, context["config_name2"].(string)),
 					testAccCheckComputePerInstanceConfigDestroyed(t, igmId, context["config_name3"].(string)),
 				),
