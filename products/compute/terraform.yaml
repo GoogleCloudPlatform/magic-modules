@@ -585,6 +585,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           region_url_map_name: "website-map"
           region_backend_service_name: "website-backend"
           region_health_check_name: "website-hc"
+          rigm_name: "website-rigm"
           network_name: "website-net"
           fw_name: "website-fw"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
