@@ -40,15 +40,61 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           instance_name: "test-instance"
     properties:
-      name: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      acceleratorConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      bootDiskSizeGb: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      bootDiskType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      containerImage: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      createTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      customGpuDriverPath: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      dataDiskSizeGb: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      dataDiskType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      diskEncryption: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      installGpuDriver: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      instanceOwners: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      kmsKey: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       machineType: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      metadata: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride      
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      network: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      noProxyAccess: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      noPublicIp: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      noRemoveDataDisk: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      postStartupScript: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      proxyUri: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      serviceAccount: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      subnet: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      updateTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      vmImage: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   Location: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
-      name: !ruby/object:Overrides::Terraform::PropertyOverride        
-        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb        
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

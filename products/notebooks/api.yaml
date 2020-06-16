@@ -337,6 +337,7 @@ objects:
         output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'vmImage'
+        input: true
         exactly_one_of:
             - vm_image
             - container_image
