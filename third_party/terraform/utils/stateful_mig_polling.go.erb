@@ -82,7 +82,12 @@ func findInstanceName(d *schema.ResourceData, config *Config) (string, error) {
 
 	token := ""
 	for paginate := true; paginate; {
-		urlWithToken := fmt.Sprintf("%s?pageToken=%s", url, token)
+		urlWithToken := ""
+		if token != "" {
+			urlWithToken = fmt.Sprintf("%s?maxResults=1&pageToken=%s", url, token)
+		} else {
+			urlWithToken = fmt.Sprintf("%s?maxResults=1", url)
+		}
 		res, err := sendRequest(config, "POST", project, urlWithToken, nil)
 		if err != nil {
 			return "", err
