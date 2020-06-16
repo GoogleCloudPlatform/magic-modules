@@ -4426,7 +4426,7 @@ resource "google_compute_node_template" "nodetmpl" {
   node_type = "n1-node-96-624"
 
 <% unless version == 'ga' -%>
-  cpu_overcommit_type = "DISABLED"
+  cpu_overcommit_type = "ENABLED"
 <% end -%>
 }
 
