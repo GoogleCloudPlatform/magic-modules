@@ -36,6 +36,7 @@ func resourceServiceNetworkingConnection() *schema.Resource {
 				Required:         true,
 				ForceNew:         true,
 				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				Description: `Name of VPC network connected with service producers using VPC peering.`,
 			},
 			// NOTE(craigatgoogle): This field is weird, it's required to make the Insert/List calls as a parameter
 			// named "parent", however it's also defined in the response as an output field called "peering", which
@@ -47,11 +48,13 @@ func resourceServiceNetworkingConnection() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				Description: `Provider peering service that is managing peering connectivity for a service provider organization. For Google services that support this functionality it is 'servicenetworking.googleapis.com'.`,
 			},
 			"reserved_peering_ranges": {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				Description: `Named IP address range(s) of PEERING type reserved for this service provider. Note that invoking this method with a different range when connection is already established will not reallocate already provisioned service producer subnetworks.`,
 			},
 			"peering": {
 				Type:     schema.TypeString,

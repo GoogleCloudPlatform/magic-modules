@@ -33,11 +33,13 @@ func resourceGoogleFolder() *schema.Resource {
 			"parent": {
 				Type:     schema.TypeString,
 				Required: true,
+				Description: `The resource name of the parent Folder or Organization. Must be of the form folders/{folder_id} or organizations/{org_id}.`,
 			},
 			// Must be unique amongst its siblings.
 			"display_name": {
 				Type:     schema.TypeString,
 				Required: true,
+				Description: `The folder's display name. A folder's display name must be unique amongst its siblings, e.g. no two folders with the same parent can share the same display name. The display name must start and end with a letter or digit, may contain letters, digits, spaces, hyphens and underscores and can be no longer than 30 characters.`,
 			},
 
 			// Format is 'folders/{folder_id}.
@@ -45,14 +47,17 @@ func resourceGoogleFolder() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Description: `The resource name of the Folder. Its format is folders/{folder_id}.`,
 			},
 			"lifecycle_state": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Description: `The lifecycle state of the folder such as ACTIVE or DELETE_REQUESTED.`,
 			},
 			"create_time": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Description: `Timestamp when the Folder was created. Assigned by the server. A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".`,
 			},
 		},
 	}
