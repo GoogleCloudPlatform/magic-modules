@@ -7786,6 +7786,14 @@ objects:
             values:
               - :RESTART_NODE_ON_ANY_SERVER
               - :RESTART_NODE_ON_MINIMAL_SERVERS
+      - !ruby/object:Api::Type::Enum
+        name: 'cpuOvercommitType'
+        description: |
+          CPU overcommit.
+        min_version: beta
+        values:
+          - :ENABLED
+          - :DISABLED
   - !ruby/object:Api::Resource
     name: 'PacketMirroring'
     min_version: beta
