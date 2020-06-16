@@ -148,6 +148,8 @@ objects:
         name: 'basic'
         description: |
           A set of predefined conditions for the access level and a combining function.
+        conflicts:
+          - custom
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'combiningFunction'
@@ -294,6 +296,34 @@ objects:
                   countries/regions.
                   Format: A valid ISO 3166-1 alpha-2 code.
                 item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: 'custom'
+        description: |
+          Custom access level conditions are set using the Cloud Common Expression Language to represent the necessary conditions for the level to apply to a request. 
+          See CEL spec at: https://github.com/google/cel-spec
+        conflicts:
+          - basic  
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'expr'
+            required: true
+            description: |
+              Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression language. 
+              The syntax and semantics of CEL are documented at https://github.com/google/cel-spec.
+            properties:
+            - !ruby/object:Api::Type::String
+              name: 'expression'
+              required: true
+              description: Textual representation of an expression in Common Expression Language syntax.
+            - !ruby/object:Api::Type::String
+              name: 'title'
+              description: Title for the expression, i.e. a short string describing its purpose.
+            - !ruby/object:Api::Type::String
+              name: 'description'
+              description: Description of the expression 
+            - !ruby/object:Api::Type::String
+              name: 'location'
+              description: String indicating the location of the expression for error reporting, e.g. a file name and a position in the file      
   - !ruby/object:Api::Resource
     name: 'ServicePerimeter'
     # This is an unusual API, so we need to use a few fields to map the methods
