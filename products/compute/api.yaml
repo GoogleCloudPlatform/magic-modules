@@ -7793,7 +7793,8 @@ objects:
         min_version: beta
         values:
           - :ENABLED
-          - :DISABLED
+          - :NONE
+        default_value: :NONE
   - !ruby/object:Api::Resource
     name: 'PacketMirroring'
     min_version: beta
