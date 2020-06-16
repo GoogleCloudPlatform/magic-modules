@@ -469,6 +469,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       resourcePolicies: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        description: |
+          {{description}}
+
+          ~>**NOTE** This value does not support updating the
+          resource policy, as resource policies can not be updated more than
+          one at a time. Use
+          [`google_compute_disk_resource_policy_attachment`](https://www.terraform.io/docs/providers/google/r/compute_disk_resource_policy_attachment.html)
+          to allow for updating the resource policy attached to the disk.
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       constants: templates/terraform/constants/disk.erb
