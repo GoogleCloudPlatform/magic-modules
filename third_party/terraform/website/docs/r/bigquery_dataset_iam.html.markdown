@@ -9,12 +9,13 @@ description: |-
 
 # IAM policy for BigQuery dataset
 
-These resources are intended to convert the permissions system for BigQuery datasets to the standard IAM interface. For advanced usages, including [creating authorized views](https://cloud.google.com/bigquery/docs/share-access-views), please use either `google_bigquery_dataset_access` or the `access` field on `google_bigquery_dataset`.
 Three different resources help you manage your IAM policy for BigQuery dataset. Each of these resources serves a different use case:
 
 * `google_bigquery_dataset_iam_policy`: Authoritative. Sets the IAM policy for the dataset and replaces any existing policy already attached.
 * `google_bigquery_dataset_iam_binding`: Authoritative for a given role. Updates the IAM policy to grant a role to a list of members. Other roles within the IAM policy for the dataset are preserved.
 * `google_bigquery_dataset_iam_member`: Non-authoritative. Updates the IAM policy to grant a role to a new member. Other members for the role for the dataset are preserved.
+
+These resources are intended to convert the permissions system for BigQuery datasets to the standard IAM interface. For advanced usages, including [creating authorized views](https://cloud.google.com/bigquery/docs/share-access-views), please use either `google_bigquery_dataset_access` or the `access` field on `google_bigquery_dataset`.
 
 ~> **Note:** These resources **cannot** be used with `google_bigquery_dataset_access` resources or the `access` field on `google_bigquery_dataset` or they will fight over what the policy should be.
 
