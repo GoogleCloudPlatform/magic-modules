@@ -32,30 +32,30 @@ func resourceComputeTargetPool() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
 				Description: `A unique name for the resource, required by GCE. Changing this forces a new resource to be created.`,
 			},
 
 			"backup_pool": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: false,
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    false,
 				Description: `URL to the backup target pool. Must also set failover_ratio.`,
 			},
 
 			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
 				Description: `Textual description field.`,
 			},
 
 			"failover_ratio": {
-				Type:     schema.TypeFloat,
-				Optional: true,
-				ForceNew: true,
+				Type:        schema.TypeFloat,
+				Optional:    true,
+				ForceNew:    true,
 				Description: `Ratio (0 to 1) of failed nodes before using the backup pool (which must also be set).`,
 			},
 
@@ -89,32 +89,32 @@ func resourceComputeTargetPool() *schema.Resource {
 			},
 
 			"project": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 
 			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
 				Description: `Where the target pool resides. Defaults to project region.`,
 			},
 
 			"self_link": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
 				Description: `The URI of the created resource.`,
 			},
 
 			"session_affinity": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "NONE",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     "NONE",
 				Description: `How to distribute load. Options are "NONE" (no affinity). "CLIENT_IP" (hash of the source/dest addresses / ports), and "CLIENT_IP_PROTO" also includes the protocol (default "NONE").`,
 			},
 		},

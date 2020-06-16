@@ -34,7 +34,7 @@ func resourceComputeNetworkPeering() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validateGCPName,
-				Description: `Name of the peering.`,
+				Description:  `Name of the peering.`,
 			},
 
 			"network": {
@@ -43,7 +43,7 @@ func resourceComputeNetworkPeering() *schema.Resource {
 				ForceNew:         true,
 				ValidateFunc:     validateRegexp(peerNetworkLinkRegex),
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
-				Description: `The primary network of the peering.`,
+				Description:      `The primary network of the peering.`,
 			},
 
 			"peer_network": {
@@ -52,22 +52,22 @@ func resourceComputeNetworkPeering() *schema.Resource {
 				ForceNew:         true,
 				ValidateFunc:     validateRegexp(peerNetworkLinkRegex),
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
-				Description: `The peer network in the peering. The peer network may belong to a different project.`,
+				Description:      `The peer network in the peering. The peer network may belong to a different project.`,
 			},
 
 			"export_custom_routes": {
-				Type:     schema.TypeBool,
-				ForceNew: true,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				ForceNew:    true,
+				Optional:    true,
+				Default:     false,
 				Description: `Whether to export the custom routes to the peer network. Defaults to false.`,
 			},
 
 			"import_custom_routes": {
-				Type:     schema.TypeBool,
-				ForceNew: true,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				ForceNew:    true,
+				Optional:    true,
+				Default:     false,
 				Description: `Whether to export the custom routes from the peer network. Defaults to false.`,
 			},
 
@@ -85,14 +85,14 @@ func resourceComputeNetworkPeering() *schema.Resource {
 			},
 
 			"state": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
 				Description: `State for the peering, either ACTIVE or INACTIVE. The peering is ACTIVE when there's a matching configuration in the peer network.`,
 			},
 
 			"state_details": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
 				Description: `Details about the current state of the peering.`,
 			},
 

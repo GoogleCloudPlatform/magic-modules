@@ -24,16 +24,16 @@ func resourceDnsRecordSet() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"managed_zone": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
 				Description: `The name of the zone in which this record set will reside.`,
 			},
 
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
 				Description: `The DNS name this record set will apply to.`,
 			},
 
@@ -56,22 +56,22 @@ func resourceDnsRecordSet() *schema.Resource {
 			},
 
 			"ttl": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Type:        schema.TypeInt,
+				Required:    true,
 				Description: `The time-to-live of this record set (seconds).`,
 			},
 
 			"type": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
 				Description: `The DNS record set type.`,
 			},
 
 			"project": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 		},
