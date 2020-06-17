@@ -26,16 +26,16 @@ func resourceContainerRegistry() *schema.Resource {
 			},
 
 			"project": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 
 			"bucket_self_link": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
 				Description: `The URI of the created resource.`,
 			},
 		},
