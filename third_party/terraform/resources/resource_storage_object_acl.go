@@ -22,12 +22,14 @@ func resourceStorageObjectAcl() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				Description: `The name of the bucket the object is stored in.`,
 			},
 
 			"object": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				Description: `The name of the object to apply the acl to.`,
 			},
 
 			"predefined_acl": {
@@ -35,6 +37,7 @@ func resourceStorageObjectAcl() *schema.Resource {
 				Optional:      true,
 				ConflictsWith: []string{"role_entity"},
 				ValidateFunc:  validation.StringInSlice([]string{"private", "bucketOwnerRead", "bucketOwnerFullControl", "projectPrivate", "authenticatedRead", "publicRead", ""}, false),
+				Description: `The "canned" predefined ACL to apply. Must be set if role_entity is not.`,
 			},
 
 			"role_entity": {
@@ -46,6 +49,7 @@ func resourceStorageObjectAcl() *schema.Resource {
 					ValidateFunc: validateRoleEntityPair,
 				},
 				ConflictsWith: []string{"predefined_acl"},
+				Description: `List of role/entity pairs in the form ROLE:entity. See GCS Object ACL documentation for more details. Must be set if predefined_acl is not.`,
 			},
 		},
 	}
