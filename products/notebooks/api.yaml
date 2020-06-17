@@ -200,36 +200,35 @@ objects:
             the same project, but you must have the service account user 
             permission to use the instance. If not specified, 
             the Compute Engine default service account is used.      
-      - !ruby/object:Api::Type::Array
+      - !ruby/object:Api::Type::NestedObject
         name: 'acceleratorConfig'
         description: |
             The hardware accelerator used on this instance. If you use accelerators, 
             make sure that your configuration has enough vCPUs and memory to support the 
             machineType you have selected.
-        item_type: !ruby/object:Api::Type::NestedObject
-          properties:
-            - !ruby/object:Api::Type::Enum
-              name: 'type'
-              values:
-               - ACCELERATOR_TYPE_UNSPECIFIED
-               - NVIDIA_TESLA_K80
-               - NVIDIA_TESLA_P100
-               - NVIDIA_TESLA_V100
-               - NVIDIA_TESLA_P4
-               - NVIDIA_TESLA_T4
-               - NVIDIA_TESLA_T4_VWS
-               - NVIDIA_TESLA_P100_VWS
-               - NVIDIA_TESLA_P4_VWS
-               - TPU_V2
-               - TPU_V3
-              required: true
-              description: |
-                Type of this accelerator.
-            - !ruby/object:Api::Type::Integer
-              name: 'coreCount'
-              required: true
-              description: |
-                Count of cores of this accelerator.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'type'
+            values:
+              - ACCELERATOR_TYPE_UNSPECIFIED
+              - NVIDIA_TESLA_K80
+              - NVIDIA_TESLA_P100
+              - NVIDIA_TESLA_V100
+              - NVIDIA_TESLA_P4
+              - NVIDIA_TESLA_T4
+              - NVIDIA_TESLA_T4_VWS
+              - NVIDIA_TESLA_P100_VWS
+              - NVIDIA_TESLA_P4_VWS
+              - TPU_V2
+              - TPU_V3
+            required: true
+            description: |
+              Type of this accelerator.
+          - !ruby/object:Api::Type::Integer
+            name: 'coreCount'
+            required: true
+            description: |
+              Count of cores of this accelerator.
       - !ruby/object:Api::Type::Enum
         name: 'state'
         values:
@@ -248,6 +247,7 @@ objects:
         description: |
             Indicates that this is a boot disk. The virtual machine will
             use the first partition of the disk for its root filesystem.
+        input: true        
       - !ruby/object:Api::Type::String
         name: 'customGpuDriverPath'
         description: |
@@ -337,7 +337,6 @@ objects:
         output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'vmImage'
-        input: true
         exactly_one_of:
             - vm_image
             - container_image
@@ -351,13 +350,13 @@ objects:
                 Format: projects/{project_id}
             required: true
           - !ruby/object:Api::Type::String
+            name: 'imageFamily'
+            description: |
+              Use this VM image family to find the image; the newest image in this family will be used.
+          - !ruby/object:Api::Type::String
             name: 'imageName'
             description: |
                 Use VM image name to find the image.
-          - !ruby/object:Api::Type::String
-            name: 'imageFamily'
-            description: |
-                Use this VM image family to find the image; the newest image in this family will be used.
       - !ruby/object:Api::Type::NestedObject
         name: 'containerImage'
         exactly_one_of:

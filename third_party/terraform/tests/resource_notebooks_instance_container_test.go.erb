@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-func TestAccNotebooksInstance_create_vm_image(t *testing.T) {
+func TestAccNotebooksInstance_create_container(t *testing.T) {
 	t.Parallel()
 
 	prefix := fmt.Sprintf("%d", randInt(t))
@@ -19,7 +19,7 @@ func TestAccNotebooksInstance_create_vm_image(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNotebooksInstance_create_vm_image(name),
+				Config: testAccNotebooksInstance_create_container(name),
 			},
 			{
 				ResourceName:      "google_notebooks_instance.test",
@@ -32,7 +32,7 @@ func TestAccNotebooksInstance_create_vm_image(t *testing.T) {
 	})
 }
 
-func testAccNotebooksInstance_create_vm_image(name string) string {
+func testAccNotebooksInstance_create_container(name string) string {
 	return fmt.Sprintf(`
 
 resource "google_notebooks_instance" "test" {
@@ -43,9 +43,9 @@ resource "google_notebooks_instance" "test" {
     proxy-mode = "service_account"
     terraform  = "true"
   }
-  vm_image {
-    project      = "deeplearning-platform-release"
-    image_family = "tf-latest-cpu"
+  container_image {
+    repository = "gcr.io/deeplearning-platform-release/base-cpu"
+    tag = "latest"
   }
 }
 `, name)
