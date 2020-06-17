@@ -335,7 +335,6 @@ func resourceDataprocCluster() *schema.Resource {
 						"security_config": {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: "Security related configuration",
 							MaxItems:    1,
 							Description: `Security related configuration.`,
 							Elem: &schema.Resource{
@@ -345,7 +344,6 @@ func resourceDataprocCluster() *schema.Resource {
 										Required:    true,
 										Description: "Kerberos related configuration",
 										MaxItems:    1,
-										Description: `Kerberos Configuration`,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"cross_realm_trust_admin_server": {
