@@ -31,16 +31,19 @@ func resourceComputeProjectMetadataItem() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				Description: `The metadata key to set.`,
 			},
 			"value": {
 				Type:     schema.TypeString,
 				Required: true,
+				Description: `The value to set for the given metadata key.`,
 			},
 			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
+				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 		},
 
