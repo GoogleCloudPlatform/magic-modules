@@ -365,7 +365,7 @@ objects:
               The device state data.
       - !ruby/object:Api::Type::Enum
         name: 'logLevel'
-        default_value: :NONE
+        allow_empty_object: true
         description: |
           The logging verbosity for device activity.
         values:
@@ -392,7 +392,7 @@ objects:
               - :NON_GATEWAY
           - !ruby/object:Api::Type::Enum
             name: 'gatewayAuthMethod'
-            default_value: :NON_GATEWAY
+            default_value: :GATEWAY_AUTH_METHOD_UNSPECIFIED
             description: |
               Indicates whether the device is a gateway.
             values:
