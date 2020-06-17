@@ -22,6 +22,7 @@ func resourceContainerRegistry() *schema.Resource {
 				StateFunc: func(s interface{}) string {
 					return strings.ToUpper(s.(string))
 				},
+				Description: `The location of the registry. One of ASIA, EU, US or not specified. See the official documentation for more information on registry locations.`,
 			},
 
 			"project": {
@@ -29,11 +30,13 @@ func resourceContainerRegistry() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
+				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 
 			"bucket_self_link": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Description: `The URI of the created resource.`,
 			},
 		},
 	}
