@@ -1,0 +1,9 @@
+resource "google_artifact_registry_repository" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+
+  location = "us-central1"
+  repository_id = "<%= ctx[:vars]['repository_id'] %>"
+  description = "<%= ctx[:vars]['description'] %>"
+  format = "DOCKER"
+  kms_key_name = "projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key"
+}
