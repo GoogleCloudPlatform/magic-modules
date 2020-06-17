@@ -1182,6 +1182,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      importCustomRoutes: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+      exportCustomRoutes: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: 'templates/terraform/custom_delete/skip_delete.go.erb'
       encoder: 'templates/terraform/encoders/network_peering_routes_config.go.erb'
