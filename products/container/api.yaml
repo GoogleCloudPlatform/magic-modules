@@ -687,6 +687,21 @@ objects:
           - !ruby/object:Api::Type::Boolean
             name: 'enabled'
             description: If enabled, all container images will be validated by Binary Authorization.
+      - !ruby/object:Api::Type::NestedObject
+        min_version: beta
+        name: 'releaseChannel'
+        description: |
+          ReleaseChannel indicates which release channel a cluster is subscribed to.
+          Release channels are arranged in order of risk and frequency of updates.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'channel'
+            description: 'Which release channel the cluster is subscribed to.'
+            values: 
+              - UNSPECIFIED
+              - RAPID
+              - REGULAR
+              - STABLE
   - !ruby/object:Api::Resource
     name: 'NodePool'
     base_url: projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools
