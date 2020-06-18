@@ -444,3 +444,6 @@ security_policy:
   priority: "1000"
   ip_range: "9.9.9.0/24"
   description: my description
+
+memcache_instance:
+  name: mem-instance

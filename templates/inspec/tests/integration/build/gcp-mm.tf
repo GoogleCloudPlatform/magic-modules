@@ -1257,3 +1257,20 @@ resource "google_compute_security_policy" "policy" {
     description = "default rule"
   }
 }
+
+variable "memcache_instance" {
+  type = any
+}
+
+resource "google_memcache_instance" "instance" {
+  provider = google-beta
+  name = "test-instance"
+  project = var.gcp_project_id
+  region = var.gcp_location
+
+  node_config {
+    cpu_count      = 1
+    memory_size_mb = 1024
+  }
+  node_count = 1
+}

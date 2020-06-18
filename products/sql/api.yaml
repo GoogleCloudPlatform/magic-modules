@@ -435,6 +435,34 @@ objects:
             name: 'kmsKeyVersionName'
             description: |
               The KMS key version used to encrypt the Cloud SQL instance
+      - !ruby/object:Api::Type::NestedObject
+        name: 'serverCaCert'
+        description: 'SSL configuration'
+        output: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'cert'
+            description: 'PEM representation of the X.509 certificate.'
+          - !ruby/object:Api::Type::String
+            name: 'certSerialNumber'
+            description: 'Serial number, as extracted from the certificate.'
+          - !ruby/object:Api::Type::String
+            name: 'commonName'
+            description: 'User supplied name. Constrained to [a-zA-Z.-_ ]+.'
+          - !ruby/object:Api::Type::Time
+            name: 'createTime'
+            description: |
+              The time when the certificate was created in RFC 3339 format, for
+              example 2012-11-15T16:19:00.094Z.
+          - !ruby/object:Api::Type::Time
+            name: 'expirationTime'
+            description: |
+              The time when the certificate expires in RFC 3339 format, for example
+              2012-11-15T16:19:00.094Z.
+          - !ruby/object:Api::Type::Time
+            name: 'sha1Fingerprint'
+            description: |
+              SHA-1 fingerprint of the certificate.
   - !ruby/object:Api::Resource
     name: 'Database'
     kind: 'sql#database'
