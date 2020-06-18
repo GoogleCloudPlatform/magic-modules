@@ -57,6 +57,11 @@ resource "google_cloudiot_registry" "%s" {
 resource "google_cloudiot_device" "%s" {
   name     = "%s"
   registry = google_cloudiot_registry.%s.id
+
+  gateway_config {
+    gateway_auth_method = "DEVICE_AUTH_TOKEN_ONLY"
+    gateway_type = "GATEWAY"
+  }
 }
 
 
@@ -75,10 +80,10 @@ resource "google_cloudiot_device" "%s" {
   registry = google_cloudiot_registry.%s.id
 
   credentials {
-      public_key {
-          format = "RSA_PEM"
-          key = file("test-fixtures/rsa_public.pem")
-      }
+    public_key {
+      format = "RSA_PEM"
+      key = file("test-fixtures/rsa_public.pem")
+    }
   }
 
   blocked = false
@@ -86,11 +91,12 @@ resource "google_cloudiot_device" "%s" {
   log_level = "INFO"
 
   metadata = {
-      test_key_1 = "test_value_1"
+    test_key_1 = "test_value_1"
   }
 
   gateway_config {
-      gateway_type = "NON_GATEWAY"
+    gateway_auth_method = "ASSOCIATION_AND_DEVICE_AUTH_TOKEN"
+    gateway_type = "GATEWAY"
   }
 }
 `, registryName, registryName, deviceName, deviceName, registryName)

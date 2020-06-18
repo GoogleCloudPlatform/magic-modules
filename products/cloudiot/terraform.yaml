@@ -156,6 +156,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         # We don't need this field, because it has the same format as the ID
         exclude: true
+      gatewayConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        # The only mutable gateway_config field is gateway_auth_method,
+        # at least according to the API responses.
+        update_mask_fields:
+          - "gateway_config.gateway_auth_method"
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudiot_device_basic"
