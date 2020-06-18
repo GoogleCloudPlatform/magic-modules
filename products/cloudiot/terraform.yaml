@@ -162,6 +162,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "test-device"
         vars:
           cloudiot_device_name: "cloudiot-device"
+          cloudiot_device_registry_name: "cloudiot-device-registry"
         test_env_vars:
           project: :PROJECT_NAME
           region: :REGION
@@ -170,6 +171,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "test-device"
         vars:
           cloudiot_device_name: "cloudiot-device"
+          cloudiot_device_registry_name: "cloudiot-device-registry"
         test_env_vars:
           project: :PROJECT_NAME
           region: :REGION
