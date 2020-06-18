@@ -1257,3 +1257,44 @@ resource "google_compute_security_policy" "policy" {
     description = "default rule"
   }
 }
+
+variable "memcache_instance" {
+  type = any
+}
+
+resource "google_compute_network" "memcache_network" {
+  provider = google-beta
+  project = var.gcp_project_id
+  name = "inspec-gcp-memcache"
+}
+
+resource "google_compute_global_address" "service_range" {
+  provider = google-beta
+  project = var.gcp_project_id
+  name          = "inspec-gcp-memcache"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.memcache_network.id
+}
+
+resource "google_service_networking_connection" "private_service_connection" {
+  provider = google-beta
+  network                 = google_compute_network.memcache_network.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.service_range.name]
+}
+
+resource "google_memcache_instance" "instance" {
+  provider = google-beta
+  name = var.memcache_instance["name"]
+  project = var.gcp_project_id
+  region = var.gcp_location
+  authorized_network = google_service_networking_connection.private_service_connection.network
+
+  node_config {
+    cpu_count      = 1
+    memory_size_mb = 1024
+  }
+  node_count = 1
+}
