@@ -89,7 +89,7 @@ func resourceBigQueryTable() *schema.Resource {
 						"source_format": {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: `The data format. Supported values are: "CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "PARQUET", and "DATSTORE_BACKUP". To use "GOOGLE_SHEETS" the scopes must include.`,
+							Description: `The data format. Supported values are: "CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "PARQUET", and "DATSTORE_BACKUP". To use "GOOGLE_SHEETS" the scopes must include "googleapis.com/auth/drive.readonly".`,
 							ValidateFunc: validation.StringInSlice([]string{
 								"CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "DATSTORE_BACKUP", "PARQUET",
 							}, false),
