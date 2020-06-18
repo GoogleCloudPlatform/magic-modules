@@ -38,6 +38,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: 'beta'
         vars:
           address_name: "my-internal-address"
+        skip_docs: true  # It is almost identical to internal_with_gce_endpoint 
       # TODO(rileykarson): Remove this example when instance is supported
       - !ruby/object:Provider::Terraform::Examples
         name: "instance_with_ip"
