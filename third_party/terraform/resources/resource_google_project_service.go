@@ -80,23 +80,27 @@ func resourceGoogleProjectService() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: StringNotInSlice(append(ignoredProjectServices, bannedProjectServices...), false),
+				Description: `The service to enable.`,
 			},
 			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
+				Description: `The project ID. If not provided, the provider project is used.`,
 			},
 
 			"disable_dependent_services": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: `If true, services that are enabled and which depend on this service should also be disabled when this service is destroyed. If false or unset, an error will be generated if any enabled services depend on this service when destroying it.`,
 			},
 
 			"disable_on_destroy": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
+				Description: `If true, disable the service when the terraform resource is destroyed.  Defaults to true.  May be useful in the event that a project is long-lived but the infrastructure running in that project changes frequently.`,
 			},
 		},
 	}
