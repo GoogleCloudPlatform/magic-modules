@@ -185,6 +185,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       pathMatchers.pathRules: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
+      pathMatchers.defaultRouteAction.weightedBackendServices: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true
   VpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   VpnTunnel: !ruby/object:Overrides::Inspec::ResourceOverride
