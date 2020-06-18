@@ -1280,7 +1280,6 @@ resource "google_compute_global_address" "service_range" {
 
 resource "google_service_networking_connection" "private_service_connection" {
   provider = google-beta
-  project = var.gcp_project_id
   network                 = google_compute_network.memcache_network.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.service_range.name]
@@ -1291,6 +1290,7 @@ resource "google_memcache_instance" "instance" {
   name = var.memcache_instance["name"]
   project = var.gcp_project_id
   region = var.gcp_location
+  authorized_network = google_service_networking_connection.private_service_connection.network
 
   node_config {
     cpu_count      = 1

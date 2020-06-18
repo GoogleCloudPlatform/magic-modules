@@ -459,7 +459,7 @@ objects:
             description: |
               The time when the certificate expires in RFC 3339 format, for example
               2012-11-15T16:19:00.094Z.
-          - !ruby/object:Api::Type::Time
+          - !ruby/object:Api::Type::String
             name: 'sha1Fingerprint'
             description: |
               SHA-1 fingerprint of the certificate.
