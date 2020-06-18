@@ -32,6 +32,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "internal_with_gce_endpoint"
         vars:
           address_name: "my-internal-address-"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "address_with_shared_loadbalancer_vip"
+        primary_resource_id: "internal_with_shared_loadbalancer_vip"
+        min_version: 'beta'
+        vars:
+          address_name: "my-internal-address"
+        skip_docs: true  # It is almost identical to internal_with_gce_endpoint 
       # TODO(rileykarson): Remove this example when instance is supported
       - !ruby/object:Provider::Terraform::Examples
         name: "instance_with_ip"
