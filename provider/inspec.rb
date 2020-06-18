@@ -393,8 +393,11 @@ module Provider
     end
 
     def ga_api_url(object)
-      ga_version = object.__product.version_obj_or_closest('ga')
-      object.product_url || ga_version.base_url
+      if object.__product.exists_at_version('ga')
+        ga_version = object.__product.version_obj_or_closest('ga')
+        return object.product_url || ga_version.base_url
+      end
+      beta_api_url(object)
     end
   end
 end
