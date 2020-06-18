@@ -76,21 +76,21 @@ resource "google_cloudiot_device" "%s" {
 
   credentials {
       public_key {
-          format = RSA_PEM
+          format = "RSA_PEM"
           key = file("test-fixtures/rsa_public.pem")
       }
   }
 
   blocked = false
 
-  log_level = INFO
+  log_level = "INFO"
 
-  metadata {
+  metadata = {
       test_key_1 = "test_value_1"
   }
 
   gateway_config {
-      gateway_type = NON_GATEWAY
+      gateway_type = "NON_GATEWAY"
   }
 }
 `, registryName, registryName, deviceName, deviceName, registryName)

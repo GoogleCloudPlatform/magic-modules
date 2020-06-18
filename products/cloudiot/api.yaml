@@ -242,6 +242,7 @@ objects:
             - !ruby/object:Api::Type::Time
               name: 'expirationTime'
               allow_empty_object: true
+              output: true
               description: |
                 The time at which this credential becomes invalid.
             - !ruby/object:Api::Type::NestedObject
@@ -385,11 +386,9 @@ objects:
               - :NON_GATEWAY
           - !ruby/object:Api::Type::Enum
             name: 'gatewayAuthMethod'
-            default_value: :GATEWAY_AUTH_METHOD_UNSPECIFIED
             description: |
               Indicates whether the device is a gateway.
             values:
-              - :GATEWAY_AUTH_METHOD_UNSPECIFIED
               - :ASSOCIATION_ONLY
               - :DEVICE_AUTH_TOKEN_ONLY
               - :ASSOCIATION_AND_DEVICE_AUTH_TOKEN
