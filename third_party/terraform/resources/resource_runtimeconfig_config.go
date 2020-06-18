@@ -27,11 +27,13 @@ func resourceRuntimeconfigConfig() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validateRegexp("[0-9A-Za-z](?:[_.A-Za-z0-9-]{0,62}[_.A-Za-z0-9])?"),
+				Description: `The name of the runtime config.`,
 			},
 
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Description: `The description to associate with the runtime config.`,
 			},
 
 			"project": {
@@ -39,6 +41,7 @@ func resourceRuntimeconfigConfig() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
+				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 		},
 	}
