@@ -21,9 +21,7 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDataflowFlexTemplateJobCreate,
 		Read:   resourceDataflowFlexTemplateJobRead,
-		// Update: resourceDataflowFlexTemplateJobUpdateByReplacement,
-		// Note: resourceDataflowJobDelete is borrowed from dataflow_job to maintain
-		// same cancel/drain on_delete behavior.
+		Update: resourceDataflowFlexTemplateJobUpdateByReplacement,
 		Delete: resourceDataflowJobDelete,
 		Schema: map[string]*schema.Schema{
 
@@ -50,6 +48,7 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Type:             schema.TypeMap,
 				Optional:         true,
 				DiffSuppressFunc: resourceDataflowJobLabelDiffSuppress,
+				ForceNew: true,
 			},
 
 			"parameters": {
@@ -149,6 +148,8 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 }
 
 // resourceDataflowFlexTemplateJobUpdateByReplacement will be the method for updating Flex-Template jobs
-// See NOTE above.
+func resourceDataflowFlexTemplateJobUpdateByReplacement(d *schema.ResourceData, meta interface{}) error {
+	return nil
+}
 
 <% end -%>
