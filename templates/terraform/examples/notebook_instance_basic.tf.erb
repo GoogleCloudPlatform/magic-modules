@@ -1,0 +1,10 @@
+resource "google_notebooks_instance" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+  name = "<%= ctx[:vars]["instance_name"] %>"
+  location = "us-west1-a"
+  machine_type = "n1-standard-1"
+  vm_image {
+    project      = "deeplearning-platform-release"
+    image_family = "tf-latest-cpu"
+  }
+}
