@@ -2,6 +2,6 @@
 <% gcp_location = "#{external_attribute(pwd, 'gcp_location', doc_generation)}" -%>
 <% memcache_instance = grab_attributes(pwd)['memcache_instance'] -%>
 describe google_memcache_instances(project: <%= gcp_project_id -%>, region: <%= gcp_location %>) do
-	its('size') { should be >= 1 }
-  its('names') { should include <%= doc_generation ? "'#{memcache_instance['name']}'" : "memcache_instance['name']" -%> }
+	its('count') { should be >= 1 }
+  its('node_counts') { should include 1 }
 end
