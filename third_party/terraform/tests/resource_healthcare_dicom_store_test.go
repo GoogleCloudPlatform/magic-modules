@@ -102,12 +102,12 @@ func TestAccHealthcareDicomStore_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-			 	Config: testGoogleHealthcareDicomStore_basic(dicomStoreName, datasetName),
+				Config: testGoogleHealthcareDicomStore_basic(dicomStoreName, datasetName),
 			},
 			{
-			 	ResourceName:      resourceName,
-			 	ImportState:       true,
-			 	ImportStateVerify: true,
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
