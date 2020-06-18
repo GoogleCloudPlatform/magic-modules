@@ -146,6 +146,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # See the comment on stateNotificationConfig.exclude
         exclude: true
   Device: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: [ "{{%registry}}/devices/{{name}}" ]
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         required: true
@@ -155,13 +156,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         # We don't need this field, because it has the same format as the ID
         exclude: true
-      region: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
-        required: false
-        default_from_api: true
-        description: |
-          The region in which the created device should reside.
-          If it is not provided, the provider region is used.
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudiot_device_basic"

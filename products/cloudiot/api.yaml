@@ -194,8 +194,8 @@ objects:
                         The type of public key in the certificate.
   - !ruby/object:Api::Resource
     name: 'Device'
-    base_url: 'registries/{{registry}}/devices'
-    self_link: 'registries/{{registry}}/devices/{{name}}'
+    base_url: '{{registry}}/devices'
+    self_link: '{{registry}}/devices/{{name}}'
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -206,13 +206,6 @@ objects:
           'https://cloud.google.com/iot/docs/'
       api: 'https://cloud.google.com/iot/docs/reference/cloudiot/rest/'
     parameters:
-      - !ruby/object:Api::Type::String
-        name: region
-        input: true
-        url_param_only: true
-        required: true
-        description: |
-          The region of this Device.
       - !ruby/object:Api::Type::String
         name: registry
         input: true
