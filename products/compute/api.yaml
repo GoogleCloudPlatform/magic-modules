@@ -301,6 +301,14 @@ objects:
               instance may take to initialize. To do this, create an instance
               and time the startup process.
             default_value: 60
+          - !ruby/object:Api::Type::Enum
+            name: 'mode'
+            description: |
+              Defines operating mode for this policy.
+            values:
+              - :OFF
+              - :ONLY_UP
+              - :ON
           - !ruby/object:Api::Type::NestedObject
             name: 'scaleDownControl'
             min_version: beta
@@ -8505,14 +8513,6 @@ objects:
               instance may take to initialize. To do this, create an instance
               and time the startup process.
             default_value: 60
-          - !ruby/object:Api::Type::Enum
-            name: 'mode'
-            description: |
-              Defines operating mode for this policy.
-            values:
-              - :OFF
-              - :ONLY_UP
-              - :ON
           - !ruby/object:Api::Type::NestedObject
             name: 'cpuUtilization'
             description: |
