@@ -17,8 +17,8 @@ type googRanges struct {
 }
 
 type prefixes struct {
-	Ipv4Prefix string `json:ipv4Prefix`
-	Ipv6Prefix string `json:ipv6Prefix`
+	Ipv4Prefix string `json:"ipv4Prefix"`
+	Ipv6Prefix string `json:"ipv6Prefix"`
 }
 
 func dataSourceGoogleNetblockIpRanges() *schema.Resource {
