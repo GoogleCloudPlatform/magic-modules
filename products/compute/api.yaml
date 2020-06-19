@@ -303,6 +303,7 @@ objects:
             default_value: 60
           - !ruby/object:Api::Type::Enum
             name: 'mode'
+            default_value: :ON
             description: |
               Defines operating mode for this policy.
             values:
