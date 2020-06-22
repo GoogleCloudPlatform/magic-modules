@@ -1,44 +1,69 @@
 package google
 
 import (
-	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-func TestAccCloudIdentityGroup_basic(t *testing.T) {
+func TestAccCloudIdentityGroup_update(t *testing.T) {
 	t.Parallel()
 
-	name := "tftest-cloudidentity-" + acctest.RandString(6)
+	context := map[string]interface{}{
+		"org_domain":    getTestOrgDomainFromEnv(t),
+		"cust_id":       getTestCustIdFromEnv(t),
+		"random_suffix": randString(t, 10),
+	}
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProvidersOiCS,
+		CheckDestroy: testAccCheckCloudIdentityGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudIdentityGroup(name),
+				Config: testAccCloudIdentityGroup_basic(context),
 			},
 			{
-				ResourceName:      "google_cloud_identity_group.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				Config: testAccCloudIdentityGroup_update(context),
 			},
 		},
 	})
 }
 
-func testAccCloudIdentityGroup(name string) string {
-	return fmt.Sprintf(`
-resource "google_cloud_identity_group" "default" {
-  name          = "%s"
-  display_name   = "%s"
+func testAccCloudIdentityGroup_basic(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_cloud_identity_group" "cloud_identity_group_basic" {
+  provider = google-beta
+  display_name   = "tf-test-my-identity-group%{random_suffix}"
+
+  parent = "customers/%{cust_id}"
+
+  group_key {
+    id = "tf-test-my-identity-group%{random_suffix}@%{org_domain}"
+  }
 
   labels = {
-  	name = "%s"
-  	label_key = "Label-Value"
+    "cloudidentity.googleapis.com/groups.discussion_forum" = ""
   }
 }
-`, name, name, name)
+`, context)
+}
+
+func testAccCloudIdentityGroup_update(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_cloud_identity_group" "cloud_identity_group_basic" {
+  provider = google-beta
+  display_name   = "tf-test-my-identity-group%{random_suffix}-update"
+
+  parent = "customers/%{cust_id}"
+
+  group_key {
+    id = "tf-test-my-identity-group%{random_suffix}@%{org_domain}"
+  }
+
+  labels = {
+    "cloudidentity.googleapis.com/groups.discussion_forum" = ""
+  }
+}
+`, context)
 }

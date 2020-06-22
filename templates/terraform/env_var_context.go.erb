@@ -17,5 +17,7 @@
 		"<%= var_name -%>": getTestProjectFromEnv(),
 	<% elsif var_type == :FIRESTORE_PROJECT_NAME -%>
 		"<%= var_name -%>": getTestFirestoreProjectFromEnv(t),
+	<% elsif var_type == :CUST_ID  -%>
+		"<%= var_name -%>": getTestCustIdFromEnv(t),
 	<% end -%>
 <% end -%>

@@ -14,8 +14,41 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Group: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{name}}"
     import_format: ["{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_identity_groups_basic"
+        primary_resource_id: "cloud_identity_group_basic"
+        min_version: beta
+        vars:
+          id_group: "my-identity-group"
+        test_env_vars:
+          org_domain: :ORG_DOMAIN
+          cust_id: :CUST_ID
+      ### The full API doesn't seem to be implemented yet
+      # - !ruby/object:Provider::Terraform::Examples
+      #   name: "cloud_identity_groups_full"
+      #   primary_resource_id: "cloud_identity_group_full"
+      #   min_version: beta
+      #   vars:
+      #     id_group: "my-identity-group"
+      #   test_env_vars:
+      #     org_domain: :ORG_DOMAIN
+      #     cust_id: :CUST_ID
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/set_computed_name.erb
+  # GroupMembership: !ruby/object:Overrides::Terraform::ResourceOverride
+  #   import_format: ["{{name}}"]
+  #   examples:
+  #     - !ruby/object:Provider::Terraform::Examples
+  #       name: "cloud_identity_group_membership"
+  #       primary_resource_id: "cloud_identity_group_membership_basic"
+  #       min_version: beta
+  #       vars:
+  #         id_group: "my-identity-group"
+  #       test_env_vars:
+  #         org_domain: :ORG_DOMAIN
+  #         cust_id: :CUST_ID
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

@@ -16,8 +16,8 @@ name: CloudIdentity
 display_name: Cloud Identity
 versions:
   - !ruby/object:Api::Product::Version
-    name: ga
-    base_url: https://cloudidentity.googleapis.com/v1/
+    name: beta
+    base_url: https://cloudidentity.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-identity
 apis_required:
@@ -27,52 +27,70 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'Group'
-    input: true
     base_url: groups
+    update_url: '{{name}}'
+    self_link: '{{name}}'
+    update_verb: :PATCH
+    update_mask: true
     description: |
       A Cloud Identity resource representing a Group.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
-        required: true
+        output: true
         description: |
           Resource name of the Group in the format: groups/{group_id}, where group_id
           is the unique ID assigned to the Group.
       - !ruby/object:Api::Type::NestedObject
         name: 'groupKey'
+        required: true
+        input: true
         description: |
           EntityKey of the Group.
         properties:
           - !ruby/object:Api::Type::String
             name: 'id'
+            required: true
             description: |
-              The ID of the entity within the given namespace. The ID must be unique within
-              its namespace.
+              The ID of the entity.
+
+              For Google-managed entities, the id must be the email address of an existing
+              group or user.
+
+              For external-identity-mapped entities, the id must be a string conforming
+              to the Identity Source's requirements.
+
+              Must be unique within a namespace.
           - !ruby/object:Api::Type::String
             name: 'namespace'
-            output: true
             description: |
-              Namespaces provide isolation for IDs, so an ID only needs to be unique within its namespace.
+              The namespace in which the entity exists.
 
-              Namespaces are currently only created as part of `IdentitySource` creation from Admin Console.
-              A namespace `identitysources/{identity_source_id}` is created corresponding to every Identity
-              Source identity_source_id.
+              If not specified, the EntityKey represents a Google-managed entity
+              such as a Google user or a Google Group.
+
+              If specified, the EntityKey represents an external-identity-mapped group.
+              The namespace must correspond to an identity source created in Admin Console
+              and must be in the form of `identitysources/{identity_source_id}.
       - !ruby/object:Api::Type::String
         name: 'parent'
+        required: true
+        input: true
         description: |
-          The entity under which this Group resides in Cloud Identity resource hierarchy.
-          Currently allowed types: `identitysources`.
+          The resource name of the entity under which this Group resides in the
+          Cloud Identity resource hierarchy.
+
+          Must be of the form identitysources/{identity_source_id} for external-identity-mapped
+          groups or customers/{customer_id} for Google Groups.
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: |
-          The Group's display name.
+          The display name of the Group.
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
           An extended description to help users determine the purpose of a Group.
-          For example, you can include information about who should join the Group,
-          the types of messages to send to the Group, links to FAQs about the Group,
-          or related Groups. Maximum length is 4,096 characters.
+          Must not be longer than 4,096 characters.
       - !ruby/object:Api::Type::String
         name: 'createTime'
         output: true
@@ -86,6 +104,212 @@ objects:
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         required: true
+        input: true
         description: |
-          Labels for Group resource. For creating Groups under a namespace, set label key
-          to `labels/system/groups/external` and label value as empty.
+          The labels that apply to the Group.
+
+          Must not contain more than one entry. Must contain the entry
+          'cloudidentity.googleapis.com/groups.discussion_forum': '' if the Group is a Google Group or
+          'system/groups/external': '' if the Group is an external-identity-mapped group.
+      # TODO (mbang): The full API doesn't seem to be implemented yet
+      # - !ruby/object:Api::Type::Array
+      #   name: 'additionalGroupKeys'
+      #   input: true
+      #   description: |
+      #     Additional entity key aliases for a Group.
+      #   item_type: !ruby/object:Api::Type::NestedObject
+      #     properties:
+      #       - !ruby/object:Api::Type::String
+      #         name: 'id'
+      #         required: true
+      #         description: |
+      #           The ID of the entity.
+
+      #           For Google-managed entities, the id must be the email address of an existing
+      #           group or user.
+
+      #           For external-identity-mapped entities, the id must be a string conforming
+      #           to the Identity Source's requirements.
+
+      #           Must be unique within a namespace.
+      #       - !ruby/object:Api::Type::String
+      #         name: 'namespace'
+      #         description: |
+      #           The namespace in which the entity exists.
+
+      #           If not specified, the EntityKey represents a Google-managed entity
+      #           such as a Google user or a Google Group.
+
+      #           If specified, the EntityKey represents an external-identity-mapped group.
+      #           The namespace must correspond to an identity source created in Admin Console
+      #           and must be in the form of `identitysources/{identity_source_id}.
+      # - !ruby/object:Api::Type::NestedObject
+      #   name: 'dynamicGroupMetadata'
+      #   input: true
+      #   description: |
+      #     Dynamic group metadata like queries and status.
+      #   properties:
+      #     - !ruby/object:Api::Type::Array
+      #       name: 'queries'
+      #       required: true
+      #       description: |
+      #         Memberships will be the union of all queries. Only one entry with USER resource is currently supported.
+      #       item_type: !ruby/object:Api::Type::NestedObject
+      #         properties:
+      #           - !ruby/object:Api::Type::Enum
+      #             name: 'resourceType'
+      #             description: |
+      #               Resources supported for dynamic groups.
+      #             default_value: :USER
+      #             values:
+      #               - :USER
+      #           - !ruby/object:Api::Type::String
+      #             name: 'query'
+      #             description: |
+      #               Query that determines the memberships of the dynamic group.
+
+      #               Examples: All users with at least one organizations.department of engineering.
+
+      #               user.organizations.exists(org, org.department=='engineering')
+
+      #               All users with at least one location that has area of foo and building_id of bar.
+
+      #               user.locations.exists(loc, loc.area=='foo' && loc.building_id=='bar')
+      #     - !ruby/object:Api::Type::NestedObject
+      #       name: 'DynamicGroupStatus'
+      #       output: true
+      #       description: |
+      #         Status of the dynamic group.
+      #       properties:
+      #         - !ruby/object:Api::Type::String
+      #           name: 'status'
+      #           description: |
+      #             Status of the dynamic group.
+      #         - !ruby/object:Api::Type::String
+      #           name: 'statusTime'
+      #           description: |
+      #             The latest time at which the dynamic group is guaranteed to be in the given status.
+      #             For example, if status is: UP_TO_DATE - The latest time at which this dynamic group
+      #             was confirmed to be up to date. UPDATING_MEMBERSHIPS - The time at which dynamic group was created.
+
+      #             A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
+  # - !ruby/object:Api::Resource
+  #   name: 'GroupMembership'
+  #   base_url: '{{group}}/memberships'
+  #   self_link: '{{name}}'
+  #   description: |
+  #     A Membership defines a relationship between a Group and an entity belonging to that Group, referred to as a "member".
+  #   parameters:
+  #     - !ruby/object:Api::Type::ResourceRef
+  #       name: 'group'
+  #       resource: 'Group'
+  #       imports: 'name'
+  #       description: |
+  #         The name of the Group to create this membership.
+  #       required: true
+  #       input: true
+  #       url_param_only: true
+  #   properties:
+  #     - !ruby/object:Api::Type::String
+  #       name: 'name'
+  #       output: true
+  #       description: |
+  #         The resource name of the Membership, of the form groups/{group_id}/memberships/{membership_id}.
+  #     - !ruby/object:Api::Type::NestedObject
+  #       name: 'memberKey'
+  #       input: true
+  #       description: |
+  #         EntityKey of the member.
+  #       exactly_one_of:
+  #         - member_key
+  #         - preferred_member_key
+  #       properties:
+  #         - !ruby/object:Api::Type::String
+  #           name: 'id'
+  #           required: true
+  #           description: |
+  #             The ID of the entity.
+
+  #             For Google-managed entities, the id must be the email address of an existing
+  #             group or user.
+
+  #             For external-identity-mapped entities, the id must be a string conforming
+  #             to the Identity Source's requirements.
+
+  #             Must be unique within a namespace.
+  #         - !ruby/object:Api::Type::String
+  #           name: 'namespace'
+  #           description: |
+  #             The namespace in which the entity exists.
+
+  #             If not specified, the EntityKey represents a Google-managed entity
+  #             such as a Google user or a Google Group.
+
+  #             If specified, the EntityKey represents an external-identity-mapped group.
+  #             The namespace must correspond to an identity source created in Admin Console
+  #             and must be in the form of `identitysources/{identity_source_id}.
+  #     - !ruby/object:Api::Type::NestedObject
+  #       name: 'preferredMemberKey'
+  #       input: true
+  #       description: |
+  #         EntityKey of the member.
+  #       exactly_one_of:
+  #         - member_key
+  #         - preferred_member_key
+  #       properties:
+  #         - !ruby/object:Api::Type::String
+  #           name: 'id'
+  #           required: true
+  #           description: |
+  #             The ID of the entity.
+
+  #             For Google-managed entities, the id must be the email address of an existing
+  #             group or user.
+
+  #             For external-identity-mapped entities, the id must be a string conforming
+  #             to the Identity Source's requirements.
+
+  #             Must be unique within a namespace.
+  #         - !ruby/object:Api::Type::String
+  #           name: 'namespace'
+  #           description: |
+  #             The namespace in which the entity exists.
+
+  #             If not specified, the EntityKey represents a Google-managed entity
+  #             such as a Google user or a Google Group.
+
+  #             If specified, the EntityKey represents an external-identity-mapped group.
+  #             The namespace must correspond to an identity source created in Admin Console
+  #             and must be in the form of `identitysources/{identity_source_id}.
+  #     - !ruby/object:Api::Type::String
+  #       name: 'createTime'
+  #       output: true
+  #       description: |
+  #         The time when the Membership was created.
+  #     - !ruby/object:Api::Type::String
+  #       name: 'updateTime'
+  #       output: true
+  #       description: |
+  #         The time when the Membership was last updated.
+  #     - !ruby/object:Api::Type::Array
+  #       name: 'roles'
+  #       description: |
+  #         The MembershipRoles that apply to the Membership.
+  #         If unspecified, defaults to a single MembershipRole with name MEMBER.
+  #         Must not contain duplicate MembershipRoles with the same name.
+  #       item_type: !ruby/object:Api::Type::NestedObject
+  #         properties:
+  #           - !ruby/object:Api::Type::Enum
+  #             name: 'name'
+  #             required: true
+  #             description: |
+  #               The name of the MembershipRole. Must be one of OWNER, MANAGER, MEMBER.
+  #             values:
+  #               - :OWNER
+  #               - :MANAGER
+  #               - :MEMBER
+  #     - !ruby/object:Api::Type::String
+  #       name: 'type'
+  #       output: true
+  #       description: |
+  #         # The type of the membership.
