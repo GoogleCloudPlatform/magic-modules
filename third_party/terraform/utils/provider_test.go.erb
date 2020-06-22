@@ -63,9 +63,11 @@ var orgEnvVars = []string{
 	"GOOGLE_ORG",
 }
 
+<% unless version == 'ga' -%>
 var custIdEnvVars = []string{
 	"GOOGLE_CUST_ID",
 }
+<% end -%>
 
 var orgEnvDomainVars = []string{
 	"GOOGLE_ORG_DOMAIN",
@@ -849,9 +851,11 @@ func getTestZoneFromEnv() string {
 	return multiEnvSearch(zoneEnvVars)
 }
 
+<% unless version == 'ga' -%>
 func getTestCustIdFromEnv(t *testing.T) string {
 	return multiEnvSearch(custIdEnvVars)
 }
+<% end -%>
 
 // Firestore can't be enabled at the same time as Datastore, so we need a new
 // project to manage it until we can enable Firestore programmatically.
