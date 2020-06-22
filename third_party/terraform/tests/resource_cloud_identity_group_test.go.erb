@@ -1,5 +1,7 @@
 package google
 
+<% autogen_exception -%>
+<% unless version == 'ga' -%>
 import (
 	"testing"
 
@@ -68,3 +70,4 @@ resource "google_cloud_identity_group" "cloud_identity_group_basic" {
 }
 `, context)
 }
+<% end -%>
