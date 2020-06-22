@@ -1,6 +1,6 @@
 resource "google_cloud_identity_group" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
-  display_name   = "<%= ctx[:vars]['id_group'] %>"
+  display_name = "<%= ctx[:vars]['id_group'] %>"
 
   parent = "customers/<%= ctx[:test_env_vars]['cust_id'] %>"
 

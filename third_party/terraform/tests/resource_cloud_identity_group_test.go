@@ -34,7 +34,7 @@ func testAccCloudIdentityGroup_basic(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_identity_group" "cloud_identity_group_basic" {
   provider = google-beta
-  display_name   = "tf-test-my-identity-group%{random_suffix}"
+  display_name = "tf-test-my-identity-group%{random_suffix}"
 
   parent = "customers/%{cust_id}"
 
@@ -53,7 +53,8 @@ func testAccCloudIdentityGroup_update(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_identity_group" "cloud_identity_group_basic" {
   provider = google-beta
-  display_name   = "tf-test-my-identity-group%{random_suffix}-update"
+  display_name = "tf-test-my-identity-group%{random_suffix}-update"
+  description  = "my-description"
 
   parent = "customers/%{cust_id}"
 
