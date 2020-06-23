@@ -38,7 +38,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         min_version: 'beta'
         vars:
           address_name: "my-internal-address"
-        skip_docs: true  # It is almost identical to internal_with_gce_endpoint 
+        skip_docs: true  # It is almost identical to internal_with_gce_endpoint
       # TODO(rileykarson): Remove this example when instance is supported
       - !ruby/object:Provider::Terraform::Examples
         name: "instance_with_ip"
@@ -114,6 +114,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: maxReplicas
       autoscalingPolicy.coolDownPeriodSec: !ruby/object:Overrides::Terraform::PropertyOverride
         name: cooldownPeriod
+      autoscalingPolicy.scaleDownControl: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
       autoscalingPolicy.cpuUtilization: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -352,7 +355,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       Adds existing resource policies to a disk. You can only add one policy
       which will be applied to this disk for scheduling snapshot creation.
 
-      ~> **Note:** This resource does not support zonal disks (`google_compute_disk`). For zonal disks, please refer to [`google_compute_disk_resource_policy_attachment`](https://www.terraform.io/docs/providers/google/r/compute_disk_resource_policy_attachment.html) 
+      ~> **Note:** This resource does not support zonal disks (`google_compute_disk`). For zonal disks, please refer to [`google_compute_disk_resource_policy_attachment`](https://www.terraform.io/docs/providers/google/r/compute_disk_resource_policy_attachment.html)
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_disk_resource_policy_attachment_basic"
