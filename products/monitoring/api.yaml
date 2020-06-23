@@ -1648,6 +1648,16 @@ objects:
         - http_check
         - tcp_check
       properties:
+      - !ruby/object:Api::Type::Enum
+        name: requestMethod
+        input: true
+        description: The HTTP request method to use for the check. If set to 
+          METHOD_UNSPECIFIED then requestMethod defaults to GET.
+        default_value: :GET
+        values:
+          - :METHOD_UNSPECIFIED
+          - :GET
+          - :POST
       - !ruby/object:Api::Type::NestedObject
         name: authInfo
         at_least_one_of:
