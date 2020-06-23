@@ -301,6 +301,46 @@ objects:
               instance may take to initialize. To do this, create an instance
               and time the startup process.
             default_value: 60
+          - !ruby/object:Api::Type::Enum
+            name: 'mode'
+            default_value: :ON
+            description: |
+              Defines operating mode for this policy.
+            values:
+              - :OFF
+              - :ONLY_UP
+              - :ON
+          - !ruby/object:Api::Type::NestedObject
+            name: 'scaleDownControl'
+            min_version: beta
+            at_least_one_of:
+             - scale_down_control.0.max_scaled_down_replicas
+             - scale_down_control.0.time_window_sec
+            description: |
+              Defines scale down controls to reduce the risk of response latency
+              and outages due to abrupt scale-in events
+            properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'maxScaledDownReplicas'
+              at_least_one_of:
+              - scale_down_control.0.max_scaled_down_replicas.0.fixed
+              - scale_down_control.0.max_scaled_down_replicas.0.percent
+              properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'fixed'
+                description: |
+                  Specifies a fixed number of VM instances. This must be a positive
+                  integer.
+              - !ruby/object:Api::Type::Integer
+                name: 'percent'
+                description: |
+                  Specifies a percentage of instances between 0 to 100%, inclusive.
+                  For example, specify 80 for 80%.
+            - !ruby/object:Api::Type::Integer
+              name: 'timeWindowSec'
+              description: |
+                How long back autoscaling should look when computing recommendations
+                to include directives regarding slower scale down, as described above.
           - !ruby/object:Api::Type::NestedObject
             name: 'cpuUtilization'
             description: |
@@ -7590,8 +7630,8 @@ objects:
               The autoscaling mode. Set to one of the following:
                 - OFF: Disables the autoscaler.
                 - ON: Enables scaling in and scaling out.
-                - ONLY_SCALE_OUT: Enables only scaling out. 
-                You must use this mode if your node groups are configured to 
+                - ONLY_SCALE_OUT: Enables only scaling out.
+                You must use this mode if your node groups are configured to
                 restart their hosted VMs on minimal servers.
             values:
               - :OFF
@@ -7600,7 +7640,7 @@ objects:
           - !ruby/object:Api::Type::Integer
             name: 'minNodes'
             description: |
-              Minimum size of the node group. Must be less 
+              Minimum size of the node group. Must be less
               than or equal to max-nodes. The default value is 0.
           - !ruby/object:Api::Type::Integer
             name: 'maxNodes'
@@ -7846,7 +7886,7 @@ objects:
         description: The name of the packet mirroring rule
         required: true
       - !ruby/object:Api::Type::String
-        name: description 
+        name: description
         description: A human-readable description of the rule.
         input: true
       - !ruby/object:Api::Type::String
@@ -7890,7 +7930,7 @@ objects:
             imports: 'selfLink'
             description: The URL of the forwarding rule.
       - !ruby/object:Api::Type::NestedObject
-        name: filter 
+        name: filter
         description: |
             A filter for mirrored traffic.  If unset, all traffic is mirrored.
         properties:
