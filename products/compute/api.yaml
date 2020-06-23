@@ -313,12 +313,18 @@ objects:
           - !ruby/object:Api::Type::NestedObject
             name: 'scaleDownControl'
             min_version: beta
+            at_least_one_of:
+             - scale_down_control.0.max_scaled_down_replicas
+             - scale_down_control.0.time_window_sec
             description: |
               Defines scale down controls to reduce the risk of response latency
               and outages due to abrupt scale-in events
             properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'maxScaledDownReplicas'
+              at_least_one_of:
+              - scale_down_control.0.max_scaled_down_replicas.0.fixed
+              - scale_down_control.0.max_scaled_down_replicas.0.percent
               properties:
               - !ruby/object:Api::Type::Integer
                 name: 'fixed'
