@@ -67,6 +67,10 @@ var orgEnvVars = []string{
 var custIdEnvVars = []string{
 	"GOOGLE_CUST_ID",
 }
+
+var adminUserEnvVars = []string{
+	"GOOGLE_ADMIN_USER",
+}
 <% end -%>
 
 var orgEnvDomainVars = []string{
@@ -854,6 +858,10 @@ func getTestZoneFromEnv() string {
 <% unless version == 'ga' -%>
 func getTestCustIdFromEnv(t *testing.T) string {
 	return multiEnvSearch(custIdEnvVars)
+}
+
+func getTestAdminUserFromEnv(t *testing.T) string {
+	return multiEnvSearch(adminUserEnvVars)
 }
 <% end -%>
 

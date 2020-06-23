@@ -18,7 +18,7 @@ resource "google_cloud_identity_group_membership" "cloud_identity_group_membersh
   group    = google_cloud_identity_group.group.id
 
   member_key {
-    id = "my-user@<%= ctx[:test_env_vars]['org_domain'] %>"
+    id = "<%= ctx[:test_env_vars]['admin_user'] %>@<%= ctx[:test_env_vars]['org_domain'] %>"
   }
 
   roles {

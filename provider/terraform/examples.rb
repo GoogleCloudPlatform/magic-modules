@@ -60,6 +60,7 @@ module Provider
       #  - :BILLING_ACCT
       #  - :SERVICE_ACCT
       #  - :CUST_ID
+      #  - :ADMIN_USER
       # This list corresponds to the `get*FromEnv` methods in provider_test.go.
       attr_reader :test_env_vars
 
@@ -140,7 +141,8 @@ module Provider
           ORG_TARGET: '123456789',
           BILLING_ACCT: '000000-0000000-0000000-000000',
           SERVICE_ACCT: 'emailAddress:my@service-account.com',
-          CUST_ID: 'A01b123xz'
+          CUST_ID: 'A01b123xz',
+          ADMIN_USER: 'admin_user'
         }
         @vars ||= {}
         @test_env_vars ||= {}
