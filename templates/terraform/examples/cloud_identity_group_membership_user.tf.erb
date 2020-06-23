@@ -1,0 +1,31 @@
+resource "google_cloud_identity_group" "group" {
+  provider = google-beta
+  display_name = "<%= ctx[:vars]['id_group'] %>"
+
+  parent = "customers/<%= ctx[:test_env_vars]['cust_id'] %>"
+
+  group_key {
+  	id = "<%= ctx[:vars]['id_group'] %>@<%= ctx[:test_env_vars]['org_domain'] %>"
+  }
+
+  labels = {
+    "cloudidentity.googleapis.com/groups.discussion_forum" = ""
+  }
+}
+
+resource "google_cloud_identity_group_membership" "cloud_identity_group_membership_basic" {
+  provider = google-beta
+  group    = google_cloud_identity_group.group.id
+
+  member_key {
+    id = "my-user@<%= ctx[:test_env_vars]['org_domain'] %>"
+  }
+
+  roles {
+  	name = "MEMBER"
+  }
+
+  roles {
+  	name = "MANAGER"
+  }
+}

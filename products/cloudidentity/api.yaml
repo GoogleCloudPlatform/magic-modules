@@ -207,7 +207,7 @@ objects:
         resource: 'Group'
         imports: 'name'
         description: |
-          The name of the Group to create this membership.
+          The name of the Group to create this membership in.
         required: true
         input: true
         url_param_only: true
@@ -229,6 +229,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'id'
             required: true
+            input: true
             description: |
               The ID of the entity.
 
@@ -241,6 +242,7 @@ objects:
               Must be unique within a namespace.
           - !ruby/object:Api::Type::String
             name: 'namespace'
+            input: true
             description: |
               The namespace in which the entity exists.
 
@@ -249,7 +251,7 @@ objects:
 
               If specified, the EntityKey represents an external-identity-mapped group.
               The namespace must correspond to an identity source created in Admin Console
-              and must be in the form of `identitysources/{identity_source_id}.
+              and must be in the form of `identitysources/{identity_source_id}`.
       - !ruby/object:Api::Type::NestedObject
         name: 'preferredMemberKey'
         input: true
@@ -262,6 +264,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'id'
             required: true
+            input: true
             description: |
               The ID of the entity.
 
@@ -274,6 +277,7 @@ objects:
               Must be unique within a namespace.
           - !ruby/object:Api::Type::String
             name: 'namespace'
+            input: true
             description: |
               The namespace in which the entity exists.
 
@@ -282,7 +286,7 @@ objects:
 
               If specified, the EntityKey represents an external-identity-mapped group.
               The namespace must correspond to an identity source created in Admin Console
-              and must be in the form of `identitysources/{identity_source_id}.
+              and must be in the form of `identitysources/{identity_source_id}`.
       - !ruby/object:Api::Type::String
         name: 'createTime'
         output: true
@@ -295,9 +299,9 @@ objects:
           The time when the Membership was last updated.
       - !ruby/object:Api::Type::Array
         name: 'roles'
+        required: true
         description: |
           The MembershipRoles that apply to the Membership.
-          If unspecified, defaults to a single MembershipRole with name MEMBER.
           Must not contain duplicate MembershipRoles with the same name.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -314,4 +318,4 @@ objects:
         name: 'type'
         output: true
         description: |
-          # The type of the membership.
+          The type of the membership.

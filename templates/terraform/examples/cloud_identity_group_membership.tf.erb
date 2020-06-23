@@ -30,7 +30,7 @@ resource "google_cloud_identity_group" "child-group" {
 
 resource "google_cloud_identity_group_membership" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
-  group    = google_cloud_identity_group.group.name
+  group    = google_cloud_identity_group.group.id
 
   member_key {
     id = google_cloud_identity_group.child-group.group_key[0].id

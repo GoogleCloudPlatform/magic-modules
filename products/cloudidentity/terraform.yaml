@@ -49,6 +49,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           org_domain: :ORG_DOMAIN
           cust_id: :CUST_ID
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_identity_group_membership_user"
+        primary_resource_id: "cloud_identity_group_membership_basic"
+        min_version: beta
+        vars:
+          id_group: "my-identity-group"
+        test_env_vars:
+          org_domain: :ORG_DOMAIN
+          cust_id: :CUST_ID
+        skip_test: true
     properties:
       memberKey: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
