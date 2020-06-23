@@ -12,11 +12,11 @@
 # limitations under the License.
 --- !ruby/object:Api::Product
 name: Monitoring
-display_name: Stackdriver Monitoring
+display_name: Cloud (Stackdriver) Monitoring
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://monitoring.googleapis.com/v3/
+    base_url: https://monitoring.googleapis.com/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -26,8 +26,8 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'AlertPolicy'
-    base_url: projects/{{project}}/alertPolicies
-    self_link: "{{name}}"
+    base_url: v3/projects/{{project}}/alertPolicies
+    self_link: "v3/{{name}}"
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -738,12 +738,10 @@ objects:
             description: |
               The format of the content field. Presently, only the value
               "text/markdown" is supported.
-
-
   - !ruby/object:Api::Resource
     name: 'Group'
-    base_url: projects/{{project}}/groups
-    self_link: "{{name}}"
+    base_url: v3/projects/{{project}}/groups
+    self_link: "v3/{{name}}"
     update_verb: :PUT
     description: |
       The description of a dynamic collection of monitored resources. Each group
@@ -787,19 +785,16 @@ objects:
         description: |
           The filter used to determine which monitored resources
           belong to this group.
-
-
   - !ruby/object:Api::Resource
     name: NotificationChannel
-    base_url: projects/{{project}}/notificationChannels
-    self_link: "{{name}}"
+    base_url: v3/projects/{{project}}/notificationChannels
+    self_link: "v3/{{name}}"
     update_verb: :PATCH
     description: |
       A NotificationChannel is a medium through which an alert is delivered
       when a policy violation is detected. Examples of channels include email, SMS,
       and third-party messaging applications. Fields containing sensitive information
       like authentication tokens or contact info are only partially populated on retrieval.
-
       Notification Channels are designed to be flexible and are made up of a supported `type`
       and labels to configure that channel. Each `type` has specific labels that need to be
       present for that channel to be correctly configured. The labels that are required to be
@@ -807,7 +802,6 @@ objects:
       Due to these loose constraints it's often best to set up a channel through the UI
       and import to Terraform when setting up a brand new channel type to determine which
       labels are required.
-
       A list of supported channels per project the `list` endpoint can be
       accessed programmatically or through the api explorer at  https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.notificationChannelDescriptors/list .
       This provides the channel type and all of the required labels that must be passed.
@@ -822,6 +816,38 @@ objects:
       description: Configuration fields that define the channel and its behavior. The
         permissible and required labels are specified in the NotificationChannelDescriptor.labels
         of the NotificationChannelDescriptor corresponding to the type field.
+    - !ruby/object:Api::Type::NestedObject
+      name: sensitiveLabels
+      # This is a helper object for Terraform only
+      exclude: true
+      url_param_only: true
+      description: |
+        Terraform only field
+      properties:
+        - !ruby/object:Api::Type::String
+          name: authToken
+          exactly_one_of:
+            - sensitive_labels.0.auth_token
+            - sensitive_labels.0.password
+            - sensitive_labels.0.service_key
+          description: |
+            An authorization token for a notification channel. Channel types that support this field include: slack
+        - !ruby/object:Api::Type::String
+          name: password
+          exactly_one_of:
+            - sensitive_labels.0.auth_token
+            - sensitive_labels.0.password
+            - sensitive_labels.0.service_key
+          description: |
+            An password for a notification channel. Channel types that support this field include: webhook_basicauth
+        - !ruby/object:Api::Type::String
+          name: serviceKey
+          exactly_one_of:
+            - sensitive_labels.0.auth_token
+            - sensitive_labels.0.password
+            - sensitive_labels.0.service_key
+          description: |
+            An servicekey token for a notification channel. Channel types that support this field include: pagerduty
     - !ruby/object:Api::Type::String
       name: name
       description: |
@@ -869,7 +895,6 @@ objects:
         the channel. This may not exceed 1024 Unicode characters.
     - !ruby/object:Api::Type::String
       name: displayName
-      required: true
       description: An optional human-readable name for this notification channel. It
         is recommended that you specify a non-empty and unique name in order to make
         it easier to identify the channels in your project, though this is not enforced.
@@ -885,7 +910,640 @@ objects:
         to receive notifications from the same set of alerting policies on the channel
         at some point in the future.
 
-
+  - !ruby/object:Api::Resource
+    name: Service
+    base_url: v3/projects/{{project}}/services
+    create_url: v3/projects/{{project}}/services?serviceId={{service_id}}
+    self_link: "v3/{{name}}"
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A Service is a discrete, autonomous, and network-accessible unit,
+      designed to solve an individual concern (Wikipedia). In Cloud Monitoring,
+      a Service acts as the root resource under which operational aspects of
+      the service are accessible
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Service Monitoring': 'https://cloud.google.com/monitoring/service-monitoring'
+        'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
+      api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services'
+    parameters:
+    - !ruby/object:Api::Type::String
+      name: serviceId
+      description: |
+        An optional service ID to use. If not given, the server will generate a
+        service ID.
+      input: true
+    properties:
+    - !ruby/object:Api::Type::String
+      name: name
+      description: |
+        The full resource name for this service. The syntax is:
+        projects/[PROJECT_ID]/services/[SERVICE_ID].
+      output: true
+    - !ruby/object:Api::Type::String
+      name: displayName
+      description: |
+        Name used for UI elements listing this Service.
+    - !ruby/object:Api::Type::NestedObject
+      name: telemetry
+      description: |
+        Configuration for how to query telemetry on a Service.
+      properties:
+        - !ruby/object:Api::Type::String
+          name: resourceName
+          description: |
+            The full name of the resource that defines this service.
+            Formatted as described in
+            https://cloud.google.com/apis/design/resource_names.
+  - !ruby/object:Api::Resource
+    name: Slo
+    base_url: v3/projects/{{project}}/services/{{service}}/serviceLevelObjectives
+    # name = projects/{{project}}/services/{{service}}/serviceLevelObjectives/{{slo_id}}
+    self_link: "v3/{{name}}"
+    create_url: v3/projects/{{project}}/services/{{service}}/serviceLevelObjectives?serviceLevelObjectiveId={{slo_id}}
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A Service-Level Objective (SLO) describes the level of desired good
+      service. It consists of a service-level indicator (SLI), a performance
+      goal, and a period over which the objective is to be evaluated against
+      that goal. The SLO can use SLIs defined in a number of different manners.
+      Typical SLOs might include "99% of requests in each rolling week have
+      latency below 200 milliseconds" or "99.5% of requests in each calendar
+      month return successfully."
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Service Monitoring': 'https://cloud.google.com/monitoring/service-monitoring'
+        'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
+      api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services.serviceLevelObjectives'
+    parameters:
+    - !ruby/object:Api::Type::String
+      name: service
+      required: true
+      url_param_only: true
+      input: true
+      description: |
+        ID of the service to which this SLO belongs.
+    - !ruby/object:Api::Type::String
+      name: sloId
+      description: |
+        The id to use for this ServiceLevelObjective. If omitted, an id will be generated instead.
+      input: true
+    properties:
+    - !ruby/object:Api::Type::String
+      name: name
+      description: |
+        The full resource name for this service. The syntax is:
+        projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]/serviceLevelObjectives/[SLO_NAME]
+      output: true
+    - !ruby/object:Api::Type::String
+      name: displayName
+      description: |
+        Name used for UI elements listing this SLO.
+    - !ruby/object:Api::Type::Double
+      name: goal
+      required: true
+      description: |
+        The fraction of service that must be good in order for this objective
+        to be met. 0 < goal <= 0.999
+    - !ruby/object:Api::Type::Integer
+      name: rollingPeriodDays
+      api_name: rollingPeriod
+      exactly_one_of:
+        - rolling_period_days
+        - calendar_period
+      description: |
+        A rolling time period, semantically "in the past X days".
+        Must be between 1 to 30 days, inclusive.
+    - !ruby/object:Api::Type::Enum
+      name: calendarPeriod
+      exactly_one_of:
+        - rolling_period_days
+        - calendar_period
+      description: |
+        A calendar period, semantically "since the start of the current
+        <calendarPeriod>".
+      values:
+        - DAY
+        - WEEK
+        - FORTNIGHT
+        - MONTH
+    - !ruby/object:Api::Type::NestedObject
+      name: serviceLevelIndicator
+      description: |
+        serviceLevelIndicator (SLI) describes a good service.
+        It is used to measure and calculate the quality of the Service's
+        performance with respect to a single aspect of service quality.
+      properties:
+        - !ruby/object:Api::Type::NestedObject
+          name: basicSli
+          exactly_one_of:
+            - service_level_indicator.0.basic_sli
+            - service_level_indicator.0.request_based_sli
+            - service_level_indicator.0.windows_based_sli
+          description: |
+            Basic Service-Level Indicator (SLI) on a well-known service type.
+            Performance will be computed on the basis of pre-defined metrics.
+            SLIs are used to measure and calculate the quality of the Service's
+            performance with respect to a single aspect of service quality.
+            Exactly one of the following must be set:
+            `basic_sli`, `request_based_sli`, `windows_based_sli`
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: method
+              description: |
+                An optional set of RPCs to which this SLI is relevant.
+                Telemetry from other methods will not be used to calculate
+                performance for this SLI. If omitted, this SLI applies to all
+                the Service's methods. For service types that don't support
+                breaking down by method, setting this field will result in an
+                error.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: location
+              description: |
+                An optional set of locations to which this SLI is relevant.
+                Telemetry from other locations will not be used to calculate
+                performance for this SLI. If omitted, this SLI applies to all
+                locations in which the Service has activity. For service types
+                that don't support breaking down by location, setting this
+                field will result in an error.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: version
+              description: |
+                 The set of API versions to which this SLI is relevant.
+                 Telemetry from other API versions will not be used to
+                 calculate performance for this SLI. If omitted,
+                 this SLI applies to all API versions. For service types
+                 that don't support breaking down by version, setting this
+                 field will result in an error.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::NestedObject
+              name: latency
+              description: |
+                Parameters for a latency threshold SLI.
+              required: true
+              properties:
+              - !ruby/object:Api::Type::String
+                required: true
+                name: threshold
+                description: |
+                  A duration string, e.g. 10s.
+                  Good service is defined to be the count of requests made to
+                  this service that return in no more than threshold.
+        - !ruby/object:Api::Type::NestedObject
+          name: requestBasedSli
+          api_name: 'requestBased'
+          exactly_one_of:
+            - service_level_indicator.0.basic_sli
+            - service_level_indicator.0.request_based_sli
+            - service_level_indicator.0.windows_based_sli
+          description: |
+            A request-based SLI defines a SLI for which atomic units of
+            service are counted directly.
+            A SLI describes a good service.
+            It is used to measure and calculate the quality of the Service's
+            performance with respect to a single aspect of service quality.
+            Exactly one of the following must be set:
+            `basic_sli`, `request_based_sli`, `windows_based_sli`
+          properties:
+          # NOTE: If adding properties to requestBasedSli, remember to add to the
+          # custom updateMask fields in property overrides.
+          - !ruby/object:Api::Type::NestedObject
+            name: goodTotalRatio
+            exactly_one_of:
+            - service_level_indicator.0.request_based_sli.0.good_total_ratio
+            - service_level_indicator.0.request_based_sli.0.distribution_cut
+            description: |
+              A means to compute a ratio of `good_service` to `total_service`.
+              Defines computing this ratio with two TimeSeries [monitoring filters](https://cloud.google.com/monitoring/api/v3/filters)
+              Must specify exactly two of good, bad, and total service filters.
+              The relationship good_service + bad_service = total_service
+              will be assumed.
+              Exactly one of `distribution_cut` or `good_total_ratio` can be set.
+            properties:
+            - !ruby/object:Api::Type::String
+              name: goodServiceFilter
+              at_least_one_of:
+                - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.good_service_filter
+                - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.bad_service_filter
+                - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.total_service_filter
+              description: |
+                 A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
+                 quantifying good service provided.
+                 Must have ValueType = DOUBLE or ValueType = INT64 and
+                 must have MetricKind = DELTA or MetricKind = CUMULATIVE.
+                 Exactly two of `good_service_filter`,`bad_service_filter`,`total_service_filter`
+                 must be set (good + bad = total is assumed).
+            - !ruby/object:Api::Type::String
+              name: badServiceFilter
+              at_least_one_of:
+                - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.good_service_filter
+                - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.bad_service_filter
+                - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.total_service_filter
+              description: |
+                 A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
+                 quantifying bad service provided, either demanded service that
+                 was not provided or demanded service that was of inadequate
+                 quality.
+                 Must have ValueType = DOUBLE or ValueType = INT64 and
+                 must have MetricKind = DELTA or MetricKind = CUMULATIVE.
+                 Exactly two of `good_service_filter`,`bad_service_filter`,`total_service_filter`
+                 must be set (good + bad = total is assumed).
+            - !ruby/object:Api::Type::String
+              name: totalServiceFilter
+              at_least_one_of:
+                - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.good_service_filter
+                - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.bad_service_filter
+                - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.total_service_filter
+              description: |
+                 A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
+                 quantifying total demanded service.
+                 Must have ValueType = DOUBLE or ValueType = INT64 and
+                 must have MetricKind = DELTA or MetricKind = CUMULATIVE.
+                 Exactly two of `good_service_filter`,`bad_service_filter`,`total_service_filter`
+                 must be set (good + bad = total is assumed).
+          - !ruby/object:Api::Type::NestedObject
+            name: distributionCut
+            exactly_one_of:
+            - service_level_indicator.0.request_based_sli.0.good_total_ratio
+            - service_level_indicator.0.request_based_sli.0.distribution_cut
+            description: |
+              Used when good_service is defined by a count of values aggregated in a
+              Distribution that fall into a good range. The total_service is the
+              total count of all values aggregated in the Distribution.
+              Defines a distribution TimeSeries filter and thresholds used for
+              measuring good service and total service.
+              Exactly one of `distribution_cut` or `good_total_ratio` can be set.
+            properties:
+            - !ruby/object:Api::Type::String
+              name: distributionFilter
+              required: true
+              description: |
+                 A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
+                 aggregating values to quantify the good service provided.
+                 Must have ValueType = DISTRIBUTION and
+                 MetricKind = DELTA or MetricKind = CUMULATIVE.
+            - !ruby/object:Api::Type::NestedObject
+              name: range
+              required: true
+              description: |
+                 Range of numerical values. The computed good_service
+                 will be the count of values x in the Distribution such
+                 that range.min <= x < range.max. inclusive of min and
+                 exclusive of max. Open ranges can be defined by setting
+                 just one of min or max.
+              properties:
+              - !ruby/object:Api::Type::Integer
+                name: min
+                at_least_one_of:
+                - service_level_indicator.0.request_based_sli.0.distribution_cut.0.range.0.min
+                - service_level_indicator.0.request_based_sli.0.distribution_cut.0.range.0.max
+                description: |
+                  Min value for the range (inclusive). If not given,
+                  will be set to "-infinity", defining an open range
+                  "< range.max"
+              - !ruby/object:Api::Type::Integer
+                name: max
+                at_least_one_of:
+                - service_level_indicator.0.request_based_sli.0.distribution_cut.0.range.0.min
+                - service_level_indicator.0.request_based_sli.0.distribution_cut.0.range.0.max
+                description: |
+                  max value for the range (inclusive). If not given,
+                  will be set to "infinity", defining an open range
+                  ">= range.min"
+        - !ruby/object:Api::Type::NestedObject
+          name: windowsBasedSli
+          api_name: 'windowsBased'
+          exactly_one_of:
+            - service_level_indicator.0.basic_sli
+            - service_level_indicator.0.request_based_sli
+            - service_level_indicator.0.windows_based_sli
+          description: |
+            A windows-based SLI defines the criteria for time windows.
+            good_service is defined based off the count of these time windows
+            for which the provided service was of good quality.
+            A SLI describes a good service. It is used to measure and calculate
+            the quality of the Service's performance with respect to a single
+            aspect of service quality.
+            Exactly one of the following must be set:
+            `basic_sli`, `request_based_sli`, `windows_based_sli`
+          properties:
+            # NOTE: If adding properties to windowsBasedSli, remember to add to the
+            # custom updateMask fields in property overrides.
+            - !ruby/object:Api::Type::String
+              name: windowPeriod
+              description: |
+                Duration over which window quality is evaluated, given as a
+                duration string "{X}s" representing X seconds. Must be an
+                integer fraction of a day and at least 60s.
+            # START window_criterion FIELDS
+            - !ruby/object:Api::Type::String
+              name: goodBadMetricFilter
+              exactly_one_of:
+                - service_level_indicator.0.windows_based_sli.0.good_bad_metric_filter
+                - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold
+                - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range
+                - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range
+              description: |
+                A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
+                with ValueType = BOOL. The window is good if any true values
+                appear in the window. One of `good_bad_metric_filter`,
+                `good_total_ratio_threshold`, `metric_mean_in_range`,
+                `metric_sum_in_range` must be set for `windows_based_sli`.
+            - !ruby/object:Api::Type::NestedObject
+              name: goodTotalRatioThreshold
+              exactly_one_of:
+                - service_level_indicator.0.windows_based_sli.0.good_bad_metric_filter
+                - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold
+                - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range
+                - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range
+              description: |
+                Criterion that describes a window as good if its performance is
+                high enough. One of `good_bad_metric_filter`,
+                `good_total_ratio_threshold`, `metric_mean_in_range`,
+                `metric_sum_in_range` must be set for `windows_based_sli`.
+              properties:
+                - !ruby/object:Api::Type::Double
+                  name: threshold
+                  description: |
+                    If window performance >= threshold, the window is counted
+                    as good.
+                - !ruby/object:Api::Type::NestedObject
+                  name: performance
+                  exactly_one_of:
+                    - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance
+                    - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.basic_sli_performance
+                  description: |
+                    Request-based SLI to evaluate to judge window quality.
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: goodTotalRatio
+                      exactly_one_of:
+                        - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio
+                        - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut
+                      description: |
+                        A means to compute a ratio of `good_service` to `total_service`.
+                        Defines computing this ratio with two TimeSeries [monitoring filters](https://cloud.google.com/monitoring/api/v3/filters)
+                        Must specify exactly two of good, bad, and total service filters.
+                        The relationship good_service + bad_service = total_service
+                        will be assumed.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: goodServiceFilter
+                          at_least_one_of:
+                            - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.good_service_filter
+                            - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.bad_service_filter
+                            - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.total_service_filter
+                          description: |
+                             A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
+                             quantifying good service provided. Exactly two of
+                             good, bad, or total service filter must be defined (where
+                             good + bad = total is assumed)
+                             Must have ValueType = DOUBLE or ValueType = INT64 and
+                             must have MetricKind = DELTA or MetricKind = CUMULATIVE.
+                        - !ruby/object:Api::Type::String
+                          name: badServiceFilter
+                          at_least_one_of:
+                            - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.good_service_filter
+                            - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.bad_service_filter
+                            - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.total_service_filter
+                          description: |
+                             A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
+                             quantifying bad service provided, either demanded service that
+                             was not provided or demanded service that was of inadequate
+                             quality. Exactly two of
+                             good, bad, or total service filter must be defined (where
+                             good + bad = total is assumed)
+                             Must have ValueType = DOUBLE or ValueType = INT64 and
+                             must have MetricKind = DELTA or MetricKind = CUMULATIVE.
+                        - !ruby/object:Api::Type::String
+                          name: totalServiceFilter
+                          at_least_one_of:
+                            - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.good_service_filter
+                            - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.bad_service_filter
+                            - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.total_service_filter
+                          description: |
+                             A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
+                             quantifying total demanded service. Exactly two of
+                             good, bad, or total service filter must be defined (where
+                             good + bad = total is assumed)
+                             Must have ValueType = DOUBLE or ValueType = INT64 and
+                             must have MetricKind = DELTA or MetricKind = CUMULATIVE.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: distributionCut
+                      exactly_one_of:
+                        - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio
+                        - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut
+                      description: |
+                        Used when good_service is defined by a count of values aggregated in a
+                        Distribution that fall into a good range. The total_service is the
+                        total count of all values aggregated in the Distribution.
+                        Defines a distribution TimeSeries filter and thresholds used for
+                        measuring good service and total service.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: distributionFilter
+                          required: true
+                          description: |
+                             A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
+                             aggregating values to quantify the good service provided.
+                             Must have ValueType = DISTRIBUTION and
+                             MetricKind = DELTA or MetricKind = CUMULATIVE.
+                        - !ruby/object:Api::Type::NestedObject
+                          name: range
+                          required: true
+                          description: |
+                             Range of numerical values. The computed good_service
+                             will be the count of values x in the Distribution such
+                             that range.min <= x < range.max. inclusive of min and
+                             exclusive of max. Open ranges can be defined by setting
+                             just one of min or max.
+                          properties:
+                            - !ruby/object:Api::Type::Integer
+                              name: min
+                              at_least_one_of:
+                                - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut.0.range.0.min
+                                - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut.0.range.0.max
+                              description: |
+                                Min value for the range (inclusive). If not given,
+                                will be set to "-infinity", defining an open range
+                                "< range.max"
+                            - !ruby/object:Api::Type::Integer
+                              name: max
+                              at_least_one_of:
+                                - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut.0.range.0.min
+                                - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut.0.range.0.max
+                              description: |
+                                max value for the range (inclusive). If not given,
+                                will be set to "infinity", defining an open range
+                                ">= range.min"
+                - !ruby/object:Api::Type::NestedObject
+                  name: basicSliPerformance
+                  exactly_one_of:
+                    - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance
+                    - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.basic_sli_performance
+                  description: |
+                    Basic SLI to evaluate to judge window quality.
+                  properties:
+                    - !ruby/object:Api::Type::Array
+                      name: method
+                      description: |
+                        An optional set of RPCs to which this SLI is relevant.
+                        Telemetry from other methods will not be used to calculate
+                        performance for this SLI. If omitted, this SLI applies to all
+                        the Service's methods. For service types that don't support
+                        breaking down by method, setting this field will result in an
+                        error.
+                      item_type: Api::Type::String
+                    - !ruby/object:Api::Type::Array
+                      name: location
+                      description: |
+                        An optional set of locations to which this SLI is relevant.
+                        Telemetry from other locations will not be used to calculate
+                        performance for this SLI. If omitted, this SLI applies to all
+                        locations in which the Service has activity. For service types
+                        that don't support breaking down by location, setting this
+                        field will result in an error.
+                      item_type: Api::Type::String
+                    - !ruby/object:Api::Type::Array
+                      name: version
+                      description: |
+                         The set of API versions to which this SLI is relevant.
+                         Telemetry from other API versions will not be used to
+                         calculate performance for this SLI. If omitted,
+                         this SLI applies to all API versions. For service types
+                         that don't support breaking down by version, setting this
+                         field will result in an error.
+                      item_type: Api::Type::String
+                    - !ruby/object:Api::Type::NestedObject
+                      name: latency
+                      required: true
+                      description: |
+                        Parameters for a latency threshold SLI.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          required: true
+                          name: threshold
+                          description: |
+                            A duration string, e.g. 10s.
+                            Good service is defined to be the count of requests made to
+                            this service that return in no more than threshold.
+            - !ruby/object:Api::Type::NestedObject
+              name: metricMeanInRange
+              exactly_one_of:
+                - service_level_indicator.0.windows_based_sli.0.good_bad_metric_filter
+                - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold
+                - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range
+                - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range
+              description: |
+                Criterion that describes a window as good if the metric's value
+                is in a good range, *averaged* across returned streams.
+                One of `good_bad_metric_filter`,
+                `good_total_ratio_threshold`, `metric_mean_in_range`,
+                `metric_sum_in_range` must be set for `windows_based_sli`.
+                Average value X of `time_series` should satisfy
+                `range.min <= X < range.max` for a good window.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: timeSeries
+                  required: true
+                  description: |
+                    A [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
+                    specifying the TimeSeries to use for evaluating window
+                    The provided TimeSeries must have ValueType = INT64 or
+                    ValueType = DOUBLE and MetricKind = GAUGE. Mean value `X`
+                    should satisfy `range.min <= X < range.max`
+                    under good service.
+                - !ruby/object:Api::Type::NestedObject
+                    name: range
+                    required: true
+                    description: |
+                      Range of numerical values. The computed good_service
+                      will be the count of values x in the Distribution such
+                      that range.min <= x < range.max. inclusive of min and
+                      exclusive of max. Open ranges can be defined by setting
+                      just one of min or max. Mean value `X` of `time_series`
+                      values should satisfy `range.min <= X < range.max` for a
+                      good service.
+                    properties:
+                      - !ruby/object:Api::Type::Integer
+                        name: min
+                        at_least_one_of:
+                          - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.min
+                          - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.max
+                        description: |
+                          Min value for the range (inclusive). If not given,
+                          will be set to "-infinity", defining an open range
+                          "< range.max"
+                      - !ruby/object:Api::Type::Integer
+                        name: max
+                        at_least_one_of:
+                          - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.min
+                          - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.max
+                        description: |
+                          max value for the range (inclusive). If not given,
+                          will be set to "infinity", defining an open range
+                          ">= range.min"
+            - !ruby/object:Api::Type::NestedObject
+              name: metricSumInRange
+              exactly_one_of:
+                - service_level_indicator.0.windows_based_sli.0.good_bad_metric_filter
+                - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold
+                - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range
+                - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range
+              description: |
+                Criterion that describes a window as good if the metric's value
+                is in a good range, *summed* across returned streams.
+                Summed value `X` of `time_series` should satisfy
+                `range.min <= X < range.max` for a good window.
+                One of `good_bad_metric_filter`,
+                `good_total_ratio_threshold`, `metric_mean_in_range`,
+                `metric_sum_in_range` must be set for `windows_based_sli`.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: timeSeries
+                  required: true
+                  description: |
+                    A [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
+                    specifying the TimeSeries to use for evaluating window
+                    quality. The provided TimeSeries must have
+                    ValueType = INT64 or ValueType = DOUBLE and
+                    MetricKind = GAUGE.
+                    Summed value `X` should satisfy
+                    `range.min <= X < range.max` for a good window.
+                - !ruby/object:Api::Type::NestedObject
+                    name: range
+                    required: true
+                    description: |
+                      Range of numerical values. The computed good_service
+                      will be the count of values x in the Distribution such
+                      that range.min <= x < range.max. inclusive of min and
+                      exclusive of max. Open ranges can be defined by setting
+                      just one of min or max. Summed value `X` should satisfy
+                      `range.min <= X < range.max` for a good window.
+                    properties:
+                      - !ruby/object:Api::Type::Integer
+                        name: min
+                        at_least_one_of:
+                          - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.min
+                          - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.max
+                        description: |
+                          Min value for the range (inclusive). If not given,
+                          will be set to "-infinity", defining an open range
+                          "< range.max"
+                      - !ruby/object:Api::Type::Integer
+                        name: max
+                        at_least_one_of:
+                          - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.min
+                          - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.max
+                        description: |
+                          max value for the range (inclusive). If not given,
+                          will be set to "infinity", defining an open range
+                          ">= range.min"
+            # END window_criterion FIELDS
   - !ruby/object:Api::Resource
     name: UptimeCheckConfig
     update_verb: :PATCH
@@ -895,8 +1553,8 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/monitoring/uptime-checks/'
       api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.uptimeCheckConfigs'
-    base_url: projects/{{project}}/uptimeCheckConfigs
-    self_link: "{{name}}"
+    base_url: v3/projects/{{project}}/uptimeCheckConfigs
+    self_link: "v3/{{name}}"
     description: This message configures which resources and services to monitor for
       availability.
     properties:
@@ -940,6 +1598,16 @@ objects:
           name: content
           description: String or regex content to match (max 1024 bytes)
           required: true
+        - !ruby/object:Api::Type::Enum
+          name: matcher
+          description: The type of content matcher that will be applied to the server output,
+            compared to the content string when the check is run.
+          default_value: :CONTAINS_STRING
+          values:
+            - :CONTAINS_STRING
+            - :NOT_CONTAINS_STRING
+            - :MATCHES_REGEX
+            - :NON_MATCHES_REGEX
     - !ruby/object:Api::Type::Array
       name: selectedRegions
       description: The list of regions from which the check will be run. Some regions
@@ -955,6 +1623,15 @@ objects:
         - http_check
         - tcp_check
       properties:
+      - !ruby/object:Api::Type::Enum
+        name: requestMethod
+        input: true
+        description: The HTTP request method to use for the check. If set to 
+          METHOD_UNSPECIFIED then requestMethod defaults to GET.
+        values:
+          - :METHOD_UNSPECIFIED
+          - :GET
+          - :POST
       - !ruby/object:Api::Type::NestedObject
         name: authInfo
         at_least_one_of:

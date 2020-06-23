@@ -5,6 +5,7 @@ resource "google_monitoring_uptime_check_config" "<%= ctx[:primary_resource_id] 
   http_check {
     path = "/some-path"
     port = "8010"
+    request_method = "GET"
   }
 
   monitored_resource {
