@@ -33,14 +33,10 @@ resource "google_cloud_identity_group_membership" "<%= ctx[:primary_resource_id]
   group    = google_cloud_identity_group.group.name
 
   member_key {
-  	id = google_cloud_identity_group.child-group.group_key.id
+    id = google_cloud_identity_group.child-group.group_key[0].id
   }
 
   roles {
   	name = "MEMBER"
-  }
-
-  roles {
-  	name = "MANAGER"
   }
 }
