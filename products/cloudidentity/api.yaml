@@ -51,6 +51,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'id'
             required: true
+            input: true
             description: |
               The ID of the entity.
 
@@ -63,6 +64,7 @@ objects:
               Must be unique within a namespace.
           - !ruby/object:Api::Type::String
             name: 'namespace'
+            input: true
             description: |
               The namespace in which the entity exists.
 
@@ -71,7 +73,7 @@ objects:
 
               If specified, the EntityKey represents an external-identity-mapped group.
               The namespace must correspond to an identity source created in Admin Console
-              and must be in the form of `identitysources/{identity_source_id}.
+              and must be in the form of `identitysources/{identity_source_id}`.
       - !ruby/object:Api::Type::String
         name: 'parent'
         required: true
