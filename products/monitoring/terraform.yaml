@@ -119,6 +119,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: "templates/terraform/custom_flatten/uptime_check_http_password.erb"
       httpCheck.port: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      httpCheck.headers: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       resourceGroup.groupId: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
         custom_flatten: "templates/terraform/custom_flatten/group_id_to_name.erb"
