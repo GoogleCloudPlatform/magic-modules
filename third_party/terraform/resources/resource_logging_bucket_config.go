@@ -31,7 +31,7 @@ var loggingBucketConfigSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 		Computed:    true,
-		Description: `Describes this bucket.`,
+		Description: `An optional description for this bucket.`,
 	},
 	"retention_days": {
 		Type:        schema.TypeInt,
