@@ -8520,6 +8520,46 @@ objects:
               instance may take to initialize. To do this, create an instance
               and time the startup process.
             default_value: 60
+          - !ruby/object:Api::Type::Enum
+            name: 'mode'
+            default_value: :ON
+            description: |
+              Defines operating mode for this policy.
+            values:
+              - :OFF
+              - :ONLY_UP
+              - :ON
+          - !ruby/object:Api::Type::NestedObject
+            name: 'scaleDownControl'
+            min_version: beta
+            at_least_one_of:
+             - scale_down_control.0.max_scaled_down_replicas
+             - scale_down_control.0.time_window_sec
+            description: |
+              Defines scale down controls to reduce the risk of response latency
+              and outages due to abrupt scale-in events
+            properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'maxScaledDownReplicas'
+              at_least_one_of:
+              - scale_down_control.0.max_scaled_down_replicas.0.fixed
+              - scale_down_control.0.max_scaled_down_replicas.0.percent
+              properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'fixed'
+                description: |
+                  Specifies a fixed number of VM instances. This must be a positive
+                  integer.
+              - !ruby/object:Api::Type::Integer
+                name: 'percent'
+                description: |
+                  Specifies a percentage of instances between 0 to 100%, inclusive.
+                  For example, specify 80 for 80%.
+            - !ruby/object:Api::Type::Integer
+              name: 'timeWindowSec'
+              description: |
+                How long back autoscaling should look when computing recommendations
+                to include directives regarding slower scale down, as described above.
           - !ruby/object:Api::Type::NestedObject
             name: 'cpuUtilization'
             description: |
