@@ -255,14 +255,6 @@ func testAccCheckGoogleFolderIamBindingExists(t *testing.T, expected *cloudresou
 }
 
 func getFolderIamPolicyByParentAndDisplayName(parent, displayName string, config *Config) (*cloudresourcemanager.Policy, error) {
-	name, err := getFolderNameByParentAndDisplayName(parent, displayName, config)
-	if err != nil {
-		return nil, fmt.Errorf("Error getting folder name: %v", err)
-	}
-	return getFolderIamPolicyByFolderName(name, config)
-}
-
-func getFolderNameByParentAndDisplayName(parent, displayName string, config *Config) (string, error) {
 	queryString := fmt.Sprintf("lifecycleState=ACTIVE AND parent=%s AND displayName=%s", parent, displayName)
 	searchRequest := &resourceManagerV2Beta1.SearchFoldersRequest{
 		Query: queryString,
@@ -270,17 +262,18 @@ func getFolderNameByParentAndDisplayName(parent, displayName string, config *Con
 	searchResponse, err := config.clientResourceManagerV2Beta1.Folders.Search(searchRequest).Do()
 	if err != nil {
 		if isGoogleApiErrorWithCode(err, 404) {
-			return "", fmt.Errorf("Folder not found: %s,%s", parent, displayName)
+			return nil, fmt.Errorf("Folder not found: %s,%s", parent, displayName)
 		}
 
-		return "", errwrap.Wrapf("Error reading folders: {{err}}", err)
+		return nil, errwrap.Wrapf("Error reading folders: {{err}}", err)
 	}
 
 	folders := searchResponse.Folders
 	if len(folders) != 1 {
-		return "", fmt.Errorf("expected exactly 1 folder, found %d", len(folders))
+		return nil, fmt.Errorf("expected exactly 1 folder, found %d", len(folders))
 	}
-	return folders[0].Name, nil
+
+	return getFolderIamPolicyByFolderName(folders[0].Name, config)
 }
 
 func testAccFolderIamBasic(org, fname string) string {
