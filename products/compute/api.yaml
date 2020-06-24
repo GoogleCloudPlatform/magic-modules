@@ -7894,21 +7894,22 @@ objects:
   - !ruby/object:Api::Resource
     name: 'OrganizationSecurityPolicyAssociation'
     min_version: beta
-    base_url: 'locations/global/securityPolicies/{{security_policy_id}}'
-    self_link: 'locations/global/securityPolicies/{{security_policy_id}}/getAssociation?name={{name}}'
-    create_url: 'locations/global/securityPolicies/{{security_policy_id}}/addAssociation'
+    base_url: 'locations/global/securityPolicies/{{policy_id}}'
+    self_link: 'locations/global/securityPolicies/{{policy_id}}/getAssociation?name={{name}}'
+    create_url: 'locations/global/securityPolicies/{{policy_id}}/addAssociation'
     delete_verb: :POST
-    delete_url: 'locations/global/securityPolicies/{{security_policy_id}}/removeAssociation?name={{name}}'
+    delete_url: 'locations/global/securityPolicies/{{policy_id}}/removeAssociation?name={{name}}'
     description: |
       An association for the OrganizationSecurityPolicy.
     input: true
     parameters:
       - !ruby/object:Api::Type::String
-        name: 'securityPolicyId'
+        name: 'policyId'
         description: |
           The security policy ID of the association.
         required: true
         url_param_only: true
+        api_name: 'securityPolicyId'
     properties:
       - !ruby/object:Api::Type::String
         name: name

@@ -31,7 +31,7 @@ resource "google_compute_organization_security_policy_rule" "<%= ctx[:primary_re
 resource "google_compute_organization_security_policy_association" "<%= ctx[:primary_resource_id] %>" {
   provider = "google-beta"
 
-  name               = "tf-test%{random_suffix}"
-  attachment_id      = google_compute_organization_security_policy.<%= ctx[:primary_resource_id] %>.parent
-  security_policy_id = google_compute_organization_security_policy.<%= ctx[:primary_resource_id] %>.id
+  name          = "tf-test%{random_suffix}"
+  attachment_id = google_compute_organization_security_policy.<%= ctx[:primary_resource_id] %>.parent
+  policy_id     = google_compute_organization_security_policy.<%= ctx[:primary_resource_id] %>.id
 }
