@@ -1,41 +1,24 @@
 parent := d.Get("parent").(string)
-err = computeOrgOperationWaitTime(
-    config, res, parent, "Creating OrganizationSecurityPolicy",
-    d.Timeout(schema.TimeoutCreate))
+var opRes map[string]interface{}
+err = computeOrgOperationWaitTimeWithResponse(
+	config, res, &opRes, parent, "Creating OrganizationSecurityPolicy",
+	d.Timeout(schema.TimeoutCreate))
 
 if err != nil {
-  // The resource didn't actually create
-  d.SetId("")
-  return fmt.Errorf("Error waiting to create OrganizationSecurityPolicy: %s", err)
+	// The resource didn't actually create
+	d.SetId("")
+	return fmt.Errorf("Error waiting to create OrganizationSecurityPolicy: %s", err)
 }
 
-// We need to check the policy ID in the final operation result
-operationName, ok := res["name"]
+policyId, ok := opRes["targetId"]
 if !ok {
-  return fmt.Errorf("Operation didn't contain name. Cannot get targetId.")
-}
-
-operationUrl := fmt.Sprintf("{{ComputeBasePath}}locations/global/operations/%s?parentId={{parent}}", operationName.(string))
-
-url, err = replaceVars(d, config, operationUrl)
-if err != nil {
-  return err
-}
-
-res, err = sendRequest(config, "GET", "", url, nil)
-if err != nil {
-  return handleNotFoundError(err, d, fmt.Sprintf("ComputeOrganizationSecurityPolicy %q", d.Id()))
-}
-
-policyId, ok := res["targetId"]
-if !ok {
-  return fmt.Errorf("Create response didn't contain targetId. Create may not have succeeded.")
+	return fmt.Errorf("Create response didn't contain targetId. Create may not have succeeded.")
 }
 d.Set("policy_id", policyId.(string))
 
 // Store the ID now.
 id, err = replaceVars(d, config, "locations/global/securityPolicies/{{policy_id}}")
 if err != nil {
-  return fmt.Errorf("Error constructing id: %s", err)
+	return fmt.Errorf("Error constructing id: %s", err)
 }
 d.SetId(id)

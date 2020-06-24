@@ -125,7 +125,7 @@ func computeOperationWaitTime(config *Config, res interface{}, project, activity
 }
 
 <% unless version == 'ga' -%>
-func computeOrgOperationWaitTime(config *Config, res interface{}, parent, activity string, timeout time.Duration) error {
+func computeOrgOperationWaitTimeWithResponse(config *Config, res interface{}, response *map[string]interface{}, parent, activity string, timeout time.Duration) error {
 	op := &computeBeta.Operation{}
 	err := Convert(res, op)
 	if err != nil {
@@ -141,7 +141,14 @@ func computeOrgOperationWaitTime(config *Config, res interface{}, parent, activi
 	if err := w.SetOp(op); err != nil {
 		return err
 	}
-	return OperationWait(w, activity, timeout, config.PollInterval)
+	if err := OperationWait(w, activity, timeout, config.PollInterval); err != nil {
+		return err
+	}
+	e, err := json.Marshal(w.Op)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal([]byte(e), response)
 }
 
 <% end -%>
