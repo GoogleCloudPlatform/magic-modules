@@ -68,8 +68,8 @@ var custIdEnvVars = []string{
 	"GOOGLE_CUST_ID",
 }
 
-var adminUserEnvVars = []string{
-	"GOOGLE_ADMIN_USER",
+var identityUserEnvVars = []string{
+	"GOOGLE_IDENTITY_USER",
 }
 <% end -%>
 
@@ -860,8 +860,8 @@ func getTestCustIdFromEnv(t *testing.T) string {
 	return multiEnvSearch(custIdEnvVars)
 }
 
-func getTestAdminUserFromEnv(t *testing.T) string {
-	return multiEnvSearch(adminUserEnvVars)
+func getTestIdentityUserFromEnv(t *testing.T) string {
+	return multiEnvSearch(identityUserEnvVars)
 }
 <% end -%>
 

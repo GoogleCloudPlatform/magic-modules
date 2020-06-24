@@ -19,7 +19,7 @@
 		"<%= var_name -%>": getTestFirestoreProjectFromEnv(t),
 	<% elsif var_type == :CUST_ID  -%>
 		"<%= var_name -%>": getTestCustIdFromEnv(t),
-	<% elsif var_type == :ADMIN_USER  -%>
-		"<%= var_name -%>": getTestAdminUserFromEnv(t),
+	<% elsif var_type == :IDENTITY_USER  -%>
+		"<%= var_name -%>": getTestIdentityUserFromEnv(t),
 	<% end -%>
 <% end -%>

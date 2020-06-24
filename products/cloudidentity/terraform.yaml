@@ -58,7 +58,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           org_domain: :ORG_DOMAIN
           cust_id: :CUST_ID
-          admin_user: :ADMIN_USER
+          identity_user: :IDENTITY_USER
     properties:
       memberKey: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
