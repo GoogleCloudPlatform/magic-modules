@@ -12,7 +12,7 @@ var loggingProjectBucketConfigSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		ForceNew:    true,
-		Description: `The parent resource that contains the logging bucket.`,
+		Description: `The parent project that contains the logging bucket.`,
 	},
 }
 
