@@ -1286,8 +1286,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_delete: templates/terraform/post_delete/org_security_policy.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
   OrganizationSecurityPolicyAssociation: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "locations/global/securityPolicies/{{policy_id}}/association/{{name}}"
-    import_format: ["locations/global/securityPolicies/{{policy_id}}/association/{{name}}"]
+    id_format: "{{security_policy_id}}/association/{{name}}"
+    import_format: ["{{security_policy_id}}/association/{{name}}"]
+    base_url: '{{security_policy_id}}'
+    self_link: '{{security_policy_id}}/getAssociation?name={{name}}'
+    create_url: '{{security_policy_id}}/addAssociation'
+    delete_url: '{{security_policy_id}}/removeAssociation?name={{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "organization_security_policy_association_basic"
@@ -1300,8 +1304,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_delete: templates/terraform/post_create/org_security_policy_association.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
   OrganizationSecurityPolicyRule: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "locations/global/securityPolicies/{{policy_id}}/priority/{{priority}}"
-    import_format: ["locations/global/securityPolicies/{{policy_id}}/priority/{{priority}}"]
+    id_format: "{{policy_id}}/priority/{{priority}}"
+    import_format: ["{{policy_id}}/priority/{{priority}}"]
+    base_url: '{{policy_id}}'
+    self_link: '{{policy_id}}/getRule?priority={{priority}}'
+    create_url: '{{policy_id}}/addRule?priority={{priority}}'
+    update_url: '{{policy_id}}/patchRule?priority={{priority}}'
+    delete_url: '{{policy_id}}/removeRule?priority={{priority}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "organization_security_policy_rule_basic"

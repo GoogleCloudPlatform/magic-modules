@@ -8,7 +8,7 @@ resource "google_compute_organization_security_policy" "<%= ctx[:primary_resourc
 resource "google_compute_organization_security_policy_rule" "<%= ctx[:primary_resource_id] %>" {
   provider = "google-beta"
 
-  policy_id = google_compute_organization_security_policy.<%= ctx[:primary_resource_id] %>.policy_id
+  policy_id = google_compute_organization_security_policy.<%= ctx[:primary_resource_id] %>.id
   action = "allow"
 
   direction = "INGRESS"
