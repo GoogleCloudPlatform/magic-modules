@@ -8,20 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-func folderIamAuditConfigImportStep(t *testing.T, resourceName, fname, service string) resource.TestStep {
-	name, err := getFolderNameByParentAndDisplayName("organizations/"+getTestOrgFromEnv(t), fname, googleProviderConfig(t))
-	if err != nil {
-		t.Fatalf("Error getting folder name: %v", err)
-	}
-
-	return resource.TestStep{
-		ResourceName:      resourceName,
-		ImportStateId:     fmt.Sprintf("%s %s", name, service),
-		ImportState:       true,
-		ImportStateVerify: true,
-	}
-}
-
 // Test that an IAM audit config can be applied to a folder
 func TestAccFolderIamAuditConfig_basic(t *testing.T) {
 	t.Parallel()
@@ -44,7 +30,6 @@ func TestAccFolderIamAuditConfig_basic(t *testing.T) {
 			{
 				Config: testAccFolderAssociateAuditConfigBasic(org, fname, service),
 			},
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.acceptance", fname, service),
 		},
 	})
 }
@@ -77,8 +62,6 @@ func TestAccFolderIamAuditConfig_multiple(t *testing.T) {
 			{
 				Config: testAccFolderAssociateAuditConfigMultiple(org, fname, service, service2),
 			},
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.acceptance", fname, service),
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.multiple", fname, service2),
 		},
 	})
 }
@@ -109,8 +92,6 @@ func TestAccFolderIamAuditConfig_multipleAtOnce(t *testing.T) {
 			{
 				Config: testAccFolderAssociateAuditConfigMultiple(org, fname, service, service2),
 			},
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.acceptance", fname, service),
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.multiple", fname, service2),
 		},
 	})
 }
@@ -138,19 +119,14 @@ func TestAccFolderIamAuditConfig_update(t *testing.T) {
 			{
 				Config: testAccFolderAssociateAuditConfigBasic(org, fname, service),
 			},
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.acceptance", fname, service),
-
 			// Apply an updated IAM audit config
 			{
 				Config: testAccFolderAssociateAuditConfigUpdated(org, fname, service),
 			},
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.acceptance", fname, service),
-
 			// Drop the original member
 			{
 				Config: testAccFolderAssociateAuditConfigDropMemberFromBasic(org, fname, service),
 			},
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.acceptance", fname, service),
 		},
 	})
 }
@@ -181,9 +157,6 @@ func TestAccFolderIamAuditConfig_remove(t *testing.T) {
 			{
 				Config: testAccFolderAssociateAuditConfigMultiple(org, fname, service, service2),
 			},
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.acceptance", fname, service),
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.multiple", fname, service2),
-
 			// Remove the audit configs
 			{
 				Config: testAccFolderIamBasic(org, fname),
@@ -220,13 +193,10 @@ func TestAccFolderIamAuditConfig_addFirstExemptMember(t *testing.T) {
 			{
 				Config: testAccFolderAssociateAuditConfigMembers(org, fname, service, members),
 			},
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.acceptance", fname, service),
-
 			// Apply IAM audit config with one member
 			{
 				Config: testAccFolderAssociateAuditConfigMembers(org, fname, service, members2),
 			},
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.acceptance", fname, service),
 		},
 	})
 }
@@ -256,13 +226,10 @@ func TestAccFolderIamAuditConfig_removeLastExemptMember(t *testing.T) {
 			{
 				Config: testAccFolderAssociateAuditConfigMembers(org, fname, service, members),
 			},
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.acceptance", fname, service),
-
 			// Apply IAM audit config with no members
 			{
 				Config: testAccFolderAssociateAuditConfigMembers(org, fname, service, members2),
 			},
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.acceptance", fname, service),
 		},
 	})
 }
@@ -292,13 +259,10 @@ func TestAccFolderIamAuditConfig_updateNoExemptMembers(t *testing.T) {
 			{
 				Config: testAccFolderAssociateAuditConfigLogType(org, fname, service, logType),
 			},
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.acceptance", fname, service),
-
 			// Apply IAM audit config with DATA_WRITE
 			{
 				Config: testAccFolderAssociateAuditConfigLogType(org, fname, service, logType2),
 			},
-			folderIamAuditConfigImportStep(t, "google_folder_iam_audit_config.acceptance", fname, service),
 		},
 	})
 }
