@@ -2492,6 +2492,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           url_map_name: "urlmap"
           home_backend_service_name: "home"
           health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "url_map_header_based_routing"
+        primary_resource_id: "urlmap"
+        vars:
+          url_map_name: "urlmap"
+          default_backend_service_name: "default"
+          service_a_backend_service_name: "service-a"
+          service_b_backend_service_name: "service-b"
+          health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "url_map_parameter_based_routing"
+        primary_resource_id: "urlmap"
+        vars:
+          url_map_name: "urlmap"
+          default_backend_service_name: "default"
+          service_a_backend_service_name: "service-a"
+          service_b_backend_service_name: "service-b"
+          health_check_name: "health-check"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "map_id"
