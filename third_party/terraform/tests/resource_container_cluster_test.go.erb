@@ -1716,7 +1716,6 @@ func TestAccContainerCluster_errorNoClusterCreated(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 	t.Parallel()
 
@@ -1745,7 +1744,6 @@ func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_withResourceUsageExportConfig(t *testing.T) {
 	t.Parallel()
@@ -2110,7 +2108,7 @@ func testAccContainerCluster_updateAddons(projectID string, clusterName string) 
 	return fmt.Sprintf(`
 data "google_project" "project" {
   project_id = "%s"
-}	
+}
 
 resource "google_container_cluster" "primary" {
   name               = "%s"
@@ -3853,7 +3851,6 @@ resource "google_container_cluster" "with_resource_labels" {
 `, location)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withDatabaseEncryption(clusterName string, kmsData bootstrappedKMS) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
@@ -3886,7 +3883,6 @@ resource "google_container_cluster" "with_database_encryption" {
 }
 `, kmsData.KeyRing.Name, kmsData.CryptoKey.Name, clusterName)
 }
-<% end -%>
 
 func testAccContainerCluster_withMasterAuthorizedNetworksDisabled(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`
