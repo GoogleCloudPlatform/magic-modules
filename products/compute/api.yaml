@@ -7993,7 +7993,8 @@ objects:
                 Destination IP address range in CIDR format.
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
-              name: 'layer4Configs'
+              name: 'layer4Config'
+              api_name: 'layer4Configs'
               description: |
                 Pairs of IP protocols and ports that the rule should match.
               item_type: !ruby/object:Api::Type::NestedObject
