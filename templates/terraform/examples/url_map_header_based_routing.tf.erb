@@ -1,5 +1,5 @@
 resource "google_compute_url_map" "<%= ctx[:primary_resource_id] %>" {
-name        = "<%= ctx[:vars]['url_map_name'] %>"
+  name        = "<%= ctx[:vars]['url_map_name'] %>"
   description = "header-based routing example"
   default_service = google_compute_backend_service.default.id
 
@@ -72,7 +72,4 @@ resource "google_compute_http_health_check" "default" {
   check_interval_sec = 1
   timeout_sec        = 1
 }
-
-
-
 
