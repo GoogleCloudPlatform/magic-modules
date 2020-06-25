@@ -9,7 +9,9 @@ USER=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
 
 # Only run tests for safe users
 if $(echo $USER | fgrep -wq -e ndmckinley -e danawillow -e emilymye -e megan07 -e paddycarver -e rambleraptor -e SirGitsalot -e slevenick -e c2thorn -e rileykarson); then
-  echo "User is on the list, not assigning."
+  echo "User is on the list, not skipping."
+else
+	echo "User is not on the list, skipping."
   exit 0
 fi
 
@@ -44,7 +46,7 @@ while [[ "$STATE" != "finished" ]]; do
 	STATUS=$(cat poll.json | jq .status -r)
 	STATE=$(cat poll.json | jq .state -r)
 	echo "Trying again, State: $STATE Status: $STATUS"
-	((var++))
+	counter=$((counter + 1))
 done
 
 if [ "$STATUS" == "SUCCESS" ]
