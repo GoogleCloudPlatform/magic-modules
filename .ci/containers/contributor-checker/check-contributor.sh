@@ -1,13 +1,14 @@
 #!/bin/bash
-if [ -z "$GITHUB_TOKEN" ]; then
+if [[ -z "$GITHUB_TOKEN" ]]; then
     echo "Did not provide GITHUB_TOKEN environment variable."
     exit 1
 fi
-if [ $# -lt 1 ]; then
+if [[ $# -lt 1 ]]; then
     echo "Usage: $0 pr-number"
     exit 1
 fi
 PR_NUMBER=$1
+
 set -x
 
 ASSIGNEE=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
@@ -18,7 +19,7 @@ if [[ "$ASSIGNEE" == "null" || -z "$ASSIGNEE" ]] ; then
     "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/reviews" | jq .[0].user.login)
 fi
 
-if [ "$ASSIGNEE" == "null" ] || [ -z "$ASSIGNEE" ] ; then 
+if [[ "$ASSIGNEE" == "null"  || -z "$ASSIGNEE" ]] ; then 
   echo "Issue is not assigned."
 else
   echo "Issue is assigned, not assigning."
