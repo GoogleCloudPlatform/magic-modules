@@ -13,12 +13,12 @@ set -x
 ASSIGNEE=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/requested_reviewers" | jq .users[0].login)
   
-if [ "$ASSIGNEE" == "null" || -z "$ASSIGNEE" ]; then 
+if [ "$ASSIGNEE" == "null" ] || [ -z "$ASSIGNEE" ] ; then 
   ASSIGNEE=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
     "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/${PR_NUMBER}/reviews" | jq .[0].user.login)
 fi
 
-if [ "$ASSIGNEE" == "null" || -z "$ASSIGNEE" ] ; then 
+if [ "$ASSIGNEE" == "null" ] || [ -z "$ASSIGNEE" ] ; then 
   echo "Issue is not assigned."
 else
   echo "Issue is assigned, not assigning."
