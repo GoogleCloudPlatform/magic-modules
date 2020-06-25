@@ -187,13 +187,26 @@ objects:
           ** Changing this property may recreate the FHIR store (removing all data) **
         required: true
         input: true
+      # Version is duplicated because it is optional in beta but required in GA.
       - !ruby/object:Api::Type::Enum
         name: version
         description: |
           The FHIR specification version.
-        required: false # TODO: Make this field required in GA.
+        exact_version: beta
+        required: false
         input: true
         default_value: :STU3
+        values:
+          - :DSTU2
+          - :STU3
+          - :R4
+      - !ruby/object:Api::Type::Enum
+        name: version
+        description: |
+          The FHIR specification version.
+        exact_version: ga
+        required: true
+        input: true
         values:
           - :DSTU2
           - :STU3
@@ -291,6 +304,62 @@ objects:
         description: |
           The fully qualified name of this dataset
         output: true
+      - !ruby/object:Api::Type::Array
+        name: streamConfigs
+        description: |-
+          A list of streaming configs that configure the destinations of streaming export for every resource mutation in
+          this FHIR store. Each store is allowed to have up to 10 streaming configs. After a new config is added, the next
+          resource mutation is streamed to the new location in addition to the existing ones. When a location is removed
+          from the list, the server stops streaming to that location. Before adding a new config, you must add the required
+          bigquery.dataEditor role to your project's Cloud Healthcare Service Agent service account. Some lag (typically on
+          the order of dozens of seconds) is expected before the results show up in the streaming destination.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'resourceTypes'
+              description: |
+                Supply a FHIR resource type (such as "Patient" or "Observation"). See 
+                https://www.hl7.org/fhir/valueset-resource-types.html for a list of all FHIR resource types. The server treats
+                an empty list as an intent to stream all the supported resource types in this FHIR store.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::NestedObject
+              name: bigqueryDestination
+              required: true
+              description: |
+                The destination BigQuery structure that contains both the dataset location and corresponding schema config.
+                The output is organized in one table per resource type. The server reuses the existing tables (if any) that
+                are named after the resource types, e.g. "Patient", "Observation". When there is no existing table for a given
+                resource type, the server attempts to create one.
+                See the [streaming config reference](https://cloud.google.com/healthcare/docs/reference/rest/v1beta1/projects.locations.datasets.fhirStores#streamconfig) for more details.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: datasetUri
+                  required: true
+                  description: |
+                    BigQuery URI to a dataset, up to 2000 characters long, in the format bq://projectId.bqDatasetId
+                - !ruby/object:Api::Type::NestedObject
+                  name: schemaConfig
+                  required: true
+                  description: |
+                    The configuration for the exported BigQuery schema.
+                  properties:
+                    - !ruby/object:Api::Type::Enum
+                      name: schemaType
+                      description: |
+                        Specifies the output schema type. Only ANALYTICS is supported at this time.
+                         * ANALYTICS: Analytics schema defined by the FHIR community.
+                          See https://github.com/FHIR/sql-on-fhir/blob/master/sql-on-fhir.md.
+                      default_value: :ANALYTICS
+                      values:
+                        - :ANALYTICS
+                    - !ruby/object:Api::Type::Integer
+                      name: recursiveStructureDepth
+                      required: true
+                      description: |
+                        The depth for all recursive structures in the output analytics schema. For example, concept in the CodeSystem
+                        resource is a recursive structure; when the depth is 2, the CodeSystem table will have a column called
+                        concept.concept but not concept.concept.concept. If not specified or set to 0, the server will use the default
+                        value 2. The maximum depth allowed is 5.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating a FHIR store':

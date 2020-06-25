@@ -1,4 +1,4 @@
-gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
-gcp_location = attribute(:gcp_location, default: '<%= external_attribute('gcp_location') -%>', description: 'The GCP project region.')
-router = attribute('router', default: <%= JSON.pretty_generate(grab_attributes['router']) -%>, description: 'Compute router description')
-router_nat = attribute('router_nat', default: <%= JSON.pretty_generate(grab_attributes['router_nat']) -%>, description: 'Compute router NAT description')
+gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute(pwd, 'gcp_project_id') -%>', description: 'The GCP project identifier.')
+gcp_location = attribute(:gcp_location, default: '<%= external_attribute(pwd, 'gcp_location') -%>', description: 'The GCP project region.')
+router = attribute('router', default: <%= JSON.pretty_generate(grab_attributes(pwd)['router']) -%>, description: 'Compute router description')
+router_nat = attribute('router_nat', default: <%= JSON.pretty_generate(grab_attributes(pwd)['router_nat']) -%>, description: 'Compute router NAT description')

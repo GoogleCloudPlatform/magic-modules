@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"google.golang.org/api/googleapi"
+	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
 type RetryErrorPredicateFunc func(error) (bool, string)
@@ -162,6 +163,22 @@ func pubsubTopicProjectNotReady(err error) (bool, string) {
 
 // Retry if Cloud SQL operation returns a 429 with a specific message for
 // concurrent operations.
+func isSqlInternalError(err error) (bool, string) {
+	if gerr, ok := err.(*SqlAdminOperationError); ok {
+		// SqlAdminOperationError is a non-interface type so we need to cast it through
+		// a layer of interface{}.  :)
+		var ierr interface{}
+		ierr = gerr
+		if serr, ok := ierr.(*sqladmin.OperationErrors); ok && serr.Errors[0].Code == "INTERNAL_ERROR" {
+			return true, "Received an internal error, which is sometimes retryable for some SQL resources.  Optimistically retrying."
+		}
+
+	}
+	return false, ""
+}
+
+// Retry if Cloud SQL operation returns a 429 with a specific message for
+// concurrent operations.
 func isSqlOperationInProgressError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 {
 		if strings.Contains(gerr.Body, "you cannot reuse the name of the deleted instance until one week from the deletion date.") {
@@ -175,7 +192,7 @@ func isSqlOperationInProgressError(err error) (bool, string) {
 
 // Retry if Monitoring operation returns a 429 with a specific message for
 // concurrent operations.
-func isMonitoringRetryableError(err error) (bool, string) {
+func isMonitoringConcurrentEditError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 409 && strings.Contains(strings.ToLower(gerr.Body), "too many concurrent edits") {
 			return true, "Waiting for other Monitoring changes to finish"
@@ -214,4 +231,47 @@ func isNotFoundRetryableError(opType string) RetryErrorPredicateFunc {
 		}
 		return false, ""
 	}
+}
+
+func isStoragePreconditionError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 412 {
+		return true, fmt.Sprintf("Retry on storage precondition not met")
+	}
+	return false, ""
+}
+
+func isDataflowJobUpdateRetryableError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 404 && strings.Contains(gerr.Body, "in RUNNING OR DRAINING state") {
+			return true, "Waiting for job to be in a valid state"
+		}
+	}
+	return false, ""
+}
+
+func isPeeringOperationInProgress(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && strings.Contains(gerr.Body, "There is a peering operation in progress") {
+			return true, "Waiting peering operation to complete"
+		}
+	}
+	return false, ""
+}
+
+func isCloudFunctionsSourceCodeError(err error) (bool, string) {
+	if operr, ok := err.(*CommonOpError); ok {
+		if operr.Code == 3 && operr.Message == "Failed to retrieve function source code" {
+			return true, fmt.Sprintf("Retry on Function failing to pull code from GCS")
+		}
+	}
+	return false, ""
+}
+
+func datastoreIndex409Contention(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 409 && strings.Contains(gerr.Body, "too much contention") {
+			return true, "too much contention - waiting for less activity"
+		}
+	}
+	return false, ""
 }

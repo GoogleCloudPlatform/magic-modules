@@ -16,6 +16,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   FirewallRule: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["apps/{{project}}/firewall/ingressRules/{{priority}}"]
     mutex: "apps/{{project}}"
+    async: !ruby/object:Provider::Terraform::PollAsync
+      check_response_func: PollCheckForExistence
+      actions: ['create']
+      operation: !ruby/object:Api::Async::Operation
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 4
+          update_minutes: 4
+          delete_minutes: 4
     # This resource is a child resource (requires app ID in the URL)
     skip_sweeper: true
     examples:
@@ -28,6 +36,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
   StandardAppVersion: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
+    id_format: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
     mutex: "apps/{{project}}"
     error_retry_predicates: ["isAppEngineRetryableError"]
     parameters:
@@ -35,12 +44,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         required: false
     virtual_fields:
-      - !ruby/object:Provider::Terraform::VirtualFields
+      - !ruby/object:Api::Type::Boolean
         name: 'noop_on_destroy'
+        default_value: false
         description: |
           If set to `true`, the application version will not be deleted.
-      - !ruby/object:Provider::Terraform::VirtualFields
+      - !ruby/object:Api::Type::Boolean
         name: 'delete_service_on_destroy'
+        default_value: false
         description: |
           If set to `true`, the service will be deleted if it is the last version.    
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -57,9 +68,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       threadsafe: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+      handlers: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       # instanceClass defaults to a value based on the scaling method
       instanceClass: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      inboundServices: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_standard_app_version"
@@ -74,6 +89,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
   FlexibleAppVersion: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["apps/{{project}}/services/{{service}}/versions/{{version_id}}"]
+    id_format: "apps/{{project}}/services/{{service}}/versions/{{version_id}}"
     mutex: "apps/{{project}}"
     error_retry_predicates: ["isAppEngineRetryableError"]
     parameters:
@@ -81,12 +97,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         required: false
     virtual_fields:
-      - !ruby/object:Provider::Terraform::VirtualFields
+      - !ruby/object:Api::Type::Boolean
         name: 'noop_on_destroy'
+        default_value: false
         description: |
           If set to `true`, the application version will not be deleted.
-      - !ruby/object:Provider::Terraform::VirtualFields
+      - !ruby/object:Api::Type::Boolean
         name: 'delete_service_on_destroy'
+        default_value: false
         description: |
           If set to `true`, the service will be deleted if it is the last version.    
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -117,6 +135,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       # runtimeApiVersion defaults to a runtime-specific value
       runtimeApiVersion: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      handlers: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      inboundServices: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_flexible_app_version"

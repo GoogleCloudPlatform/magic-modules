@@ -1,0 +1,12 @@
+resource "google_kms_key_ring" "keyring" {
+  name     = "<%= ctx[:vars]['keyring'] %>"
+  location = "global"
+}
+
+resource "google_kms_key_ring_import_job" "<%= ctx[:primary_resource_id] %>" {
+  key_ring = google_kms_key_ring.keyring.id
+  import_job_id = "my-import-job"
+
+  import_method = "RSA_OAEP_3072_SHA1_AES_256"
+  protection_level = "SOFTWARE"
+}

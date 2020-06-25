@@ -1,9 +1,9 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% http_proxy = grab_attributes['http_proxy'] -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% http_proxy = grab_attributes(pwd)['http_proxy'] -%>
 describe google_compute_target_http_proxy(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: <%= doc_generation ? "'#{http_proxy['name']}'" : "http_proxy['name']" -%>) do
   it { should exist }
   its('description') { should eq <%= doc_generation ? "'#{http_proxy['description']}'" : "http_proxy['description']" -%> }
-  its('url_map') { should  match /\/<%= "#{grab_attributes['url_map']['name']}" -%>$/ }
+  its('url_map') { should  match /\/<%= "#{grab_attributes(pwd)['url_map']['name']}" -%>$/ }
 end
 
 describe google_compute_target_http_proxy(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: 'nonexistent') do

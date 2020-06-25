@@ -104,7 +104,7 @@ func testSweepDatabases(region string) error {
 				return nil
 			}
 
-			err = sqlAdminOperationWait(config, op, config.Project, "Stop Replica")
+			err = sqlAdminOperationWaitTime(config, op, config.Project, "Stop Replica", 10 * time.Minute)
 			if err != nil {
 				if strings.Contains(err.Error(), "does not exist") {
 					log.Printf("Replication operation not found")
@@ -136,7 +136,7 @@ func testSweepDatabases(region string) error {
 				return nil
 			}
 
-			err = sqlAdminOperationWait(config, op, config.Project, "Delete Instance")
+			err = sqlAdminOperationWaitTime(config, op, config.Project, "Delete Instance", 10 * time.Minute)
 			if err != nil {
 				if strings.Contains(err.Error(), "does not exist") {
 					log.Printf("SQL instance not found")
@@ -152,6 +152,8 @@ func testSweepDatabases(region string) error {
 }
 
 func TestAccSqlDatabaseInstance_basicInferredName(t *testing.T) {
+	// Randomness
+	skipIfVcr(t)
 	t.Parallel()
 
 	vcrTest(t, resource.TestCase{
@@ -195,7 +197,6 @@ func TestAccSqlDatabaseInstance_basicSecondGen(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccSqlDatabaseInstance_basicMSSQL(t *testing.T) {
 	t.Parallel()
 
@@ -220,7 +221,6 @@ func TestAccSqlDatabaseInstance_basicMSSQL(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 	t.Parallel()
@@ -258,7 +258,7 @@ func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 						t.Errorf("Error while inserting root@%% user: %s", err)
 						return
 					}
-					err = sqlAdminOperationWait(config, op, config.Project, "Waiting for user to insert")
+					err = sqlAdminOperationWaitTime(config, op, config.Project, "Waiting for user to insert", 10 * time.Minute)
 					if err != nil {
 						t.Errorf("Error while waiting for user insert operation to complete: %s", err.Error())
 					}
@@ -675,7 +675,6 @@ resource "google_sql_database_instance" "instance" {
 }
 `
 
-<% unless version == 'ga' -%>
 var testGoogleSqlDatabaseInstance_basic_mssql = `
 resource "google_sql_database_instance" "instance" {
   name             = "%s"
@@ -686,7 +685,6 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `
-<% end -%>
 
 func testGoogleSqlDatabaseInstanceConfig_withoutReplica(instanceName string) string {
 	return fmt.Sprintf(`

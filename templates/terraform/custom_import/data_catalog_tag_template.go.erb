@@ -1,0 +1,18 @@
+	config := meta.(*Config)
+
+	// current import_formats can't import fields with forward slashes in their value
+	if err := parseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+		return nil, err
+	}
+
+	name := d.Get("name").(string)
+	egRegex := regexp.MustCompile("projects/(.+)/locations/(.+)/tagTemplates/(.+)")
+
+	parts := egRegex.FindStringSubmatch(name)
+	if len(parts) != 4 {
+		return nil, fmt.Errorf("tag template name does not fit the format %s", egRegex)
+	}
+	d.Set("project", parts[1])
+	d.Set("region", parts[2])
+	d.Set("tag_template_id", parts[3])
+	return []*schema.ResourceData{d}, nil

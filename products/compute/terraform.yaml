@@ -32,6 +32,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "internal_with_gce_endpoint"
         vars:
           address_name: "my-internal-address-"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "address_with_shared_loadbalancer_vip"
+        primary_resource_id: "internal_with_shared_loadbalancer_vip"
+        min_version: 'beta'
+        vars:
+          address_name: "my-internal-address"
+        skip_docs: true  # It is almost identical to internal_with_gce_endpoint
       # TODO(rileykarson): Remove this example when instance is supported
       - !ruby/object:Provider::Terraform::Examples
         name: "instance_with_ip"
@@ -107,6 +114,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: maxReplicas
       autoscalingPolicy.coolDownPeriodSec: !ruby/object:Overrides::Terraform::PropertyOverride
         name: cooldownPeriod
+      autoscalingPolicy.scaleDownControl: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
       autoscalingPolicy.cpuUtilization: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -257,21 +267,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_round_robin"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_ring_hash"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_balancing_mode"
-        min_version: beta
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-service"
@@ -281,6 +288,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/region_backend_service.go.erb
       encoder: templates/terraform/encoders/region_backend_service.go.erb
+      decoder: templates/terraform/decoders/region_backend_service.go.erb
       resource_definition: 'templates/terraform/resource_definition/region_backend_service.go.erb'
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -312,6 +320,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       protocol: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      portName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       sessionAffinity: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -345,7 +355,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       Adds existing resource policies to a disk. You can only add one policy
       which will be applied to this disk for scheduling snapshot creation.
 
-      ~> **Note:** This resource does not support zonal disks (`google_compute_disk`).
+      ~> **Note:** This resource does not support zonal disks (`google_compute_disk`). For zonal disks, please refer to [`google_compute_disk_resource_policy_attachment`](https://www.terraform.io/docs/providers/google/r/compute_disk_resource_policy_attachment.html)
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_disk_resource_policy_attachment_basic"
@@ -369,7 +379,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       Adds existing resource policies to a disk. You can only add one policy
       which will be applied to this disk for scheduling snapshot creation.
 
-      ~> **Note:** This resource does not support regional disks (`google_compute_region_disk`).
+      ~> **Note:** This resource does not support regional disks (`google_compute_region_disk`). For regional disks, please refer to [`google_compute_region_disk_resource_policy_attachment`](https://www.terraform.io/docs/providers/google/r/compute_region_disk_resource_policy_attachment.html)
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "disk_resource_policy_attachment_basic"
@@ -469,6 +479,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       resourcePolicies: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        description: |
+          {{description}}
+
+          ~>**NOTE** This value does not support updating the
+          resource policy, as resource policies can not be updated more than
+          one at a time. Use
+          [`google_compute_disk_resource_policy_attachment`](https://www.terraform.io/docs/providers/google/r/compute_disk_resource_policy_attachment.html)
+          to allow for updating the resource policy attached to the disk.
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       constants: templates/terraform/constants/disk.erb
@@ -577,6 +595,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           region_url_map_name: "website-map"
           region_backend_service_name: "website-backend"
           region_health_check_name: "website-hc"
+          rigm_name: "website-rigm"
           network_name: "website-net"
           fw_name: "website-fw"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -939,6 +958,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "instance_group_named_port_gke"
         primary_resource_id: "my_port"
+        # Multiple fine-grained resources
+        skip_vcr: true
         vars:
           network_name: "container-network"
           subnetwork_name: "container-subnetwork"
@@ -984,12 +1005,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       candidateSubnets: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+      edgeAvailabilityDomain: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/interconnect_attachment.go.erb
       post_create: templates/terraform/post_create/interconnect_attachment.go.erb
       pre_delete: templates/terraform/pre_delete/interconnect_attachment.go.erb
   License: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
+  MachineImage: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "machine_image_basic"
+        primary_resource_id: "image"
+        vars:
+          vm_name: "vm"
+          image_name: "image"
+
   MachineType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Network: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -1000,8 +1032,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           network_name: "vpc-network"
     virtual_fields:
-      - !ruby/object:Provider::Terraform::VirtualFields
+      - !ruby/object:Api::Type::Boolean
         name: 'delete_default_routes_on_create'
+        default_value: false
         description: |
           If set to `true`, default routes (`0.0.0.0/0`) will be deleted
           immediately after network creation. Defaults to `false`.
@@ -1159,6 +1192,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      importCustomRoutes: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+      exportCustomRoutes: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: 'templates/terraform/custom_delete/skip_delete.go.erb'
       encoder: 'templates/terraform/encoders/network_peering_routes_config.go.erb'
@@ -1255,6 +1292,140 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           The Region in which the created address should reside.
           If it is not provided, the provider region is used.
 
+  PerInstanceConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{project}}/{{zone}}/{{instance_group_manager}}/{{name}}"
+    mutex: instanceGroupManager/{{project}}/{{zone}}/{{instance_group_manager}}
+    # Fine-grained resources don't actually exist as standalone GCP resource
+    # in Cloud Asset Inventory
+    exclude_validator: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "stateful_igm"
+        primary_resource_id: "stateful-instance"
+        # Fine-grained resource need different autogenerated tests, as
+        # we need to check destroy during a test step where the parent resource
+        # still exists, rather than during CheckDestroy (when read returns
+        # nothing because the parent resource has then also been destroyed)
+        skip_test: true
+        vars:
+          template_name: "my-template"
+          igm_name: "my-igm"
+    properties:
+      preservedState.disk: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        custom_flatten: templates/terraform/custom_flatten/preserved_state_disks.go.erb
+        custom_expand: templates/terraform/custom_expand/preserved_state_disks.go.erb
+    virtual_fields:
+      - !ruby/object:Api::Type::Enum
+        name: 'minimal_action'
+        description: |
+          The minimal action to perform on the instance during an update.
+          Default is `NONE`. Possible values are:
+          * REPLACE
+          * RESTART
+          * REFRESH
+          * NONE
+        values:
+          - :REPLACE
+          - :RESTART
+          - :REFRESH
+          - :NONE
+        default_value: :NONE
+      - !ruby/object:Api::Type::Enum
+        name: 'most_disruptive_allowed_action'
+        description: |
+          The most disruptive action to perform on the instance during an update.
+          Default is `REPLACE`. Possible values are:
+          * REPLACE
+          * RESTART
+          * REFRESH
+          * NONE
+        values:
+          - :REPLACE
+          - :RESTART
+          - :REFRESH
+          - :NONE
+        default_value: :REPLACE
+      - !ruby/object:Api::Type::Boolean
+        name: 'remove_instance_state_on_destroy'
+        description: |
+          When true, deleting this config will immediately remove any specified state from the underlying instance.
+          When false, deleting this config will *not* immediately remove any state from the underlying instance.
+          State will be removed on the next instance recreation or update.
+        default_value: false
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/compute_per_instance_config.go.erb
+      update_encoder: templates/terraform/update_encoder/compute_per_instance_config.go.erb
+      pre_delete: templates/terraform/pre_delete/compute_per_instance_config.go.erb
+      post_update: templates/terraform/post_update/compute_per_instance_config.go.erb
+      custom_delete: templates/terraform/custom_delete/per_instance_config.go.erb
+  RegionPerInstanceConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{project}}/{{region}}/{{region_instance_group_manager}}/{{name}}"
+    mutex: instanceGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}
+    # Fine-grained resources don't actually exist as standalone GCP resource
+    # in Cloud Asset Inventory
+    exclude_validator: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "stateful_rigm"
+        primary_resource_id: "stateful-instance"
+        # Fine-grained resource need different autogenerated tests, as
+        # we need to check destroy during a test step where the parent resource
+        # still exists, rather than during CheckDestroy (when read returns
+        # nothing because the parent resource has then also been destroyed)
+        skip_test: true
+        vars:
+          template_name: "my-template"
+          igm_name: "my-rigm"
+    properties:
+      preservedState.disk: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        custom_flatten: templates/terraform/custom_flatten/preserved_state_disks.go.erb
+        custom_expand: templates/terraform/custom_expand/preserved_state_disks.go.erb
+    virtual_fields:
+      - !ruby/object:Api::Type::Enum
+        name: 'minimal_action'
+        description: |
+          The minimal action to perform on the instance during an update.
+          Default is `NONE`. Possible values are:
+          * REPLACE
+          * RESTART
+          * REFRESH
+          * NONE
+        values:
+          - :REPLACE
+          - :RESTART
+          - :REFRESH
+          - :NONE
+        default_value: :NONE
+      - !ruby/object:Api::Type::Enum
+        name: 'most_disruptive_allowed_action'
+        description: |
+          The most disruptive action to perform on the instance during an update.
+          Default is `REPLACE`. Possible values are:
+          * REPLACE
+          * RESTART
+          * REFRESH
+          * NONE
+        values:
+          - :REPLACE
+          - :RESTART
+          - :REFRESH
+          - :NONE
+        default_value: :REPLACE
+      - !ruby/object:Api::Type::Boolean
+        name: 'remove_instance_state_on_destroy'
+        description: |
+          When true, deleting this config will immediately remove any specified state from the underlying instance.
+          When false, deleting this config will *not* immediately remove any state from the underlying instance.
+          State will be removed on the next instance recreation or update.
+        default_value: false
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/compute_per_instance_config.go.erb
+      update_encoder: templates/terraform/update_encoder/compute_per_instance_config.go.erb
+      pre_delete: templates/terraform/pre_delete/compute_per_instance_config.go.erb
+      post_update: templates/terraform/post_update/compute_region_per_instance_config.go.erb
+      custom_delete: templates/terraform/custom_delete/region_per_instance_config.go.erb
   ProjectInfo: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -1440,7 +1611,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       sslHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
   RegionUrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
-    min_version: 'beta'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_url_map_basic"
@@ -1501,6 +1671,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
       tests: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "test"
+      pathMatchers.defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      pathMatchers.pathRules.urlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
   ResourcePolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1550,6 +1729,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntAtLeast(1)'
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
+    # Route cannot be added while a peering is on progress on the network
+    mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
+    error_retry_predicates: ["isPeeringOperationInProgress"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "route_basic"
@@ -1711,6 +1893,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           router_name: "my-router"
           peer_name: "my-router-peer"
     properties:
+      advertiseMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateRFC1035Name(2, 63)'
@@ -1829,14 +2013,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_basic"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
         ignore_read_extra:
           - "name_prefix"
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_random_provider"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_target_https_proxies"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
         vars:
           target_https_proxy_name: "test-proxy"
           url_map_name: "url-map"
@@ -1874,15 +2064,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "region_ssl_certificate_basic"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
         ignore_read_extra:
           - "name_prefix"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_ssl_certificate_random_provider"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
       - !ruby/object:Provider::Terraform::Examples
         name: "region_ssl_certificate_target_https_proxies"
-        min_version: "beta"
         primary_resource_id: "default"
+        # Uses resource.UniqueId
+        skip_vcr: true
         vars:
           region_target_https_proxy_name: "test-proxy"
           region_url_map_name: "url-map"
@@ -2010,7 +2205,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validateIpCidrRange'
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
-        input: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       purpose: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -2077,7 +2271,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_value: :NONE
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   RegionTargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
-    min_version: 'beta'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_target_http_proxy_basic"
@@ -2104,7 +2297,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
   RegionTargetHttpsProxy: !ruby/object:Overrides::Terraform::ResourceOverride
-    min_version: 'beta'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_target_https_proxy_basic"
@@ -2336,6 +2528,49 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: The backend service or backend bucket link that should be matched by this test.
       tests: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "test"
+      pathMatchers.defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      defaultUrlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      pathMatchers.pathRules.urlRedirect.stripQuery: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        description: '{{description}} This field is required to ensure an empty block is not set. The normal default value is false.'
+      pathMatchers.defaultRouteAction.weightedBackendServices.weight: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0, 1000)'
+      pathMatchers.defaultRouteAction.timeout: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      pathMatchers.defaultRouteAction.retryPolicy.numRetries: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(1)'
+      pathMatchers.defaultRouteAction.faultInjectionPolicy.delay.percentage: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.FloatBetween(0, 100)'
+      pathMatchers.defaultRouteAction.faultInjectionPolicy.abort.httpStatus: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(200, 599)'
+      pathMatchers.defaultRouteAction.faultInjectionPolicy.abort.percentage: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.FloatBetween(0, 100)'
+      defaultRouteAction.weightedBackendServices.weight: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0, 1000)'
+      defaultRouteAction.timeout: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      defaultRouteAction.retryPolicy.numRetries: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntAtLeast(1)'
+      defaultRouteAction.faultInjectionPolicy.delay.percentage: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.FloatBetween(0, 100)'
+      defaultRouteAction.faultInjectionPolicy.abort.httpStatus: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(200, 599)'
+      defaultRouteAction.faultInjectionPolicy.abort.percentage: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.FloatBetween(0, 100)'
   VpnTunnel: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -2411,7 +2646,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/labels.erb
   Zone: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
-
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

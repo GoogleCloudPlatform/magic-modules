@@ -61,36 +61,39 @@ module Provider
 
     # This function uses the resource templates to create singular and plural
     # resources that can be used by InSpec
-    def generate_resource(data)
+    def generate_resource(pwd, data)
       target_folder = File.join(data.output_folder, 'libraries')
       name = data.object.name.underscore
 
       data.generate(
+        pwd,
         'templates/inspec/singular_resource.erb',
         File.join(target_folder, "#{resource_name(data.object, data.product)}.rb"),
         self
       )
-      generate_documentation(data.clone, name, false)
+      generate_documentation(pwd, data.clone, name, false)
 
       unless data.object.singular_only
         data.generate(
+          pwd,
           'templates/inspec/plural_resource.erb',
           File.join(target_folder, resource_name(data.object, data.product).pluralize + '.rb'),
           self
         )
-        generate_documentation(data.clone, name, true)
+        generate_documentation(pwd, data.clone, name, true)
       end
 
-      generate_properties(data.clone, data.object.all_user_properties)
+      generate_properties(pwd, data.clone, data.object.all_user_properties)
     end
 
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
-    def generate_iam_policy(data)
+    def generate_iam_policy(pwd, data)
       target_folder = File.join(data.output_folder, 'libraries')
 
       iam_policy_resource_name = "#{resource_name(data.object, data.product)}_iam_policy"
       data.generate(
+        pwd,
         'templates/inspec/iam_policy/iam_policy.erb',
         File.join(target_folder, "#{iam_policy_resource_name}.rb"),
         self
@@ -98,21 +101,23 @@ module Provider
 
       markdown_target_folder = File.join(data.output_folder, 'docs/resources')
       data.generate(
+        pwd,
         'templates/inspec/iam_policy/iam_policy.md.erb',
         File.join(markdown_target_folder, "#{iam_policy_resource_name}.md"),
         self
       )
 
-      generate_iam_binding(data)
+      generate_iam_binding(pwd, data)
     end
 
     # Generate the IAM binding for this object. This is used to query and test
     # IAM bindings in a more convienient way than using the IAM policy resource
-    def generate_iam_binding(data)
+    def generate_iam_binding(pwd, data)
       target_folder = File.join(data.output_folder, 'libraries')
 
       iam_binding_resource_name = "#{resource_name(data.object, data.product)}_iam_binding"
       data.generate(
+        pwd,
         'templates/inspec/iam_binding/iam_binding.erb',
         File.join(target_folder, "#{iam_binding_resource_name}.rb"),
         self
@@ -120,25 +125,26 @@ module Provider
 
       markdown_target_folder = File.join(data.output_folder, 'docs/resources')
       data.generate(
+        pwd,
         'templates/inspec/iam_binding/iam_binding.md.erb',
         File.join(markdown_target_folder, "#{iam_binding_resource_name}.md"),
         self
       )
     end
 
-    def generate_properties(data, props)
+    def generate_properties(pwd, data, props)
       nested_objects = props.select(&:nested_properties?)
       return if nested_objects.empty?
 
       # Create property files for any nested objects.
-      generate_property_files(nested_objects, data)
+      generate_property_files(pwd, nested_objects, data)
 
       # Create property files for any deeper nested objects.
-      nested_objects.each { |prop| generate_properties(data, prop.nested_properties) }
+      nested_objects.each { |prop| generate_properties(pwd, data, prop.nested_properties) }
     end
 
     # Generate the files for the properties
-    def generate_property_files(properties, data)
+    def generate_property_files(pwd, properties, data)
       properties.flatten.compact.each do |property|
         nested_object_template = NestedObjectProductFileTemplate.new(
           data.output_folder,
@@ -153,11 +159,11 @@ module Provider
           nested_object_template.output_folder,
           "libraries/#{nested_object_requires(property)}.rb"
         )
-        nested_object_template.generate(source, target, self)
+        nested_object_template.generate(pwd, source, target, self)
       end
     end
 
-    def build_object_data(object, output_folder, version)
+    def build_object_data(_pwd, object, output_folder, version)
       InspecProductFileTemplate.file_for_resource(
         output_folder,
         object,
@@ -168,7 +174,7 @@ module Provider
     end
 
     # Generates InSpec markdown documents for the resource
-    def generate_documentation(data, base_name, plural)
+    def generate_documentation(pwd, data, base_name, plural)
       docs_folder = File.join(data.output_folder, 'docs', 'resources')
 
       name = plural ? base_name.pluralize : base_name
@@ -179,6 +185,7 @@ module Provider
       file_name = resource_name(data.object, data.product)
       file_name = file_name.pluralize if plural
       data.generate(
+        pwd,
         'templates/inspec/doc_template.md.erb',
         File.join(docs_folder, "#{file_name}.md"),
         self
@@ -193,28 +200,29 @@ module Provider
     end
 
     # Copies InSpec tests to build folder
-    def generate_resource_tests(data)
+    def generate_resource_tests(pwd, data)
       target_folder = File.join(data.output_folder, 'test')
       FileUtils.mkpath target_folder
 
-      FileUtils.cp_r 'templates/inspec/tests/.', target_folder
+      FileUtils.cp_r pwd + '/templates/inspec/tests/.', target_folder
 
       name = resource_name(data.object, data.product)
 
-      generate_inspec_test(data.clone, name, target_folder, name)
+      generate_inspec_test(pwd, data.clone, name, target_folder, name)
 
       # Build test for plural resource
-      generate_inspec_test(data.clone, name.pluralize, target_folder, name)\
+      generate_inspec_test(pwd, data.clone, name.pluralize, target_folder, name)\
         unless data.object.singular_only
     end
 
-    def generate_inspec_test(data, name, target_folder, attribute_file_name)
+    def generate_inspec_test(pwd, data, name, target_folder, attribute_file_name)
       data.name = name
       data.attribute_file_name = attribute_file_name
       data.doc_generation = false
       data.privileged = data.object.privileged
 
       data.generate(
+        pwd,
         'templates/inspec/integration_test_template.erb',
         File.join(
           target_folder,
@@ -225,7 +233,7 @@ module Provider
       )
     end
 
-    def generate_resource_sweepers(data)
+    def generate_resource_sweepers(pwd, data)
       # No generated sweepers for this provider
     end
 
@@ -314,18 +322,18 @@ module Provider
       description
     end
 
-    def grab_attributes
-      YAML.load_file('templates/inspec/tests/integration/configuration/mm-attributes.yml')
+    def grab_attributes(pwd)
+      YAML.load_file(pwd + '/templates/inspec/tests/integration/configuration/mm-attributes.yml')
     end
 
     # Returns a variable name OR default value for that variable based on
     # defaults from the existing inspec-gcp tests that do not exist within MM
     # Default values are used within documentation to show realistic examples
-    def external_attribute(attribute_name, doc_generation = false)
+    def external_attribute(pwd, attribute_name, doc_generation = false)
       return attribute_name unless doc_generation
 
       external_attribute_file = 'templates/inspec/examples/attributes/external_attributes.yml'
-      "'#{YAML.load_file(external_attribute_file)[attribute_name]}'"
+      "'#{YAML.load_file(pwd + '/' + external_attribute_file)[attribute_name]}'"
     end
 
     def qualified_property_class(property)
@@ -385,8 +393,11 @@ module Provider
     end
 
     def ga_api_url(object)
-      ga_version = object.__product.version_obj_or_closest('ga')
-      object.product_url || ga_version.base_url
+      if object.__product.exists_at_version('ga')
+        ga_version = object.__product.version_obj_or_closest('ga')
+        return object.product_url || ga_version.base_url
+      end
+      beta_api_url(object)
     end
   end
 end

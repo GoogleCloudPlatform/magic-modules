@@ -112,7 +112,7 @@ resource "google_compute_instance_template" "instance_template" {
 
 resource "google_compute_instance_group_manager" "instance_group_manager" {
   name               = "instance-group-manager"
-  instance_template  = google_compute_instance_template.instance_template.self_link
+  instance_template  = google_compute_instance_template.instance_template.id
   base_instance_name = "instance-group-manager"
   zone               = "us-central1-f"
   target_size        = "1"
@@ -413,6 +413,8 @@ The `shielded_instance_config` block supports:
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
+* `id` - an identifier for the resource with format `projects/{{project}}/global/instanceTemplates/{{name}}`
+
 * `metadata_fingerprint` - The unique fingerprint of the metadata.
 
 * `self_link` - The URI of the created resource.
@@ -421,6 +423,14 @@ exported:
 
 [1]: /docs/providers/google/r/compute_instance_group_manager.html
 [2]: /docs/configuration/resources.html#lifecycle
+
+## Timeouts
+
+This resource provides the following
+[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+
+- `create` - Default is 4 minutes.
+- `delete` - Default is 4 minutes.
 
 ## Import
 

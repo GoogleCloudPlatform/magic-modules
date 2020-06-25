@@ -486,10 +486,13 @@ objects:
                 description: |
                   The set of optional components to activate on the cluster.
 
-                  Possible values include: COMPONENT_UNSPECIFIED, ANACONDA, HIVE_WEBHCAT, JUPYTER, ZEPPELIN
+                  Possible values include: COMPONENT_UNSPECIFIED, ANACONDA, HIVE_WEBHCAT, JUPYTER, ZEPPELIN, HBASE, SOLR, and RANGER
                 values:
                 - :COMPONENT_UNSPECIFIED
                 - :ANACONDA
+                - :HBASE
+                - :RANGER
+                - :SOLR
                 - :HIVE_WEBHCAT
                 - :JUPYTER
                 - :ZEPPELIN

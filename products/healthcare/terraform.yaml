@@ -50,6 +50,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           dataset_name: "example-dataset"
           fhir_store_name: "example-fhir-store"
           pubsub_topic: "fhir-notifications"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "healthcare_fhir_store_streaming_config"
+        primary_resource_id: "default"
+        vars:
+          dataset_name: "example-dataset"
+          fhir_store_name: "example-fhir-store"
+          pubsub_topic: "fhir-notifications"
+          bq_dataset_name: "bq_example_dataset"
     properties:
       creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -107,8 +115,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       parserConfig.schema: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/healthcare_hl7_v2_store_schema.erb'
-        custom_flatten: 'templates/terraform/custom_flatten/healthcare_hl7_v2_store_schema.erb'
+        custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.ValidateJsonString'

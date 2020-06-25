@@ -32,7 +32,6 @@ func TestAccContainerNodePool_basic(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerNodePool_nodeLocations(t *testing.T) {
 	t.Parallel()
 
@@ -56,7 +55,6 @@ func TestAccContainerNodePool_nodeLocations(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerNodePool_maxPodsPerNode(t *testing.T) {
 	t.Parallel()
@@ -83,6 +81,8 @@ func TestAccContainerNodePool_maxPodsPerNode(t *testing.T) {
 }
 
 func TestAccContainerNodePool_namePrefix(t *testing.T) {
+	// Randomness
+	skipIfVcr(t)
 	t.Parallel()
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
@@ -106,6 +106,8 @@ func TestAccContainerNodePool_namePrefix(t *testing.T) {
 }
 
 func TestAccContainerNodePool_noName(t *testing.T) {
+	// Randomness
+	skipIfVcr(t)
 	t.Parallel()
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
@@ -165,9 +167,10 @@ func TestAccContainerNodePool_withNodeConfig(t *testing.T) {
 }
 
 <% unless version.nil? || version == 'ga' -%>
-func TestAccContainerNodePool_withWorkloadMetadataConfig(t *testing.T) {
+func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 	t.Parallel()
 
+	pid := getTestProjectFromEnv()
 	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
 
@@ -193,22 +196,6 @@ func TestAccContainerNodePool_withWorkloadMetadataConfig(t *testing.T) {
 					"node_config.0.workload_metadata_config.0.node_metadata",
 				},
 			},
-		},
-	})
-}
-
-func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
-	t.Parallel()
-
-	pid := getTestProjectFromEnv()
-	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
-	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerNodePool_withWorkloadMetadataConfig_gkeMetadataServer(pid, cluster, np),
 				Check: resource.ComposeTestCheckFunc(
@@ -356,8 +343,8 @@ func TestAccContainerNodePool_withManagement(t *testing.T) {
 	nodePool := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
 	management := `
 	management {
-		auto_repair = "true"
-		auto_upgrade = "true"
+		auto_repair = "false"
+		auto_upgrade = "false"
 	}`
 
 	vcrTest(t, resource.TestCase{
@@ -371,9 +358,9 @@ func TestAccContainerNodePool_withManagement(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_container_node_pool.np_with_management", "management.#", "1"),
 					resource.TestCheckResourceAttr(
-						"google_container_node_pool.np_with_management", "management.0.auto_repair", "false"),
+						"google_container_node_pool.np_with_management", "management.0.auto_repair", "true"),
 					resource.TestCheckResourceAttr(
-						"google_container_node_pool.np_with_management", "management.0.auto_repair", "false"),
+						"google_container_node_pool.np_with_management", "management.0.auto_upgrade", "true"),
 				),
 			},
 			resource.TestStep{
@@ -387,9 +374,9 @@ func TestAccContainerNodePool_withManagement(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_container_node_pool.np_with_management", "management.#", "1"),
 					resource.TestCheckResourceAttr(
-						"google_container_node_pool.np_with_management", "management.0.auto_repair", "true"),
+						"google_container_node_pool.np_with_management", "management.0.auto_repair", "false"),
 					resource.TestCheckResourceAttr(
-						"google_container_node_pool.np_with_management", "management.0.auto_repair", "true"),
+						"google_container_node_pool.np_with_management", "management.0.auto_upgrade", "false"),
 				),
 			},
 			resource.TestStep{
@@ -570,8 +557,13 @@ func TestAccContainerNodePool_resize(t *testing.T) {
 	})
 }
 
+
 func TestAccContainerNodePool_version(t *testing.T) {
 	t.Parallel()
+
+	// Re-enable this test when there is more than one acceptable node pool version
+	// for the current master version
+	t.Skip()
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
@@ -785,7 +777,6 @@ resource "google_container_node_pool" "np" {
 `, cluster, np)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerNodePool_nodeLocations(cluster, np, network string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -843,7 +834,6 @@ resource "google_container_node_pool" "np" {
 }
 `, network, cluster, np)
 }
-<% end -%>
 
 func testAccContainerNodePool_maxPodsPerNode(cluster, np, network string) string {
 	return fmt.Sprintf(`
@@ -1367,7 +1357,6 @@ resource "google_container_cluster" "cluster" {
   name               = "%s"
   location           = "us-central1-c"
   initial_node_count = 1
-  node_version       = data.google_container_engine_versions.central1c.latest_node_version
   min_master_version = data.google_container_engine_versions.central1c.latest_master_version
 }
 

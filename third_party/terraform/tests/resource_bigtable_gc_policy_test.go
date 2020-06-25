@@ -10,6 +10,8 @@ import (
 )
 
 func TestAccBigtableGCPolicy_basic(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	skipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
@@ -33,6 +35,8 @@ func TestAccBigtableGCPolicy_basic(t *testing.T) {
 }
 
 func TestAccBigtableGCPolicy_union(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	skipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
@@ -136,6 +140,7 @@ resource "google_bigtable_instance" "instance" {
   }
 
   instance_type = "DEVELOPMENT"
+  deletion_protection = false
 }
 
 resource "google_bigtable_table" "table" {
@@ -170,6 +175,7 @@ resource "google_bigtable_instance" "instance" {
   }
 
   instance_type = "DEVELOPMENT"
+  deletion_protection = false
 }
 
 resource "google_bigtable_table" "table" {

@@ -9,6 +9,9 @@ description: |-
 
 # google\_container\_node\_pool
 
+-> See the [Using GKE with Terraform](/docs/providers/google/guides/using_gke_with_terraform.html)
+guide for more information about using GKE with Terraform.
+
 Manages a node pool in a Google Kubernetes Engine (GKE) cluster separately from
 the cluster control plane. For more information see [the official documentation](https://cloud.google.com/container-engine/docs/node-pools)
 and [the API reference](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters.nodePools).
@@ -122,7 +125,7 @@ this will force recreation of the resource.
     See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/flexible-pod-cidr)
     for more information.
 
-* `node_locations` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `node_locations` - (Optional)
 The list of zones in which the node pool's nodes should be located. Nodes must
 be in the region of their regional cluster or in the same region as their
 cluster's zone for zonal clusters. If unspecified, the cluster-level
@@ -186,6 +189,8 @@ The `upgrade_settings` block supports:
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
+
+* `id` - an identifier for the resource with format `{{project}}/{{zone}}/{{cluster}}/{{name}}`
 
 * `instance_group_urls` - The resource URLs of the managed instance groups associated with this node pool.
 

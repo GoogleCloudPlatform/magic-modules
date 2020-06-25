@@ -1,5 +1,5 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% redis = grab_attributes['redis'] -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% redis = grab_attributes(pwd)['redis'] -%>
 describe google_redis_instances(project: <%= gcp_project_id -%>, region: <%= doc_generation ? "'#{redis['region']}'" : "redis['region']" -%>) do
   its('tiers') { should include <%= doc_generation ? "'#{redis['tier']}'" : "redis['tier']" -%> }
   its('memory_size_gbs') { should include <%= doc_generation ? "'#{redis['memory_size_gb']}'" : "redis['memory_size_gb']" -%> }

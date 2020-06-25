@@ -1,11 +1,7 @@
-data "google_compute_node_types" "central1a" {
-  zone = "us-central1-a"
-}
-
 resource "google_compute_node_template" "soletenant-tmpl" {
   name      = "<%= ctx[:vars]['template_name'] %>"
   region    = "us-central1"
-  node_type = data.google_compute_node_types.central1a.names[0]
+  node_type = "n1-node-96-624"
 }
 
 resource "google_compute_node_group" "<%= ctx[:primary_resource_id] %>" {
@@ -14,5 +10,5 @@ resource "google_compute_node_group" "<%= ctx[:primary_resource_id] %>" {
   description = "example google_compute_node_group for Terraform Google Provider"
 
   size          = 1
-  node_template = google_compute_node_template.soletenant-tmpl.self_link
+  node_template = google_compute_node_template.soletenant-tmpl.id
 }

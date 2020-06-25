@@ -8,6 +8,8 @@ import (
 )
 
 func TestAccBigtableAppProfile_update(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	skipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
@@ -49,6 +51,8 @@ resource "google_bigtable_instance" "instance" {
     num_nodes    = 3
     storage_type = "HDD"
   }
+
+  deletion_protection = false
 }
 
 resource "google_bigtable_app_profile" "ap" {
@@ -71,6 +75,8 @@ resource "google_bigtable_instance" "instance" {
     num_nodes    = 3
     storage_type = "HDD"
   }
+
+  deletion_protection = false
 }
 
 resource "google_bigtable_app_profile" "ap" {

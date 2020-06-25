@@ -1,0 +1,488 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: DataCatalog
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://datacatalog.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Google Cloud Data Catalog API
+    url: https://console.cloud.google.com/apis/library/datacatalog.googleapis.com
+objects:
+  - !ruby/object:Api::Resource
+    name: EntryGroup
+    base_url: projects/{{project}}/locations/{{region}}/entryGroups
+    create_url: projects/{{project}}/locations/{{region}}/entryGroups?entryGroupId={{entry_group_id}}
+    self_link: "{{name}}"
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      An EntryGroup resource represents a logical grouping of zero or more Data Catalog Entry resources.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': https://cloud.google.com/data-catalog/docs
+      api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_attribute: 'entry_group'
+      import_format: ["projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}", "{{entry_group}}"]
+      base_url: projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        url_param_only: true
+        input: true
+        description: |
+          EntryGroup location region.
+      - !ruby/object:Api::Type::String
+        name: entryGroupId
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The id of the entry group to create. The id must begin with a letter or underscore,
+          contain only English letters, numbers and underscores, and be at most 64 characters.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          The resource name of the entry group in URL format. Example: projects/{project}/locations/{location}/entryGroups/{entryGroupId}
+        output: true
+      - !ruby/object:Api::Type::String
+        name: displayName
+        description: |
+          A short name to identify the entry group, for example, "analytics data - jan 2011".
+      - !ruby/object:Api::Type::String
+        name: description
+        description: |
+          Entry group description, which can consist of several sentences or paragraphs that describe entry group contents.
+  - !ruby/object:Api::Resource
+    name: Entry
+    base_url: '{{entry_group}}/entries'
+    create_url: '{{entry_group}}/entries?entryId={{entry_id}}'
+    self_link: "{{name}}"
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Entry Metadata. A Data Catalog Entry resource represents another resource in Google Cloud Platform
+      (such as a BigQuery dataset or a Pub/Sub topic) or outside of Google Cloud Platform. Clients can use
+      the linkedResource field in the Entry resource to refer to the original resource ID of the source system.
+
+      An Entry resource contains resource details, such as its schema. An Entry can also be used to attach
+      flexible metadata, such as a Tag.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': https://cloud.google.com/data-catalog/docs
+      api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups.entries
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: entryGroup
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The name of the entry group this entry is in.
+      - !ruby/object:Api::Type::String
+        name: entryId
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The id of the entry to create.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          The Data Catalog resource name of the entry in URL format.
+          Example: projects/{project_id}/locations/{location}/entryGroups/{entryGroupId}/entries/{entryId}.
+          Note that this Entry and its child resources may not actually be stored in the location in this name.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: linkedResource
+        description: |
+          The resource this metadata entry refers to.
+          For Google Cloud Platform resources, linkedResource is the full name of the resource.
+          For example, the linkedResource for a table resource from BigQuery is:
+          //bigquery.googleapis.com/projects/projectId/datasets/datasetId/tables/tableId
+          Output only when Entry is of type in the EntryType enum. For entries with userSpecifiedType,
+          this field is optional and defaults to an empty string.
+      - !ruby/object:Api::Type::String
+        name: displayName
+        description: |
+          Display information such as title and description. A short name to identify the entry,
+          for example, "Analytics Data - Jan 2011".
+      - !ruby/object:Api::Type::String
+        name: description
+        description: |
+          Entry description, which can consist of several sentences or paragraphs that describe entry contents.
+      - !ruby/object:Api::Type::String
+        # This is a string instead of a NestedObject because schemas contain ColumnSchemas, which can contain nested ColumnSchemas.
+        # We'll have people provide the json blob for the schema instead.
+        name: schema
+        description: |
+          Schema of the entry (e.g. BigQuery, GoogleSQL, Avro schema), as a json string. An entry might not have any schema
+          attached to it. See
+          https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups.entries#schema
+          for what fields this schema can contain.
+      - !ruby/object:Api::Type::Enum
+        name: type
+        description: |
+          The type of the entry. Only used for Entries with types in the EntryType enum.
+          Currently, only FILESET enum value is allowed. All other entries created through Data Catalog must use userSpecifiedType.
+        values:
+          - :FILESET
+        input: true
+        exactly_one_of:
+          - type
+          - user_specified_type
+      - !ruby/object:Api::Type::String
+        name: userSpecifiedType
+        description: |
+          Entry type if it does not fit any of the input-allowed values listed in EntryType enum above.
+          When creating an entry, users should check the enum values first, if nothing matches the entry
+          to be created, then provide a custom value, for example "my_special_type".
+          userSpecifiedType strings must begin with a letter or underscore and can only contain letters,
+          numbers, and underscores; are case insensitive; must be at least 1 character and at most 64 characters long.
+        exactly_one_of:
+          - type
+          - user_specified_type
+      - !ruby/object:Api::Type::String
+        name: integratedSystem
+        description: |
+          This field indicates the entry's source system that Data Catalog integrates with, such as BigQuery or Pub/Sub.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: userSpecifiedSystem
+        description: |
+          This field indicates the entry's source system that Data Catalog does not integrate with.
+          userSpecifiedSystem strings must begin with a letter or underscore and can only contain letters, numbers,
+          and underscores; are case insensitive; must be at least 1 character and at most 64 characters long.
+      - !ruby/object:Api::Type::NestedObject
+        name: gcsFilesetSpec
+        description: |
+          Specification that applies to a Cloud Storage fileset. This is only valid on entries of type FILESET.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: filePatterns
+            description: |
+              Patterns to identify a set of files in Google Cloud Storage.
+              See [Cloud Storage documentation](https://cloud.google.com/storage/docs/gsutil/addlhelp/WildcardNames)
+              for more information. Note that bucket wildcards are currently not supported. Examples of valid filePatterns:
+
+              * gs://bucket_name/dir/*: matches all files within bucket_name/dir directory.
+              * gs://bucket_name/dir/**: matches all files in bucket_name/dir spanning all subdirectories.
+              * gs://bucket_name/file*: matches files prefixed by file in bucket_name
+              * gs://bucket_name/??.txt: matches files with two characters followed by .txt in bucket_name
+              * gs://bucket_name/[aeiou].txt: matches files that contain a single vowel character followed by .txt in bucket_name
+              * gs://bucket_name/[a-m].txt: matches files that contain a, b, ... or m followed by .txt in bucket_name
+              * gs://bucket_name/a/*/b: matches all files in bucket_name that match a/*/b pattern, such as a/c/b, a/d/b
+              * gs://another_bucket/a.txt: matches gs://another_bucket/a.txt
+            required: true
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            name: sampleGcsFileSpecs
+            description: |
+              Sample files contained in this fileset, not all files contained in this fileset are represented here.
+            output: true
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: filePath
+                  description: |
+                    The full file path
+                  output: true
+                - !ruby/object:Api::Type::Integer
+                  name: sizeBytes
+                  description: |
+                    The size of the file, in bytes.
+                  output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: bigqueryTableSpec
+        description: |
+          Specification that applies to a BigQuery table. This is only valid on entries of type TABLE.
+        output: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: tableSourceType
+            description: |
+              The table source type.
+            output: true
+          - !ruby/object:Api::Type::NestedObject
+            name: viewSpec
+            description: |
+              Table view specification. This field should only be populated if tableSourceType is BIGQUERY_VIEW.
+            output: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: viewQuery
+                description: |
+                  The query that defines the table view.
+                output: true
+          - !ruby/object:Api::Type::NestedObject
+            name: tableSpec
+            description: |
+              Spec of a BigQuery table. This field should only be populated if tableSourceType is BIGQUERY_TABLE.
+            output: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: groupedEntry
+                description: |
+                  If the table is a dated shard, i.e., with name pattern [prefix]YYYYMMDD, groupedEntry is the
+                  Data Catalog resource name of the date sharded grouped entry, for example,
+                  projects/{project_id}/locations/{location}/entrygroups/{entryGroupId}/entries/{entryId}.
+                  Otherwise, groupedEntry is empty.
+                output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: bigqueryDateShardedSpec
+        description: |
+          Specification for a group of BigQuery tables with name pattern [prefix]YYYYMMDD.
+          Context: https://cloud.google.com/bigquery/docs/partitioned-tables#partitioning_versus_sharding.
+        output: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: dataset
+            description: |
+              The Data Catalog resource name of the dataset entry the current table belongs to, for example,
+              projects/{project_id}/locations/{location}/entrygroups/{entryGroupId}/entries/{entryId}
+            output: true
+          - !ruby/object:Api::Type::String
+            name: tablePrefix
+            description: |
+              The table name prefix of the shards. The name of any given shard is [tablePrefix]YYYYMMDD,
+              for example, for shard MyTable20180101, the tablePrefix is MyTable.
+            output: true
+          - !ruby/object:Api::Type::Integer
+            name: shardCount
+            description: |
+              Total number of shards.
+            output: true
+  - !ruby/object:Api::Resource
+    name: TagTemplate
+    base_url: projects/{{project}}/locations/{{region}}/tagTemplates
+    self_link: "{{name}}"
+    create_url: projects/{{project}}/locations/{{region}}/tagTemplates?tagTemplateId={{tag_template_id}}
+    delete_url: "{{name}}?force={{force_delete}}"
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A tag template defines a tag, which can have one or more typed fields.
+      The template is used to create and attach the tag to GCP resources.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': https://cloud.google.com/data-catalog/docs
+      api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.tagTemplates
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        url_param_only: true
+        input: true
+        description: |
+          Template location region.
+      - !ruby/object:Api::Type::String
+        name: tagTemplateId
+        required: true
+        url_param_only: true
+        input: true
+        description: |
+          The id of the tag template to create.
+      - !ruby/object:Api::Type::Boolean
+        name: forceDelete
+        url_param_only: true
+        description: |
+          This confirms the deletion of any possible tags using this template. Must be set to true in order to delete the tag template.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          The resource name of the tag template in URL format. Example: projects/{project_id}/locations/{location}/tagTemplates/{tagTemplateId}
+        output: true
+      - !ruby/object:Api::Type::String
+        name: displayName
+        description: |
+         The display name for this template.
+      - !ruby/object:Api::Type::Map
+        name: fields
+        description: |
+          Map of tag template field IDs to the settings for the field. This map is an exhaustive list of the allowed fields. This map must contain at least one field and at most 500 fields.
+        required: true
+        input: true  # TODO(danawillow): update logic
+        key_name: field_id
+        value_type: !ruby/object:Api::Type::NestedObject
+          name: field
+          properties:
+            - !ruby/object:Api::Type::String
+              name: name
+              description: |
+                The resource name of the tag template field in URL format. Example: projects/{project_id}/locations/{location}/tagTemplates/{tagTemplateId}/fields/{field}
+              output: true
+            - !ruby/object:Api::Type::String
+              name: displayName
+              description: |
+               The display name for this field.
+            - !ruby/object:Api::Type::NestedObject
+              name: type
+              description: |
+                The type of value this tag field can contain.
+              required: true
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: primitiveType
+                  description: |
+                    Represents primitive types - string, bool etc.
+                  values:
+                    - :DOUBLE
+                    - :STRING
+                    - :BOOL
+                    - :TIMESTAMP
+                - !ruby/object:Api::Type::NestedObject
+                  name: enumType
+                  description: |
+                    Represents an enum type.
+                  properties:
+                    - !ruby/object:Api::Type::Array
+                      name: allowedValues
+                      description: |
+                        The set of allowed values for this enum. The display names of the
+                        values must be case-insensitively unique within this set. Currently,
+                        enum values can only be added to the list of allowed values. Deletion
+                        and renaming of enum values are not supported.
+                        Can have up to 500 allowed values.
+                      required: true
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: displayName
+                            description: |
+                              The display name of the enum value.
+                            required: true
+            - !ruby/object:Api::Type::Boolean
+              name: isRequired
+              description: |
+                Whether this is a required field. Defaults to false.
+            - !ruby/object:Api::Type::Integer
+              name: order
+              description: |
+                The order of this field with respect to other fields in this tag template.
+                A higher value indicates a more important field. The value can be negative.
+                Multiple fields can have the same order, and field orders within a tag do not have to be sequential.
+  - !ruby/object:Api::Resource
+    name: Tag
+    base_url: '{{parent}}/tags'
+    self_link: '{{name}}'
+    update_url: '{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    self_link: '{{parent}}/tags'
+    delete_url: '{{name}}'
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys:
+        - tags
+    description: |
+      Tags are used to attach custom metadata to Data Catalog resources. Tags conform to the specifications within their tag template.
+
+      See [Data Catalog IAM](https://cloud.google.com/data-catalog/docs/concepts/iam) for information on the permissions needed to create or view tags.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': https://cloud.google.com/data-catalog/docs
+      api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups.tags
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: parent
+        url_param_only: true
+        description: |
+          The name of the parent this tag is attached to. This can be the name of an entry or an entry group. If an entry group, the tag will be attached to
+          all entries in that group.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          The resource name of the tag in URL format. Example:
+          projects/{project_id}/locations/{location}/entrygroups/{entryGroupId}/entries/{entryId}/tags/{tag_id} or
+          projects/{project_id}/locations/{location}/entrygroups/{entryGroupId}/tags/{tag_id}
+          where tag_id is a system-generated identifier. Note that this Tag may not actually be stored in the location in this name.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: template
+        description: |
+          The resource name of the tag template that this tag uses. Example:
+          projects/{project_id}/locations/{location}/tagTemplates/{tagTemplateId}
+          This field cannot be modified after creation.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: templateDisplayName
+        description: |
+          The display name of the tag template.
+        output: true
+      - !ruby/object:Api::Type::Map
+        name: fields
+        description: |
+          This maps the ID of a tag field to the value of and additional information about that field.
+          Valid field IDs are defined by the tag's template. A tag must have at least 1 field and at most 500 fields.
+        required: true
+        key_name: field_name
+        value_type: !ruby/object:Api::Type::NestedObject
+          name: field_value
+          properties:
+            - !ruby/object:Api::Type::String
+              name: display_name
+              description: |
+                The display name of this field
+              output: true
+            - !ruby/object:Api::Type::Integer
+              name: order
+              description: |
+                The order of this field with respect to other fields in this tag. For example, a higher value can indicate
+                a more important field. The value can be negative. Multiple fields can have the same order, and field orders
+                within a tag do not have to be sequential.
+              output: true
+            - !ruby/object:Api::Type::Double
+              name: doubleValue
+              description: |
+                Holds the value for a tag field with double type.
+            - !ruby/object:Api::Type::String
+              name: stringValue
+              description: |
+                Holds the value for a tag field with string type.
+            - !ruby/object:Api::Type::Boolean
+              name: boolValue
+              description: |
+                Holds the value for a tag field with boolean type.
+            - !ruby/object:Api::Type::String
+              name: timestampValue
+              description: |
+                Holds the value for a tag field with timestamp type.
+            - !ruby/object:Api::Type::NestedObject
+              name: enumValue
+              description: |
+                Holds the value for a tag field with enum type. This value must be one of the allowed values in the definition of this enum.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: displayName
+                  description: |
+                    The display name of the enum value.
+                  required: true
+      - !ruby/object:Api::Type::String
+        name: column
+        description: |
+          Resources like Entry can have schemas associated with them. This scope allows users to attach tags to an
+          individual column based on that schema.
+
+          For attaching a tag to a nested column, use `.` to separate the column names. Example:
+          `outer_column.inner_column`

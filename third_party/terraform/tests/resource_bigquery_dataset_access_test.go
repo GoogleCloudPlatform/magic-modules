@@ -69,6 +69,8 @@ func TestAccBigQueryDatasetAccess_view(t *testing.T) {
 }
 
 func TestAccBigQueryDatasetAccess_multiple(t *testing.T) {
+	// Multiple fine-grained resources
+	skipIfVcr(t)
 	t.Parallel()
 
 	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
@@ -100,6 +102,49 @@ func TestAccBigQueryDatasetAccess_multiple(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBigQueryDatasetAccessAbsent(t, "google_bigquery_dataset.dataset", expected1),
 					testAccCheckBigQueryDatasetAccessAbsent(t, "google_bigquery_dataset.dataset", expected2),
+				),
+			},
+		},
+	})
+}
+
+func TestAccBigQueryDatasetAccess_predefinedRole(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+
+	expected1 := map[string]interface{}{
+		"role":   "WRITER",
+		"domain": "google.com",
+	}
+
+	expected2 := map[string]interface{}{
+		"role":   "READER",
+		"domain": "google.com",
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryDatasetAccess_predefinedRole("roles/bigquery.dataEditor", datasetID),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBigQueryDatasetAccessPresent(t, "google_bigquery_dataset.dataset", expected1),
+				),
+			},
+			{
+				// Update role
+				Config: testAccBigQueryDatasetAccess_predefinedRole("roles/bigquery.dataViewer", datasetID),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBigQueryDatasetAccessPresent(t, "google_bigquery_dataset.dataset", expected2),
+				),
+			},
+			{
+				// Destroy step instead of CheckDestroy so we can check the access is removed without deleting the dataset
+				Config: testAccBigQueryDatasetAccess_destroy(datasetID, "dataset"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBigQueryDatasetAccessAbsent(t, "google_bigquery_dataset.dataset", expected1),
 				),
 			},
 		},
@@ -223,4 +268,18 @@ resource "google_bigquery_dataset" "dataset" {
   dataset_id = "%s"
 }
 `, datasetID)
+}
+
+func testAccBigQueryDatasetAccess_predefinedRole(role, datasetID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset_access" "access" {
+  dataset_id = google_bigquery_dataset.dataset.dataset_id
+  role       = "%s"
+  domain     = "google.com"
+}
+
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id = "%s"
+}
+`, role, datasetID)
 }

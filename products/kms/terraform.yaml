@@ -102,6 +102,36 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/kms_crypto_key.go.erb
       update_encoder: templates/terraform/update_encoder/kms_crypto_key.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/kms_self_link.erb
+  KeyRingImportJob: !ruby/object:Overrides::Terraform::ResourceOverride
+    description: |
+      {{description}}
+
+      ~> **Note:** KeyRingImportJobs cannot be deleted from Google Cloud Platform.
+      Destroying a Terraform-managed KeyRingImportJob will remove it from state but
+      *will not delete the resource on the server.* 
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "kms_key_ring_import_job"
+        primary_resource_id: "import-job"
+        vars:
+          keyring: "keyring-example"
+        skip_test: true
+    properties:
+      createTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      keyRing: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'kmsCryptoKeyRingsEquivalent'
+        ignore_read: true
+      createTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      generateTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      expireEventTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/kms_key_ring_import_job.go.erb
   SecretCiphertext: !ruby/object:Overrides::Terraform::ResourceOverride
     description: |
       {{description}}

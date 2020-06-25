@@ -540,6 +540,10 @@ objects:
                 the default value.
             - `1` not-thread-safe. Single concurrency
             - `2-N` thread-safe, max concurrency of N
+        - !ruby/object:Api::Type::Integer
+          name: timeoutSeconds
+          description: |-
+            TimeoutSeconds holds the max duration the instance is allowed for responding to a request.
         - !ruby/object:Api::Type::String
           name: serviceAccountName
           description:  |-

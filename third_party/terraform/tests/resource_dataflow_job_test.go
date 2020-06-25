@@ -15,9 +15,13 @@ import (
 const (
 	testDataflowJobTemplateWordCountUrl = "gs://dataflow-templates/latest/Word_Count"
 	testDataflowJobSampleFileUrl        = "gs://dataflow-samples/shakespeare/various.txt"
+	testDataflowJobTemplateTextToPubsub = "gs://dataflow-templates/latest/Stream_GCS_Text_to_Cloud_PubSub"
 )
 
 func TestAccDataflowJob_basic(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -41,6 +45,9 @@ func TestAccDataflowJob_basic(t *testing.T) {
 }
 
 func TestAccDataflowJob_withRegion(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -63,6 +70,9 @@ func TestAccDataflowJob_withRegion(t *testing.T) {
 }
 
 func TestAccDataflowJob_withServiceAccount(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -87,6 +97,9 @@ func TestAccDataflowJob_withServiceAccount(t *testing.T) {
 }
 
 func TestAccDataflowJob_withNetwork(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -111,6 +124,9 @@ func TestAccDataflowJob_withNetwork(t *testing.T) {
 }
 
 func TestAccDataflowJob_withSubnetwork(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -136,6 +152,9 @@ func TestAccDataflowJob_withSubnetwork(t *testing.T) {
 }
 
 func TestAccDataflowJob_withLabels(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -161,6 +180,9 @@ func TestAccDataflowJob_withLabels(t *testing.T) {
 }
 
 func TestAccDataflowJob_withIpConfig(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -176,6 +198,94 @@ func TestAccDataflowJob_withIpConfig(t *testing.T) {
 				Config: testAccDataflowJob_ipConfig(bucket, job),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_job.big_data"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataflowJobWithAdditionalExperiments(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	skipIfVcr(t)
+	t.Parallel()
+
+	randStr := randString(t, 10)
+	bucket := "tf-test-dataflow-gcs-" + randStr
+	job := "tf-test-dataflow-job-" + randStr
+	additionalExperiments := []string{"enable_stackdriver_agent_metrics", "shuffle_mode=service"}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataflowJob_additionalExperiments(bucket, job, additionalExperiments),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobExists(t, "google_dataflow_job.with_additional_experiments"),
+					testAccDataflowJobHasExperiments(t, "google_dataflow_job.with_additional_experiments", additionalExperiments),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataflowJob_streamUpdate(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	skipIfVcr(t)
+	t.Parallel()
+
+	suffix := randString(t, 10)
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataflowJob_updateStream(suffix, "google_storage_bucket.bucket1.url"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobExists(t, "google_dataflow_job.pubsub_stream"),
+				),
+			},
+			{
+				Config: testAccDataflowJob_updateStream(suffix, "google_storage_bucket.bucket2.url"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobHasTempLocation(t, "google_dataflow_job.pubsub_stream", "gs://tf-test-bucket2-"+suffix),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataflowJob_virtualUpdate(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	skipIfVcr(t)
+	t.Parallel()
+
+	suffix := randString(t, 10)
+
+	// If the update is virtual-only, the ID should remain the same after updating.
+	var id string
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataflowJob_virtualUpdate(suffix, "drain"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobExists(t, "google_dataflow_job.pubsub_stream"),
+					testAccDataflowSetId(t, "google_dataflow_job.pubsub_stream", &id),
+				),
+			},
+			{
+				Config: testAccDataflowJob_virtualUpdate(suffix, "cancel"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowCheckId(t, "google_dataflow_job.pubsub_stream", &id),
+					resource.TestCheckResourceAttr("google_dataflow_job.pubsub_stream", "on_delete", "cancel"),
 				),
 			},
 		},
@@ -242,6 +352,32 @@ func testAccDataflowJobExists(t *testing.T, resource string) resource.TestCheckF
 			return fmt.Errorf("could not confirm Dataflow Job %q exists: %v", rs.Primary.ID, err)
 		}
 
+		return nil
+	}
+}
+
+func testAccDataflowSetId(t *testing.T, resource string, id *string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resource]
+		if !ok {
+			return fmt.Errorf("resource %q not in state", resource)
+		}
+
+		*id = rs.Primary.ID
+		return nil
+	}
+}
+
+func testAccDataflowCheckId(t *testing.T, resource string, id *string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resource]
+		if !ok {
+			return fmt.Errorf("resource %q not in state", resource)
+		}
+
+		if rs.Primary.ID != *id {
+			return fmt.Errorf("ID did not match. Expected %s, received %s", *id, rs.Primary.ID)
+		}
 		return nil
 	}
 }
@@ -378,6 +514,69 @@ func testAccDataflowJobHasLabels(t *testing.T, res, key string) resource.TestChe
 
 		if job.Labels[key] != rs.Primary.Attributes["labels."+key] {
 			return fmt.Errorf("Labels do not match what is stored in state.")
+		}
+
+		return nil
+	}
+}
+
+func testAccDataflowJobHasExperiments(t *testing.T, res string, experiments []string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[res]
+		if !ok {
+			return fmt.Errorf("resource %q not found in state", res)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+		config := googleProviderConfig(t)
+
+		job, err := config.clientDataflow.Projects.Jobs.Get(config.Project, rs.Primary.ID).View("JOB_VIEW_ALL").Do()
+		if err != nil {
+			return fmt.Errorf("dataflow job does not exist")
+		}
+
+		for _, expectedExperiment := range experiments {
+			var contains = false
+			for _, actualExperiment := range job.Environment.Experiments {
+				if actualExperiment == expectedExperiment {
+					contains = true
+				}
+			}
+			if contains != true {
+				return fmt.Errorf("Expected experiment '%s' not found in experiments", expectedExperiment)
+			}
+		}
+
+		return nil
+	}
+}
+
+func testAccDataflowJobHasTempLocation(t *testing.T, res, targetLocation string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[res]
+		if !ok {
+			return fmt.Errorf("resource %q not found in state", res)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+		config := googleProviderConfig(t)
+
+		job, err := config.clientDataflow.Projects.Jobs.Get(config.Project, rs.Primary.ID).View("JOB_VIEW_ALL").Do()
+		if err != nil {
+			return fmt.Errorf("dataflow job does not exist")
+		}
+		sdkPipelineOptions, err := ConvertToMap(job.Environment.SdkPipelineOptions)
+		if err != nil {
+			return err
+		}
+		optionsMap := sdkPipelineOptions["options"].(map[string]interface{})
+
+		if optionsMap["tempLocation"] != targetLocation {
+			return fmt.Errorf("Temp locations do not match. Got %s while expecting %s", optionsMap["tempLocation"], targetLocation)
 		}
 
 		return nil
@@ -582,4 +781,75 @@ resource "google_dataflow_job" "with_labels" {
 }
 `, bucket, job, labelKey, labelVal, testDataflowJobTemplateWordCountUrl, testDataflowJobSampleFileUrl)
 
+}
+
+func testAccDataflowJob_additionalExperiments(bucket string, job string, experiments []string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "temp" {
+  name = "%s"
+  force_destroy = true
+}
+
+resource "google_dataflow_job" "with_additional_experiments" {
+  name = "%s"
+
+  additional_experiments = ["%s"]
+
+  template_gcs_path = "%s"
+  temp_gcs_location = google_storage_bucket.temp.url
+  parameters = {
+    inputFile = "%s"
+    output    = "${google_storage_bucket.temp.url}/output"
+  }
+  on_delete = "cancel"
+}
+`, bucket, job, strings.Join(experiments, `", "`), testDataflowJobTemplateWordCountUrl, testDataflowJobSampleFileUrl)
+}
+
+func testAccDataflowJob_updateStream(suffix, tempLocation string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "topic" {
+	name     = "tf-test-dataflow-job-%s"
+}
+resource "google_storage_bucket" "bucket1" {
+	name = "tf-test-bucket1-%s"
+	force_destroy = true
+}
+resource "google_storage_bucket" "bucket2" {
+	name = "tf-test-bucket2-%s"
+	force_destroy = true
+}
+resource "google_dataflow_job" "pubsub_stream" {
+	name = "tf-test-dataflow-job-%s"
+	template_gcs_path = "%s"
+	temp_gcs_location = %s
+	parameters = {
+	  inputFilePattern = "${google_storage_bucket.bucket1.url}/*.json"
+	  outputTopic    = google_pubsub_topic.topic.id
+	}
+	on_delete = "cancel"
+}
+  `, suffix, suffix, suffix, suffix, testDataflowJobTemplateTextToPubsub, tempLocation)
+}
+
+func testAccDataflowJob_virtualUpdate(suffix, onDelete string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "topic" {
+	name     = "tf-test-dataflow-job-%s"
+}
+resource "google_storage_bucket" "bucket" {
+	name = "tf-test-bucket-%s"
+	force_destroy = true
+}
+resource "google_dataflow_job" "pubsub_stream" {
+	name = "tf-test-dataflow-job-%s"
+	template_gcs_path = "%s"
+	temp_gcs_location = google_storage_bucket.bucket.url
+	parameters = {
+	  inputFilePattern = "${google_storage_bucket.bucket.url}/*.json"
+	  outputTopic    = google_pubsub_topic.topic.id
+	}
+	on_delete = "%s"
+}
+  `, suffix, suffix, suffix, testDataflowJobTemplateTextToPubsub, onDelete)
 }

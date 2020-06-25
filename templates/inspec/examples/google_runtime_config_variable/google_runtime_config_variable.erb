@@ -1,6 +1,6 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% runtimeconfig_config = grab_attributes['runtimeconfig_config'] -%>
-<% runtimeconfig_variable = grab_attributes['runtimeconfig_variable'] -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% runtimeconfig_config = grab_attributes(pwd)['runtimeconfig_config'] -%>
+<% runtimeconfig_variable = grab_attributes(pwd)['runtimeconfig_variable'] -%>
 describe google_runtime_config_variable(project: <%= gcp_project_id -%>, config: <%= doc_generation ? "'#{runtimeconfig_config['name']}'" : "runtimeconfig_config['name']" -%>, name: <%= doc_generation ? "'#{runtimeconfig_variable['name']}'" : "runtimeconfig_variable['name']" -%>) do
   it { should exist }
   its('text') { should cmp <%= doc_generation ? "'#{runtimeconfig_variable['text']}'" : "runtimeconfig_variable['text']" -%> }

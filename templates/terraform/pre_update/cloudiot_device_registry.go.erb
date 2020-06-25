@@ -1,0 +1,35 @@
+log.Printf("[DEBUG] updateMask before adding extra schema entries %q: %v", d.Id(), updateMask)
+
+log.Printf("[DEBUG] Pre-update on state notification config: %q", d.Id())
+if d.HasChange("state_notification_config") {
+	log.Printf("[DEBUG] %q stateNotificationConfig.pubsubTopicName has a change. Adding it to the update mask", d.Id())
+	updateMask = append(updateMask, "stateNotificationConfig.pubsubTopicName")
+}
+
+log.Printf("[DEBUG] Pre-update on MQTT config: %q", d.Id())
+if d.HasChange("mqtt_config") {
+	log.Printf("[DEBUG] %q mqttConfig.mqttEnabledState has a change. Adding it to the update mask", d.Id())
+	updateMask = append(updateMask, "mqttConfig.mqttEnabledState")
+}
+
+log.Printf("[DEBUG] Pre-update on HTTP config: %q", d.Id())
+if d.HasChange("http_config") {
+	log.Printf("[DEBUG] %q httpConfig.httpEnabledState has a change. Adding it to the update mask", d.Id())
+	updateMask = append(updateMask, "httpConfig.httpEnabledState")
+}
+
+log.Printf("[DEBUG] Pre-update on credentials: %q", d.Id())
+if d.HasChange("credentials") {
+	log.Printf("[DEBUG] %q credentials has a change. Adding it to the update mask", d.Id())
+	updateMask = append(updateMask, "credentials")
+}
+
+log.Printf("[DEBUG] updateMask after adding extra schema entries %q: %v", d.Id(), updateMask)
+
+// Refreshing updateMask after adding extra schema entries
+url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+if err != nil {
+	return err
+}
+
+log.Printf("[DEBUG] Update URL %q: %v", d.Id(), url)

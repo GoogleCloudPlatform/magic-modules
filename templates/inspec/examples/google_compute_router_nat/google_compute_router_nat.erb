@@ -1,7 +1,7 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
-<% router = grab_attributes['router'] -%>
-<% router_nat = grab_attributes['router_nat'] -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute(pwd, 'gcp_location', doc_generation)}" -%>
+<% router = grab_attributes(pwd)['router'] -%>
+<% router_nat = grab_attributes(pwd)['router_nat'] -%>
 describe google_compute_router_nat(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, router: <%= doc_generation ? "'#{router['name']}'" : "router['name']" -%>, name: <%= doc_generation ? "'#{router_nat['name']}'" : "router_nat['name']" -%>) do
   it { should exist }
   its('nat_ip_allocate_option') { should cmp <%= doc_generation ? "'#{router_nat['nat_ip_allocate_option']}'" : "router_nat['nat_ip_allocate_option']" -%> }

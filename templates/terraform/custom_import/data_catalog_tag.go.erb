@@ -1,0 +1,17 @@
+	config := meta.(*Config)
+
+	// current import_formats can't import fields with forward slashes in their value
+	if err := parseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+		return nil, err
+	}
+
+	name := d.Get("name").(string)
+	egRegex := regexp.MustCompile("(.+)/tags")
+
+	parts := egRegex.FindStringSubmatch(name)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("entry name does not fit the format %s", egRegex)
+	}
+
+	d.Set("parent", parts[1])
+	return []*schema.ResourceData{d}, nil

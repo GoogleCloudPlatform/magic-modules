@@ -19,6 +19,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
         primary_resource_id: "example-zone"
+        # Randomness from random provider
+        skip_vcr: true
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_private"
         primary_resource_id: "private-zone"
@@ -36,7 +38,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           network_2_name: "network-2"
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_private_peering"
-        min_version: 'beta'
         primary_resource_id: "peering-zone"
         vars:
           zone_name: "peering-zone"
@@ -88,7 +89,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           and apply an incorrect update to the resource. If you encounter this issue, remove all `networks`
           blocks in an update and then apply another update adding all of them back simultaneously.
       privateVisibilityConfig.networks.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/network_full_url.erb'
         diff_suppress_func: 'compareSelfLinkOrResourceName'
+        description: |
+          The id or fully qualified URL of the VPC network to bind to.
+          This should be formatted like `projects/{project}/global/networks/{network}` or
+          `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
       forwardingConfig.targetNameServers: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: |-
@@ -113,6 +119,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       visibility: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'caseDiffSuppress'
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
+      peeringConfig.targetNetwork.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: templates/terraform/custom_expand/network_full_url.erb
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        description: |
+          The id or fully qualified URL of the VPC network to forward queries to.
+          This should be formatted like `projects/{project}/global/networks/{network}` or
+          `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
       reverseLookup: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/object_to_bool.go.erb
         custom_expand: templates/terraform/custom_expand/bool_to_object.go.erb
@@ -158,6 +171,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
             schema.SerializeResourceForHash(&buf, raw, dnsPolicyNetworksSchema())
             return hashcode.String(buf.String())
           }
+      networks.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: templates/terraform/custom_expand/network_full_url.erb
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        description: |
+          The id or fully qualified URL of the VPC network to forward queries to.
+          This should be formatted like `projects/{project}/global/networks/{network}` or
+          `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_network.erb
   ResourceRecordSet: !ruby/object:Overrides::Terraform::ResourceOverride

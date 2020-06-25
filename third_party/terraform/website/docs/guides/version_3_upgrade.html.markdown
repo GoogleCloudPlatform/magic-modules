@@ -1,7 +1,7 @@
 ---
 layout: "google"
 page_title: "Terraform Google Provider 3.0.0 Upgrade Guide"
-sidebar_current: "docs-google-provider-version-3-upgrade"
+sidebar_current: "docs-google-provider-guides-version-3-upgrade"
 description: |-
   Terraform Google Provider 3.0.0 Upgrade Guide
 ---
@@ -427,7 +427,7 @@ resource "google_cloud_run_service" "default" {
     metadata {
       annotations = {
         "autoscaling.knative.dev/maxScale"      = "1000"
-        "run.googleapis.com/client-name"        = "cloud-console"
+        "run.googleapis.com/client-name"        = "terraform"
       }
       name = "revision-name"
     }
