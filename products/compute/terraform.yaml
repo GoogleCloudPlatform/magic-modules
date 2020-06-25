@@ -1284,6 +1284,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/org_security_policy.go.erb
       post_update: templates/terraform/post_update/org_security_policy.go.erb
       post_delete: templates/terraform/post_delete/org_security_policy.go.erb
+      # TODO: Remove once b/154369201 is closed.
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
   OrganizationSecurityPolicyAssociation: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{policy_id}}/association/{{name}}"
@@ -1302,6 +1303,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/org_security_policy_association.go.erb
       post_delete: templates/terraform/post_create/org_security_policy_association.go.erb
+      # TODO: Remove once b/154369201 is closed.
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
   OrganizationSecurityPolicyRule: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{policy_id}}/priority/{{priority}}"
@@ -1322,6 +1324,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/org_security_policy_rule.go.erb
       post_delete: templates/terraform/post_create/org_security_policy_rule.go.erb
       post_update: templates/terraform/post_create/org_security_policy_rule.go.erb
+      # TODO: Remove once b/154369201 is closed.
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
   PacketMirroring: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
