@@ -24,8 +24,8 @@ func TestAccDataSourceCloudIdentityGroups_basic(t *testing.T) {
 			{
 				Config: testAccCloudIdentityGroupConfig(context),
 				Check: resource.ComposeTestCheckFunc(
-					//resource.TestCheckResourceAttrSet("data.google_cloud_identity_groups.groups",
-					//	"groups"),
+					resource.TestCheckResourceAttrSet("data.google_cloud_identity_groups.groups",
+						"groups.#"),
 					resource.TestMatchResourceAttr("data.google_cloud_identity_groups.groups",
 						"groups.0.name", regexp.MustCompile("^groups/.*$")),
 				),
