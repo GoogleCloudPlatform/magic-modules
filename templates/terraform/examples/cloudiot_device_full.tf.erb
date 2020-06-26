@@ -1,4 +1,4 @@
-resource "google_cloudiot_registry" "<%= ctx[:vars]['cloudiot_device_registry_name'] %>" {
+resource "google_cloudiot_registry" "registry" {
   name     = "<%= ctx[:vars]['cloudiot_device_registry_name'] %>"
 }
 
