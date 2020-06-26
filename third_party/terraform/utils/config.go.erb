@@ -26,7 +26,9 @@ import (
 	"google.golang.org/api/bigtableadmin/v2"
 	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudbuild/v1"
+<% unless version == 'ga' -%>
 	"google.golang.org/api/cloudidentity/v1beta1"
+<% end -%>
 	"google.golang.org/api/cloudfunctions/v1"
 	"google.golang.org/api/cloudiot/v1"
 	"google.golang.org/api/cloudkms/v1"
@@ -93,7 +95,9 @@ type Config struct {
 
 	clientBuild        *cloudbuild.Service
 
+<% unless version == 'ga' -%>
 	clientCloudIdentity   *cloudidentity.Service
+<% end -%>
 
 	ComposerBasePath string
 	clientComposer   *composer.Service
@@ -574,6 +578,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	c.clientHealthcare.UserAgent = userAgent
 	c.clientHealthcare.BasePath = healthcareClientBasePath
 
+<% unless version == 'ga' -%>
 	cloudidentityClientBasePath := removeBasePathVersion(c.CloudIdentityBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud CloudIdentity client for path %s", cloudidentityClientBasePath)
 
@@ -583,6 +588,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	}
 	c.clientCloudIdentity.UserAgent = userAgent
 	c.clientCloudIdentity.BasePath = cloudidentityClientBasePath
+<% end -%>
 
 	c.Region = GetRegionFromRegionSelfLink(c.Region)
 
