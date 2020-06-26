@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-
+set -x
 PR_NUMBER=$1
 
 USER=$(curl -H "Authorization: token ${GITHUB_TOKEN}" \
@@ -37,7 +37,7 @@ STATUS=$(cat poll.json | jq .status -r)
 STATE=$(cat poll.json | jq .state -r)
 counter=0
 while [[ "$STATE" != "finished" ]]; do
-	if [ "$counter" -gt "50" ]; then
+	if [ "$counter" -gt "100" ]; then
 		echo "Failed to wait for job to finish, exiting"
 		exit 1
 	fi
@@ -49,7 +49,7 @@ while [[ "$STATE" != "finished" ]]; do
 	counter=$((counter + 1))
 done
 
-if [ "$STATUS" == "SUCCESS" ]
+if [ "$STATUS" == "SUCCESS" ]; then
 	echo "Tests succeeded."
 	exit 0
 fi
@@ -61,8 +61,20 @@ ret=$?
 if [ $ret -ne 0 ]; then
   echo "Job failed without failing tests"
   exit 1
-else
+fi
 
 sed -i 's/{{PR_NUMBER}}/'"$PR_NUMBER"'/g' /teamcityparamsrecording.xml
 sed -i 's/{{FAILED_TESTS}}/'"$FAILED_TESTS"'/g' /teamcityparamsrecording.xml
-curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" https://ci-oss.hashicorp.engineering/app/rest/buildQueue --request POST --header "Content-Type:application/xml" --data-binary @/teamcityparamsrecording.xml
+curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" https://ci-oss.hashicorp.engineering/app/rest/buildQueue --request POST --header "Content-Type:application/xml" --data-binary @/teamcityparamsrecording.xml --output record.json
+URL=$(cat record.json | jq .webUrl)
+ret=$?
+if [ $ret -ne 0 ]; then
+  echo "Failed to trigger recording build"
+  exit 1
+else
+	comment="I have triggered VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS You can view the result here: $URL"
+
+	curl -H "Authorization: token ${GITHUB_TOKEN}" \
+	      -d "$(jq -r --arg comment "$comment" -n "{body: \$comment}")" \
+	      "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}/comments"
+fi
