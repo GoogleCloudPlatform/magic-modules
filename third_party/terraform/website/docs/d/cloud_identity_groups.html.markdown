@@ -1,74 +1,66 @@
 ---
 subcategory: "Cloud Identity"
 layout: "google"
-page_title: "Google: google_cloud_identity_group_memberships"
-sidebar_current: "docs-google-datasource-cloud-identity-group-memberships"
+page_title: "Google: google_cloud_identity_groups"
+sidebar_current: "docs-google-datasource-cloud-identity-groups"
 description: |-
-  Get list of the Cloud Identity Group Memberships within a Group.
+  Get list of the Cloud Identity Groups under a customer or namespace.
 ---
 
-# google_cloud_identity_group_memberships
+# google_cloud_identity_groups
 
-Use this data source to get list of the Cloud Identity Group Memberships within a given Group.
+Use this data source to get list of the Cloud Identity Groups under a customer or namespace.
 
-https://cloud.google.com/identity/docs/concepts/overview#memberships
+https://cloud.google.com/identity/docs/concepts/overview#groups
 
 ## Example Usage
 
 ```tf
-data "google_cloud_identity_group_memberships" "members" {
-  group = "groups/123eab45c6defghi"
+data "google_cloud_identity_groups" "groups" {
+  parent = "customers/A01b123xz"
 }
 ```
 
 ## Argument Reference
 
-* `group` - The parent Group resource under which to lookup the Membership names. Must be of the form groups/{group_id}.
+* `parent` - The parent resource under which to list all Groups. Must be of the form identitysources/{identity_source_id} for external- identity-mapped groups or customers/{customer_id} for Google Groups.
 
 ## Attributes Reference
 
 In addition to the arguments listed above, the following attributes are exported:
 
-* `memberships` - The list of memberships under the given group. Structure is documented below.
+* `groups` - The list of groups under the provided customer or namespace. Structure is documented below.
 
-The `memberships` block contains:
+The `groups` block contains:
 
 * `name` -
-  The resource name of the Membership, of the form groups/{group_id}/memberships/{membership_id}.
+  Resource name of the Group in the format: groups/{group_id}, where `group_id` is the unique ID assigned to the Group.
 
-* `roles` - The MembershipRoles that apply to the Membership. Structure is documented below.
+* `group_key` -
+  EntityKey of the Group.  Structure is documented below.
 
-* `member_key` -
-  (Optional)
-  EntityKey of the member.  Structure is documented below.
+* `display_name` -
+  The display name of the Group.
 
-* `preferred_member_key` -
-  (Optional)
-  EntityKey of the member.  Structure is documented below.
+* `description` -
+  An extended description to help users determine the purpose of a Group.
 
-The `roles` block supports:
+* `labels` -The labels that apply to the Group.
+  Contains 'cloudidentity.googleapis.com/groups.discussion_forum': '' if the Group is a Google Group or
+  'system/groups/external': '' if the Group is an external-identity-mapped group.
 
-* `name` - The name of the MembershipRole. One of OWNER, MANAGER, MEMBER.
+The `group_key` block supports:
 
-
-The `member_key` block supports:
-
-* `id` - The ID of the entity. For Google-managed entities, the id is the email address of an existing
-  group or user. For external-identity-mapped entities, the id is a string conforming
+* `id` -
+  The ID of the entity.
+  For Google-managed entities, the id is the email address of an existing group or user.
+  For external-identity-mapped entities, the id is a string conforming
   to the Identity Source's requirements.
 
-* `namespace` - The namespace in which the entity exists.
+* `namespace` -
+  The namespace in which the entity exists.
   If not populated, the EntityKey represents a Google-managed entity
   such as a Google user or a Google Group.
   If populated, the EntityKey represents an external-identity-mapped group.
-
-The `preferred_member_key` block supports:
-
-* `id` - The ID of the entity. For Google-managed entities, the id is the email address of an existing
-  group or user. For external-identity-mapped entities, the id is a string conforming
-  to the Identity Source's requirements.
-
-* `namespace` - The namespace in which the entity exists.
-  If not populated, the EntityKey represents a Google-managed entity
-  such as a Google user or a Google Group.
-  If populated, the EntityKey represents an external-identity-mapped group.
+  The namespace must correspond to an identity source created in Admin Console
+  and must be in the form of `identitysources/{identity_source_id}`.
