@@ -247,6 +247,7 @@ objects:
                 The time at which this credential becomes invalid.
             - !ruby/object:Api::Type::NestedObject
               name: 'publicKey'
+              required: true
               description: |
                 A public key used to verify the signature of JSON Web Tokens (JWTs).
               properties:
@@ -380,6 +381,7 @@ objects:
           - !ruby/object:Api::Type::Enum
             name: 'gatewayType'
             default_value: :NON_GATEWAY
+            input: true
             description: |
               Indicates whether the device is a gateway.
             values:
