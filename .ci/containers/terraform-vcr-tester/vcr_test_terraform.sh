@@ -19,17 +19,11 @@ sed -i 's/{{PR_NUMBER}}/'"$PR_NUMBER"'/g' /teamcityparams.xml
 curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" https://ci-oss.hashicorp.engineering/app/rest/buildQueue --request POST --header "Content-Type:application/xml" --data-binary @/teamcityparams.xml -o build.json
 
 URL=$(cat build.json | jq .webUrl)
-ret=$?
-if [ $ret -ne 0 ]; then
-  echo "Auth failed"
-  exit 1
-else
-	comment="I have triggered VCR tests based on this PR's diffs. See the results here: $URL"
+comment="I have triggered VCR tests based on this PR's diffs. See the results here: $URL"
 
-	curl -H "Authorization: token ${GITHUB_TOKEN}" \
-	      -d "$(jq -r --arg comment "$comment" -n "{body: \$comment}")" \
-	      "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}/comments"
-fi
+curl -H "Authorization: token ${GITHUB_TOKEN}" \
+      -d "$(jq -r --arg comment "$comment" -n "{body: \$comment}")" \
+      "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}/comments"
 
 ID=$(cat build.json | jq .id -r)
 curl --header "Authorization: Bearer $TEAMCITY_TOKEN" --header "Accept: application/json" https://ci-oss.hashicorp.engineering/app/rest/builds/id:$ID --output poll.json
@@ -62,19 +56,14 @@ if [ $ret -ne 0 ]; then
   echo "Job failed without failing tests"
   exit 1
 fi
+set -e
 
 sed -i 's/{{PR_NUMBER}}/'"$PR_NUMBER"'/g' /teamcityparamsrecording.xml
 sed -i 's/{{FAILED_TESTS}}/'"$FAILED_TESTS"'/g' /teamcityparamsrecording.xml
 curl --header "Accept: application/json" --header "Authorization: Bearer $TEAMCITY_TOKEN" https://ci-oss.hashicorp.engineering/app/rest/buildQueue --request POST --header "Content-Type:application/xml" --data-binary @/teamcityparamsrecording.xml --output record.json
 URL=$(cat record.json | jq .webUrl)
-ret=$?
-if [ $ret -ne 0 ]; then
-  echo "Failed to trigger recording build"
-  exit 1
-else
-	comment="I have triggered VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS You can view the result here: $URL"
+comment="I have triggered VCR tests in RECORDING mode for the following tests that failed during VCR: $FAILED_TESTS You can view the result here: $URL"
 
-	curl -H "Authorization: token ${GITHUB_TOKEN}" \
-	      -d "$(jq -r --arg comment "$comment" -n "{body: \$comment}")" \
-	      "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}/comments"
-fi
+curl -H "Authorization: token ${GITHUB_TOKEN}" \
+      -d "$(jq -r --arg comment "$comment" -n "{body: \$comment}")" \
+      "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/${PR_NUMBER}/comments"
