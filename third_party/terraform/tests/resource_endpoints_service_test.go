@@ -154,10 +154,11 @@ EOF
 
 }
 
-resource "null_resource" "some" {
-  triggers = {
+resource "random_id" "foo" {
+  keepers = {
     config_id = google_endpoints_service.endpoints_service.config_id
   }
+  byte_length = 8
 }
 `, serviceId, project, rev)
 }
