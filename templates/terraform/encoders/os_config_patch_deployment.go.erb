@@ -1,6 +1,7 @@
-if d.Get("recurring_schedule.monthly") != nil {
+schedule := obj["recurringSchedule"].(map[string]interface{})
+if schedule["monthly"] != nil {
 	obj["recurringSchedule"].(map[string]interface{})["frequency"] = "MONTHLY"
-} else if d.Get("recurring_schedule.weekly") != nil {
+} else if schedule["weekly"] != nil {
 	obj["recurringSchedule"].(map[string]interface{})["frequency"] = "WEEKLY"
 }
 

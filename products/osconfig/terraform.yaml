@@ -35,6 +35,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           instance_name: "patch-deploy-inst"
           patch_deployment_id: "patch-deploy"
     properties:
+      patchDeploymentId: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))"
       recurringSchedule.timeOfDay.hours: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(0,23)'
