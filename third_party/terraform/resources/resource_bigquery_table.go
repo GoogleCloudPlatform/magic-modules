@@ -694,8 +694,6 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 
-		edc := map[string]interface{}(nil)
-
 		if v, ok := d.GetOk("external_data_configuration"); ok {
 			// The API response doesn't return the `external_data_configuration.schema`
 			// used when creating the table and it cannot be queried.
@@ -708,7 +706,7 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 			// The `ForceNew=true` on `external_data_configuration.schema` will ensure
 			// the users' expectation that changing the configured  input schema will
 			// recreate the resource.
-			edc = v.([]interface{})[0].(map[string]interface{})
+			edc := v.([]interface{})[0].(map[string]interface{})
 			if edc["schema"] != nil {
 				externalDataConfiguration[0]["schema"] = edc["schema"]
 			}
