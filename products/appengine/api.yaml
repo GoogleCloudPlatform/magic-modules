@@ -256,6 +256,7 @@ objects:
         url_param_only: true
         resource: 'Service'
         imports: 'name'
+        required: true
         description: |
           AppEngine service resource
     properties:
@@ -609,6 +610,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'service'
+        required: true
         url_param_only: true
         resource: 'Service'
         imports: 'name'
