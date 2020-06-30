@@ -419,8 +419,6 @@ objects:
                   name: 'allowedSuccessCodes'
                   description: |
                     Defaults to [0]. A list of possible return values that the execution can return to indicate a success.
-                  # default_value:
-                  #   - 0
                   item_type: Api::Type::Integer
                 - !ruby/object:Api::Type::Enum
                   name: 'interpreter'
@@ -472,8 +470,6 @@ objects:
                   name: 'allowedSuccessCodes'
                   description: |
                     Defaults to [0]. A list of possible return values that the execution can return to indicate a success.
-                  # default_value:
-                  #   - 0
                   item_type: Api::Type::Integer
                 - !ruby/object:Api::Type::Enum
                   name: 'interpreter'
@@ -539,8 +535,6 @@ objects:
                   name: 'allowedSuccessCodes'
                   description: |
                     Defaults to [0]. A list of possible return values that the execution can return to indicate a success.
-                  # default_value:
-                  #   - 0
                   item_type: Api::Type::Integer
                 - !ruby/object:Api::Type::Enum
                   name: 'interpreter'
@@ -592,8 +586,6 @@ objects:
                   name: 'allowedSuccessCodes'
                   description: |
                     Defaults to [0]. A list of possible return values that the execution can return to indicate a success.
-                  # default_value:
-                  #   - 0
                   item_type: Api::Type::Integer
                 - !ruby/object:Api::Type::Enum
                   name: 'interpreter'
