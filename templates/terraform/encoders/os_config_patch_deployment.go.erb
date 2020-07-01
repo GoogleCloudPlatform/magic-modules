@@ -5,4 +5,20 @@ if schedule["monthly"] != nil {
 	obj["recurringSchedule"].(map[string]interface{})["frequency"] = "WEEKLY"
 }
 
+if obj["patchConfig"] != nil {
+	patchConfig := obj["patchConfig"].(map[string]interface{})
+	if patchConfig["goo"] != nil {
+		goo := patchConfig["goo"].(map[string]interface{})
+
+		if goo["enabled"] == true {
+			delete(goo, "enabled")
+			patchConfig["goo"] = goo
+		} else {
+			delete(patchConfig, "goo")
+		}
+
+		obj["patchConfig"] = patchConfig
+	}
+}
+
 return obj, nil

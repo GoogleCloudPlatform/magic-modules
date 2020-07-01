@@ -145,7 +145,7 @@ objects:
               - patch_config.0.reboot_config
               - patch_config.0.apt
               - patch_config.0.yum
-              # - patch_config.0.goo
+              - patch_config.0.goo
               - patch_config.0.zypper
               - patch_config.0.window_update
               - patch_config.0.pre_step
@@ -162,7 +162,7 @@ objects:
               - patch_config.0.reboot_config
               - patch_config.0.apt
               - patch_config.0.yum
-              # - patch_config.0.goo
+              - patch_config.0.goo
               - patch_config.0.zypper
               - patch_config.0.window_update
               - patch_config.0.pre_step
@@ -207,7 +207,7 @@ objects:
               - patch_config.0.reboot_config
               - patch_config.0.apt
               - patch_config.0.yum
-              # - patch_config.0.goo
+              - patch_config.0.goo
               - patch_config.0.zypper
               - patch_config.0.window_update
               - patch_config.0.pre_step
@@ -253,10 +253,25 @@ objects:
                   If these packages are not installed, they will be ignored. This field cannot be specified with
                   any other patch configuration fields.
                 item_type: Api::Type::String
-          # - !ruby/object:Api::Type::NestedObject
-          #   name: 'goo'
-          #   description: |
-          #     goo update settings. Use this setting to override the default goo patch rules.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'goo'
+            description: |
+              goo update settings. Use this setting to override the default goo patch rules.
+            at_least_one_of:
+              - patch_config.0.reboot_config
+              - patch_config.0.apt
+              - patch_config.0.yum
+              - patch_config.0.goo
+              - patch_config.0.zypper
+              - patch_config.0.window_update
+              - patch_config.0.pre_step
+              - patch_config.0.post_step
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: enabled
+                description: |
+                  goo update settings. Use this setting to override the default goo patch rules.
+                required: true
           - !ruby/object:Api::Type::NestedObject
             name: 'zypper'
             description: |
@@ -265,7 +280,7 @@ objects:
               - patch_config.0.reboot_config
               - patch_config.0.apt
               - patch_config.0.yum
-              # - patch_config.0.goo
+              - patch_config.0.goo
               - patch_config.0.zypper
               - patch_config.0.window_update
               - patch_config.0.pre_step
@@ -350,7 +365,7 @@ objects:
               - patch_config.0.reboot_config
               - patch_config.0.apt
               - patch_config.0.yum
-              # - patch_config.0.goo
+              - patch_config.0.goo
               - patch_config.0.zypper
               - patch_config.0.window_update
               - patch_config.0.pre_step
@@ -401,7 +416,7 @@ objects:
               - patch_config.0.reboot_config
               - patch_config.0.apt
               - patch_config.0.yum
-              # - patch_config.0.goo
+              - patch_config.0.goo
               - patch_config.0.zypper
               - patch_config.0.window_update
               - patch_config.0.pre_step
@@ -517,7 +532,7 @@ objects:
               - patch_config.0.reboot_config
               - patch_config.0.apt
               - patch_config.0.yum
-              # - patch_config.0.goo
+              - patch_config.0.goo
               - patch_config.0.zypper
               - patch_config.0.window_update
               - patch_config.0.pre_step

@@ -28,6 +28,10 @@ resource "google_os_config_patch_deployment" "<%= ctx[:primary_resource_id] %>" 
       excludes = ["bash"]
     }
 
+    goo {
+      enabled = true
+    }
+
     zypper {
       categories = ["security"]
     }
