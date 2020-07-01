@@ -3,7 +3,7 @@ resource "google_artifact_registry_repository" "<%= ctx[:primary_resource_id] %>
 
   location = "us-central1"
   repository_id = "<%= ctx[:vars]['repository_id'] %>"
-  description = "<%= ctx[:description] %>"
+  description = "example docker repository with cmek"
   format = "DOCKER"
   kms_key_name = "<%= ctx[:vars]['kms_key_name'] %>"
 }
