@@ -1,0 +1,108 @@
+<% autogen_exception -%>
+package google
+
+<% unless version == 'ga' -%>
+import (
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"testing"
+)
+
+func TestAAccDataSourceGameServicesGameServerDeploymentRollout_basic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProvidersOiCS,
+		CheckDestroy: testAccCheckGameServicesGameServerDeploymentRolloutDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceGameServicesGameServerDeploymentRollout_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataSourceCheck("data.google_game_services_game_server_deployment_rollout.qa", "google_game_services_game_server_deployment_rollout.foo"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataSourceCheck(datasourceName string, resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+
+		ds, ok := s.RootModule().Resources[datasourceName]
+		if !ok {
+			return fmt.Errorf("root module has no resource called %s", datasourceName)
+		}
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("can't find %s in state", resourceName)
+		}
+
+		datasourceAttributes := ds.Primary.Attributes
+		resourceAttributes := rs.Primary.Attributes
+
+		instanceToDatasourceAttrsMapping := map[string]string{
+			"id":                         "id",
+			"default_game_server_config": "default_game_server_config",
+			"deployment_id":              "deployment_id",
+			"name":                       "name",
+		}
+		for resourceAttr, datasourceAttr := range instanceToDatasourceAttrsMapping {
+
+			if resourceAttributes[resourceAttr] != datasourceAttributes[datasourceAttr] {
+				fmt.Printf(
+					"%s is %s; want %s\n",
+					datasourceAttr,
+					datasourceAttributes[datasourceAttr],
+					resourceAttributes[resourceAttr],
+				)
+			}
+		}
+		return nil
+	}
+}
+
+func testAccDataSourceGameServicesGameServerDeploymentRollout_basic(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_game_services_game_server_deployment" "default" {
+  provider = google-beta
+
+  deployment_id  = "tf-test-deployment-%{random_suffix}"
+  description = "a deployment description"
+}
+
+resource "google_game_services_game_server_config" "default" {
+  provider = google-beta
+
+  config_id     = "tf-test-config-%{random_suffix}"
+  deployment_id = google_game_services_game_server_deployment.default.deployment_id
+  description   = "a config description"
+
+  fleet_configs {
+    name       = "some-non-guid"
+    fleet_spec = jsonencode({ "replicas" : 1, "scheduling" : "Packed", "template" : { "metadata" : { "name" : "tf-test-game-server-template" }, "spec" : { "template" : { "spec" : { "containers" : [{ "name" : "simple-udp-server", "image" : "gcr.io/agones-images/udp-server:0.14" }] } } } } })
+
+    // Alternate usage:
+    // fleet_spec = file(fleet_configs.json)
+  }
+}
+
+resource "google_game_services_game_server_deployment_rollout" "foo" {
+  provider = google-beta
+
+  deployment_id              = google_game_services_game_server_deployment.default.deployment_id
+  default_game_server_config = google_game_services_game_server_config.default.name
+}
+
+data "google_game_services_game_server_deployment_rollout" "qa" {
+    provider = google-beta
+    deployment_id = google_game_services_game_server_deployment.default.deployment_id
+}
+`, context)
+}
+<% end -%>
