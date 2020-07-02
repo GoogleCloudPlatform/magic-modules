@@ -166,16 +166,14 @@ The `external_data_configuration` block supports:
 * `schema` - (Optional) A JSON schema for the external table. Schema is required
     for CSV and JSON formats if autodetect is not on. Schema is disallowed
     for Google Cloud Bigtable, Cloud Datastore backups, Avro, ORC and Parquet formats.
-    A JSON schema for the table. Schema is required
-    for CSV and JSON formats and is disallowed for Google Cloud
-    Bigtable, Cloud Datastore backups, and Avro formats when using
-    external tables.
     ~>**NOTE**: Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
-    Any diff on this schema will force the table to be recreated.
-    This schema is only applied when creating a table from an external
+    Furthermore drift for this field cannot not be detected because BigQuery
+    only uses this schema to compute the effective schema for the table, therefore
+    any changes on the configured value will force the table to be recreated.
+    This schema is effectively only applied when creating a table from an external
     datasource, after creation the computed schema will be stored in
-    `google_bigquery_dataset.schema`
+    `google_bigquery_table.schema`
 
 * `source_format` (Required) - The data format. Supported values are:
     "CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "PARQUET",
