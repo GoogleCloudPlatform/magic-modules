@@ -2,14 +2,15 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	containerBeta "google.golang.org/api/container/v1beta1"
 )
 
@@ -53,20 +54,6 @@ func resourceContainerNodePool() *schema.Resource {
 					Required:    true,
 					ForceNew:    true,
 					Description: `The cluster to create the node pool for. Cluster must be present in location provided for zonal clusters.`,
-				},
-				"zone": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Removed:     "use location instead",
-					Computed:    true,
-					Description: `The zone of the cluster`,
-				},
-				"region": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Removed:     "use location instead",
-					Computed:    true,
-					Description: `The region of the cluster`,
 				},
 				"location": {
 					Type:        schema.TypeString,

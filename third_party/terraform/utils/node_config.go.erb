@@ -4,8 +4,8 @@ package google
 import (
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	containerBeta "google.golang.org/api/container/v1beta1"
 )
 
@@ -210,6 +210,7 @@ func schemaNodeConfig() *schema.Schema {
 					},
 				},
 
+	<% unless version == 'ga' -%>
 				"workload_metadata_config": {
 					Computed:   true,
 					Type:       schema.TypeList,
@@ -227,10 +228,6 @@ func schemaNodeConfig() *schema.Schema {
 				},
 
 				"sandbox_config": {
-	<% if version.nil? || version == 'ga' -%>
-					Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/guides/provider_versions.html for more details.",
-					Computed: true,
-	<% end -%>
 					Type:       schema.TypeList,
 					Optional:   true,
 					ForceNew:   true,
@@ -246,7 +243,6 @@ func schemaNodeConfig() *schema.Schema {
 					},
 				},
 
-	<% unless version == 'ga' -%>
 				"boot_disk_kms_key": {
 					Type:       schema.TypeString,
 					Optional:   true,

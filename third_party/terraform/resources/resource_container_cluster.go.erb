@@ -2,6 +2,7 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"reflect"
@@ -11,9 +12,9 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/go-version"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	containerBeta "google.golang.org/api/container/v1beta1"
 )
 
@@ -167,37 +168,12 @@ func resourceContainerCluster() *schema.Resource {
 				Description: `The location (region or zone) in which the cluster master will be created, as well as the default node location. If you specify a zone (such as us-central1-a), the cluster will be a zonal cluster with a single cluster master. If you specify a region (such as us-west1), the cluster will be a regional cluster with multiple masters spread across zones in the region, and with default node locations in those zones as well.`,
 			},
 
-			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Removed:     "Use location instead",
-				Computed:    true,
-				Description: `The region in which the cluster master will be created. Zone and region have been removed in favor of location.`,
-			},
-
-			"zone": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Removed:     "Use location instead",
-				Computed:    true,
-				Description: `The zone in which the cluster master will be created. Zone and region have been removed in favor of location.`,
-			},
-
 			"node_locations": {
 				Type:        schema.TypeSet,
 				Optional:    true,
 				Computed:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: `The list of zones in which the cluster's nodes are located. Nodes must be in the region of their regional cluster or in the same region as their cluster's zone for zonal clusters. If this is specified for a zonal cluster, omit the cluster's zone.`,
-			},
-
-			"additional_zones": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				Removed:     "Use node_locations instead",
-				Computed:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: `Additional_zones has been removed in favor of node_locations.`,
 			},
 
 			"addons_config": {
@@ -236,22 +212,6 @@ func resourceContainerCluster() *schema.Resource {
 									"disabled": {
 										Type:     schema.TypeBool,
 										Required: true,
-									},
-								},
-							},
-						},
-						"kubernetes_dashboard": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Removed:     "The Kubernetes Dashboard addon is removed for clusters on GKE.",
-							Computed:    true,
-							MaxItems:    1,
-							Description: `The status of  Kubernetes Dashboard addon.`,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"disabled": {
-										Type:     schema.TypeBool,
-										Optional: true,
 									},
 								},
 							},
@@ -511,10 +471,7 @@ func resourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Description: `Whether to enable Cloud TPU resources in this cluster.`,
-<% if version == 'ga' -%>
-				Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/guides/provider_versions.html for more details.",
-				Computed: true,
-<% else -%>
+<% unless version == 'ga' -%>
 				Default: false,
 <% end -%>
 			},
@@ -783,11 +740,7 @@ func resourceContainerCluster() *schema.Resource {
 			},
 
 			"pod_security_policy_config": {
-<% if version == 'ga' -%>
-				// Remove return nil from expand when this is removed for good.
-				Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/guides/provider_versions.html for more details.",
-				Computed: true,
-<% else -%>
+<% unless version == 'ga' -%>
 				DiffSuppressFunc: podSecurityPolicyCfgSuppress,
 <% end -%>
 				Type:        schema.TypeList,
@@ -900,20 +853,6 @@ func resourceContainerCluster() *schema.Resource {
 							ForceNew:      true,
 							ConflictsWith: ipAllocationCidrBlockFields,
 							Description:   `The name of the existing secondary range in the cluster's subnetwork to use for service ClusterIPs. Alternatively, services_ipv4_cidr_block can be used to automatically create a GKE-managed one.`,
-						},
-
-						"subnetwork_name": {
-							Type:     schema.TypeString,
-							Removed:  "This field is removed as of 3.0.0. Define an explicit google_compute_subnetwork and use subnetwork instead.",
-							Computed: true,
-							Optional: true,
-						},
-
-						"node_ipv4_cidr_block": {
-							Type:     schema.TypeString,
-							Removed:  "This field is removed as of 3.0.0. Define an explicit google_compute_subnetwork and use subnetwork instead.",
-							Computed: true,
-							Optional: true,
 						},
 					},
 				},
@@ -1195,7 +1134,14 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-
+			"enable_intranode_visibility": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.`,
+<% unless version == 'ga' -%>
+				Default: false,
+<% end -%>
+			},
 		},
 	}
 }
@@ -1213,7 +1159,7 @@ func resourceContainerCluster() *schema.Resource {
 // we have a work around for removing guest accelerators. Also Terraform 0.11 cannot use dynamic blocks
 // so this isn't a solution for module authors who want to dynamically omit guest accelerators
 // See https://github.com/hashicorp/terraform-provider-google/issues/3786
-func resourceNodeConfigEmptyGuestAccelerator(diff *schema.ResourceDiff, meta interface{}) error {
+func resourceNodeConfigEmptyGuestAccelerator(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	old, new := diff.GetChange("node_config.0.guest_accelerator")
 	oList := old.([]interface{})
 	nList := new.([]interface{})
@@ -3691,7 +3637,7 @@ func containerClusterPrivateClusterConfigSuppress(k, old, new string, d *schema.
 	return false
 }
 
-func containerClusterPrivateClusterConfigCustomDiff(d *schema.ResourceDiff, meta interface{}) error {
+func containerClusterPrivateClusterConfigCustomDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	pcc, ok := d.GetOk("private_cluster_config")
 	if !ok {
 		return nil
