@@ -3,6 +3,7 @@
 package google
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/base64"
 	"errors"
@@ -12,10 +13,10 @@ import (
 	"time"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mitchellh/hashstructure"
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/compute/v1"
@@ -712,7 +713,7 @@ func resourceComputeInstance() *schema.Resource {
 		},
 		CustomizeDiff: customdiff.All(
 			customdiff.If(
-				func(d *schema.ResourceDiff, meta interface{}) bool {
+				func(_ context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 					return d.HasChange("guest_accelerator")
 				},
 				suppressEmptyGuestAcceleratorDiff,
@@ -1840,7 +1841,7 @@ func suppressEmptyGuestAcceleratorDiff(d *schema.ResourceDiff, meta interface{})
 }
 
 // return an error if the desired_status field is set to a value other than RUNNING on Create.
-func desiredStatusDiff(diff *schema.ResourceDiff, meta interface{}) error {
+func desiredStatusDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	// when creating an instance, name is not set
 	oldName, _ := diff.GetChange("name")
 
