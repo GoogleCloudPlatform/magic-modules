@@ -550,7 +550,6 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		if err != nil {
 			return err
 		}
-		d.SetPartial("named_port")
 	}
 
 	// target size should use resize
@@ -568,7 +567,6 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		if err != nil {
 			return err
 		}
-		d.SetPartial("target_size")
 	}
 
 	d.Partial(false)

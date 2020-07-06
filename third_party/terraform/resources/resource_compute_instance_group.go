@@ -349,8 +349,6 @@ func resourceComputeInstanceGroupUpdate(d *schema.ResourceData, meta interface{}
 				return err
 			}
 		}
-
-		d.SetPartial("instances")
 	}
 
 	if d.HasChange("named_port") {
@@ -371,7 +369,6 @@ func resourceComputeInstanceGroupUpdate(d *schema.ResourceData, meta interface{}
 		if err != nil {
 			return err
 		}
-		d.SetPartial("named_port")
 	}
 
 	d.Partial(false)

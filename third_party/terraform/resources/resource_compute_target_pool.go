@@ -299,7 +299,6 @@ func resourceComputeTargetPoolUpdate(d *schema.ResourceData, meta interface{}) e
 		if err != nil {
 			return err
 		}
-		d.SetPartial("health_checks")
 	}
 
 	if d.HasChange("instances") {
@@ -348,7 +347,6 @@ func resourceComputeTargetPoolUpdate(d *schema.ResourceData, meta interface{}) e
 		if err != nil {
 			return err
 		}
-		d.SetPartial("instances")
 	}
 
 	if d.HasChange("backup_pool") {
@@ -366,7 +364,6 @@ func resourceComputeTargetPoolUpdate(d *schema.ResourceData, meta interface{}) e
 		if err != nil {
 			return err
 		}
-		d.SetPartial("backup_pool")
 	}
 
 	d.Partial(false)

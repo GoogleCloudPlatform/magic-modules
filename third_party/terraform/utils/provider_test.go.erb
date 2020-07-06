@@ -19,13 +19,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/terraform-providers/terraform-provider-random/random"
 )
 
-var testAccProviders map[string]terraform.ResourceProvider
+var testAccProviders map[string]*schema.Provider
 <% unless version == 'ga' -%>
-var testAccProvidersOiCS map[string]terraform.ResourceProvider
+var testAccProvidersOiCS map[string]*schema.Provider
 <% end -%>
 var testAccProvider *schema.Provider
 var testAccRandomProvider *schema.Provider
@@ -102,15 +102,15 @@ var sources map[string]VcrSource
 func init() {
 	configs = make(map[string]*Config)
 	sources = make(map[string]VcrSource)
-	testAccProvider = Provider().(*schema.Provider)
+	testAccProvider = Provider()
 	testAccRandomProvider = random.Provider().(*schema.Provider)
 	<% if version == 'ga' -%>
-	testAccProviders = map[string]terraform.ResourceProvider{
+	testAccProviders = map[string]*schema.Provider{
 		"google": testAccProvider,
 		"random": testAccRandomProvider,
 	}
 	<% else -%>
-	testAccProviders = map[string]terraform.ResourceProvider{
+	testAccProviders = map[string]*schema.Provider{
 		"google": testAccProvider,
 		"random": testAccRandomProvider,
 	}
@@ -118,7 +118,7 @@ func init() {
 	// The OiCS provider map is used to ensure that OiCS examples use `google-beta`
 	// if the example is versioned as beta; normal beta tests should continue to
 	// use the standard provider map.
-	testAccProvidersOiCS = map[string]terraform.ResourceProvider{
+	testAccProvidersOiCS = map[string]*schema.Provider{
 <%# Add a google-#{version} provider for each version that is supported by this version. This allows us to run google-beta tests within a google-alpha provider.  -%>
 <% Api::Product::Version::ORDER[1..Api::Product::Version::ORDER.index(version)].each do |aliased_version| -%>
 		"google-<%= aliased_version -%>": testAccProvider,
@@ -248,8 +248,8 @@ func googleProviderConfig(t *testing.T) *Config {
 	return testAccProvider.Meta().(*Config)
 }
 
-func getTestAccProviders(testName string) map[string]terraform.ResourceProvider {
-	prov := Provider().(*schema.Provider)
+func getTestAccProviders(testName string) map[string]*schema.Provider {
+	prov := Provider()
 	provRand := random.Provider().(*schema.Provider)
 	if isVcrEnabled() {
 		old := prov.ConfigureFunc
@@ -259,7 +259,7 @@ func getTestAccProviders(testName string) map[string]terraform.ResourceProvider 
 	} else {
 		log.Print("[DEBUG] VCR_PATH or VCR_MODE not set, skipping VCR")
 	}
-	return map[string]terraform.ResourceProvider{
+	return map[string]*schema.Provider{
 		"google": prov,
 		"google-beta": prov,
 		"random": provRand,
@@ -391,13 +391,13 @@ func randInt(t *testing.T) int {
 }
 
 func TestProvider(t *testing.T) {
-	if err := Provider().(*schema.Provider).InternalValidate(); err != nil {
+	if err := Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
 func TestProvider_impl(t *testing.T) {
-	var _ terraform.ResourceProvider = Provider()
+	var _ *schema.Provider = Provider()
 }
 
 func TestProvider_noDuplicatesInResourceMap(t *testing.T) {

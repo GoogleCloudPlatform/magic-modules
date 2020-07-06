@@ -2,6 +2,7 @@ package google
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -338,7 +339,7 @@ func resourceStorageBucket() *schema.Resource {
 }
 
 // Is the old bucket retention policy locked?
-func isPolicyLocked(old, new, _ interface{}) bool {
+func isPolicyLocked(_ context.Context, old, new, _ interface{}) bool {
 	if old == nil || new == nil {
 		return false
 	}
