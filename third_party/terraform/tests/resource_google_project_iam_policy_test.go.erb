@@ -128,7 +128,6 @@ func TestAccProjectIamPolicy_expandedAuditConfig(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccProjectIamPolicy_withCondition(t *testing.T) {
 	t.Parallel()
 
@@ -157,7 +156,6 @@ func TestAccProjectIamPolicy_withCondition(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func getStatePrimaryResource(s *terraform.State, res, expectedID string) (*terraform.InstanceState, error) {
 	// Get the project resource
@@ -431,7 +429,6 @@ data "google_iam_policy" "expanded" {
 `, pid, name, org)
 }
 
-<% unless version == 'ga' -%>
 func testAccProjectAssociatePolicy_withCondition(pid, name, org string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
@@ -467,4 +464,3 @@ data "google_iam_policy" "admin" {
 }
 `, pid, name, org)
 }
-<% end -%>
