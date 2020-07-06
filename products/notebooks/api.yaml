@@ -1,0 +1,390 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Notebooks
+display_name: Cloud AI Notebooks
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://notebooks.googleapis.com/v1beta1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Cloud Notebooks API
+    url: https://console.cloud.google.com/apis/api/notebooks.googleapis.com
+async: !ruby/object:Api::OpAsync
+    operation: !ruby/object:Api::OpAsync::Operation
+      base_url: '{{op_id}}'
+      path: 'name'
+      wait_ms: 1000
+    result: !ruby/object:Api::OpAsync::Result
+      path: 'response'
+      resource_inside_response: true
+    status: !ruby/object:Api::OpAsync::Status
+      path: 'done'
+      complete: True
+      allowed:
+        - True
+        - False
+    error: !ruby/object:Api::OpAsync::Error
+      path: 'error'
+      message: 'message'
+objects:
+  # Notebooks Environment         
+  - !ruby/object:Api::Resource
+    name: 'Environment'
+    description: |
+        A Cloud AI Platform Notebook environment.
+    min_version: beta
+    base_url: projects/{{project}}/locations/{{location}}/environments
+    create_url: projects/{{project}}/locations/{{location}}/environments?environmentId={{name}}
+    self_link: projects/{{project}}/locations/{{location}}/environments/{{name}}
+    create_verb: :POST    
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/ai-platform-notebooks'
+      api: 'https://cloud.google.com/ai-platform/notebooks/docs/reference/rest'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+            The name specified for the Environment instance.
+            Format: projects/{project_id}/locations/{location}/environments/{environmentId}
+        required: true
+        input: true
+        url_param_only: true
+        pattern: projects/{{project}}/locations/{{location}}/environments/{{name}}
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'location'
+        description: 'A reference to the zone where the machine resides.'
+        resource: 'Location'
+        imports: 'name'
+        required: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+            Display name of this environment for the UI.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+            A brief description of this environment.
+      - !ruby/object:Api::Type::String
+        name: 'postStartupScript'
+        description: |
+            Path to a Bash script that automatically runs after a notebook instance fully boots up. 
+            The path must be a URL or Cloud Storage path. Example: "gs://path-to-file/file-name"
+      - !ruby/object:Api::Type::Time
+        name: 'createTime'
+        description: 'Instance creation time'
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'vmImage'
+        exactly_one_of:
+            - vm_image
+            - container_image
+        description: |
+            Use a Compute Engine VM image to start the notebook instance.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'project'
+            description: |
+                The name of the Google Cloud project that this VM image belongs to. 
+                Format: projects/{project_id}
+            required: true                
+          - !ruby/object:Api::Type::String
+            name: 'imageName'
+            description: |
+                Use VM image name to find the image.
+          - !ruby/object:Api::Type::String
+            name: 'imageFamily'
+            description: |
+                Use this VM image family to find the image; the newest image in this family will be used.        
+      - !ruby/object:Api::Type::NestedObject
+        name: 'containerImage'
+        exactly_one_of:
+            - vm_image
+            - container_image
+        description: |
+            Use a container image to start the notebook instance.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'repository'
+            description: |
+               The path to the container image repository. 
+               For example: gcr.io/{project_id}/{imageName}
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'tag'
+            description: |
+                The tag of the container image. If not specified, this defaults to the latest tag. 
+  # Notebooks Instance
+  - !ruby/object:Api::Resource
+    name: 'Instance'
+    description: |
+        A Cloud AI Platform Notebook instance.
+    min_version: beta
+    base_url: projects/{{project}}/locations/{{location}}/instances
+    create_url: projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}
+    self_link: projects/{{project}}/locations/{{location}}/instances/{{name}}
+    create_verb: :POST
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/ai-platform-notebooks'
+      api: 'https://cloud.google.com/ai-platform/notebooks/docs/reference/rest'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'location'
+        description: 'A reference to the zone where the machine resides.'
+        resource: 'Location'
+        imports: 'selfLink'
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+            The name specified for the Notebook instance.
+        required: true
+        input: true
+        url_param_only: true
+        pattern: projects/{{project}}/locations/{{location}}/instances/{{name}}
+      - !ruby/object:Api::Type::String
+        name: 'machineType'
+        description: |
+            A reference to a machine type which defines VM kind.
+        required: true
+        input: true
+        pattern: projects/{{project}}/zones/{{location}}/machineTypes/{{name}}
+      - !ruby/object:Api::Type::String
+        name: 'postStartupScript'
+        description: |
+            Path to a Bash script that automatically runs after a 
+            notebook instance fully boots up. The path must be a URL 
+            or Cloud Storage path (gs://path-to-file/file-name).
+      - !ruby/object:Api::Type::String
+        name: 'proxyUri'
+        description: |
+            The proxy endpoint that is used to access the Jupyter notebook.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'instanceOwners'
+        description: |
+            The owner of this instance after creation. 
+            Format: alias@example.com.
+            Currently supports one owner only. 
+            If not specified, all of the service account users of 
+            your VM instance's service account can use the instance.
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccount'
+        description: |
+            The service account on this instance, giving access to other 
+            Google Cloud services. You can use any service account within 
+            the same project, but you must have the service account user 
+            permission to use the instance. If not specified, 
+            the Compute Engine default service account is used.      
+      - !ruby/object:Api::Type::NestedObject
+        name: 'acceleratorConfig'
+        description: |
+            The hardware accelerator used on this instance. If you use accelerators, 
+            make sure that your configuration has enough vCPUs and memory to support the 
+            machineType you have selected.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'type'
+            values:
+              - ACCELERATOR_TYPE_UNSPECIFIED
+              - NVIDIA_TESLA_K80
+              - NVIDIA_TESLA_P100
+              - NVIDIA_TESLA_V100
+              - NVIDIA_TESLA_P4
+              - NVIDIA_TESLA_T4
+              - NVIDIA_TESLA_T4_VWS
+              - NVIDIA_TESLA_P100_VWS
+              - NVIDIA_TESLA_P4_VWS
+              - TPU_V2
+              - TPU_V3
+            required: true
+            description: |
+              Type of this accelerator.
+          - !ruby/object:Api::Type::Integer
+            name: 'coreCount'
+            required: true
+            description: |
+              Count of cores of this accelerator.
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        values:
+          - STATE_UNSPECIFIED
+          - STARTING
+          - PROVISIONING
+          - ACTIVE
+          - STOPPING
+          - STOPPED
+          - DELETED
+        description: |
+            The state of this instance.
+        output: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'installGpuDriver'
+        description: |
+            Indicates that this is a boot disk. The virtual machine will
+            use the first partition of the disk for its root filesystem.
+        input: true        
+      - !ruby/object:Api::Type::String
+        name: 'customGpuDriverPath'
+        description: |
+            Specify a custom Cloud Storage path where the GPU driver is stored. 
+            If not specified, we'll automatically choose from official GPU drivers.
+      - !ruby/object:Api::Type::Enum
+        name: 'bootDiskType'
+        values:
+          - DISK_TYPE_UNSPECIFIED
+          - PD_STANDARD
+          - PD_SSD
+        description: |
+            Possible disk types for notebook instances.
+      - !ruby/object:Api::Type::Integer
+        name: 'bootDiskSizeGb'
+        description: |
+            The size of the boot disk in GB attached to this instance, 
+            up to a maximum of 64000 GB (64 TB). The minimum recommended value is 100 GB. 
+            If not specified, this defaults to 100.
+      - !ruby/object:Api::Type::Enum
+        name: 'dataDiskType'
+        values:
+          - DISK_TYPE_UNSPECIFIED
+          - PD_STANDARD
+          - PD_SSD
+        description: |
+            Possible disk types for notebook instances.
+      - !ruby/object:Api::Type::Integer
+        name: 'dataDiskSizeGb'
+        description: |
+            The size of the data disk in GB attached to this instance, 
+            up to a maximum of 64000 GB (64 TB). 
+            You can choose the size of the data disk based on how big your notebooks and data are. 
+            If not specified, this defaults to 100.       
+      - !ruby/object:Api::Type::Boolean
+        name: 'noRemoveDataDisk'
+        description: |
+            If true, the data disk will not be auto deleted when deleting the instance.
+      - !ruby/object:Api::Type::Enum
+        name: 'diskEncryption'
+        values:
+          - DISK_ENCRYPTION_UNSPECIFIED
+          - GMEK
+          - CMEK
+        description: |
+            Disk encryption method used on the boot and data disks, defaults to GMEK.
+      - !ruby/object:Api::Type::String
+        name: 'kmsKey'
+        description: |
+            The KMS key used to encrypt the disks, only applicable if diskEncryption is CMEK. 
+            Format: projects/{project_id}/locations/{location}/keyRings/{key_ring_id}/cryptoKeys/{key_id}
+      - !ruby/object:Api::Type::Boolean
+        name: 'noPublicIp'
+        description: |
+            no public IP will be assigned to this instance.
+      - !ruby/object:Api::Type::Boolean
+        name: 'noProxyAccess'
+        description: |
+            the notebook instance will not register with the proxy..
+      - !ruby/object:Api::Type::String
+        name: 'network'      
+        description: |
+            The name of the VPC that this instance is in. 
+            Format: projects/{project_id}/global/networks/{network_id}
+      - !ruby/object:Api::Type::String
+        name: 'subnet'      
+        description: |
+            The name of the subnet that this instance is in. 
+            Format: projects/{project_id}/regions/{region}/subnetworks/{subnetwork_id}              
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+            Labels to apply to this instance. These can be later modified by the setLabels method.
+            An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'metadata'
+        description: |
+            Custom metadata to apply to this instance.
+            An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+      - !ruby/object:Api::Type::Time
+        name: 'createTime'
+        description: 'Instance creation time'
+        output: true        
+      - !ruby/object:Api::Type::Time
+        name: 'updateTime'
+        description: 'Instance update time.'
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'vmImage'
+        exactly_one_of:
+            - vm_image
+            - container_image
+        description: |
+            Use a Compute Engine VM image to start the notebook instance.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'project'
+            description: |
+                The name of the Google Cloud project that this VM image belongs to. 
+                Format: projects/{project_id}
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'imageFamily'
+            description: |
+              Use this VM image family to find the image; the newest image in this family will be used.
+          - !ruby/object:Api::Type::String
+            name: 'imageName'
+            description: |
+                Use VM image name to find the image.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'containerImage'
+        exactly_one_of:
+            - vm_image
+            - container_image
+        description: |
+            Use a container image to start the notebook instance.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'repository'
+            description: |
+               The path to the container image repository. 
+               For example: gcr.io/{project_id}/{imageName}
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'tag'
+            description: |
+                The tag of the container image. If not specified, this defaults to the latest tag.
+  # Compute Zone (Location)
+  - !ruby/object:Api::Resource
+    name: 'Location'
+    kind: 'compute#zone'
+    base_url: projects/{{project}}/locations
+    collection_url_key: 'items'
+    has_self_link: true
+    readonly: true
+    description: 'Represents a Location resource.'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the Location resource.'

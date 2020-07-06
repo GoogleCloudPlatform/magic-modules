@@ -387,7 +387,7 @@ func testAccComputeGlobalForwardingRule_internalLoadBalancing(fr, proxy, backend
 resource "google_compute_global_forwarding_rule" "forwarding_rule" {
   name                  = "%s"
   target                = google_compute_target_http_proxy.default.self_link
-  port_range            = "80"
+  port_range            = "8080"
   load_balancing_scheme = "INTERNAL_SELF_MANAGED"
   ip_address            = "0.0.0.0"
   metadata_filters {
@@ -491,7 +491,7 @@ func testAccComputeGlobalForwardingRule_internalLoadBalancingUpdate(fr, proxy, b
 resource "google_compute_global_forwarding_rule" "forwarding_rule" {
   name                  = "%s"
   target                = google_compute_target_http_proxy.default.self_link
-  port_range            = "80"
+  port_range            = "8080"
   load_balancing_scheme = "INTERNAL_SELF_MANAGED"
   ip_address            = "0.0.0.0"
   metadata_filters {

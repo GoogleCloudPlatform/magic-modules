@@ -1,7 +1,7 @@
 resource "google_compute_region_target_http_proxy" "default" {
   region  = "us-central1"
   name    = "<%= ctx[:vars]['region_target_http_proxy_name'] %>"
-  url_map = google_compute_region_url_map.default.self_link
+  url_map = google_compute_region_url_map.default.id
 }
 
 resource "google_compute_region_url_map" "default" {

@@ -138,6 +138,11 @@ objects:
               This must be a relative path. If a step's dir is specified and
               is an absolute path, this value is ignored for that step's
               execution.
+
+          - !ruby/object:Api::Type::Boolean
+            name: 'invertRegex'
+            description: |
+              Only trigger a build if the revision regex does NOT match the revision regex.
           - !ruby/object:Api::Type::String
             name: 'branchName'
             description: |
@@ -203,6 +208,10 @@ objects:
                 values:
                   - :COMMENTS_DISABLED
                   - :COMMENTS_ENABLED
+              - !ruby/object:Api::Type::Boolean
+                name: 'invertRegex'
+                description: |
+                    If true, branches that do NOT match the git_ref will trigger a build.
           - !ruby/object:Api::Type::NestedObject
             name: 'push'
             description: |
@@ -211,6 +220,10 @@ objects:
               - github.0.pull_request
               - github.0.push
             properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'invertRegex'
+                description: |
+                    When true, only trigger a build if the revision regex does NOT match the git_ref regex.
               - !ruby/object:Api::Type::String
                 name: 'branch'
                 description: |

@@ -1,13 +1,8 @@
-data "google_compute_node_types" "central1a" {
-  provider = google-beta
-  zone = "us-central1-a"
-}
-
 resource "google_compute_node_template" "soletenant-tmpl" {
   provider = google-beta
   name      = "<%= ctx[:vars]['template_name'] %>"
   region    = "us-central1"
-  node_type = data.google_compute_node_types.central1a.names[0]
+  node_type = "n1-node-96-624"
 }
 
 resource "google_compute_node_group" "<%= ctx[:primary_resource_id] %>" {

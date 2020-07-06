@@ -197,7 +197,6 @@ func TestAccSqlDatabaseInstance_basicSecondGen(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccSqlDatabaseInstance_basicMSSQL(t *testing.T) {
 	t.Parallel()
 
@@ -222,7 +221,6 @@ func TestAccSqlDatabaseInstance_basicMSSQL(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 	t.Parallel()
@@ -677,7 +675,6 @@ resource "google_sql_database_instance" "instance" {
 }
 `
 
-<% unless version == 'ga' -%>
 var testGoogleSqlDatabaseInstance_basic_mssql = `
 resource "google_sql_database_instance" "instance" {
   name             = "%s"
@@ -688,7 +685,6 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `
-<% end -%>
 
 func testGoogleSqlDatabaseInstanceConfig_withoutReplica(instanceName string) string {
 	return fmt.Sprintf(`

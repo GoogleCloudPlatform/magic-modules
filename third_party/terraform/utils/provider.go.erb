@@ -146,10 +146,14 @@ func Provider() terraform.ResourceProvider {
 			"google_client_config":                             dataSourceGoogleClientConfig(),
 			"google_client_openid_userinfo":                    dataSourceGoogleClientOpenIDUserinfo(),
 			"google_cloudfunctions_function":                   dataSourceGoogleCloudFunctionsFunction(),
+			<% unless version == 'ga' -%>
+			"google_cloud_identity_groups":                     dataSourceGoogleCloudIdentityGroups(),
+			"google_cloud_identity_group_memberships":          dataSourceGoogleCloudIdentityGroupMemberships(),
+			<% end -%>
 			"google_composer_image_versions":                   dataSourceGoogleComposerImageVersions(),
 			"google_compute_address":                           dataSourceGoogleComputeAddress(),
 			"google_compute_backend_service":                   dataSourceGoogleComputeBackendService(),
-			"google_compute_backend_bucket":                   dataSourceGoogleComputeBackendBucket(),
+			"google_compute_backend_bucket":                    dataSourceGoogleComputeBackendBucket(),
 			"google_compute_default_service_account":           dataSourceGoogleComputeDefaultServiceAccount(),
 			"google_compute_forwarding_rule":                   dataSourceGoogleComputeForwardingRule(),
 			"google_compute_global_address":                    dataSourceGoogleComputeGlobalAddress(),
@@ -210,6 +214,7 @@ func Provider() terraform.ResourceProvider {
 			"google_storage_project_service_account":           dataSourceGoogleStorageProjectServiceAccount(),
 			"google_storage_transfer_project_service_account":  dataSourceGoogleStorageTransferProjectServiceAccount(),
 			"google_tpu_tensorflow_versions":                   dataSourceTpuTensorflowVersions(),
+			"google_redis_instance":                            dataSourceGoogleRedisInstance(),
 		},
 
 		ResourcesMap: ResourceMap(),
@@ -330,6 +335,7 @@ end     # products.each do
 				"google_folder_iam_binding":                    ResourceIamBinding(IamFolderSchema, NewFolderIamUpdater, FolderIdParseFunc),
 				"google_folder_iam_member":                     ResourceIamMember(IamFolderSchema, NewFolderIamUpdater, FolderIdParseFunc),
 				"google_folder_iam_policy":                     ResourceIamPolicy(IamFolderSchema, NewFolderIamUpdater, FolderIdParseFunc),
+				"google_folder_iam_audit_config":               ResourceIamAuditConfig(IamFolderSchema, NewFolderIamUpdater, FolderIdParseFunc),
 				"google_folder_organization_policy":            resourceGoogleFolderOrganizationPolicy(),
 				"google_healthcare_dataset_iam_binding":        ResourceIamBindingWithBatching(IamHealthcareDatasetSchema, NewHealthcareDatasetIamUpdater, DatasetIdParseFunc, IamBatchingEnabled),
 				"google_healthcare_dataset_iam_member":         ResourceIamMemberWithBatching(IamHealthcareDatasetSchema, NewHealthcareDatasetIamUpdater, DatasetIdParseFunc, IamBatchingEnabled),

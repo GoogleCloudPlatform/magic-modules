@@ -156,7 +156,7 @@ The following arguments are supported:
     Structure is documented below.
     **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
-* `tags` - (Optional) A list of tags to attach to the instance.
+* `tags` - (Optional) A list of network tags to attach to the instance.
 
 * `shielded_instance_config` - (Optional) Enable [Shielded VM](https://cloud.google.com/security/shielded-cloud/shielded-vm) on this instance. Shielded VM provides verifiable integrity to prevent against malware and rootkits. Defaults to disabled. Structure is documented below.
 	**Note**: [`shielded_instance_config`](#shielded_instance_config) can only be used with boot images with shielded vm support. See the complete list [here](https://cloud.google.com/compute/docs/images#shielded-images).
@@ -211,7 +211,7 @@ The `initialize_params` block supports:
     `global/images/family/{family}`, `family/{family}`, `{project}/{family}`,
     `{project}/{image}`, `{family}`, or `{image}`. If referred by family, the
     images names must include the family name. If they don't, use the
-    [google_compute_image data source](/docs/providers/google/d/datasource_compute_image.html).
+    [google_compute_image data source](/docs/providers/google/d/compute_image.html).
     For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
     These images can be referred by family name here.
 

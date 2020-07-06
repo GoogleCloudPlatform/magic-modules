@@ -147,7 +147,10 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 							// configuration.
 							Computed:     true,
 							ValidateFunc: validation.StringInSlice([]string{"REGIONAL", "ZONAL"}, false),
-							Description:  `The availability type of the Cloud SQL instance, high availability (REGIONAL) or single zone (ZONAL).'`,
+							Description:  `The availability type of the Cloud SQL instance, high availability
+(REGIONAL) or single zone (ZONAL). For MySQL instances, ensure that
+settings.backup_configuration.enabled and
+settings.backup_configuration.binary_log_enabled are both set to true.`,
 						},
 						"backup_configuration": {
 							Type:     schema.TypeList,
@@ -369,7 +372,6 @@ func resourceSqlDatabaseInstance() *schema.Resource {
             <% end -%>
 
 
-			<% unless version == 'ga' -%>
 			"root_password": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -377,7 +379,6 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 				Sensitive:   true,
 				Description: `Initial root password. Required for MS SQL Server, ignored by MySQL and PostgreSQL.`,
 			},
-			<% end -%>
 
 			"ip_address": {
 				Type:     schema.TypeList,
@@ -638,12 +639,10 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
 	}
 
-	<% unless version == 'ga' -%>
 	// MSSQL Server require rootPassword to be set
 	if strings.Contains(instance.DatabaseVersion, "SQLSERVER") {
 		instance.RootPassword = d.Get("root_password").(string)
 	}
-	<% end -%>
 
 	// Modifying a replica during Create can cause problems if the master is
 	// modified at the same time. Lock the master until we're done in order

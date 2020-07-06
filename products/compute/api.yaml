@@ -122,6 +122,7 @@ objects:
         required: true
       - !ruby/object:Api::Type::Enum
         name: purpose
+        exact_version: ga
         description: |
           The purpose of this resource, which can be one of the following values:
 
@@ -130,6 +131,17 @@ objects:
           This should only be set when using an Internal address.
         values:
           - :GCE_ENDPOINT
+      - !ruby/object:Api::Type::Enum
+        name: purpose
+        exact_version: beta
+        description: |
+          The purpose of this resource, which can be one of the following values:
+          - GCE_ENDPOINT for addresses that are used by VM instances, alias IP ranges, internal load balancers, and similar resources.
+          - SHARED_LOADBALANCER_VIP for an address that can be used by multiple internal load balancers
+          This should only be set when using an Internal address.
+        values:
+          - :GCE_ENDPOINT
+          - :SHARED_LOADBALANCER_VIP
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
         description: |
@@ -289,6 +301,46 @@ objects:
               instance may take to initialize. To do this, create an instance
               and time the startup process.
             default_value: 60
+          - !ruby/object:Api::Type::Enum
+            name: 'mode'
+            default_value: :ON
+            description: |
+              Defines operating mode for this policy.
+            values:
+              - :OFF
+              - :ONLY_UP
+              - :ON
+          - !ruby/object:Api::Type::NestedObject
+            name: 'scaleDownControl'
+            min_version: beta
+            at_least_one_of:
+             - scale_down_control.0.max_scaled_down_replicas
+             - scale_down_control.0.time_window_sec
+            description: |
+              Defines scale down controls to reduce the risk of response latency
+              and outages due to abrupt scale-in events
+            properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'maxScaledDownReplicas'
+              at_least_one_of:
+              - scale_down_control.0.max_scaled_down_replicas.0.fixed
+              - scale_down_control.0.max_scaled_down_replicas.0.percent
+              properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'fixed'
+                description: |
+                  Specifies a fixed number of VM instances. This must be a positive
+                  integer.
+              - !ruby/object:Api::Type::Integer
+                name: 'percent'
+                description: |
+                  Specifies a percentage of instances between 0 to 100%, inclusive.
+                  For example, specify 80 for 80%.
+            - !ruby/object:Api::Type::Integer
+              name: 'timeWindowSec'
+              description: |
+                How long back autoscaling should look when computing recommendations
+                to include directives regarding slower scale down, as described above.
           - !ruby/object:Api::Type::NestedObject
             name: 'cpuUtilization'
             description: |
@@ -7578,8 +7630,8 @@ objects:
               The autoscaling mode. Set to one of the following:
                 - OFF: Disables the autoscaler.
                 - ON: Enables scaling in and scaling out.
-                - ONLY_SCALE_OUT: Enables only scaling out. 
-                You must use this mode if your node groups are configured to 
+                - ONLY_SCALE_OUT: Enables only scaling out.
+                You must use this mode if your node groups are configured to
                 restart their hosted VMs on minimal servers.
             values:
               - :OFF
@@ -7588,7 +7640,7 @@ objects:
           - !ruby/object:Api::Type::Integer
             name: 'minNodes'
             description: |
-              Minimum size of the node group. Must be less 
+              Minimum size of the node group. Must be less
               than or equal to max-nodes. The default value is 0.
           - !ruby/object:Api::Type::Integer
             name: 'maxNodes'
@@ -7786,6 +7838,15 @@ objects:
             values:
               - :RESTART_NODE_ON_ANY_SERVER
               - :RESTART_NODE_ON_MINIMAL_SERVERS
+      - !ruby/object:Api::Type::Enum
+        name: 'cpuOvercommitType'
+        description: |
+          CPU overcommit.
+        min_version: beta
+        values:
+          - :ENABLED
+          - :NONE
+        default_value: :NONE
   - !ruby/object:Api::Resource
     name: 'PacketMirroring'
     min_version: beta
@@ -7825,7 +7886,7 @@ objects:
         description: The name of the packet mirroring rule
         required: true
       - !ruby/object:Api::Type::String
-        name: description 
+        name: description
         description: A human-readable description of the rule.
         input: true
       - !ruby/object:Api::Type::String
@@ -7869,7 +7930,7 @@ objects:
             imports: 'selfLink'
             description: The URL of the forwarding rule.
       - !ruby/object:Api::Type::NestedObject
-        name: filter 
+        name: filter
         description: |
             A filter for mirrored traffic.  If unset, all traffic is mirrored.
         properties:
@@ -8459,6 +8520,46 @@ objects:
               instance may take to initialize. To do this, create an instance
               and time the startup process.
             default_value: 60
+          - !ruby/object:Api::Type::Enum
+            name: 'mode'
+            default_value: :ON
+            description: |
+              Defines operating mode for this policy.
+            values:
+              - :OFF
+              - :ONLY_UP
+              - :ON
+          - !ruby/object:Api::Type::NestedObject
+            name: 'scaleDownControl'
+            min_version: beta
+            at_least_one_of:
+             - scale_down_control.0.max_scaled_down_replicas
+             - scale_down_control.0.time_window_sec
+            description: |
+              Defines scale down controls to reduce the risk of response latency
+              and outages due to abrupt scale-in events
+            properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'maxScaledDownReplicas'
+              at_least_one_of:
+              - scale_down_control.0.max_scaled_down_replicas.0.fixed
+              - scale_down_control.0.max_scaled_down_replicas.0.percent
+              properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'fixed'
+                description: |
+                  Specifies a fixed number of VM instances. This must be a positive
+                  integer.
+              - !ruby/object:Api::Type::Integer
+                name: 'percent'
+                description: |
+                  Specifies a percentage of instances between 0 to 100%, inclusive.
+                  For example, specify 80 for 80%.
+            - !ruby/object:Api::Type::Integer
+              name: 'timeWindowSec'
+              description: |
+                How long back autoscaling should look when computing recommendations
+                to include directives regarding slower scale down, as described above.
           - !ruby/object:Api::Type::NestedObject
             name: 'cpuUtilization'
             description: |
@@ -12172,7 +12273,7 @@ objects:
       - !ruby/object:Api::Type::Integer
         name: 'storageBytes'
         description: |
-          A size of the the storage used by the snapshot. As snapshots share
+          A size of the storage used by the snapshot. As snapshots share
           storage, this number is expected to change with snapshot
           creation/deletion.
         output: true
@@ -14201,14 +14302,12 @@ objects:
           properties:
             - !ruby/object:Api::Type::ResourceRef
               name: 'defaultService'
-              # TODO: (mbang) won't work for array path matchers yet, uncomment here and remove conflicts once they are supported.
+              # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
               # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # exactly_one_of:
               #   - path_matchers.0.default_service
               #   - path_matchers.0.default_url_redirect
               #   - path_matchers.0.default_route_action.0.weighted_backend_services
-              conflicts:
-                - defaultUrlRedirect
               resource: 'BackendService'
               imports: 'selfLink'
               description: |
@@ -15404,15 +15503,12 @@ objects:
                           original URL is retained. Defaults to false.
             - !ruby/object:Api::Type::NestedObject
               name: 'defaultUrlRedirect'
-              # TODO: (mbang) won't work for array path matchers yet, uncomment here and remove defaultService conflict once they are supported.
+              # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
               # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # exactly_one_of:
               #   - path_matchers.0.default_service
               #   - path_matchers.0.default_url_redirect
               #   - path_matchers.0.default_route_action.0.weighted_backend_services
-              conflicts:
-                - defaultService
-                - defaultRouteAction
               description: |
                 When none of the specified hostRules match, the request is redirected to a URL specified
                 by defaultUrlRedirect. If defaultUrlRedirect is specified, defaultService or
@@ -15472,8 +15568,9 @@ objects:
                     retained.
             - !ruby/object:Api::Type::NestedObject
               name: 'defaultRouteAction'
-              conflicts:
-                - defaultUrlRedirect
+              # TODO: (mbang) conflicts also won't work for array path matchers yet, uncomment here once supported.
+              # conflicts:
+              #   - defaultUrlRedirect
               description: |
                 defaultRouteAction takes effect when none of the pathRules or routeRules match. The load balancer performs
                 advanced routing actions like URL rewrites, header transformations, etc. prior to forwarding the request

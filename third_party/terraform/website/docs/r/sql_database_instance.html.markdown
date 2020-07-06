@@ -214,7 +214,7 @@ includes an up-to-date reference of supported versions.
 * `replica_configuration` - (Optional) The configuration for replication. The
     configuration is detailed below.
     
-* `root_password` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Initial root password. Required for MS SQL Server, ignored by MySQL and PostgreSQL.
+* `root_password` - (Optional) Initial root password. Required for MS SQL Server, ignored by MySQL and PostgreSQL.
 
 * `encryption_key_name` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
     The full path to the encryption key used for the CMEK disk encryption.  Setting
@@ -240,7 +240,10 @@ The required `settings` block supports:
     for information on how to upgrade to Second Generation instances.
     A list of Google App Engine (GAE) project names that are allowed to access this instance.
 
-* `availability_type` - (Optional) The availability type of the Cloud SQL instance, high availability (`REGIONAL`) or single zone (`ZONAL`).'
+* `availability_type` - (Optional) The availability type of the Cloud SQL
+instance, high availability (`REGIONAL`) or single zone (`ZONAL`).' For MySQL
+instances, ensure that `settings.backup_configuration.enabled` and
+`settings.backup_configuration.binary_log_enabled` are both set to `true`.
 
 * `crash_safe_replication` - (Optional, Deprecated) This property is only applicable to First Generation instances.
     First Generation instances are now deprecated, see [here](https://cloud.google.com/sql/docs/mysql/upgrade-2nd-gen)

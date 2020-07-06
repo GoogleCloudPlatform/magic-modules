@@ -32,6 +32,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "internal_with_gce_endpoint"
         vars:
           address_name: "my-internal-address-"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "address_with_shared_loadbalancer_vip"
+        primary_resource_id: "internal_with_shared_loadbalancer_vip"
+        min_version: 'beta'
+        vars:
+          address_name: "my-internal-address"
+        skip_docs: true  # It is almost identical to internal_with_gce_endpoint
       # TODO(rileykarson): Remove this example when instance is supported
       - !ruby/object:Provider::Terraform::Examples
         name: "instance_with_ip"
@@ -107,6 +114,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: maxReplicas
       autoscalingPolicy.coolDownPeriodSec: !ruby/object:Overrides::Terraform::PropertyOverride
         name: cooldownPeriod
+      autoscalingPolicy.scaleDownControl: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
       autoscalingPolicy.cpuUtilization: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -345,7 +355,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       Adds existing resource policies to a disk. You can only add one policy
       which will be applied to this disk for scheduling snapshot creation.
 
-      ~> **Note:** This resource does not support zonal disks (`google_compute_disk`). For zonal disks, please refer to [`google_compute_disk_resource_policy_attachment`](https://www.terraform.io/docs/providers/google/r/compute_disk_resource_policy_attachment.html) 
+      ~> **Note:** This resource does not support zonal disks (`google_compute_disk`). For zonal disks, please refer to [`google_compute_disk_resource_policy_attachment`](https://www.terraform.io/docs/providers/google/r/compute_disk_resource_policy_attachment.html)
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_disk_resource_policy_attachment_basic"
@@ -433,7 +443,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           `global/images/family/{family}`, `family/{family}`, `{project}/{family}`,
           `{project}/{image}`, `{family}`, or `{image}`. If referred by family, the
           images names must include the family name. If they don't, use the
-          [google_compute_image data source](/docs/providers/google/d/datasource_compute_image.html).
+          [google_compute_image data source](/docs/providers/google/d/compute_image.html).
           For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
           These images can be referred by family name here.
       diskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -469,6 +479,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       resourcePolicies: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        description: |
+          {{description}}
+
+          ~>**NOTE** This value does not support updating the
+          resource policy, as resource policies can not be updated more than
+          one at a time. Use
+          [`google_compute_disk_resource_policy_attachment`](https://www.terraform.io/docs/providers/google/r/compute_disk_resource_policy_attachment.html)
+          to allow for updating the resource policy attached to the disk.
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       constants: templates/terraform/constants/disk.erb
@@ -577,6 +595,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           region_url_map_name: "website-map"
           region_backend_service_name: "website-backend"
           region_health_check_name: "website-hc"
+          rigm_name: "website-rigm"
           network_name: "website-net"
           fw_name: "website-fw"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -1173,6 +1192,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      importCustomRoutes: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+      exportCustomRoutes: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: 'templates/terraform/custom_delete/skip_delete.go.erb'
       encoder: 'templates/terraform/encoders/network_peering_routes_config.go.erb'
@@ -1271,7 +1294,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
   PerInstanceConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{zone}}/{{instance_group_manager}}/{{name}}"
-    mutex: instangeGroupManager/{{project}}/{{zone}}/{{instance_group_manager}}
+    mutex: instanceGroupManager/{{project}}/{{zone}}/{{instance_group_manager}}
     # Fine-grained resources don't actually exist as standalone GCP resource
     # in Cloud Asset Inventory
     exclude_validator: true
@@ -1323,14 +1346,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - :REFRESH
           - :NONE
         default_value: :REPLACE
+      - !ruby/object:Api::Type::Boolean
+        name: 'remove_instance_state_on_destroy'
+        description: |
+          When true, deleting this config will immediately remove any specified state from the underlying instance.
+          When false, deleting this config will *not* immediately remove any state from the underlying instance.
+          State will be removed on the next instance recreation or update.
+        default_value: false
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/compute_per_instance_config.go.erb
       update_encoder: templates/terraform/update_encoder/compute_per_instance_config.go.erb
       pre_delete: templates/terraform/pre_delete/compute_per_instance_config.go.erb
       post_update: templates/terraform/post_update/compute_per_instance_config.go.erb
+      custom_delete: templates/terraform/custom_delete/per_instance_config.go.erb
   RegionPerInstanceConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{region}}/{{region_instance_group_manager}}/{{name}}"
-    mutex: instangeGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}
+    mutex: instanceGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}
     # Fine-grained resources don't actually exist as standalone GCP resource
     # in Cloud Asset Inventory
     exclude_validator: true
@@ -1382,12 +1413,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - :REFRESH
           - :NONE
         default_value: :REPLACE
+      - !ruby/object:Api::Type::Boolean
+        name: 'remove_instance_state_on_destroy'
+        description: |
+          When true, deleting this config will immediately remove any specified state from the underlying instance.
+          When false, deleting this config will *not* immediately remove any state from the underlying instance.
+          State will be removed on the next instance recreation or update.
+        default_value: false
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/compute_per_instance_config.go.erb
       update_encoder: templates/terraform/update_encoder/compute_per_instance_config.go.erb
       pre_delete: templates/terraform/pre_delete/compute_per_instance_config.go.erb
       post_update: templates/terraform/post_update/compute_region_per_instance_config.go.erb
-
+      custom_delete: templates/terraform/custom_delete/region_per_instance_config.go.erb
   ProjectInfo: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -2453,6 +2491,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           url_map_name: "urlmap"
           home_backend_service_name: "home"
+          health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "url_map_header_based_routing"
+        primary_resource_id: "urlmap"
+        vars:
+          url_map_name: "urlmap"
+          default_backend_service_name: "default"
+          service_a_backend_service_name: "service-a"
+          service_b_backend_service_name: "service-b"
+          health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "url_map_parameter_based_routing"
+        primary_resource_id: "urlmap"
+        vars:
+          url_map_name: "urlmap"
+          default_backend_service_name: "default"
+          service_a_backend_service_name: "service-a"
+          service_b_backend_service_name: "service-b"
           health_check_name: "health-check"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride

@@ -1,5 +1,5 @@
-// Instance name in applyUpdatesToInstances request must include region
-instanceName, err := replaceVars(d, config, "regoins/{{region}}/instances/{{name}}")
+// Instance name in applyUpdatesToInstances request must include zone
+instanceName, err := findInstanceName(d, config)
 if err != nil {
 	return err
 }

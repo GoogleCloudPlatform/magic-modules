@@ -28,7 +28,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         skip_test: true
-        name: "scheduled_query"
+        name: "bigquerydatatransfer_config_scheduled_query"
         primary_resource_id: "query_config"
         vars:
           display_name: "my-query"
