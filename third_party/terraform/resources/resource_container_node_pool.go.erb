@@ -712,7 +712,6 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		log.Printf("[INFO] Updated autoscaling in Node Pool %s", d.Id())
 
 		if prefix == "" {
-			d.SetPartial("autoscaling")
 		}
 	}
 
@@ -859,7 +858,6 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 <% end -%>
 
 		if prefix == "" {
-			d.SetPartial("node_config")
 		}
 	}
 
@@ -894,7 +892,6 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		log.Printf("[INFO] GKE node pool %s size has been updated to %d", name, newSize)
 
 		if prefix == "" {
-			d.SetPartial("node_count")
 		}
 	}
 
@@ -935,7 +932,6 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		log.Printf("[INFO] Updated management in Node Pool %s", name)
 
 		if prefix == "" {
-			d.SetPartial("management")
 		}
 	}
 
@@ -969,7 +965,6 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		log.Printf("[INFO] Updated version in Node Pool %s", name)
 
 		if prefix == "" {
-			d.SetPartial("version")
 		}
 	}
 
@@ -1000,7 +995,6 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		log.Printf("[INFO] Updated node locations in Node Pool %s", name)
 
 		if prefix == "" {
-			d.SetPartial("node_locations")
 		}
 	}
 
@@ -1037,7 +1031,6 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		log.Printf("[INFO] Updated upgrade settings in Node Pool %s", name)
 
 		if prefix == "" {
-			d.SetPartial("upgrade_settings")
 		}
 	}
 

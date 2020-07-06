@@ -52,7 +52,7 @@ func resourceMonitoringDashboard() *schema.Resource {
 			"dashboard_json": {
 				Type:             schema.TypeString,
 				Required:         true,
-				ValidateFunc:     validation.ValidateJsonString,
+				ValidateFunc:     validation.StringIsJSON,
 				DiffSuppressFunc: monitoringDashboardDiffSuppress,
 				StateFunc: func(v interface{}) string {
 					json, _ := structure.NormalizeJsonString(v)

@@ -336,8 +336,6 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 		if p, err = updateProject(config, d, project_name, p); err != nil {
 			return err
 		}
-
-		d.SetPartial("name")
 	}
 
 	// Project parent has changed
@@ -350,8 +348,6 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 		if p, err = updateProject(config, d, project_name, p); err != nil {
 			return err
 		}
-		d.SetPartial("org_id")
-		d.SetPartial("folder_id")
 	}
 
 	// Billing account has changed
@@ -370,7 +366,6 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 		if p, err = updateProject(config, d, project_name, p); err != nil {
 			return err
 		}
-		d.SetPartial("labels")
 	}
 
 	d.Partial(false)

@@ -164,8 +164,6 @@ func resourceGoogleProjectIamCustomRoleUpdate(d *schema.ResourceData, meta inter
 		if err != nil {
 			return fmt.Errorf("Error undeleting the custom project role %s: %s", d.Get("title").(string), err)
 		}
-
-		d.SetPartial("deleted")
 	}
 
 	if d.HasChange("title") || d.HasChange("description") || d.HasChange("stage") || d.HasChange("permissions") {
@@ -179,10 +177,6 @@ func resourceGoogleProjectIamCustomRoleUpdate(d *schema.ResourceData, meta inter
 		if err != nil {
 			return fmt.Errorf("Error updating the custom project role %s: %s", d.Get("title").(string), err)
 		}
-		d.SetPartial("title")
-		d.SetPartial("description")
-		d.SetPartial("stage")
-		d.SetPartial("permissions")
 	}
 
 	d.Partial(false)

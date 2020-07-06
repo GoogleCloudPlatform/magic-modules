@@ -121,7 +121,7 @@ func resource<%= resource_name -%>() *schema.Resource {
 <% end -%>
 
 <% object.settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
-func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(diff *schema.ResourceDiff, meta interface{}) error {
+func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 <%=
     compile_template(pwd + '/templates/terraform/unordered_list_customize_diff.erb',
                      prop: prop,
@@ -665,10 +665,6 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%              end -%>
         }
 <%          end -%>
-<%      end -%>
-
-<%      props.each do |prop|    -%>
-        d.SetPartial("<%= prop.name.underscore -%>")
 <%      end -%>
     }
 <%  end -%>
