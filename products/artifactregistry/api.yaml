@@ -100,6 +100,14 @@ objects:
         longer than 63 characters. Label keys must begin with a lowercase letter
         and may only contain lowercase letters, numeric characters, underscores,
         and dashes.
+    - !ruby/object:Api::Type::String
+      name: 'kmsKeyName'
+      description: |-
+        The Cloud KMS resource name of the customer managed encryption key that’s
+        used to encrypt the contents of the Repository. Has the form:
+        `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
+        This value may not be changed after the Repository has been created.
+      input: true
     - !ruby/object:Api::Type::Time
       name: createTime
       description: The time when the repository was created.
