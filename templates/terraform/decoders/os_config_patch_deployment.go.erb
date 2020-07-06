@@ -1,0 +1,9 @@
+if  res["patchConfig"] != nil {
+	patchConfig := res["patchConfig"].(map[string]interface{})
+	if patchConfig["goo"] != nil {
+		patchConfig["goo"].(map[string]interface{})["enabled"] = true
+		res["patchConfig"] = patchConfig
+	}
+}
+
+return res, nil
