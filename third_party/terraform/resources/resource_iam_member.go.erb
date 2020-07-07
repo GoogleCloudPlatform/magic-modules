@@ -25,7 +25,6 @@ var IamMemberBaseSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: caseDiffSuppress,
 		ValidateFunc:     validation.StringDoesNotMatch(regexp.MustCompile("^deleted:"), "Terraform does not support IAM members for deleted principals"),
 	},
-<% unless version == 'ga' -%>
 	"condition": {
 		Type:     schema.TypeList,
 		Optional: true,
@@ -51,7 +50,6 @@ var IamMemberBaseSchema = map[string]*schema.Schema{
 			},
 		},
 	},
-<% end -%>
 	"etag": {
 		Type:     schema.TypeString,
 		Computed: true,
@@ -66,13 +64,6 @@ func iamMemberImport(newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser 
 		config := m.(*Config)
 		s := strings.Fields(d.Id())
 		var id, role, member string
-<% if version == 'ga' -%>
-		if len(s) != 3 {
-			d.SetId("")
-			return nil, fmt.Errorf("Wrong number of parts to Member id %s; expected 'resource_name role member'.", s)
-		}
-		id, role, member = s[0], s[1], s[2]
-<% else -%>
 		if len(s) < 3 {
 			d.SetId("")
 			return nil, fmt.Errorf("Wrong number of parts to Member id %s; expected 'resource_name role member [condition_title]'.", s)
@@ -85,7 +76,6 @@ func iamMemberImport(newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser 
 			// condition titles can have any characters in them, so re-join the split string
 			id, role, member, conditionTitle = s[0], s[1], s[2], strings.Join(s[3:], " ")
 		}
-<% end -%>
 
 		// Set the ID only to the first part so all IAM types can share the same resourceIdParserFunc.
 		d.SetId(id)
@@ -101,7 +91,6 @@ func iamMemberImport(newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser 
 		// Use the current ID in case it changed in the resourceIdParserFunc.
 		d.SetId(d.Id() + "/" + role + "/" + strings.ToLower(member))
 
-<% unless version == 'ga' -%>
 		// Read the upstream policy so we can set the full condition.
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
@@ -138,7 +127,6 @@ func iamMemberImport(newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser 
 		if k := conditionKeyFromCondition(binding.Condition); !k.Empty() {
 			d.SetId(d.Id() + "/" + k.String())
 		}
-<% end -%>
 
 		return []*schema.ResourceData{d}, nil
 	}
@@ -165,11 +153,9 @@ func getResourceIamMember(d *schema.ResourceData) *cloudresourcemanager.Binding 
 		Members:   []string{d.Get("member").(string)},
 		Role:      d.Get("role").(string),
 	}
-<% unless version == 'ga' -%>
 	if c := expandIamCondition(d.Get("condition")); c != nil {
 		b.Condition = c
 	}
-<% end -%>
 	return b
 }
 
@@ -198,11 +184,9 @@ func resourceIamMemberCreate(newUpdaterFunc newResourceIamUpdaterFunc, enableBat
 			return err
 		}
 		d.SetId(updater.GetResourceId() + "/" + memberBind.Role + "/" + strings.ToLower(memberBind.Members[0]))
-<% unless version == 'ga' -%>
 		if k := conditionKeyFromCondition(memberBind.Condition); !k.Empty() {
 			d.SetId(d.Id() + "/" + k.String())
 		}
-<% end -%>
 		return resourceIamMemberRead(newUpdaterFunc)(d, meta)
 	}
 }
@@ -255,9 +239,7 @@ func resourceIamMemberRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.Read
 		d.Set("etag", p.Etag)
 		d.Set("member", member)
 		d.Set("role", binding.Role)
-<% unless version == 'ga' -%>
 		d.Set("condition", flattenIamCondition(binding.Condition))
-<% end -%>
 		return nil
 	}
 }
