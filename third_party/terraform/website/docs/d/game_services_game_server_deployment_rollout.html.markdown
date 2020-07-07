@@ -9,7 +9,7 @@ description: |-
 
 # google\_game\_services\_game\_server\_deployment\_rollout
 
-Use this data source to get  the rollout state. 
+Use this data source to get the rollout state. 
 
 https://cloud.google.com/game-servers/docs/reference/rest/v1beta/GameServerDeploymentRollout
 
@@ -28,8 +28,8 @@ data "google_game_services_game_server_deployment_rollout" "qa" {
 The following arguments are supported:
 
 
-* `deployment_id` 
-  The deployment to rollout the new config to. Only 1 rollout must be associated with each deployment.
+* `deployment_id` - (Required)
+  The deployment to get the rollout state from. Only 1 rollout must be associated with each deployment.
 
 
 ## Attributes Reference
