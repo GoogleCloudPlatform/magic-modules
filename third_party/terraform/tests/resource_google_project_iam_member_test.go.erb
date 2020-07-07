@@ -134,7 +134,6 @@ func TestAccProjectIamMember_remove(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccProjectIamMember_withCondition(t *testing.T) {
 	t.Parallel()
 
@@ -168,7 +167,6 @@ func TestAccProjectIamMember_withCondition(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func testAccProjectAssociateMemberBasic(pid, name, org, role, member string) string {
 	return fmt.Sprintf(`
@@ -208,7 +206,6 @@ resource "google_project_iam_member" "multiple" {
 `, pid, name, org, role, member, role2, member2)
 }
 
-<% unless version == 'ga' -%>
 func testAccProjectAssociateMember_withCondition(pid, name, org, role, member, conditionTitle string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
@@ -229,4 +226,3 @@ resource "google_project_iam_member" "acceptance" {
 }
 `, pid, name, org, role, member, conditionTitle)
 }
-<% end -%>
