@@ -2560,14 +2560,14 @@ func expandClusterAddonsConfig(configured interface{}) *containerBeta.AddonsConf
 }
 
 <% unless version == 'ga' -%>
-func expandIPAllocationPolicy(configured interface{}, networking_mode string) (*containerBeta.IPAllocationPolicy, error) {
+func expandIPAllocationPolicy(configured interface{}, networkingMode string) (*containerBeta.IPAllocationPolicy, error) {
 <% else -%>
 func expandIPAllocationPolicy(configured interface{}) (*containerBeta.IPAllocationPolicy, error) {
 <% end -%>
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 <% unless version == 'ga' -%>
-		if networking_mode == "VPC_NATIVE" {
+		if networkingMode == "VPC_NATIVE" {
 			return nil, fmt.Errorf("`ip_allocation_policy` block is required for VPC_NATIVE clusters.")
 		}
 <% end -%>
@@ -2580,7 +2580,7 @@ func expandIPAllocationPolicy(configured interface{}) (*containerBeta.IPAllocati
 	config := l[0].(map[string]interface{})
 	return &containerBeta.IPAllocationPolicy{
 <% unless version == 'ga' -%>
-		UseIpAliases:          networking_mode == "VPC_NATIVE",
+		UseIpAliases:          networkingMode == "VPC_NATIVE" || networkingMode == "",
 <% else -%>
 		UseIpAliases:          true,
 <% end -%>
@@ -2591,7 +2591,7 @@ func expandIPAllocationPolicy(configured interface{}) (*containerBeta.IPAllocati
 		ServicesSecondaryRangeName: config["services_secondary_range_name"].(string),
 		ForceSendFields:            []string{"UseIpAliases"},
 <% unless version == 'ga' -%>
-		UseRoutes:              networking_mode == "ROUTES",
+		UseRoutes:              networkingMode == "ROUTES",
 <% end -%>
 	}, nil
 }
