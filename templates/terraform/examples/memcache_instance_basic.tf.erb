@@ -30,11 +30,4 @@ resource "google_memcache_instance" "<%= ctx[:primary_resource_id] %>" {
     memory_size_mb = 1024
   }
   node_count = 1
-
-  parameters {
-    params = {
-      "listen-backlog" = "2048"
-      "max-item-size" = "8388608"
-    }
-  }
 }
