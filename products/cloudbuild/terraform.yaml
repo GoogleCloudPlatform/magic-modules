@@ -33,6 +33,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       build.steps: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'step'
+      build.secrets: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'secret'
+      build.source: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}}
+          One of `storageSource` or `repoSource` must be provided.
       triggerTemplate: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           {{description}}
