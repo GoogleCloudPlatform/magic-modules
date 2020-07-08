@@ -182,6 +182,9 @@ func Provider() terraform.ResourceProvider {
 			"google_container_registry_repository":             dataSourceGoogleContainerRepo(),
 			"google_dns_keys":                                  dataSourceDNSKeys(),
 			"google_dns_managed_zone":                          dataSourceDnsManagedZone(),
+                        <% unless version == 'ga' -%>
+			"google_game_services_game_server_deployment_rollout":  dataSourceGameServicesGameServerDeploymentRollout(),
+                        <% end -%>
 			"google_iam_policy":                                dataSourceGoogleIamPolicy(),
 			"google_iam_role":                                  dataSourceGoogleIamRole(),
 			"google_iam_testable_permissions":                  dataSourceGoogleIamTestablePermissions(),
