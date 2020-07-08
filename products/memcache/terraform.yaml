@@ -36,6 +36,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+      parameters: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: memcacheParameters
 
 
 # This is for copying files over
