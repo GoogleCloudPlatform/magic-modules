@@ -176,6 +176,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 
     log.Printf("[DEBUG] Creating new <%= object.name -%>: %#v", obj)
+<%= lines(compile(pwd + '/' + object.custom_code.pre_create)) if object.custom_code.pre_create -%>
 <%  if object.nested_query&.modify_by_patch -%>
 <%# Keep this after mutex - patch request data relies on current resource state %>
     obj, err = resource<%= resource_name -%>PatchCreateEncoder(d, meta, obj)

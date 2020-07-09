@@ -75,6 +75,9 @@ module Provider
       # (e.g. "fooBarDiffSuppress") and regexes that are necessarily
       # exported (e.g. "fooBarValidationRegex").
       attr_reader :constants
+      # This code is run before the Create call happens.  It's placed
+      # in the Create function, just before the Create call is made.
+      attr_reader :pre_create
       # This code is run after the Create call succeeds.  It's placed
       # in the Create function directly without modification.
       attr_reader :post_create
@@ -126,6 +129,7 @@ module Provider
         check :update_encoder, type: String
         check :decoder, type: String
         check :constants, type: String
+        check :pre_create, type: String
         check :post_create, type: String
         check :custom_create, type: String
         check :pre_update, type: String
