@@ -1,0 +1,108 @@
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: ActiveDirectory
+display_name: Managed Microsoft Active Directory
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://managedidentities.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'   
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Domain'
+    kind: 'activedirectory#domain'
+    base_url : projects/{{project}}/locations/global/domains?domainName={{domain_name}}
+    update_verb: :PATCH
+    update_mask: true
+    self_link: '{{name}}'
+    description: Creates a Microsoft AD domain
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Managed Microsoft Active Directory Quickstart': 'https://cloud.google.com/managed-microsoft-ad/docs/quickstarts'
+      api: 'https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: domainName
+        required: true
+        url_param_only: true
+        description: |
+          The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions, 
+          https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        output: true
+        description: 'The unique name of the domain using the format: `projects/{project}/locations/global/domains/{domainName}`.'
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: 'Resource labels that can contain user-provided metadata'
+      - !ruby/object:Api::Type::Array
+        name: 'authorizedNetworks'
+        item_type: Api::Type::String
+        description: |
+          The full names of the Google Compute Engine networks the domain instance is connected to. Networks can be added using domains.patch. 
+          The domain is only available on networks listed in authorizedNetworks. If CIDR subnets overlap between networks, domain creation will fail.
+      - !ruby/object:Api::Type::String
+        name: 'reservedIpRange'
+        required: true
+        description: |
+          The CIDR range of internal addresses that are reserved for this domain. Reserved networks must be /24 or larger. 
+          Ranges must be unique and non-overlapping with existing subnets in [Domain].[authorizedNetworks]
+      - !ruby/object:Api::Type::Array
+        name: 'locations'
+        required: true
+        item_type: Api::Type::String
+        description: |
+          Locations where domain needs to be provisioned. [regions][compute/docs/regions-zones/] 
+          e.g. us-west1 or us-east4 Service supports up to 4 locations at once. Each location will use a /26 block.
+      - !ruby/object:Api::Type::String
+        name: 'admin'
+        default_value: 'setupadmin'
+        description: |
+          The name of delegated administrator account used to perform Active Directory operations. 
+          If not specified, setupadmin will be used.
+      - !ruby/object:Api::Type::String    
+        name: 'fqdn'
+        output: true
+        description: |
+          The fully-qualified domain name of the exposed domain used by clients to connect to the service. 
+          Similar to what would be chosen for an Active Directory set up on an internal network.
+
+          
+          
+
+            
