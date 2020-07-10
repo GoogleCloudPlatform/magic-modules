@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAAccDataSourceSqlDatabaseInstance_basic(t *testing.T) {
+func TestAccDataSourceSqlDatabaseInstance_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
