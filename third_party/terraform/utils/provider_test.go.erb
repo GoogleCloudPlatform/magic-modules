@@ -20,7 +20,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/terraform-providers/terraform-provider-random/random"
 )
 
 var testAccProviders map[string]*schema.Provider
@@ -28,7 +27,6 @@ var testAccProviders map[string]*schema.Provider
 var testAccProvidersOiCS map[string]*schema.Provider
 <% end -%>
 var testAccProvider *schema.Provider
-var testAccRandomProvider *schema.Provider
 
 var credsEnvVars = []string{
 	"GOOGLE_CREDENTIALS",
@@ -103,16 +101,13 @@ func init() {
 	configs = make(map[string]*Config)
 	sources = make(map[string]VcrSource)
 	testAccProvider = Provider()
-	testAccRandomProvider = random.Provider().(*schema.Provider)
 	<% if version == 'ga' -%>
 	testAccProviders = map[string]*schema.Provider{
 		"google": testAccProvider,
-		"random": testAccRandomProvider,
 	}
 	<% else -%>
 	testAccProviders = map[string]*schema.Provider{
 		"google": testAccProvider,
-		"random": testAccRandomProvider,
 	}
 
 	// The OiCS provider map is used to ensure that OiCS examples use `google-beta`
@@ -123,7 +118,6 @@ func init() {
 <% Api::Product::Version::ORDER[1..Api::Product::Version::ORDER.index(version)].each do |aliased_version| -%>
 		"google-<%= aliased_version -%>": testAccProvider,
 <% end -%>
-		"random": testAccRandomProvider,
 	}
 	<% end -%>
 }
@@ -250,7 +244,6 @@ func googleProviderConfig(t *testing.T) *Config {
 
 func getTestAccProviders(testName string) map[string]*schema.Provider {
 	prov := Provider()
-	provRand := random.Provider().(*schema.Provider)
 	if isVcrEnabled() {
 		old := prov.ConfigureFunc
 		prov.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
@@ -262,7 +255,6 @@ func getTestAccProviders(testName string) map[string]*schema.Provider {
 	return map[string]*schema.Provider{
 		"google": prov,
 		"google-beta": prov,
-		"random": provRand,
 	}
 }
 

@@ -544,37 +544,31 @@ settings.backup_configuration.binary_log_enabled are both set to true.`,
 			"server_ca_cert": {
 				Type:     schema.TypeList,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"cert": {
 							Type:         schema.TypeString,
 							Computed:     true,
-							AtLeastOneOf: serverCertsKeys,
 							Description:  `The CA Certificate used to connect to the SQL Instance via SSL.`,
 						},
 						"common_name": {
 							Type:         schema.TypeString,
 							Computed:     true,
-							AtLeastOneOf: serverCertsKeys,
 							Description:   `The CN valid for the CA Cert.`,
 						},
 						"create_time": {
 							Type:         schema.TypeString,
 							Computed:     true,
-							AtLeastOneOf: serverCertsKeys,
 							Description:  `Creation time of the CA Cert.`,
 						},
 						"expiration_time": {
 							Type:         schema.TypeString,
 							Computed:     true,
-							AtLeastOneOf: serverCertsKeys,
 							Description:  `Expiration time of the CA Cert.`,
 						},
 						"sha1_fingerprint": {
 							Type:         schema.TypeString,
 							Computed:     true,
-							AtLeastOneOf: serverCertsKeys,
 							Description:  `SHA Fingerprint of the CA Cert.`,
 						},
 					},

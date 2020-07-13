@@ -1,6 +1,7 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -39,7 +40,7 @@ func TestIsShrinkageIpCidr(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if isShrinkageIpCidr(tc.Old, tc.New, nil) != tc.Shrinkage {
+		if isShrinkageIpCidr(context.Background(), tc.Old, tc.New, nil) != tc.Shrinkage {
 			t.Errorf("%s failed: Shrinkage should be %t", tn, tc.Shrinkage)
 		}
 	}

@@ -81,7 +81,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZonePrivateVisibilityConfigNetworksSchema())
-            return hashcode.String(buf.String())
+            return hashcode(buf.String())
           }
         # TODO(drebes) Remove this description override once the Terraform 0.12 SDK is used.
         description: |
@@ -102,11 +102,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           func(v interface{}) int {
             raw := v.(map[string]interface{})
             if address, ok := raw["ipv4_address"]; ok {
-              hashcode.String(address.(string))
+              hashcode(address.(string))
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZoneForwardingConfigTargetNameServersSchema())
-            return hashcode.String(buf.String())
+            return hashcode(buf.String())
           }
       serviceDirectoryConfig.namespace.namespaceUrl: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/sd_full_url.erb'
@@ -147,11 +147,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           func(v interface{}) int {
             raw := v.(map[string]interface{})
             if address, ok := raw["ipv4_address"]; ok {
-              hashcode.String(address.(string))
+              hashcode(address.(string))
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsPolicyAlternativeNameServerConfigTargetNameServersSchema())
-            return hashcode.String(buf.String())
+            return hashcode(buf.String())
           }
       description: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
@@ -170,7 +170,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsPolicyNetworksSchema())
-            return hashcode.String(buf.String())
+            return hashcode(buf.String())
           }
       networks.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/network_full_url.erb

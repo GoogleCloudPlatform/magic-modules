@@ -28,7 +28,7 @@ func resourceComputeFirewallRuleHash(v interface{}) int {
 		}
 	}
 
-	return hashcode.String(buf.String())
+	return hashcode(buf.String())
 }
 
 func compareCaseInsensitive(k, old, new string, d *schema.ResourceData) bool {
