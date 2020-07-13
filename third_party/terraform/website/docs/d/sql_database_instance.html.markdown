@@ -11,8 +11,6 @@ description: |-
 
 Use this data source to get information about a Cloud SQL instance
 
-https://cloud.google.com/sql/docs/admin-api/v1beta4/instances
-
 ## Example Usage 
 
 
@@ -28,11 +26,13 @@ The following arguments are supported:
 
 * `name` - (required) The name of the instance.
 
+* `project` - (optional) The ID of the project in which the resource belongs.
+
+* `region` -  (optional) The region the instance will sit in. Note.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following attributes are exported:
-
-* `region` -  The region the instance will sit in. Note.
     
 * `settings` -  The settings to use for the database. The
     configuration is detailed below.
@@ -41,8 +41,6 @@ In addition to the arguments listed above, the following attributes are exported
 
 * `master_instance_name` - The name of the instance that will act as
     the master in the replication setup.
-
-* `project` - The ID of the project in which the resource belongs.
 
 * `replica_configuration` - The configuration for replication. The
     configuration is detailed below.
