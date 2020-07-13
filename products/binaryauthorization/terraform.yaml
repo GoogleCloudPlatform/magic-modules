@@ -97,7 +97,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, copy, resourceBinaryAuthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
-            return hashcode.String(buf.String())
+            return hashcode(buf.String())
           }
       clusterAdmissionRules.requireAttestationsBy: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true

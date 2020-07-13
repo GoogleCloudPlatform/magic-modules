@@ -96,7 +96,6 @@ func resourceDataprocJob() *schema.Resource {
 			"status": {
 				Type:        schema.TypeList,
 				Computed:    true,
-				MaxItems:    1,
 				Description: `The status of the job.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

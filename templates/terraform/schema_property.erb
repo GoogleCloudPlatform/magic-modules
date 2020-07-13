@@ -82,7 +82,9 @@
 <% end -%>
 	Description: `<%= property.description.strip.gsub("`", "'") + enum_values_description -%>`,
 <% if property.is_a?(Api::Type::NestedObject) -%>
+  <% unless property.output -%>
   MaxItems: 1,
+  <% end -%>
   Elem: &schema.Resource{
     Schema: map[string]*schema.Schema{
       <% order_properties(property.properties).each do |prop| -%>

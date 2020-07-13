@@ -21,7 +21,6 @@ import (
 	"sort"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"golang.org/x/oauth2/google"
@@ -192,7 +191,7 @@ func loadJwtConfig(d *schema.ResourceData, meta interface{}) (*jwt.Config, error
 	}
 
 	if strings.TrimSpace(credentials) != "" {
-		contents, _, err := pathorcontents.Read(credentials)
+		contents, _, err := pathOrContents(credentials)
 		if err != nil {
 			return nil, errwrap.Wrapf("Error loading credentials: {{err}}", err)
 		}

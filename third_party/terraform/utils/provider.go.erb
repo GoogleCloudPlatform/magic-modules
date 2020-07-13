@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/mutexkv"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -14,8 +13,10 @@ import (
 	googleoauth "golang.org/x/oauth2/google"
 )
 
+const TestEnvVar = "TF_ACC"
+
 // Global MutexKV
-var mutexKV = mutexkv.NewMutexKV()
+var mutexKV = NewMutexKV()
 
 // Provider returns a *schema.Provider.
 func Provider() *schema.Provider {
@@ -237,13 +238,7 @@ func Provider() *schema.Provider {
 	}
 
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-		terraformVersion := provider.TerraformVersion
-		if terraformVersion == "" {
-			// Terraform 0.12 introduced this field to the protocol
-			// We can therefore assume that if it's missing it's 0.10 or 0.11
-			terraformVersion = "0.11+compatible"
-		}
-		return providerConfigure(ctx, d, provider, terraformVersion)
+		return providerConfigure(ctx, d, provider)
 	}
 
 	return provider
@@ -436,14 +431,18 @@ end     # products.each do
 		)
 }
 
-func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider, terraformVersion string) (interface{}, diag.Diagnostics) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
 	config := Config{
 		Project:             d.Get("project").(string),
 		Region:              d.Get("region").(string),
 		Zone:                d.Get("zone").(string),
 		UserProjectOverride: d.Get("user_project_override").(bool),
 		BillingProject:      d.Get("billing_project").(string),
-		terraformVersion:    terraformVersion,
+        <% if version.nil? || version == 'ga' -%>
+        userAgent: p.UserAgent("terraform-provider-google", version.ProviderVersion),
+        <% else -%>
+        userAgent: p.UserAgent("terraform-provider-google-<%= version -%>", version.ProviderVersion),
+        <% end -%>
 	}
 
 	if v, ok := d.GetOk("request_timeout"); ok {
