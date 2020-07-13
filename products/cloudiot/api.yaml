@@ -241,7 +241,6 @@ objects:
           properties:
             - !ruby/object:Api::Type::Time
               name: 'expirationTime'
-              output: true
               description: |
                 The time at which this credential becomes invalid.
             - !ruby/object:Api::Type::NestedObject

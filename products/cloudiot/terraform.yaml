@@ -156,6 +156,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         # We don't need this field, because it has the same format as the ID
         exclude: true
+      credentials.expirationTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        # If you don't set an expirationTime for a key, the API returns
+        # 1970-01-01T00:00:00Z
+        default_from_api: true
       gatewayConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         # The only mutable gateway_config field is gateway_auth_method,
         # at least according to the API responses.
