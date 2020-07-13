@@ -9,7 +9,7 @@ description: |-
 
 # google\_sql\_database\_instance
 
-Use this data source to get the instance  state. 
+Use this data source to get information about a Cloud SQL instance
 
 https://cloud.google.com/sql/docs/admin-api/v1beta4/instances
 
