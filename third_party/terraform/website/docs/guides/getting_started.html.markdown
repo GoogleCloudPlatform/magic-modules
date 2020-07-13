@@ -23,7 +23,10 @@ provider.
 First, authenticate with GCP.  The easiest way to do this is to run
 `gcloud auth application-default login`, if you already have gcloud
 installed.  If you don't already have it, gcloud can be installed with
-`apt-get install google-cloud-sdk` on Debian-based machines.
+`apt-get install google-cloud-sdk` on Debian-based machines.  For a
+production use-case, you will want to use service account authentication,
+which you can learn about further down in this doc, but for experimenting,
+gcloud authentication will work fine.
 
 Next, create a Terraform config file named `"main.tf"`. Inside, you'll
 want to include the following configuration:
@@ -172,6 +175,11 @@ You supply the key to Terraform using the environment variable
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS={{path}}
 ```
+
+If you choose to use `gcloud`-generated credentials, and you encounter
+quota or billing issues which don't seem to apply to you, you may want to set
+`user_project_override` to `true` in the provider block - see the
+[provider reference](/docs/providers/google/guides/provider_reference.html) for more information.
 
 -> Remember to add this line to a startup file such as `bash_profile` or
 `bashrc` to store your credentials across sessions!
