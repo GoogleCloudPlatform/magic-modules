@@ -20,7 +20,12 @@ provider.
 
 ## Configuring the Provider
 
-First create a Terraform config file named `"main.tf"`. Inside, you'll
+First, authenticate with GCP.  The easiest way to do this is to run
+`gcloud auth application-default login`, if you already have gcloud
+installed.  If you don't already have it, gcloud can be installed with
+`apt-get install google-cloud-sdk` on Debian-based machines.
+
+Next, create a Terraform config file named `"main.tf"`. Inside, you'll
 want to include the following configuration:
 
 ```hcl
@@ -45,7 +50,7 @@ Not all resources require a location. Some GCP resources are global and are
 automatically spread across all of GCP.
 
 -> Want to try out another location? Check out the [list of available regions and zones](https://cloud.google.com/compute/docs/regions-zones/#available).
-Instances created in zones outside the US are not part of the always free tier
+Instances created in zones outside the US are not necessarily part of the always free tier
 and could incur charges.
 
 ## Creating a VM instance
