@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2020 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,6 +25,7 @@ async: !ruby/object:Api::OpAsync
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
+    # It takes about 35-40 mins to get the resource created
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 60
       update_minutes: 60
@@ -40,7 +41,7 @@ async: !ruby/object:Api::OpAsync
       - false
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
-    message: 'message'   
+    message: 'message'
 objects:
   - !ruby/object:Api::Resource
     name: 'Domain'
@@ -74,14 +75,15 @@ objects:
         name: 'authorizedNetworks'
         item_type: Api::Type::String
         description: |
-          The full names of the Google Compute Engine networks the domain instance is connected to. Networks can be added using domains.patch. 
-          The domain is only available on networks listed in authorizedNetworks. If CIDR subnets overlap between networks, domain creation will fail.
+          The full names of the Google Compute Engine networks the domain instance is connected to. The domain is only available on networks listed in authorizedNetworks.
+          If CIDR subnets overlap between networks, domain creation will fail.
       - !ruby/object:Api::Type::String
         name: 'reservedIpRange'
         required: true
+        input: true
         description: |
           The CIDR range of internal addresses that are reserved for this domain. Reserved networks must be /24 or larger. 
-          Ranges must be unique and non-overlapping with existing subnets in [Domain].[authorizedNetworks]
+          Ranges must be unique and non-overlapping with existing subnets in authorizedNetworks
       - !ruby/object:Api::Type::Array
         name: 'locations'
         required: true
@@ -92,6 +94,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'admin'
         default_value: 'setupadmin'
+        input: true
         description: |
           The name of delegated administrator account used to perform Active Directory operations. 
           If not specified, setupadmin will be used.
@@ -101,8 +104,3 @@ objects:
         description: |
           The fully-qualified domain name of the exposed domain used by clients to connect to the service. 
           Similar to what would be chosen for an Active Directory set up on an internal network.
-
-          
-          
-
-            

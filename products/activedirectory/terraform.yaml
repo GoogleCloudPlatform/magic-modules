@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2020 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,14 +17,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     autogen_async: true
+    properties:
+      authorizedNetworks: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      domainName: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[a-z][a-z0-9-]{0,14}\.[a-z0-9-\.]*[a-z]+[a-z0-9]*$'  
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb   
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "active_directory_domain_basic"
         primary_resource_id: "ad-domain"
         vars:
           name: "myorg"
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/self_link_as_name.erb   
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
