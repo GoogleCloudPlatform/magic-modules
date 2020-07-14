@@ -74,6 +74,11 @@ objects:
         description: |
          An optional description of the instance.
         input: true
+      - !ruby/object:Api::Type::String
+        name: 'version'
+        description: |
+         An optional version of the instance. 
+        input: true
       - !ruby/object:Api::Type::Enum
         name: 'type'
         required: true
