@@ -42,7 +42,7 @@ For more information see
     lifetime = "300s"
   }
 
-  provider google {
+  provider "google" {
     alias  = "impersonated"
     access_token = data.google_service_account_access_token.impersonated.access_token
   }
