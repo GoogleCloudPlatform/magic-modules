@@ -18,7 +18,7 @@ For more information see
   `google_service_account_id_token` will use the configured [provider credentials](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#credentials-1)
   
   ```hcl
-  data "google_service_account_id_token" oidc {
+  data "google_service_account_id_token" "oidc" {
     target_audience = "https://foo.bar/"
   }
 
@@ -47,7 +47,7 @@ For more information see
     access_token = data.google_service_account_access_token.impersonated.access_token
   }
 
-  data "google_service_account_id_token" oidc {
+  data "google_service_account_id_token" "oidc" {
     provider = google.impersonated
     target_service_account = "impersonated-account@project.iam.gserviceaccount.com"
     delegates = []
