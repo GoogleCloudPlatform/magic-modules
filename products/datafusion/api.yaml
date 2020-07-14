@@ -151,11 +151,6 @@ objects:
         description: |
           Endpoint on which the Data Fusion UI and REST APIs are accessible.
       - !ruby/object:Api::Type::String
-        name: 'version'
-        output: true
-        description: |
-          Current version of the Data Fusion.
-      - !ruby/object:Api::Type::String
         name: 'serviceAccount'
         output: true
         description: |
