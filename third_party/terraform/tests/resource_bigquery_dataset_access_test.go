@@ -168,6 +168,22 @@ func TestAccBigQueryDatasetAccess_iamMember(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryDatasetAccess_allUsers(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryDatasetAccess_allUsers(datasetID),
+			},
+		},
+	})
+}
+
 func testAccCheckBigQueryDatasetAccessPresent(t *testing.T, n string, expected map[string]interface{}) resource.TestCheckFunc {
 	return testAccCheckBigQueryDatasetAccess(t, n, expected, true)
 }
@@ -323,4 +339,18 @@ resource "google_logging_project_sink" "logging_sink" {
   unique_writer_identity = true
 }
 `, datasetID, sinkName)
+}
+
+func testAccBigQueryDatasetAccess_allUsers(datasetID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset_access" "dns_query_sink" {
+  dataset_id = google_bigquery_dataset.dataset.dataset_id
+  role = "roles/bigquery.dataEditor"
+  iam_member = "allUsers"
+}
+
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id    = "%s"
+}
+`, datasetID)
 }

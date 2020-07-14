@@ -103,9 +103,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # before comparison.
         custom_expand: "templates/terraform/custom_expand/bigquery_access_role.go.erb"
       iamMember: !ruby/object:Overrides::Terraform::PropertyOverride
-        # iamMember gets returned as userByEmail, groupByEmail, domain, or specialGroup
+        # iamMember sometimes gets returned as userByEmail, groupByEmail, domain, or specialGroup
         # and needs to be "computed" in order for the customizeDiff to Clear it from the diff
-        ignore_read: true
         default_from_api: true
       userByEmail:  !ruby/object:Overrides::Terraform::PropertyOverride
         # these need to be "computed" in order for the customizeDiff to be SetNew

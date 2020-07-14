@@ -36,11 +36,17 @@ func customDiffBigQueryDatasetAccess(d *schema.ResourceDiff, meta interface{}) e
 		return nil
 	}
 
-	key := bigqueryAccessIamMemberToTypeMap[parts[0]]
+	var key string
+	if k, ok := bigqueryAccessIamMemberToTypeMap[parts[0]]; !ok {
+		return nil
+	} else {
+		key = k
+
+		if err := d.Clear("iam_member"); err != nil {
+			return err
+		}
+	}
 	value := parts[1]
 
-	if err := d.Clear("iam_member"); err != nil {
-		return err
-	}
 	return d.SetNew(key, value)
 }
