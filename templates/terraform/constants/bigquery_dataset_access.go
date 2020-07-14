@@ -5,11 +5,16 @@ var bigqueryAccessRoleToPrimitiveMap =  map[string]string {
 }
 
 var bigqueryAccessIamMemberToTypeMap = map[string]string{
-	"serviceAccount": "user_by_email",
-	"user":           "user_by_email",
-	"group":          "group_by_email",
-	"domain":         "domain",
-	"specialGroup":   "special_group",
+	"serviceAccount":        "user_by_email",
+	"user":                  "user_by_email",
+	"group":                 "group_by_email",
+	"domain":                "domain",
+	"specialGroup":          "special_group",
+	"allUsers":              "iam_member",
+	"projectOwners":         "special_group",
+	"projectReaders":        "special_group",
+	"projectWriters":        "special_group",
+	"allAuthenticatedUsers": "special_group",
 }
 
 func resourceBigQueryDatasetAccessRoleDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
@@ -32,21 +37,30 @@ func customDiffBigQueryDatasetAccess(d *schema.ResourceDiff, meta interface{}) e
 	_, configValue := d.GetChange("iam_member")
 
 	parts := strings.Split(configValue.(string), ":")
-	if len(parts) != 2 {
+	if len(parts) > 2 {
 		return nil
 	}
 
 	var key string
+	var value string
 	if k, ok := bigqueryAccessIamMemberToTypeMap[parts[0]]; !ok {
-		return nil
+		key = "iam_member"
 	} else {
 		key = k
-
-		if err := d.Clear("iam_member"); err != nil {
-			return err
-		}
 	}
-	value := parts[1]
 
+	if len(parts) == 1 {
+		value = parts[0]
+	} else {
+		value = parts[1]
+	}
+
+	if key == "iam_member" {
+		return nil
+	}
+
+	if err := d.Clear("iam_member"); err != nil {
+		return err
+	}
 	return d.SetNew(key, value)
 }
