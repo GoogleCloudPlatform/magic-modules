@@ -22,7 +22,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
       domainName: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          regex: '^[a-z][a-z0-9-]{0,14}\.[a-z0-9-\.]*[a-z]+[a-z0-9]*$'  
+          function: 'validateADDomainName'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb   
     examples:
