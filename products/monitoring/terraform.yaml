@@ -277,6 +277,41 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
         custom_flatten: "templates/terraform/custom_flatten/group_id_to_name.erb"
 
+  MetricDescriptor: !ruby/object:Overrides::Terraform::ResourceOverride
+    async: !ruby/object:Provider::Terraform::PollAsync
+      check_response_func_existence: PollCheckForExistence
+      check_response_func_absence: PollCheckForAbsence
+      target_occurrences: 20
+      actions: ['create', 'delete']
+      operation: !ruby/object:Api::Async::Operation
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 6
+          delete_minutes: 6
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    error_retry_predicates: ["isMonitoringConcurrentEditError"]
+    properties:
+      labels: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      labels.valueType: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: "templates/terraform/custom_flatten/metric_descriptor_labels_value_type.erb"
+      metadata: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      launchStage: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      monitoredResourceTypes: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "monitoring_metric_descriptor"
+        primary_resource_id: "basic"
+        #vars:
+         # display_name: "Test Custom Metric"
+          # resource_name: "//product.googleapis.com/foo/foo/services/test"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+    
+
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
