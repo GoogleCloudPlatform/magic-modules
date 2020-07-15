@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	compute "google.golang.org/api/compute/v1"
@@ -162,7 +161,11 @@ func dataSourceGoogleComputeImageRead(d *schema.ResourceData, meta interface{}) 
 	d.Set("source_image_id", image.SourceImageId)
 	d.Set("status", image.Status)
 
-	d.SetId(strings.Join(params, "/"))
+	id, err := replaceVars(d, config, "projects/{{project}}/global/images/{{name}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
 
 	return nil
 }
