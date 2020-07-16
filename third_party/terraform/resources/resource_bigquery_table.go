@@ -15,6 +15,7 @@ import (
 )
 
 // JSONBytesEqual compares the JSON in two byte slices.
+// Reference: https://stackoverflow.com/questions/32408890/how-to-compare-two-json-requests
 func JSONBytesEqual(a, b []byte) (bool, error) {
 	var j, j2 interface{}
 	if err := json.Unmarshal(a, &j); err != nil {
@@ -34,7 +35,7 @@ func JSONBytesEqual(a, b []byte) (bool, error) {
 	return reflect.DeepEqual(j2List, jList), nil
 }
 
-// Compare only the resource name of two self links/paths.
+// Compare the JSON strings are equal
 func bigQueryTableSchemaDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	oldBytes := []byte(old)
 	newBytes := []byte(new)
