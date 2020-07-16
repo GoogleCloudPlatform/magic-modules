@@ -87,11 +87,13 @@ objects:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: pubsubDestination
+            required: true
             description: |
               Destination on Cloud Pubsub.
             properties:
               - !ruby/object:Api::Type::String
                 name: topic
+                required: true
                 description: |
                   Destination on Cloud Pubsub topic.
   - !ruby/object:Api::Resource
@@ -165,11 +167,13 @@ objects:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: pubsubDestination
+            required: true
             description: |
               Destination on Cloud Pubsub.
             properties:
               - !ruby/object:Api::Type::String
                 name: topic
+                required: true
                 description: |
                   Destination on Cloud Pubsub topic.
   - !ruby/object:Api::Resource
@@ -243,10 +247,12 @@ objects:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: pubsubDestination
+            required: true
             description: |
               Destination on Cloud Pubsub.
             properties:
               - !ruby/object:Api::Type::String
                 name: topic
+                required: true
                 description: |
                   Destination on Cloud Pubsub topic.
