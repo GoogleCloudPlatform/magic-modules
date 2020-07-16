@@ -321,7 +321,7 @@ func validateADDomainName() schema.SchemaValidateFunc {
 
 		if len(value) > 64 || !regexp.MustCompile(ADDomainNameRegex).MatchString(value) {
 			errors = append(errors, fmt.Errorf(
-				"%q domain_name must be 2 to 64 with lowercase letters, digits, hyphens, dots and start with a letter.", value))
+				"%q (%q) doesn't match regexp %q, domain_name must be 2 to 64 with lowercase letters, digits, hyphens, dots and start with a letter", k, value, ADDomainNameRegex))
 		}
 		return
 	}

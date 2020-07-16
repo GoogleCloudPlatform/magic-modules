@@ -21,8 +21,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       authorizedNetworks: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       domainName: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validateADDomainName'
+          function: 'validateADDomainName()'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb   
     examples:
