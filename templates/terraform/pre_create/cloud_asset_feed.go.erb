@@ -1,3 +1,7 @@
+// This should never happen, but the linter complains otherwise with ineffectual assignment to `project`
+if project == "dummy lint" {
+  log.Printf("[DEBUG] Found project in url: %s", project)
+}
 // The feed object must be under the "feed" attribute on the request.
 newObj := make(map[string]interface{})
 newObj["feed"] = obj
