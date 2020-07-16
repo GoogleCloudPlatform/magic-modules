@@ -1,6 +1,6 @@
 # Create a feed that sends notifications about network resource updates.
 resource "google_cloud_asset_project_feed" "<%= ctx[:primary_resource_id] %>" {
-  project          = "<%= ctx[:vars]["project"] %>"
+  project          = "<%= ctx[:test_env_vars]["project"] %>"
   feed_id          = "<%= ctx[:vars]["feed_id"] %>"
   content_type     = "RESOURCE"
 
@@ -23,21 +23,21 @@ resource "google_cloud_asset_project_feed" "<%= ctx[:primary_resource_id] %>" {
 
 # The topic where the resource change notifications will be sent.
 resource "google_pubsub_topic" "feed_output" {
-  project  = "<%= ctx[:vars]["project"] %>"
-  name = "<%= ctx[:vars]["feed_id"] %>"
+  project  = "<%= ctx[:test_env_vars]["project"] %>"
+  name     = "<%= ctx[:vars]["feed_id"] %>"
 }
 
 # Find the project number of the project whose identity will be used for sending
 # the asset change notifications.
 data "google_project" "project" {
-  project_id = "<%= ctx[:vars]["project"] %>"
+  project_id = "<%= ctx[:test_env_vars]["project"] %>"
 }
 
 # Allow the publishing role to the Cloud Asset service account of the project that
 # was used for sending the notifications.
 resource "google_pubsub_topic_iam_member" "cloud_asset_writer" {
-  project = "<%= ctx[:vars]["project"] %>"
+  project = "<%= ctx[:test_env_vars]["project"] %>"
   topic   = google_pubsub_topic.feed_output.id
   role    = "roles/pubsub.publisher"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudasset.iam.gserviceaccount.com"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudasset.iam.gserviceaccount.com"
 }
