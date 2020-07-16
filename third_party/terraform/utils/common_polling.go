@@ -42,8 +42,9 @@ func PollingWaitTime(pollF PollReadFunc, checkResponse PollCheckResponseFunc, ac
 	})
 }
 
-// RetryWithTargetOccurrences is a basic wrapper around StateChangeConf that will just retry
+// RetryWithTargetOccurrences is a basic wrapper around StateChangeConf that will retry
 // a function until it returns the specified amount of target occurrences continuously.
+// Adapted from the Retry function in the go SDK.
 func RetryWithTargetOccurrences(timeout time.Duration, targetOccurrences int,
 	f resource.RetryFunc) error {
 	// These are used to pull the error out of the function; need a mutex to
@@ -98,7 +99,8 @@ func RetryWithTargetOccurrences(timeout time.Duration, targetOccurrences int,
  * Common PollCheckResponseFunc implementations
  */
 
-// PollCheckForExistence waits for a successful response, continues polling on 404, and returns any other error.
+// PollCheckForExistence waits for a successful response, continues polling on 404,
+// and returns any other error.
 func PollCheckForExistence(_ map[string]interface{}, respErr error) PollResult {
 	if respErr != nil {
 		if isGoogleApiErrorWithCode(respErr, 404) {
@@ -109,17 +111,14 @@ func PollCheckForExistence(_ map[string]interface{}, respErr error) PollResult {
 	return SuccessPollResult()
 }
 
-// PollCheckForAbsence waits for a 404 response, continues polling on 200, and returns any other error.
+// PollCheckForAbsence waits for a 404 response, continues polling on a successful
+// response, and returns any other error.
 func PollCheckForAbsence(_ map[string]interface{}, respErr error) PollResult {
-	log.Printf("[DEBUG] PollCheckForAbsence response: %v", respErr) // remove later
 	if respErr != nil {
 		if isGoogleApiErrorWithCode(respErr, 404) {
-			log.Printf("[DEBUG] PollCheckForAbsence response: success") // remove later
 			return SuccessPollResult()
 		}
-		log.Printf("[DEBUG] PollCheckForAbsence response: error") // remove later
 		return ErrorPollResult(respErr)
 	}
-	log.Printf("[DEBUG] PollCheckForAbsence response: pending") // remove later
 	return PendingStatusPollResult("found")
 }

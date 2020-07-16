@@ -15,7 +15,8 @@ func TestAccMonitoringMetricDescriptor_update(t *testing.T) {
 		CheckDestroy: testAccCheckMonitoringMetricDescriptorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMonitoringMetricDescriptor_update("key1", "STRING", "description1", "30s", "30s"),
+				Config: testAccMonitoringMetricDescriptor_update("key1", "STRING",
+					"description1", "30s", "30s"),
 			},
 			{
 				ResourceName:            "google_monitoring_metric_descriptor.basic",
@@ -24,7 +25,8 @@ func TestAccMonitoringMetricDescriptor_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"metadata", "launch_stage"},
 			},
 			{
-				Config: testAccMonitoringMetricDescriptor_update("key2", "INT64", "description2", "30s", "30s"),
+				Config: testAccMonitoringMetricDescriptor_update("key2", "INT64",
+					"description2", "60s", "60s"),
 			},
 			{
 				ResourceName:            "google_monitoring_metric_descriptor.basic",
@@ -36,7 +38,8 @@ func TestAccMonitoringMetricDescriptor_update(t *testing.T) {
 	})
 }
 
-func testAccMonitoringMetricDescriptor_update(key, valueType, description, samplePeriod, ingestDelay string) string {
+func testAccMonitoringMetricDescriptor_update(key, valueType, description,
+	samplePeriod, ingestDelay string) string {
 	return fmt.Sprintf(`
 resource "google_monitoring_metric_descriptor" "basic" {
 	description = "Daily sales records from all branch stores."

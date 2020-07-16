@@ -1841,8 +1841,6 @@ objects:
     self_link: "v3/{{name}}"
     update_verb: :POST
     update_url: v3/projects/{{project}}/metricDescriptors
-    # update_mask: true
-    # input: true
     description: Defines a metric type and its schema. Once a metric descriptor is created,
       deleting or altering it stops data collection and makes the metric type's existing data
       unusable.
@@ -1853,7 +1851,7 @@ objects:
       description: The resource name of the metric descriptor.
     - !ruby/object:Api::Type::String
       name: type
-      input: true # ???
+      input: true
       required: true
       description: The metric type, including its DNS name prefix. The type is not 
         URL-encoded. All service defined metrics must be prefixed with the service name, 
@@ -1865,7 +1863,6 @@ objects:
         custom.googleapis.com, external.googleapis.com, or logging.googleapis.com/user/.
     - !ruby/object:Api::Type::Array
       name: labels
-      # input: true # ???
       description: The set of labels that can be used to describe a specific instance of this
         metric type. In order to delete a label, the entire resource must be deleted,
         then created with the desired labels.
@@ -1889,7 +1886,7 @@ objects:
           description: A human-readable description for the label.
     - !ruby/object:Api::Type::Enum
       name: metricKind
-      input: true # ???
+      input: true
       required: true
       description: Whether the metric records instantaneous values, changes to a value, etc.
         Some combinations of metricKind and valueType might not be supported.
@@ -1900,7 +1897,7 @@ objects:
         - :CUMULATIVE
     - !ruby/object:Api::Type::Enum
       name: valueType
-      input: true # ???
+      input: true
       required: true
       description: Whether the measurement is an integer, a floating-point number, etc. Some
         combinations of metricKind and valueType might not be supported.
@@ -1913,7 +1910,7 @@ objects:
         - :DISTRIBUTION
     - !ruby/object:Api::Type::String
       name: unit
-      input: true # ???
+      input: true
       required: true
       description: |
         The units in which the metric value is reported. It is only applicable if the
@@ -1938,12 +1935,12 @@ objects:
         (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors).
     - !ruby/object:Api::Type::String
       name: description
-      input: true # ???
+      input: true
       required: true
       description: A detailed description of the metric, which can be used in documentation.
     - !ruby/object:Api::Type::String
       name: displayName
-      input: true # ???
+      input: true
       required: true
       description: A concise name for the metric, which can be displayed in user interfaces. 
         Use sentence case without an ending period, for example "Request count". This field is 
@@ -1951,7 +1948,7 @@ objects:
         concepts, such as Quota.
     - !ruby/object:Api::Type::NestedObject
       name: metadata
-      input: true # ???
+      input: true
       description: Metadata which can be used to guide usage of the metric.
       properties:
       - !ruby/object:Api::Type::String
@@ -1960,13 +1957,15 @@ objects:
           written periodically, consecutive data points are stored at this time interval, 
           excluding data loss due to errors. Metrics with a higher granularity have a 
           smaller sampling period. In duration format (see more 
-          https://developers.google.com/protocol-buffers/docs/reference/google.protobuf?&_ga=2.264881487.1507873253.1593446723-935052455.1591817775#google.protobuf.Duration).
+          https://developers.google.com/protocol-buffers/docs/reference/google.protobuf?&_ga=
+          2.264881487.1507873253.1593446723-935052455.1591817775#google.protobuf.Duration).
       - !ruby/object:Api::Type::String
         name: ingestDelay
         description: The delay of data points caused by ingestion. Data points older than 
           this age are guaranteed to be ingested and available to be read, excluding data 
           loss due to errors. In duration format (see more 
-          https://developers.google.com/protocol-buffers/docs/reference/google.protobuf?&_ga=2.264881487.1507873253.1593446723-935052455.1591817775#google.protobuf.Duration).
+          https://developers.google.com/protocol-buffers/docs/reference/google.protobuf?&_ga=
+          2.264881487.1507873253.1593446723-935052455.1591817775#google.protobuf.Duration).
     - !ruby/object:Api::Type::Enum
       name: launchStage
       input: true
@@ -1982,7 +1981,7 @@ objects:
         - :DEPRECATED
     - !ruby/object:Api::Type::Array
       name: monitoredResourceTypes
-      output: true # (??? read only)
+      output: true
       description: Read-only. If present, then a time series, which is identified partially by 
         a metric type and a MonitoredResourceDescriptor, that is associated with this metric 
         type can only be associated with one of the monitored resource types listed here.
