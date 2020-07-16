@@ -846,7 +846,7 @@ objects:
     base_url: "projects/{{project}}/guestPolicies"
     create_url: "projects/{{project}}/guestPolicies?guestPolicyId={{guest_policy_id}}"
     update_verb: :PATCH
-    self_link: "{{name}}"
+    self_link: "projects/{{project}}/guestPolicies/{{guest_policy_id}}"
     min_version: beta
     description: |
       An OS Config resource representing a guest configuration policy. These policies represent
