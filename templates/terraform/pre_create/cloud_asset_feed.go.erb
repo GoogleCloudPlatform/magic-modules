@@ -1,0 +1,13 @@
+// The feed object must be under the "feed" attribute on the request.
+newObj := make(map[string]interface{})
+newObj["feed"] = obj
+obj = newObj
+// Send the project ID in the X-Goog-User-Project header.
+origUserProjectOverride := config.UserProjectOverride
+config.UserProjectOverride = true
+// If we have a billing project, use that one instead.
+origProject, _ := d.GetOk("project")
+bp, bpok := d.GetOk("billing_project")
+if bpok && bp != "" {
+  d.Set("project", bp)
+}
