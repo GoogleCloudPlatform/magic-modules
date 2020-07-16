@@ -517,7 +517,7 @@ objects:
                 properties:
                 - !ruby/object:Api::Type::String
                   name: name
-                  description: Name of the port
+                  description: Name of the port.
                 - !ruby/object:Api::Type::String
                   name: protocol
                   description: Protocol used on port. Defaults to http.
