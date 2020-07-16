@@ -53,6 +53,12 @@
           :version_added: '2.9'
         :effect:
           :version_added: '2.9'
+      :shieldedInstanceConfig:
+        :version_added: '2.10'
+        :enableSecureBoot:
+          :version_added: '2.10'
+        :enableIntegrityMonitoring:
+          :version_added: '2.10'
     :masterAuth:
       :version_added: '2.6'
       :username:
@@ -79,6 +85,8 @@
         :version_added: '2.8'
     :clusterIpv4Cidr:
       :version_added: '2.6'
+    :enableTpu:
+      :version_added: '2.9'
     :addonsConfig:
       :version_added: '2.6'
       :httpLoadBalancing:
@@ -133,10 +141,8 @@
         :version_added: '2.9'
       :tpuIpv4CidrBlock:
         :version_added: '2.9'
-    :enableTpu:
-      :version_added: '2.9'
-    :tpuIpv4CidrBlock:
-      :version_added: '2.9'
+      :tpuIpv4CidrBlock:
+        :version_added: '2.9'
     :initialClusterVersion:
       :version_added: '2.10'
     :masterAuthorizedNetworksConfig:
@@ -150,6 +156,10 @@
         :cidrBlock:
           :version_added: '2.10'
     :binaryAuthorization:
+      :version_added: '2.10'
+      :enabled:
+        :version_added: '2.10'
+    :shieldedNodes:
       :version_added: '2.10'
       :enabled:
         :version_added: '2.10'
@@ -203,6 +213,12 @@
           :version_added: '2.9'
         :effect:
           :version_added: '2.9'
+      :shieldedInstanceConfig:
+        :version_added: '2.10'
+        :enableSecureBoot:
+          :version_added: '2.10'
+        :enableIntegrityMonitoring:
+          :version_added: '2.10'
     :initialNodeCount:
       :version_added: '2.6'
     :version:

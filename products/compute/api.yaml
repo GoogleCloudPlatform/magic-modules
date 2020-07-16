@@ -14302,14 +14302,12 @@ objects:
           properties:
             - !ruby/object:Api::Type::ResourceRef
               name: 'defaultService'
-              # TODO: (mbang) won't work for array path matchers yet, uncomment here and remove conflicts once they are supported.
+              # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
               # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # exactly_one_of:
               #   - path_matchers.0.default_service
               #   - path_matchers.0.default_url_redirect
               #   - path_matchers.0.default_route_action.0.weighted_backend_services
-              conflicts:
-                - defaultUrlRedirect
               resource: 'BackendService'
               imports: 'selfLink'
               description: |
@@ -15505,15 +15503,12 @@ objects:
                           original URL is retained. Defaults to false.
             - !ruby/object:Api::Type::NestedObject
               name: 'defaultUrlRedirect'
-              # TODO: (mbang) won't work for array path matchers yet, uncomment here and remove defaultService conflict once they are supported.
+              # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
               # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # exactly_one_of:
               #   - path_matchers.0.default_service
               #   - path_matchers.0.default_url_redirect
               #   - path_matchers.0.default_route_action.0.weighted_backend_services
-              conflicts:
-                - defaultService
-                - defaultRouteAction
               description: |
                 When none of the specified hostRules match, the request is redirected to a URL specified
                 by defaultUrlRedirect. If defaultUrlRedirect is specified, defaultService or
@@ -15573,8 +15568,9 @@ objects:
                     retained.
             - !ruby/object:Api::Type::NestedObject
               name: 'defaultRouteAction'
-              conflicts:
-                - defaultUrlRedirect
+              # TODO: (mbang) conflicts also won't work for array path matchers yet, uncomment here once supported.
+              # conflicts:
+              #   - defaultUrlRedirect
               description: |
                 defaultRouteAction takes effect when none of the pathRules or routeRules match. The load balancer performs
                 advanced routing actions like URL rewrites, header transformations, etc. prior to forwarding the request
