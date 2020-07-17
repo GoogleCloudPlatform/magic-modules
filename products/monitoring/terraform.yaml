@@ -295,13 +295,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       labels: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       labels.valueType: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_flatten: "templates/terraform/custom_flatten/metric_descriptor_labels_value_type.erb"
+        custom_flatten: "templates/terraform/custom_flatten/default_if_empty.erb"
       metadata: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       launchStage: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
-      monitoredResourceTypes: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_metric_descriptor_basic"

@@ -36,6 +36,12 @@ func PollingWaitTime(pollF PollReadFunc, checkResponse PollCheckResponseFunc, ac
 	timeout time.Duration, targetOccurrences int) error {
 	log.Printf("[DEBUG] %s: Polling until expected state is read", activity)
 	log.Printf("[DEBUG] Target occurrences: %d", targetOccurrences)
+	if targetOccurrences == 1 {
+		return resource.Retry(timeout, func() *resource.RetryError {
+			readResp, readErr := pollF()
+			return checkResponse(readResp, readErr)
+		})
+	}
 	return RetryWithTargetOccurrences(timeout, targetOccurrences, func() *resource.RetryError {
 		readResp, readErr := pollF()
 		return checkResponse(readResp, readErr)
