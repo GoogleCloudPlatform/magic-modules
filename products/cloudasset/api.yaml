@@ -75,10 +75,16 @@ objects:
           the feed. For example: "compute.googleapis.com/Disk"
           See https://cloud.google.com/asset-inventory/docs/supported-asset-types for a list of all
           supported asset types.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Enum
         name: contentType
         description: |
           Asset content type. If not specified, no content but the asset name and type will be returned.
+        values:
+          - :CONTENT_TYPE_UNSPECIFIED
+          - :RESOURCE
+          - :IAM_POLICY
+          - :ORG_POLICY
+          - :ACCESS_POLICY
       - !ruby/object:Api::Type::NestedObject
         name: feedOutputConfig
         required: true
@@ -155,10 +161,16 @@ objects:
           the feed. For example: "compute.googleapis.com/Disk"
           See https://cloud.google.com/asset-inventory/docs/supported-asset-types for a list of all
           supported asset types.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Enum
         name: contentType
         description: |
           Asset content type. If not specified, no content but the asset name and type will be returned.
+        values:
+          - :CONTENT_TYPE_UNSPECIFIED
+          - :RESOURCE
+          - :IAM_POLICY
+          - :ORG_POLICY
+          - :ACCESS_POLICY
       - !ruby/object:Api::Type::NestedObject
         name: feedOutputConfig
         required: true
@@ -235,10 +247,16 @@ objects:
           the feed. For example: "compute.googleapis.com/Disk"
           See https://cloud.google.com/asset-inventory/docs/supported-asset-types for a list of all
           supported asset types.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Enum
         name: contentType
         description: |
           Asset content type. If not specified, no content but the asset name and type will be returned.
+        values:
+          - :CONTENT_TYPE_UNSPECIFIED
+          - :RESOURCE
+          - :IAM_POLICY
+          - :ORG_POLICY
+          - :ACCESS_POLICY
       - !ruby/object:Api::Type::NestedObject
         name: feedOutputConfig
         required: true
