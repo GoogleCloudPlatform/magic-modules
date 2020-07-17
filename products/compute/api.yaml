@@ -19,10 +19,10 @@ display_name: Compute Engine
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://www.googleapis.com/compute/v1/
+    base_url: https://compute.googleapis.com/v1/
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://www.googleapis.com/compute/beta/
+    base_url: https://compute.googleapis.com/beta/
 scopes:
   - https://www.googleapis.com/auth/compute
 apis_required:
