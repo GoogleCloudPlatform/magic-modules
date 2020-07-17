@@ -513,7 +513,8 @@ objects:
               name: ports
               description: |-
                 List of open ports in the container.
-                More Info: https://cloud.google.com/run/docs/reference/rest/v1/RevisionSpec#ContainerPort
+                More Info: 
+                https://cloud.google.com/run/docs/reference/rest/v1/RevisionSpec#ContainerPort
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                 - !ruby/object:Api::Type::String
