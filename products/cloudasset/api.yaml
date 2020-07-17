@@ -117,7 +117,7 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/asset-inventory/docs'
       api: 'https://cloud.google.com/asset-inventory/docs/reference/rest/'
-    properties:
+    parameters:
       - !ruby/object:Api::Type::String
         name: folder
         required: true
@@ -125,6 +125,7 @@ objects:
         url_param_only: true
         description: |
           The folder this feed should be created in.
+    properties:
       - !ruby/object:Api::Type::String
         name: project
         required: true
@@ -203,7 +204,7 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/asset-inventory/docs'
       api: 'https://cloud.google.com/asset-inventory/docs/reference/rest/'
-    properties:
+    parameters:
       - !ruby/object:Api::Type::String
         name: org_id
         required: true
@@ -211,6 +212,7 @@ objects:
         url_param_only: true
         description: |
           The organization this feed should be created in.
+    properties:
       - !ruby/object:Api::Type::String
         name: project
         required: true
