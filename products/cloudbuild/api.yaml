@@ -253,9 +253,6 @@ objects:
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'storageSource'
-                exactly_one_of:
-                  - storageSource
-                  - repoSource
                 description: |
                   Location of the source in an archive file in Google Cloud Storage.
                 properties:
@@ -275,9 +272,6 @@ objects:
                       If the generation is omitted, the latest generation will be used
               - !ruby/object:Api::Type::NestedObject
                 name: 'repoSource'
-                exactly_one_of:
-                  - storageSource
-                  - repoSource
                 description: |
                   Location of the source in a Google Cloud Source Repository.
                 properties:
@@ -307,30 +301,18 @@ objects:
                       Substitutions to use in a triggered build. Should only be used with triggers.run
                   - !ruby/object:Api::Type::String
                     name: 'branchName'
-                    exactly_one_of:
-                      - branchName
-                      - tagName
-                      - commitSha
                     description: |
                       Regex matching branches to build. Exactly one a of branch name, tag, or commit SHA must be provided.
                       The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
                       described at https://github.com/google/re2/wiki/Syntax
                   - !ruby/object:Api::Type::String
                     name: 'tagName'
-                    exactly_one_of:
-                      - branchName
-                      - tagName
-                      - commitSha
                     description: |
                       Regex matching tags to build. Exactly one a of branch name, tag, or commit SHA must be provided.
                       The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
                       described at https://github.com/google/re2/wiki/Syntax
                   - !ruby/object:Api::Type::String
                     name: 'commitSha'
-                    exactly_one_of:
-                      - branchName
-                      - tagName
-                      - commitSha
                     description: |
                       Explicit commit SHA to build. Exactly one a of branch name, tag, or commit SHA must be provided.
           - !ruby/object:Api::Type::Array
