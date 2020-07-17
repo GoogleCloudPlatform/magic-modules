@@ -17,7 +17,7 @@ display_name: Cloud Storage
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://storage.googleapis.com/v1/
+    base_url: https://storage.googleapis.com/storage/v1/
 scopes:
   - https://www.googleapis.com/auth/devstorage.full_control
 apis_required:
