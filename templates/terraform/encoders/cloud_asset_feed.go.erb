@@ -1,4 +1,4 @@
 // The feed object must be under the "feed" attribute on the request.
 newObj := make(map[string]interface{})
 newObj["feed"] = obj
-obj = newObj
+return newObj, nil

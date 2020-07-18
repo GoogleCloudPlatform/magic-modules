@@ -2,10 +2,6 @@
 if project == "dummy lint" {
   log.Printf("[DEBUG] Found project in url: %s", project)
 }
-// The feed object must be under the "feed" attribute on the request.
-newObj := make(map[string]interface{})
-newObj["feed"] = obj
-obj = newObj
 // Send the project ID in the X-Goog-User-Project header.
 origUserProjectOverride := config.UserProjectOverride
 config.UserProjectOverride = true
