@@ -522,7 +522,7 @@ objects:
                   description: Name of the port.
                 - !ruby/object:Api::Type::String
                   name: protocol
-                  description: Protocol used on port. Defaults to http.
+                  description: Protocol used on port. Defaults to TCP.
                 - !ruby/object:Api::Type::Integer
                   name: containerPort
                   description: Port number.  Defaults to 8080.
