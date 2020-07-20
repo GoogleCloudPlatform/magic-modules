@@ -1275,7 +1275,7 @@ objects:
                       - !ruby/object:Api::Type::Array
                         name: 'flags'
                         description: |
-                          The flags to use when installing the MSI defaults to ["/i"] (i.e. the install flag).
+                          The flags to use when installing the MSI. Defaults to the install flag.
                         item_type: Api::Type::String
                       - !ruby/object:Api::Type::Array
                         name: 'allowedExitCodes'
@@ -1433,7 +1433,7 @@ objects:
                       - !ruby/object:Api::Type::Array
                         name: 'flags'
                         description: |
-                          The flags to use when installing the MSI defaults to ["/i"] (i.e. the install flag).
+                          The flags to use when installing the MSI. Defaults to the install flag.
                         item_type: Api::Type::String
                       - !ruby/object:Api::Type::Array
                         name: 'allowedExitCodes'
