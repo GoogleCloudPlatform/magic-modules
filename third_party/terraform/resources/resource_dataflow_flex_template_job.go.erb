@@ -5,7 +5,11 @@ package google
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"google.golang.org/api/googleapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -21,8 +25,8 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDataflowFlexTemplateJobCreate,
 		Read:   resourceDataflowFlexTemplateJobRead,
-		Update: resourceDataflowFlexTemplateJobUpdateByReplacement,
-		Delete: resourceDataflowJobDelete,
+		Update: resourceDataflowFlexTemplateJobUpdate,
+		Delete: resourceDataflowFlexTemplateJobDelete,
 		Schema: map[string]*schema.Schema{
 
 			"container_spec_gcs_path": {
@@ -41,14 +45,14 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"cancel", "drain"}, false),
 				Optional:     true,
-				Default:      "drain",
+				Default:      "cancel",
 			},
 
 			"labels": {
 				Type:             schema.TypeMap,
 				Optional:         true,
 				DiffSuppressFunc: resourceDataflowJobLabelDiffSuppress,
-				ForceNew: true,
+				ForceNew:         true,
 			},
 
 			"parameters": {
@@ -99,10 +103,12 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 			Parameters:           expandStringMap(d, "parameters"),
 		},
 	}
+
 	response, err := config.clientDataflow.Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
 	if err != nil {
 		return err
 	}
+
 	job := response.Job
 	d.SetId(job.Id)
 	d.Set("job_id", job.Id)
@@ -141,15 +147,91 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 		d.SetId("")
 		return nil
 	}
-	d.SetId(job.Id)
-	d.Set("job_id", job.Id)
 
 	return nil
 }
 
-// resourceDataflowFlexTemplateJobUpdateByReplacement will be the method for updating Flex-Template jobs
-func resourceDataflowFlexTemplateJobUpdateByReplacement(d *schema.ResourceData, meta interface{}) error {
+// resourceDataflowFlexTemplateJobUpdate is a blank method to enable updating
+// the on_delete virtual field
+func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interface{}) error {
 	return nil
+}
+
+func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+
+	project, err := getProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	region, err := getRegion(d, config)
+	if err != nil {
+		return err
+	}
+
+	id := d.Id()
+
+	requestedState, err := resourceDataflowJobMapRequestedState(d.Get("on_delete").(string))
+	if err != nil {
+		return err
+	}
+
+	// Retry updating the state while the job is not ready to be canceled/drained.
+	err = resource.Retry(time.Minute*time.Duration(15), func() *resource.RetryError {
+		// To terminate a dataflow job, we update the job with a requested
+		// terminal state.
+		job := &dataflow.Job{
+			RequestedState: requestedState,
+		}
+
+		_, updateErr := resourceDataflowJobUpdateJob(config, project, region, id, job)
+		if updateErr != nil {
+			gerr, isGoogleErr := updateErr.(*googleapi.Error)
+			if !isGoogleErr {
+				// If we have an error and it's not a google-specific error, we should go ahead and return.
+				return resource.NonRetryableError(updateErr)
+			}
+
+			if strings.Contains(gerr.Message, "not yet ready for canceling") {
+				// Retry cancelling job if it's not ready.
+				// Sleep to avoid hitting update quota with repeated attempts.
+				time.Sleep(5 * time.Second)
+				return resource.RetryableError(updateErr)
+			}
+
+			if strings.Contains(gerr.Message, "Job has terminated") {
+				// Job has already been terminated, skip.
+				return nil
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	// Wait for state to reach terminal state (canceled/drained/done)
+	_, ok := dataflowTerminalStatesMap[d.Get("state").(string)]
+	for !ok {
+		log.Printf("[DEBUG] Waiting for job with job state %q to terminate...", d.Get("state").(string))
+		time.Sleep(5 * time.Second)
+
+		err = resourceDataflowFlexTemplateJobRead(d, meta)
+		if err != nil {
+			return fmt.Errorf("Error while reading job to see if it was properly terminated: %v", err)
+		}
+		_, ok = dataflowTerminalStatesMap[d.Get("state").(string)]
+	}
+
+	// Only remove the job from state if it's actually successfully canceled.
+	if _, ok := dataflowTerminalStatesMap[d.Get("state").(string)]; ok {
+		log.Printf("[DEBUG] Removing dataflow job with final state %q", d.Get("state").(string))
+		d.SetId("")
+		return nil
+	}
+	return fmt.Errorf("Unable to cancel the dataflow job '%s' - final state was %q.", d.Id(), d.Get("state").(string))
 }
 
 <% end -%>

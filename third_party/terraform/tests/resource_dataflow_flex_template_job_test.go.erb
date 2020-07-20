@@ -24,13 +24,14 @@ func TestAccDataflowFlexTemplateJob_simple(t *testing.T) {
 			{
 				Config: testAccDataflowFlowFlexTemplateJob_basic(bucket, job),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataflowJobExists(t, "google_dataflow_job.big_data"),
+					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.big_data"),
 				),
 			},
 		},
 	})
 }
 
+// note: this config creates a job that doesn't actually do anything
 func testAccDataflowFlowFlexTemplateJob_basic(bucket, job string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
@@ -40,45 +41,50 @@ resource "google_storage_bucket" "temp" {
 
 resource "google_storage_bucket_object" "flex_template" {
 	name   = "flex_template.json"
-	bucket = "%s"
-	content = "%s"
+	bucket = google_storage_bucket.temp.name
+	content = <<EOF
+{
+    "image": "my-image",
+    "metadata": {
+        "description": "An Apache Beam streaming pipeline that reads JSON encoded messages from Pub/Sub, uses Beam SQL to transform the message data, and writes the results to a BigQuery",
+        "name": "Streaming Beam SQL",
+        "parameters": [
+            {
+                "helpText": "Pub/Sub subscription to read from.",
+                "label": "Pub/Sub input subscription.",
+                "name": "inputSubscription",
+                "regexes": [
+                    "[-_.a-zA-Z0-9]+"
+                ]
+            },
+            {
+                "helpText": "BigQuery table spec to write to, in the form 'project:dataset.table'.",
+                "is_optional": true,
+                "label": "BigQuery output table",
+                "name": "outputTable",
+                "regexes": [
+                    "[^:]+:[^.]+[.].+"
+                ]
+            }
+        ]
+    },
+    "sdkInfo": {
+        "language": "JAVA"
+    }
+}
+EOF
 }
 
 resource "google_dataflow_flex_template_job" "big_data" {
   name = "%s"
-  container_spec_gcs_path = "%s"
+  container_spec_gcs_path = "${google_storage_bucket.temp.url}/${google_storage_bucket_object.flex_template.name}"
   on_delete = "cancel"
+  parameters = {
+    inputSubscription = "my-subscription"
+    outputTable  = "my-project:my-dataset.my-table"
+  }
 }
-`, bucket, bucket, flexTemplateContent(), bucket, job)
+`, bucket, job)
 }
 
-func flexTemplateContent() string {
-	return `
-<<EOF
-{
-	"name": "Streaming Beam SQL",
-	"description": "An Apache Beam streaming pipeline that reads JSON encoded messages from Pub/Sub, uses Beam SQL to transform the message data, and writes the results to a BigQuery",
-	"parameters": [
-		{
-		"name": "inputSubscription",
-		"label": "Pub/Sub input subscription.",
-		"helpText": "Pub/Sub subscription to read from.",
-		"regexes": [
-			"[-_.a-zA-Z0-9]+"
-		]
-		},
-		{
-		"name": "outputTable",
-		"label": "BigQuery output table",
-		"helpText": "BigQuery table spec to write to, in the form 'project:dataset.table'.",
-		"is_optional": true,
-		"regexes": [
-			"[^:]+:[^.]+[.].+"
-		]
-		}
-	]
-}
-EOF
-`
-}
 <% end -%>
