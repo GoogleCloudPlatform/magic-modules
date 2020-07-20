@@ -3326,7 +3326,7 @@ func flattenMasterAuthorizedNetworksConfig(c *containerBeta.MasterAuthorizedNetw
 <% unless version == 'ga' -%>
 func flattenPodSecurityPolicyConfig(c *containerBeta.PodSecurityPolicyConfig) []map[string]interface{} {
 	if c == nil {
-		[]map[string]interface{}{
+		return []map[string]interface{}{
 			{
 				"enabled": false,
 			},
