@@ -23,7 +23,7 @@ resource "google_notebooks_instance" "<%= ctx[:primary_resource_id] %>" {
   subnet = data.google_compute_subnetwork.my_subnetwork.id
 
   labels = {
-  	k = "val"
+    k = "val"
   }
 
   metadata = {
