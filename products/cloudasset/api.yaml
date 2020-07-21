@@ -45,7 +45,10 @@ objects:
         url_param_only: true
         input: true
         description: |
-          The project whose identity will be used when sending messages to the destination pubsub topic.
+          The project whose identity will be used when sending messages to the
+          destination pubsub topic. It also specifies the project for API 
+          enablement check, quota, and billing. If not specified, the resource's
+          project will be used.
       - !ruby/object:Api::Type::String
         name: name
         output: true
@@ -127,17 +130,20 @@ objects:
           The folder this feed should be created in.
     properties:
       - !ruby/object:Api::Type::String
-        name: project
+        name: billing_project
         required: true
         input: true
         url_param_only: true
         description: |
-          The project whose identity will be used when sending messages to the destination pubsub topic.
+          The project whose identity will be used when sending messages to the
+          destination pubsub topic. It also specifies the project for API 
+          enablement check, quota, and billing.
       - !ruby/object:Api::Type::String
         name: folder_id
         output: true
         description: |
-          The ID of the folder where this feed has been created.
+          The ID of the folder where this feed has been created. Both [FOLDER_NUMBER]
+          and folders/[FOLDER_NUMBER] are accepted.
       - !ruby/object:Api::Type::String
         name: name
         output: true
@@ -219,12 +225,14 @@ objects:
           The organization this feed should be created in.
     properties:
       - !ruby/object:Api::Type::String
-        name: project
+        name: billing_project
         required: true
         input: true
         url_param_only: true
         description: |
-          The project whose identity will be used when sending messages to the destination pubsub topic.
+          The project whose identity will be used when sending messages to the
+          destination pubsub topic. It also specifies the project for API 
+          enablement check, quota, and billing.
       - !ruby/object:Api::Type::String
         name: name
         output: true

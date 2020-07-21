@@ -1,7 +1,7 @@
 # Create a feed that sends notifications about network resource updates under a
 # particular folder.
 resource "google_cloud_asset_folder_feed" "<%= ctx[:primary_resource_id] %>" {
-  project  = "<%= ctx[:test_env_vars]["project"] %>"
+  billing_project  = "<%= ctx[:test_env_vars]["project"] %>"
   folder           = google_folder.my_folder.name
   feed_id          = "<%= ctx[:vars]["feed_id"] %>"
   content_type     = "RESOURCE"
