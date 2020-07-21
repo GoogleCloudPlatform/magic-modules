@@ -141,8 +141,7 @@ objects:
     create_url: projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}
     self_link: projects/{{project}}/locations/{{location}}/instances/{{name}}
     create_verb: :POST
-    update_verb: :PATCH
-    update_mask: true
+    input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -171,7 +170,11 @@ objects:
         description: |
             A reference to a machine type which defines VM kind.
         required: true
-        input: true
+        # Machine Type is updatable, but requires the instance to be stopped, just like
+        # for compute instances.
+        # TODO: Implement allow_stopping_for_update here and for acceleratorConfig
+        # update_verb: :PATCH
+        # update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:setMachineType'
         pattern: projects/{{project}}/zones/{{location}}/machineTypes/{{name}}
       - !ruby/object:Api::Type::String
         name: 'postStartupScript'
@@ -206,6 +209,11 @@ objects:
             The hardware accelerator used on this instance. If you use accelerators, 
             make sure that your configuration has enough vCPUs and memory to support the 
             machineType you have selected.
+        # AcceleratorConfig is updatable, but requires the instance to be stopped, just like
+        # for compute instances.
+        # TODO: Implement allow_stopping_for_update here and for machineType
+        # update_verb: :PATCH
+        # update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:setAccelerator'
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'type'
@@ -322,6 +330,8 @@ objects:
         description: |
             Labels to apply to this instance. These can be later modified by the setLabels method.
             An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+        update_verb: :PATCH
+        update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:setLabels'
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'metadata'
         description: |
