@@ -461,7 +461,7 @@ module Api
       def validate
         super
         check :values, type: ::Array, item_type: [Symbol, ::String, ::Integer], required: true
-        check :skip_docs_values, type :boolean, default: false
+        check :skip_docs_values, type: :boolean
       end
     end
 
