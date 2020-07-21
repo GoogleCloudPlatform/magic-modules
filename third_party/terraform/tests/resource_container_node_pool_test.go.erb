@@ -284,7 +284,7 @@ func TestAccContainerNodePool_withInvalidKubeletCpuManagerPolicy(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccContainerNodePool_withKubeletConfig(cluster, np, "dontexist"),
+				Config:      testAccContainerNodePool_withKubeletConfig(cluster, np, "dontexist", "100us", true),
 				ExpectError: regexp.MustCompile(`.*to be one of \[static default\].*`),
 			},
 		},
