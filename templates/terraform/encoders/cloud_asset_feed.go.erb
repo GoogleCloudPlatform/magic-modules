@@ -1,0 +1,8 @@
+// Remove the "folders/" prefix from the folder ID
+if folder, ok := d.GetOkExists("folder"); ok {
+  d.Set("folder_id", strings.TrimPrefix(folder.(string), "folders/"))
+}
+// The feed object must be under the "feed" attribute on the request.
+newObj := make(map[string]interface{})
+newObj["feed"] = obj
+return newObj, nil
