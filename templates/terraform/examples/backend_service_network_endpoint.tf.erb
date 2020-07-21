@@ -15,7 +15,6 @@ resource "google_compute_backend_service" "<%= ctx[:primary_resource_id] %>" {
   enable_cdn                      = true
   timeout_sec                     = 10
   connection_draining_timeout_sec = 10
-  global_network_backend          = true
  
   custom_request_headers          = ["host: ${google_compute_global_network_endpoint.proxy.fqdn}"]
 

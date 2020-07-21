@@ -1046,13 +1046,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "vpc_network"
         vars:
           network_name: "vpc-network"
-    virtual_fields:
-      - !ruby/object:Api::Type::Boolean
-        name: 'delete_default_routes_on_create'
-        default_value: false
-        description: |
-          If set to `true`, default routes (`0.0.0.0/0`) will be deleted
-          immediately after network creation. Defaults to `false`.
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true

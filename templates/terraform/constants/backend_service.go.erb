@@ -124,18 +124,3 @@ func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
 	log.Printf("[DEBUG] computed hash value of %v from %v", hashcode.String(buf.String()), buf.String())
 	return hashcode.String(buf.String())
 }
-
-// Backend service backend has a max_utilization which defaults to .8, but cannot be sent if global_network_backend is true
-func backendServiceCustomizeDiff(diff *schema.ResourceDiff, v interface{}) error {
-	globalNeg := diff.Get("global_network_backend")
-	healthChecksLen := diff.Get("health_checks.#").(int)
-	if !globalNeg.(bool) {
-		// For regular backend services health_checks is required
-		// health_checks may be based off interpolated values
-		if diff.NewValueKnown("health_checks.#") && healthChecksLen == 0 {
-			return fmt.Errorf("Error in Backend Service %s: health_checks are required unless the backend service has a global network endpoint set as the backend.", diff.Get("name"))
-		}
-	}
-	return nil
-}
-
