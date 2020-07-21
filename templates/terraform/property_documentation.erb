@@ -19,6 +19,7 @@
 
 <% unless property.default_value.nil? || property.default_value == "" -%>
   Default value: `<%= property.default_value %>`
+
 <% end -%>
   Possible values are:
 <% property.values.select { |v| v != "" }.each do |v| -%>
