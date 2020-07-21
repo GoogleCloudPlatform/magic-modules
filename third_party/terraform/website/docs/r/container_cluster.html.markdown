@@ -792,21 +792,21 @@ The `workload_metadata_config` block supports:
 
 The `kubelet_config` block supports:
 
-* `cpu_manager_policy` (Optional): The CPU management policy on the node. See
+* `cpu_manager_policy` - (Optional) The CPU management policy on the node. See
 [K8S CPU Management Policies](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/).
 One of `"default"` or `"static"`.
 
-* `cpu_cfs_quota` (Optional): If true, enables CPU CFS quota enforcement for
+* `cpu_cfs_quota` - (Optional) If true, enables CPU CFS quota enforcement for
 containers that specify CPU limits.
 
-* `cpu_cfs_quota_period` (Optional): The CPU CFS quota period value. Specified
+* `cpu_cfs_quota_period` - (Optional) The CPU CFS quota period value. Specified
 as a sequence of decimal numbers, each with optional fraction and a unit suffix,
 such as `"300ms"`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m",
 "h". The value must be a positive duration.
 
 The `linux_node_config` block supports:
 
-* `sysctls` (Required): The Linux kernel parameters to be applied to the nodes
+* `sysctls` - (Required)  The Linux kernel parameters to be applied to the nodes
 and all pods running on the nodes. Specified as a map from the key, such as
 `net.core.wmem_max`, to a string value. 
 

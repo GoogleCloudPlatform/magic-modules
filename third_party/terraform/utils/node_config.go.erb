@@ -252,6 +252,8 @@ func schemaNodeConfig() *schema.Schema {
 				},
 	<% end -%>
 	<% unless version == 'ga' -%>
+				// Note that AtLeastOneOf can't be set because this schema is reused by
+				// two different resources.
 				"kubelet_config": {
 					Type:     schema.TypeList,
 					Optional: true,
