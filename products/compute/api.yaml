@@ -9819,13 +9819,19 @@ objects:
                         name: 'redirectResponseCode'
                         description: |
                           The HTTP Status code to use for this RedirectAction. Supported values are:
-                          - MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-                          - FOUND, which corresponds to 302.
-                          - SEE_OTHER which corresponds to 303.
-                          - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
+
+                          * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+                          
+                          * FOUND, which corresponds to 302.
+                          
+                          * SEE_OTHER which corresponds to 303.
+                          
+                          * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
                           will be retained.
-                          - PERMANENT_REDIRECT, which corresponds to 308. In this case,
+                          
+                          * PERMANENT_REDIRECT, which corresponds to 308. In this case,
                           the request method will be retained.
+                        skip_docs_values: true
                         values:
                           - :FOUND
                           - :MOVED_PERMANENTLY_DEFAULT
@@ -10238,13 +10244,19 @@ objects:
                         name: 'redirectResponseCode'
                         description: |
                           The HTTP Status code to use for this RedirectAction. Supported values are:
-                          - MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-                          - FOUND, which corresponds to 302.
-                          - SEE_OTHER which corresponds to 303.
-                          - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
+
+                          * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+                          
+                          * FOUND, which corresponds to 302.
+                          
+                          * SEE_OTHER which corresponds to 303.
+                          
+                          * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
                           will be retained.
-                          - PERMANENT_REDIRECT, which corresponds to 308. In this case,
+                          
+                          * PERMANENT_REDIRECT, which corresponds to 308. In this case,
                           the request method will be retained.
+                        skip_docs_values: true
                         values:
                           - :FOUND
                           - :MOVED_PERMANENTLY_DEFAULT
@@ -10301,13 +10313,19 @@ objects:
                   name: 'redirectResponseCode'
                   description: |
                     The HTTP Status code to use for this RedirectAction. Supported values are:
-                    - MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-                    - FOUND, which corresponds to 302.
-                    - SEE_OTHER which corresponds to 303.
-                    - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
+                    
+                    * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+                    
+                    * FOUND, which corresponds to 302.
+                    
+                    * SEE_OTHER which corresponds to 303.
+                    
+                    * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
                     will be retained.
-                    - PERMANENT_REDIRECT, which corresponds to 308. In this case,
+                    
+                    * PERMANENT_REDIRECT, which corresponds to 308. In this case,
                     the request method will be retained.
+                  skip_docs_values: true
                   values:
                     - :FOUND
                     - :MOVED_PERMANENTLY_DEFAULT
@@ -10390,13 +10408,19 @@ objects:
             name: 'redirectResponseCode'
             description: |
               The HTTP Status code to use for this RedirectAction. Supported values are:
-              - MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-              - FOUND, which corresponds to 302.
-              - SEE_OTHER which corresponds to 303.
-              - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
+              
+              * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+
+              * FOUND, which corresponds to 302.
+
+              * SEE_OTHER which corresponds to 303.
+              
+              * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
               will be retained.
-              - PERMANENT_REDIRECT, which corresponds to 308. In this case,
+              
+              * PERMANENT_REDIRECT, which corresponds to 308. In this case,
               the request method will be retained.
+            skip_docs_values: true
             values:
               - :FOUND
               - :MOVED_PERMANENTLY_DEFAULT
@@ -14803,13 +14827,19 @@ objects:
                         name: 'redirectResponseCode'
                         description: |
                           The HTTP Status code to use for this RedirectAction. Supported values are:
-                          - MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-                          - FOUND, which corresponds to 302.
-                          - SEE_OTHER which corresponds to 303.
-                          - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
+
+                          * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+
+                          * FOUND, which corresponds to 302.
+
+                          * SEE_OTHER which corresponds to 303.
+
+                          * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
                           will be retained.
-                          - PERMANENT_REDIRECT, which corresponds to 308. In this case,
+
+                          * PERMANENT_REDIRECT, which corresponds to 308. In this case,
                           the request method will be retained.
+                        skip_docs_values: true
                         values:
                           - :FOUND
                           - :MOVED_PERMANENTLY_DEFAULT
@@ -15482,12 +15512,18 @@ objects:
                       - !ruby/object:Api::Type::Enum
                         name: 'redirectResponseCode'
                         description: |
-                          The HTTP Status code to use for this RedirectAction. Supported values are:   -
-                          MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.  -
-                          FOUND, which corresponds to 302.  - SEE_OTHER which corresponds to 303.  -
-                          TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
-                          will be retained.  - PERMANENT_REDIRECT, which corresponds to 308. In this case,
-                          the request method will be retained.
+                          The HTTP Status code to use for this RedirectAction. Supported values are:
+
+                          * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+
+                          * FOUND, which corresponds to 302.
+
+                          * SEE_OTHER which corresponds to 303.
+                          
+                          * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method will be retained.
+
+                          * PERMANENT_REDIRECT, which corresponds to 308. In this case, the request method will be retained.
+                        skip_docs_values: true
                         values:
                           - :FOUND
                           - :MOVED_PERMANENTLY_DEFAULT
@@ -15547,13 +15583,19 @@ objects:
                   name: 'redirectResponseCode'
                   description: |
                     The HTTP Status code to use for this RedirectAction. Supported values are:
-                    - MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-                    - FOUND, which corresponds to 302.
-                    - SEE_OTHER which corresponds to 303.
-                    - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
+                    
+                    * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+                    
+                    * FOUND, which corresponds to 302.
+                    
+                    * SEE_OTHER which corresponds to 303.
+                    
+                    * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
                     will be retained.
-                    - PERMANENT_REDIRECT, which corresponds to 308. In this case,
+                    
+                    * PERMANENT_REDIRECT, which corresponds to 308. In this case,
                     the request method will be retained.
+                  skip_docs_values: true
                   values:
                     - :FOUND
                     - :MOVED_PERMANENTLY_DEFAULT
@@ -15952,13 +15994,19 @@ objects:
             name: 'redirectResponseCode'
             description: |
               The HTTP Status code to use for this RedirectAction. Supported values are:
-              - MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-              - FOUND, which corresponds to 302.
-              - SEE_OTHER which corresponds to 303.
-              - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
+
+              * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+              
+              * FOUND, which corresponds to 302.
+              
+              * SEE_OTHER which corresponds to 303.
+              
+              * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
               will be retained.
-              - PERMANENT_REDIRECT, which corresponds to 308. In this case,
+              
+              * PERMANENT_REDIRECT, which corresponds to 308. In this case,
               the request method will be retained.
+            skip_docs_values: true
             values:
               - :FOUND
               - :MOVED_PERMANENTLY_DEFAULT

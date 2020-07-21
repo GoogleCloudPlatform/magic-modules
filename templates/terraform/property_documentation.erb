@@ -14,7 +14,7 @@
 <%   end -%>
 <% end -%>
 <%= indent(property.description.strip.gsub("\n\n", "\n"), 2) -%>
-<% if property.is_a?(Api::Type::Enum) && !property.output -%>
+<% if property.is_a?(Api::Type::Enum) && !property.output && !property.skip_docs_values -%>
 
 
 <% unless property.default_value.nil? || property.default_value == "" -%>
