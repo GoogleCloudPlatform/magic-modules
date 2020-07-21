@@ -245,7 +245,7 @@ objects:
               A duration in seconds with up to nine fractional digits, terminated by 's'.
               Example - "3.5s".
       - !ruby/object:Api::Type::String
-        name: 'name'
+        name: 'filter'
         required: false
         description: |
           The subscription only delivers the messages that match the filter. 
