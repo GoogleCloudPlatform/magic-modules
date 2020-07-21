@@ -238,7 +238,85 @@ func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
+<% unless version.nil? || version == 'ga' -%>
+func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "static"),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_kubelet_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccContainerNodePool_withInvalidKubeletCpuManagerPolicy(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccContainerNodePool_withKubeletConfig(cluster, np, "dontexist"),
+				ExpectError: regexp.MustCompile(`.*to be one of \[static default\].*`),
+			},
+		},
+	})
+}
+
+func TestAccContainerNodePool_withLinuxNodeConfig(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withLinuxNodeConfig(cluster, np, 10000, 12800, "1000 20000 100000", 1),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_linux_node_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Perform an update.
+			{
+				Config: testAccContainerNodePool_withLinuxNodeConfig(cluster, np, 10000, 12800, "1000 20000 200000", 1),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_linux_node_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
+
+<% unless version.nil? || version == 'ga' -%>
 func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
 	t.Parallel()
 
@@ -1267,7 +1345,83 @@ resource "google_container_node_pool" "with_sandbox_config" {
 }
 `, cluster, np)
 }
+<% end -%>
 
+<% unless version.nil? || version == 'ga' -%>
+func testAccContainerNodePool_withKubeletConfig(cluster, np, policy string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+}
+resource "google_container_node_pool" "with_kubelet_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    image_type = "COS_CONTAINERD"
+    kubelet_config {
+      cpu_manager_policy   = "%s"
+      cpu_cfs_quota        = true
+      cpu_cfs_quota_period = "100us"
+    }
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+`, cluster, np, policy)
+}
+
+func testAccContainerNodePool_withLinuxNodeConfig(cluster, np string, maxBacklog, soMaxConn int, tcpMem string, twReuse int) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+}
+resource "google_container_node_pool" "with_linux_node_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    image_type = "COS_CONTAINERD"
+    linux_node_config {
+      sysctls = {
+        "net.core.netdev_max_backlog" = "%d"
+        "net.core.rmem_max"           = 10000
+        "net.core.wmem_default"       = 10000
+        "net.core.wmem_max"           = 20000
+        "net.core.optmem_max"         = 10000
+        "net.core.somaxconn"          = %d
+        "net.ipv4.tcp_rmem"           = "%s"
+        "net.ipv4.tcp_wmem"           = "%s"
+        "net.ipv4.tcp_tw_reuse"       = %d
+      }
+    }
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+`, cluster, np, maxBacklog, soMaxConn, tcpMem, tcpMem, twReuse)
+}
+<% end -%>
+
+<% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_withBootDiskKmsKey(project, cluster, np string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
