@@ -456,7 +456,7 @@ module Api
     # Represents an enum, and store is valid values
     class Enum < Primitive
       attr_reader :values
-      attr_reader :display_values_in_docs
+      attr_reader :skip_docs_values
 
       def validate
         super
