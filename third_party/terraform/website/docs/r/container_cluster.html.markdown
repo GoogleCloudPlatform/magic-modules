@@ -320,7 +320,12 @@ subnetwork in which the cluster's instances are launched.
   [GKE SNAT](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-masquerade-agent#how_ipmasq_works) DefaultSnatStatus contains the desired state of whether default sNAT should be disabled on the cluster, [API doc](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#networkconfig).
 
 The `default_snat_status` block supports
+<<<<<<< HEAD
 *  `disabled` - Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic
+=======
+
+*  `disabled` - (Required) Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic
+>>>>>>> 3342f32eacadd2166e3989ab15b6cdaf7c610e3e
 
 The `cluster_telemetry` block supports
 * `type` - Telemetry integration for the cluster. Supported values (`ENABLE, DISABLE, SYSTEM_ONLY`);

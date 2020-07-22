@@ -27,7 +27,7 @@ import (
 	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudbuild/v1"
 <% unless version == 'ga' -%>
-	"google.golang.org/api/cloudidentity/v1beta1"
+	cloudidentity "google.golang.org/api/cloudidentity/v1beta1"
 <% end -%>
 	"google.golang.org/api/cloudfunctions/v1"
 	"google.golang.org/api/cloudiot/v1"
@@ -566,7 +566,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 		return err
 	}
 	c.clientStorageTransfer.UserAgent = userAgent
-  	c.clientStorageTransfer.BasePath = storageTransferClientBasePath
+	c.clientStorageTransfer.BasePath = storageTransferClientBasePath
 
 	healthcareClientBasePath := removeBasePathVersion(c.HealthcareBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud Healthcare client for path %s", healthcareClientBasePath)
@@ -687,7 +687,7 @@ func (c *Config) GetCredentials(clientScopes []string) (googleoauth.Credentials,
 
 	defaultTS, err := googleoauth.DefaultTokenSource(context.Background(), clientScopes...)
 	if err != nil {
-		return googleoauth.Credentials{}, fmt.Errorf("Error loading Default TokenSource: %s", err)
+		return googleoauth.Credentials{}, fmt.Errorf("Attempted to load application default credentials since neither `credentials` nor `access_token` was set in the provider block.  No credentials loaded. To use your gcloud credentials, run 'gcloud auth application-default login'.  Original error: %w", err)
 	}
 	return googleoauth.Credentials{
 		TokenSource: defaultTS,
