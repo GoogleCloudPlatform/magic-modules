@@ -27,6 +27,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           instance_name: "test-instance"
       - !ruby/object:Provider::Terraform::Examples
         name: "filestore_instance_full"
+        min_version: beta
         primary_resource_id: "instance"
         vars:
           instance_name: "test-instance"
