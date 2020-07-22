@@ -201,8 +201,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_network_endpoint"
         primary_resource_id: "default"
-        # ImportStateVerify won't work for virtual field
-        skip_test: true
         vars:
           backend_service_name: "backend-service"
           neg_name: "network-endpoint"

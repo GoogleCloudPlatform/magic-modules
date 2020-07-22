@@ -1110,8 +1110,10 @@ objects:
         max_size: 1
         description: |
            The set of URLs to the HttpHealthCheck or HttpsHealthCheck resource
-           for health checking this BackendService. Currently at most one health
-           check can be specified, and a health check is required.
+           for health checking this BackendService.
+
+           Unless the backend of this service is a NetworkEndpointGroup, a health check is required.
+           Currently at most one health check can be specified.
 
            For internal load balancing, a URL to a HealthCheck resource must be specified instead.
       - !ruby/object:Api::Type::Integer
