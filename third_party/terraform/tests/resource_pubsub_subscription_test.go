@@ -44,7 +44,7 @@ func TestAccPubsubSubscription_basic(t *testing.T) {
 		CheckDestroy: testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPubsubSubscription_basic(topic, subscription, "bar", 20),
+				Config: testAccPubsubSubscription_basic(topic, subscription, "attributes.foo = \"bar\"", "bar", 20),
 			},
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
@@ -69,7 +69,7 @@ func TestAccPubsubSubscription_update(t *testing.T) {
 		CheckDestroy: testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPubsubSubscription_basic(topic, subscriptionShort, "bar", 20),
+				Config: testAccPubsubSubscription_basic(topic, subscriptionShort, "attributes.foo = \"bar\"", "bar", 20),
 			},
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
@@ -78,7 +78,7 @@ func TestAccPubsubSubscription_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccPubsubSubscription_basic(topic, subscriptionShort, "baz", 30),
+				Config: testAccPubsubSubscription_basic(topic, subscriptionShort, "attributes.foo = \"bar\"", "baz", 30),
 				Check: resource.TestCheckResourceAttr(
 					"google_pubsub_subscription.foo", "path", subscriptionLong,
 				),
@@ -212,21 +212,22 @@ resource "google_pubsub_subscription" "foo" {
 `, saAccount, topicFoo, subscription)
 }
 
-func testAccPubsubSubscription_basic(topic, subscription, label string, deadline int) string {
+func testAccPubsubSubscription_basic(topic, subscription, filter string, label string, deadline int) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
   name = "%s"
 }
 
 resource "google_pubsub_subscription" "foo" {
-  name  = "%s"
-  topic = google_pubsub_topic.foo.id
+  name   = "%s"
+	topic  = google_pubsub_topic.foo.id
+	filter = "%s"
   labels = {
     foo = "%s"
   }
   ack_deadline_seconds = %d
 }
-`, topic, subscription, label, deadline)
+`, topic, subscription, filter, label, deadline)
 }
 
 func testAccPubsubSubscription_topicOnly(topic string) string {
