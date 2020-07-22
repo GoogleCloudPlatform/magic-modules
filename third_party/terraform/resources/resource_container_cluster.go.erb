@@ -1114,6 +1114,7 @@ func resourceContainerCluster() *schema.Resource {
 				Type: schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Computed: true,
 				Description: `Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.`,
 				Elem: &schema.Resource {
 					Schema: map[string]*schema.Schema {
