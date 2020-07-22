@@ -304,9 +304,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_metric_descriptor_basic"
         primary_resource_id: "basic"
+        vars:
+          display_name: "metric-descriptor"
+          type: "daily_sales"
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_metric_descriptor_alert"
         primary_resource_id: "with_alert"
+        vars:
+          display_name: "metric-descriptor"
+          type: "daily_sales"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
     
