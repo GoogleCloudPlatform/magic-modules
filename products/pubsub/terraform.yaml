@@ -21,7 +21,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # resource until it exists and the negative cached result goes away.
     # Context: terraform-providers/terraform-provider-google#4993
     async: !ruby/object:Provider::Terraform::PollAsync
-      check_response_func: PollCheckForExistence
+      check_response_func_existence: PollCheckForExistence
       actions: ['create']
       operation: !ruby/object:Api::Async::Operation
         timeouts: !ruby/object:Api::Timeouts
@@ -71,7 +71,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # resource until it exists and the negative cached result goes away.
     # Context: terraform-providers/terraform-provider-google#4993
     async: !ruby/object:Provider::Terraform::PollAsync
-      check_response_func: PollCheckForExistence
+      check_response_func_existence: PollCheckForExistence
       actions: ['create']
       operation: !ruby/object:Api::Async::Operation
         timeouts: !ruby/object:Api::Timeouts

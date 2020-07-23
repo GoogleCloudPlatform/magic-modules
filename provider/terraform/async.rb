@@ -20,8 +20,13 @@ module Provider
     class PollAsync < Api::Async
       # Details how to poll for an eventually-consistent resource state.
 
-      # Function to call for checking the Poll response
-      attr_reader :check_response_func
+      # Function to call for checking the Poll response for
+      # creating and updating a resource
+      attr_reader :check_response_func_existence
+
+      # Function to call for checking the Poll response for
+      # deleting a resource
+      attr_reader :check_response_func_absence
 
       # Custom code to get a poll response, if needed.
       # Will default to same logic as Read() to get current resource
@@ -31,12 +36,18 @@ module Provider
       # result of the final Read()
       attr_reader :suppress_error
 
+      # Number of times the desired state has to occur continuously
+      # during polling before returning a success
+      attr_reader :target_occurrences
+
       def validate
         super
 
-        check :check_response_func, type: String, required: true
+        check :check_response_func_existence, type: String, required: true
+        check :check_response_func_absence, type: String, default: 'PollCheckForAbsence'
         check :custom_poll_read, type: String
         check :suppress_error, type: :boolean, default: false
+        check :target_occurrences, type: Integer, default: 1
       end
     end
   end

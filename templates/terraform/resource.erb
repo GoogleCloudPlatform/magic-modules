@@ -201,6 +201,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         project = parts[1]
     }
 <%  end -%>
+<%= lines(compile(pwd + '/' + object.custom_code.pre_create)) if object.custom_code.pre_create -%>
     res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutCreate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
 <%  if object.custom_code.post_create_failure && object.async.nil? # Only add if not handled by async error handling -%>
@@ -228,7 +229,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
 <%  if object.async&.allow?('create') -%>
 <%    if object.async.is_a? Provider::Terraform::PollAsync -%>
-    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func -%>, "Creating <%= object.name -%>", d.Timeout(schema.TimeoutCreate))
+    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Creating <%= object.name -%>", d.Timeout(schema.TimeoutCreate), <%= object.async.target_occurrences -%>)
     if err != nil {
 <%      if object.async.suppress_error -%>
         log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
@@ -616,7 +617,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             return err
         }
 <%          elsif object.async.is_a? Provider::Terraform::PollAsync -%>
-        err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate))
+        err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate), <%= object.async.target_occurrences -%>)
         if err != nil {
 <%              if object.async.suppress_error-%>
         log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
@@ -716,7 +717,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         return err
     }
 <%    elsif object.async.is_a? Provider::Terraform::PollAsync -%>
-    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate))
+    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate), <%= object.async.target_occurrences -%>)
     if err != nil {
 <%      if object.async.suppress_error-%>
         log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
@@ -797,6 +798,16 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     }
 
 <%  if object.async&.allow?('delete') -%>
+<%    if object.async.is_a? Provider::Terraform::PollAsync -%>
+    err = PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_absence -%>, "Deleting <%= object.name -%>", d.Timeout(schema.TimeoutCreate), <%= object.async.target_occurrences -%>)
+    if err != nil {
+<%      if object.async.suppress_error -%>
+        log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
+<%      else -%>
+        return fmt.Errorf("Error waiting to delete <%= object.name -%>: %s", err)
+<%      end -%>
+    }
+<%    else -%>
     err = <%= client_name_camel -%>OperationWaitTime(
         config, res, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
         d.Timeout(schema.TimeoutDelete))
@@ -804,7 +815,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
-
+<%    end -%>
 <%  end -%>
 
     log.Printf("[DEBUG] Finished deleting <%= object.name -%> %q: %#v", d.Id(), res)
