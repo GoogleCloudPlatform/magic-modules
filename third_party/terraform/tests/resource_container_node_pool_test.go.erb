@@ -253,7 +253,7 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "static", "300ms", false),
+				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "static", "100us", false),
 			},
 			{
 				ResourceName:      "google_container_node_pool.with_kubelet_config",
@@ -261,7 +261,7 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "default", "200ms", true),
+				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "default", "200us", true),
 			},
 			{
 				ResourceName:      "google_container_node_pool.with_kubelet_config",
