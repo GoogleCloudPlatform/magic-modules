@@ -32,7 +32,11 @@ if iapVal == nil {
 	obj["iap"] = iap
 }
 
-backends := obj["backends"].([]interface{})
+backendsRaw, ok := obj["backends"]
+if !ok {
+	return obj, nil
+}
+backends := backendsRaw.([]interface{})
 for _, backendRaw := range backends {
 	backend := backendRaw.(map[string]interface{})
 	backendGroup, ok := backend["group"]
