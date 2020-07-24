@@ -201,8 +201,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_network_endpoint"
         primary_resource_id: "default"
-        # ImportStateVerify won't work for virtual field
-        skip_test: true
         vars:
           backend_service_name: "backend-service"
           neg_name: "network-endpoint"
@@ -213,13 +211,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: 'templates/terraform/post_create/compute_backend_service_security_policy.go.erb'
       post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.erb'
       resource_definition: 'templates/terraform/resource_definition/backend_service.go.erb'
-    virtual_fields:
-      - !ruby/object:Api::Type::Boolean
-        name: 'global_network_backend'
-        default_value: false
-        description: |
-          If set to `true` allows this backend service to use a global network endpoint group as a backend.
-          This allows the backend service to be created without health checks.
     properties:
       backends: !ruby/object:Overrides::Terraform::PropertyOverride
         name: backend

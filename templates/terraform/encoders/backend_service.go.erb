@@ -32,11 +32,16 @@ if iapVal == nil {
 	obj["iap"] = iap
 }
 
-if d.Get("global_network_backend").(bool) {
-	// Remove `max_utilization` from any backend
-	backends := obj["backends"].([]interface{})
-	for _, backendRaw := range backends {
-		backend := backendRaw.(map[string]interface{})
+backends := obj["backends"].([]interface{})
+for _, backendRaw := range backends {
+	backend := backendRaw.(map[string]interface{})
+	backendGroup, ok := backend["group"]
+	if !ok {
+		continue
+	}
+	if strings.Contains(backendGroup.(string), "global/networkEndpointGroups") {
+		// Remove `max_utilization` from any backend that belongs to a global NEG. This field
+		// has a default value and causes API validation errors
 		backend["maxUtilization"] = nil
 	}
 }
