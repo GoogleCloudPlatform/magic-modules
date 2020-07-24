@@ -779,7 +779,7 @@ objects:
                 either maxRate or maxRatePerEndpoint must be set.
             - !ruby/object:Api::Type::Double
               name: 'maxUtilization'
-              send_empty_value: true  
+              send_empty_value: true
               default_value: 0.8
               description: |
                 Used when balancingMode is UTILIZATION. This ratio defines the
