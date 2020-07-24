@@ -32,4 +32,13 @@ if iapVal == nil {
 	obj["iap"] = iap
 }
 
+if d.Get("global_network_backend").(bool) {
+	// Remove `max_utilization` from any backend
+	backends := obj["backends"].([]interface{})
+	for _, backendRaw := range backends {
+		backend := backendRaw.(map[string]interface{})
+		backend["maxUtilization"] = nil
+	}
+}
+
 return obj, nil
