@@ -5,7 +5,7 @@ resource "google_compute_global_network_endpoint_group" "external_proxy" {
 }
 
 resource "google_compute_global_network_endpoint" "proxy" {
-  global_network_endpoint_group = google_compute_global_network_endpoint_group.external_proxy.name
+  global_network_endpoint_group = google_compute_global_network_endpoint_group.external_proxy.id
   fqdn                          = "test.example.com"
   port                          = google_compute_global_network_endpoint_group.external_proxy.default_port
 }
@@ -19,6 +19,6 @@ resource "google_compute_backend_service" "<%= ctx[:primary_resource_id] %>" {
   custom_request_headers          = ["host: ${google_compute_global_network_endpoint.proxy.fqdn}"]
 
   backend {
-    group = google_compute_global_network_endpoint_group.external_proxy.self_link
+    group = google_compute_global_network_endpoint_group.external_proxy.id
   }
 }

@@ -781,7 +781,7 @@ objects:
               name: 'maxUtilization'
               description: |
                 Used when balancingMode is UTILIZATION. This ratio defines the
-                CPU utilization target for the group. The default is 0.8. Valid
+                CPU utilization target for the group. Valid
                 range is [0.0, 1.0].
       - !ruby/object:Api::Type::NestedObject
         name: 'circuitBreakers'
