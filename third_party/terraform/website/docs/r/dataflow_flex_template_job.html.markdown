@@ -27,7 +27,6 @@ resource "google_dataflow_flex_template_job" "big_data_job" {
 }
 ```
 
-[ To Come ...]
 ## Note on "destroy" / "apply"
 There are many types of Dataflow jobs.  Some Dataflow jobs run constantly,
 getting new data from (e.g.) a GCS bucket, and outputting data continuously. 
