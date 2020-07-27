@@ -3085,13 +3085,6 @@ objects:
           not enforced and the network behaves as if it did not exist. If this
           is unspecified, the firewall rule will be enabled.
         send_empty_value: true
-      - !ruby/object:Api::Type::Boolean
-        name: 'enableLogging'
-        deprecation_message: 'Deprecated in favor of enable in LogConfig'
-        description: |
-          This field denotes whether to enable logging for a particular
-          firewall rule. If logging is enabled, logs will be exported to
-          Stackdriver.
       - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
         description: |

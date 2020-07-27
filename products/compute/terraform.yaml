@@ -512,6 +512,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/firewall.erb
       resource_definition: templates/terraform/resource_definition/firewall.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/firewall.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -539,13 +540,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # being ingress to egress without examining the diff carefully.
         # See terraform issue #2713 for more context.
         input: true
-      enableLogging: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-        deprecation_message: 'Deprecated in favor of LogConfig'
-        description: |
-          This field denotes whether to enable logging for a particular
-          firewall rule. If logging is enabled, logs will be exported to
-          Stackdriver.
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           This field denotes the logging options for a particular firewall rule.
@@ -553,6 +547,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         send_empty_value: true
         custom_expand: 'templates/terraform/custom_expand/firewall_log_config.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/firewall_log_config.go.erb'
+        diff_suppress_func: 'diffSuppressEnableLogging'
       logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       logConfig.metadata: !ruby/object:Overrides::Terraform::PropertyOverride
