@@ -108,7 +108,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["projects/{{project}}/jobs/{{job_id}}"]
     skip_delete: true
     async: !ruby/object:Provider::Terraform::PollAsync
-      check_response_func: PollCheckForExistence
+      check_response_func_existence: PollCheckForExistence
       actions: ['create']
       operation: !ruby/object:Api::Async::Operation
         timeouts: !ruby/object:Api::Timeouts

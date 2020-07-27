@@ -1046,21 +1046,18 @@ func resourceContainerCluster() *schema.Resource {
         Type:        schema.TypeList,
         MaxItems:    1,
         Optional:    true,
-        ForceNew:    true,
         Computed:    true,
         Description: `Application-layer Secrets Encryption settings. The object format is {state = string, key_name = string}. Valid values of state are: "ENCRYPTED"; "DECRYPTED". key_name is the name of a CloudKMS key.`,
         Elem: &schema.Resource{
           Schema: map[string]*schema.Schema{
             "state": {
               Type:         schema.TypeString,
-              ForceNew:     true,
               Required:     true,
               ValidateFunc: validation.StringInSlice([]string{"ENCRYPTED", "DECRYPTED"}, false),
               Description:  `ENCRYPTED or DECRYPTED.`,
             },
             "key_name": {
               Type:        schema.TypeString,
-              ForceNew:    true,
               Optional:    true,
               Description: `The key to use to encrypt/decrypt secrets.`,
             },
@@ -1112,8 +1109,35 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-
+			
+			"default_snat_status": {
+				Type: schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				Computed: true,
+				Description: `Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.`,
+				Elem: &schema.Resource {
+					Schema: map[string]*schema.Schema {
+						"disabled": {
+							Type: schema.TypeBool,
+							Required: true,
+							Description: `When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic.`,
+						},
+					},
+				},
+			},
 <% end -%>
+			"enable_intranode_visibility": {
+			   Type: schema.TypeBool,
+			   Optional: true,
+			   Description: `Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.`,
+<% if version == 'ga' -%>
+			   Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/guides/provider_versions.html for more details.",
+			   Computed: true,
+<% else -%>
+			   Default: false,
+<% end -%>
+			}, 
 
 			"resource_usage_export_config": {
 				Type:        schema.TypeList,
@@ -1153,17 +1177,6 @@ func resourceContainerCluster() *schema.Resource {
 				},
 			},
 
-			"enable_intranode_visibility": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: `Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.`,
-<% if version == 'ga' -%>
-				Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/guides/provider_versions.html for more details.",
-				Computed: true,
-<% else -%>
-				Default: false,
-<% end -%>
-			},
 		},
 	}
 }
@@ -1286,8 +1299,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		EnableTpu:               d.Get("enable_tpu").(bool),
 		NetworkConfig: &containerBeta.NetworkConfig{
 			EnableIntraNodeVisibility: d.Get("enable_intranode_visibility").(bool),
-		},
-<% end -%>
+			DefaultSnatStatus:         expandDefaultSnatStatus(d.Get("default_snat_status")),
+	    },	
+<% end -%>	
 		MasterAuth:     expandMasterAuth(d.Get("master_auth")),
 		ResourceLabels: expandStringMap(d, "resource_labels"),
 	}
@@ -1549,8 +1563,12 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("release_channel", flattenReleaseChannel(cluster.ReleaseChannel)); err != nil {
 		return err
 	}
+
+	if err := d.Set("default_snat_status", flattenDefaultSnatStatus(cluster.NetworkConfig.DefaultSnatStatus)); err != nil {
+		return err
+	}
 	d.Set("enable_intranode_visibility", cluster.NetworkConfig.EnableIntraNodeVisibility)
-<% end -%>
+<% end -%>	
 	if err := d.Set("authenticator_groups_config", flattenAuthenticatorGroupsConfig(cluster.AuthenticatorGroupsConfig)); err != nil {
 		return err
 	}
@@ -1756,6 +1774,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		d.SetPartial("enable_shielded_nodes")
 	}
+
 <% unless version == 'ga' -%>
 	if d.HasChange("enable_intranode_visibility") {
 		enabled := d.Get("enable_intranode_visibility").(bool)
@@ -1790,8 +1809,37 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		d.SetPartial("enable_intranode_visibility")
 	}
-<% end -%>
-<% unless version == 'ga' -%>
+
+	if d.HasChange("default_snat_status") {
+		req := &containerBeta.UpdateClusterRequest{
+			Update: &containerBeta.ClusterUpdate{
+				DesiredDefaultSnatStatus: expandDefaultSnatStatus(d.Get("default_snat_status")),
+			},
+		}
+		updateF := func() error {
+			log.Println("[DEBUG] updating default_snat_status")
+			name := containerClusterFullName(project, location, clusterName)
+			op, err := config.clientContainerBeta.Projects.Locations.Clusters.Update(name, req).Do()
+			if err != nil {
+				return err
+			}
+
+			// Wait until it's updated
+			err = containerOperationWait(config, op, project, location, "updating GKE Default SNAT status", d.Timeout(schema.TimeoutUpdate))
+			log.Println("[DEBUG] done updating default_snat_status")
+			return err
+		}
+
+		// Call update serially.
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s Default SNAT status has been updated", d.Id())
+
+		d.SetPartial("default_snat_status")
+	}
+
 	if d.HasChange("release_channel") {
 		req := &containerBeta.UpdateClusterRequest{
 			Update: &containerBeta.ClusterUpdate{
@@ -2155,6 +2203,31 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 			d.SetPartial("vertical_pod_autoscaling")
 		}
+	}
+
+	if d.HasChange("database_encryption") {
+		c := d.Get("database_encryption")
+		req := &containerBeta.UpdateClusterRequest{
+			Update: &containerBeta.ClusterUpdate{
+				DesiredDatabaseEncryption: expandDatabaseEncryption(c),
+			},
+		}
+
+		updateF := func() error {
+			name := containerClusterFullName(project, location, clusterName)
+			op, err := config.clientContainerBeta.Projects.Locations.Clusters.Update(name, req).Do()
+			if err != nil {
+				return err
+			}
+			// Wait until it's updated
+			return containerOperationWait(config, op, project, location, "updating GKE cluster database encryption config", d.Timeout(schema.TimeoutUpdate))
+		}
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+		log.Printf("[INFO] GKE cluster %s database encryption config has been updated", d.Id())
+
+		d.SetPartial("database_encryption")
 	}
 
 <% unless version == 'ga' -%>
@@ -2560,14 +2633,14 @@ func expandClusterAddonsConfig(configured interface{}) *containerBeta.AddonsConf
 }
 
 <% unless version == 'ga' -%>
-func expandIPAllocationPolicy(configured interface{}, networking_mode string) (*containerBeta.IPAllocationPolicy, error) {
+func expandIPAllocationPolicy(configured interface{}, networkingMode string) (*containerBeta.IPAllocationPolicy, error) {
 <% else -%>
 func expandIPAllocationPolicy(configured interface{}) (*containerBeta.IPAllocationPolicy, error) {
 <% end -%>
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 <% unless version == 'ga' -%>
-		if networking_mode == "VPC_NATIVE" {
+		if networkingMode == "VPC_NATIVE" {
 			return nil, fmt.Errorf("`ip_allocation_policy` block is required for VPC_NATIVE clusters.")
 		}
 <% end -%>
@@ -2580,7 +2653,7 @@ func expandIPAllocationPolicy(configured interface{}) (*containerBeta.IPAllocati
 	config := l[0].(map[string]interface{})
 	return &containerBeta.IPAllocationPolicy{
 <% unless version == 'ga' -%>
-		UseIpAliases:          networking_mode == "VPC_NATIVE",
+		UseIpAliases:          networkingMode == "VPC_NATIVE" || networkingMode == "",
 <% else -%>
 		UseIpAliases:          true,
 <% end -%>
@@ -2591,7 +2664,7 @@ func expandIPAllocationPolicy(configured interface{}) (*containerBeta.IPAllocati
 		ServicesSecondaryRangeName: config["services_secondary_range_name"].(string),
 		ForceSendFields:            []string{"UseIpAliases"},
 <% unless version == 'ga' -%>
-		UseRoutes:              networking_mode == "ROUTES",
+		UseRoutes:              networkingMode == "ROUTES",
 <% end -%>
 	}, nil
 }
@@ -2889,7 +2962,21 @@ func expandClusterTelemetry(configured interface{}) *containerBeta.ClusterTeleme
 	}
 }
 
+func expandDefaultSnatStatus(configured interface{}) *containerBeta.DefaultSnatStatus {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &containerBeta.DefaultSnatStatus{
+		Disabled:        config["disabled"].(bool),
+		ForceSendFields: []string{"Disabled"},
+	}
+
+}
+
 <% end -%>
+
 func expandWorkloadIdentityConfig(configured interface{}) *containerBeta.WorkloadIdentityConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -2946,8 +3033,9 @@ func expandResourceUsageExportConfig(configured interface{}) *containerBeta.Reso
 		ForceSendFields: []string{"EnableNetworkEgressMetering"},
 	}
 	if _, ok := resourceUsageConfig["bigquery_destination"]; ok {
-		if len(resourceUsageConfig["bigquery_destination"].([]interface{})) > 0 {
-			bigqueryDestination := resourceUsageConfig["bigquery_destination"].([]interface{})[0].(map[string]interface{})
+		destinationArr := resourceUsageConfig["bigquery_destination"].([]interface{})
+		if len(destinationArr) > 0 && destinationArr[0] != nil {
+			bigqueryDestination := destinationArr[0].(map[string]interface{})
 			if _, ok := bigqueryDestination["dataset_id"]; ok {
 				result.BigqueryDestination = &containerBeta.BigQueryDestination{
 					DatasetId: bigqueryDestination["dataset_id"].(string),
@@ -3148,6 +3236,16 @@ func flattenClusterTelemetry(c *containerBeta.ClusterTelemetry) []map[string]int
 	return result
 }
 
+func flattenDefaultSnatStatus(c *containerBeta.DefaultSnatStatus) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"disabled": c.Disabled,
+		})
+	}
+	return result
+}
+
 <% end -%>
 func flattenWorkloadIdentityConfig(c *containerBeta.WorkloadIdentityConfig) []map[string]interface{} {
 	if c == nil {
@@ -3304,7 +3402,11 @@ func flattenMasterAuthorizedNetworksConfig(c *containerBeta.MasterAuthorizedNetw
 <% unless version == 'ga' -%>
 func flattenPodSecurityPolicyConfig(c *containerBeta.PodSecurityPolicyConfig) []map[string]interface{} {
 	if c == nil {
-		return nil
+		return []map[string]interface{}{
+			{
+				"enabled": false,
+			},
+		}
 	}
 	return []map[string]interface{}{
 		{

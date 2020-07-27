@@ -39,6 +39,7 @@ objects:
       parent_resource_attribute: secret_id
       method_name_separator: ':'
       exclude: false
+      allowed_iam_role: roles/secretmanager.secretAccessor
     references: !ruby/object:Api::Resource::ReferenceLinks
       api: 'https://cloud.google.com/secret-manager/docs/reference/rest/v1/projects.secrets'
     description: |

@@ -1,0 +1,21 @@
+resource "google_os_config_patch_deployment" "<%= ctx[:primary_resource_id] %>" {
+  patch_deployment_id = "<%= ctx[:vars]['instance_name'] %>"
+
+  instance_filter {
+    all = true
+  }
+
+  recurring_schedule {
+    time_zone {
+      id = "America/New_York"
+    }
+
+    time_of_day {
+      hours = 1
+    }
+
+    weekly {
+      day_of_week = "MONDAY"
+    }
+  }
+}

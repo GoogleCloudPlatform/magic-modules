@@ -136,7 +136,7 @@ objects:
               Memory size in Mebibytes for each memcache node.
             required: true
       - !ruby/object:Api::Type::NestedObject
-        name: memcacheParameters
+        name: parameters
         description: |
           User-specified parameters for this memcache instance.
         input: true
