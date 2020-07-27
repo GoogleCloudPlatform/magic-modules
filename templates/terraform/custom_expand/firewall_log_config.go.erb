@@ -16,13 +16,9 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 	l := v.([]interface{})
 	transformed := make(map[string]interface{})
 
-	if d.Get("enable_logging").(bool) != true {
-		// send enable = false to ensure logging is disabled if there is no config
-		transformed["enable"] = false
-		return transformed, nil
-	} else if len(l) == 0 || l[0] == nil {
-		// send enable = true to ensure logging is enabled if there is no config, but enable_logging = true
-		transformed["enable"] = true
+	if len(l) == 0 || l[0] == nil {
+		// send enable = enable_logging value to ensure correct logging status if there is no config
+		transformed["enable"] = d.Get("enable_logging").(bool)
 		return transformed, nil
 	}
 
