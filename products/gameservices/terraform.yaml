@@ -17,7 +17,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         name: "game_service_realm_basic"
         primary_resource_id: "default"
         vars:
@@ -26,7 +25,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   GameServerCluster: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         name: "game_service_cluster_basic"
         primary_resource_id: "default"
         vars:
@@ -44,7 +42,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         name: "game_service_deployment_basic"
         primary_resource_id: "default"
         vars:
@@ -54,7 +51,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         name: "game_service_config_basic"
         primary_resource_id: "default"
         vars:
@@ -77,7 +73,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   GameServerDeploymentRollout: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         name: "game_service_deployment_rollout_basic"
         primary_resource_id: "default"
         vars:
