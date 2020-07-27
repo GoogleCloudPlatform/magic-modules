@@ -456,10 +456,12 @@ module Api
     # Represents an enum, and store is valid values
     class Enum < Primitive
       attr_reader :values
+      attr_reader :skip_docs_values
 
       def validate
         super
         check :values, type: ::Array, item_type: [Symbol, ::String, ::Integer], required: true
+        check :skip_docs_values, type: :boolean
       end
     end
 

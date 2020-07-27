@@ -63,6 +63,54 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/os_config_patch_deployment.go.erb
       decoder: templates/terraform/decoders/os_config_patch_deployment.go.erb
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
+  GuestPolicies: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{name}}"
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "os_config_guest_policies_basic"
+        primary_resource_id: "guest_policies"
+        vars:
+          instance_name: "guest-policy-inst"
+          guest_policy_id: "guest-policy"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "os_config_guest_policies_packages"
+        primary_resource_id: "guest_policies"
+        vars:
+          guest_policy_id: "guest-policy"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "os_config_guest_policies_recipes"
+        primary_resource_id: "guest_policies"
+        vars:
+          guest_policy_id: "guest-policy"
+    properties:
+      guestPolicyId: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))"
+      recipes.installSteps.archiveExtraction.destination: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      recipes.installSteps.msiInstallation.flags: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      recipes.installSteps.msiInstallation.allowedExitCodes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      recipes.installSteps.fileExec.allowedExitCodes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      recipes.installSteps.scriptRun.allowedExitCodes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      recipes.updateSteps.archiveExtraction.destination: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      recipes.updateSteps.msiInstallation.flags: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      recipes.updateSteps.msiInstallation.allowedExitCodes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      recipes.updateSteps.fileExec.allowedExitCodes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      recipes.updateSteps.scriptRun.allowedExitCodes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      etag: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/set_computed_name.erb
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

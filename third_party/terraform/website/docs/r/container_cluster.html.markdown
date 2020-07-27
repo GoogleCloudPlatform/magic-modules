@@ -51,7 +51,7 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
 
   node_config {
     preemptible  = true
-    machine_type = "n1-standard-1"
+    machine_type = "e2-medium"
 
     metadata = {
       disable-legacy-endpoints = "true"
@@ -316,8 +316,14 @@ subnetwork in which the cluster's instances are launched.
 * `enable_intranode_visibility` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
     Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.
 
-The `cluster_telemetry` blocks supports
+* `default_snat_status` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  [GKE SNAT](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-masquerade-agent#how_ipmasq_works) DefaultSnatStatus contains the desired state of whether default sNAT should be disabled on the cluster, [API doc](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#networkconfig).
 
+The `default_snat_status` block supports
+
+*  `disabled` - (Required) Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic
+
+The `cluster_telemetry` block supports
 * `type` - Telemetry integration for the cluster. Supported values (`ENABLE, DISABLE, SYSTEM_ONLY`);
    `SYSTEM_ONLY` (Only system components are monitored and logged) is only available in GKE versions 1.15 and later.
 
@@ -564,7 +570,7 @@ The `node_config` block supports:
     attached to each cluster node. Defaults to 0.
 
 * `machine_type` - (Optional) The name of a Google Compute Engine machine type.
-    Defaults to `n1-standard-1`. To create a custom machine type, value should be set as specified
+    Defaults to `e2-medium`. To create a custom machine type, value should be set as specified
     [here](https://cloud.google.com/compute/docs/reference/latest/instances#machineType).
 
 * `metadata` - (Optional) The metadata key/value pairs assigned to instances in

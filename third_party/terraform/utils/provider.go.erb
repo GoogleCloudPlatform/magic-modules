@@ -210,8 +210,10 @@ func Provider() terraform.ResourceProvider {
 			"google_secret_manager_secret_version":              dataSourceSecretManagerSecretVersion(),
 			"google_service_account":                           dataSourceGoogleServiceAccount(),
 			"google_service_account_access_token":              dataSourceGoogleServiceAccountAccessToken(),
+			"google_service_account_id_token":                 dataSourceGoogleServiceAccountIdToken(),
 			"google_service_account_key":                       dataSourceGoogleServiceAccountKey(),
 			"google_sql_ca_certs":                              dataSourceGoogleSQLCaCerts(),
+			"google_sql_database_instance":                     dataSourceSqlDatabaseInstance(),
 			"google_storage_bucket_object":                     dataSourceGoogleStorageBucketObject(),
 			"google_storage_object_signed_url":                 dataSourceGoogleSignedUrl(),
 			"google_storage_project_service_account":           dataSourceGoogleStorageProjectServiceAccount(),
@@ -324,6 +326,9 @@ end     # products.each do
 				"google_container_node_pool":                   resourceContainerNodePool(),
 				"google_container_registry":                    resourceContainerRegistry(),
 				"google_dataflow_job":                          resourceDataflowJob(),
+				<% unless version == 'ga' -%>
+				"google_dataflow_flex_template_job":            resourceDataflowFlexTemplateJob(), 
+				<% end -%>
 				"google_dataproc_cluster":                      resourceDataprocCluster(),
 				"google_dataproc_cluster_iam_binding":          ResourceIamBinding(IamDataprocClusterSchema, NewDataprocClusterUpdater, DataprocClusterIdParseFunc),
 				"google_dataproc_cluster_iam_member":           ResourceIamMember(IamDataprocClusterSchema, NewDataprocClusterUpdater, DataprocClusterIdParseFunc),

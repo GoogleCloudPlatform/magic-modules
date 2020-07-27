@@ -20,6 +20,9 @@
 *.pyc
 *.python-version
 
+# Python virtual environment
+.env/*
+
 # IDEA files
 .idea/*
 *.iml

@@ -36,3 +36,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   UptimeCheckConfig: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  MetricDescriptor: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
