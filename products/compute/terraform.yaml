@@ -502,6 +502,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   DiskType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |+
+        * `enable_logging` - (Optional, Deprecated) This field denotes whether to enable logging for a particular firewall rule.
+        If logging is enabled, logs will be exported to Stackdriver. Deprecated in favor of `log_config`
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firewall_basic"
