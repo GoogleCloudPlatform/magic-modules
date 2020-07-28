@@ -508,6 +508,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   DiskType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |+
+        * `enable_logging` - (Optional, Deprecated) This field denotes whether to enable logging for a particular firewall rule.
+        If logging is enabled, logs will be exported to Stackdriver. Deprecated in favor of `log_config`
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firewall_basic"
@@ -518,6 +522,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/firewall.erb
       resource_definition: templates/terraform/resource_definition/firewall.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/firewall.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -546,9 +551,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # See terraform issue #2713 for more context.
         input: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
-        flatten_object: true
-      logConfig.enableLogging: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          This field denotes the logging options for a particular firewall rule.
+          If defined, logging is enabled, and logs will be exported to Cloud Logging.
         send_empty_value: true
+        custom_expand: 'templates/terraform/custom_expand/firewall_log_config.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/firewall_log_config.go.erb'
+        diff_suppress_func: 'diffSuppressEnableLogging'
+      logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      logConfig.metadata: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
