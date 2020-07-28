@@ -8002,6 +8002,7 @@ objects:
             name: 'config'
             description:
               The configuration options for matching the rule.
+            required: true
             properties:
             - !ruby/object:Api::Type::Array
               name: 'srcIpRanges'
