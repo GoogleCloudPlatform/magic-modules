@@ -60,6 +60,7 @@ objects:
         name: domainName
         required: true
         url_param_only: true
+        input: true
         description: |
           The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions, 
           https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains.
@@ -107,23 +108,30 @@ objects:
   - !ruby/object:Api::Resource
       name: 'DomainTrust'
       kind: 'activedirectory#trust'
-      base_url: projects/{{project}}/locations/global/domains/{{domain_name}}:attachTrust
+      base_url: projects/{{project}}/locations/global/domains
+      create_url: projects/{{project}}/locations/global/domains/{{domain_name}}:attachTrust
       update_url: projects/{{project}}/locations/global/domains/{{domain_name}}:reconfigureTrust
       delete_url: projects/{{project}}/locations/global/domains/{{domain_name}}:detachTrust
       self_link: '{{name}}'
-      description: Adds an AD trust to a domain
+      description: Adds a trust between Active Directory domains
       references: !ruby/object:Api::Resource::ReferenceLinks
         guides:
           'Active Directory Trust': 'https://cloud.google.com/managed-microsoft-ad/docs/create-one-way-trust'
         api: 'https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains/attachTrust'
-      properties:
+      parameters:
         - !ruby/object:Api::Type::String
           name: domain_name
           required: true
           url_param_only: true
+          input: true
           description: |
             The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions, 
             https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains.  
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'name'
+          output: true
+          description: 'The trust name between source and target domains.'      
         - !ruby/object:Api::Type::NestedObject
           name: 'trust'
           description:

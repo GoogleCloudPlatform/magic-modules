@@ -21,8 +21,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       authorizedNetworks: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       domainName: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
         validation: !ruby/object:Provider::Terraform::Validation
-          regex: '^[a-z][a-z0-9-]{0,14}\.[a-z0-9-\.]*[a-z]+[a-z0-9]*$'  
+          function: 'validateADDomainName()'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb   
     examples:
@@ -31,6 +32,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "ad-domain"
         vars:
           name: "myorg"
+  DomainTrust: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{name}}/{{trust.targetDomainName}}"
+    import_format: ["{{name}}/{{trust.targetDomainName}}"]
+    autogen_async: true
+    properties:
+      trust.targetDnsIpAddresses: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb    
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "active_directory_domain_trust_basic"
+        primary_resource_id: "ad-domain-trust"
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
