@@ -3089,17 +3089,22 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
         description: |
-          This field denotes whether to enable logging for a particular
-          firewall rule. If logging is enabled, logs will be exported to
-          Stackdriver.
+          This field denotes the logging options for a particular firewall rule.
+          If logging is enabled, logs will be exported to Cloud Logging.
         properties:
           - !ruby/object:Api::Type::Boolean
-            name: 'enableLogging'
-            api_name: enable
+            name: 'enable'
             description: |
               This field denotes whether to enable logging for a particular
               firewall rule. If logging is enabled, logs will be exported to
               Stackdriver.
+          - !ruby/object:Api::Type::Enum
+            name: 'metadata'
+            description: |
+              This field denotes whether to include or exclude metadata for firewall logs.
+            values:
+              - :EXCLUDE_ALL_METADATA
+              - :INCLUDE_ALL_METADATA
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
