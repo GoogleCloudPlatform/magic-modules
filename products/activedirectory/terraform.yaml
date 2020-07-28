@@ -33,14 +33,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "myorg"
   DomainTrust: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{name}}/{{trust.targetDomainName}}"
-    import_format: ["{{name}}/{{trust.targetDomainName}}"]
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
     autogen_async: true
     properties:
       trust.targetDnsIpAddresses: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/self_link_as_name.erb    
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      post_create: templates/terraform/post_create/set_computed_name.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "active_directory_domain_trust_basic"
