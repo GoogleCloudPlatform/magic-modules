@@ -525,7 +525,7 @@ objects:
                   description: Protocol used on port. Defaults to TCP.
                 - !ruby/object:Api::Type::Integer
                   name: containerPort
-                  description: Port number.  Defaults to 8080.
+                  description: Port number.
                   required: true
             - !ruby/object:Api::Type::NestedObject
               name: resources
