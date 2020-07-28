@@ -7857,6 +7857,11 @@ objects:
     update_verb: :PATCH
     description: |
       Organization security policies are used to control incoming/outgoing traffic.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating a firewall policy':
+          'https://cloud.google.com/vpc/docs/using-firewall-policies#create-policy'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies'
     parameters:
       - !ruby/object:Api::Type::String
         name: parent
@@ -7876,6 +7881,12 @@ objects:
         name: description
         description: |
           A textual description for the organization security policy.
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'fingerprint'
+        description: |
+          Fingerprint of this resource. This field is used internally during
+          updates of this resource.
+        output: true
       - !ruby/object:Api::Type::String
         name: id
         description: |
@@ -7902,6 +7913,11 @@ objects:
     description: |
       An association for the OrganizationSecurityPolicy.
     input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Associating a policy with the organization or folder':
+          'https://cloud.google.com/vpc/docs/using-firewall-policies#associate'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addAssociation'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'policyId'
@@ -7937,6 +7953,11 @@ objects:
     delete_url: 'locations/global/securityPolicies/{{policy_id}}/removeRule?priority={{priority}}'
     description: |
       A rule for the OrganizationSecurityPolicy.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating firewall rules':
+          'https://cloud.google.com/vpc/docs/using-firewall-policies#create-rules'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addRule'
     parameters:
       - !ruby/object:Api::Type::String
         name: policyId
@@ -7953,7 +7974,7 @@ objects:
       - !ruby/object:Api::Type::Integer
         name: 'priority'
         description: |
-          An integer indicating the priority of a rule in the list. The priority must be a positive value
+          An integer indicating the priority of a rule in the list. The priority must be a value
           between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
           highest priority and 2147483647 is the lowest prority.
         required: true
@@ -7972,7 +7993,7 @@ objects:
           - !ruby/object:Api::Type::Enum
             name: 'versionedExpr'
             description: |
-              Preconfigured versioned expression. For organization security policies rules,
+              Preconfigured versioned expression. For organization security policy rules,
               the only supported type is "FIREWALL".
             values:
               - :FIREWALL
@@ -8022,7 +8043,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'action'
         description: |
-          The Action to preform when the client connection triggers the rule. Can currently be either
+          The Action to perform when the client connection triggers the rule. Can currently be either
           "allow", "deny" or "goto_next".
         required: true
       - !ruby/object:Api::Type::Boolean
@@ -12293,7 +12314,7 @@ objects:
             - !ruby/object:Api::Type::Integer
               name: 'priority'
               description: |
-                An integer indicating the priority of a rule in the list. The priority must be a positive value
+                An integer indicating the priority of a rule in the list. The priority must be a value
                 between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
                 highest priority and 2147483647 is the lowest prority.
             - !ruby/object:Api::Type::String
