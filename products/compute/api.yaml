@@ -7948,6 +7948,7 @@ objects:
     base_url: 'locations/global/securityPolicies/{{policy_id}}'
     self_link: 'locations/global/securityPolicies/{{policy_id}}/getRule?priority={{priority}}'
     create_url: 'locations/global/securityPolicies/{{policy_id}}/addRule?priority={{priority}}'
+    update_verb: :POST
     update_url: 'locations/global/securityPolicies/{{policy_id}}/patchRule?priority={{priority}}'
     delete_verb: :POST
     delete_url: 'locations/global/securityPolicies/{{policy_id}}/removeRule?priority={{priority}}'
@@ -8072,6 +8073,7 @@ objects:
           Denotes whether to enable logging for a particular rule.
           If logging is enabled, logs will be exported to the
           configured export destination in Stackdriver.
+        send_empty_value: true
       - !ruby/object:Api::Type::Array
         name: 'targetServiceAccounts'
         description: |
