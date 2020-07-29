@@ -1,5 +1,4 @@
 <% autogen_exception -%>
-<% unless version == 'ga' -%>
 ---
 subcategory: "Kubernetes (Container) Engine"
 layout: "google"
@@ -9,6 +8,7 @@ sidebar_current: "docs-google-datasource-container-versions"
 description: |-
   Provides lists of available Google Kubernetes Engine versions for masters and nodes.
 ---
+<% unless version == 'ga' -%>
 
 # google\_container\_engine\_versions
 
