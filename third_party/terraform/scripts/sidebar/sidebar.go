@@ -43,11 +43,11 @@ func main() {
 		panic(err)
 	}
 
-	resourcesByProduct, err := entriesByProduct(currVersion, tpgDir + "/website/docs/r")
+	resourcesByProduct, err := entriesByProduct(currVersion, tpgDir+"/website/docs/r")
 	if err != nil {
 		panic(err)
 	}
-	dataSourcesByProduct, err := entriesByProduct(currVersion, tpgDir + "/website/docs/d")
+	dataSourcesByProduct, err := entriesByProduct(currVersion, tpgDir+"/website/docs/d")
 	if err != nil {
 		panic(err)
 	}
