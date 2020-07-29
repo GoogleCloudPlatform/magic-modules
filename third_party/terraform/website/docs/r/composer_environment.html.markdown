@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 ---
 subcategory: "Cloud Composer"
 layout: "google"
@@ -170,11 +169,9 @@ The `config` block supports:
   (Optional)
   The configuration used for the Private IP Cloud Composer environment. Structure is documented below.
 
-<% unless version == "ga" -%>
 * `web_server_network_access_control` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
   The network-level access control policy for the Airflow web server. If unspecified, no network-level access restrictions will be applied.
-<% end -%>
 
 The `node_config` block supports:
 

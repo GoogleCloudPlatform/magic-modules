@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 ---
 subcategory: "Dataproc"
 layout: "google"
@@ -185,13 +184,11 @@ The `cluster_config` block supports:
 * `encryption_config` (Optional) The Customer managed encryption keys settings for the cluster.
    Structure defined below.
 
-<% unless version == 'ga' -%>
 * `lifecycle_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The settings for auto deletion cluster schedule.
    Structure defined below.
 
 * `endpoint_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The config settings for port access on the cluster.
    Structure defined below.
-<% end -%>
 - - -
 
 The `cluster_config.gce_cluster_config` block supports:
@@ -574,7 +571,6 @@ cluster_config {
 
 - - -
 
-<% unless version == 'ga' -%>
 The `lifecycle_config` block supports:
 
 ```terraform
@@ -607,7 +603,6 @@ cluster_config {
 
 * `enable_http_port_access` - (Optional) The flag to enable http access to specific ports
   on the cluster from external sources (aka Component Gateway). Defaults to false.
-<% end -%>
 
 ## Attributes Reference
 

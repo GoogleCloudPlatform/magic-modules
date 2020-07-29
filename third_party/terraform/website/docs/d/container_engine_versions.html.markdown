@@ -1,14 +1,11 @@
-<% autogen_exception -%>
 ---
 subcategory: "Kubernetes (Container) Engine"
 layout: "google"
-version: "google-beta"
 page_title: "Google: google_container_engine_versions"
 sidebar_current: "docs-google-datasource-container-versions"
 description: |-
   Provides lists of available Google Kubernetes Engine versions for masters and nodes.
 ---
-<% unless version == 'ga' -%>
 
 # google\_container\_engine\_versions
 
@@ -19,6 +16,9 @@ regional cluster, ensure that you have provided a region as the `location` to
 the datasource. A region can have a different set of supported versions than
 its component zones, and not all zones in a region are guaranteed to
 support the same version.
+
+~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 
 ## Example Usage
 
@@ -75,5 +75,3 @@ The following attributes are exported:
 * `latest_node_version` - The latest version available in the given zone for use with node instances.
 * `default_cluster_version` - Version of Kubernetes the service deploys by default.
 * `release_channel_default_version` ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - A map from a release channel name to the channel's default version.
-
-<% end -%>

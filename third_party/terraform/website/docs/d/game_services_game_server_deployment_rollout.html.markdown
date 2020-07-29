@@ -1,14 +1,11 @@
-<% autogen_exception -%>
 ---
 subcategory: "Game Servers"
 layout: "google"
-version: "google-beta"
 page_title: "Google: google_game_services_game_server_deployment_rollout"
 sidebar_current: "docs-google-datasource-game-services-game-server-deployment-rollout"
 description: |-
   Get the rollout state.
 ---
-<% unless version == 'ga' -%>
 
 # google\_game\_services\_game\_server\_deployment\_rollout
 
@@ -16,8 +13,10 @@ Use this data source to get the rollout state.
 
 https://cloud.google.com/game-servers/docs/reference/rest/v1beta/GameServerDeploymentRollout
 
-## Example Usage 
+~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 
+## Example Usage
 
 ```terraform
 data "google_game_services_game_server_deployment_rollout" "qa" {
@@ -73,5 +72,3 @@ The `realms_selector` block contains:
 * `name` -
   The resource id of the game server deployment
   eg: `projects/my-project/locations/global/gameServerDeployments/my-deployment/rollout`.
-
-<% end -%>

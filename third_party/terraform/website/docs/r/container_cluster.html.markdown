@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 ---
 subcategory: "Kubernetes (Container) Engine"
 layout: "google"
@@ -165,10 +164,8 @@ for more information.
     this cluster. Note that when this option is enabled, the cluster cannot be upgraded
     and will be automatically deleted after 30 days.
 
-<% unless version == 'ga' -%>
 * `enable_tpu` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Whether to enable Cloud TPU resources in this cluster.
     See the [official documentation](https://cloud.google.com/tpu/docs/kubernetes-engine-setup).
-<% end -%>
 
 * `enable_legacy_abac` - (Optional) Whether the ABAC authorizer is enabled for this cluster.
     When enabled, identities in the system, including service accounts, nodes, and controllers,
@@ -189,11 +186,9 @@ VPC-native clusters. Adding this block enables [IP aliasing](https://cloud.googl
 making the cluster VPC-native instead of routes-based. Structure is documented
 below.
 
-<% unless version == 'ga' -%>
 * `networking_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Determines whether alias IPs or routes will be used for pod IPs in the cluster.
 Options are `VPC_NATIVE` or `ROUTES`. `VPC_NATIVE` enables [IP aliasing](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-aliases),
 and requires the `ip_allocation_policy` block to be defined. By default when this field is unspecified, GKE will create a `ROUTES`-based cluster.
-<% end -%>
 
 * `logging_service` - (Optional) The logging service that the cluster should
     write logs to. Available options include `logging.googleapis.com`(Legacy Stackdriver),
@@ -266,11 +261,9 @@ region are guaranteed to support the same version.
     `version_prefix` field to approximate fuzzy versions in a Terraform-compatible way.
     To update nodes in other node pools, use the `version` attribute on the node pool.
 
-<% unless version == 'ga' -%>
 * `pod_security_policy_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is documented below.
-<% end -%>
 
 * `authenticator_groups_config` - (Optional) Configuration for the
     [Google Groups for GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#groups-setup-gsuite) feature.
@@ -279,16 +272,13 @@ region are guaranteed to support the same version.
 * `private_cluster_config` - (Optional) Configuration for [private clusters](https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters),
 clusters with private nodes. Structure is documented below.
 
-<% unless version == 'ga' -%>
 * `cluster_telemetry` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for
    [ClusterTelemetry](https://cloud.google.com/monitoring/kubernetes-engine/installing#controlling_the_collection_of_application_logs) feature,
    Structure is documented below.
-<% end -%>
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
-<% unless version == 'ga' -%>
 * `release_channel` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
 Configuration options for the [Release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels)
 feature, which provide more control over automatic upgrades of your GKE clusters.
@@ -299,7 +289,6 @@ the default version for a channel. Note that removing the `release_channel`
 field from your config will cause Terraform to stop managing your cluster's
 release channel, but will not unenroll it. Instead, use the `"UNSPECIFIED"`
 channel. Structure is documented below.
-<% end -%>
 
 * `remove_default_node_pool` - (Optional) If `true`, deletes the default node
     pool upon cluster creation. If you're using `google_container_node_pool`
@@ -324,7 +313,6 @@ subnetwork in which the cluster's instances are launched.
     [Google IAM Service Account](https://cloud.google.com/iam/docs/service-accounts#user-managed_service_accounts).
     Structure is documented below.
 
-<% unless version == 'ga' -%>
 * `enable_intranode_visibility` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
     Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.
 
@@ -338,7 +326,6 @@ The `default_snat_status` block supports
 The `cluster_telemetry` block supports
 * `type` - Telemetry integration for the cluster. Supported values (`ENABLE, DISABLE, SYSTEM_ONLY`);
    `SYSTEM_ONLY` (Only system components are monitored and logged) is only available in GKE versions 1.15 and later.
-<% end -%>
 
 The `addons_config` block supports:
 
@@ -364,7 +351,6 @@ The `addons_config` block supports:
     The status of the CloudRun addon. It is disabled by default.
     Set `disabled = false` to enable.
 
-<% unless version == 'ga' -%>
 * `istio_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     Structure is documented below.
 
@@ -383,7 +369,6 @@ The `addons_config` block supports:
 
 *  `config_connector_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
-<% end -%>
 
 This example `addons_config` disables two addons:
 
@@ -405,14 +390,12 @@ The `database_encryption` block supports:
 
 * `key_name` - (Required) the key to use to encrypt/decrypt secrets.  See the [DatabaseEncryption definition](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#Cluster.DatabaseEncryption) for more information.
 
-<% unless version == 'ga' -%>
 The `istio_config` block supports:
 
 * `disabled` - (Optional) The status of the Istio addon, which makes it easy to set up Istio for services in a
     cluster. It is disabled by default. Set `disabled = false` to enable.
 
 * `auth` - (Optional) The authentication type between services in Istio. Available options include `AUTH_MUTUAL_TLS`.
-<% end -%>
 
 The `cluster_autoscaling` block supports:
 
@@ -427,12 +410,10 @@ in addition to node auto-provisioning. Structure is documented below.
 * `auto_provisioning_defaults` - (Optional) Contains defaults for a node pool created by NAP.
 Structure is documented below.
 
-<% unless version == 'ga' -%>
 * `autoscaling_profile` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) Configuration
 options for the [Autoscaling profile](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#autoscaling_profiles)
 feature, which lets you choose whether the cluster autoscaler should optimize for resource utilization or resource availability
 when deciding to remove nodes from a cluster. Can be `BALANCED` or `OPTIMIZE_UTILIZATION`. Defaults to `BALANCED`.
-<% end -%>
 
 The `resource_limits` block supports:
 
@@ -446,12 +427,10 @@ for a list of types.
 
 The `auto_provisioning_defaults` block supports:
 
-<% unless version == 'ga' -%>
 * `min_cpu_platform` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
 Minimum CPU platform to be used for NAP created node pools. The instance may be scheduled on the
 specified or newer CPU platform. Applicable values are the friendly names of CPU platforms, such
 as "Intel Haswell" or "Intel Sandy Bridge".
-<% end -%>
 
 * `oauth_scopes` - (Optional) Scopes that are used by NAP when creating node pools.
 
@@ -670,12 +649,10 @@ workload_identity_config {
 }
 ```
 
-<% unless version == 'ga' -%>
 The `pod_security_policy_config` block supports:
 
 * `enabled` (Required) - Enable the PodSecurityPolicy controller for this cluster.
     If enabled, pods must be valid under a PodSecurityPolicy to be created.
-<% end -%>
 
 The `private_cluster_config` block supports:
 
@@ -697,11 +674,9 @@ subnet. See [Private Cluster Limitations](https://cloud.google.com/kubernetes-en
 for more details. This field only applies to private clusters, when
 `enable_private_nodes` is `true`.
 
-<% unless version == 'ga' -%>
 * `master_global_access_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - Controls cluster master global
 access settings. If unset, Terraform will no longer manage this field and will
 not modify the previously-set value. Structure is documented below.
-<% end -%>
 
 In addition, the `private_cluster_config` allows access to the following read-only fields:
 
@@ -715,12 +690,10 @@ In addition, the `private_cluster_config` allows access to the following read-on
 `private_cluster_config` when `enable_private_nodes` is `false`. It's
 recommended that you omit the block entirely if the field is not set to `true`.
 
-<% unless version == 'ga' -%>
 The `private_cluster_config.master_global_access_config` block supports:
 
 * `enabled` (Optional) - Whether the cluster master is accessible globally or
 not.
-<% end -%>
 
 The `sandbox_config` block supports:
 
@@ -729,7 +702,6 @@ The `sandbox_config` block supports:
 
     * `"gvisor"`: Pods run within a gVisor sandbox.
 
-<% unless version == 'ga' -%>
 The `release_channel` block supports:
 
 * `channel` - (Required) The selected release channel.
@@ -738,7 +710,6 @@ The `release_channel` block supports:
     * RAPID: Weekly upgrade cadence; Early testers and developers who requires new features.
     * REGULAR: Multiple per month upgrade cadence; Production users who need features not yet offered in the Stable channel.
     * STABLE: Every few months upgrade cadence; Production users who need stability above all else, and for whom frequent upgrades are too risky.
-<% end -%>
 
 The `resource_usage_export_config` block supports:
 
@@ -828,11 +799,9 @@ exported:
     be different than the `min_master_version` set in the config if the master
     has been updated by GKE.
 
-<% unless version == 'ga' -%>
 * `tpu_ipv4_cidr_block` - ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The IP address range of the Cloud TPUs in this cluster, in
     [CIDR](http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing)
     notation (e.g. `1.2.3.4/29`).
-<% end -%>
 
 * `services_ipv4_cidr` - The IP address range of the Kubernetes services in this
   cluster, in [CIDR](http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing)

@@ -16,8 +16,6 @@ type Entry struct {
 	Filename string
 	Product  string
 	Resource string
-	Layout   string
-	Version  string
 }
 
 type Entries struct {
@@ -38,16 +36,11 @@ func main() {
 		log.Fatal("Script was run outside of google provider directory")
 	}
 
-	currVersion, err := getProviderVersion(tpgDir)
+	resourcesByProduct, err := entriesByProduct(tpgDir + "/website/docs/r")
 	if err != nil {
 		panic(err)
 	}
-
-	resourcesByProduct, err := entriesByProduct(currVersion, tpgDir+"/website/docs/r")
-	if err != nil {
-		panic(err)
-	}
-	dataSourcesByProduct, err := entriesByProduct(currVersion, tpgDir+"/website/docs/d")
+	dataSourcesByProduct, err := entriesByProduct(tpgDir + "/website/docs/d")
 	if err != nil {
 		panic(err)
 	}
@@ -78,7 +71,7 @@ func main() {
 	}
 }
 
-func entriesByProduct(currVersion, dir string) (map[string][]Entry, error) {
+func entriesByProduct(dir string) (map[string][]Entry, error) {
 	d, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, err
@@ -90,21 +83,10 @@ func entriesByProduct(currVersion, dir string) (map[string][]Entry, error) {
 		if err != nil {
 			return nil, err
 		}
-		if entry.Version == "google" || entry.Version == currVersion {
-			entriesByProduct[entry.Product] = append(entriesByProduct[entry.Product], entry)
-		}
+		entriesByProduct[entry.Product] = append(entriesByProduct[entry.Product], entry)
 	}
 
 	return entriesByProduct, nil
-}
-
-func getProviderVersion(dir string) (string, error) {
-	file, err := ioutil.ReadFile(dir + "/website/docs/index.html.markdown")
-	if err != nil {
-		return "google", err
-	}
-
-	return findRegex(file, `version: "(.*)"`), nil
 }
 
 func getEntry(dir, filename string) (Entry, error) {
@@ -117,8 +99,6 @@ func getEntry(dir, filename string) (Entry, error) {
 		Filename: strings.TrimSuffix(filename, ".markdown"),
 		Product:  findRegex(file, `subcategory: "(.*)"`),
 		Resource: findRegex(file, `page_title: "Google: (.*)"`),
-		Layout:   findRegex(file, `layout: "(.*)"`),
-		Version:  findRegex(file, `version: "(.*)"`),
 	}, nil
 }
 

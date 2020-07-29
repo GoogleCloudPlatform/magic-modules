@@ -1,14 +1,11 @@
-<% autogen_exception -%>
 ---
 subcategory: "Dataflow"
 layout: "google"
-version: "google-beta"
 page_title: "Google: google_dataflow_flex_template_job"
 sidebar_current: "docs-google-dataflow-flex-template-job"
 description: |-
   Creates a job in Dataflow based on a Flex Template.
 ---
-<% unless version == 'ga' -%>
 
 # google\_dataflow\_flex\_template\_job
 
@@ -83,5 +80,3 @@ In addition to the arguments listed above, the following computed attributes are
 * `job_id` - The unique ID of this job.
 
 * `state` - The current state of the resource, selected from the [JobState enum](https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.jobs#Job.JobState)
-
-<% end -%>

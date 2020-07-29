@@ -1,14 +1,11 @@
-<% autogen_exception -%>
 ---
 subcategory: "Firebase"
 layout: "google"
-version: "google-beta"
 page_title: "Google: google_firebase_web_app"
 sidebar_current: "docs-google-firebase-web-app"
 description: |-
   A Google Cloud Firebase web application instance
 ---
-<% unless version == 'ga' -%>
 
 # google\_firebase\_web\_app
 
@@ -48,5 +45,3 @@ In addition to the arguments listed above, the following computed attributes are
 * `app_id` -
   Immutable. The globally unique, Firebase-assigned identifier of the App.
   This identifier should be treated as an opaque token, as the data format is not specified.
-
-<% end -%>

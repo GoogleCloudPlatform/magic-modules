@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 ---
 subcategory: "Cloud SQL"
 layout: "google"
@@ -217,7 +216,6 @@ includes an up-to-date reference of supported versions.
     
 * `root_password` - (Optional) Initial root password. Required for MS SQL Server, ignored by MySQL and PostgreSQL.
 
-<% unless version == 'ga' -%>
 * `encryption_key_name` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
     The full path to the encryption key used for the CMEK disk encryption.  Setting
     up disk encryption currently requires manual steps outside of Terraform.
@@ -227,7 +225,6 @@ includes an up-to-date reference of supported versions.
     manually, please see [this step](https://cloud.google.com/sql/docs/mysql/configure-cmek#service-account).
     That service account needs the `Cloud KMS > Cloud KMS CryptoKey Encrypter/Decrypter` role on your
     key - please see [this step](https://cloud.google.com/sql/docs/mysql/configure-cmek#grantkey).
-<% end -%>
 
 The required `settings` block supports:
 

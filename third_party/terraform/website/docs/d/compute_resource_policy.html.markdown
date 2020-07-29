@@ -1,14 +1,11 @@
-<% autogen_exception -%>
 ---
 layout: "google"
-version: "google-beta"
 subcategory: "Compute Engine"
 page_title: "Google: google_compute_resource_policy"
 sidebar_current: "docs-google-datasource-compute-resource-policy"
 description: |-
   Provide access to a Resource Policy's attributes
 ---
-<% unless version == 'ga' -%>
 
 # google\_compute\_resource\_policy
 
@@ -16,6 +13,8 @@ Provide access to a Resource Policy's attributes. For more information see [the 
 
 ~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+
+## Example Usage
 
 ```terraform
 provider "google-beta" {
@@ -44,5 +43,3 @@ The following attributes are exported:
 
 * `description` - Description of this Resource Policy.
 * `self_link` - The URI of the resource.
-
-<% end -%>

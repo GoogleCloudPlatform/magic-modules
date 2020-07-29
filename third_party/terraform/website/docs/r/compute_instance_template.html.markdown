@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 ---
 subcategory: "Compute Engine"
 layout: "google"
@@ -386,10 +385,8 @@ The `scheduling` block supports:
    [here](https://cloud.google.com/compute/docs/nodes/create-nodes).
    Structure documented below.
 
-<% unless version == 'ga' -%>
 * `min_node_cpus` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The minimum number of virtual CPUs
    this instance will consume when running on a sole-tenant node.
-<% end -%>
 
 The `guest_accelerator` block supports:
 

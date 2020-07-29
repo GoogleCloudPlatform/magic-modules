@@ -1,20 +1,20 @@
-<% autogen_exception -%>
 ---
 subcategory: "Cloud Identity"
 layout: "google"
-version: "google-beta"
 page_title: "Google: google_cloud_identity_groups"
 sidebar_current: "docs-google-datasource-cloud-identity-groups"
 description: |-
   Get list of the Cloud Identity Groups under a customer or namespace.
 ---
-<% unless version == 'ga' -%>
 
 # google_cloud_identity_groups
 
 Use this data source to get list of the Cloud Identity Groups under a customer or namespace.
 
 https://cloud.google.com/identity/docs/concepts/overview#groups
+
+~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 
 ## Example Usage
 
@@ -67,5 +67,3 @@ The `group_key` block supports:
   If populated, the EntityKey represents an external-identity-mapped group.
   The namespace must correspond to an identity source created in Admin Console
   and must be in the form of `identitysources/{identity_source_id}`.
-
-<% end -%>

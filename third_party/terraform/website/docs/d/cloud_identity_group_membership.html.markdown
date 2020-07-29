@@ -1,20 +1,20 @@
-<% autogen_exception -%>
 ---
 subcategory: "Cloud Identity"
 layout: "google"
-version: "google-beta"
 page_title: "Google: google_cloud_identity_group_memberships"
 sidebar_current: "docs-google-datasource-cloud-identity-group-memberships"
 description: |-
   Get list of the Cloud Identity Group Memberships within a Group.
 ---
-<% unless version == 'ga' -%>
 
 # google_cloud_identity_group_memberships
 
 Use this data source to get list of the Cloud Identity Group Memberships within a given Group.
 
 https://cloud.google.com/identity/docs/concepts/overview#memberships
+
+~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 
 ## Example Usage
 
@@ -75,5 +75,3 @@ The `preferred_member_key` block supports:
   If not populated, the EntityKey represents a Google-managed entity
   such as a Google user or a Google Group.
   If populated, the EntityKey represents an external-identity-mapped group.
-
-<% end -%>
