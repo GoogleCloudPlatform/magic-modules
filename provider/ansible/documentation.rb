@@ -112,7 +112,7 @@ module Provider
         desc.split(".\n").map do |paragraph|
           paragraph += '.' unless paragraph.end_with?('.')
           paragraph = format_url(paragraph)
-          paragraph.tr("\n", ' ').strip.squeeze(' ')
+          paragraph.tr("\n", ' ').strip.squeeze(' ').gsub('`', "'")
         end
       end
 
