@@ -21,7 +21,7 @@ For more information see
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_bigquery_default_service_account" "bq_sa" {
 }
 

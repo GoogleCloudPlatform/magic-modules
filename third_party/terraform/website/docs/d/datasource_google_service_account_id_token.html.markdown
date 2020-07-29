@@ -17,7 +17,7 @@ For more information see
 ## Example Usage - ServiceAccount JSON credential file.
   `google_service_account_id_token` will use the configured [provider credentials](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#credentials-1)
   
-  ```hcl
+  ```terraform
   data "google_service_account_id_token" "oidc" {
     target_audience = "https://foo.bar/"
   }
@@ -33,7 +33,7 @@ For more information see
   Note: to use the following, you must grant `target_service_account` the
   `roles/iam.serviceAccountTokenCreator` role on itself.
 
-  ```hcl
+  ```terraform
   data "google_service_account_access_token" "impersonated" {
     provider = google
     target_service_account = "impersonated-account@project.iam.gserviceaccount.com"
@@ -64,7 +64,7 @@ For more information see
 
   The following configuration will invoke [Cloud Run](https://cloud.google.com/run/docs/authenticating/service-to-service) endpoint where the service account for Terraform has been granted `roles/run.invoker` role previously.
 
-```hcl
+```terraform
 
 data "google_service_account_id_token" "oidc" {
   target_audience = "https://your.cloud.run.app/"

@@ -21,7 +21,7 @@ and
 
 Example creating a public object in an existing `image-store` bucket.
 
-```hcl
+```terraform
 resource "google_storage_bucket_object" "picture" {
   name   = "butterfly01"
   source = "/images/nature/garden-tiger-moth.jpg"

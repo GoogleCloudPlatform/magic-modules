@@ -14,14 +14,14 @@ the official [API](https://cloud.google.com/compute/docs/access/service-accounts
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_service_account" "object_viewer" {
   account_id = "object-viewer"
 }
 ```
 
 ## Example Usage, save key in Kubernetes secret
-```hcl
+```terraform
 data "google_service_account" "myaccount" {
   account_id = "myaccount-id"
 }

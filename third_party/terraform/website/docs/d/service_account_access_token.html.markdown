@@ -34,7 +34,7 @@ Once the IAM permissions are set, you can apply the new token to a provider boot
 
 In the example below, `google_project` will run as `service_B`.
 
-```hcl
+```terraform
 provider "google" {
 }
 

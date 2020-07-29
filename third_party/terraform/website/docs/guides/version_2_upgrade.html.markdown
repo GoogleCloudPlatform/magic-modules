@@ -132,7 +132,7 @@ in order to upgrade your provider to the latest released version.
 
 For example, given this previous configuration:
 
-```hcl
+```terraform
 provider "google" {
   # ... other configuration ...
 
@@ -142,7 +142,7 @@ provider "google" {
 
 An updated configuration:
 
-```hcl
+```terraform
 provider "google" {
   # ... other configuration ...
 
@@ -170,7 +170,7 @@ These changes will be announced in the [`google-beta` CHANGELOG](https://github.
 
 To have resources at different API versions, set up provider blocks for each version:
 
-```hcl
+```terraform
 provider "google" {
   credentials = "${file("account.json")}"
   project     = "my-project-id"
@@ -187,7 +187,7 @@ provider "google-beta" {
 In each resource, explicitly state which provider that resource should be used
 with:
 
-```hcl
+```terraform
 resource "google_compute_instance" "ga-instance" {
   provider = "google"
 
@@ -223,7 +223,7 @@ may have been reordered.
 
 Example previous configuration:
 
-```hcl
+```terraform
 resource "google_bigtable_instance" "instance" {
   name         = "tf-instance"
   cluster_id   = "tf-instance-cluster"
@@ -235,7 +235,7 @@ resource "google_bigtable_instance" "instance" {
 
 Example updated configuration:
 
-```hcl
+```terraform
 resource "google_bigtable_instance" "instance" {
   name = "tf-instance"
   cluster {
@@ -292,7 +292,7 @@ Use the [`google-beta` provider](#google-beta-provider) to use these resources.
 
 Example updated configuration:
 
-```hcl
+```terraform
 resource "google_cloudbuild_trigger" "build_trigger" {
   trigger_template {
     branch_name = "master-updated"
@@ -333,7 +333,7 @@ Use the `event_trigger` block instead.
 
 Example updated configuration:
 
-```hcl
+```terraform
 resource "google_cloudfunctions_function" "function" {
   name                  = "example-function"
   available_memory_mb   = 128
@@ -386,7 +386,7 @@ You may also encounter the same behaviour on import.
 
 Use the `disk_encryption_key` block instead:
 
-```hcl
+```terraform
 data "google_compute_image" "my_image" {
   family  = "debian-9"
   project = "debian-cloud"
@@ -486,7 +486,7 @@ Before updating, remove it from your config.
 
 Use the `snapshot_encryption_key` block instead:
 
-```hcl
+```terraform
 data "google_compute_image" "my_image" {
   family  = "debian-9"
   project = "debian-cloud"
@@ -514,7 +514,7 @@ resource "google_compute_snapshot" "my_snapshot" {
 
 Use the `source_disk_encryption_key` block instead:
 
-```hcl
+```terraform
 data "google_compute_image" "my_image" {
   family  = "debian-9"
   project = "debian-cloud"
@@ -589,7 +589,7 @@ Use the `name` field along with the `random` provider instead.
 
 Sample config:
 
-```hcl
+```terraform
 variable "machine_type" {}
 
 resource "google_container_cluster" "example" {
@@ -652,7 +652,7 @@ Use `protoc_output_base64` instead.
 
 Example previous configuration:
 
-```hcl
+```terraform
 resource "google_endpoints_service" "grpc_service" {
   service_name  = "api-name.endpoints.project-id.cloud.goog"
   grpc_config   = "${file("service_spec.yml")}"
@@ -661,7 +661,7 @@ resource "google_endpoints_service" "grpc_service" {
 
 Example updated configuration:
 
-```hcl
+```terraform
 resource "google_endpoints_service" "grpc_service" {
   service_name         = "api-name.endpoints.project-id.cloud.goog"
   grpc_config          = "${file("service_spec.yml")}"

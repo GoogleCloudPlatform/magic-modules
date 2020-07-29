@@ -21,7 +21,7 @@ state as plain-text. [Read more about sensitive data in state](/docs/state/sensi
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_project" "my_project" {
   name       = "My Project"
   project_id = "your-project-id"

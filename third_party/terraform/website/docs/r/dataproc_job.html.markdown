@@ -16,7 +16,7 @@ Manages a job resource within a Dataproc cluster within GCE. For more informatio
 
 ## Example usage
 
-```hcl
+```terraform
 resource "google_dataproc_cluster" "mycluster" {
   name   = "dproc-cluster-unique-name"
   region = "us-central1"
@@ -111,7 +111,7 @@ The `pyspark_config` block supports:
 
 Submitting a pyspark job to the cluster. Below is an example configuration:
 
-```hcl
+```terraform
 # Submit a pyspark job to the cluster
 resource "google_dataproc_job" "pyspark" {
   ...
@@ -149,7 +149,7 @@ are generally applicable:
 
 The `spark_config` block supports:
 
-```hcl
+```terraform
 # Submit a spark job to the cluster
 resource "google_dataproc_job" "spark" {
   ...
@@ -192,7 +192,7 @@ resource "google_dataproc_job" "spark" {
 
 The `hadoop_config` block supports:
 
-```hcl
+```terraform
 # Submit a hadoop job to the cluster
 resource "google_dataproc_job" "hadoop" {
   ...
@@ -225,7 +225,7 @@ resource "google_dataproc_job" "hadoop" {
 
 The `hive_config` block supports:
 
-```hcl
+```terraform
 # Submit a hive job to the cluster
 resource "google_dataproc_job" "hive" {
   ...
@@ -255,7 +255,7 @@ resource "google_dataproc_job" "hive" {
 
 The `pig_config` block supports:
 
-```hcl
+```terraform
 # Submit a pig job to the cluster
 resource "google_dataproc_job" "pig" {
   ...
@@ -290,7 +290,7 @@ resource "google_dataproc_job" "pig" {
 
 The `sparksql_config` block supports:
 
-```hcl
+```terraform
 # Submit a spark SQL job to the cluster
 resource "google_dataproc_job" "sparksql" {
   ...

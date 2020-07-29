@@ -25,7 +25,7 @@ and
 
 This snippet creates a customized IAM organization role.
 
-```hcl
+```terraform
 resource "google_organization_iam_custom_role" "my-custom-role" {
   role_id     = "myCustomRole"
   org_id      = "123456789"

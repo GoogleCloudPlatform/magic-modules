@@ -11,7 +11,7 @@ description: |-
 
 Use this data source to get information about a Google Billing Account.
 
-```hcl
+```terraform
 data "google_billing_account" "acct" {
   display_name = "My Billing Account"
   open         = true

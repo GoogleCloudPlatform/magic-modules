@@ -25,7 +25,7 @@ doc for more information.
 
 ## Example Usage
 
-```hcl
+```terraform
 # Top-level folder under an organization.
 resource "google_folder" "department1" {
   display_name = "Department 1"

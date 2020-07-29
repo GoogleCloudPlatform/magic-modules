@@ -21,7 +21,7 @@ to be functional.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_compute_network_peering" "peering1" {
   name         = "peering1"
   network      = google_compute_network.default.id

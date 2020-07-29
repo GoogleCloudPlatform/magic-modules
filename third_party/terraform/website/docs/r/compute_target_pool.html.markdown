@@ -18,7 +18,7 @@ and [API](https://cloud.google.com/compute/docs/reference/latest/targetPools).
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_compute_target_pool" "default" {
   name = "instance-pool"
 

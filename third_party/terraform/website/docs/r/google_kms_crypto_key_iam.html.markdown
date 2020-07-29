@@ -21,7 +21,7 @@ Three different resources help you manage your IAM policy for KMS crypto key. Ea
 
 # google\_kms\_crypto\_key\_iam\_policy
 
-```hcl
+```terraform
 resource "google_kms_key_ring" "keyring" {
   name     = "keyring-example"
   location = "global"
@@ -53,7 +53,7 @@ resource "google_kms_crypto_key_iam_policy" "crypto_key" {
 
 With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 
-```hcl
+```terraform
 data "google_iam_policy" "admin" {
   binding {
     role = "roles/cloudkms.cryptoKeyEncrypter"
@@ -73,7 +73,7 @@ data "google_iam_policy" "admin" {
 
 # google\_kms\_crypto\_key\_iam\_binding
 
-```hcl
+```terraform
 resource "google_kms_crypto_key_iam_binding" "crypto_key" {
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypter"
@@ -86,7 +86,7 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key" {
 
 With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 
-```hcl
+```terraform
 resource "google_kms_crypto_key_iam_binding" "crypto_key" {
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypter"
@@ -105,7 +105,7 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key" {
 
 # google\_kms\_crypto\_key\_iam\_member
 
-```hcl
+```terraform
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypter"
@@ -115,7 +115,7 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
 
 With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 
-```hcl
+```terraform
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypter"

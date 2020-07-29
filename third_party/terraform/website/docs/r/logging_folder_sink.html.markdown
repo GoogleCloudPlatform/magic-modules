@@ -18,7 +18,7 @@ granted to the credentials used with terraform.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_logging_folder_sink" "my-sink" {
   name   = "my-sink"
   folder = google_folder.my-folder.name

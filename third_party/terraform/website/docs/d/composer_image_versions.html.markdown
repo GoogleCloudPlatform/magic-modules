@@ -13,7 +13,7 @@ Provides access to available Cloud Composer versions in a region for a given pro
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_composer_image_versions" "all" {
 }
 

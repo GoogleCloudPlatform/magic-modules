@@ -15,7 +15,7 @@ https://cloud.google.com/compute/docs/load-balancing/health-checks#health_check_
 
 ## Example Usage
 
-```tf
+```terraform
 data "google_compute_lb_ip_ranges" "ranges" {
 }
 

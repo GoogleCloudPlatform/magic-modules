@@ -1,6 +1,9 @@
+<% autogen_exception -%>
+<% unless version == 'ga' -%>
 ---
 subcategory: "Dataflow"
 layout: "google"
+version: "google-beta"
 page_title: "Google: google_dataflow_flex_template_job"
 sidebar_current: "docs-google-dataflow-flex-template-job"
 description: |-
@@ -16,7 +19,7 @@ and [Dataflow](https://cloud.google.com/dataflow/).
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_dataflow_flex_template_job" "big_data_job" {
   provider                = google-beta
   name                    = "dataflow-flextemplates-job"
@@ -80,3 +83,5 @@ In addition to the arguments listed above, the following computed attributes are
 * `job_id` - The unique ID of this job.
 
 * `state` - The current state of the resource, selected from the [JobState enum](https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.jobs#Job.JobState)
+
+<% end -%>

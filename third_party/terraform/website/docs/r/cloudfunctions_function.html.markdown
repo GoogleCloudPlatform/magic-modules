@@ -22,7 +22,7 @@ for Cloud Functions.
 
 ## Example Usage - Public Function
 
-```hcl
+```terraform
 resource "google_storage_bucket" "bucket" {
   name = "test-bucket"
 }
@@ -58,7 +58,7 @@ resource "google_cloudfunctions_function_iam_member" "invoker" {
 
 ## Example Usage - Single User
 
-```hcl
+```terraform
 resource "google_storage_bucket" "bucket" {
   name = "test-bucket"
 }

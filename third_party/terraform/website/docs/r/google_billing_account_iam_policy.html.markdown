@@ -23,7 +23,7 @@ by use of this resource. The safest alternative is to use multiple `google_billi
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_billing_account_iam_policy" "policy" {
   billing_account_id = "00AA00-000AAA-00AA0A"
   policy_data        = data.google_iam_policy.admin.policy_data

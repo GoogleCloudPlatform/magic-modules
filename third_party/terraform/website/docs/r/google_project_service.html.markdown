@@ -16,7 +16,7 @@ For a list of services available, visit the
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_project_service" "project" {
   project = "your-project-id"
   service = "iam.googleapis.com"

@@ -21,7 +21,7 @@ Three different resources help you manage your IAM policy for KMS key ring. Each
 
 ## google\_kms\_key\_ring\_iam\_policy
 
-```hcl
+```terraform
 resource "google_kms_key_ring" "keyring" {
   name     = "keyring-example"
   location = "global"
@@ -45,7 +45,7 @@ resource "google_kms_key_ring_iam_policy" "key_ring" {
 
 With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 
-```hcl
+```terraform
 resource "google_kms_key_ring" "keyring" {
   name     = "keyring-example"
   location = "global"
@@ -75,7 +75,7 @@ resource "google_kms_key_ring_iam_policy" "key_ring" {
 
 ## google\_kms\_key\_ring\_iam\_binding
 
-```hcl
+```terraform
 resource "google_kms_key_ring_iam_binding" "key_ring" {
   key_ring_id = "your-key-ring-id"
   role        = "roles/editor"
@@ -88,7 +88,7 @@ resource "google_kms_key_ring_iam_binding" "key_ring" {
 
 With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 
-```hcl
+```terraform
 resource "google_kms_key_ring_iam_binding" "key_ring" {
   key_ring_id = "your-key-ring-id"
   role        = "roles/editor"
@@ -107,7 +107,7 @@ resource "google_kms_key_ring_iam_binding" "key_ring" {
 
 ## google\_kms\_key\_ring\_iam\_member
 
-```hcl
+```terraform
 resource "google_kms_key_ring_iam_member" "key_ring" {
   key_ring_id = "your-key-ring-id"
   role        = "roles/editor"
@@ -117,7 +117,7 @@ resource "google_kms_key_ring_iam_member" "key_ring" {
 
 With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 
-```hcl
+```terraform
 resource "google_kms_key_ring_iam_member" "key_ring" {
   key_ring_id = "your-key-ring-id"
   role        = "roles/editor"

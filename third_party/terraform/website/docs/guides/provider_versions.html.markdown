@@ -46,7 +46,7 @@ their GA launch.
 To use the `google-beta` provider, simply set the `provider` field on each
 resource where you want to use `google-beta`.
 
-```hcl
+```terraform
 resource "google_compute_instance" "beta-instance" {
   provider = google-beta
   # ...
@@ -56,7 +56,7 @@ resource "google_compute_instance" "beta-instance" {
 To customize the behavior of the beta provider, you can define a `google-beta`
 provider block, which accepts the same arguments as the `google` provider block.
 
-```hcl
+```terraform
 provider "google-beta" {
   credentials = "${file("account.json")}"
   project     = "my-project-id"
@@ -75,7 +75,7 @@ In each resource, state which provider that resource should be used with.
 We recommend that you set `provider = google` even though it is the default,
 for clarity.
 
-```hcl
+```terraform
 resource "google_compute_instance" "ga-instance" {
   provider = google
 
@@ -91,7 +91,7 @@ resource "google_compute_instance" "beta-instance" {
 
 You can define parallel provider blocks - they will not interfere with each other.
 
-```hcl
+```terraform
 provider "google" {
   credentials = "${file("account.json")}"
   project     = "my-project-id"

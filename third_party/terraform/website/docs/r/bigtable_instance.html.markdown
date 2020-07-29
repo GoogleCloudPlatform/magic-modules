@@ -25,7 +25,7 @@ It is recommended to not set this field (or set it to true) until you're ready t
 
 ## Example Usage - Production Instance
 
-```hcl
+```terraform
 resource "google_bigtable_instance" "production-instance" {
   name = "tf-instance"
 
@@ -44,7 +44,7 @@ resource "google_bigtable_instance" "production-instance" {
 
 ## Example Usage - Development Instance
 
-```hcl
+```terraform
 resource "google_bigtable_instance" "development-instance" {
   name          = "tf-instance"
   instance_type = "DEVELOPMENT"

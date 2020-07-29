@@ -20,7 +20,7 @@ where the Shared VPC feature is referred to by its former name "XPN".
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_compute_shared_vpc_service_project" "service1" {
   host_project    = "host-project-id"
   service_project = "service-project-id-1"

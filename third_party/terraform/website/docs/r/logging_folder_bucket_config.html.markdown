@@ -17,7 +17,7 @@ Manages a folder-level logging bucket config. For more information see
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_folder" "default" {
 	display_name = "some-folder-name"
 	parent       = "organizations/123456789"

@@ -50,6 +50,7 @@
 <% end -%>
 '<%= dir -%>/test-fixtures/': 'third_party/terraform/utils/test-fixtures'
 <%  Dir["third_party/terraform/website/**/*.*"].each do |file_path|
+    next if file_path.end_with?('.erb')
     fname = file_path.split('/', 4)[3]
 -%>
 'website/<%= fname -%>': 'third_party/terraform/website/<%= fname -%>'

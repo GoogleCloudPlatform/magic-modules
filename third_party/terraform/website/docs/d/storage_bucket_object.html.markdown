@@ -20,7 +20,7 @@ and
 
 Example picture stored within a folder.
 
-```hcl
+```terraform
 data "google_storage_bucket_object" "picture" {
   name   = "folder/butterfly01.jpg"
   bucket = "image-store"

@@ -13,7 +13,7 @@ Get a VPN gateway within GCE from its name.
 
 ## Example Usage
 
-```tf
+```terraform
 data "google_compute_vpn_gateway" "my-vpn-gateway" {
   name = "vpn-gateway-us-east1"
 }

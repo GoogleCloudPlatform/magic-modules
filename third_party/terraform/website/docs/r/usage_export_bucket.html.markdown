@@ -23,7 +23,7 @@ safe to have multiple resources with the same backing bucket.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_project_usage_export_bucket" "usage_export" {
   project     = "development-project"
   bucket_name = "usage-tracking-bucket"

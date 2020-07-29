@@ -14,7 +14,7 @@ Get information about a Google Compute Image. Check that your service account ha
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_compute_image" "my_image" {
   family  = "debian-9"
   project = "debian-cloud"

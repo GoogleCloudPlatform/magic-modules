@@ -24,7 +24,7 @@ Three different resources help you manage your IAM policy for a Spanner instance
 
 ## google\_spanner\_instance\_iam\_policy
 
-```hcl
+```terraform
 data "google_iam_policy" "admin" {
   binding {
     role = "roles/editor"
@@ -43,7 +43,7 @@ resource "google_spanner_instance_iam_policy" "instance" {
 
 ## google\_spanner\_instance\_iam\_binding
 
-```hcl
+```terraform
 resource "google_spanner_instance_iam_binding" "instance" {
   instance = "your-instance-name"
   role     = "roles/compute.networkUser"
@@ -56,7 +56,7 @@ resource "google_spanner_instance_iam_binding" "instance" {
 
 ## google\_spanner\_instance\_iam\_member
 
-```hcl
+```terraform
 resource "google_spanner_instance_iam_member" "instance" {
   instance = "your-instance-name"
   role     = "roles/compute.networkUser"

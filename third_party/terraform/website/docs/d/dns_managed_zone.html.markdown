@@ -15,7 +15,7 @@ For more information see
 and
 [API](https://cloud.google.com/dns/api/v1/managedZones).
 
-```hcl
+```terraform
 data "google_dns_managed_zone" "env_dns_zone" {
   name = "qa-zone"
 }

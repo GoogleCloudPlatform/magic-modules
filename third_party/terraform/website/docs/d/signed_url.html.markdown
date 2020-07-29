@@ -15,7 +15,7 @@ For more info about signed URL's is available [here](https://cloud.google.com/st
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_storage_object_signed_url" "artifact" {
   bucket = "install_binaries"
   path   = "path/to/install_file.bin"
@@ -36,7 +36,7 @@ resource "google_compute_instance" "vm" {
 
 ## Full Example
 
-```hcl
+```terraform
 data "google_storage_object_signed_url" "get_url" {
   bucket       = "fried_chicken"
   path         = "path/to/file"

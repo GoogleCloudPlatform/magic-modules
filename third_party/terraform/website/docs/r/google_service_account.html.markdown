@@ -20,7 +20,7 @@ creation. If using these resources in the same config, you can add a
 
 This snippet creates a service account in a project.
 
-```hcl
+```terraform
 resource "google_service_account" "service_account" {
   account_id   = "service_account_id"
   display_name = "Service Account"

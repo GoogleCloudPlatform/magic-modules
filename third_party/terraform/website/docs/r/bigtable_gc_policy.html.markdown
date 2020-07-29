@@ -16,7 +16,7 @@ Creates a Google Cloud Bigtable GC Policy inside a family. For more information 
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_bigtable_instance" "instance" {
   name = "tf-instance"
   cluster {
@@ -49,7 +49,7 @@ resource "google_bigtable_gc_policy" "policy" {
 
 Multiple conditions is also supported. `UNION` when any of its sub-policies apply (OR). `INTERSECTION` when all its sub-policies apply (AND)
 
-```hcl
+```terraform
 resource "google_bigtable_gc_policy" "policy" {
   instance_name = google_bigtable_instance.instance.name
   table         = google_bigtable_table.table.name

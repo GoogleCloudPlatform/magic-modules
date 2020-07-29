@@ -53,6 +53,7 @@
 <%= lines(autogen_notice(:yaml, pwd)) -%>
 subcategory: "<%= tf_subcategory -%>"
 layout: "google"
+version: "google<% unless version == 'ga' -%>-beta<% end -%>"
 page_title: "Google: <%= resource_ns_iam -%>"
 sidebar_current: "docs-<%= resource_ns_iam.gsub("_", "-") -%>"
 description: |-
@@ -84,7 +85,7 @@ end
 -%>
 ## <%= markdown_escaped_name -%>\_policy
 
-```hcl
+```terraform
 data "google_iam_policy" "admin" {
   binding {
     role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
@@ -103,7 +104,7 @@ resource "<%= resource_ns_iam -%>_policy" "policy" {
 <% unless version == 'ga' || object.iam_policy.iam_conditions_request_type.nil? -%>
 With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 
-```hcl
+```terraform
 data "google_iam_policy" "admin" {
   binding {
     role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
@@ -127,7 +128,7 @@ resource "<%= resource_ns_iam -%>_policy" "policy" {
 <% end -%>
 ## <%= markdown_escaped_name -%>\_binding
 
-```hcl
+```terraform
 resource "<%= resource_ns_iam -%>_binding" "binding" {
 <%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
@@ -140,7 +141,7 @@ resource "<%= resource_ns_iam -%>_binding" "binding" {
 <% unless version == 'ga' || object.iam_policy.iam_conditions_request_type.nil? -%>
 With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 
-```hcl
+```terraform
 resource "<%= resource_ns_iam -%>_binding" "binding" {
 <%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
@@ -158,7 +159,7 @@ resource "<%= resource_ns_iam -%>_binding" "binding" {
 <% end -%>
 ## <%= markdown_escaped_name -%>\_member
 
-```hcl
+```terraform
 resource "<%= resource_ns_iam -%>_member" "member" {
 <%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
@@ -169,7 +170,7 @@ resource "<%= resource_ns_iam -%>_member" "member" {
 <% unless version == 'ga' || object.iam_policy.iam_conditions_request_type.nil? -%>
 With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
 
-```hcl
+```terraform
 resource "<%= resource_ns_iam -%>_member" "member" {
 <%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
@@ -222,7 +223,7 @@ The following arguments are supported:
   a `google_iam_policy` data source.
 
 <% unless version == 'ga' || object.iam_policy.iam_conditions_request_type.nil? -%>
-* `condition` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) An [IAM Condition](https://cloud.google.com/iam/docs/conditions-overview) for a given binding.
+* `condition` - (Optional) An [IAM Condition](https://cloud.google.com/iam/docs/conditions-overview) for a given binding.
   Structure is documented below.
 
 ---
@@ -262,7 +263,7 @@ Any variables not passed in the import command will be taken from the provider c
 
 IAM member imports use space-delimited identifiers: the resource in question, the role, and the member identity, e.g.
 ```
-$ terraform import <% if object.min_version.name == 'beta' %>-provider=google-beta <% end -%><%= resource_ns_iam -%>_member.editor "<%= all_formats.first.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%> jane@example.com"
+$ terraform import <% if version == 'beta' %>-provider=google-beta <% end -%><%= resource_ns_iam -%>_member.editor "<%= all_formats.first.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%> jane@example.com"
 ```
 
 IAM binding imports use space-delimited identifiers: the resource in question and the role, e.g.
@@ -272,7 +273,7 @@ $ terraform import <%= resource_ns_iam -%>_binding.editor "<%= all_formats.first
 
 IAM policy imports use the identifier of the resource in question, e.g.
 ```
-$ terraform import <% if object.min_version.name == 'beta' %>-provider=google-beta <% end -%><%= resource_ns_iam -%>_policy.editor <%= all_formats.first.gsub('{{name}}', "{{#{object.name.underscore}}}") %>
+$ terraform import <% if version == 'beta' %>-provider=google-beta <% end -%><%= resource_ns_iam -%>_policy.editor <%= all_formats.first.gsub('{{name}}', "{{#{object.name.underscore}}}") %>
 ```
 
 -> If you're importing a resource with beta features, make sure to include `-provider=google-beta`

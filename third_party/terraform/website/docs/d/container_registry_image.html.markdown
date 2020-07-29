@@ -15,7 +15,7 @@ The URLs are computed entirely offline - as long as the project exists, they wil
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_container_registry_image" "debian" {
   name = "debian"
 }

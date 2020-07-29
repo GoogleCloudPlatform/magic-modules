@@ -13,7 +13,7 @@ This resource creates and rolls out a Cloud Endpoints service using OpenAPI or g
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_endpoints_service" "openapi_service" {
   service_name   = "api-name.endpoints.project-id.cloud.goog"
   project        = "project-id"

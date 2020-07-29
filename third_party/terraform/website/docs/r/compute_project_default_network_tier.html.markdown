@@ -18,7 +18,7 @@ For more information, see,
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_compute_project_default_network_tier" "default" {
   network_tier = "PREMIUM"
 }

@@ -16,7 +16,7 @@ This resource can be used to ensure that the GCS bucket exists prior to assignin
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_container_registry" "registry" {
   project  = "my-project"
   location = "EU"
@@ -25,7 +25,7 @@ resource "google_container_registry" "registry" {
 
 The `id` field of the `google_container_registry` is the identifier of the storage bucket that backs GCR and can be used to assign permissions to the bucket.
 
-```hcl
+```terraform
 resource "google_container_registry" "registry" {
   project  = "my-project"
   location = "EU"

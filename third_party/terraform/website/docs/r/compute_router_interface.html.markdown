@@ -16,7 +16,7 @@ and
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_compute_router_interface" "foobar" {
   name       = "interface-1"
   router     = "router-1"

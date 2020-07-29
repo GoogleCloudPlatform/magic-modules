@@ -15,7 +15,7 @@ documentation](https://cloud.google.com/resource-manager/docs/organization-polic
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_project_organization_policy" "policy" {
   project    = "project-id"
   constraint = "constraints/serviceuser.services"

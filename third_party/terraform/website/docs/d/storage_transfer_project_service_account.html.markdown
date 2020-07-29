@@ -13,7 +13,7 @@ Use this data source to retrieve Storage Transfer service account for this proje
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_storage_transfer_project_service_account" "default" {
 }
 

@@ -18,7 +18,7 @@ the IAM policy for an existing Google Cloud Platform Billing Account.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_billing_account_iam_member" "binding" {
   billing_account_id = "00AA00-000AAA-00AA0A"
   role               = "roles/billing.viewer"

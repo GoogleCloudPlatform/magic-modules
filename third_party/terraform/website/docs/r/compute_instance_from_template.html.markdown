@@ -21,7 +21,7 @@ This resource is specifically to create a compute instance from a given
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_compute_instance_template" "tpl" {
   name         = "template"
   machine_type = "n1-standard-1"

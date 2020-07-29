@@ -13,14 +13,14 @@ Get TensorFlow versions available for a project. For more information see the [o
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_tpu_tensorflow_versions" "available" {
 }
 ```
 
 ## Example Usage: Configure Basic TPU Node with available version
 
-```hcl
+```terraform
 data "google_tpu_tensorflow_versions" "available" {
 }
 

@@ -31,7 +31,7 @@ Four different resources help you manage your IAM policy for a project. Each of 
    fully managed by Terraform. If you do use this resource, it is recommended to **import** the policy before
    applying the change.
 
-```hcl
+```terraform
 resource "google_project_iam_policy" "project" {
   project     = "your-project-id"
   policy_data = data.google_iam_policy.admin.policy_data
@@ -50,7 +50,7 @@ data "google_iam_policy" "admin" {
 
 With IAM Conditions:
 
-```hcl
+```terraform
 resource "google_project_iam_policy" "project" {
   project     = "your-project-id"
   policy_data = "${data.google_iam_policy.admin.policy_data}"
@@ -77,7 +77,7 @@ data "google_iam_policy" "admin" {
 
 ~> **Note:** If `role` is set to `roles/owner` and you don't specify a user or service account you have access to in `members`, you can lock yourself out of your project.
 
-```hcl
+```terraform
 resource "google_project_iam_binding" "project" {
   project = "your-project-id"
   role    = "roles/editor"
@@ -90,7 +90,7 @@ resource "google_project_iam_binding" "project" {
 
 With IAM Conditions:
 
-```hcl
+```terraform
 resource "google_project_iam_binding" "project" {
   project = "your-project-id"
   role    = "roles/editor"
@@ -109,7 +109,7 @@ resource "google_project_iam_binding" "project" {
 
 ## google\_project\_iam\_member
 
-```hcl
+```terraform
 resource "google_project_iam_member" "project" {
   project = "your-project-id"
   role    = "roles/editor"
@@ -119,7 +119,7 @@ resource "google_project_iam_member" "project" {
 
 With IAM Conditions:
 
-```hcl
+```terraform
 resource "google_project_iam_member" "project" {
   project = "your-project-id"
   role    = "roles/editor"
@@ -135,7 +135,7 @@ resource "google_project_iam_member" "project" {
 
 ## google\_project\_iam\_audit\_config
 
-```hcl
+```terraform
 resource "google_project_iam_audit_config" "project" {
   project = "your-project-id"
   service = "allServices"

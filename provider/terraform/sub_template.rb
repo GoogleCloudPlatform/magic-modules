@@ -58,21 +58,23 @@ module Provider
                          pwd: pwd
       end
 
-      def build_property_documentation(property, pwd)
+      def build_property_documentation(property, pwd, version)
         return if property.removed?
 
         compile_template pwd + '/templates/terraform/property_documentation.erb',
                          property: property,
-                         pwd: pwd
+                         pwd: pwd,
+                         version: version
       end
 
-      def build_nested_property_documentation(property, pwd)
+      def build_nested_property_documentation(property, pwd, version)
         return if property.removed?
 
         compile_template(
           pwd + '/templates/terraform/nested_property_documentation.erb',
           property: property,
-          pwd: pwd
+          pwd: pwd,
+          version: version
         )
       end
 

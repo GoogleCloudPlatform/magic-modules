@@ -24,7 +24,7 @@ Three different resources help you manage your IAM policy for Healthcare DICOM s
 
 ## google\_healthcare\_dicom\_store\_iam\_policy
 
-```hcl
+```terraform
 data "google_iam_policy" "admin" {
   binding {
     role = "roles/editor"
@@ -43,7 +43,7 @@ resource "google_healthcare_dicom_store_iam_policy" "dicom_store" {
 
 ## google\_healthcare\_dicom\_store\_iam\_binding
 
-```hcl
+```terraform
 resource "google_healthcare_dicom_store_iam_binding" "dicom_store" {
   dicom_store_id = "your-dicom-store-id"
   role           = "roles/editor"
@@ -56,7 +56,7 @@ resource "google_healthcare_dicom_store_iam_binding" "dicom_store" {
 
 ## google\_healthcare\_dicom\_store\_iam\_member
 
-```hcl
+```terraform
 resource "google_healthcare_dicom_store_iam_member" "dicom_store" {
   dicom_store_id = "your-dicom-store-id"
   role           = "roles/editor"

@@ -16,7 +16,7 @@ location (`zone` and/or `region`) for your resources.
 
 ## Example Usage - Basic provider blocks
 
-```hcl
+```terraform
 provider "google" {
   credentials = file("account.json")
   project     = "my-project-id"
@@ -25,7 +25,7 @@ provider "google" {
 }
 ```
 
-```hcl
+```terraform
 provider "google-beta" {
   credentials = file("account.json")
   project     = "my-project-id"
@@ -46,15 +46,15 @@ See [Provider Versions](https://terraform.io/docs/providers/google/guides/provid
 for a full reference on how to use features from different GCP API versions in
 the Google provider.
 
-```hcl
+```terraform
 resource "google_compute_instance" "ga-instance" {
-  provider = "google"
+  provider = google
 
   # ...
 }
 
 resource "google_compute_instance" "beta-instance" {
-  provider = "google-beta"
+  provider = google-beta
 
   # ...
 }

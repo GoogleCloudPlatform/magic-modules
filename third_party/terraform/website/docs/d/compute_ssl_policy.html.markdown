@@ -14,7 +14,7 @@ Gets an SSL Policy within GCE from its name, for use with Target HTTPS and Targe
 
 ## Example Usage
 
-```tf
+```terraform
 data "google_compute_ssl_policy" "my-ssl-policy" {
   name = "production-ssl-policy"
 }

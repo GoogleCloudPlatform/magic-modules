@@ -19,7 +19,7 @@ Terraform `lifecycle` block as outlined in the example below.
 
 ## Example Usage - Empty instance group
 
-```hcl
+```terraform
 resource "google_compute_instance_group" "test" {
   name        = "terraform-test"
   description = "Terraform test instance group"
@@ -30,7 +30,7 @@ resource "google_compute_instance_group" "test" {
 
 ### Example Usage - With instances and named ports
 
-```hcl
+```terraform
 resource "google_compute_instance_group" "webservers" {
   name        = "terraform-webservers"
   description = "Terraform test instance group"
@@ -59,7 +59,7 @@ Recreating an instance group that's in use by another resource will give a
 `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
 as shown in this example to avoid this type of error.
 
-```hcl
+```terraform
 resource "google_compute_instance_group" "staging_group" {
   name      = "staging-instance-group"
   zone      = "us-central1-c"

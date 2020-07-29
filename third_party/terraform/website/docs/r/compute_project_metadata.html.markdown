@@ -21,7 +21,7 @@ key/value pairs within the project metadata rather than the entire set, then use
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_compute_project_metadata" "default" {
   metadata = {
     foo  = "bar"

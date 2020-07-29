@@ -16,7 +16,7 @@ and
 
 ## Example usage
 
-```hcl
+```terraform
 resource "google_compute_network" "peering_network" {
   name = "peering-network"
 }

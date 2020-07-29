@@ -22,7 +22,7 @@ To get more information about Google Cloud Storage Transfer, see:
 
 Example creating a nightly Transfer Job from an AWS S3 Bucket to a GCS bucket.
 
-```hcl
+```terraform
 data "google_storage_transfer_project_service_account" "default" {
   project = var.project
 }

@@ -29,7 +29,7 @@ These resources are intended to convert the permissions system for BigQuery data
 
 ## google\bigquery\_dataset\_iam\_policy
 
-```hcl
+```terraform
 data "google_iam_policy" "owner" {
   binding {
     role = "roles/dataOwner"
@@ -48,7 +48,7 @@ resource "google_bigquery_dataset_iam_policy" "dataset" {
 
 ## google\_bigquery\_dataset\_iam\_binding
 
-```hcl
+```terraform
 resource "google_bigquery_dataset_iam_binding" "reader" {
   dataset_id = "your-dataset-id"
   role       = "roles/bigquery.dataViewer"
@@ -61,7 +61,7 @@ resource "google_bigquery_dataset_iam_binding" "reader" {
 
 ## google\_bigquery\_dataset\_iam\_member
 
-```hcl
+```terraform
 resource "google_bigquery_dataset_iam_member" "editor" {
   dataset_id = "your-dataset-id"
   role       = "roles/bigquery.dataEditor"

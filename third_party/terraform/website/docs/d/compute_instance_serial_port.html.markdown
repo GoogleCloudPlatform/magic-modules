@@ -14,7 +14,7 @@ the official [API](https://cloud.google.com/compute/docs/instances/viewing-seria
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_compute_instance_serial_port" "serial" {
   instance = "my-instance"
   zone = "us-central1-a"
@@ -28,7 +28,7 @@ output "serial_out" {
 
 Using the serial port output to generate a windows password, derived from the [official guide](https://cloud.google.com/compute/docs/instances/windows/automate-pw-generation):
 
-```hcl
+```terraform
 resource "google_compute_instance" "windows" {
   name         = "windows-instance"
   machine_type = "n1-standard-1"

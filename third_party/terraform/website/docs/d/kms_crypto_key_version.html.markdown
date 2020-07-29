@@ -18,7 +18,7 @@ A CryptoKeyVersion represents an individual cryptographic key, and the associate
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_kms_key_ring" "my_key_ring" {
   name     = "my-key-ring"
   location = "us-central1"

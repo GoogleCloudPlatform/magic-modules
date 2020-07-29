@@ -21,7 +21,7 @@ Three different resources help you manage IAM policies on dataproc clusters. Eac
 
 ## google\_pubsub\_subscription\_iam\_policy
 
-```hcl
+```terraform
 data "google_iam_policy" "admin" {
   binding {
     role = "roles/editor"
@@ -41,7 +41,7 @@ resource "google_dataproc_cluster_iam_policy" "editor" {
 
 ## google\_pubsub\_subscription\_iam\_binding
 
-```hcl
+```terraform
 resource "google_dataproc_cluster_iam_binding" "editor" {
   cluster = "your-dataproc-cluster"
   role    = "roles/editor"
@@ -53,7 +53,7 @@ resource "google_dataproc_cluster_iam_binding" "editor" {
 
 ## google\_pubsub\_subscription\_iam\_member
 
-```hcl
+```terraform
 resource "google_dataproc_cluster_iam_member" "editor" {
   cluster = "your-dataproc-cluster"
   role    = "roles/editor"

@@ -16,7 +16,7 @@ Creates a table resource in a dataset for Google BigQuery. For more information 
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_bigquery_dataset" "default" {
   dataset_id                  = "foo"
   friendly_name               = "test"

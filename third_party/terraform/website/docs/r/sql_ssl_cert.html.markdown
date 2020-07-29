@@ -18,7 +18,7 @@ Creates a new Google SQL SSL Cert on a Google SQL Instance. For more information
 
 Example creating a SQL Client Certificate.
 
-```hcl
+```terraform
 resource "random_id" "db_name_suffix" {
   byte_length = 4
 }

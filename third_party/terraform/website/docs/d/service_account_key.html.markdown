@@ -14,7 +14,7 @@ Get service account public key. For more information, see [the official document
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_service_account" "myaccount" {
   account_id = "dev-foo-account"
 }

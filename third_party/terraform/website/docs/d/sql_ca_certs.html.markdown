@@ -17,7 +17,7 @@ and
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_sql_ca_certs" "ca_certs" {
   instance = "primary-database-server"
 }

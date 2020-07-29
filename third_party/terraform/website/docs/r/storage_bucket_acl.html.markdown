@@ -24,7 +24,7 @@ Permissions can be granted either by ACLs or Cloud IAM policies. In general, per
 
 Example creating an ACL on a bucket with one owner, and one reader.
 
-```hcl
+```terraform
 resource "google_storage_bucket" "image-store" {
   name     = "image-store-bucket"
   location = "EU"

@@ -13,7 +13,7 @@ Get a Secret Manager secret's version. For more information see the [official do
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_secret_manager_secret_version" "basic" {
   secret = "my-secret"
 }

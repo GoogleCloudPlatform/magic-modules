@@ -11,7 +11,7 @@ description: |-
 
 Use this data source to get information about a Google Cloud Folder.
 
-```hcl
+```terraform
 # Get folder by id
 data "google_folder" "my_folder_1" {
   folder              = "folders/12345"

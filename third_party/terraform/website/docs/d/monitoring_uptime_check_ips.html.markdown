@@ -14,7 +14,7 @@ the [official documentation](https://cloud.google.com/monitoring/uptime-checks#g
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_monitoring_uptime_check_ips" "ips" {
 }
 

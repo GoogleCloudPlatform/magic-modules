@@ -14,7 +14,7 @@ Creates and manages service account key-pairs, which allow the user to establish
 
 ## Example Usage, creating a new Key Pair
 
-```hcl
+```terraform
 resource "google_service_account" "myaccount" {
   account_id   = "myaccount"
   display_name = "My Service Account"
@@ -28,7 +28,7 @@ resource "google_service_account_key" "mykey" {
 
 ## Example Usage, save key in Kubernetes secret
 
-```hcl
+```terraform
 resource "google_service_account" "myaccount" {
   account_id   = "myaccount"
   display_name = "My Service Account"

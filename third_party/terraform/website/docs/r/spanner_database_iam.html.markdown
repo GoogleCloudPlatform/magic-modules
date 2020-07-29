@@ -24,7 +24,7 @@ Three different resources help you manage your IAM policy for a Spanner database
 
 ## google\_spanner\_database\_iam\_policy
 
-```hcl
+```terraform
 data "google_iam_policy" "admin" {
   binding {
     role = "roles/editor"
@@ -44,7 +44,7 @@ resource "google_spanner_database_iam_policy" "database" {
 
 ## google\_spanner\_database\_iam\_binding
 
-```hcl
+```terraform
 resource "google_spanner_database_iam_binding" "database" {
   instance = "your-instance-name"
   database = "your-database-name"
@@ -58,7 +58,7 @@ resource "google_spanner_database_iam_binding" "database" {
 
 ## google\_spanner\_database\_iam\_member
 
-```hcl
+```terraform
 resource "google_spanner_database_iam_member" "database" {
   instance = "your-instance-name"
   database = "your-database-name"

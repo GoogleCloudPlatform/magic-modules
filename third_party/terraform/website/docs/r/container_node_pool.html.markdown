@@ -18,7 +18,7 @@ and [the API reference](https://cloud.google.com/kubernetes-engine/docs/referenc
 
 ### Example Usage - using a separately managed node pool (recommended)
 
-```hcl
+```terraform
 resource "google_container_cluster" "primary" {
   name     = "my-gke-cluster"
   location = "us-central1"
@@ -50,7 +50,7 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
 
 ### Example Usage - 2 node pools, 1 separately managed + the default node pool
 
-```hcl
+```terraform
 resource "google_container_node_pool" "np" {
   name       = "my-node-pool"
   location   = "us-central1-a"
@@ -150,7 +150,7 @@ cluster.
 * `project` - (Optional) The ID of the project in which to create the node pool. If blank,
     the provider-configured project will be used.
 
-* `upgrade_settings` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Specify node upgrade settings to change how many nodes GKE attempts to
+* `upgrade_settings` (Optional) Specify node upgrade settings to change how many nodes GKE attempts to
     upgrade at once. The number of nodes upgraded simultaneously is the sum of `max_surge` and `max_unavailable`.
     The maximum number of nodes upgraded simultaneously is limited to 20.
 

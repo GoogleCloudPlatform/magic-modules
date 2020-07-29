@@ -25,7 +25,7 @@ role entity pairs.
 
 Create an object ACL with one owner and one reader.
 
-```hcl
+```terraform
 resource "google_storage_bucket" "image-store" {
   name     = "image-store-bucket"
   location = "EU"

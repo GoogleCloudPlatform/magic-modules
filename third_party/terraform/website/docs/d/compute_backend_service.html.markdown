@@ -15,7 +15,7 @@ and the [API](https://cloud.google.com/compute/docs/reference/latest/backendServ
 
 ## Example Usage
 
-```tf
+```terraform
 data "google_compute_backend_service" "baz" {
   name = "foobar"
 }

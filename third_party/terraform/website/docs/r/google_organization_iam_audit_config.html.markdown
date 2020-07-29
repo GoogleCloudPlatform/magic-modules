@@ -11,7 +11,7 @@ description: |-
 
 Allows management of audit logging config for a given service for a Google Cloud Platform Organization.
 
-```hcl
+```terraform
 resource "google_organization_iam_audit_config" "config" {
   org_id = "your-organization-id"
   service = "allServices"

@@ -18,7 +18,7 @@ or the
 
 Example creating a RuntimeConfig variable.
 
-```hcl
+```terraform
 resource "google_runtimeconfig_config" "my-runtime-config" {
   name        = "my-service-runtime-config"
   description = "Runtime configuration values for my service"
@@ -36,7 +36,7 @@ value must be base64 encoded.
 
 Example of using the `value` argument.
 
-```hcl
+```terraform
 resource "google_runtimeconfig_config" "my-runtime-config" {
   name        = "my-service-runtime-config"
   description = "Runtime configuration values for my service"

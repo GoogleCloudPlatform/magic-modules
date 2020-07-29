@@ -21,7 +21,7 @@ for more information on lifecycle parameters.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_bigtable_instance" "instance" {
   name = "tf-instance"
 

@@ -39,7 +39,7 @@ Terraform. Only newly added projects are affected.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_project" "my_project" {
   name       = "My Project"
   project_id = "your-project-id"
@@ -49,7 +49,7 @@ resource "google_project" "my_project" {
 
 To create a project under a specific folder
 
-```hcl
+```terraform
 resource "google_project" "my_project-in-a-folder" {
   name       = "My Project"
   project_id = "your-project-id"

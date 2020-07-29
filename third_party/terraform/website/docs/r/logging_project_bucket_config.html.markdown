@@ -17,7 +17,7 @@ Manages a project-level logging bucket config. For more information see
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_project" "default" {
 	project_id = "your-project-id"
 	name       = "your-project-id"

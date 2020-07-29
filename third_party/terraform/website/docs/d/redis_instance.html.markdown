@@ -15,7 +15,7 @@ and [API](https://cloud.google.com/memorystore/docs/redis/apis).
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_redis_instance" "default" {
   name = "my-redis-instance"
 }

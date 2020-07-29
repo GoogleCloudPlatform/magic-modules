@@ -18,7 +18,7 @@ or the
 
 Example creating a RuntimeConfig resource.
 
-```hcl
+```terraform
 resource "google_runtimeconfig_config" "my-runtime-config" {
   name        = "my-service-runtime-config"
   description = "Runtime configuration values for my service"

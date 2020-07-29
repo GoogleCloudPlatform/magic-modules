@@ -26,7 +26,7 @@ Allows management of the entire IAM policy for an existing Google Cloud Platform
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_organization_iam_policy" "policy" {
   org_id      = "123456789"
   policy_data = data.google_iam_policy.admin.policy_data

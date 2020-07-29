@@ -13,7 +13,7 @@ Get info about a Google Compute SSL Certificate from its name.
 
 ## Example Usage
 
-```tf
+```terraform
 data "google_compute_ssl_certificate" "my_cert" {
   name = "my-cert"
 }

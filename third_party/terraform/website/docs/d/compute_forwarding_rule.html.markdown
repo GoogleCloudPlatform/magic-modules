@@ -13,7 +13,7 @@ Get a forwarding rule within GCE from its name.
 
 ## Example Usage
 
-```tf
+```terraform
 data "google_compute_forwarding_rule" "my-forwarding-rule" {
   name = "forwarding-rule-us-east1"
 }

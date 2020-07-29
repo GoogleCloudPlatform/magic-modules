@@ -16,7 +16,7 @@ and [API](https://cloud.google.com/dns/docs/reference/v1/dnsKeys).
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_dns_managed_zone" "foo" {
   name     = "foobar"
   dns_name = "foo.bar."

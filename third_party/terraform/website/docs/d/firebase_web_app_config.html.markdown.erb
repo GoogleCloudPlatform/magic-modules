@@ -1,6 +1,9 @@
+<% autogen_exception -%>
+<% unless version == 'ga' -%>
 ---
 subcategory: "Firebase"
 layout: "google"
+version: "google-beta"
 page_title: "Google: google_firebase_web_app_config"
 sidebar_current: "docs-google-firebase-web-app-config"
 description: |-
@@ -64,3 +67,5 @@ In addition to the arguments listed above, the following attributes are exported
   Learn more about this ID and Google Analytics web streams in the Analytics documentation.
   To generate a measurementId and link the Web App with a Google Analytics web stream,
   call projects.addGoogleAnalytics.
+
+<% end -%>

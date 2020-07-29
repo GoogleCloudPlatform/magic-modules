@@ -17,7 +17,7 @@ Security Policy is used by [`google_compute_backend_service`](https://www.terraf
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_compute_security_policy" "policy" {
   name = "my-policy"
 

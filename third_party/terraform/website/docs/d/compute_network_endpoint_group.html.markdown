@@ -15,7 +15,7 @@ The NEG may be found by providing either a `self_link`, or a `name` and a `zone`
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_compute_network_endpoint_group" "neg1" {
   name = "k8s1-abcdef01-myns-mysvc-8080-4b6bac43"
   zone = "us-central1-a"

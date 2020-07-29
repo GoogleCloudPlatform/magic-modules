@@ -21,7 +21,7 @@ Three different resources help you manage IAM policies on bigtable instances. Ea
 
 ## google\_bigtable\_instance\_iam\_policy
 
-```hcl
+```terraform
 data "google_iam_policy" "admin" {
   binding {
     role = "roles/editor"
@@ -40,7 +40,7 @@ resource "google_bigtable_instance_iam_policy" "editor" {
 
 ## google\_bigtable\_instance\_iam\_binding
 
-```hcl
+```terraform
 resource "google_bigtable_instance_iam_binding" "editor" {
   instance = "your-bigtable-instance"
   role     = "roles/editor"
@@ -52,7 +52,7 @@ resource "google_bigtable_instance_iam_binding" "editor" {
 
 ## google\_bigtable\_instance\_iam\_member
 
-```hcl
+```terraform
 resource "google_bigtable_instance_iam_member" "editor" {
   instance = "your-bigtable-instance"
   role     = "roles/editor"

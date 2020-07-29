@@ -13,7 +13,7 @@ Get info about a GKE cluster from its name and location.
 
 ## Example Usage
 
-```tf
+```terraform
 data "google_container_cluster" "my_cluster" {
   name     = "my-cluster"
   location = "us-east1-a"

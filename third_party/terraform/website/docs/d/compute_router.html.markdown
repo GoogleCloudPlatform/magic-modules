@@ -13,7 +13,7 @@ Get a router within GCE from its name and VPC.
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_compute_router" "my-router" {
   name   = "myrouter-us-east1"
   network = "my-network"

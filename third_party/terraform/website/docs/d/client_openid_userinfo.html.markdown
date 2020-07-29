@@ -23,7 +23,7 @@ receive an error otherwise.
 
 ## Example Usage - exporting an email
 
-```hcl
+```terraform
 data "google_client_openid_userinfo" "me" {
 }
 
@@ -34,7 +34,7 @@ output "my-email" {
 
 ## Example Usage - OpenID Connect w/ Kubernetes provider + RBAC IAM role
 
-```hcl
+```terraform
 data "google_client_openid_userinfo" "provider_identity" {
 }
 

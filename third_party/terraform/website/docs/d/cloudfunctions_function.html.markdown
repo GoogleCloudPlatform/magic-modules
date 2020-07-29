@@ -15,7 +15,7 @@ and [API](https://cloud.google.com/functions/docs/apis).
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_cloudfunctions_function" "my-function" {
   name = "function"
 }

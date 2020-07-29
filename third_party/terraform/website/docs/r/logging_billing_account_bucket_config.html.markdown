@@ -17,7 +17,7 @@ Manages a billing account level logging bucket config. For more information see
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_billing_account" "default" {
 	billing_account = "00AA00-000AAA-00AA0A"
 }

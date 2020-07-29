@@ -15,7 +15,7 @@ for a given project. For more information, see [the official documentation](http
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_compute_node_types" "central1b" {
   zone = "us-central1-b"
 }

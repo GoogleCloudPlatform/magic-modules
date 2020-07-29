@@ -26,7 +26,7 @@ To get more information about attaching disks, see:
 **Note:** When using `google_compute_attached_disk` you **must** use `lifecycle.ignore_changes = ["attached_disk"]` on the `google_compute_instance` resource that has the disks attached. Otherwise the two resources will fight for control of the attached disk block.
 
 ## Example Usage
-```hcl
+```terraform
 resource "google_compute_attached_disk" "default" {
   disk     = google_compute_disk.default.id
   instance = google_compute_instance.default.id

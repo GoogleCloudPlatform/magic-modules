@@ -18,7 +18,7 @@ Manages a set of DNS records within Google Cloud DNS. For more information see [
 
 ### Binding a DNS name to the ephemeral IP of a new instance:
 
-```hcl
+```terraform
 resource "google_dns_record_set" "frontend" {
   name = "frontend.${google_dns_managed_zone.prod.dns_name}"
   type = "A"
@@ -55,7 +55,7 @@ resource "google_dns_managed_zone" "prod" {
 
 ### Adding an A record
 
-```hcl
+```terraform
 resource "google_dns_record_set" "a" {
   name         = "backend.${google_dns_managed_zone.prod.dns_name}"
   managed_zone = google_dns_managed_zone.prod.name
@@ -73,7 +73,7 @@ resource "google_dns_managed_zone" "prod" {
 
 ### Adding an MX record
 
-```hcl
+```terraform
 resource "google_dns_record_set" "mx" {
   name         = google_dns_managed_zone.prod.dns_name
   managed_zone = google_dns_managed_zone.prod.name
@@ -99,7 +99,7 @@ resource "google_dns_managed_zone" "prod" {
 
 Quotes (`""`) must be added around your `rrdatas` for a SPF record. Otherwise `rrdatas` string gets split on spaces.
 
-```hcl
+```terraform
 resource "google_dns_record_set" "spf" {
   name         = "frontend.${google_dns_managed_zone.prod.dns_name}"
   managed_zone = google_dns_managed_zone.prod.name
@@ -119,7 +119,7 @@ resource "google_dns_managed_zone" "prod" {
 
  The list of `rrdatas` should only contain a single string corresponding to the Canonical Name intended.
 
-```hcl
+```terraform
 resource "google_dns_record_set" "cname" {
   name         = "frontend.${google_dns_managed_zone.prod.dns_name}"
   managed_zone = google_dns_managed_zone.prod.name

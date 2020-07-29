@@ -20,7 +20,7 @@ typical IAM roles granted on a project.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_logging_billing_account_sink" "my-sink" {
   name            = "my-sink"
   billing_account = "ABCDEF-012345-GHIJKL"

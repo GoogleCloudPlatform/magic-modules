@@ -15,7 +15,7 @@ Retrieve a list of testable permissions for a resource. Testable permissions mea
 
 Retrieve all the supported permissions able to be set on `my-project` that are in either GA or BETA. This is useful for dynamically constructing custom roles.
 
-```hcl
+```terraform
 data "google_iam_testable_permissions" "perms" {
 	full_resource_name = "//cloudresourcemanager.googleapis.com/projects/my-project"
 	stages             = ["GA", "BETA"]

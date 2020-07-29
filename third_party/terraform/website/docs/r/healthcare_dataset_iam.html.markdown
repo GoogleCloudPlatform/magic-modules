@@ -24,7 +24,7 @@ Three different resources help you manage your IAM policy for Healthcare dataset
 
 ## google\_healthcare\_dataset\_iam\_policy
 
-```hcl
+```terraform
 data "google_iam_policy" "admin" {
   binding {
     role = "roles/editor"
@@ -43,7 +43,7 @@ resource "google_healthcare_dataset_iam_policy" "dataset" {
 
 ## google\_healthcare\_dataset\_iam\_binding
 
-```hcl
+```terraform
 resource "google_healthcare_dataset_iam_binding" "dataset" {
   dataset_id = "your-dataset-id"
   role       = "roles/editor"
@@ -56,7 +56,7 @@ resource "google_healthcare_dataset_iam_binding" "dataset" {
 
 ## google\_healthcare\_dataset\_iam\_member
 
-```hcl
+```terraform
 resource "google_healthcare_dataset_iam_member" "dataset" {
   dataset_id = "your-dataset-id"
   role       = "roles/editor"

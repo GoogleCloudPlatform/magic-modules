@@ -13,7 +13,7 @@ Use this data source to get the IP addresses from different special IP ranges on
 
 ## Example Usage - Cloud Ranges
 
-```tf
+```terraform
 data "google_netblock_ip_ranges" "netblock" {
 }
 
@@ -32,7 +32,7 @@ output "cidr_blocks_ipv6" {
 
 ## Example Usage - Allow Health Checks
 
-```tf
+```terraform
 data "google_netblock_ip_ranges" "legacy-hcs" {
   range_type = "legacy-health-checkers"
 }

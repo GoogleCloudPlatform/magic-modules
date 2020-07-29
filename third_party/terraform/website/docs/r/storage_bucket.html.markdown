@@ -25,7 +25,7 @@ determined which will require enabling the compute api.
 
 ## Example Usage - creating a private bucket in standard storage, in the EU region. Bucket configured as static website and CORS configurations
 
-```hcl
+```terraform
 resource "google_storage_bucket" "static-site" {
   name          = "image-store.com"
   location      = "EU"
@@ -48,7 +48,7 @@ resource "google_storage_bucket" "static-site" {
 
 ## Example Usage - Life cycle settings for storage bucket objects
 
-```hcl
+```terraform
 resource "google_storage_bucket" "auto-expire" {
   name          = "auto-expiring-bucket"
   location      = "US"

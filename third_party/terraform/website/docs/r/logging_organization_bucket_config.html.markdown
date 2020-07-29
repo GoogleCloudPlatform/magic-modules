@@ -17,7 +17,7 @@ Manages a organization-level logging bucket config. For more information see
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_organization" "default" {
 	organization = "123456789"
 }

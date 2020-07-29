@@ -21,7 +21,7 @@ Three different resources help you manage IAM policies on dataproc jobs. Each of
 
 ## google\_pubsub\_subscription\_iam\_policy
 
-```hcl
+```terraform
 data "google_iam_policy" "admin" {
   binding {
     role = "roles/editor"
@@ -41,7 +41,7 @@ resource "google_dataproc_job_iam_policy" "editor" {
 
 ## google\_pubsub\_subscription\_iam\_binding
 
-```hcl
+```terraform
 resource "google_dataproc_job_iam_binding" "editor" {
   job_id = "your-dataproc-job"
   role   = "roles/editor"
@@ -53,7 +53,7 @@ resource "google_dataproc_job_iam_binding" "editor" {
 
 ## google\_pubsub\_subscription\_iam\_member
 
-```hcl
+```terraform
 resource "google_dataproc_job_iam_member" "editor" {
   job_id = "your-dataproc-job"
   role   = "roles/editor"

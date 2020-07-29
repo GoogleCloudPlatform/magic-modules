@@ -14,7 +14,7 @@ Platform folder.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_folder_iam_policy" "folder_admin_policy" {
   folder      = google_folder.department1.name
   policy_data = data.google_iam_policy.admin.policy_data

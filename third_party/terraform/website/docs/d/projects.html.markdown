@@ -15,7 +15,7 @@ for more details.
 
 ## Example Usage - searching for projects about to be deleted in an org
 
-```hcl
+```terraform
 data "google_projects" "my-org-projects" {
   filter = "parent.id:012345678910 lifecycleState:DELETE_REQUESTED"
 }

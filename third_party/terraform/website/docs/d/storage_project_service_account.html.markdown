@@ -19,7 +19,7 @@ For more information see
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_storage_project_service_account" "gcs_account" {
 }
 

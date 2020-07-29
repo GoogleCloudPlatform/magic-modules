@@ -26,7 +26,7 @@ making this resource dependent on those IAM resources via `depends_on`. This wil
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_storage_notification" "notification" {
   bucket         = google_storage_bucket.bucket.name
   payload_format = "JSON_API_V1"

@@ -15,7 +15,7 @@ documentation](https://cloud.google.com/resource-manager/docs/organization-polic
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_folder_organization_policy" "policy" {
   folder     = "folders/folderid"
   constraint = "constraints/compute.trustedImageProjects"

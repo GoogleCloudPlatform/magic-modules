@@ -1,6 +1,9 @@
+<% autogen_exception -%>
+<% unless version == 'ga' -%>
 ---
 subcategory: "Game Servers"
 layout: "google"
+version: "google-beta"
 page_title: "Google: google_game_services_game_server_deployment_rollout"
 sidebar_current: "docs-google-datasource-game-services-game-server-deployment-rollout"
 description: |-
@@ -16,7 +19,7 @@ https://cloud.google.com/game-servers/docs/reference/rest/v1beta/GameServerDeplo
 ## Example Usage 
 
 
-```hcl
+```terraform
 data "google_game_services_game_server_deployment_rollout" "qa" {
     provider = google-beta
     deployment_id = "tf-test-deployment-s8sn12jt2c"
@@ -70,3 +73,5 @@ The `realms_selector` block contains:
 * `name` -
   The resource id of the game server deployment
   eg: `projects/my-project/locations/global/gameServerDeployments/my-deployment/rollout`.
+
+<% end -%>

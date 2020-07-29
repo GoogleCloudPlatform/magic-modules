@@ -21,7 +21,7 @@ and
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_logging_project_sink" "my-sink" {
   name = "my-pubsub-instance-sink"
 
@@ -41,7 +41,7 @@ cloud storage bucket. Because we are using `unique_writer_identity`, we must gra
 this grant requires the "Project IAM Admin" IAM role (`roles/resourcemanager.projectIamAdmin`) granted to the credentials
 used with terraform.
 
-```hcl
+```terraform
 # Our logged compute instance
 resource "google_compute_instance" "my-logged-instance" {
   name         = "my-instance"

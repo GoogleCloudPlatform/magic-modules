@@ -27,7 +27,7 @@ to control individual role entity pairs.
 
 Example creating a default object ACL on a bucket with one owner, and one reader.
 
-```hcl
+```terraform
 resource "google_storage_bucket" "image-store" {
   name     = "image-store-bucket"
   location = "EU"

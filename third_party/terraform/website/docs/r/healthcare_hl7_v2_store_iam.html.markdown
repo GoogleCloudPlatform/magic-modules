@@ -24,7 +24,7 @@ Three different resources help you manage your IAM policy for Healthcare HL7v2 s
 
 ## google\_healthcare\_hl7\_v2\_store\_iam\_policy
 
-```hcl
+```terraform
 data "google_iam_policy" "admin" {
   binding {
     role = "roles/editor"
@@ -43,7 +43,7 @@ resource "google_healthcare_hl7_v2_store_iam_policy" "hl7_v2_store" {
 
 ## google\_healthcare\_hl7\_v2\_store\_iam\_binding
 
-```hcl
+```terraform
 resource "google_healthcare_hl7_v2_store_iam_binding" "hl7_v2_store" {
   hl7_v2_store_id = "your-hl7-v2-store-id"
   role            = "roles/editor"
@@ -57,7 +57,7 @@ resource "google_healthcare_hl7_v2_store_iam_binding" "hl7_v2_store" {
 
 ## google\_healthcare\_hl7\_v2\_store\_iam\_member
 
-```hcl
+```terraform
 resource "google_healthcare_hl7_v2_store_iam_member" "hl7_v2_store" {
   hl7_v2_store_id = "your-hl7-v2-store-id"
   role            = "roles/editor"

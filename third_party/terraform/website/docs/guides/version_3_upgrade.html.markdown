@@ -13,6 +13,11 @@ includes some changes that you will need to consider when upgrading. This guide
 is intended to help with that process and focuses only on the changes necessary
 to upgrade from the final `2.X` series release to `3.0.0`.
 
+-> The "Google provider" refers to both `google` and `google-beta`; each will
+have released `3.0.0` at around the same time, and this guide is for both
+variants of the Google provider. See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html)
+for details if you're new to using `google-beta`.
+
 Most of the changes outlined in this guide have been previously marked as
 deprecated in the Terraform `plan`/`apply` output throughout previous provider
 releases, up to and including the final `2.X` series release. These changes,
@@ -29,7 +34,7 @@ features not available in `3.0.0-beta.1`, only bugfixes for issues we're made
 aware of before `3.0.0`'s release. Using `3.0.0-beta.1` in production is not
 recommended.
 
-```hcl
+```terraform
 provider "google" {
   # ... other configuration ...
 
@@ -155,7 +160,7 @@ in order to upgrade your provider to the latest released version.
 
 For example, given this previous configuration:
 
-```hcl
+```terraform
 provider "google" {
   # ... other configuration ...
 
@@ -165,7 +170,7 @@ provider "google" {
 
 An updated configuration:
 
-```hcl
+```terraform
 provider "google" {
   # ... other configuration ...
 
@@ -194,7 +199,7 @@ If this was previously defined explicitly, the definition can now be removed.
 
 #### Old Config
 
-```hcl
+```terraform
 provider "google" {
   scopes = [
     "https://www.googleapis.com/auth/compute",
@@ -208,7 +213,7 @@ provider "google" {
 
 #### New Config
 
-```hcl
+```terraform
 provider "google" {}
 ```
 
@@ -363,7 +368,7 @@ removed from Terraform to prevent conflicts.
 
 #### Old Config
 
-```hcl
+```terraform
 resource "google_cloudiot_registry" "myregistry" {
   name = "%s"
 
@@ -376,7 +381,7 @@ resource "google_cloudiot_registry" "myregistry" {
 
 #### New Config
 
-```hcl
+```terraform
 resource "google_cloudiot_registry" "myregistry" {
   name = "%s"
 
@@ -399,7 +404,7 @@ To support partial rollouts of different revisions, the `spec` block is now nest
 
 #### Old Config
 
-```hcl
+```terraform
 resource "google_cloud_run_service" "default" {
   spec {
     containers {
@@ -413,7 +418,7 @@ resource "google_cloud_run_service" "default" {
 
 #### New Config
 
-```hcl
+```terraform
 resource "google_cloud_run_service" "default" {
   template {
     spec {
@@ -559,7 +564,7 @@ interpolating values from a `google_compute_address` resource.
 
 #### Old Config (that would have permadiff)
 
-```hcl
+```terraform
 resource "google_compute_address" "my-addr" {
   name = "my-addr"
 }
@@ -573,7 +578,7 @@ resource "google_compute_forwarding_rule" "frule" {
 
 #### New Config
 
-```hcl
+```terraform
 resource "google_compute_address" "my-addr" {
   name = "my-addr"
 }
@@ -658,7 +663,7 @@ directed to that version.
 
 ### Old Config
 
-```hcl
+```terraform
 resource "google_compute_instance_group_manager" "my_igm" {
   name               = "my-igm"
   zone               = "us-central1-c"
@@ -670,7 +675,7 @@ resource "google_compute_instance_group_manager" "my_igm" {
 
 ### New Config
 
-```hcl
+```terraform
 resource "google_compute_instance_group_manager" "my_igm" {
   name               = "my-igm"
   zone               = "us-central1-c"
@@ -693,7 +698,7 @@ For more details see the
 
 ### Old Config
 
-```hcl
+```terraform
 resource "google_compute_instance_group_manager" "my_igm" {
   name               = "my-igm"
   zone               = "us-central1-c"
@@ -707,7 +712,7 @@ resource "google_compute_instance_group_manager" "my_igm" {
 
 ### New Config
 
-```hcl
+```terraform
 resource "google_compute_instance_group_manager" "my_igm" {
   name               = "my-igm"
   zone               = "us-central1-c"
@@ -747,7 +752,7 @@ now invalid.
 A disk with `type` `"SCRATCH"` must have `disk_type` `"local-ssd"` and a size of 375GB. For example,
 the following is valid:
 
-```hcl
+```terraform
 disk {
   auto_delete  = true
   type         = "SCRATCH"
@@ -759,7 +764,7 @@ disk {
 These configs would have been accepted by Terraform previously, but will now
 fail:
 
-```hcl
+```terraform
 disk {
   source_image = "https://www.googleapis.com/compute/v1/projects/gce-uefi-images/global/images/centos-7-v20190729"
   auto_delete  = true
@@ -767,7 +772,7 @@ disk {
 }
 ```
 
-```hcl
+```terraform
 disk {
   source_image = "https://www.googleapis.com/compute/v1/projects/gce-uefi-images/global/images/centos-7-v20190729"
   auto_delete  = true
@@ -775,7 +780,7 @@ disk {
 }
 ```
 
-```hcl
+```terraform
 disk {
   auto_delete  = true
   type         = "SCRATCH"
@@ -925,7 +930,7 @@ In an attempt to avoid allowing empty blocks in config files, at least one of
 
 ### Old Config
 
-```hcl
+```terraform
 resource "google_compute_subnetwork" "subnet-with-logging" {
   name          = "log-test-subnetwork"
   ip_cidr_range = "10.2.0.0/16"
@@ -939,7 +944,7 @@ resource "google_compute_subnetwork" "subnet-with-logging" {
 
 ### New Config
 
-```hcl
+```terraform
 resource "google_compute_subnetwork" "subnet-with-logging" {
   name          = "log-test-subnetwork"
   ip_cidr_range = "10.2.0.0/16"
@@ -981,7 +986,7 @@ to `false`.
 
 #### Old Config
 
-```hcl
+```terraform
 resource "google_container_cluster" "primary" {
   name     = "my-cluster"
   location = "us-central1"
@@ -996,7 +1001,7 @@ resource "google_container_cluster" "primary" {
 
 #### New Config
 
-```hcl
+```terraform
 resource "google_container_cluster" "primary" {
   name     = "my-cluster"
   location = "us-central1"
@@ -1050,7 +1055,7 @@ managed by a GKE cluster and other resources can use it safely.
 
 #### Old Config
 
-```hcl
+```terraform
 resource "google_compute_network" "container_network" {
   name                    = "container-network"
   auto_create_subnetworks = false
@@ -1075,7 +1080,7 @@ resource "google_container_cluster" "primary" {
 
 #### New Config
 
-```hcl
+```terraform
 resource "google_compute_network" "container_network" {
   name                    = "container-network"
   auto_create_subnetworks = false
@@ -1186,14 +1191,14 @@ intended value in config; the old default values can be added to a
 
 #### Old Defaults
 
-```hcl
+```terraform
 logging_service    = "logging.googleapis.com"
 monitoring_service = "monitoring.googleapis.com"
 ```
 
 #### New Defaults
 
-```hcl
+```terraform
 logging_service    = "logging.googleapis.com/kubernetes"
 monitoring_service = "monitoring.googleapis.com/kubernetes"
 ```
@@ -1513,7 +1518,7 @@ when you migrate off `google_project_services`.
 
 #### Old Config
 
-```hcl
+```terraform
 resource "google_project_services" "project" {
   project            = "your-project-id"
   services           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com"]
@@ -1523,7 +1528,7 @@ resource "google_project_services" "project" {
 
 #### New Config (module)
 
-```hcl
+```terraform
 module "project_services" {
   source  = "terraform-google-modules/project-factory/google//modules/project_services"
   version = "3.3.0"
@@ -1541,7 +1546,7 @@ module "project_services" {
 
 #### New Config (google_project_service)
 
-```hcl
+```terraform
 resource "google_project_service" "service" {
   for_each = toset([
     "iam.googleapis.com",

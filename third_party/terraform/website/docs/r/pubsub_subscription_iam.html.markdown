@@ -21,7 +21,7 @@ Three different resources help you manage your IAM policy for pubsub subscriptio
 
 ## google\_pubsub\_subscription\_iam\_policy
 
-```hcl
+```terraform
 data "google_iam_policy" "admin" {
   binding {
     role = "roles/editor"
@@ -39,7 +39,7 @@ resource "google_pubsub_subscription_iam_policy" "editor" {
 
 ## google\_pubsub\_subscription\_iam\_binding
 
-```hcl
+```terraform
 resource "google_pubsub_subscription_iam_binding" "editor" {
   subscription = "your-subscription-name"
   role         = "roles/editor"
@@ -51,7 +51,7 @@ resource "google_pubsub_subscription_iam_binding" "editor" {
 
 ## google\_pubsub\_subscription\_iam\_member
 
-```hcl
+```terraform
 resource "google_pubsub_subscription_iam_member" "editor" {
   subscription = "your-subscription-name"
   role         = "roles/editor"

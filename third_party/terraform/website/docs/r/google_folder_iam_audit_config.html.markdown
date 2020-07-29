@@ -11,7 +11,7 @@ description: |-
 
 Allows management of audit logging config for a given service for a Google Cloud Platform folder.
 
-```hcl
+```terraform
 resource "google_folder_iam_audit_config" "config" {
   folder = "folders/{folder_id}"
   service = "allServices"

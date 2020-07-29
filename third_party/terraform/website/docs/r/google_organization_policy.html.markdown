@@ -18,7 +18,7 @@ documentation](https://cloud.google.com/resource-manager/docs/organization-polic
 
 To set policy with a [boolean constraint](https://cloud.google.com/resource-manager/docs/organization-policy/quickstart-boolean-constraints):
 
-```hcl
+```terraform
 resource "google_organization_policy" "serial_port_policy" {
   org_id     = "123456789"
   constraint = "compute.disableSerialPortAccess"
@@ -32,7 +32,7 @@ resource "google_organization_policy" "serial_port_policy" {
 
 To set a policy with a [list constraint](https://cloud.google.com/resource-manager/docs/organization-policy/quickstart-list-constraints):
 
-```hcl
+```terraform
 resource "google_organization_policy" "services_policy" {
   org_id     = "123456789"
   constraint = "serviceuser.services"
@@ -47,7 +47,7 @@ resource "google_organization_policy" "services_policy" {
 
 Or to deny some services, use the following instead:
 
-```hcl
+```terraform
 resource "google_organization_policy" "services_policy" {
   org_id     = "123456789"
   constraint = "serviceuser.services"
@@ -64,7 +64,7 @@ resource "google_organization_policy" "services_policy" {
 
 To restore the default organization policy, use the following instead:
 
-```hcl
+```terraform
 resource "google_organization_policy" "services_policy" {
   org_id     = "123456789"
   constraint = "serviceuser.services"

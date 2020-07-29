@@ -14,7 +14,7 @@ the official [API](https://cloud.google.com/compute/docs/reference/latest/global
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_compute_global_address" "my_address" {
   name = "foobar"
 }

@@ -13,7 +13,7 @@ Use this data source to access the configuration of the Google Cloud provider.
 
 ## Example Usage
 
-```tf
+```terraform
 data "google_client_config" "current" {
 }
 
@@ -24,7 +24,7 @@ output "project" {
 
 ## Example Usage: Configure Kubernetes provider with OAuth2 access token
 
-```tf
+```terraform
 data "google_client_config" "default" {
 }
 

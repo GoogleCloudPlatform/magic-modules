@@ -23,7 +23,7 @@ Three different resources help you manage your IAM policy for a service account.
 
 ## google\_service\_account\_iam\_policy
 
-```hcl
+```terraform
 data "google_iam_policy" "admin" {
   binding {
     role = "roles/iam.serviceAccountUser"
@@ -47,7 +47,7 @@ resource "google_service_account_iam_policy" "admin-account-iam" {
 
 ## google\_service\_account\_iam\_binding
 
-```hcl
+```terraform
 resource "google_service_account" "sa" {
   account_id   = "my-service-account"
   display_name = "A service account that only Jane can use"
@@ -65,7 +65,7 @@ resource "google_service_account_iam_binding" "admin-account-iam" {
 
 With IAM Conditions:
 
-```hcl
+```terraform
 resource "google_service_account" "sa" {
   account_id   = "my-service-account"
   display_name = "A service account that only Jane can use"
@@ -89,7 +89,7 @@ resource "google_service_account_iam_binding" "admin-account-iam" {
 
 ## google\_service\_account\_iam\_member
 
-```hcl
+```terraform
 data "google_compute_default_service_account" "default" {
 }
 
@@ -114,7 +114,7 @@ resource "google_service_account_iam_member" "gce-default-account-iam" {
 
 With IAM Conditions:
 
-```hcl
+```terraform
 resource "google_service_account" "sa" {
   account_id   = "my-service-account"
   display_name = "A service account that Jane can use"

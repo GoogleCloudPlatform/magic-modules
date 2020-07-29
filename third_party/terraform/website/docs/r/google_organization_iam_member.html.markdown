@@ -18,7 +18,7 @@ the IAM policy for an existing Google Cloud Platform Organization.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_organization_iam_member" "binding" {
   org_id = "0123456789"
   role   = "roles/editor"

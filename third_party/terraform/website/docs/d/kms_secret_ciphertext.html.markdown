@@ -26,7 +26,7 @@ data outside of resource definitions.
 
 First, create a KMS KeyRing and CryptoKey using the resource definitions:
 
-```hcl
+```terraform
 resource "google_kms_key_ring" "my_key_ring" {
   project  = "my-project"
   name     = "my-key-ring"
@@ -41,7 +41,7 @@ resource "google_kms_crypto_key" "my_crypto_key" {
 
 Next, encrypt some sensitive information and use the encrypted data in your resource definitions:
 
-```hcl
+```terraform
 data "google_kms_secret_ciphertext" "my_password" {
   crypto_key = google_kms_crypto_key.my_crypto_key.self_link
   plaintext  = "my-secret-password"

@@ -22,7 +22,7 @@ an existing Google Cloud Platform Organization.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_organization_iam_binding" "binding" {
   org_id = "123456789"
   role    = "roles/browser"

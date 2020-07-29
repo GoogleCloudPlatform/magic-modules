@@ -15,7 +15,7 @@ For more information see
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_project" "project" {
 }
 

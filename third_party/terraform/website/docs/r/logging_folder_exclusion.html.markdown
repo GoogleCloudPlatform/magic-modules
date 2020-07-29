@@ -18,7 +18,7 @@ granted to the credentials used with Terraform.
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "google_logging_folder_exclusion" "my-exclusion" {
   name   = "my-instance-debug-exclusion"
   folder = google_folder.my-folder.name

@@ -1,6 +1,9 @@
+<% autogen_exception -%>
+<% unless version == 'ga' -%>
 ---
 subcategory: "Cloud Identity"
 layout: "google"
+version: "google-beta"
 page_title: "Google: google_cloud_identity_groups"
 sidebar_current: "docs-google-datasource-cloud-identity-groups"
 description: |-
@@ -15,7 +18,7 @@ https://cloud.google.com/identity/docs/concepts/overview#groups
 
 ## Example Usage
 
-```tf
+```terraform
 data "google_cloud_identity_groups" "groups" {
   parent = "customers/A01b123xz"
 }
@@ -64,3 +67,5 @@ The `group_key` block supports:
   If populated, the EntityKey represents an external-identity-mapped group.
   The namespace must correspond to an identity source created in Admin Console
   and must be in the form of `identitysources/{identity_source_id}`.
+
+<% end -%>

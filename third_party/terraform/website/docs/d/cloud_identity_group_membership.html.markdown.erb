@@ -1,6 +1,9 @@
+<% autogen_exception -%>
+<% unless version == 'ga' -%>
 ---
 subcategory: "Cloud Identity"
 layout: "google"
+version: "google-beta"
 page_title: "Google: google_cloud_identity_group_memberships"
 sidebar_current: "docs-google-datasource-cloud-identity-group-memberships"
 description: |-
@@ -15,7 +18,7 @@ https://cloud.google.com/identity/docs/concepts/overview#memberships
 
 ## Example Usage
 
-```tf
+```terraform
 data "google_cloud_identity_group_memberships" "members" {
   group = "groups/123eab45c6defghi"
 }
@@ -72,3 +75,5 @@ The `preferred_member_key` block supports:
   If not populated, the EntityKey represents a Google-managed entity
   such as a Google user or a Google Group.
   If populated, the EntityKey represents an external-identity-mapped group.
+
+<% end -%>

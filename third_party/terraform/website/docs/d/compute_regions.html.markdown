@@ -12,7 +12,7 @@ description: |-
 Provides access to available Google Compute regions for a given project.
 See more about [regions and zones](https://cloud.google.com/compute/docs/regions-zones/) in the upstream docs.
 
-```hcl
+```terraform
 data "google_compute_regions" "available" {
 }
 

@@ -20,7 +20,7 @@ To get more information about Dashboards, see:
 ## Example Usage - Monitoring Dashboard Basic
 
 
-```hcl
+```terraform
 resource "google_monitoring_dashboard" "dashboard" {
   dashboard_json = <<EOF
 {
@@ -41,7 +41,7 @@ EOF
 ## Example Usage - Monitoring Dashboard GridLayout
 
 
-```hcl
+```terraform
 resource "google_monitoring_dashboard" "dashboard" {
   dashboard_json = <<EOF
 {

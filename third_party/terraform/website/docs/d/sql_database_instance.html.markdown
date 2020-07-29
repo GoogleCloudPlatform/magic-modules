@@ -14,7 +14,7 @@ Use this data source to get information about a Cloud SQL instance
 ## Example Usage 
 
 
-```hcl
+```terraform
 data "google_sql_database_instance" "qa" {
     name = google_sql_database_instance.master.name
 }

@@ -13,7 +13,7 @@ Use this data source to retrieve default service account for this project
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_compute_default_service_account" "default" {
 }
 

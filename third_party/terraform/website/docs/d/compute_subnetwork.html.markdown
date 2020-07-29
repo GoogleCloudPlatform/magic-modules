@@ -13,7 +13,7 @@ Get a subnetwork within GCE from its name and region.
 
 ## Example Usage
 
-```hcl
+```terraform
 data "google_compute_subnetwork" "my-subnetwork" {
   name   = "default-us-east1"
   region = "us-east1"
