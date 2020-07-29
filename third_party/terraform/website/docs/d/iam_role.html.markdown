@@ -11,6 +11,8 @@ description: |-
 
 Use this data source to get information about a Google IAM Role.
 
+## Example Usage
+
 ```terraform
 data "google_iam_role" "roleinfo" {
   name = "roles/compute.viewer"

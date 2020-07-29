@@ -17,6 +17,8 @@ other Google Cloud Platform resources, such as the `google_project` resource.
 See the [setIamPolicy docs](https://cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy)
 for a list of these restrictions.
 
+## Example Usage
+
 ```terraform
 data "google_iam_policy" "admin" {
   binding {

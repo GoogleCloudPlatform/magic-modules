@@ -9,9 +9,6 @@ description: |-
 
 # IAM policy for Google Cloud Healthcare FHIR store
 
-~> **Warning:** These resources are in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
-
 Three different resources help you manage your IAM policy for Healthcare FHIR store. Each of these resources serves a different use case:
 
 * `google_healthcare_fhir_store_iam_policy`: Authoritative. Sets the IAM policy for the FHIR store and replaces any existing policy already attached.

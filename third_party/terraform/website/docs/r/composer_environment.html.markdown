@@ -313,12 +313,10 @@ See [documentation](https://cloud.google.com/composer/docs/how-to/managing/confi
   (Optional)
   The CIDR block from which IP range for web server will be reserved. Needs to be disjoint from `master_ipv4_cidr_block` and `cloud_sql_ipv4_cidr_block`.
 
-<% unless version == "ga" -%>
 The `web_server_network_access_control` supports:
 
 * `allowed_ip_range` -
   A collection of allowed IP ranges with descriptions. Structure is documented below.
-<% end -%>
 
 The `allowed_ip_range` supports:
 

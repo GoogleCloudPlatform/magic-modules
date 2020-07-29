@@ -11,6 +11,8 @@ description: |-
 
 Use this data source to get information about a Google Cloud Organization.
 
+## Example Usage
+
 ```terraform
 data "google_organization" "org" {
   domain = "example.com"
