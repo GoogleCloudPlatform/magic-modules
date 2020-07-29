@@ -243,7 +243,7 @@ resource_count = 0
 iam_resource_count = 0
 products.each do |product|
   product_definition = product[:definitions]
-  product_definition.objects.reject { |r| r.exclude || r.not_in_version?(product_definition.version_obj_or_closest(version)) }.each do |object|
+  product_definition.objects.reject { |r| r.exclude || r.not_in_version?(product_definition.version_obj_or_closest(version, true)) }.each do |object|
 	resource_count += 1 unless object&.exclude_resource
 	iam_policy = object&.iam_policy
 	unless iam_policy.nil? || iam_policy.exclude
@@ -268,7 +268,7 @@ products.each do |product|
   product_definition = product[:definitions]
   config = product[:overrides]
   product_definition.objects.each do |object|
-	next if object.exclude || object.not_in_version?(product_definition.version_obj_or_closest(version))
+	next if object.exclude || object.not_in_version?(product_definition.version_obj_or_closest(version, true))
 	tf_product = (config.legacy_name || product_definition.name).underscore
 	terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
 -%>

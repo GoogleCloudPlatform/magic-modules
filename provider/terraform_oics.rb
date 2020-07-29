@@ -19,16 +19,16 @@ module Provider
   class TerraformOiCS < Provider::Terraform
     # We don't want *any* static generation, so we override generate to only
     # generate objects.
-    def generate(output_folder, types, _product_path, _dump_yaml)
-      generate_objects(output_folder, types)
+    def generate(output_folder, types, _product_path, _dump_yaml, doc_only)
+      generate_objects(output_folder, types, doc_only)
     end
 
     # Create a directory of examples per resource
-    def generate_resource(pwd, data)
+    def generate_resource(pwd, data, doc_only)
       examples = data.object.examples
                      .reject(&:skip_test)
                      .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
-                     .reject { |e| @version < @api.version_obj_or_closest(e.min_version) }
+                     .reject { |e| @version < @api.version_obj_or_closest(e.min_version, doc_only) }
 
       examples.each do |example|
         target_folder = data.output_folder
@@ -68,6 +68,6 @@ module Provider
 
     def copy_common_files(output_folder) end
 
-    def generate_iam_policy(pwd, data) end
+    def generate_iam_policy(pwd, data, doc_only) end
   end
 end

@@ -25,7 +25,7 @@ module Provider
   class Core
     include Compile::Core
 
-    def initialize(config, api, version_name, start_time)
+    def initialize(config, api, version_name, start_time, doc_only)
       @config = config
       @api = api
 
@@ -39,7 +39,7 @@ module Provider
       # needs to match the provider name.
       @target_version_name = version_name
 
-      @version = @api.version_obj_or_closest(version_name)
+      @version = @api.version_obj_or_closest(version_name, doc_only)
       @api.set_properties_based_on_version(@version)
 
       # The compiler will error out if a file has been written in this compiler
@@ -76,8 +76,8 @@ module Provider
     end
 
     # Main entry point for generation.
-    def generate(output_folder, types, product_path, dump_yaml)
-      generate_objects(output_folder, types)
+    def generate(output_folder, types, product_path, dump_yaml, doc_only)
+      generate_objects(output_folder, types, doc_only)
       copy_files(output_folder) \
         unless @config.files.nil? || @config.files.copy.nil?
       # Compilation has to be the last step, as some files (e.g.
@@ -95,7 +95,9 @@ module Provider
       generate_datasources(pwd, output_folder, types) \
         unless @config.datasources.nil?
 
-      generate_operation(pwd, output_folder, types)
+      unless doc_only
+        generate_operation(pwd, output_folder, types)
+      end
       Dir.chdir pwd
 
       # Write a file with the final version of the api, after overrides
@@ -197,7 +199,7 @@ module Provider
       Dir.chdir pwd
     end
 
-    def generate_objects(output_folder, types)
+    def generate_objects(output_folder, types, doc_only)
       (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
@@ -215,23 +217,25 @@ module Provider
           object.freeze
           object.all_user_properties.each(&:freeze)
 
-          generate_object object, output_folder, @target_version_name
+          generate_object object, output_folder, @target_version_name, doc_only
         end
       end
     end
 
-    def generate_object(object, output_folder, version_name)
+    def generate_object(object, output_folder, version_name, doc_only)
       pwd = Dir.pwd
       data = build_object_data(pwd, object, output_folder, version_name)
       unless object.exclude_resource
         FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
         Dir.chdir output_folder
         Google::LOGGER.debug "Generating #{object.name} resource"
-        generate_resource(pwd, data.clone)
-        Google::LOGGER.debug "Generating #{object.name} tests"
-        generate_resource_tests(pwd, data.clone)
-        generate_resource_sweepers(pwd, data.clone)
-        generate_resource_files(pwd, data.clone)
+        generate_resource(pwd, data.clone, doc_only)
+        unless doc_only
+          Google::LOGGER.debug "Generating #{object.name} tests"
+          generate_resource_tests(pwd, data.clone)
+          generate_resource_sweepers(pwd, data.clone)
+          generate_resource_files(pwd, data.clone)
+        end
         Dir.chdir pwd
       end
 
@@ -241,7 +245,7 @@ module Provider
       FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
       Dir.chdir output_folder
       Google::LOGGER.debug "Generating #{object.name} IAM policy"
-      generate_iam_policy(pwd, data.clone)
+      generate_iam_policy(pwd, data.clone, doc_only)
       Dir.chdir pwd
     end
 
@@ -342,7 +346,7 @@ module Provider
       url_part
     end
 
-    def generate_iam_policy(pwd, data) end
+    def generate_iam_policy(pwd, data, doc_only) end
 
     # TODO(nelsonjr): Review all object interfaces and move to private methods
     # that should not be exposed outside the object hierarchy.

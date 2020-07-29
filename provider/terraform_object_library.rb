@@ -16,12 +16,12 @@ require 'provider/terraform_oics'
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
   class TerraformObjectLibrary < Provider::Terraform
-    def generate(output_folder, types, _product_path, _dump_yaml)
+    def generate(output_folder, types, _product_path, _dump_yaml, doc_only)
       @base_url = @version.base_url
-      generate_objects(output_folder, types)
+      generate_objects(output_folder, types, doc_only)
     end
 
-    def generate_object(object, output_folder, version_name)
+    def generate_object(object, output_folder, version_name, doc_only)
       if object.exclude_validator
         Google::LOGGER.info "Skipping fine-grained resource #{object.name}"
         return
@@ -140,7 +140,7 @@ module Provider
 
     def generate_resource_tests(pwd, data) end
 
-    def generate_iam_policy(pwd, data) end
+    def generate_iam_policy(pwd, data, doc_only) end
 
     def generate_resource_sweepers(pwd, data) end
   end

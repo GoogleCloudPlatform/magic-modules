@@ -88,7 +88,7 @@ module Provider
 
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
-    def generate_iam_policy(pwd, data)
+    def generate_iam_policy(pwd, data, doc_only)
       target_folder = File.join(data.output_folder, 'libraries')
 
       iam_policy_resource_name = "#{resource_name(data.object, data.product)}_iam_policy"

@@ -304,7 +304,7 @@ module Provider
                       self)
       end
 
-      def generate_objects(output_folder, types)
+      def generate_objects(output_folder, types, doc_only)
         # We have two sets of overrides - one for regular modules, one for
         # datasources.
         # When building regular modules, we will potentially need some
