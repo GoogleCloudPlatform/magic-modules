@@ -5617,6 +5617,54 @@ objects:
           The ID value of the image used to create this image. This value may be used
           to determine whether the image was taken from the current or a previous
           instance of a given image name.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'sourceSnapshot'
+        description: |
+          URL of the source snapshot used to create this image.
+
+          In order to create an image, you must provide the full or partial URL of one of the following:
+
+          The selfLink URL
+          This property
+          The sourceImage URL
+          The rawDisk.source URL
+          The sourceDisk URL
+        resource: 'Snapshot'
+        imports: 'selfLink'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'sourceSnapshotEncryptionKey'
+        description: |
+          The customer-supplied encryption key of the source snapshot. Required if
+          the source snapshot is protected by a customer-supplied encryption key.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'rawKey'
+            description: |
+              Specifies a 256-bit customer-supplied encryption key, encoded in
+              RFC 4648 base64 to either encrypt or decrypt this resource.
+          - !ruby/object:Api::Type::String
+            name: 'sha256'
+            description: |
+              The RFC 4648 base64 encoded SHA-256 hash of the
+              customer-supplied encryption key that protects this resource.
+            output: true
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account being used for the encryption request for the given KMS key.
+              If absent, the Compute Engine default service account is used.
+            output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
+      - !ruby/object:Api::Type::String
+        name: 'sourceSnapshotId'
+        description: |
+          The ID value of the snapshot used to create this image. This value may be used
+          to determine whether the snapshot was taken from the current or a previous
+          instance of a given snapshot name.
       - !ruby/object:Api::Type::Enum
         name: 'sourceType'
         description: |
