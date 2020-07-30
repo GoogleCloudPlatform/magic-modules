@@ -108,12 +108,14 @@ objects:
   - !ruby/object:Api::Resource
       name: 'DomainTrust'
       kind: 'activedirectory#trust'
-      base_url: projects/{{project}}/locations/global/domains
-      create_url: projects/{{project}}/locations/global/domains/{{domain_name}}:attachTrust
-      update_url: projects/{{project}}/locations/global/domains/{{domain_name}}:reconfigureTrust
-      delete_url: projects/{{project}}/locations/global/domains/{{domain_name}}:detachTrust
+      base_url: {{domain}}
+      create_url: {{domain}}:attachTrust
+      update_url: {{domain}}:reconfigureTrust
+      delete_url: {{domain}}:detachTrust
       self_link: '{{name}}'
       description: Adds a trust between Active Directory domains
+      identity:
+      - targetDomainName
       nested_query: !ruby/object:Api::Resource::NestedQuery
         kind: 'domain#trustList'
         keys: ['trusts']
@@ -145,7 +147,7 @@ objects:
         api: 'https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains/attachTrust'
       parameters:
         - !ruby/object:Api::Type::String
-          name: domain_name
+          name: domain
           required: true
           url_param_only: true
           input: true
@@ -157,41 +159,37 @@ objects:
           name: 'name'
           output: true
           description: 'The trust name between source and target domains.'      
-        - !ruby/object:Api::Type::NestedObject
-          name: 'trust'
-          description:
-          properties:  
-            - !ruby/object:Api::Type::String
-              name: 'targetDomainName'
-              required: true
-              description: 'The fully qualified target domain name which will be in trust with the current domain.'
-            - !ruby/object:Api::Type::Enum
-              name: 'trustType'
-              required: true
-              description: 'The type of trust represented by the trust resource.'
-              values:
-                - FOREST
-                - EXTERNAL
-            - !ruby/object:Api::Type::Enum
-              name: 'trustDirection'
-              required: true
-              description: 'The trust direction, which decides if the current domain is trusted, trusting, or both.'
-              values:
-                - INBOUND
-                - OUTBOUND
-                - BIDIRECTIONAL
-            - !ruby/object:Api::Type::Boolean
-                name: 'selectiveAuthentication'
-                description: |
-                  Whether the trusted side has forest/domain wide access or selective access to an approved set of resources.
-            - !ruby/object:Api::Type::Array
-              name: 'targetDnsIpAddresses'
-              required: true
-              item_type: Api::Type::String
-              description: |
-                The target DNS server IP addresses which can resolve the remote domain involved in the trust.
-            - !ruby/object:Api::Type::String
-              name: 'trustHandshakeSecret'
-              required: true
-              description: |
-                The trust secret used for the handshake with the target domain. This will not be stored.
+        - !ruby/object:Api::Type::String
+          name: 'targetDomainName'
+          required: true
+          description: 'The fully qualified target domain name which will be in trust with the current domain.'
+        - !ruby/object:Api::Type::Enum
+          name: 'trustType'
+          required: true
+          description: 'The type of trust represented by the trust resource.'
+          values:
+            - FOREST
+            - EXTERNAL
+        - !ruby/object:Api::Type::Enum
+          name: 'trustDirection'
+          required: true
+          description: 'The trust direction, which decides if the current domain is trusted, trusting, or both.'
+          values:
+            - INBOUND
+            - OUTBOUND
+            - BIDIRECTIONAL
+        - !ruby/object:Api::Type::Boolean
+            name: 'selectiveAuthentication'
+            description: |
+              Whether the trusted side has forest/domain wide access or selective access to an approved set of resources.
+        - !ruby/object:Api::Type::Array
+          name: 'targetDnsIpAddresses'
+          required: true
+          item_type: Api::Type::String
+          description: |
+            The target DNS server IP addresses which can resolve the remote domain involved in the trust.
+        - !ruby/object:Api::Type::String
+          name: 'trustHandshakeSecret'
+          required: true
+          description: |
+            The trust secret used for the handshake with the target domain. This will not be stored.
