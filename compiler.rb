@@ -167,11 +167,12 @@ all_product_files.each do |product_name|
   product_api = Api::Compiler.new(product_yaml).run
   product_api.validate
   pp product_api if ENV['COMPILER_DEBUG']
+  doc_only = false
 
   unless product_api.exists_at_version_or_lower(version)
     Google::LOGGER.info \
       "'#{product_name}' does not have a '#{version}' version, skipping"
-    next
+    doc_only = true
   end
 
   if File.exist?(provider_yaml_path)
@@ -188,7 +189,7 @@ all_product_files.each do |product_name|
   pp provider_config if ENV['COMPILER_DEBUG']
 
   if force_provider.nil?
-    provider = provider_config.provider.new(provider_config, product_api, version, start_time)
+    provider = provider_config.provider.new(provider_config, product_api, version, start_time, doc_only)
   else
     override_providers = {
       'oics' => Provider::TerraformOiCS,
@@ -216,7 +217,7 @@ all_product_files.each do |product_name|
 
   Google::LOGGER.info \
     "#{product_name}: Generating types: #{types_to_generate.empty? ? 'ALL' : types_to_generate}"
-  provider.generate output_path, types_to_generate, product_name, yaml_dump
+  provider.generate output_path, types_to_generate, product_name, yaml_dump, doc_only
 end
 
 # In order to only copy/compile files once per provider this must be called outside

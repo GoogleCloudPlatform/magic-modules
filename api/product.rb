@@ -105,8 +105,18 @@ module Api
 
     # Get the version of the object specified by the version given if present
     # Or else fall back to the closest version in the chain defined by Version::ORDER
-    def version_obj_or_closest(name)
+    def version_obj_or_closest(name, doc_only = false)
       return version_obj(name) if exists_at_version(name)
+
+      if doc_only
+        # when it's docs only, versions should go to next the greatest available version that exists
+        name ||= Version::ORDER.index(name)
+        higher_versions = Version::ORDER[Version::ORDER.index(name)..-1]
+
+        higher_versions.each do |version|
+          return version_obj(version) if exists_at_version(version)
+        end
+      end
 
       # versions should fall back to the closest version to them that exists
       name ||= Version::ORDER[0]
