@@ -33,7 +33,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           database_name: "my-database"
       - !ruby/object:Provider::Terraform::Examples
         name: "legacy_spanner_database_ddl"
-        primary_resource_id: "database-ddl"
+        primary_resource_id: "database"
         skip_vcr: true
         vars:
           database_name: "my-database-dll"
