@@ -9,6 +9,8 @@ import (
 )
 
 func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic(t *testing.T) {
+    // Uses random provider
+    skipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
