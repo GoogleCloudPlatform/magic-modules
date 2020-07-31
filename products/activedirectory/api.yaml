@@ -108,11 +108,11 @@ objects:
   - !ruby/object:Api::Resource
       name: 'DomainTrust'
       kind: 'activedirectory#trust'
-      base_url: {{domain}}
-      create_url: {{domain}}:attachTrust
-      update_url: {{domain}}:reconfigureTrust
-      delete_url: {{domain}}:detachTrust
-      self_link: '{{name}}'
+      base_url: projects/{{project}}/locations/global/domains
+      create_url: projects/{{project}}/locations/global/domains/{{domain}}:attachTrust
+      update_url: projects/{{project}}/locations/global/domains/{{domain}}:reconfigureTrust
+      delete_url: projects/{{project}}/locations/global/domains/{{domain}}:detachTrust
+      self_link: projects/{{project}}/locations/global/domains/{{domain}}
       description: Adds a trust between Active Directory domains
       identity:
       - targetDomainName
@@ -155,10 +155,6 @@ objects:
             The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions, 
             https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains.  
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'name'
-          output: true
-          description: 'The trust name between source and target domains.'      
         - !ruby/object:Api::Type::String
           name: 'targetDomainName'
           required: true
