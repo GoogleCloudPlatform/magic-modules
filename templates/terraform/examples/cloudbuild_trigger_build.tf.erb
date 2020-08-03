@@ -1,4 +1,9 @@
 resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
+  trigger_template {
+    branch_name = "master"
+    repo_name   = "my-repo"
+  }
+  
   build {
     step {
       name = "gcr.io/cloud-builders/gsutil"
