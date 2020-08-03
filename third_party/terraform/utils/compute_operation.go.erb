@@ -148,7 +148,7 @@ func computeOrgOperationWaitTimeWithResponse(config *Config, res interface{}, re
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal([]byte(e), response)
+	return json.Unmarshal(e, response)
 }
 
 <% end -%>

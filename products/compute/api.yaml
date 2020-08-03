@@ -8008,18 +8008,27 @@ objects:
             - !ruby/object:Api::Type::Array
               name: 'srcIpRanges'
               description: |
-                Source IP address range in CIDR format.
+                Source IP address range in CIDR format. Required for
+                INGRESS rules.
               item_type: Api::Type::String
+              exactly_one_of:
+                - src_ip_ranges
+                - dest_ip_ranges
             - !ruby/object:Api::Type::Array
               name: 'destIpRanges'
               description: |
-                Destination IP address range in CIDR format.
+                Destination IP address range in CIDR format. Required for
+                EGRESS rules.
               item_type: Api::Type::String
+              exactly_one_of:
+                - src_ip_ranges
+                - dest_ip_ranges
             - !ruby/object:Api::Type::Array
               name: 'layer4Config'
               api_name: 'layer4Configs'
               description: |
                 Pairs of IP protocols and ports that the rule should match.
+              required: true
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::String
@@ -8055,7 +8064,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: 'direction'
         description: |
-          The direction in which this rule applies.
+          The direction in which this rule applies. If unspecified an INGRESS rule is created.
         values:
         - :INGRESS
         - :EGRESS
