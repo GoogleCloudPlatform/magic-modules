@@ -145,7 +145,7 @@ objects:
         name: port
         description: The port number of the exposed Redis endpoint.
         output: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: persistenceIamIdentity
         description: |
           Output only. Cloud IAM identity used by import / export operations
