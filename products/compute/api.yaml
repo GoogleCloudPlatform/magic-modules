@@ -7556,7 +7556,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'RegionNetworkEndpointGroup'
     kind: 'compute#networkEndpointGroup'
-    base_url: 'projects/{{project}}//regions/{{region}}//networkEndpointGroups'
+    base_url: 'projects/{{project}}/regions/{{region}}/networkEndpointGroups'
     input: true
     min_version: beta
     has_self_link: true
@@ -7644,7 +7644,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'tag'
             description: |
-              Optional Cloud Run tag represents the "named-revision" to provide
+              Cloud Run tag represents the "named-revision" to provide
               additional fine-grained traffic routing information.
               The tag must be 1-63 characters long, and comply with RFC1035.
               Example value: "revision-0010".
@@ -7672,16 +7672,15 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'service'
             description: |
-              Cloud Run service is the main resource of Cloud Run.
-              The service must be 1-63 characters long, and comply with RFC1035.
-              Example value: "run-service".
+              Optional serving service.
+              The service name must be 1-63 characters long, and comply with RFC1035.
+              Example value: "default", "my-service".
           - !ruby/object:Api::Type::String
             name: 'version'
             description: |
-              Optional Cloud Run tag represents the "named-revision" to provide
-              additional fine-grained traffic routing information.
-              The tag must be 1-63 characters long, and comply with RFC1035.
-              Example value: "revision-0010".
+              Optional serving version.
+              The version must be 1-63 characters long, and comply with RFC1035.
+              Example value: "v1", "v2".
           - !ruby/object:Api::Type::String
             name: 'urlMask'
             description: |

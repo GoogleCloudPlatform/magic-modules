@@ -1193,8 +1193,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "region_network_endpoint_group_basic"
         primary_resource_id: "serverless_neg"
     properties:
-      id: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
