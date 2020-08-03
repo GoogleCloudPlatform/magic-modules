@@ -301,6 +301,12 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
+			
+			"serviceAccount": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `An optional textual description of the instance group manager.`,
+			},
 <% end -%>
 		},
 	}
