@@ -3,16 +3,16 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   name                  = "<%= ctx[:vars]['forwarding_rule_name'] %>"
   region                = "us-central1"
   load_balancing_scheme = "INTERNAL"
-  backend_service       = "${google_compute_region_backend_service.backend.self_link}"
+  backend_service       = google_compute_region_backend_service.backend.id
   all_ports             = true
   allow_global_access   = true
-  network               = "${google_compute_network.default.name}"
-  subnetwork            = "${google_compute_subnetwork.default.name}"
+  network               = google_compute_network.default.name
+  subnetwork            = google_compute_subnetwork.default.name
 }
 resource "google_compute_region_backend_service" "backend" {
   name                  = "<%= ctx[:vars]['backend_name'] %>"
   region                = "us-central1"
-  health_checks         = ["${google_compute_health_check.hc.self_link}"]
+  health_checks         = [google_compute_health_check.hc.id]
 }
 resource "google_compute_health_check" "hc" {
   name               = "check-<%= ctx[:vars]['backend_name'] %>"
@@ -30,5 +30,5 @@ resource "google_compute_subnetwork" "default" {
   name          = "<%= ctx[:vars]['network_name'] %>"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
-  network       = "${google_compute_network.default.self_link}"
+  network       = google_compute_network.default.id
 }

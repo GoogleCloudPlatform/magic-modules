@@ -30,11 +30,12 @@ module Provider
       super(object, output_folder, version_name)
     end
 
-    def generate_resource(data)
+    def generate_resource(pwd, data)
       target_folder = data.output_folder
       product_ns = data.object.__product.name
 
-      data.generate('templates/terraform/objectlib/base.go.erb',
+      data.generate(pwd,
+                    'templates/terraform/objectlib/base.go.erb',
                     File.join(target_folder,
                               "google/#{product_ns.downcase}_#{data.object.name.underscore}.go"),
                     self)
@@ -115,7 +116,7 @@ module Provider
                        ['google/compute_shared_operation.go',
                         'third_party/terraform/utils/compute_shared_operation.go'],
                        ['google/compute_instance_helpers.go',
-                        'third_party/terraform/utils/compute_instance_helpers.go'],
+                        'third_party/terraform/utils/compute_instance_helpers.go.erb'],
                        ['google/convert.go',
                         'third_party/terraform/utils/convert.go'],
                        ['google/metadata.go',
@@ -137,10 +138,10 @@ module Provider
                      ])
     end
 
-    def generate_resource_tests(data) end
+    def generate_resource_tests(pwd, data) end
 
-    def generate_iam_policy(data) end
+    def generate_iam_policy(pwd, data) end
 
-    def generate_resource_sweepers(data) end
+    def generate_resource_sweepers(pwd, data) end
   end
 end

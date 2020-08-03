@@ -1,0 +1,80 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Namespace: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "service_directory_namespace_basic"
+        primary_resource_id: "example"
+        vars:
+          namespace_id: "example-namespace"
+        min_version: beta
+    properties:
+      location: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      namespaceId: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateRFC1035Name(2, 63)'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/service_directory_namespace.go.erb
+  Service: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "service_directory_service_basic"
+        primary_resource_id: "example"
+        vars:
+          service_id: "example-service"
+          namespace_id: "example-namespace"
+        min_version: beta
+    properties:
+      namespace: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      serviceId: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateRFC1035Name(2, 63)'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/service_directory_service.go.erb
+  Endpoint: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}/endpoints/{{endpoint_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "service_directory_endpoint_basic"
+        primary_resource_id: "example"
+        vars:
+          service_id: "example-service"
+          namespace_id: "example-namespace"
+          endpoint_id: "example-endpoint"
+        min_version: beta
+    properties:
+      service: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      endpointId: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateRFC1035Name(2, 63)'
+      address: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateIpAddress'
+      port: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0, 65535)'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/service_directory_endpoint.go.erb
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

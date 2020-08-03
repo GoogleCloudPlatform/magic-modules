@@ -4,7 +4,7 @@ resource "google_compute_network" "net" {
 
 resource "google_compute_subnetwork" "subnet" {
   name          = "<%= ctx[:vars]['subnet_name'] %>"
-  network       = google_compute_network.net.self_link
+  network       = google_compute_network.net.id
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
 }
@@ -12,7 +12,7 @@ resource "google_compute_subnetwork" "subnet" {
 resource "google_compute_router" "router" {
   name    = "<%= ctx[:vars]['router_name'] %>"
   region  = google_compute_subnetwork.subnet.region
-  network = google_compute_network.net.self_link
+  network = google_compute_network.net.id
 
   bgp {
     asn = 64514

@@ -27,7 +27,7 @@ function clone_repo() {
         LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/docs-examples
     elif [ "$REPO" == "ansible" ]; then
         UPSTREAM_OWNER=ansible-collections
-        GH_REPO=ansible_collections_google
+        GH_REPO=google.cloud
         LOCAL_PATH=$PWD/../ansible
     elif [ "$REPO" == "inspec" ]; then
         UPSTREAM_OWNER=modular-magician
@@ -85,7 +85,8 @@ fi
 
 if [ "$REPO" == "terraform" ]; then
     pushd $LOCAL_PATH
-    find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \;
+    find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \;
+    go mod download
     popd
 fi
 
@@ -100,6 +101,11 @@ else
 fi
 
 pushd $LOCAL_PATH
+
+if [ "$REPO" == "terraform" ]; then
+    make generate
+fi
+
 git config --local user.name "Modular Magician"
 git config --local user.email "magic-modules@google.com"
 git add .

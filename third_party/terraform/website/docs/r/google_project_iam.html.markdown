@@ -28,7 +28,8 @@ Four different resources help you manage your IAM policy for a project. Each of 
    from anyone without organization-level access to the project. Proceed with caution.
    It's not recommended to use `google_project_iam_policy` with your provider project
    to avoid locking yourself out, and it should generally only be used with projects
-   fully managed by Terraform.
+   fully managed by Terraform. If you do use this resource, it is recommended to **import** the policy before
+   applying the change.
 
 ```hcl
 resource "google_project_iam_policy" "project" {
@@ -47,7 +48,7 @@ data "google_iam_policy" "admin" {
 }
 ```
 
-With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
+With IAM Conditions:
 
 ```hcl
 resource "google_project_iam_policy" "project" {
@@ -87,7 +88,7 @@ resource "google_project_iam_binding" "project" {
 }
 ```
 
-With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
+With IAM Conditions:
 
 ```hcl
 resource "google_project_iam_binding" "project" {
@@ -116,7 +117,7 @@ resource "google_project_iam_member" "project" {
 }
 ```
 
-With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_versions.html)):
+With IAM Conditions:
 
 ```hcl
 resource "google_project_iam_member" "project" {
@@ -182,7 +183,7 @@ will not be inferred from the provider.
 
 * `audit_log_config` - (Required only by google\_project\_iam\_audit\_config) The configuration for logging of each type of permission.  This can be specified multiple times.  Structure is documented below.
 
-* `condition` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) An [IAM Condition](https://cloud.google.com/iam/docs/conditions-overview) for a given binding.
+* `condition` - (Optional) An [IAM Condition](https://cloud.google.com/iam/docs/conditions-overview) for a given binding.
   Structure is documented below.
 
 ---
@@ -241,4 +242,3 @@ terraform import google_project_iam_audit_config.my_project "your-project-id foo
 
 -> **Custom Roles**: If you're importing a IAM resource with a custom role, make sure to use the
  full name of the custom role, e.g. `[projects/my-project|organizations/my-org]/roles/my-custom-role`.
-

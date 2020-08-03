@@ -1,0 +1,3 @@
+resource "google_cloudiot_registry" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloudiot_registry_name'] %>"
+}

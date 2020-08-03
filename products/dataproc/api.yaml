@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Product
 name: Dataproc
-display_name: Cloud Dataproc
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
@@ -32,6 +31,7 @@ objects:
     name: 'AutoscalingPolicy'
     base_url: "projects/{{project}}/locations/{{location}}/autoscalingPolicies"
     self_link: "projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{id}}"
+    collection_url_key: 'policies'
     description: |
       Describes an autoscaling policy for Dataproc cluster autoscaler.
     parameters:
@@ -486,10 +486,13 @@ objects:
                 description: |
                   The set of optional components to activate on the cluster.
 
-                  Possible values include: COMPONENT_UNSPECIFIED, ANACONDA, HIVE_WEBHCAT, JUPYTER, ZEPPELIN
+                  Possible values include: COMPONENT_UNSPECIFIED, ANACONDA, HIVE_WEBHCAT, JUPYTER, ZEPPELIN, HBASE, SOLR, and RANGER
                 values:
                 - :COMPONENT_UNSPECIFIED
                 - :ANACONDA
+                - :HBASE
+                - :RANGER
+                - :SOLR
                 - :HIVE_WEBHCAT
                 - :JUPYTER
                 - :ZEPPELIN

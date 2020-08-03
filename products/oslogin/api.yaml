@@ -60,6 +60,7 @@ objects:
         description: |
           Public key text in SSH format, defined by RFC4253 section 6.6.
         required: true
+        input: true
       - !ruby/object:Api::Type::String
         name: 'expirationTimeUsec'
         description: |

@@ -1,0 +1,9 @@
+<build>
+    <buildType id="GoogleCloud_ProviderGoogleCloudMmUpstreamVcr"/>
+    <properties>
+      <property name="TEST_PATTERN" value="TestAcc"/>
+      <property name="BRANCH_NAME" value="refs/heads/auto-pr-{{PR_NUMBER}}"/>
+      <property name="env.VCR_MODE" value="REPLAYING"/>
+    </properties>
+    <comment><text>Magician triggered PR</text></comment>
+</build>

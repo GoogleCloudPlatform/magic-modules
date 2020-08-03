@@ -1,6 +1,6 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% url_map = grab_attributes['url_map'] -%>
-<% backend_service = grab_attributes['backend_service'] -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% url_map = grab_attributes(pwd)['url_map'] -%>
+<% backend_service = grab_attributes(pwd)['backend_service'] -%>
 describe google_compute_url_maps(project: <%= gcp_project_id -%>) do
   its('names') { should include <%= doc_generation ? "'#{url_map['name']}'" : "url_map['name']" -%> }
 end

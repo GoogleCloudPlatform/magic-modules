@@ -1,5 +1,5 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% ssl_certificate = grab_attributes['ssl_certificate'] -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% ssl_certificate = grab_attributes(pwd)['ssl_certificate'] -%>
 describe google_compute_ssl_certificate(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{ssl_certificate['name']}'" : "ssl_certificate['name']" -%>) do
   it { should exist }
   its('description') { should eq <%= doc_generation ? "'#{ssl_certificate['description']}'" : "ssl_certificate['description']" -%> }

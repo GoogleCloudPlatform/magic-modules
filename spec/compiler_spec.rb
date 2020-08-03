@@ -48,7 +48,7 @@ describe Api::Compiler do
 
     it { is_expected.to be_instance_of Api::Product }
     it { is_expected.to have_attributes(api_name: 'myproduct') }
-    it { is_expected.to have_attribute_of_length(objects: 4) }
+    it { is_expected.to have_attribute_of_length(objects: 5) }
   end
 
   context 'should only accept product' do

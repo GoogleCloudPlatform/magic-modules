@@ -50,7 +50,7 @@
   timeouts ||= Api::Timeouts.new
 -%>
 ---
-<%= lines(autogen_notice :yaml) -%>
+<%= lines(autogen_notice(:yaml, pwd)) -%>
 subcategory: "<%= tf_subcategory -%>"
 layout: "google"
 page_title: "Google: <%= resource_ns_iam -%>"
@@ -95,7 +95,7 @@ data "google_iam_policy" "admin" {
 }
 
 resource "<%= resource_ns_iam -%>_policy" "policy" {
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   policy_data = data.google_iam_policy.admin.policy_data
 }
 ```
@@ -120,7 +120,7 @@ data "google_iam_policy" "admin" {
 }
 
 resource "<%= resource_ns_iam -%>_policy" "policy" {
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   policy_data = data.google_iam_policy.admin.policy_data
 }
 ```
@@ -129,7 +129,7 @@ resource "<%= resource_ns_iam -%>_policy" "policy" {
 
 ```hcl
 resource "<%= resource_ns_iam -%>_binding" "binding" {
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   members = [
     "user:jane@example.com",
@@ -142,7 +142,7 @@ With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_
 
 ```hcl
 resource "<%= resource_ns_iam -%>_binding" "binding" {
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   members = [
     "user:jane@example.com",
@@ -160,7 +160,7 @@ resource "<%= resource_ns_iam -%>_binding" "binding" {
 
 ```hcl
 resource "<%= resource_ns_iam -%>_member" "member" {
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   member = "user:jane@example.com"
 }
@@ -171,7 +171,7 @@ With IAM Conditions ([beta](https://terraform.io/docs/providers/google/provider_
 
 ```hcl
 resource "<%= resource_ns_iam -%>_member" "member" {
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "<%= object.iam_policy.admin_iam_role || object.iam_policy.allowed_iam_role -%>"
   member = "user:jane@example.com"
 
@@ -262,7 +262,7 @@ Any variables not passed in the import command will be taken from the provider c
 
 IAM member imports use space-delimited identifiers: the resource in question, the role, and the member identity, e.g.
 ```
-$ terraform import <% if object.min_version.name == 'beta' %>-provider=google-beta <% end -%><%= resource_ns_iam -%>_member.editor "<%= id_format(object).gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%> jane@example.com"
+$ terraform import <% if object.min_version.name == 'beta' %>-provider=google-beta <% end -%><%= resource_ns_iam -%>_member.editor "<%= all_formats.first.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> <%= object.iam_policy.allowed_iam_role -%> jane@example.com"
 ```
 
 IAM binding imports use space-delimited identifiers: the resource in question and the role, e.g.

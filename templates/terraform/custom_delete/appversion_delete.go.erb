@@ -30,7 +30,7 @@ if d.Get("delete_service_on_destroy") == true {
 	}
 	err = appEngineOperationWaitTime(
 		config, res, project, "Deleting Service",
-		int(d.Timeout(schema.TimeoutDelete).Minutes()))
+		d.Timeout(schema.TimeoutDelete))
 
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ if d.Get("delete_service_on_destroy") == true {
 	}
 	err = appEngineOperationWaitTime(
 		config, res, project, "Deleting AppVersion",
-		int(d.Timeout(schema.TimeoutDelete).Minutes()))
+		d.Timeout(schema.TimeoutDelete))
 
 	if err != nil {
 		return err

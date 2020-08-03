@@ -33,10 +33,10 @@ func resourceGoogleProject() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(4 * time.Minute),
-			Update: schema.DefaultTimeout(4 * time.Minute),
-			Read:   schema.DefaultTimeout(4 * time.Minute),
-			Delete: schema.DefaultTimeout(4 * time.Minute),
+			Create: schema.DefaultTimeout(10 * time.Minute),
+			Update: schema.DefaultTimeout(10 * time.Minute),
+			Read:   schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
 		MigrateState: resourceGoogleProjectMigrateState,
@@ -47,45 +47,54 @@ func resourceGoogleProject() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validateProjectID(),
+				Description:  `The project ID. Changing this forces a new project to be created.`,
 			},
 			"skip_delete": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: `If true, the Terraform resource can be deleted without deleting the Project via the Google API.`,
 			},
 			"auto_create_network": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: `Create the 'default' network automatically.  Default true. If set to false, the default network will be deleted.  Note that, for quota purposes, you will still need to have 1 network slot available to create the project successfully, even if you set auto_create_network to false, since the network will exist momentarily.`,
 			},
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validateProjectName(),
+				Description:  `The display name of the project.`,
 			},
 			"org_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: `The numeric ID of the organization this project belongs to. Changing this forces a new project to be created.  Only one of org_id or folder_id may be specified. If the org_id is specified then the project is created at the top level. Changing this forces the project to be migrated to the newly specified organization.`,
 			},
 			"folder_id": {
-				Type:      schema.TypeString,
-				Optional:  true,
-				Computed:  true,
-				StateFunc: parseFolderId,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				StateFunc:   parseFolderId,
+				Description: `The numeric ID of the folder this project should be created under. Only one of org_id or folder_id may be specified. If the folder_id is specified, then the project is created under the specified folder. Changing this forces the project to be migrated to the newly specified folder.`,
 			},
 			"number": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `The numeric identifier of the project.`,
 			},
 			"billing_account": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The alphanumeric ID of the billing account this project belongs to. The user or service account performing this operation with Terraform must have Billing Account Administrator privileges (roles/billing.admin) in the organization. See Google Cloud Billing API Access Control for more details.`,
 			},
 			"labels": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: `A set of key/value label pairs to assign to the project.`,
 			},
 		},
 	}
@@ -136,7 +145,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	waitErr := resourceManagerOperationWaitTime(config, opAsMap, "creating folder", int(d.Timeout(schema.TimeoutCreate).Minutes()))
+	waitErr := resourceManagerOperationWaitTime(config, opAsMap, "creating folder", d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		// The resource wasn't actually created
 		d.SetId("")
@@ -150,6 +159,10 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 			return err
 		}
 	}
+
+	// Sleep for 10s, letting the billing account settle before other resources
+	// try to use this project.
+	time.Sleep(10 * time.Second)
 
 	err = resourceGoogleProjectRead(d, meta)
 	if err != nil {
@@ -204,6 +217,9 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 
 	p, err := readGoogleProject(d, config)
 	if err != nil {
+		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 403 && strings.Contains(gerr.Message, "caller does not have permission") {
+			return fmt.Errorf("the user does not have permission to access Project %q or it may not exist", pid)
+		}
 		return handleNotFoundError(err, d, fmt.Sprintf("Project %q", pid))
 	}
 
@@ -433,7 +449,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *Config, projectId
 			if err != nil {
 				return errwrap.Wrapf("Error deleting firewall: {{err}}", err)
 			}
-			err = computeOperationWait(config, op, projectId, "Deleting Firewall")
+			err = computeOperationWaitTime(config, op, projectId, "Deleting Firewall", d.Timeout(schema.TimeoutCreate))
 			if err != nil {
 				return err
 			}
@@ -493,7 +509,7 @@ func deleteComputeNetwork(project, network string, config *Config) error {
 		return errwrap.Wrapf("Error deleting network: {{err}}", err)
 	}
 
-	err = computeOperationWaitTime(config, op, project, "Deleting Network", 10)
+	err = computeOperationWaitTime(config, op, project, "Deleting Network", 10*time.Minute)
 	if err != nil {
 		return err
 	}
@@ -561,7 +577,7 @@ func doEnableServicesRequest(services []string, project string, config *Config, 
 		return errwrap.Wrapf("failed to send enable services request: {{err}}", err)
 	}
 	// Poll for the API to return
-	waitErr := serviceUsageOperationWait(config, op, project, fmt.Sprintf("Enable Project %q Services: %+v", project, services))
+	waitErr := serviceUsageOperationWait(config, op, project, fmt.Sprintf("Enable Project %q Services: %+v", project, services), timeout)
 	if waitErr != nil {
 		return waitErr
 	}

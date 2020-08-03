@@ -17,6 +17,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     # This resource is a child resource
     skip_sweeper: true
+    id_format: "{{instance}}/{{name}}"
     import_format:
       - "projects/{{project}}/instances/{{instance}}/databases/{{name}}"
       - "instances/{{instance}}/databases/{{name}}"
@@ -26,6 +27,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "spanner_database_basic"
         primary_resource_id: "database"
+        # Randomness due to spanner instance
+        skip_vcr: true
         vars:
           database_name: "my-database"
     properties:
@@ -55,6 +58,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "spanner_instance_basic"
         primary_resource_id: "example"
+        # Randomness
+        skip_vcr: true
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |

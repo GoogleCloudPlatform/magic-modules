@@ -68,9 +68,10 @@ func computeInstanceFromTemplateSchema() map[string]*schema.Schema {
 	})
 
 	s["source_instance_template"] = &schema.Schema{
-		Type:     schema.TypeString,
-		Required: true,
-		ForceNew: true,
+		Type:        schema.TypeString,
+		Required:    true,
+		ForceNew:    true,
+		Description: `Name or self link of an instance template to create the instance based on.`,
 	}
 
 	return s
@@ -163,7 +164,7 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 
 	// Wait for the operation to complete
 	waitErr := computeOperationWaitTime(config, op, project,
-		"instance to create", int(d.Timeout(schema.TimeoutCreate).Minutes()))
+		"instance to create", d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		// The resource didn't actually create
 		d.SetId("")

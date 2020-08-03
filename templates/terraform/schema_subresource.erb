@@ -19,7 +19,7 @@ func <%= namespace_property_from_object(property, object) -%>Schema() *schema.Re
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
           <% order_properties(property.item_type.properties).each do |prop| -%>
-            <%= lines(build_schema_property(prop, object)) -%>
+            <%= lines(build_schema_property(prop, object, pwd)) -%>
           <% end -%>
 		},
 	}
@@ -27,5 +27,5 @@ func <%= namespace_property_from_object(property, object) -%>Schema() *schema.Re
 <% end %>
 
 <% property.nested_properties.each do |prop| -%>
-<%= lines(build_subresource_schema(prop, object), 1) -%>
+<%= lines(build_subresource_schema(prop, object, pwd), 1) -%>
 <% end -%>

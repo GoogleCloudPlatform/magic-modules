@@ -1,0 +1,12 @@
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+  if v == nil || v.(string) == "" {
+    return "", nil
+  } else if strings.HasPrefix(v.(string), "https://") {
+    return v, nil
+  }
+  url, err := replaceVars(d, config, "{{ComputeBasePath}}" + v.(string))
+  if err != nil {
+    return "", err
+  }
+  return ConvertSelfLinkToV1(url), nil
+}

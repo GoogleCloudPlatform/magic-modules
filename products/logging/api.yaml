@@ -13,7 +13,7 @@
 ---
 !ruby/object:Api::Product
 name: Logging
-display_name: Stackdriver Logging
+display_name: Cloud (Stackdriver) Logging
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

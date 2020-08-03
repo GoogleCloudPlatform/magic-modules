@@ -115,6 +115,43 @@ objects:
               name: 'nv-prop1'
               description: 'the first property in my namevalues'
   - !ruby/object:Api::Resource
+    name: 'ResourceWithTerraformOverride'
+    kind: 'terraform#resourceWithTerraformOverride'
+    base_url: 'resourceWithTerraformOverride'
+    description: 'a description'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'stringOne'
+        description: 'a string property (depth 0)'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'objectOne'
+        description: 'a NestedObject property (depth 0)'
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'objectOneString'
+            description: 'a string property (depth 1)'
+          - !ruby/object:Api::Type::NestedObject
+            name: 'objectOneFlattenedObject'
+            description: 'a nested NestedObject (depth 1)'
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'objectOneNestedNestedInteger'
+                description: 'a nested integer (depth 2)'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'objectTwoFlattened'
+        description: 'a NestedObject property that is flattened (depth 0)'
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'objectTwoString'
+            description: 'a nested string (depth 1)'
+          - !ruby/object:Api::Type::NestedObject
+            name: 'objectTwoNestedObject'
+            description: 'a nested NestedObject (depth 1)'
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'objectTwoNestedNestedString'
+                description: 'a nested String (depth 2)'
+  - !ruby/object:Api::Resource
     name: 'TerraformImportIdTest'
     description: 'Used for spec/provider_terraform_import_spec'
     base_url: "projects/{{project}}/regions/{{region}}/subnetworks"

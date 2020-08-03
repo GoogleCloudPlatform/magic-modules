@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"sort"
 	"strings"
 	"time"
 
@@ -86,7 +87,8 @@ func handleNotFoundError(err error, d *schema.ResourceData, resource string) err
 		return nil
 	}
 
-	return fmt.Errorf("Error reading %s: %s", resource, err)
+	return errwrap.Wrapf(
+		fmt.Sprintf("Error when reading or editing %s: {{err}}", resource), err)
 }
 
 func isGoogleApiErrorWithCode(err error, errCode int) bool {
@@ -209,6 +211,8 @@ func convertStringSet(set *schema.Set) []string {
 	for _, v := range set.List() {
 		s = append(s, v.(string))
 	}
+	sort.Strings(s)
+
 	return s
 }
 
@@ -226,6 +230,7 @@ func stringSliceFromGolangSet(sset map[string]struct{}) []string {
 	for s := range sset {
 		ls = append(ls, s)
 	}
+	sort.Strings(ls)
 
 	return ls
 }
@@ -411,7 +416,7 @@ func calcAddRemove(from []string, to []string) (add, remove []string) {
 }
 
 func stringInSlice(arr []string, str string) bool {
-	for _,i := range arr {
+	for _, i := range arr {
 		if i == str {
 			return true
 		}
@@ -421,9 +426,22 @@ func stringInSlice(arr []string, str string) bool {
 }
 
 func migrateStateNoop(v int, is *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
-		return is, nil
+	return is, nil
 }
 
 func expandString(v interface{}, d TerraformResourceData, config *Config) (string, error) {
 	return v.(string), nil
+}
+
+func changeFieldSchemaToForceNew(sch *schema.Schema) {
+	sch.ForceNew = true
+	switch sch.Type {
+	case schema.TypeList:
+	case schema.TypeSet:
+		if nestedR, ok := sch.Elem.(*schema.Resource); ok {
+			for _, nestedSch := range nestedR.Schema {
+				changeFieldSchemaToForceNew(nestedSch)
+			}
+		}
+	}
 }

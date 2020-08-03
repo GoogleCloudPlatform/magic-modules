@@ -156,13 +156,15 @@ The following arguments are supported:
     Structure is documented below.
     **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
-* `tags` - (Optional) A list of tags to attach to the instance.
+* `tags` - (Optional) A list of network tags to attach to the instance.
 
 * `shielded_instance_config` - (Optional) Enable [Shielded VM](https://cloud.google.com/security/shielded-cloud/shielded-vm) on this instance. Shielded VM provides verifiable integrity to prevent against malware and rootkits. Defaults to disabled. Structure is documented below.
 	**Note**: [`shielded_instance_config`](#shielded_instance_config) can only be used with boot images with shielded vm support. See the complete list [here](https://cloud.google.com/compute/docs/images#shielded-images).
 
 * `enable_display` - (Optional) Enable [Virtual Displays](https://cloud.google.com/compute/docs/instances/enable-instance-virtual-display#verify_display_driver) on this instance.
 **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
+
+* `resource_policies` (Optional) -- A list of short names or self_links of resource policies to attach to the instance. Modifying this list will cause the instance to recreate. Currently a max of 1 resource policy is supported.
 
 
 ---
@@ -209,7 +211,7 @@ The `initialize_params` block supports:
     `global/images/family/{family}`, `family/{family}`, `{project}/{family}`,
     `{project}/{image}`, `{family}`, or `{image}`. If referred by family, the
     images names must include the family name. If they don't, use the
-    [google_compute_image data source](/docs/providers/google/d/datasource_compute_image.html).
+    [google_compute_image data source](/docs/providers/google/d/compute_image.html).
     For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
     These images can be referred by family name here.
 
@@ -349,6 +351,8 @@ The `shielded_instance_config` block supports:
 
 In addition to the arguments listed above, the following computed attributes are
 exported:
+
+* `id` - an identifier for the resource with format `projects/{{project}}/zones/{{zone}}/instances/{{name}}`
 
 * `instance_id` - The server-assigned unique identifier of this instance.
 

@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: BigqueryDataTransfer
-display_name: BigQueryDataTransfer
+display_name: BigQuery Data Transfer
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
@@ -27,8 +27,10 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'Config'
-    base_url: projects/{{project}}/locations/{{location}}/transferConfigs
+    base_url: projects/{{project}}/locations/{{location}}/transferConfigs?serviceAccountName={{service_account_name}}
     self_link: "{{name}}"
+    # see comment at service_account_name, PATCHing service_account_name also required update_mask entry
+    # update_url: "{{name}}?serviceAccountName={{service_account_name}}"
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -47,6 +49,18 @@ objects:
         description: |
           The geographic location where the transfer config should reside.
           Examples: US, EU, asia-northeast1. The default value is US.
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccountName'
+        url_param_only: true
+        # The API would support PATCHing the service account, but setting the
+        # update_mask accordingly for a url_param_only is currently not
+        # supported in magic-modules
+        input: true
+        default_value: ''
+        description: |
+          Optional service account name. If this field is set, transfer config will
+          be created with this service account credentials. It requires that
+          requesting user calling this API has permissions to act as this service account.
     properties:
       - !ruby/object:Api::Type::String
         name: 'displayName'

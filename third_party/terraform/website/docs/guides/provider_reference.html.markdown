@@ -18,7 +18,7 @@ location (`zone` and/or `region`) for your resources.
 
 ```hcl
 provider "google" {
-  credentials = "${file("account.json")}"
+  credentials = file("account.json")
   project     = "my-project-id"
   region      = "us-central1"
   zone        = "us-central1-c"
@@ -27,7 +27,7 @@ provider "google" {
 
 ```hcl
 provider "google-beta" {
-  credentials = "${file("account.json")}"
+  credentials = file("account.json")
   project     = "my-project-id"
   region      = "us-central1"
   zone        = "us-central1-c"
@@ -74,7 +74,12 @@ same configuration.
 
 * `credentials` - (Optional) Either the path to or the contents of a
 [service account key file] in JSON format. You can
-[manage key files using the Cloud Console].
+[manage key files using the Cloud Console].  If not provided, the
+application default credentials will be used.  You can configure
+Application Default Credentials on your personal machine by
+running `gcloud auth application-default login`. If
+terraform is running on a GCP machine, and this value is unset,
+it will automatically use that machine's configured service account.
 
 * `project` - (Optional) The default project to manage resources in. If another
 project is specified on a resource, it will take precedence.
@@ -110,7 +115,7 @@ Values are expected to include the version of the service, such as
 `https://www.googleapis.com/compute/v1/`.
 
 * `batching` - (Optional) This block controls batching GCP calls for groups of specific resource types. Structure is documented below.
-~>**NOTE**: Batching is not implemented for the majority or resources/request types and is bounded by two values. If you are running into issues with slow batches
+~>**NOTE:** Batching is not implemented for the majority or resources/request types and is bounded by two values. If you are running into issues with slow batches
 resources, you may need to adjust one or both of 1) the core [`-parallelism`](https://www.terraform.io/docs/commands/apply.html#parallelism-n) flag, which controls how many concurrent resources are being operated on and 2) `send_after`, the time interval after which a batch is sent.
 
 * `request_timeout` - (Optional) A duration string controlling the amount of time
@@ -265,7 +270,7 @@ be used for configuration are below:
 * `iam_credentials_custom_endpoint` (`GOOGLE_IAM_CREDENTIALS_CUSTOM_ENDPOINT`) - `https://iamcredentials.googleapis.com/v1/`
 * `kms_custom_endpoint` (`GOOGLE_KMS_CUSTOM_ENDPOINT`) - `https://cloudkms.googleapis.com/v1/`
 * `logging_custom_endpoint` (`GOOGLE_LOGGING_CUSTOM_ENDPOINT`) - `https://logging.googleapis.com/v2/`
-* `monitoring_custom_endpoint` (`GOOGLE_MONITORING_CUSTOM_ENDPOINT`) - `https://monitoring.googleapis.com/v3/`
+* `monitoring_custom_endpoint` (`GOOGLE_MONITORING_CUSTOM_ENDPOINT`) - `https://monitoring.googleapis.com/`
 * `pubsub_custom_endpoint` (`GOOGLE_PUBSUB_CUSTOM_ENDPOINT`) - `https://pubsub.googleapis.com/v1/`
 * `redis_custom_endpoint` (`GOOGLE_REDIS_CUSTOM_ENDPOINT`) - `https://redis.googleapis.com/v1/` | `https://redis.googleapis.com/v1beta1/`
 * `resource_manager_custom_endpoint` (`GOOGLE_RESOURCE_MANAGER_CUSTOM_ENDPOINT`) - `https://cloudresourcemanager.googleapis.com/v1/`

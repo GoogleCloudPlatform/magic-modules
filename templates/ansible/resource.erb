@@ -3,12 +3,12 @@
 #
 # Copyright (C) 2017 Google
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-<%= lines(autogen_notice :python) -%>
+<%= lines(autogen_notice(:python, pwd)) -%>
 
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-<%= lines(compile('templates/ansible/documentation.erb'), 1) -%>
+<%= lines(compile(pwd + '/templates/ansible/documentation.erb'), 1) -%>
 ################################################################################
 # Imports
 ################################################################################
@@ -44,7 +44,7 @@ import json
 def main():
     """Main function"""
 
-<%= lines(indent(compile('templates/ansible/module.erb'), 4)) -%>
+<%= lines(indent(compile(pwd + '/templates/ansible/module.erb'), 4)) -%>
 
     if not module.params['scopes']:
         module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
@@ -295,7 +295,7 @@ def <%= func_name -%>(module, request, response):
 <% end -%>
 <% end # unless update_props.empty? -%>
 <% if object.update_mask -%>
-<%= lines(compile('templates/ansible/update_mask.erb')) -%>
+<%= lines(compile(pwd + '/templates/ansible/update_mask.erb')) -%>
 <% end # if update_mask -%>
 <%=
   lines(method_decl('delete', ['module', 'link', ('kind' if object.kind?),
@@ -378,7 +378,7 @@ def unwrap_resource(result, module):
 <% end -%>
 
 
-<%= lines(compile('templates/ansible/transport.erb'), 2) -%>
+<%= lines(compile(pwd + '/templates/ansible/transport.erb'), 2) -%>
 <%= lines(emit_link('self_link', build_url(object.self_link_url), object), 2) -%>
 <%= lines(emit_link('collection', build_url(object.collection_url), object), 2) -%>
 <%- unless object.create_url.nil? -%>
@@ -446,7 +446,7 @@ def is_different(module, response):
 def response_to_hash(module, response):
     return <%= lines(python_literal(response_properties(object.properties), use_hash_brackets: true)) -%>
 <% if object.all_user_properties.any?(&:pattern) -%>
-<%= lines(compile('templates/ansible/pattern.py.erb')) -%>
+<%= lines(compile(pwd + '/templates/ansible/pattern.py.erb')) -%>
 <% end -%>
 <% readonly_selflink_rrefs.each do |resource| -%>
 
@@ -459,9 +459,9 @@ def <%= resource.name.underscore -%>_selflink(name, params):
         name = <%= build_url(resource.self_link_url).gsub('{name}', '%s') -%>.format(**params) % name
     return name
 <% end -%>
-<%= lines_before(compile('templates/ansible/async.erb'), 1) -%>
-<%= lines_before(compile('templates/ansible/provider_helpers.erb'), 1) -%>
-<%= lines_before(compile('templates/ansible/properties.erb'), 1) -%>
+<%= lines_before(compile(pwd + '/templates/ansible/async.erb'), 1) -%>
+<%= lines_before(compile(pwd + '/templates/ansible/provider_helpers.erb'), 1) -%>
+<%= lines_before(compile(pwd + '/templates/ansible/properties.erb'), 1) -%>
 
 
 if __name__ == '__main__':

@@ -93,6 +93,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   MachineType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  MachineImage: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   ManagedSslCertificate: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Network: !ruby/object:Overrides::Inspec::ResourceOverride
@@ -183,6 +185,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       pathMatchers.pathRules: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude: true
+      pathMatchers.defaultRouteAction.weightedBackendServices: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: true
   VpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   VpnTunnel: !ruby/object:Overrides::Inspec::ResourceOverride
@@ -202,3 +206,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         override_name: "zone_status"
       id: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: "zone_id"
+  PerInstanceConfig: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  RegionPerInstanceConfig: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true

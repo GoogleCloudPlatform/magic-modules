@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: GameServices
-display_name: Google Game Services
+display_name: Game Servers
 scopes:
 - https://www.googleapis.com/auth/compute
 versions:

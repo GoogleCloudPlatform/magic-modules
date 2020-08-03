@@ -1,0 +1,6 @@
+resource "google_compute_address" "<%= ctx[:primary_resource_id] %>" {
+  provider     = google-beta 
+  name         = "<%= ctx[:vars]['address_name'] %>"
+  address_type = "INTERNAL"
+  purpose      = "SHARED_LOADBALANCER_VIP"
+}

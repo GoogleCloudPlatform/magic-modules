@@ -51,6 +51,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           underscores. The maximum length is 1,024 characters.
   DatasetAccess: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  Job: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

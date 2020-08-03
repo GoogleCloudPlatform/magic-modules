@@ -13,9 +13,10 @@
   # limitations under the License.
 -%>
 <% if property.custom_flatten -%>
-<%= lines(compile_template(property.custom_flatten,
+<%= lines(compile_template(pwd + '/' + property.custom_flatten,
                            prefix: prefix,
-                           property: property)) -%>
+                           property: property,
+                           pwd: pwd)) -%>
 <% else -%>
 <% if tf_types.include?(property.class) -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
@@ -132,7 +133,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 }
 <% if property.nested_properties? -%>
   <% property.nested_properties.each do |prop| -%>
-    <%= lines(build_flatten_method(prefix + titlelize_property(property), prop, object), 1) -%>
+    <%= lines(build_flatten_method(prefix + titlelize_property(property), prop, object, pwd), 1) -%>
   <% end -%>
 <% end -%>
 <% else -%>
