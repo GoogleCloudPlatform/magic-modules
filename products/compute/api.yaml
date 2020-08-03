@@ -7594,10 +7594,6 @@ objects:
           A reference to the region where the Serverless NEGs Reside.
         required: true
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: 'id'
-        description: 'The unique identifier for the resource.'
-        output: true
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |

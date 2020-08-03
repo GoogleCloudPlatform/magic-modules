@@ -1192,6 +1192,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "region_network_endpoint_group_basic"
         primary_resource_id: "serverless_neg"
+        vars:
+          neg_name: "test-neg"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
