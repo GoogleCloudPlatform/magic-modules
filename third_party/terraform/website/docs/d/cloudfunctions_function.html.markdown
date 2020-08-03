@@ -56,6 +56,13 @@ exported:
 * `service_account_email` - The service account email to be assumed by the cloud function.
 * `vpc_connector` - The VPC Network Connector that this cloud function can connect to. 
 * `vpc_connector_egress_settings` - The egress settings for the connector, controlling what traffic is diverted through it.
+* `source_archive_bucket` - The GCS bucket containing the zip archive which contains the function.
+* `source_archive_object` - The source archive object (file) in archive bucket.
+* `max_instances` - The limit on the maximum number of function instances that may coexist at a given time.
+
+The `source_repository` block contains:
+
+* `url` - The URL pointing to the hosted repository where the function is defined.
 
 The `event_trigger` block contains:
 
