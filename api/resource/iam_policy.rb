@@ -91,7 +91,7 @@ module Api
       attr_reader :import_format
 
       # [Optional] Version number in the request payload.
-      # if set, it override the default iamPolicyVersion
+      # if set, it overrides the default iamPolicyVersion
       attr_reader :iam_policy_version
       def validate
         super
