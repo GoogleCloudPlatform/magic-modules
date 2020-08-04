@@ -7614,13 +7614,10 @@ objects:
         name: 'networkEndpointType'
         required: true
         description: |
-          Type of network endpoints in this network endpoint group.
+          Type of network endpoints in this network endpoint group. Defaults to SERVERLESS
         values:
-          - :INTERNET_IP_PORT
-          - :INTERNET_FQDN_PORT
           - :SERVERLESS
-          - :NON_GCP_PRIVATE_IP_PORT
-          - :GCE_VM_IP_PORT
+        default_value: :SERVERLESS
       - !ruby/object:Api::Type::NestedObject
         name: 'cloudRun'
         exactly_one_of:

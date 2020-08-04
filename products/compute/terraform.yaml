@@ -1190,10 +1190,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RegionNetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "region_network_endpoint_group_basic"
-        primary_resource_id: "serverless_neg"
+        name: "region_network_endpoint_group_functions"
+        primary_resource_id: "function_neg"
         vars:
-          neg_name: "test-neg"
+          neg_name: "function-neg"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_cloudrun"
+        primary_resource_id: "cloudrun_neg"
+        vars:
+          neg_name: "cloudrun-neg"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_appengine"
+        primary_resource_id: "appengine_neg"
+        vars:
+          neg_name: "appengine-neg"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation

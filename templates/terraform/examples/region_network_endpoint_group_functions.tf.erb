@@ -1,0 +1,32 @@
+// Cloud Functions Example
+resource "google_compute_global_network_endpoint_group" "<%= ctx[:primary_resource_id] %>" {
+  name                  = "<%= ctx[:vars]['neg_name'] %>"
+  network_endpoint_type = "SERVERLESS"
+  region = "us-central1"
+  cloud_function {
+    function = google_cloudfunctions_function.<%= ctx[:primary_resource_id] %>.name
+  }
+}
+
+resource "google_cloudfunctions_function" "<%= ctx[:primary_resource_id] %>" {
+  name        = "function-test"
+  description = "My function"
+  runtime     = "nodejs10"
+
+  available_memory_mb   = 128
+  source_archive_bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
+  source_archive_object = google_storage_bucket_object.<%= ctx[:primary_resource_id] %>.name
+  trigger_http          = true
+  entry_point           = "helloGET"
+}
+
+
+resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
+  name = "test-bucket"
+}
+
+resource "google_storage_bucket_object" "<%= ctx[:primary_resource_id] %>" {
+  name   = "index.zip"
+  bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
+  source = "./path/to/zip/file/which/contains/code"
+}
