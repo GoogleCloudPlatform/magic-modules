@@ -90,6 +90,9 @@ module Api
       # variables that are outside of the base_url qualifiers.
       attr_reader :import_format
 
+      # [Optional] Version number in the request payload.
+      # if set, it override the default iamPolicyVersion
+      attr_reader :iam_policy_version
       def validate
         super
 
@@ -112,6 +115,7 @@ module Api
           :example_config_body,
           type: String, default: 'templates/terraform/iam/iam_attributes.tf.erb'
         )
+        check :iam_policy_version, type: String
       end
     end
   end

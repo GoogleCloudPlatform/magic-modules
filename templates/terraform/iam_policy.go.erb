@@ -178,14 +178,14 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 <% end -%>
 	var obj map[string]interface{}
 <% if object.iam_policy.iam_conditions_request_type == :QUERY_PARAM -%>
-	url, err = addQueryParams(url, map[string]string{"optionsRequestedPolicyVersion": fmt.Sprintf("%d", iamPolicyVersion)})
+       url, err = addQueryParams(url, map[string]string{"optionsRequestedPolicyVersion": fmt.Sprintf("%d", <% if object.iam_policy.iam_policy_version -%> <%= object.iam_policy.iam_policy_version -%> <% else -%> iamPolicyVersion <% end -%>)})
 	if err != nil {
 		return nil, err
 	}
 <% elsif object.iam_policy.iam_conditions_request_type == :REQUEST_BODY -%>
 	obj = map[string]interface{}{
 		"options": map[string]interface{}{
-			"requestedPolicyVersion": iamPolicyVersion,
+                       "requestedPolicyVersion": <% if object.iam_policy.iam_policy_version -%> <%= object.iam_policy.iam_policy_version -%> <% else -%> iamPolicyVersion <% end -%>,
 		},
 	}
 <%  end -%>
@@ -209,6 +209,10 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 	if err != nil {
 		return err
 	}
+
+<% if object.iam_policy.iam_policy_version -%>
+        json["version"] = <%= object.iam_policy.iam_policy_version -%>
+<% end -%>
 
 <% if object.iam_policy.wrapped_policy_obj -%>
 	obj := make(map[string]interface{})
