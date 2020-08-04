@@ -7612,7 +7612,6 @@ objects:
           you create the resource.
       - !ruby/object:Api::Type::Enum
         name: 'networkEndpointType'
-        required: true
         description: |
           Type of network endpoints in this network endpoint group. Defaults to SERVERLESS
         values:
