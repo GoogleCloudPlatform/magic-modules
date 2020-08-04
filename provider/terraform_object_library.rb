@@ -50,6 +50,8 @@ module Provider
         products
       )
       compile_file_list(output_folder, [
+                          ['google/compute_operation.go',
+                           'third_party/terraform/utils/compute_operation.go.erb'],
                           ['google/config.go',
                            'third_party/terraform/utils/config.go.erb'],
                           ['google/utils.go',
@@ -111,8 +113,6 @@ module Provider
                         'third_party/terraform/utils/bigtable_client_factory.go'],
                        ['google/common_operation.go',
                         'third_party/terraform/utils/common_operation.go'],
-                       ['google/compute_operation.go',
-                        'third_party/terraform/utils/compute_operation.go'],
                        ['google/compute_shared_operation.go',
                         'third_party/terraform/utils/compute_shared_operation.go'],
                        ['google/compute_instance_helpers.go',

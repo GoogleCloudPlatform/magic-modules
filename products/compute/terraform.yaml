@@ -1275,6 +1275,71 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           If it is not provided, the provider region is used.
       serverBinding: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  OrganizationSecurityPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "locations/global/securityPolicies/{{policy_id}}"
+    self_link: "locations/global/securityPolicies/{{policy_id}}"
+    import_format: ["locations/global/securityPolicies/{{policy_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "organization_security_policy_basic"
+        primary_resource_id: "policy"
+        min_version: 'beta'
+        test_env_vars:
+          org_id: :ORG_ID
+    parameters:
+      displayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateRFC1035Name(2, 63)'
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: policy_id
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/org_security_policy.go.erb
+      post_update: templates/terraform/post_update/org_security_policy.go.erb
+      post_delete: templates/terraform/post_delete/org_security_policy.go.erb
+      # TODO: Remove once b/154369201 is closed.
+      test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
+  OrganizationSecurityPolicyAssociation: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{policy_id}}/association/{{name}}"
+    import_format: ["{{policy_id}}/association/{{name}}"]
+    base_url: '{{policy_id}}'
+    self_link: '{{policy_id}}/getAssociation?name={{name}}'
+    create_url: '{{policy_id}}/addAssociation'
+    delete_url: '{{policy_id}}/removeAssociation?name={{name}}'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "organization_security_policy_association_basic"
+        primary_resource_id: "policy"
+        min_version: 'beta'
+        test_env_vars:
+          org_id: :ORG_ID
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/org_security_policy_association.go.erb
+      post_delete: templates/terraform/post_create/org_security_policy_association.go.erb
+      # TODO: Remove once b/154369201 is closed.
+      test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
+  OrganizationSecurityPolicyRule: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{policy_id}}/priority/{{priority}}"
+    import_format: ["{{policy_id}}/priority/{{priority}}"]
+    base_url: '{{policy_id}}'
+    self_link: '{{policy_id}}/getRule?priority={{priority}}'
+    create_url: '{{policy_id}}/addRule?priority={{priority}}'
+    update_url: '{{policy_id}}/patchRule?priority={{priority}}'
+    delete_url: '{{policy_id}}/removeRule?priority={{priority}}'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "organization_security_policy_rule_basic"
+        primary_resource_id: "policy"
+        min_version: 'beta'
+        test_env_vars:
+          org_id: :ORG_ID
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/organization_security_policy_rule.go.erb
+      post_create: templates/terraform/post_create/org_security_policy_rule.go.erb
+      post_delete: templates/terraform/post_create/org_security_policy_rule.go.erb
+      post_update: templates/terraform/post_create/org_security_policy_rule.go.erb
+      # TODO: Remove once b/154369201 is closed.
+      test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
   PacketMirroring: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
