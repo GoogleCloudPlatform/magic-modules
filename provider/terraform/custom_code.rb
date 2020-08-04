@@ -103,6 +103,8 @@ module Provider
       # useful to prepare an object for deletion, e.g. by detaching
       # a disk before deleting it.
       attr_reader :pre_delete
+      # This code is run just after the Delete call happens.
+      attr_reader :post_delete
       # This code replaces the entire delete method.  Since the delete
       # method's function header can't be changed, the template
       # inserts that for you - do not include it in your custom code.
