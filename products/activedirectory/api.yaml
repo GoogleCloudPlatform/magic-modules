@@ -126,7 +126,6 @@ objects:
           path: 'name'
           base_url: '{{op_id}}'
           wait_ms: 1000
-          # It takes about 35-40 mins to get the resource created
           timeouts: !ruby/object:Api::Timeouts
             insert_minutes: 10
             update_minutes: 10
