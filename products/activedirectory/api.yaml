@@ -110,7 +110,9 @@ objects:
       kind: 'activedirectory#trust'
       base_url: projects/{{project}}/locations/global/domains
       create_url: projects/{{project}}/locations/global/domains/{{domain}}:attachTrust
+      update_verb: :POST
       update_url: projects/{{project}}/locations/global/domains/{{domain}}:reconfigureTrust
+      delete_verb: :POST
       delete_url: projects/{{project}}/locations/global/domains/{{domain}}:detachTrust
       self_link: projects/{{project}}/locations/global/domains/{{domain}}
       description: Adds a trust between Active Directory domains
@@ -162,6 +164,7 @@ objects:
         - !ruby/object:Api::Type::Enum
           name: 'trustType'
           required: true
+          input: true
           description: 'The type of trust represented by the trust resource.'
           values:
             - FOREST
@@ -169,6 +172,7 @@ objects:
         - !ruby/object:Api::Type::Enum
           name: 'trustDirection'
           required: true
+          input: true
           description: 'The trust direction, which decides if the current domain is trusted, trusting, or both.'
           values:
             - INBOUND
@@ -176,6 +180,7 @@ objects:
             - BIDIRECTIONAL
         - !ruby/object:Api::Type::Boolean
             name: 'selectiveAuthentication'
+            input: true
             description: |
               Whether the trusted side has forest/domain wide access or selective access to an approved set of resources.
         - !ruby/object:Api::Type::Array
@@ -187,5 +192,6 @@ objects:
         - !ruby/object:Api::Type::String
           name: 'trustHandshakeSecret'
           required: true
+          input: true
           description: |
             The trust secret used for the handshake with the target domain. This will not be stored.
