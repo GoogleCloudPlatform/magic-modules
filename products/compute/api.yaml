@@ -8012,8 +8012,8 @@ objects:
                 INGRESS rules.
               item_type: Api::Type::String
               exactly_one_of:
-                - src_ip_ranges
-                - dest_ip_ranges
+                - match.0.config.0.src_ip_ranges
+                - match.0.config.0.dest_ip_ranges
             - !ruby/object:Api::Type::Array
               name: 'destIpRanges'
               description: |
@@ -8021,8 +8021,8 @@ objects:
                 EGRESS rules.
               item_type: Api::Type::String
               exactly_one_of:
-                - src_ip_ranges
-                - dest_ip_ranges
+                - match.0.config.0.src_ip_ranges
+                - match.0.config.0.dest_ip_ranges
             - !ruby/object:Api::Type::Array
               name: 'layer4Config'
               api_name: 'layer4Configs'
