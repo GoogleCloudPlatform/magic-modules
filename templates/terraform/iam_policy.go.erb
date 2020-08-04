@@ -211,7 +211,7 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 	}
 
 <% if object.iam_policy.iam_policy_version -%>
-<%# This is an override of the existing version that might have been set in the resource_iam_member|policy|binding code -%>
+        // This is an override of the existing version that might have been set in the resource_iam_member|policy|binding code
         json["version"] = <%= object.iam_policy.iam_policy_version -%>
 <% end -%>
 
