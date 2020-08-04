@@ -1,0 +1,74 @@
+// If the field is present, it will be ENABLED
+resource "google_firestore_field" "<%= ctx[:primary_resource_id] %>" {
+  project = "<%= ctx[:test_env_vars]['project_id'] %>"
+
+  collection = "chatrooms"
+
+  name = "projects/"<%= ctx[:test_env_vars]['project_id'] %>"/databases/{database_id}/collectionGroups/chatrooms/fields/name"
+
+  index_config {
+    indexes {
+      query_scope = "COLLECTION"
+
+      fields {
+        field_path = "name"
+        order = "ASCENDING"
+      }
+    }
+
+    indexes {
+      query_scope = "COLLECTION"
+
+      fields {
+        field_path = "name"
+        order = "DESCENDING"
+      }
+    }
+
+    indexes {
+      query_scope = "COLLECTION"
+
+      fields {
+        field_path = "name"
+        array_config = "CONTAINS"
+      }
+    }
+
+    indexes {
+      query_scope = "COLLECTION_GROUP"
+
+      fields {
+        field_path = "name"
+        order = "ASCENDING"
+      }
+    }
+
+    indexes {
+      query_scope = "COLLECTION_GROUP"
+
+      fields {
+        field_path = "name"
+        order = "DESCENDING"
+      }
+    }
+
+    indexes {
+      query_scope = "COLLECTION_GROUP"
+
+      fields {
+        field_path = "name"
+        array_config = "CONTAINS"
+      }
+    }
+  }
+}
+
+// If the field is not present, it will be DISABLED
+resource "google_firestore_field" "my_field" {
+  project = "<%= ctx[:test_env_vars]['project_id'] %>"
+  collection = "chatrooms"
+  name = "projects/"<%= ctx[:test_env_vars]['project_id'] %>"/databases/{database_id}/collectionGroups/chatrooms/fields/name"
+  index_config {
+    // An empty index_config disables every field
+  }
+}
