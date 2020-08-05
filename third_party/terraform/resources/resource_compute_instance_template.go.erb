@@ -835,7 +835,7 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		Scheduling:        scheduling,
 		ServiceAccounts:   expandServiceAccounts(d.Get("service_account").([]interface{})),
 		Tags:              resourceInstanceTags(d),
-		ShieldedVmConfig:  expandShieldedVmConfigs(d),
+		ShieldedInstanceConfig:  expandShieldedVmConfigs(d),
 		DisplayDevice:     expandDisplayDevice(d),
 	}
 
@@ -1199,7 +1199,7 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		}
 	}
 	if instanceTemplate.Properties.ShieldedVmConfig != nil {
-		if err = d.Set("shielded_instance_config", flattenShieldedVmConfig(instanceTemplate.Properties.ShieldedVmConfig)); err != nil {
+		if err = d.Set("shielded_instance_config", flattenShieldedVmConfig(instanceTemplate.Properties.ShieldedInstanceConfig)); err != nil {
 			return fmt.Errorf("Error setting shielded_instance_config: %s", err)
 		}
 	}
