@@ -7623,6 +7623,9 @@ objects:
           - cloudRun
           - cloudFunction
           - appEngine
+        at_least_one_of: 
+          - cloud_run.0.service
+          - cloud_run.0.url_mask
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
           Only one of cloud_run, app_engine or cloud_function may be set.
@@ -7657,6 +7660,7 @@ objects:
           - appEngine
           - cloudFunction
           - cloudRun
+        allow_empty_object: true
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
           Only one of cloud_run, app_engine or cloud_function may be set.
@@ -7690,6 +7694,9 @@ objects:
           - appEngine
           - cloudFunction
           - cloudRun
+        at_least_one_of: 
+          - cloud_function.0.function
+          - cloud_function.0.url_mask
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
           Only one of cloud_run, app_engine or cloud_function may be set.
