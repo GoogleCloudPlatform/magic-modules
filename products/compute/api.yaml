@@ -2425,7 +2425,7 @@ objects:
     # corresponding type.
     description: |
       Represents a DiskType resource. A DiskType resource represents the type
-      of disk to use, such as a pd-ssd or pd-standard. To reference a disk
+      of disk to use, such as a pd-ssd, pd-balanced or pd-standard. To reference a disk
       type, use the disk type's full or partial URL.
     # TODO(nelsonjr): Temporarily make DiskType virtual so no tests gets
     # triggered for create. Implement support for read only objects, and delete
@@ -8706,7 +8706,7 @@ objects:
     collection_url_key: 'items'
     description: |
       Represents a regional DiskType resource. A DiskType resource represents
-      the type of disk to use, such as a pd-ssd or pd-standard. To reference a
+      the type of disk to use, such as a pd-ssd, pd-balanded or pd-standard. To reference a
       disk type, use the disk type's full or partial URL.
     readonly: true
     has_self_link: true
