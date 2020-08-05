@@ -624,7 +624,6 @@ func resourceComputeInstance() *schema.Resource {
 						"enable_confidential_compute": {
 							Type:         schema.TypeBool,
 							Optional:     true,
-							AtLeastOneOf: shieldedInstanceConfigKeys,
 							Default:      false,
 							Description:  `Defines whether the instance should have confidential compute enabled.`,
 						},
