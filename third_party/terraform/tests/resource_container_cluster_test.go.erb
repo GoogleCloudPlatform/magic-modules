@@ -95,6 +95,41 @@ func TestAccContainerCluster_basic(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_misc(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	vcrTest(t, resource.TestCase{
+		PreCheck:	  func() { testAccPreCheck(t) },
+		Providers:	  testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_misc(clusterName),
+				// Explicitly check removing the default node pool since we won't
+				// catch it by just importing.
+				Check: resource.TestCheckResourceAttr(
+					"google_container_cluster.primary", "node_pool.#", "0"),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
+			},
+			{
+				Config: testAccContainerCluster_misc_update(clusterName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withAddons(t *testing.T) {
 	t.Parallel()
 
@@ -1987,6 +2022,71 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
+}
+`, name)
+}
+
+func testAccContainerCluster_misc(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  remove_default_node_pool = true
+
+  node_locations = [
+    "us-central1-b",
+    "us-central1-c",
+  ]
+
+  enable_legacy_abac      = true
+
+  resource_labels = {
+    created-by = "terraform"
+  }
+
+  vertical_pod_autoscaling {
+    enabled = true
+  }
+
+<% unless version == 'ga' -%>
+  enable_intranode_visibility = true
+  enable_binary_authorization = true
+<% end -%>
+}
+`, name)
+}
+
+func testAccContainerCluster_misc_update(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  remove_default_node_pool = true # Not worth updating
+
+  node_locations = [
+    "us-central1-f",
+    "us-central1-c",
+  ]
+
+  enable_legacy_abac      = false
+
+  resource_labels = {
+    created-by = "terraform-update"
+    new-label  = "update"
+  }
+
+  vertical_pod_autoscaling {
+    enabled = true
+  }
+
+<% unless version == 'ga' -%>
+  enable_intranode_visibility = true
+  enable_binary_authorization = true
+<% end -%>
 }
 `, name)
 }
