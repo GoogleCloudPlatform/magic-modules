@@ -1194,6 +1194,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "function_neg"
         vars:
           neg_name: "function-neg"
+          function_name: "function-neg"
+          bucket_name: "cloudfunctions-function-example-bucket"
+          zip_path: "path/to/index.zip"
+        test_vars_overrides:
+          zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
       - !ruby/object:Provider::Terraform::Examples
         name: "region_network_endpoint_group_cloudrun"
         primary_resource_id: "cloudrun_neg"

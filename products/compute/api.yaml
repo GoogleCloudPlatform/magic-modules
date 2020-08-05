@@ -7623,15 +7623,15 @@ objects:
           - cloudRun
           - cloudFunction
           - appEngine
-        at_least_one_of: 
-          - cloud_run.0.service
-          - cloud_run.0.url_mask
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
           Only one of cloud_run, app_engine or cloud_function may be set.
         properties:
           - !ruby/object:Api::Type::String
             name: 'service'
+            at_least_one_of: 
+              - cloud_run.0.service
+              - cloud_run.0.url_mask
             description: |
               Cloud Run service is the main resource of Cloud Run.
               The service must be 1-63 characters long, and comply with RFC1035.
@@ -7645,6 +7645,9 @@ objects:
               Example value: "revision-0010".
           - !ruby/object:Api::Type::String
             name: 'urlMask'
+            at_least_one_of: 
+              - cloud_run.0.service
+              - cloud_run.0.url_mask
             description: |
               A template to parse service and tag fields from a request URL. 
               URL mask allows for routing to multiple Run services without having 
@@ -7694,21 +7697,24 @@ objects:
           - appEngine
           - cloudFunction
           - cloudRun
-        at_least_one_of: 
-          - cloud_function.0.function
-          - cloud_function.0.url_mask
         description: |
           Only valid when networkEndpointType is "SERVERLESS".
           Only one of cloud_run, app_engine or cloud_function may be set.
         properties:
           - !ruby/object:Api::Type::String
             name: 'function'
+            at_least_one_of: 
+              - cloud_function.0.function
+              - cloud_function.0.url_mask
             description: |
               A user-defined name of the Cloud Function.
               The function name is case-sensitive and must be 1-63 characters long.
               Example value: "func1".
           - !ruby/object:Api::Type::String
             name: 'urlMask'
+            at_least_one_of: 
+              - cloud_function.0.function
+              - cloud_function.0.url_mask
             description: |
               A template to parse function field from a request URL. URL mask allows
               for routing to multiple Cloud Functions without having to create

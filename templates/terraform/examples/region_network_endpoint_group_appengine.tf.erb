@@ -20,7 +20,7 @@ resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id]
 
   deployment {
     zip {
-      source_url = google_storage_bucket_object.<%= ctx[:primary_resource_id] %>.self_link
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.<%= ctx[:primary_resource_id] %>.name}/${google_storage_bucket_object.<%= ctx[:primary_resource_id] %>.name}"
     }
   }
 
