@@ -45,7 +45,7 @@ func TestAccAppEngineStandardAppVersion_update(t *testing.T) {
 				ImportState: 						 true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"env_variables", "deployment", "entrypoint", "service", "noop_on_destroy"},
-			}
+			},
 		},
 	})
 }
