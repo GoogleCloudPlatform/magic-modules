@@ -258,10 +258,12 @@ objects:
                 properties:
                   - !ruby/object:Api::Type::String
                     name: 'bucket'
+                    required: true
                     description: |
                       Google Cloud Storage bucket containing the source.
                   - !ruby/object:Api::Type::String
                     name: 'object'
+                    required: true
                     description: |
                       Google Cloud Storage object containing the source.
                       This object must be a gzipped archive file (.tar.gz) containing source to build.
