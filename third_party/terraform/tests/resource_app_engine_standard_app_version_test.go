@@ -163,7 +163,7 @@ resource "google_app_engine_standard_app_version" "foo" {
   service    = "default"
   runtime    = "python38"
 
-	vpcAccessConnector = "projects/foo-project/locations/us-central1/connectors/foo-connector"
+	vpc_access_connector = "projects/foo-project/locations/us-central1/connectors/foo-connector"
 
   entrypoint {
     shell = "gunicorn -b :$PORT main:app"
