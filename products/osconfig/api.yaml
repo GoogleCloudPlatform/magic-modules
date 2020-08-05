@@ -374,7 +374,7 @@ objects:
               - patch_config.0.pre_step
               - patch_config.0.post_step
             properties:
-             - !ruby/object:Api::Type::Enum
+             - !ruby/object:Api::Type::Array
               name: 'classifications'
               at_least_one_of:
                 - patch_config.0.windowsUpdate.classifications
@@ -382,16 +382,19 @@ objects:
                 - patch_config.0.windowsUpdate.exclusive_patches
               description: |
                 Only apply updates of these windows update classifications. If empty, all updates are applied.
-              values:
-                - :CRITICAL
-                - :SECURITY
-                - :DEFINITION
-                - :DRIVER
-                - :FEATURE_PACK
-                - :SERVICE_PACK
-                - :TOOL
-                - :UPDATE_ROLLUP
-                - :UPDATE
+              item_type: !ruby/object:Api::Type::Enum
+                name: 'classification'
+                description: 'What type of updates should we apply?'
+                values:
+                  - :CRITICAL
+                  - :SECURITY
+                  - :DEFINITION
+                  - :DRIVER
+                  - :FEATURE_PACK
+                  - :SERVICE_PACK
+                  - :TOOL
+                  - :UPDATE_ROLLUP
+                  - :UPDATE
              - !ruby/object:Api::Type::Array
               name: 'excludes'
               at_least_one_of:

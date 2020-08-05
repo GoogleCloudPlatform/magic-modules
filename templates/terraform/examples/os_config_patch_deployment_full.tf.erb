@@ -37,6 +37,7 @@ resource "google_os_config_patch_deployment" "<%= ctx[:primary_resource_id] %>" 
     }
 
     windows_update {
+      classifications = ["CRITICAL", "SECURITY", "UPDATE"]
       exclusive_patches = ["KB4339284"]
     }
 
