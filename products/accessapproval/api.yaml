@@ -88,6 +88,7 @@ objects:
               name: enrollmentLevel
               description: |
                 The enrollment level of the service.
+              default_value: :BLOCK_ALL
               values:
                 - :BLOCK_ALL
       - !ruby/object:Api::Type::Boolean
@@ -158,6 +159,7 @@ objects:
               name: enrollmentLevel
               description: |
                 The enrollment level of the service.
+              default_value: :BLOCK_ALL
               values:
                 - :BLOCK_ALL
       - !ruby/object:Api::Type::Boolean
@@ -228,6 +230,7 @@ objects:
               name: enrollmentLevel
               description: |
                 The enrollment level of the service.
+              default_value: :BLOCK_ALL
               values:
                 - :BLOCK_ALL
       - !ruby/object:Api::Type::Boolean

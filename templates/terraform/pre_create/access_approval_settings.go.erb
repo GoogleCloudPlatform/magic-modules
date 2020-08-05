@@ -1,0 +1,15 @@
+updateMask := []string{}
+
+if d.Get("notification_emails") != nil {
+	updateMask = append(updateMask, "notificationEmails")
+}
+
+if d.Get("enrolled_services") != nil {
+	updateMask = append(updateMask, "enrolledServices")
+}
+// updateMask is a URL parameter but not present in the schema, so replaceVars
+// won't set it
+url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+if err != nil {
+	return err
+}
