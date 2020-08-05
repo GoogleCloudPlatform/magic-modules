@@ -944,14 +944,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       sourceDiskId: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      sourceImageEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
-      sourceImageId: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
-      sourceSnapshotEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
-      sourceSnapshotId: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
       sourceType: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
