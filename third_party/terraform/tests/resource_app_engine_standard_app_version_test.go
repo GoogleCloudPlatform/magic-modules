@@ -41,8 +41,8 @@ func TestAccAppEngineStandardAppVersion_update(t *testing.T) {
 				Config: testAccAppEngineStandardAppVersion_vpcAccessConnector(context),
 			},
 			{
-				ResourceName: 					 "google_app_engine_standard_app_version.foo",
-				ImportState: 						 true,
+				ResourceName:            "google_app_engine_standard_app_version.foo",
+				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"env_variables", "deployment", "entrypoint", "service", "noop_on_destroy"},
 			},
