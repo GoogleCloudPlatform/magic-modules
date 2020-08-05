@@ -67,7 +67,14 @@
 	StateFunc: <%= property.state_func %>,
 <% end -%>
 <% enum_values_description = "" -%>
-<% if property.is_a?(Api::Type::Enum) && !property.output -%>
+<% if property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::Enum) && !property.output && !property.item_type.skip_docs_values -%>
+<% unless property.item_type.default_value.nil? || property.item_type.default_value == "" -%>
+<% enum_values_description += " Default value: \"#{property.item_type.default_value}\"" -%>
+<% end -%>
+<% enum_values_description += " Possible values: [" -%>
+<% enum_values_description += property.item_type.values.select { |v| v != "" }.map { |v| "\"#{v}\"" }.join(', ') -%>
+<% enum_values_description += "]" -%>
+<% elsif property.is_a?(Api::Type::Enum) && !property.output -%>
 <% unless property.default_value.nil? || property.default_value == "" -%>
 <% enum_values_description += " Default value: \"#{property.default_value}\"" -%>
 <% end -%>
