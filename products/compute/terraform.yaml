@@ -508,6 +508,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   DiskType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |+
+        * `enable_logging` - (Optional, Deprecated) This field denotes whether to enable logging for a particular firewall rule.
+        If logging is enabled, logs will be exported to Stackdriver. Deprecated in favor of `log_config`
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firewall_basic"
@@ -518,6 +522,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/firewall.erb
       resource_definition: templates/terraform/resource_definition/firewall.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/firewall.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -546,9 +551,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # See terraform issue #2713 for more context.
         input: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
-        flatten_object: true
-      logConfig.enableLogging: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          This field denotes the logging options for a particular firewall rule.
+          If defined, logging is enabled, and logs will be exported to Cloud Logging.
         send_empty_value: true
+        custom_expand: 'templates/terraform/custom_expand/firewall_log_config.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/firewall_log_config.go.erb'
+        diff_suppress_func: 'diffSuppressEnableLogging'
+      logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      logConfig.metadata: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
@@ -639,7 +652,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           internal IP address will be automatically allocated from the IP range
           of the subnet or network configured for this forwarding rule.
 
-          An address must be specified by a literal IP address. ~> **NOTE**: While
+          An address must be specified by a literal IP address. ~> **NOTE:** While
           the API allows you to specify various resource paths for an address resource
           instead, Terraform requires this to specifically be an IP address to
           avoid needing to fetching the IP address from resource paths on refresh
@@ -1262,6 +1275,71 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           If it is not provided, the provider region is used.
       serverBinding: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  OrganizationSecurityPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "locations/global/securityPolicies/{{policy_id}}"
+    self_link: "locations/global/securityPolicies/{{policy_id}}"
+    import_format: ["locations/global/securityPolicies/{{policy_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "organization_security_policy_basic"
+        primary_resource_id: "policy"
+        min_version: 'beta'
+        test_env_vars:
+          org_id: :ORG_ID
+    parameters:
+      displayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateRFC1035Name(2, 63)'
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: policy_id
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/org_security_policy.go.erb
+      post_update: templates/terraform/post_update/org_security_policy.go.erb
+      post_delete: templates/terraform/post_delete/org_security_policy.go.erb
+      # TODO: Remove once b/154369201 is closed.
+      test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
+  OrganizationSecurityPolicyAssociation: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{policy_id}}/association/{{name}}"
+    import_format: ["{{policy_id}}/association/{{name}}"]
+    base_url: '{{policy_id}}'
+    self_link: '{{policy_id}}/getAssociation?name={{name}}'
+    create_url: '{{policy_id}}/addAssociation'
+    delete_url: '{{policy_id}}/removeAssociation?name={{name}}'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "organization_security_policy_association_basic"
+        primary_resource_id: "policy"
+        min_version: 'beta'
+        test_env_vars:
+          org_id: :ORG_ID
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/org_security_policy_association.go.erb
+      post_delete: templates/terraform/post_create/org_security_policy_association.go.erb
+      # TODO: Remove once b/154369201 is closed.
+      test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
+  OrganizationSecurityPolicyRule: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{policy_id}}/priority/{{priority}}"
+    import_format: ["{{policy_id}}/priority/{{priority}}"]
+    base_url: '{{policy_id}}'
+    self_link: '{{policy_id}}/getRule?priority={{priority}}'
+    create_url: '{{policy_id}}/addRule?priority={{priority}}'
+    update_url: '{{policy_id}}/patchRule?priority={{priority}}'
+    delete_url: '{{policy_id}}/removeRule?priority={{priority}}'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "organization_security_policy_rule_basic"
+        primary_resource_id: "policy"
+        min_version: 'beta'
+        test_env_vars:
+          org_id: :ORG_ID
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/organization_security_policy_rule.go.erb
+      post_create: templates/terraform/post_create/org_security_policy_rule.go.erb
+      post_delete: templates/terraform/post_create/org_security_policy_rule.go.erb
+      post_update: templates/terraform/post_create/org_security_policy_rule.go.erb
+      # TODO: Remove once b/154369201 is closed.
+      test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
   PacketMirroring: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples

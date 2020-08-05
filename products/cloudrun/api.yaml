@@ -509,6 +509,24 @@ objects:
                     references will never be expanded, regardless of whether the variable
                     exists or not.
                     Defaults to "".
+            - !ruby/object:Api::Type::Array
+              name: ports
+              description: |-
+                List of open ports in the container.
+                More Info: 
+                https://cloud.google.com/run/docs/reference/rest/v1/RevisionSpec#ContainerPort
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                - !ruby/object:Api::Type::String
+                  name: name
+                  description: Name of the port.
+                - !ruby/object:Api::Type::String
+                  name: protocol
+                  description: Protocol used on port. Defaults to TCP.
+                - !ruby/object:Api::Type::Integer
+                  name: containerPort
+                  description: Port number.
+                  required: true
             - !ruby/object:Api::Type::NestedObject
               name: resources
               description: |-
