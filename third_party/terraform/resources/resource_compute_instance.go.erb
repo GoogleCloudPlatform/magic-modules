@@ -623,6 +623,7 @@ func resourceComputeInstance() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"enable_confidential_compute": {
 							Type:         schema.TypeBool,
+							Required:     true,
 							Optional:     true,
 							Default:      false,
 							Description:  `Defines whether the instance should have confidential compute enabled.`,
@@ -836,6 +837,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *Confi
 		Hostname:           d.Get("hostname").(string),
 		ForceSendFields:    []string{"CanIpForward", "DeletionProtection"},
 		ShieldedVmConfig:   expandShieldedVmConfigs(d),
+		ConfidentialInstanceConfig:  d.Get("confidential_instance_config"),
 		DisplayDevice:      expandDisplayDevice(d),
 		ResourcePolicies:   convertStringArr(d.Get("resource_policies").([]interface{})),
 	}, nil
@@ -1130,6 +1132,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	d.Set("description", instance.Description)
 	d.Set("hostname", instance.Hostname)
 	d.Set("current_status", instance.Status)
+	d.Set("confidential_instance_config", instance.ConfidentialInstanceConfig)
 
 	if d.Get("desired_status") != "" {
 		d.Set("desired_status", instance.Status)
