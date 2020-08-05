@@ -30,4 +30,5 @@ resource "google_memcache_instance" "<%= ctx[:primary_resource_id] %>" {
     memory_size_mb = 1024
   }
   node_count = 1
+  memcache_version = "MEMCACHE_1_5"
 }
