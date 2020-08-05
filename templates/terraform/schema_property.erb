@@ -126,7 +126,7 @@
   <% if property.is_set -%>
     <% if !property.set_hash_func.nil? -%>
     Set: <%= property.set_hash_func -%>,
-    <% elsif property.item_type.is_a?(String) -%>
+    <% elsif property.item_type.is_a?(String) or property.item_type.is_a?(Api::Type::Enum) -%>
     Set: schema.HashString,
     <% else -%>
     // Default schema.HashSchema is used.
