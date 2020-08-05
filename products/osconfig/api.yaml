@@ -376,7 +376,7 @@ objects:
             properties:
              - !ruby/object:Api::Type::Array
               name: 'classifications'
-              at_least_one_of:
+              exactly_one_of:
                 - patch_config.0.windowsUpdate.classifications
                 - patch_config.0.windowsUpdate.excludes
                 - patch_config.0.windowsUpdate.exclusive_patches
@@ -397,7 +397,7 @@ objects:
                   - :UPDATE
              - !ruby/object:Api::Type::Array
               name: 'excludes'
-              at_least_one_of:
+              exactly_one_of:
                 - patch_config.0.windowsUpdate.classifications
                 - patch_config.0.windowsUpdate.excludes
                 - patch_config.0.windowsUpdate.exclusive_patches
@@ -406,7 +406,7 @@ objects:
               item_type: Api::Type::String
              - !ruby/object:Api::Type::Array
               name: 'exclusivePatches'
-              at_least_one_of:
+              exactly_one_of:
                 - patch_config.0.windowsUpdate.classifications
                 - patch_config.0.windowsUpdate.excludes
                 - patch_config.0.windowsUpdate.exclusive_patches
