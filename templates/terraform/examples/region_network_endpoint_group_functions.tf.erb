@@ -1,5 +1,6 @@
 // Cloud Functions Example
 resource "google_compute_region_network_endpoint_group" "<%= ctx[:primary_resource_id] %>" {
+  provider              = google-beta
   name                  = "<%= ctx[:vars]['neg_name'] %>"
   network_endpoint_type = "SERVERLESS"
   region                = "us-central1"
