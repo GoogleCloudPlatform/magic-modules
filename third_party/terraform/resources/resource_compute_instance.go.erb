@@ -624,8 +624,6 @@ func resourceComputeInstance() *schema.Resource {
 						"enable_confidential_compute": {
 							Type:         schema.TypeBool,
 							Required:     true,
-							Optional:     true,
-							Default:      false,
 							Description:  `Defines whether the instance should have confidential compute enabled.`,
 						},
 					},
@@ -836,7 +834,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *Confi
 		DeletionProtection: d.Get("deletion_protection").(bool),
 		Hostname:           d.Get("hostname").(string),
 		ForceSendFields:    []string{"CanIpForward", "DeletionProtection"},
-		ConfidentialInstanceConfig:  d.Get("confidential_instance_config"),
+		ConfidentialInstanceConfig:  expandConfidentialInstanceConfig(d),
 		ShieldedInstanceConfig:   expandShieldedVmConfigs(d),
 		DisplayDevice:      expandDisplayDevice(d),
 		ResourcePolicies:   convertStringArr(d.Get("resource_policies").([]interface{})),

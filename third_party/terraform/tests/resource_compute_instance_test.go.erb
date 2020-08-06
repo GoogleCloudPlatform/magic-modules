@@ -1304,7 +1304,7 @@ func TestAccComputeInstance_shieldedVmConfig2(t *testing.T) {
 	})
 }
 
-func testAccComputeInstance_ConfidentialInstanceConfig1(t *testing.T) {
+func testAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 	t.Parallel()
 
 	var instance computeBeta.Instance
@@ -1316,10 +1316,10 @@ func testAccComputeInstance_ConfidentialInstanceConfig1(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_shieldedVmConfig(instanceName, true, true, false),
+				Config: testAccComputeInstanceConfidentialInstanceConfig(instanceName, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-					testAccComputeInstance_ConfidentialInstanceConfig(&instance, true),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, true),
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
@@ -2473,6 +2473,17 @@ func testAccCheckComputeInstanceHasShieldedVmConfig(instance *computeBeta.Instan
 		if instance.ShieldedVmConfig.EnableIntegrityMonitoring != enableIntegrityMonitoring {
 			return fmt.Errorf("Wrong shieldedVmConfig enableIntegrityMonitoring: expected %t, got, %t", enableIntegrityMonitoring, instance.ShieldedVmConfig.EnableIntegrityMonitoring)
 		}
+		return nil
+	}
+}
+
+func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *computeBeta.Instance, EnableConfidentialCompute bool) resource.TestCheckFunc {
+
+	return func(s *terraform.State) error {
+		if instance.ConfidentialInstanceConfig.EnableConfidentialCompute != EnableConfidentialCompute {
+			return fmt.Errorf("Wrong shieldedVmConfig enableSecureBoot: expected %t, got, %t", EnableConfidentialCompute, instance.ConfidentialInstanceConfig.EnableConfidentialCompute)
+		}
+
 		return nil
 	}
 }
@@ -4494,7 +4505,7 @@ resource "google_compute_instance" "foobar" {
 `, instance, enableSecureBoot, enableVtpm, enableIntegrityMonitoring)
 }
 
-func testAccComputeInstance_ConfidentialInstanceConfig(instance string, enableConfidentialCompute bool) string {
+func testAccComputeInstanceConfidentialInstanceConfig(instance string, enableConfidentialCompute bool) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "ubuntu-2004-lts"
