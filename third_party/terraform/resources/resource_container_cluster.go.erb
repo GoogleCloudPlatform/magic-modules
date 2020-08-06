@@ -1293,8 +1293,8 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			Enabled:         d.Get("enable_shielded_nodes").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
-<% unless version == 'ga' -%>
 		ReleaseChannel:          expandReleaseChannel(d.Get("release_channel")),
+<% unless version == 'ga' -%>
 		ClusterTelemetry: expandClusterTelemetry(d.Get("cluster_telemetry")),
 		EnableTpu:               d.Get("enable_tpu").(bool),
 		NetworkConfig: &containerBeta.NetworkConfig{
@@ -1556,13 +1556,12 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if cluster.ShieldedNodes != nil {
 		d.Set("enable_shielded_nodes", cluster.ShieldedNodes.Enabled)
 	}
-<% unless version == 'ga' -%>
-	d.Set("enable_tpu", cluster.EnableTpu)
-	d.Set("tpu_ipv4_cidr_block", cluster.TpuIpv4CidrBlock)
-
 	if err := d.Set("release_channel", flattenReleaseChannel(cluster.ReleaseChannel)); err != nil {
 		return err
 	}
+<% unless version == 'ga' -%>
+	d.Set("enable_tpu", cluster.EnableTpu)
+	d.Set("tpu_ipv4_cidr_block", cluster.TpuIpv4CidrBlock)
 
 	if err := d.Set("default_snat_status", flattenDefaultSnatStatus(cluster.NetworkConfig.DefaultSnatStatus)); err != nil {
 		return err
@@ -1775,6 +1774,36 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		d.SetPartial("enable_shielded_nodes")
 	}
 
+	if d.HasChange("release_channel") {
+		req := &containerBeta.UpdateClusterRequest{
+			Update: &containerBeta.ClusterUpdate{
+				DesiredReleaseChannel: expandReleaseChannel(d.Get("release_channel")),
+			},
+		}
+		updateF := func() error {
+			log.Println("[DEBUG] updating release_channel")
+			name := containerClusterFullName(project, location, clusterName)
+			op, err := config.clientContainerBeta.Projects.Locations.Clusters.Update(name, req).Do()
+			if err != nil {
+				return err
+			}
+
+			// Wait until it's updated
+			err = containerOperationWait(config, op, project, location, "updating Release Channel", d.Timeout(schema.TimeoutUpdate))
+			log.Println("[DEBUG] done updating release_channel")
+			return err
+		}
+
+		// Call update serially.
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s Release Channel has been updated to %#v", d.Id(), req.Update.DesiredReleaseChannel)
+
+		d.SetPartial("release_channel")
+	}
+
 <% unless version == 'ga' -%>
 	if d.HasChange("enable_intranode_visibility") {
 		enabled := d.Get("enable_intranode_visibility").(bool)
@@ -1840,35 +1869,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		d.SetPartial("default_snat_status")
 	}
 
-	if d.HasChange("release_channel") {
-		req := &containerBeta.UpdateClusterRequest{
-			Update: &containerBeta.ClusterUpdate{
-				DesiredReleaseChannel: expandReleaseChannel(d.Get("release_channel")),
-			},
-		}
-		updateF := func() error {
-			log.Println("[DEBUG] updating release_channel")
-			name := containerClusterFullName(project, location, clusterName)
-			op, err := config.clientContainerBeta.Projects.Locations.Clusters.Update(name, req).Do()
-			if err != nil {
-				return err
-			}
-
-			// Wait until it's updated
-			err = containerOperationWait(config, op, project, location, "updating Release Channel", d.Timeout(schema.TimeoutUpdate))
-			log.Println("[DEBUG] done updating release_channel")
-			return err
-		}
-
-		// Call update serially.
-		if err := lockedCall(lockKey, updateF); err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] GKE cluster %s Release Channel has been updated to %#v", d.Id(), req.Update.DesiredReleaseChannel)
-
-		d.SetPartial("release_channel")
-	}
 <% end -%>
 	if d.HasChange("maintenance_policy") {
 		req := &containerBeta.SetMaintenancePolicyRequest{
@@ -2939,7 +2939,6 @@ func expandDatabaseEncryption(configured interface{}) *containerBeta.DatabaseEnc
 	}
 }
 
-<% unless version == 'ga' -%>
 func expandReleaseChannel(configured interface{}) *containerBeta.ReleaseChannel {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -2951,6 +2950,7 @@ func expandReleaseChannel(configured interface{}) *containerBeta.ReleaseChannel 
 	}
 }
 
+<% unless version == 'ga' -%>
 func expandClusterTelemetry(configured interface{}) *containerBeta.ClusterTelemetry {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -3210,7 +3210,6 @@ func flattenVerticalPodAutoscaling(c *containerBeta.VerticalPodAutoscaling) []ma
 	}
 }
 
-<% unless version == 'ga' -%>
 func flattenReleaseChannel(c *containerBeta.ReleaseChannel) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -3225,6 +3224,8 @@ func flattenReleaseChannel(c *containerBeta.ReleaseChannel) []map[string]interfa
 	}
 	return result
 }
+
+<% unless version == 'ga' -%>
 
 func flattenClusterTelemetry(c *containerBeta.ClusterTelemetry) []map[string]interface{} {
 	result := []map[string]interface{}{}
