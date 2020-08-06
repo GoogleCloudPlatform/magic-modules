@@ -1187,6 +1187,32 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
+  RegionNetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_functions"
+        primary_resource_id: "function_neg"
+        vars:
+          neg_name: "function-neg"
+          function_name: "function-neg"
+          bucket_name: "cloudfunctions-function-example-bucket"
+          zip_path: "path/to/index.zip"
+        test_vars_overrides:
+          zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_cloudrun"
+        primary_resource_id: "cloudrun_neg"
+        vars:
+          neg_name: "cloudrun-neg"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_appengine"
+        primary_resource_id: "appengine_neg"
+        vars:
+          neg_name: "appengine-neg"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"
     import_format: ["projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"]
