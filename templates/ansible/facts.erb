@@ -34,7 +34,8 @@ DOCUMENTATION = '''
     ({
       object.facts.filter.name.underscore => {
         'description' => format_description(object.facts.filter.description),
-        'type' => python_type(object.facts.filter)
+        'type' => python_type(object.facts.filter),
+        'elements' => ('str' if python_type(object.facts.filter) == 'list')
       }
     } if object.facts.has_filters),
     uri_props.map { |p| documentation_for_property(p) },
