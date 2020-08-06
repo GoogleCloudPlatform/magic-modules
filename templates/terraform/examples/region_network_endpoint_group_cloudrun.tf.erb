@@ -10,6 +10,7 @@ resource "google_compute_region_network_endpoint_group" "<%= ctx[:primary_resour
 }
 
 resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
   name     = "<%= ctx[:vars]['neg_name'] %>"
   location = "us-central1"
 
