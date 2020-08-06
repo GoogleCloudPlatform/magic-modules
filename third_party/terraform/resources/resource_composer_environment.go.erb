@@ -297,6 +297,9 @@ func resourceComposerEnvironment() *schema.Resource {
 										Type:             schema.TypeString,
 										Computed:         true,
 										Optional:         true,
+<% if version == "ga" -%>
+										ForceNew:         true,
+<% end -%>
 										AtLeastOneOf:     composerSoftwareConfigKeys,
 										ValidateFunc:     validateRegexp(composerEnvironmentVersionRegexp),
 										DiffSuppressFunc: composerImageVersionDiffSuppress,
