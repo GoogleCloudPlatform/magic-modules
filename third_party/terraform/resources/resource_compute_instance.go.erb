@@ -834,7 +834,9 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *Confi
 		DeletionProtection: d.Get("deletion_protection").(bool),
 		Hostname:           d.Get("hostname").(string),
 		ForceSendFields:    []string{"CanIpForward", "DeletionProtection"},
+<% unless version == 'ga' -%>
 		ConfidentialInstanceConfig:  expandConfidentialInstanceConfig(d),
+<% end -%>
 		ShieldedInstanceConfig:   expandShieldedVmConfigs(d),
 		DisplayDevice:      expandDisplayDevice(d),
 		ResourcePolicies:   convertStringArr(d.Get("resource_policies").([]interface{})),
@@ -1130,8 +1132,9 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	d.Set("description", instance.Description)
 	d.Set("hostname", instance.Hostname)
 	d.Set("current_status", instance.Status)
+ 	<% unless version == 'ga' -%>
 	d.Set("confidential_instance_config", instance.ConfidentialInstanceConfig)
-
+    <% end -%>
 	if d.Get("desired_status") != "" {
 		d.Set("desired_status", instance.Status)
 	}

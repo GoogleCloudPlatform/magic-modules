@@ -1304,7 +1304,9 @@ func TestAccComputeInstance_shieldedVmConfig2(t *testing.T) {
 	})
 }
 
-func testAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
+<% unless version == 'ga' -%>
+
+func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 	t.Parallel()
 
 	var instance computeBeta.Instance
@@ -1326,6 +1328,8 @@ func testAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 		},
 	})
 }
+
+<% end -%>
 
 func TestAccComputeInstance_enableDisplay(t *testing.T) {
 	t.Parallel()
@@ -2477,6 +2481,7 @@ func testAccCheckComputeInstanceHasShieldedVmConfig(instance *computeBeta.Instan
 	}
 }
 
+<% unless version == 'ga' -%>
 func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *computeBeta.Instance, EnableConfidentialCompute bool) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
@@ -2487,6 +2492,7 @@ func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *computeB
 		return nil
 	}
 }
+<% end -%>
 
 func testAccCheckComputeInstanceLacksShieldedVmConfig(instance *computeBeta.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -4505,14 +4511,17 @@ resource "google_compute_instance" "foobar" {
 `, instance, enableSecureBoot, enableVtpm, enableIntegrityMonitoring)
 }
 
+<% unless version == 'ga' -%>
 func testAccComputeInstanceConfidentialInstanceConfig(instance string, enableConfidentialCompute bool) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "ubuntu-2004-lts"
-  project = "ubuntu-os-cloud"
+  provider  = google-beta
+  family    = "ubuntu-2004-lts"
+  project   = "ubuntu-os-cloud"
 }
 
 resource "google_compute_instance" "foobar" {
+  provider     = google-beta
   name         = "%s"
   machine_type = "n2d-standard-2"
   zone         = "us-central1-a"
@@ -4527,14 +4536,18 @@ resource "google_compute_instance" "foobar" {
     network = "default"
   }
 
-<% unless version == 'ga' -%>
   confidential_instance_config {
     enable_confidential_compute       = %t
   }
-<% end -%>
+
+  scheduling {
+	  on_host_maintenance = "TERMINATE"
+  }
+
 }
 `, instance, enableConfidentialCompute)
 }
+<% end -%>
 
 func testAccComputeInstance_enableDisplay(instance string) string {
 	return fmt.Sprintf(`

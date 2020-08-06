@@ -787,7 +787,8 @@ func TestAccComputeInstanceTemplate_shieldedVmConfig2(t *testing.T) {
 	})
 }
 
-func testAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T) {
+<% unless version == 'ga' -%>
+func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate computeBeta.InstanceTemplate
@@ -812,6 +813,8 @@ func testAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 	    },
 	})
 }
+
+<% end -%>
 
 func TestAccComputeInstanceTemplate_enableDisplay(t *testing.T) {
 	t.Parallel()
@@ -1212,6 +1215,7 @@ func testAccCheckComputeInstanceTemplateHasShieldedVmConfig(instanceTemplate *co
 	}
 }
 
+<% unless version == 'ga' -%>
 func testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(instanceTemplate *computeBeta.InstanceTemplate, EnableConfidentialCompute bool) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
@@ -1222,6 +1226,8 @@ func testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(instanceTe
 		return nil
 	}
 }
+
+<% end -%>
 
 func testAccCheckComputeInstanceTemplateLacksShieldedVmConfig(instanceTemplate *computeBeta.InstanceTemplate) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -2063,9 +2069,11 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix, enableSecureBoot, enableVtpm, enableIntegrityMonitoring)
 }
 
+<% unless version == 'ga' -%>
 func testAccComputeInstanceTemplateConfidentialInstanceConfig(suffix string, enableConfidentialCompute bool) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
+  provider = google-beta
   family  = "ubuntu-2004-lts"
   project = "ubuntu-os-cloud"
 }
@@ -2085,14 +2093,18 @@ resource "google_compute_instance_template" "foobar" {
     network = "default"
   }
 
-<% unless version == 'ga' -%>
   confidential_instance_config {
     enable_confidential_compute       = %t
   }
-<% end -%>
+
+  scheduling {
+	  on_host_maintenance = "TERMINATE"
+  }
+
 }
 `, suffix, enableConfidentialCompute)
 }
+<% end -%>
 
 func testAccComputeInstanceTemplate_enableDisplay(suffix string) string {
 	return fmt.Sprintf(`

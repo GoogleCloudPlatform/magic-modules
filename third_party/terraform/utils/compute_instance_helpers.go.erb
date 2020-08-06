@@ -329,6 +329,7 @@ func expandShieldedVmConfigs(d TerraformResourceData) *computeBeta.ShieldedInsta
 	}
 }
 
+<% unless version == 'ga' -%>
 func expandConfidentialInstanceConfig(d TerraformResourceData) *computeBeta.ConfidentialInstanceConfig {
 	if _, ok := d.GetOk("confidential_instance_config"); !ok {
 		return nil
@@ -350,6 +351,7 @@ func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig *computeBeta.C
 		"enable_confidential_compute":          ConfidentialInstanceConfig.EnableConfidentialCompute,
 	}}
 }
+<% end -%>
 
 func flattenShieldedVmConfig(shieldedVmConfig *computeBeta.ShieldedInstanceConfig) []map[string]bool {
 	if shieldedVmConfig == nil {

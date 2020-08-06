@@ -853,7 +853,9 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		Scheduling:        scheduling,
 		ServiceAccounts:   expandServiceAccounts(d.Get("service_account").([]interface{})),
 		Tags:              resourceInstanceTags(d),
+		<% unless version == 'ga' -%>
 		ConfidentialInstanceConfig:  expandConfidentialInstanceConfig(d),
+		<% end -%>
 		ShieldedInstanceConfig:  expandShieldedVmConfigs(d),
 		DisplayDevice:     expandDisplayDevice(d),
 	}
@@ -1222,11 +1224,14 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error setting shielded_instance_config: %s", err)
 		}
 	}
+
+	<% unless version == 'ga' -%>
 	if instanceTemplate.Properties.ConfidentialInstanceConfig != nil {
 		if err = d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(instanceTemplate.Properties.ConfidentialInstanceConfig)); err != nil {
 			return fmt.Errorf("Error setting confidential_instance_config: %s", err)
 		}
 	}
+	<% end -%>
 	if instanceTemplate.Properties.DisplayDevice != nil {
 		if err = d.Set("enable_display", flattenEnableDisplay(instanceTemplate.Properties.DisplayDevice)); err != nil {
 			return fmt.Errorf("Error setting enable_display: %s", err)
