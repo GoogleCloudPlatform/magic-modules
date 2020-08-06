@@ -4527,9 +4527,11 @@ resource "google_compute_instance" "foobar" {
     network = "default"
   }
 
+<% unless version == 'ga' -%>
   confidential_instance_config {
     enable_confidential_compute       = %t
   }
+<% end -%>
 }
 `, instance, enableConfidentialCompute)
 }
