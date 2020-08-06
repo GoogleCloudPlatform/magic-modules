@@ -155,7 +155,8 @@ module Provider
           },
           'scopes' => {
             'description' => ['Array of scopes to be used'],
-            'type' => 'list'
+            'type' => 'list',
+            'elements' => 'str'
           },
           'env_type' => {
             'description' => [
