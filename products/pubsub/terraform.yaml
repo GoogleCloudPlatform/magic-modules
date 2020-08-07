@@ -124,6 +124,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       expirationPolicy.ttl: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'comparePubsubSubscriptionExpirationPolicy'
+      retryPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/subscription.go.erb
       decoder: templates/terraform/decoders/pubsub_subscription.erb

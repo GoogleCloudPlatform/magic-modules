@@ -286,3 +286,21 @@ objects:
               This field will be honored on a best effort basis.
             
               If this parameter is 0, a default value of 5 is used.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'retryPolicy'
+        description: |
+          A policy that specifies how Pub/Sub retries message delivery for this subscription.
+
+          If not set, the default retry policy is applied. This generally implies that messages will be retried as soon as possible for healthy subscribers. 
+          RetryPolicy will be triggered on NACKs or acknowledgement deadline exceeded events for a given message
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'minimumBackoff'
+            description: |
+              The minimum delay between consecutive deliveries of a given message. Value should be between 0 and 600 seconds. Defaults to 10 seconds.
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+          - !ruby/object:Api::Type::String
+            name: 'maximumBackoff'
+            description: |
+              The maximum delay between consecutive deliveries of a given message. Value should be between 0 and 600 seconds. Defaults to 600 seconds. 
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
