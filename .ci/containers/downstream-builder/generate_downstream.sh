@@ -119,13 +119,13 @@ if [ "$REPO" == "terraform" ]; then
   CHANGELOG=true
 fi
 
-PR_NUMBER=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+PR_NUMBER=$(curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
     "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=closed&base=master&sort=updated&direction=desc" | \
     jq -r ".[] | if .merge_commit_sha == \"$REFERENCE\" then .number else empty end")
 if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && [ "$CHANGELOG" == "true" ]; then
     # Add the changelog entry!
     mkdir -p .changelog/
-    curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+    curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/$PR_NUMBER" | \
         jq -r .body | \
         sed -e '/```release-note/,/```/!d' \
@@ -137,13 +137,13 @@ fi
 git push $SCRATCH_PATH $BRANCH -f
 
 if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
-    PR_BODY=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+    PR_BODY=$(curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/$PR_NUMBER" | \
         jq -r .body)
-    PR_TITLE=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+    PR_TITLE=$(curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/$PR_NUMBER" | \
         jq -r .title)
-    MM_PR_URL=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+    MM_PR_URL=$(curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/$PR_NUMBER" | \
         jq -r .html_url)
 
@@ -155,7 +155,7 @@ if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
 
     # Wait a few seconds, then merge the PR.
     sleep 5
-    curl -H "Authorization: token ${GITHUB_TOKEN}" \
+    curl -L -H "Authorization: token ${GITHUB_TOKEN}" \
         -X PUT \
         -d '{"merge_method": "squash"}' \
         "https://api.github.com/repos/$UPSTREAM_OWNER/$GH_REPO/pulls/$NEW_PR_NUMBER/merge"
