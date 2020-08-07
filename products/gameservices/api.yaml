@@ -33,7 +33,7 @@ objects:
       'Official Documentation': 'https://cloud.google.com/game-servers/docs'
     api: 'https://cloud.google.com/game-servers/docs/reference/rest/v1beta/projects.locations.realms'
   create_url: projects/{{project}}/locations/{{location}}/realms?realmId={{realm_id}}
-  base_url: projects/{{project}}/locations/{{location}}/realms/
+  base_url: projects/{{project}}/locations/{{location}}/realms
   self_link: projects/{{project}}/locations/{{location}}/realms/{{realm_id}}
   update_verb: :PATCH
   update_mask: true

@@ -15,6 +15,7 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Realm: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
+    import_format: ["projects/{{project}}/locations/{{location}}/realms/{{realm_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "game_service_realm_basic"
@@ -23,6 +24,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           realm_id: "tf-test-realm"
     properties:
   GameServerCluster: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/locations/{{location}}/realms/{{realm_id}}/gameServerClusters/{{cluster_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "game_service_cluster_basic"
@@ -40,6 +42,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       constants: "templates/terraform/constants/gameserver_cluster_custom_diff.go"
   GameServerDeployment: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
+    import_format: ["projects/{{project}}/locations/{{location}}/gameServerDeployments/{{deployment_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "game_service_deployment_basic"
@@ -49,6 +52,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
   GameServerConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
+    import_format: ["projects/{{project}}/locations/{{location}}/gameServerDeployments/{{deployment_id}}/configs/{{config_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "game_service_config_basic"
@@ -71,6 +75,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           The format of the spec can be found :
           `https://agones.dev/site/docs/reference/fleet/`.
   GameServerDeploymentRollout: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/locations/global/gameServerDeployments/{{deployment_id}}/rollout"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "game_service_deployment_rollout_basic"
