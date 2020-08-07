@@ -77,6 +77,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         ignore_read: true
+        required: false
+        description: |
+          Region where the scheduler job resides. If it is not provided, Terraform will use the provider default.
       retryConfig.retryCount: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       retryConfig.maxRetryDuration: !ruby/object:Overrides::Terraform::PropertyOverride
