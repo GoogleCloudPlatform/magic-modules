@@ -3,7 +3,11 @@
 
 
 
-<!-- Replace each [ ] with [X] to check it. Switch to the preview view to make it easier to click on links -->
+<!--
+Replace each [ ] with [X] to check it. Switch to the preview view to make it easier to click on links.
+These steps will speed up the review process, and we appreciate you spending time on them before sending
+your code to be reviewed.
+-->
 If this PR is for Terraform, I acknowledge that I have:
 
 - [ ] Searched through the [issue tracker](https://github.com/hashicorp/terraform-provider-google/issues) for an open issue that this either resolves or contributes to, commented on it to claim it, and written "fixes {url}" or "part of {url}" in this PR description. If there were no relevant open issues, I opened one and commented that I would like to work on it (not necessary for very small changes).
