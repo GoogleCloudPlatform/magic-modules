@@ -6,13 +6,13 @@ function clone_repo() {
     SCRATCH_OWNER=modular-magician
     if [ "$REPO" == "terraform" ]; then
         if [ "$VERSION" == "ga" ]; then
-            UPSTREAM_OWNER=terraform-providers
+            UPSTREAM_OWNER=hashicorp
             GH_REPO=terraform-provider-google
-            LOCAL_PATH=$GOPATH/src/github.com/terraform-providers/terraform-provider-google
+            LOCAL_PATH=$GOPATH/src/github.com/hashicorp/terraform-provider-google
         elif [ "$VERSION" == "beta" ]; then
-            UPSTREAM_OWNER=terraform-providers
+            UPSTREAM_OWNER=hashicorp
             GH_REPO=terraform-provider-google-beta
-            LOCAL_PATH=$GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta
+            LOCAL_PATH=$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
         else
             echo "Unrecognized version $VERSION"
             exit 1

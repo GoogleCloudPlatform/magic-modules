@@ -2673,7 +2673,7 @@ objects:
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
         # Larger disks were timing out at creation. Bumping up to 5 minutes.
-        # https://github.com/terraform-providers/terraform-provider-google/issues/703
+        # https://github.com/hashicorp/terraform-provider-google/issues/703
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
@@ -5636,7 +5636,7 @@ objects:
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
         # Users were experiencing timeouts. Bumping up to 6 minutes.
-        # https://github.com/terraform-providers/terraform-provider-google/issues/852
+        # https://github.com/hashicorp/terraform-provider-google/issues/852
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 6
           update_minutes: 6
@@ -13330,7 +13330,7 @@ objects:
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
         # Users were experiencing timeout. Bumping up to 6 minutes.
-        # https://github.com/terraform-providers/terraform-provider-google/issues/718
+        # https://github.com/hashicorp/terraform-provider-google/issues/718
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 6
           update_minutes: 6
