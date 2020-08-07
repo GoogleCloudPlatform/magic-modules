@@ -5571,6 +5571,32 @@ objects:
           The ID value of the disk used to create this image. This value may
           be used to determine whether the image was taken from the current
           or a previous instance of a given disk name.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'sourceImage'
+        description: |
+          URL of the source image used to create this image. In order to create an image, you must provide the full or partial
+          URL of one of the following:
+
+          The selfLink URL
+          This property
+          The rawDisk.source URL
+          The sourceDisk URL
+        resource: 'Image'
+        imports: 'selfLink'
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'sourceSnapshot'
+        description: |
+          URL of the source snapshot used to create this image.
+
+          In order to create an image, you must provide the full or partial URL of one of the following:
+
+          The selfLink URL
+          This property
+          The sourceImage URL
+          The rawDisk.source URL
+          The sourceDisk URL
+        resource: 'Snapshot'
+        imports: 'selfLink'
       - !ruby/object:Api::Type::Enum
         name: 'sourceType'
         description: |
