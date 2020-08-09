@@ -128,6 +128,8 @@ The following arguments are supported:
 
 ---
 
+* `apply_updates_to_instances` - (Optional) This blocks allows you to call the ApplyUpdatesToInstances method when the update_policy.type is `OPPORTUNISTIC` . It allows you to set the maximum allowed distruption for the IGM.
+
 * `auto_healing_policies` - (Optional) The autohealing policies for this managed instance
 group. You can specify only one value. Structure is documented below. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/creating-groups-of-managed-instances#monitoring_groups).
 
@@ -141,6 +143,22 @@ group. You can specify one or more values. For more information, see the [offici
 * `stateful_disk` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Disks created on the instances that will be preserved on instance delete, update, etc. Structure is documented below. For more information see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/configuring-stateful-disks-in-migs). Proactive cross zone instance redistribution must be disabled before you can update stateful disks on existing instance group managers. This can be controlled via the `update_policy`.
 
 - - -
+
+The `apply_updates_to_instances` block supports:
+
+```hcl
+apply_updates_to_instances {
+  minimal_action                 = "NONE"
+  all_instances                  = true
+  most_disruptive_allowed_action = "REFRESH"
+}
+```
+
+* `minimal_action` - (Required) - The minimal action that you want to perform on each instance during the update. You can specify either `RESTART` to restart existing instances, `REPLACE` to delete and create new instances from the template, `REFRESH` to not stop the instance or `NONE` to not disrupt the instance at all.
+
+* `most_distruptive_allowed_action` - (Required) - The most disruptive action that you want to perform on each instance during the update. You can specify either `RESTART` to restart existing instances, `REPLACE` to delete and create new instances from the template, `REFRESH` to not stop the instance or `NONE` to not disrupt the instance at all.
+
+* `all_instances` - (Required) - Whether to update all the instances. 
 
 The `update_policy` block supports:
 

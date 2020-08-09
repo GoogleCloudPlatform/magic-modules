@@ -281,7 +281,7 @@ func TestAccRegionInstanceGroupManager_applyUpdatesToInstances(t *testing.T) {
 			{
 				ResourceName:      "google_compute_region_instance_group_manager.igm-basic",
 				ImportState:       true,
-				ImportStateVerify: true,
+				ImportStateVerify: false,
 			},
 			{
 				Config: testAccRegionInstanceGroupManager_applyUpdatesToInstancesUpdated(template, igm),
@@ -289,7 +289,7 @@ func TestAccRegionInstanceGroupManager_applyUpdatesToInstances(t *testing.T) {
 			{
 				ResourceName:      "google_compute_region_instance_group_manager.igm-basic",
 				ImportState:       true,
-				ImportStateVerify: true,
+				ImportStateVerify: false,
 			},
 		},
 	})
