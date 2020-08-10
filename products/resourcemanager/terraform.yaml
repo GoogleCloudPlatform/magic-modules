@@ -36,17 +36,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pre_delete: templates/terraform/pre_delete/modify_delete_url.erb
       decoder: templates/terraform/decoders/avoid_meaningless_project_update.erb
   Folder: !ruby/object:Overrides::Terraform::ResourceOverride
-    iam_policy: !ruby/object:Api::Resource::IamPolicy
-      allowed_iam_role: 'roles/browser'
-      parent_resource_attribute: 'folder'
-      iam_conditions_request_type: :QUERY_PARAM
-    examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "folder_basic"
-        primary_resource_id: "default"
-        vars:
-          folder_name: "my-instance"
-    exclude_resource: true
+    exclude: true
   Organization: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
 # This is for copying files over
