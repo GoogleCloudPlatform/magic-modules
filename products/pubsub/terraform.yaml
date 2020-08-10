@@ -19,7 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # Because some users check whether the PubSub resource exists prior
     # to applying a new resource, we need to add this PollAsync to GET the
     # resource until it exists and the negative cached result goes away.
-    # Context: terraform-providers/terraform-provider-google#4993
+    # Context: hashicorp/terraform-provider-google#4993
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckForExistence
       actions: ['create']
@@ -69,7 +69,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # Because some users check whether the PubSub resource exists prior
     # to applying a new resource, we need to add this PollAsync to GET the
     # resource until it exists and the negative cached result goes away.
-    # Context: terraform-providers/terraform-provider-google#4993
+    # Context: hashicorp/terraform-provider-google#4993
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckForExistence
       actions: ['create']

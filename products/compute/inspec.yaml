@@ -114,6 +114,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  OrganizationSecurityPolicy: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  OrganizationSecurityPolicyAssociation: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  OrganizationSecurityPolicyRule: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   PacketMirroring:  !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   ProjectInfo:  !ruby/object:Overrides::Inspec::ResourceOverride
@@ -209,4 +215,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   PerInstanceConfig: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   RegionPerInstanceConfig: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  RegionNetworkEndpointGroup: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
