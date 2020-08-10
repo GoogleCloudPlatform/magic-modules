@@ -795,7 +795,7 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    testAccProvidersOiCS,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -2079,14 +2079,14 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_instance_template" "foobar" {
+  provider     = google-beta
   name         = "cvm-%s"
   machine_type = "n2d-standard-2"
-  zone         = "us-central1-a"
 
-  boot_disk {
-    initialize_params {
-      image = data.google_compute_image.my_image.self_link
-    }
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+	auto_delete  = true
+    boot         = true
   }
 
   network_interface {

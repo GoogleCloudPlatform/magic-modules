@@ -1133,7 +1133,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	d.Set("hostname", instance.Hostname)
 	d.Set("current_status", instance.Status)
  	<% unless version == 'ga' -%>
-	d.Set("confidential_instance_config", instance.ConfidentialInstanceConfig)
+	d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(instance.ConfidentialInstanceConfig))
     <% end -%>
 	if d.Get("desired_status") != "" {
 		d.Set("desired_status", instance.Status)
