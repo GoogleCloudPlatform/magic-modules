@@ -53,7 +53,7 @@ resource "google_folder" "my_folder" {
 
 resource "google_folder_access_approval_settings" "folder_access_approval" {
   folder_id           = google_folder.my_folder.folder_id
-  notification_emails = ["mbang@hashicorp.com"]
+  notification_emails = ["testuser@example.com"]
 
   enrolled_services {
   	cloud_product = "all"
@@ -71,7 +71,7 @@ resource "google_folder" "my_folder" {
 
 resource "google_folder_access_approval_settings" "folder_access_approval" {
   folder_id           = google_folder.my_folder.folder_id
-  notification_emails = ["mbang@hashicorp.com", "terraform-team-external@google.com"]
+  notification_emails = ["testuser@example.com", "example.user@example.com"]
 
   enrolled_services {
   	cloud_product = "all"

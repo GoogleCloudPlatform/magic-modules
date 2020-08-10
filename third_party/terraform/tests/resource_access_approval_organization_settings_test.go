@@ -48,7 +48,7 @@ func testAccAccessApprovalOrganizationSettings_full(context map[string]interface
 	return Nprintf(`
 resource "google_organization_access_approval_settings" "organization_access_approval" {
   organization_id     = "%{org_id}"
-  notification_emails = ["mbang@hashicorp.com"]
+  notification_emails = ["testuser@example.com"]
 
   enrolled_services {
   	cloud_product = "appengine.googleapis.com"
@@ -66,7 +66,7 @@ func testAccAccessApprovalOrganizationSettings_update(context map[string]interfa
 	return Nprintf(`
 resource "google_organization_access_approval_settings" "organization_access_approval" {
   organization_id     = "%{org_id}"
-  notification_emails = ["mbang@hashicorp.com", "terraform-team-external@google.com"]
+  notification_emails = ["testuser@example.com", "example.user@example.com"]
 
   enrolled_services {
   	cloud_product = "all"

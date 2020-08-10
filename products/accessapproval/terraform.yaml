@@ -28,7 +28,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
-      pre_create: templates/terraform/pre_create/access_approval_settings.go.erb
+      pre_create: templates/terraform/update_mask.erb
+    properties:
+      notificationEmails: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      enrolledServices: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        default_from_api: true
   ProjectSettings: !ruby/object:Overrides::Terraform::ResourceOverride
     legacy_name: "google_project_access_approval_settings"
     import_format: ["projects/{{project}}/accessApprovalSettings"]
@@ -43,7 +49,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
-      pre_create: templates/terraform/pre_create/access_approval_settings.go.erb
+      pre_create: templates/terraform/update_mask.erb
+    properties:
+      notificationEmails: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      enrolledServices: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        default_from_api: true
   OrganizationSettings: !ruby/object:Overrides::Terraform::ResourceOverride
     legacy_name: "google_organization_access_approval_settings"
     import_format: ["organizations/{{organization_id}}/accessApprovalSettings"]
@@ -57,7 +69,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
       test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
-      pre_create: templates/terraform/pre_create/access_approval_settings.go.erb
+      pre_create: templates/terraform/update_mask.erb
+    properties:
+      notificationEmails: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      enrolledServices: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        default_from_api: true
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
