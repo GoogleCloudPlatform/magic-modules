@@ -23,6 +23,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudbuild_trigger_filename"
         primary_resource_id: "filename-trigger"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudbuild_trigger_build"
+        primary_resource_id: "build-trigger"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'trigger_id'
@@ -30,6 +33,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       build.steps: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'step'
+      build.secrets: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'secret'
+      build.source: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}}
+          One of `storageSource` or `repoSource` must be provided.
       triggerTemplate: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           {{description}}
