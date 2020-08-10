@@ -2430,13 +2430,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   TargetInstance: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        min_version: beta
         name: "target_instance_basic"
         primary_resource_id: "default"
         vars:
           target_name: "target"
           instance_name: "target-vm"
       - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
         name: "target_instance_custom_network"
         primary_resource_id: "custom_network"
         vars:
