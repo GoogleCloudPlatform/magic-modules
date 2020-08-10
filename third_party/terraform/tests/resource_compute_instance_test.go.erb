@@ -1324,7 +1324,6 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, true),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }

@@ -805,11 +805,6 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, true),
 				),
 			},
-			{
-				ResourceName:      "google_compute_instance_template.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 	    },
 	})
 }
