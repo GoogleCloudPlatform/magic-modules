@@ -67,7 +67,14 @@
 	StateFunc: <%= property.state_func %>,
 <% end -%>
 <% enum_values_description = "" -%>
-<% if property.is_a?(Api::Type::Enum) && !property.output -%>
+<% if property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::Enum) && !property.output && !property.item_type.skip_docs_values -%>
+<% unless property.item_type.default_value.nil? || property.item_type.default_value == "" -%>
+<% enum_values_description += " Default value: \"#{property.item_type.default_value}\"" -%>
+<% end -%>
+<% enum_values_description += " Possible values: [" -%>
+<% enum_values_description += property.item_type.values.select { |v| v != "" }.map { |v| "\"#{v}\"" }.join(', ') -%>
+<% enum_values_description += "]" -%>
+<% elsif property.is_a?(Api::Type::Enum) && !property.output -%>
 <% unless property.default_value.nil? || property.default_value == "" -%>
 <% enum_values_description += " Default value: \"#{property.default_value}\"" -%>
 <% end -%>
@@ -108,6 +115,11 @@
       Elem: &schema.Schema{
         Type: <%= tf_types[property.item_type_class] -%>,
       },
+  <% elsif property.item_type.is_a?(Api::Type::Enum) -%>
+      Elem: &schema.Schema{
+        Type: <%= tf_types[property.item_type.class] -%>,
+        ValidateFunc: validation.StringInSlice([]string{"<%= property.item_type.values.join '","' -%>"}, false),
+      },
   <% else # array of basic types -%>
       Elem: &schema.Schema{
         Type: <%= tf_types[property.item_type.class] -%>,
@@ -119,7 +131,7 @@
   <% if property.is_set -%>
     <% if !property.set_hash_func.nil? -%>
     Set: <%= property.set_hash_func -%>,
-    <% elsif property.item_type.is_a?(String) -%>
+    <% elsif property.item_type.is_a?(String) or property.item_type.is_a?(Api::Type::Enum) -%>
     Set: schema.HashString,
     <% else -%>
     // Default schema.HashSchema is used.

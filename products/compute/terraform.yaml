@@ -404,7 +404,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
   Disk: !ruby/object:Overrides::Terraform::ResourceOverride
     # Larger disks were timing out at creation. Bumping up to 5 minutes.
-    # https://github.com/terraform-providers/terraform-provider-google/issues/703
+    # https://github.com/hashicorp/terraform-provider-google/issues/703
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 5
     properties:
@@ -948,7 +948,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     # Users were experiencing timeouts. Bumping up to 6 minutes.
-    # https://github.com/terraform-providers/terraform-provider-google/issues/852
+    # https://github.com/hashicorp/terraform-provider-google/issues/852
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
       update_minutes: 6
@@ -1184,6 +1184,32 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+  RegionNetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_functions"
+        primary_resource_id: "function_neg"
+        vars:
+          neg_name: "function-neg"
+          function_name: "function-neg"
+          bucket_name: "cloudfunctions-function-example-bucket"
+          zip_path: "path/to/index.zip"
+        test_vars_overrides:
+          zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_cloudrun"
+        primary_resource_id: "cloudrun_neg"
+        vars:
+          neg_name: "cloudrun-neg"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_appengine"
+        primary_resource_id: "appengine_neg"
+        vars:
+          neg_name: "appengine-neg"
+    properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
@@ -2244,7 +2270,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
   Subnetwork: !ruby/object:Overrides::Terraform::ResourceOverride
     # Users were experiencing timeout. Bumping up to 6 minutes.
-    # https://github.com/terraform-providers/terraform-provider-google/issues/718
+    # https://github.com/hashicorp/terraform-provider-google/issues/718
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
       update_minutes: 6

@@ -461,8 +461,20 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'inboundServices'
         description: |
-          Before an application can receive email or XMPP messages, the application must be configured to enable the service.
-        item_type: Api::Type::String
+          A list of the types of messages that this application is able to receive.
+        item_type: !ruby/object:Api::Type::Enum
+          name: 'inboundService'
+          description: |
+            One type of message that this application is able to receive.
+          values:
+            - :INBOUND_SERVICE_MAIL
+            - :INBOUND_SERVICE_MAIL_BOUNCE
+            - :INBOUND_SERVICE_XMPP_ERROR
+            - :INBOUND_SERVICE_XMPP_MESSAGE
+            - :INBOUND_SERVICE_XMPP_SUBSCRIBE
+            - :INBOUND_SERVICE_XMPP_PRESENCE
+            - :INBOUND_SERVICE_CHANNEL_PRESENCE	
+            - :INBOUND_SERVICE_WARMUP
       - !ruby/object:Api::Type::String
         name: 'instanceClass'
         description: |
@@ -631,8 +643,20 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'inboundServices'
         description: |
-          Before an application can receive email or XMPP messages, the application must be configured to enable the service.
-        item_type: Api::Type::String
+          A list of the types of messages that this application is able to receive.
+        item_type: !ruby/object:Api::Type::Enum
+          name: 'inboundService'
+          description: |
+            One type of message that this application is able to receive.
+          values:
+            - :INBOUND_SERVICE_MAIL
+            - :INBOUND_SERVICE_MAIL_BOUNCE
+            - :INBOUND_SERVICE_XMPP_ERROR
+            - :INBOUND_SERVICE_XMPP_MESSAGE
+            - :INBOUND_SERVICE_XMPP_SUBSCRIBE
+            - :INBOUND_SERVICE_XMPP_PRESENCE
+            - :INBOUND_SERVICE_CHANNEL_PRESENCE	
+            - :INBOUND_SERVICE_WARMUP
       - !ruby/object:Api::Type::String
         name: 'instanceClass'
         description: |
