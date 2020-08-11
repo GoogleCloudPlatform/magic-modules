@@ -611,7 +611,25 @@ func resourceComputeInstance() *schema.Resource {
 					},
 				},
 			},
-
+<% unless version == 'ga' -%>
+			"confidential_instance_config": {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				Description: `The Confidential VM config being used by the instance.  on_host_maintenance has to be set to TERMINATE or this will fail to create.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enable_confidential_compute": {
+							Type:         schema.TypeBool,
+							Required:     true,
+							Description:  `Defines whether the instance should have confidential compute enabled.`,
+						},
+					},
+				},
+			},
+<% end -%>
 			"desired_status": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -816,6 +834,9 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *Confi
 		DeletionProtection: d.Get("deletion_protection").(bool),
 		Hostname:           d.Get("hostname").(string),
 		ForceSendFields:    []string{"CanIpForward", "DeletionProtection"},
+<% unless version == 'ga' -%>
+		ConfidentialInstanceConfig:  expandConfidentialInstanceConfig(d),
+<% end -%>
 		ShieldedInstanceConfig:   expandShieldedVmConfigs(d),
 		DisplayDevice:      expandDisplayDevice(d),
 		ResourcePolicies:   convertStringArr(d.Get("resource_policies").([]interface{})),
@@ -1111,7 +1132,9 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	d.Set("description", instance.Description)
 	d.Set("hostname", instance.Hostname)
 	d.Set("current_status", instance.Status)
-
+ 	<% unless version == 'ga' -%>
+	d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(instance.ConfidentialInstanceConfig))
+    <% end -%>
 	if d.Get("desired_status") != "" {
 		d.Set("desired_status", instance.Status)
 	}
