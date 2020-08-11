@@ -179,6 +179,7 @@ objects:
                   at regular intervals to the topic.
               - !ruby/object:Api::Type::String
                 name: schemaVersion
+                default_value: "1.0"
                 description: |
                   The schema version of the notification. Only "1.0" is
                   accepted. It represents the JSON schema as defined in
