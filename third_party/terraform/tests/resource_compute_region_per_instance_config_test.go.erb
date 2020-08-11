@@ -281,7 +281,7 @@ resource "google_compute_instance_template" "rigm-basic" {
 
 resource "google_compute_region_instance_group_manager" "rigm" {
   description = "Terraform test instance group manager"
-  name        = "rigm-%{random_suffix}"
+  name        = "tf-test-rigm-%{random_suffix}"
 
   version {
     name              = "prod"
