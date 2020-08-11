@@ -172,6 +172,9 @@ objects:
             properties:
               - !ruby/object:Api::Type::String
                 name: pubsubTopic
+                at_least_one_of:
+                  - budget.0.all_updates_rule.0.pubsub_topic
+                  - budget.0.all_updates_rule.0.monitoring_notification_channels
                 description: |
                   The name of the Cloud Pub/Sub topic where budget related
                   messages will be published, in the form
@@ -186,6 +189,9 @@ objects:
                   https://cloud.google.com/billing/docs/how-to/budgets#notification_format.
               - !ruby/object:Api::Type::Array
                 name: monitoringNotificationChannels
+                at_least_one_of:
+                  - budget.0.all_updates_rule.0.pubsub_topic
+                  - budget.0.all_updates_rule.0.monitoring_notification_channels
                 description: |
                   The full resource name of a monitoring notification
                   channel in the form
