@@ -60,6 +60,32 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
       custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
+  AccessLevels: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 6
+      update_minutes: 6
+      delete_minutes: 6
+    autogen_async: true
+    # Skipping the sweeper due to the non-standard base_url
+    skip_sweeper: true
+    id_format: "{{parent}}/accessLevels"
+    import_format: ["{{parent}}/accessLevels"]
+    examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "access_context_manager_access_levels_basic"
+      skip_test: true
+      primary_resource_id: "access-levels"
+      vars:
+        access_level_name1: "chromeos_no_lock"
+        access_level_name2: "mac_no_lock"
+    properties:
+      parent: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      accessLevels.basic.combiningFunction: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/access_context_manager_access_levels.go.erb
+      custom_delete: templates/terraform/custom_delete/replace_all_access_policy_empty_list.go.erb
   ServicePerimeter: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
