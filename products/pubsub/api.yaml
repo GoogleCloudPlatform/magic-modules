@@ -244,6 +244,15 @@ objects:
               If ttl is not set, the associated resource never expires.
               A duration in seconds with up to nine fractional digits, terminated by 's'.
               Example - "3.5s".
+      - !ruby/object:Api::Type::String
+        name: 'filter'
+        required: false
+        description: |
+          The subscription only delivers the messages that match the filter. 
+          Pub/Sub automatically acknowledges the messages that don't match the filter. You can filter messages
+          by their attributes. The maximum length of a filter is 256 bytes. After creating the subscription, 
+          you can't modify the filter.
+        input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'deadLetterPolicy'
         send_empty_value: true
