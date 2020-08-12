@@ -65,7 +65,6 @@ objects:
           Access requests for the resource given by name against any of these services contained here will be required
           to have explicit approval. Enrollment can only be done on an all or nothing basis.
           
-          If a cloudProduct is repeated in this list, the first entry will be honored and all following entries will be discarded.
           A maximum of 10 enrolled services will be enforced, to be expanded as the set of supported services is expanded.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -136,7 +135,6 @@ objects:
           Access requests for the resource given by name against any of these services contained here will be required
           to have explicit approval. Enrollment can only be done on an all or nothing basis.
           
-          If a cloudProduct is repeated in this list, the first entry will be honored and all following entries will be discarded.
           A maximum of 10 enrolled services will be enforced, to be expanded as the set of supported services is expanded.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -207,7 +205,6 @@ objects:
           Access requests for the resource given by name against any of these services contained here will be required
           to have explicit approval. Enrollment can be done for individual services.
           
-          If a cloudProduct is repeated in this list, the first entry will be honored and all following entries will be discarded.
           A maximum of 10 enrolled services will be enforced, to be expanded as the set of supported services is expanded.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
