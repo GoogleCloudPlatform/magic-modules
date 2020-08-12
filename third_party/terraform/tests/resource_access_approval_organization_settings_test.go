@@ -51,12 +51,12 @@ resource "google_organization_access_approval_settings" "organization_access_app
   notification_emails = ["testuser@example.com"]
 
   enrolled_services {
-  	cloud_product = "appengine.googleapis.com"
+    cloud_product = "appengine.googleapis.com"
   }
 
   enrolled_services {
-  	cloud_product = "dataflow.googleapis.com"
-  	enrollment_level = "BLOCK_ALL"
+    cloud_product = "dataflow.googleapis.com"
+    enrollment_level = "BLOCK_ALL"
   }
 }
 `, context)
@@ -69,8 +69,8 @@ resource "google_organization_access_approval_settings" "organization_access_app
   notification_emails = ["testuser@example.com", "example.user@example.com"]
 
   enrolled_services {
-  	cloud_product = "all"
-  	enrollment_level = "BLOCK_ALL"
+    cloud_product = "all"
+    enrollment_level = "BLOCK_ALL"
   }
 }
 `, context)

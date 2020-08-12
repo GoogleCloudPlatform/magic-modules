@@ -49,7 +49,11 @@ func testAccAccessApprovalProjectSettings_basic(context map[string]interface{}) 
 	return Nprintf(`
 resource "google_project_access_approval_settings" "project_access_approval" {
   project_id          = "%{project}"
-  notification_emails = ["testuser@example.com"]
+
+  enrolled_services {
+    cloud_product = "all"
+    enrollment_level = "BLOCK_ALL"
+  }
 }
 `, context)
 }
@@ -61,8 +65,8 @@ resource "google_project_access_approval_settings" "project_access_approval" {
   notification_emails = ["testuser@example.com", "example.user@example.com"]
 
   enrolled_services {
-  	cloud_product = "all"
-  	enrollment_level = "BLOCK_ALL"
+    cloud_product = "all"
+    enrollment_level = "BLOCK_ALL"
   }
 }
 `, context)

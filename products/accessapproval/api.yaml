@@ -60,6 +60,7 @@ objects:
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: enrolledServices
+        required: true
         description: |
           A list of Google Cloud Services for which the given resource has Access Approval enrolled.
           Access requests for the resource given by name against any of these services contained here will be required
@@ -130,6 +131,7 @@ objects:
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: enrolledServices
+        required: true
         description: |
           A list of Google Cloud Services for which the given resource has Access Approval enrolled.
           Access requests for the resource given by name against any of these services contained here will be required
@@ -200,6 +202,7 @@ objects:
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: enrolledServices
+        required: true
         description: |
           A list of Google Cloud Services for which the given resource has Access Approval enrolled.
           Access requests for the resource given by name against any of these services contained here will be required

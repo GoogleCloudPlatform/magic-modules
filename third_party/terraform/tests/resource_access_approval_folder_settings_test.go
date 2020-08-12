@@ -56,7 +56,7 @@ resource "google_folder_access_approval_settings" "folder_access_approval" {
   notification_emails = ["testuser@example.com"]
 
   enrolled_services {
-  	cloud_product = "all"
+    cloud_product = "all"
   }
 }
 `, context)
@@ -74,7 +74,7 @@ resource "google_folder_access_approval_settings" "folder_access_approval" {
   notification_emails = ["testuser@example.com", "example.user@example.com"]
 
   enrolled_services {
-  	cloud_product = "all"
+    cloud_product = "all"
   }
 }
 `, context)
