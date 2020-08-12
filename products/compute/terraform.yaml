@@ -346,6 +346,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           key_name: "test-key"
           backend_name: "my-backend-service"
+          igm_name: "my-webservers"
         skip_test: true
     properties:
       backendService: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -724,6 +725,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           forwarding_rule_name: "global-rule"
           http_proxy_name: "target-proxy"
           backend_service_name: "backend"
+          igm_name: "igm-internal"
     properties:
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
