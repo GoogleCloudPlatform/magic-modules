@@ -2533,6 +2533,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "ha_vpn_gateway_gcp_to_gcp"
         primary_resource_id: "ha_gateway1"
+        # Multiple fine-grained resources
+        skip_vcr: true
         vars:
           ha_vpn_gateway1_name: "ha-vpn-1"
           network1_name: "network1"
@@ -2559,6 +2561,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "external_vpn_gateway"
         primary_resource_id: "external_gateway"
+        # Multiple fine-grained resources
+        skip_vcr: true
         vars:
           ha_vpn_gateway_name: "ha-vpn"
           network_name: "network"
