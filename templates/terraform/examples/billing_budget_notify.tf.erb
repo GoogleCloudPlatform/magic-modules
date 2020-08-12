@@ -13,10 +13,7 @@ resource "google_billing_budget" "<%= ctx[:primary_resource_id] %>" {
   }
 
   amount {
-    specified_amount {
-      currency_code = "USD"
-      units         = "100000"
-    }
+    last_period_amount = true
   }
 
   threshold_rules {
