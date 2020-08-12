@@ -69,7 +69,7 @@ data "google_compute_image" "debian_image" {
 
 resource "google_compute_instance_group_manager" "igm" {
   provider = google-beta
-  name     = "igm-internal"
+  name     = "<%= ctx[:vars]['igm_name'] %>"
   version {
     instance_template = google_compute_instance_template.instance_template.id
     name              = "primary"
