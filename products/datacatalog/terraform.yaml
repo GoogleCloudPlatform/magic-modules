@@ -143,6 +143,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           force_delete: "true"
       - !ruby/object:Provider::Terraform::Examples
         name: "data_catalog_entry_tag_full"
+        # Multiple fine-grained resources
+        skip_if_vcr: true
         primary_resource_id: "basic_tag"
         vars:
           entry_group_id: "my_entry_group"
