@@ -103,32 +103,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # before comparison.
         custom_expand: "templates/terraform/custom_expand/bigquery_access_role.go.erb"
       iamMember: !ruby/object:Overrides::Terraform::PropertyOverride
-        # iamMember sometimes gets returned as userByEmail, groupByEmail, domain, or specialGroup
-        # and needs to be "computed" in order for the customizeDiff to Clear it from the diff
-        default_from_api: true
-      userByEmail:  !ruby/object:Overrides::Terraform::PropertyOverride
-        # these need to be "computed" in order for the customizeDiff to be SetNew
-        # with iamMember. we parse the value passed into iamMember and reconfigure
-        # one of these fields based in the prefix of the value passed in
-        default_from_api: true
-      groupByEmail:  !ruby/object:Overrides::Terraform::PropertyOverride
-        # these need to be "computed" in order for the customizeDiff to be SetNew
-        # with iamMember. we parse the value passed into iamMember and reconfigure
-        # one of these fields based in the prefix of the value passed in
-        default_from_api: true
-      domain:  !ruby/object:Overrides::Terraform::PropertyOverride
-        # these need to be "computed" in order for the customizeDiff to be SetNew
-        # with iamMember. we parse the value passed into iamMember and reconfigure
-        # one of these fields based in the prefix of the value passed in
-        default_from_api: true
-      specialGroup:  !ruby/object:Overrides::Terraform::PropertyOverride
-        # these need to be "computed" in order for the customizeDiff to be SetNew
-        # with iamMember. we parse the value passed into iamMember and reconfigure
-        # one of these fields based in the prefix of the value passed in
-        default_from_api: true
+        diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
+      userByEmail: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
+      groupByEmail: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
+      specialGroup: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
+      domain: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      constants: templates/terraform/constants/bigquery_dataset_access.go
-      resource_definition: templates/terraform/resource_definition/bigquery_dataset_access.go.erb
+      constants: templates/terraform/constants/bigquery_dataset_access.go.erb
+      post_create: templates/terraform/post_create/bigquery_dataset_access.go.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/bigquery_dataset_access.go.erb
   Job: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/jobs/{{job_id}}"]
     skip_delete: true

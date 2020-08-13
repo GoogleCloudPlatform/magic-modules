@@ -180,6 +180,9 @@ func TestAccBigQueryDatasetAccess_allUsers(t *testing.T) {
 			{
 				Config: testAccBigQueryDatasetAccess_allUsers(datasetID),
 			},
+			{
+				Config: testAccBigQueryDatasetAccess_allAuthenticatedUsers(datasetID),
+			},
 		},
 	})
 }
