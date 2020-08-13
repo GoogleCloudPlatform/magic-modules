@@ -66,6 +66,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       nameServerSet: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      privateVisibilityConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/dns_managed_zone_private_visibility_config.go.erb'
       privateVisibilityConfig.networks: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: |-
@@ -89,7 +91,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           and apply an incorrect update to the resource. If you encounter this issue, remove all `networks`
           blocks in an update and then apply another update adding all of them back simultaneously.
       privateVisibilityConfig.networks.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/network_full_url.erb'
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         description: |
           The id or fully qualified URL of the VPC network to bind to.
