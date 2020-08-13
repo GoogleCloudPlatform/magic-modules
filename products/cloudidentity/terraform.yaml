@@ -37,6 +37,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       #     cust_id: :CUST_ID
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/set_computed_name.erb
+      custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.erb
   GroupMembership: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{name}}"]
     examples:
@@ -66,6 +67,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/set_computed_name.erb
+      custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
