@@ -26,6 +26,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           billing_acct: :BILLING_ACCT
       - !ruby/object:Provider::Terraform::Examples
+        name: 'billing_budget_lastperiod'
+        min_version: beta
+        primary_resource_id: 'budget'
+        vars:
+          display_name: 'Example Billing Budget'
+        test_env_vars:
+          billing_acct: :BILLING_ACCT
+          project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_filter'
         min_version: beta
         primary_resource_id: 'budget'
