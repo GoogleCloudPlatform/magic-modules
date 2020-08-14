@@ -18,7 +18,7 @@ d.Set("api_updated_member", false)
 
 // iam_member is a generalized attribute, if the API can map it to a different member type on the backend, it will return
 // the correct member_type in the response. If it cannot be mapped to a different member type, it will stay in iam_member.
-if d.Get("iam_member") != nil {
+if iamMemberProp != "" {
 	member_type, member, err := resourceBigQueryDatasetAccessReassignIamMemberInNestedObjectList(d, meta, res["access"].([]interface{}))
 	if err != nil {
 		fmt.Println(err)

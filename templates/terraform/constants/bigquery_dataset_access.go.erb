@@ -4,19 +4,6 @@ var bigqueryAccessRoleToPrimitiveMap =  map[string]string {
     "roles/bigquery.dataViewer": "READER",
 }
 
-var bigqueryAccessIamMemberToTypeMap = map[string]string{
-	"serviceAccount":        "user_by_email",
-	"user":                  "user_by_email",
-	"group":                 "group_by_email",
-	"domain":                "domain",
-	"specialGroup":          "special_group",
-	"allUsers":              "iam_member",
-	"projectOwners":         "special_group",
-	"projectReaders":        "special_group",
-	"projectWriters":        "special_group",
-	"allAuthenticatedUsers": "special_group",
-}
-
 func resourceBigQueryDatasetAccessRoleDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
     if primitiveRole, ok := bigqueryAccessRoleToPrimitiveMap[new]; ok {
         return primitiveRole == old
