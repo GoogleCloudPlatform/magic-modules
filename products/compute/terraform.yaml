@@ -2100,6 +2100,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "managed_ssl_certificate_recreation"
         primary_resource_id: "default"
+        # Random provider
+        skip_vcr: true
         min_version: beta
     description: |
       {{description}}
