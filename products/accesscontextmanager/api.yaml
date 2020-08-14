@@ -339,7 +339,8 @@ objects:
       api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.accessLevels'
     description: |
       Replace all existing Access Levels in an Access Policy with the Access Levels provided. This is done atomically.
-      The longrunning operation from this RPC will have a successful status once all replacements have propagated to long-lasting storage.
+      This is a bulk edit of all Access Levels and may override existing Access Levels created by `google_access_context_manager_access_level`,
+      thus causing a permadiff if used alongside `google_access_context_manager_access_level` on the same parent.
     parameters:
       # Parent is a path parameter that _cannot_ be read or sent in the request at all.
       # This must be done at the provider level.
@@ -817,7 +818,8 @@ objects:
       api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters'
     description: |
       Replace all existing Service Perimeters in an Access Policy with the Service Perimeters provided. This is done atomically.
-      The longrunning operation from this RPC will have a successful status once all replacements have propagated to long-lasting storage
+      This is a bulk edit of all Service Perimeters and may override existing Service Perimeters created by `google_access_context_manager_service_perimeter`,
+      thus causing a permadiff if used alongside `google_access_context_manager_service_perimeter` on the same parent.
     parameters:
       # Parent is a path parameter that _cannot_ be read or sent in the request at all.
       # This must be done at the provider level.
@@ -899,6 +901,8 @@ objects:
                     A list of GCP resources that are inside of the service perimeter.
                     Currently only projects are allowed.
                     Format: projects/{project_number}
+                  # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
+                  # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   # at_least_one_of:
                   #   - status.0.resources
                   #   - status.0.access_levels
@@ -917,6 +921,8 @@ objects:
                     be empty.
 
                     Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
+                  # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
+                  # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   # at_least_one_of:
                   #   - status.0.resources
                   #   - status.0.access_levels
@@ -930,6 +936,8 @@ objects:
                     `storage.googleapis.com` is specified, access to the storage
                     buckets inside the perimeter must meet the perimeter's access
                     restrictions.
+                  # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
+                  # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   # at_least_one_of:
                   #   - status.0.resources
                   #   - status.0.access_levels
@@ -966,6 +974,8 @@ objects:
                     A list of GCP resources that are inside of the service perimeter.
                     Currently only projects are allowed.
                     Format: projects/{project_number}
+                  # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
+                  # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   # at_least_one_of:
                   #   - status.0.resources
                   #   - status.0.access_levels
@@ -984,6 +994,8 @@ objects:
                     be empty.
 
                     Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
+                  # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
+                  # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   # at_least_one_of:
                   #   - status.0.resources
                   #   - status.0.access_levels
@@ -997,6 +1009,8 @@ objects:
                     `storage.googleapis.com` is specified, access to the storage
                     buckets inside the perimeter must meet the perimeter's access
                     restrictions.
+                  # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
+                  # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   # at_least_one_of:
                   #   - status.0.resources
                   #   - status.0.access_levels
