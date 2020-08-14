@@ -11,6 +11,7 @@ func resourceBigQueryDatasetAccessRoleDiffSuppress(k, old, new string, d *schema
     return false
 }
 
+// we want to diff suppress any iam_members that are configured as `iam_member`, but stored in state as a different member type
 func resourceBigQueryDatasetAccessIamMemberDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if primitiveRole, ok := bigqueryAccessRoleToPrimitiveMap[new]; ok {
 		return primitiveRole == old
