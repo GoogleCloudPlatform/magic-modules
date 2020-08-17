@@ -201,6 +201,7 @@ func (b *RequestBatcher) SendRequestWithTimeout(batchKey string, request *BatchR
 		return nil, fmt.Errorf("Request %s timed out after %v", batchKey, timeout)
 	default:
 		return nil, fmt.Errorf("Error making request %s: %v", batchKey, ctx.Err())
+	}
 }
 
 // registerBatchRequest safely sees if an existing batch has been started
