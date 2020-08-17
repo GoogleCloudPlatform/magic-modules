@@ -885,6 +885,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           health_check_name: "http2-health-check"
       - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_grpc"
+        primary_resource_id: "grpc-health-check"
+        vars:
+          health_check_name: "grpc-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_grpc_full"
+        primary_resource_id: "grpc-health-check"
+        vars:
+          health_check_name: "grpc-health-check"
+      - !ruby/object:Provider::Terraform::Examples
         name: "health_check_with_logging"
         primary_resource_id: "health-check-with-logging"
         min_version: beta
@@ -909,6 +919,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       tcpHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
       sslHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'portDiffSuppress'
+      grpcHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
   Image: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
@@ -1696,6 +1708,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "http2-region-health-check"
         vars:
           health_check_name: "http2-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_grpc"
+        primary_resource_id: "grpc-region-health-check"
+        vars:
+          health_check_name: "grpc-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_grpc_full"
+        primary_resource_id: "grpc-region-health-check"
+        vars:
+          health_check_name: "grpc-region-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/health_check_type.erb
       resource_definition: templates/terraform/resource_definition/health_check.erb
@@ -1721,6 +1743,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       tcpHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
       sslHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'portDiffSuppress'
+      grpcHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
   RegionUrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
