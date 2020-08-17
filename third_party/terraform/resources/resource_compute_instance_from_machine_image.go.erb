@@ -72,7 +72,7 @@ func computeInstanceFromMachineImageSchema() map[string]*schema.Schema {
 	return s
 }
 
-// Already declared in resouce_compute_instance_from_instance_template.go
+// Already declared in resource_compute_instance_from_instance_template.go
 // func recurseOnSchema(s map[string]*schema.Schema, f func(*schema.Schema)) {
 // 	for _, field := range s {
 // 		f(field)
@@ -125,7 +125,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	}
 
 	// when we make the original call to expandComputeInstance expandScheduling is called, which sets default values.
-	// However, we want the values to be read from the template instead.
+	// However, we want the values to be read from the machine image instead.
 	if _, hasSchedule := d.GetOk("scheduling"); !hasSchedule {
 		instance.Scheduling = mi.SourceInstanceProperties.Scheduling
 	}
@@ -181,9 +181,8 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *Config,
 			return nil, err
 		}
 		disks = append(disks, bootDisk)
-	} else {
-		// boot disk was not overridden, so no OP and use the one defined in the machine image
 	}
+	// boot disk was not overridden, so no OP and use the one defined in the machine image
 
 	if _, hasScratchDisk := d.GetOk("scratch_disk"); hasScratchDisk {
 		scratchDisks, err := expandScratchDisks(d, config, project)
@@ -191,9 +190,8 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *Config,
 			return nil, err
 		}
 		disks = append(disks, scratchDisks...)
-	} else {
-		// scratch disks were not overridden, no OP again and use the config in the machine image
-	}
+	} 
+	// scratch disks were not overridden, no OP again and use the config in the machine image
 
 	attachedDisksCount := d.Get("attached_disk.#").(int)
 	if attachedDisksCount > 0 {
@@ -206,9 +204,8 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *Config,
 
 			disks = append(disks, disk)
 		}
-	} else {
-		// attached disks were not overridden, no OP again and use the one define in the machine image.
-	}
+	} 
+	// attached disks were not overridden, no OP again and use the one define in the machine image.
 
 	return disks, nil
 }
