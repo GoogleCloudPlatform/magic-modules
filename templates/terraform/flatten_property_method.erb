@@ -123,7 +123,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
   }
   <% if !property.set_hash_func.nil? -%>
   return schema.NewSet(<%= property.set_hash_func -%>, v.([]interface{}))
-  <% elsif property.item_type.is_a?(String) -%>
+  <% elsif property.item_type.is_a?(String) or property.item_type.is_a?(Api::Type::Enum) -%>
   return schema.NewSet(schema.HashString, v.([]interface{}))
   <% else raise 'Unknown hash function for property #{property.name}' -%>
   <% end -%>

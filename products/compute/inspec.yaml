@@ -216,3 +216,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionPerInstanceConfig: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  RegionNetworkEndpointGroup: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true

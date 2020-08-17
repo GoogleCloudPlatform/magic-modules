@@ -2673,7 +2673,7 @@ objects:
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
         # Larger disks were timing out at creation. Bumping up to 5 minutes.
-        # https://github.com/terraform-providers/terraform-provider-google/issues/703
+        # https://github.com/hashicorp/terraform-provider-google/issues/703
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
@@ -4188,6 +4188,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4311,6 +4312,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4434,6 +4436,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -4538,6 +4541,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -4642,6 +4646,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4757,6 +4762,76 @@ objects:
                 - :USE_FIXED_PORT
                 - :USE_NAMED_PORT
                 - :USE_SERVING_PORT
+      - !ruby/object:Api::Type::NestedObject
+        name: 'grpcHealthCheck'
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
+          - grpc_health_check
+        properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The port number for the health check request. 
+                Must be specified if portName and portSpecification are not set 
+                or if port_specification is USE_FIXED_PORT. Valid values are 1 through 65535.
+            - !ruby/object:Api::Type::String
+              name: 'portName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Port name as defined in InstanceGroup#NamedPort#name. If both port and
+                port_name are defined, port takes precedence.
+            - !ruby/object:Api::Type::Enum
+              name: 'portSpecification'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Specifies how port is selected for health checking, can be one of the
+                following values:
+
+                  * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+                  * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+                  * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+                  network endpoint is used for health checking. For other backends, the
+                  port or named port specified in the Backend Service is used for health
+                  checking.
+
+                If not specified, gRPC health check follows behavior specified in `port` and
+                `portName` fields.
+              values:
+                - :USE_FIXED_PORT
+                - :USE_NAMED_PORT
+                - :USE_SERVING_PORT
+            - !ruby/object:Api::Type::String
+              name: 'grpcServiceName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The gRPC service name for the health check. 
+                The value of grpcServiceName has the following meanings by convention:
+                  - Empty serviceName means the overall status of all services at the backend.
+                  - Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
+                The grpcServiceName can only be ASCII.
       - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
         description: |
@@ -5571,6 +5646,32 @@ objects:
           The ID value of the disk used to create this image. This value may
           be used to determine whether the image was taken from the current
           or a previous instance of a given disk name.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'sourceImage'
+        description: |
+          URL of the source image used to create this image. In order to create an image, you must provide the full or partial
+          URL of one of the following:
+
+          The selfLink URL
+          This property
+          The rawDisk.source URL
+          The sourceDisk URL
+        resource: 'Image'
+        imports: 'selfLink'
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'sourceSnapshot'
+        description: |
+          URL of the source snapshot used to create this image.
+
+          In order to create an image, you must provide the full or partial URL of one of the following:
+
+          The selfLink URL
+          This property
+          The sourceImage URL
+          The rawDisk.source URL
+          The sourceDisk URL
+        resource: 'Snapshot'
+        imports: 'selfLink'
       - !ruby/object:Api::Type::Enum
         name: 'sourceType'
         description: |
@@ -5610,7 +5711,7 @@ objects:
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
         # Users were experiencing timeouts. Bumping up to 6 minutes.
-        # https://github.com/terraform-providers/terraform-provider-google/issues/852
+        # https://github.com/hashicorp/terraform-provider-google/issues/852
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 6
           update_minutes: 6
@@ -7553,6 +7654,176 @@ objects:
         description: |
           The default port used if the port number is not specified in the
           network endpoint.
+  - !ruby/object:Api::Resource
+    name: 'RegionNetworkEndpointGroup'
+    kind: 'compute#networkEndpointGroup'
+    base_url: 'projects/{{project}}/regions/{{region}}/networkEndpointGroups'
+    input: true
+    min_version: beta
+    has_self_link: true
+    collection_url_key: 'items'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/serverless-neg-concepts'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups'
+    description: |
+      A regional NEG that can support Serverless Products.
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        description: |
+          A reference to the region where the Serverless NEGs Reside.
+        required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource; provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource. Provide this property when
+          you create the resource.
+      - !ruby/object:Api::Type::Enum
+        name: 'networkEndpointType'
+        description: |
+          Type of network endpoints in this network endpoint group. Defaults to SERVERLESS
+        values:
+          - :SERVERLESS
+        default_value: :SERVERLESS
+      - !ruby/object:Api::Type::NestedObject
+        name: 'cloudRun'
+        exactly_one_of:
+          - cloudRun
+          - cloudFunction
+          - appEngine
+        description: |
+          Only valid when networkEndpointType is "SERVERLESS".
+          Only one of cloud_run, app_engine or cloud_function may be set.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'service'
+            at_least_one_of: 
+              - cloud_run.0.service
+              - cloud_run.0.url_mask
+            description: |
+              Cloud Run service is the main resource of Cloud Run.
+              The service must be 1-63 characters long, and comply with RFC1035.
+              Example value: "run-service".
+          - !ruby/object:Api::Type::String
+            name: 'tag'
+            description: |
+              Cloud Run tag represents the "named-revision" to provide
+              additional fine-grained traffic routing information.
+              The tag must be 1-63 characters long, and comply with RFC1035.
+              Example value: "revision-0010".
+          - !ruby/object:Api::Type::String
+            name: 'urlMask'
+            at_least_one_of: 
+              - cloud_run.0.service
+              - cloud_run.0.url_mask
+            description: |
+              A template to parse service and tag fields from a request URL. 
+              URL mask allows for routing to multiple Run services without having 
+              to create multiple network endpoint groups and backend services.
+
+              For example, request URLs "foo1.domain.com/bar1" and "foo1.domain.com/bar2" 
+              an be backed by the same Serverless Network Endpoint Group (NEG) with 
+              URL mask ".domain.com/". The URL mask will parse them to { service="bar1", tag="foo1" } 
+              and { service="bar2", tag="foo2" } respectively. 
+      - !ruby/object:Api::Type::NestedObject
+        name: 'appEngine'
+        exactly_one_of:
+          - appEngine
+          - cloudFunction
+          - cloudRun
+        allow_empty_object: true
+        description: |
+          Only valid when networkEndpointType is "SERVERLESS".
+          Only one of cloud_run, app_engine or cloud_function may be set.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'service'
+            description: |
+              Optional serving service.
+              The service name must be 1-63 characters long, and comply with RFC1035.
+              Example value: "default", "my-service".
+          - !ruby/object:Api::Type::String
+            name: 'version'
+            description: |
+              Optional serving version.
+              The version must be 1-63 characters long, and comply with RFC1035.
+              Example value: "v1", "v2".
+          - !ruby/object:Api::Type::String
+            name: 'urlMask'
+            description: |
+              A template to parse service and version fields from a request URL.
+              URL mask allows for routing to multiple App Engine services without
+              having to create multiple Network Endpoint Groups and backend services.
+              
+              For example, the request URLs "foo1-dot-appname.appspot.com/v1" and
+              "foo1-dot-appname.appspot.com/v2" can be backed by the same Serverless NEG with
+              URL mask "-dot-appname.appspot.com/". The URL mask will parse
+              them to { service = "foo1", version = "v1" } and { service = "foo1", version = "v2" } respectively.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'cloudFunction'
+        exactly_one_of:
+          - appEngine
+          - cloudFunction
+          - cloudRun
+        description: |
+          Only valid when networkEndpointType is "SERVERLESS".
+          Only one of cloud_run, app_engine or cloud_function may be set.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'function'
+            at_least_one_of: 
+              - cloud_function.0.function
+              - cloud_function.0.url_mask
+            description: |
+              A user-defined name of the Cloud Function.
+              The function name is case-sensitive and must be 1-63 characters long.
+              Example value: "func1".
+          - !ruby/object:Api::Type::String
+            name: 'urlMask'
+            at_least_one_of: 
+              - cloud_function.0.function
+              - cloud_function.0.url_mask
+            description: |
+              A template to parse function field from a request URL. URL mask allows
+              for routing to multiple Cloud Functions without having to create
+              multiple Network Endpoint Groups and backend services.
+
+              For example, request URLs "mydomain.com/function1" and "mydomain.com/function2"
+              can be backed by the same Serverless NEG with URL mask "/". The URL mask
+              will parse them to { function = "function1" } and { function = "function2" } respectively.
   - !ruby/object:Api::Resource
     name: 'NodeGroup'
     kind: 'compute#NodeGroup'
@@ -10802,6 +11073,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -10925,6 +11197,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -11048,6 +11321,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -11152,6 +11426,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -11256,6 +11531,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -11371,6 +11647,76 @@ objects:
                 - :USE_FIXED_PORT
                 - :USE_NAMED_PORT
                 - :USE_SERVING_PORT
+      - !ruby/object:Api::Type::NestedObject
+        name: 'grpcHealthCheck'
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
+          - grpc_health_check
+        properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The port number for the health check request. 
+                Must be specified if portName and portSpecification are not set 
+                or if port_specification is USE_FIXED_PORT. Valid values are 1 through 65535.
+            - !ruby/object:Api::Type::String
+              name: 'portName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Port name as defined in InstanceGroup#NamedPort#name. If both port and
+                port_name are defined, port takes precedence.
+            - !ruby/object:Api::Type::Enum
+              name: 'portSpecification'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Specifies how port is selected for health checking, can be one of the
+                following values:
+
+                  * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+                  * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+                  * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+                  network endpoint is used for health checking. For other backends, the
+                  port or named port specified in the Backend Service is used for health
+                  checking.
+
+                If not specified, gRPC health check follows behavior specified in `port` and
+                `portName` fields.
+              values:
+                - :USE_FIXED_PORT
+                - :USE_NAMED_PORT
+                - :USE_SERVING_PORT
+            - !ruby/object:Api::Type::String
+              name: 'grpcServiceName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The gRPC service name for the health check. 
+                The value of grpcServiceName has the following meanings by convention:
+                  - Empty serviceName means the overall status of all services at the backend.
+                  - Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
+                The grpcServiceName can only be ASCII.
       - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
         description: |
@@ -13134,7 +13480,7 @@ objects:
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
         # Users were experiencing timeout. Bumping up to 6 minutes.
-        # https://github.com/terraform-providers/terraform-provider-google/issues/718
+        # https://github.com/hashicorp/terraform-provider-google/issues/718
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 6
           update_minutes: 6
@@ -13302,8 +13648,6 @@ objects:
               Toggles the aggregation interval for collecting flow logs. Increasing the
               interval time will reduce the amount of generated flow logs for long
               lasting connections. Default is an interval of 5 seconds per connection.
-              Possible values are INTERVAL_5_SEC, INTERVAL_30_SEC, INTERVAL_1_MIN,
-              INTERVAL_5_MIN, INTERVAL_10_MIN, INTERVAL_15_MIN
             values:
               - :INTERVAL_5_SEC
               - :INTERVAL_30_SEC
@@ -14377,7 +14721,7 @@ objects:
               description: |
                 IP address of the interface in the external VPN gateway.
                 Only IPv4 is supported. This IP address can be either from
-                your on-premise gateway or another Cloud provider’s VPN gateway,
+                your on-premise gateway or another Cloud provider's VPN gateway,
                 it cannot be an IP address from Google Compute Engine.
   - !ruby/object:Api::Resource
     name: 'UrlMap'

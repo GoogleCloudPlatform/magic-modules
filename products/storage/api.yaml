@@ -300,8 +300,8 @@ objects:
                       description: |
                         Objects having any of the storage classes specified by
                         this condition will be matched. Values include
-                        MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, STANDARD,
-                        and DURABLE_REDUCED_AVAILABILITY.
+                        MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, ARCHIVE,
+                        STANDARD, and DURABLE_REDUCED_AVAILABILITY.
                       item_type: Api::Type::String
                     - !ruby/object:Api::Type::Integer
                       name: 'numNewerVersions'
@@ -359,16 +359,17 @@ objects:
           The bucket's default storage class, used whenever no storageClass is
           specified for a newly-created object. This defines how objects in the
           bucket are stored and determines the SLA and the cost of storage.
-          Values include MULTI_REGIONAL, REGIONAL, STANDARD, NEARLINE, COLDLINE,
-          and DURABLE_REDUCED_AVAILABILITY. If this value is not specified when
-          the bucket is created, it will default to STANDARD. For more
-          information, see storage classes.
+          Values include MULTI_REGIONAL, REGIONAL, STANDARD, NEARLINE,
+          COLDLINE, ARCHIVE, and DURABLE_REDUCED_AVAILABILITY. If this value is
+          not specified when the bucket is created, it will default to 
+          STANDARD. For more information, see storage classes.
         values:
           - :MULTI_REGIONAL
           - :REGIONAL
           - :STANDARD
           - :NEARLINE
           - :COLDLINE
+          - :ARCHIVE
           - :DURABLE_REDUCED_AVAILABILITY
       - !ruby/object:Api::Type::Time
         name: 'timeCreated'

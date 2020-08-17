@@ -338,7 +338,7 @@ func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
+
 func TestAccContainerCluster_withReleaseChannelEnabled(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
@@ -414,6 +414,8 @@ func TestAccContainerCluster_withReleaseChannelEnabledDefaultVersion(t *testing.
 }
 
 func TestAccContainerCluster_withInvalidReleaseChannel(t *testing.T) {
+	// This is essentially a unit test, no interactions
+	skipIfVcr(t)
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 	vcrTest(t, resource.TestCase{
@@ -429,6 +431,7 @@ func TestAccContainerCluster_withInvalidReleaseChannel(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccContainerCluster_withTelemetryEnabled(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
@@ -933,6 +936,8 @@ func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 }
 
 func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
+	// KMS key has calculated next rotation time
+	skipIfVcr(t)
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
@@ -1603,6 +1608,8 @@ func TestAccContainerCluster_withAutoscalingProfile(t *testing.T) {
 }
 
 func TestAccContainerCluster_withInvalidAutoscalingProfile(t *testing.T) {
+	// This is essentially a unit test, no interactions
+	skipIfVcr(t)
 	t.Parallel()
 	clusterName := fmt.Sprintf("cluster-test-%s", randString(t, 10))
 	vcrTest(t, resource.TestCase{
@@ -1619,6 +1626,8 @@ func TestAccContainerCluster_withInvalidAutoscalingProfile(t *testing.T) {
 }
 
 func TestAccContainerCluster_sharedVpc(t *testing.T) {
+	// Multiple fine-grained resources
+	skipIfVcr(t)
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
@@ -2042,9 +2051,6 @@ resource "google_container_cluster" "primary" {
 
   enable_legacy_abac      = true
 
-  logging_service    = "logging.googleapis.com"
-  monitoring_service = "monitoring.googleapis.com"
-
   resource_labels = {
     created-by = "terraform"
   }
@@ -2076,9 +2082,6 @@ resource "google_container_cluster" "primary" {
   ]
 
   enable_legacy_abac      = false
-
-  logging_service    = "none"
-  monitoring_service = "none"
 
   resource_labels = {
     created-by = "terraform-update"
@@ -2288,7 +2291,7 @@ resource "google_container_cluster" "with_network_policy_enabled" {
 `, clusterName)
 }
 
-<% unless version == 'ga' -%>
+
 func testAccContainerCluster_withReleaseChannelEnabled(clusterName string, channel string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_release_channel" {
@@ -2319,6 +2322,7 @@ resource "google_container_cluster" "with_release_channel" {
 `, clusterName, channel)
 }
 
+<% unless version == 'ga' -%>
 func testAccContainerCluster_withTelemetryEnabled(clusterName string, telemetryType string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_cluster_telemetry" {
