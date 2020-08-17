@@ -55,11 +55,6 @@ func computeInstanceFromMachineImageSchema() map[string]*schema.Schema {
 		// template, so remove defaults.
 		field.Default = nil
 
-		// Make non-required fields computed since they'll be set by the template.
-		// Leave deprecated and removed fields alone because we don't set them.
-		if !field.Required && !(field.Deprecated != "" || field.Removed != "") {
-			field.Computed = true
-		}
 	})
 
 	s["source_machine_image"] = &schema.Schema{
@@ -181,8 +176,21 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *Config,
 			return nil, err
 		}
 		disks = append(disks, bootDisk)
+	} else {
+		// boot disk was not overridden, so use the one from the machine image
+		for _, disk := range mi.SourceInstanceProperties.Disks {
+			if disk.Boot {
+				newdisk := &computeBeta.AttachedDisk{
+					Source:     disk.Source,
+					AutoDelete: disk.AutoDelete,
+					Type:       disk.Type,
+					DeviceName: disk.DeviceName,
+				}
+				disks = append(disks, newdisk)
+				break
+			}
+		}
 	}
-	// boot disk was not overridden, so no OP and use the one defined in the machine image
 
 	if _, hasScratchDisk := d.GetOk("scratch_disk"); hasScratchDisk {
 		scratchDisks, err := expandScratchDisks(d, config, project)
@@ -190,8 +198,20 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *Config,
 			return nil, err
 		}
 		disks = append(disks, scratchDisks...)
-	} 
-	// scratch disks were not overridden, no OP again and use the config in the machine image
+	} else {
+		// scratch disks were not overridden, so use the ones from the machine image
+		for _, disk := range mi.SourceInstanceProperties.Disks {
+			if disk.Type == "SCRATCH" {
+				newdisk := &computeBeta.AttachedDisk{
+					Source:     disk.Source,
+					AutoDelete: disk.AutoDelete,
+					Type:       disk.Type,
+					DeviceName: disk.DeviceName,
+				}
+				disks = append(disks, newdisk)
+			}
+		}
+	}
 
 	attachedDisksCount := d.Get("attached_disk.#").(int)
 	if attachedDisksCount > 0 {
@@ -204,8 +224,20 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *Config,
 
 			disks = append(disks, disk)
 		}
-	} 
-	// attached disks were not overridden, no OP again and use the one define in the machine image.
+	} else {
+		// attached disks were not overridden, so use the ones from the machine image
+		for _, disk := range mi.SourceInstanceProperties.Disks {
+			if !disk.Boot && disk.Type != "SCRATCH" {
+				newdisk := &computeBeta.AttachedDisk{
+					Source:     disk.Source,
+					AutoDelete: disk.AutoDelete,
+					Type:       disk.Type,
+					DeviceName: disk.DeviceName,
+				}
+				disks = append(disks, newdisk)
+			}
+		}
+	}
 
 	return disks, nil
 }
