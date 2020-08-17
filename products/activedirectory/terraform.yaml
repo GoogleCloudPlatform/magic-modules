@@ -44,6 +44,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true  
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       update_encoder: templates/terraform/update_encoder/active_directory_domain_trust.go.erb
+      # Delete function needs to be modified any time when the resource schema is edited
       custom_delete: templates/terraform/custom_delete/active_directory_domain_trust.go.erb
       encoder: templates/terraform/encoders/active_directory_domain_trust.go.erb
       decoder: templates/terraform/decoders/unwrap_resource.go.erb

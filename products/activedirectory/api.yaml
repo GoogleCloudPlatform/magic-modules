@@ -113,6 +113,7 @@ objects:
       update_verb: :POST
       update_url: projects/{{project}}/locations/global/domains/{{domain}}:reconfigureTrust
       delete_verb: :POST
+      # Resource custom delete function needs to be modified any time when the resource schema is edited
       delete_url: projects/{{project}}/locations/global/domains/{{domain}}:detachTrust
       self_link: projects/{{project}}/locations/global/domains/{{domain}}
       description: Adds a trust between Active Directory domains
