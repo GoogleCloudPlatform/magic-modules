@@ -295,3 +295,9 @@ objects:
               This field will be honored on a best effort basis.
             
               If this parameter is 0, a default value of 5 is used.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableMessageOrdering'
+        description: |
+          If `true`, messages published with the same orderingKey in PubsubMessage will be delivered to
+          the subscribers in the order in which they are received by the Pub/Sub system. Otherwise, they
+          may be delivered in any order.
