@@ -122,7 +122,7 @@ resource "google_sql_database_instance" "postgres" {
 ```
 
 ### Private IP Instance
-~> **NOTE**: For private IP instance setup, note that the `google_sql_database_instance` does not actually interpolate values from `google_service_networking_connection`. You must explicitly add a `depends_on`reference as shown below.
+~> **NOTE:** For private IP instance setup, note that the `google_sql_database_instance` does not actually interpolate values from `google_service_networking_connection`. You must explicitly add a `depends_on`reference as shown below.
 
 ```hcl
 resource "google_compute_network" "private_network" {
@@ -282,6 +282,7 @@ The optional `settings.backup_configuration` subblock supports:
 
 * `start_time` - (Optional) `HH:MM` format time indicating when backup
     configuration starts.
+* `point_in_time_recovery_enabled` - (Optional) True if Point-in-time recovery is enabled. Will restart database if enabled after instance creation. 
 
 The optional `settings.ip_configuration` subblock supports:
 
@@ -390,7 +391,7 @@ instance.
   * A `PRIVATE` address is an address for an instance which has been configured to use private networking see: [Private IP](https://cloud.google.com/sql/docs/mysql/private-ip).
 
 * `first_ip_address` - The first IPv4 address of any type assigned. This is to
-support accessing the [first address in the list in a terraform output](https://github.com/terraform-providers/terraform-provider-google/issues/912)
+support accessing the [first address in the list in a terraform output](https://github.com/hashicorp/terraform-provider-google/issues/912)
 when the resource is configured with a `count`.
 
 * `public_ip_address` - The first public (`PRIMARY`) IPv4 address assigned. This is

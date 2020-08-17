@@ -49,9 +49,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           A Cloud Pub/Sub topic in this repo's project. Values are of the form
           `projects/<project>/topics/<topic>` or `<topic>` (where the topic will
           be inferred).
+        set_hash_func: 'resourceSourceRepoRepositoryPubSubConfigsHash'
       pubsubConfigs.serviceAccountEmail: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/source_repo_repository.go.erb
       update_encoder: templates/terraform/update_encoder/source_repo_repository.erb
       post_create: templates/terraform/post_create/source_repo_repository_update.go.erb
 # This is for copying files over

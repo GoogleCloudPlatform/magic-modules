@@ -526,7 +526,25 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 					},
 				},
 			},
-
+<% unless version == 'ga' -%>
+			"confidential_instance_config": {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				Description: `The Confidential VM config being used by the instance. on_host_maintenance has to be set to TERMINATE or this will fail to create.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enable_confidential_compute": {
+							Type:         schema.TypeBool,
+							Required:     true,
+							Description:  `Defines whether the instance should have confidential compute enabled.`,
+						},
+					},
+				},
+			},
+<% end -%>
 			"guest_accelerator": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -599,7 +617,7 @@ func resourceComputeInstanceTemplateSourceImageCustomizeDiff(diff *schema.Resour
 			}
 			// project must be retrieved once we know there is a diff to resolve, otherwise it will
 			// attempt to retrieve project during `plan` before all calculated fields are ready
-			// see https://github.com/terraform-providers/terraform-provider-google/issues/2878
+			// see https://github.com/hashicorp/terraform-provider-google/issues/2878
 			project, err := getProjectFromDiff(diff, config)
 			if err != nil {
 				return err
@@ -835,7 +853,10 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		Scheduling:        scheduling,
 		ServiceAccounts:   expandServiceAccounts(d.Get("service_account").([]interface{})),
 		Tags:              resourceInstanceTags(d),
-		ShieldedVmConfig:  expandShieldedVmConfigs(d),
+		<% unless version == 'ga' -%>
+		ConfidentialInstanceConfig:  expandConfidentialInstanceConfig(d),
+		<% end -%>
+		ShieldedInstanceConfig:  expandShieldedVmConfigs(d),
 		DisplayDevice:     expandDisplayDevice(d),
 	}
 
@@ -1199,10 +1220,18 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		}
 	}
 	if instanceTemplate.Properties.ShieldedVmConfig != nil {
-		if err = d.Set("shielded_instance_config", flattenShieldedVmConfig(instanceTemplate.Properties.ShieldedVmConfig)); err != nil {
+		if err = d.Set("shielded_instance_config", flattenShieldedVmConfig(instanceTemplate.Properties.ShieldedInstanceConfig)); err != nil {
 			return fmt.Errorf("Error setting shielded_instance_config: %s", err)
 		}
 	}
+
+	<% unless version == 'ga' -%>
+	if instanceTemplate.Properties.ConfidentialInstanceConfig != nil {
+		if err = d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(instanceTemplate.Properties.ConfidentialInstanceConfig)); err != nil {
+			return fmt.Errorf("Error setting confidential_instance_config: %s", err)
+		}
+	}
+	<% end -%>
 	if instanceTemplate.Properties.DisplayDevice != nil {
 		if err = d.Set("enable_display", flattenEnableDisplay(instanceTemplate.Properties.DisplayDevice)); err != nil {
 			return fmt.Errorf("Error setting enable_display: %s", err)

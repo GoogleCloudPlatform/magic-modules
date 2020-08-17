@@ -119,6 +119,7 @@ func resourceAppEngineApplication() *schema.Resource {
 			"iap": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				MaxItems:    1,
 				Description: `Settings for enabling Cloud Identity Aware Proxy`,
 				Elem: &schema.Resource{
@@ -254,7 +255,7 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 	}
 	err = d.Set("url_dispatch_rule", dispatchRules)
 	if err != nil {
-		return fmt.Errorf("Error setting dispatch rules in state. This is a bug, please report it at https://github.com/terraform-providers/terraform-provider-google/issues. Error is:\n%s", err.Error())
+		return fmt.Errorf("Error setting dispatch rules in state. This is a bug, please report it at https://github.com/hashicorp/terraform-provider-google/issues. Error is:\n%s", err.Error())
 	}
 	featureSettings, err := flattenAppEngineApplicationFeatureSettings(app.FeatureSettings)
 	if err != nil {
@@ -262,7 +263,7 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 	}
 	err = d.Set("feature_settings", featureSettings)
 	if err != nil {
-		return fmt.Errorf("Error setting feature settings in state. This is a bug, please report it at https://github.com/terraform-providers/terraform-provider-google/issues. Error is:\n%s", err.Error())
+		return fmt.Errorf("Error setting feature settings in state. This is a bug, please report it at https://github.com/hashicorp/terraform-provider-google/issues. Error is:\n%s", err.Error())
 	}
 	iap, err := flattenAppEngineApplicationIap(d, app.Iap)
 	if err != nil {
@@ -270,7 +271,7 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 	}
 	err = d.Set("iap", iap)
 	if err != nil {
-		return fmt.Errorf("Error setting iap in state. This is a bug, please report it at https://github.com/terraform-providers/terraform-provider-google/issues. Error is:\n%s", err.Error())
+		return fmt.Errorf("Error setting iap in state. This is a bug, please report it at https://github.com/hashicorp/terraform-provider-google/issues. Error is:\n%s", err.Error())
 	}
 	return nil
 }

@@ -43,20 +43,22 @@ groups or customers/{customer_id} for Google Groups.`,
 func dataSourceGoogleCloudIdentityGroupsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	resp, err := config.clientCloudIdentity.Groups.List().Parent(d.Get("parent").(string)).View("FULL").Do()
+	result := []map[string]interface{}{}
+	err := config.clientCloudIdentity.Groups.List().Parent(d.Get("parent").(string)).View("FULL").Pages(config.context, func(resp *cloudidentity.ListGroupsResponse) error {
+		for _, group := range resp.Groups {
+			result = append(result, map[string]interface{}{
+				"name":         group.Name,
+				"display_name": group.DisplayName,
+				"labels":       group.Labels,
+				"description":  group.Description,
+				"group_key":    flattenCloudIdentityGroupsEntityKey(group.GroupKey),
+			})
+		}
+
+		return nil
+	})
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("CloudIdentityGroups %q", d.Id()))
-	}
-
-	result := []map[string]interface{}{}
-	for _, group := range resp.Groups {
-		result = append(result, map[string]interface{}{
-			"name":         group.Name,
-			"display_name": group.DisplayName,
-			"labels":       group.Labels,
-			"description":  group.Description,
-			"group_key":    flattenCloudIdentityGroupsEntityKey(group.GroupKey),
-		})
 	}
 
 	d.Set("groups", result)

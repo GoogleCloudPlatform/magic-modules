@@ -127,6 +127,8 @@ func TestAccStorageBucket_customAttributes(t *testing.T) {
 }
 
 func TestAccStorageBucket_lifecycleRulesMultiple(t *testing.T) {
+	// Multiple fine-grained resources
+	skipIfVcr(t)
 	t.Parallel()
 
 	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", randInt(t))
@@ -1267,6 +1269,15 @@ resource "google_storage_bucket" "bucket" {
     }
     condition {
       num_newer_versions = 10
+    }
+  }
+  lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "ARCHIVE"
+    }
+    condition {
+      with_state = "ARCHIVED"
     }
   }
 }

@@ -229,6 +229,7 @@ module Provider
       return if data.object.skip_sweeper ||
                 data.object.custom_code.custom_delete ||
                 data.object.custom_code.pre_delete ||
+                data.object.custom_code.post_delete ||
                 data.object.skip_delete
 
       name = data.object.filename_override || data.object.name.underscore

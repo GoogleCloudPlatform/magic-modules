@@ -182,6 +182,7 @@ objects:
         description: |
           For privately visible zones, the set of Virtual Private Cloud
           resources that the zone is visible from.
+        send_empty_value: true
         properties:
           - !ruby/object:Api::Type::Array
             name: 'networks'

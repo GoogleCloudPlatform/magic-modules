@@ -148,7 +148,7 @@ func resourceStorageBucketObject() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Computed:    true,
-				Description: `The StorageClass of the new bucket object. Supported values include: MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE. If not provided, this defaults to the bucket's default storage class or to a standard class.`,
+				Description: `The StorageClass of the new bucket object. Supported values include: MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, ARCHIVE. If not provided, this defaults to the bucket's default storage class or to a standard class.`,
 			},
 
 			"metadata": {
@@ -170,6 +170,12 @@ func resourceStorageBucketObject() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: `The name of the object. Use this field in interpolations with google_storage_object_acl to recreate google_storage_object_acl resources when your google_storage_bucket_object is recreated.`,
+			},
+
+			"media_link": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `A url reference to download this object.`,
 			},
 		},
 	}
@@ -269,6 +275,7 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	d.Set("self_link", res.SelfLink)
 	d.Set("output_name", res.Name)
 	d.Set("metadata", res.Metadata)
+	d.Set("media_link", res.MediaLink)
 
 	d.SetId(objectGetId(res))
 
