@@ -236,7 +236,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	client.Timeout = c.synchronousTimeout()
 
 	c.client = client
-	c.userAgent = userAgent
 	c.context = ctx
 
 	// This base path and some others below need the version and possibly more of the path
@@ -560,7 +559,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	c.clientStorageTransfer.UserAgent = userAgent
+	c.clientStorageTransfer.UserAgent = c.userAgent
 	c.clientStorageTransfer.BasePath = storageTransferClientBasePath
 
 	healthcareClientBasePath := removeBasePathVersion(c.HealthcareBasePath)
