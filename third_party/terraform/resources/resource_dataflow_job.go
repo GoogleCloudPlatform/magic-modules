@@ -280,11 +280,6 @@ func resourceDataflowJobRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("template_gcs_path", optionsMap["templateLocation"])
 	d.Set("temp_gcs_location", optionsMap["tempLocation"])
 
-	if _, ok := dataflowTerminalStatesMap[job.CurrentState]; ok {
-		log.Printf("[DEBUG] Removing resource '%s' because it is in state %s.\n", job.Name, job.CurrentState)
-		d.SetId("")
-		return nil
-	}
 	d.SetId(job.Id)
 
 	return nil
