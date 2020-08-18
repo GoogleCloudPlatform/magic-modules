@@ -102,8 +102,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # converting IAM roles set in state to their primitive equivalents
         # before comparison.
         custom_expand: "templates/terraform/custom_expand/bigquery_access_role.go.erb"
+      iamMember: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
+      userByEmail: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
+      groupByEmail: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
+      specialGroup: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
+      domain: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      constants: templates/terraform/constants/bigquery_dataset_access.go
+      constants: templates/terraform/constants/bigquery_dataset_access.go.erb
+      post_create: templates/terraform/post_create/bigquery_dataset_access.go.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/bigquery_dataset_access.go.erb
   Job: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/jobs/{{job_id}}"]
     skip_delete: true
