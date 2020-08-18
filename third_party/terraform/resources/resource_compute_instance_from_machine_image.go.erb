@@ -34,7 +34,7 @@ func computeInstanceFromMachineImageSchema() map[string]*schema.Schema {
 
 	for _, field := range []string{"boot_disk", "machine_type", "network_interface"} {
 		// The user can set these fields as an override, but doesn't need to -
-		// the template values will be used if they're unset.
+		// the machine image values will be used if they're unset.
 		s[field].Required = false
 		s[field].Optional = true
 	}
@@ -52,7 +52,7 @@ func computeInstanceFromMachineImageSchema() map[string]*schema.Schema {
 
 	recurseOnSchema(s, func(field *schema.Schema) {
 		// We don't want to accidentally use default values to override the instance
-		// template, so remove defaults.
+		// machine image, so remove defaults.
 		field.Default = nil
 
 	})
@@ -67,17 +67,6 @@ func computeInstanceFromMachineImageSchema() map[string]*schema.Schema {
 	return s
 }
 
-// Already declared in resource_compute_instance_from_instance_template.go
-// func recurseOnSchema(s map[string]*schema.Schema, f func(*schema.Schema)) {
-// 	for _, field := range s {
-// 		f(field)
-// 		if e := field.Elem; e != nil {
-// 			if r, ok := e.(*schema.Resource); ok {
-// 				recurseOnSchema(r.Schema, f)
-// 			}
-// 		}
-// 	}
-// }
 
 func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)

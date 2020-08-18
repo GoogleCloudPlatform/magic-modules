@@ -26,7 +26,7 @@ This resource is specifically to create a compute instance from a given
 
 ```hcl
 resource "google_compute_instance_from_machine_image" "tpl" {
-  name = "instance-from-template"
+  name = "instance-from-machine-image"
   zone = "us-central1-a"
 
   source_machine_image = "projects/PROJECT-ID/global/machineImages/NAME"
@@ -46,8 +46,8 @@ The following arguments are supported:
 * `name` - (Required) A unique name for the resource, required by GCE.
     Changing this forces a new resource to be created.
 
-* `source_machine_image` - (Required) Name or self link of an instance
-  template to create the instance based on.
+* `source_machine_image` - (Required) Name or self link of a machine
+  image to create the instance based on.
 
 - - -
 
@@ -55,7 +55,7 @@ The following arguments are supported:
   set, the provider zone is used.
 
 In addition to these, all arguments from `google_compute_instance` are supported
-as a way to override the properties in the template. All exported attributes
+as a way to override the properties in the machine image. All exported attributes
 from `google_compute_instance` are likewise exported here.
 
 ## Timeouts
@@ -66,4 +66,3 @@ This resource provides the following
 - `create` - Default is 6 minutes.
 - `update` - Default is 6 minutes.
 - `delete` - Default is 6 minutes.
-

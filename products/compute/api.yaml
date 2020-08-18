@@ -7193,7 +7193,6 @@ objects:
               customer-supplied encryption key that protects this resource.
             output: true
           - !ruby/object:Api::Type::String
-            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
             name: 'kmsKeyName'
             output: true
             description: |
