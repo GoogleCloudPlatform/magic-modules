@@ -32,6 +32,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "ad-domain"
         vars:
           name: "myorg"
+          domain_name: name
   DomainTrust: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/locations/global/domains/{{domain}}/{{target_domain_name}}"
     import_format: ["projects/{{project}}/locations/global/domains/{{domain}}/{{target_domain_name}}"]
