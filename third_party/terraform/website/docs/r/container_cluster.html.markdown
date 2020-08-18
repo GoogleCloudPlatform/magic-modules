@@ -792,9 +792,9 @@ The `workload_metadata_config` block supports:
 
 The `kubelet_config` block supports:
 
-* `cpu_manager_policy` - (Optional) The CPU management policy on the node. See
+* `cpu_manager_policy` - (Required) The CPU management policy on the node. See
 [K8S CPU Management Policies](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/).
-One of `"none"` or `"static"`. Defaults to `none` when unset.
+One of `"none"` or `"static"`. Defaults to `none` when `kubelet_config` is unset.
 
 * `cpu_cfs_quota` - (Optional) If true, enables CPU CFS quota enforcement for
 containers that specify CPU limits.
@@ -805,8 +805,8 @@ such as `"300ms"`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m",
 "h". The value must be a positive duration.
 
 -> Note: At the time of writing (2020/08/18) the GKE API rejects the `none`
-value and accepts an invalid `default` value. While this remains true, not
-specifying the `kubelet_config` block should be the equivalent of specifying
+value and accepts an invalid `default` value instead. While this remains true,
+not specifying the `kubelet_config` block should be the equivalent of specifying
 `none`.
 
 The `linux_node_config` block supports:

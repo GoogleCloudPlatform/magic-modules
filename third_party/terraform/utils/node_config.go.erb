@@ -262,7 +262,7 @@ func schemaNodeConfig() *schema.Schema {
 						Schema: map[string]*schema.Schema{
 							"cpu_manager_policy": {
 								Type:         schema.TypeString,
-								Optional:     true,
+								Required:     true,
 								ValidateFunc: validation.StringInSlice([]string{"static", "none"}, false),
 							},
 							"cpu_cfs_quota": {
