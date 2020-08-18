@@ -261,7 +261,7 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "default", "200us", true),
+				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "static", "200us", true),
 			},
 			{
 				ResourceName:      "google_container_node_pool.with_kubelet_config",
