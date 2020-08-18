@@ -24,13 +24,13 @@ fi
 if [[ -z "${GOPATH}" ]]; then
   echo "Skipping Terraform as GOPATH could not be determined"
 else
-    if [ ! -d "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google" ]; then
-        git clone https://github.com/terraform-providers/terraform-provider-google.git \
-            $GOPATH/src/github.com/terraform-providers/terraform-provider-google
+    if [ ! -d "${GOPATH}/src/github.com/hashicorp/terraform-provider-google" ]; then
+        git clone https://github.com/hashicorp/terraform-provider-google.git \
+            $GOPATH/src/github.com/hashicorp/terraform-provider-google
     fi
-    if [ ! -d "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google-beta" ]; then
-        git clone https://github.com/terraform-providers/terraform-provider-google-beta.git \
-            $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta
+    if [ ! -d "${GOPATH}/src/github.com/hashicorp/terraform-provider-google-beta" ]; then
+        git clone https://github.com/hashicorp/terraform-provider-google-beta.git \
+            $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
     fi
 fi
 

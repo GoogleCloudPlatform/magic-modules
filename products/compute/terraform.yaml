@@ -346,6 +346,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           key_name: "test-key"
           backend_name: "my-backend-service"
+          igm_name: "my-webservers"
         skip_test: true
     properties:
       backendService: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -404,7 +405,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
   Disk: !ruby/object:Overrides::Terraform::ResourceOverride
     # Larger disks were timing out at creation. Bumping up to 5 minutes.
-    # https://github.com/terraform-providers/terraform-provider-google/issues/703
+    # https://github.com/hashicorp/terraform-provider-google/issues/703
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 5
     properties:
@@ -724,6 +725,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           forwarding_rule_name: "global-rule"
           http_proxy_name: "target-proxy"
           backend_service_name: "backend"
+          igm_name: "igm-internal"
     properties:
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -883,6 +885,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           health_check_name: "http2-health-check"
       - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_grpc"
+        primary_resource_id: "grpc-health-check"
+        vars:
+          health_check_name: "grpc-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_grpc_full"
+        primary_resource_id: "grpc-health-check"
+        vars:
+          health_check_name: "grpc-health-check"
+      - !ruby/object:Provider::Terraform::Examples
         name: "health_check_with_logging"
         primary_resource_id: "health-check-with-logging"
         min_version: beta
@@ -907,6 +919,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       tcpHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
       sslHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'portDiffSuppress'
+      grpcHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
   Image: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
@@ -948,7 +962,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     # Users were experiencing timeouts. Bumping up to 6 minutes.
-    # https://github.com/terraform-providers/terraform-provider-google/issues/852
+    # https://github.com/hashicorp/terraform-provider-google/issues/852
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
       update_minutes: 6
@@ -1694,6 +1708,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "http2-region-health-check"
         vars:
           health_check_name: "http2-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_grpc"
+        primary_resource_id: "grpc-region-health-check"
+        vars:
+          health_check_name: "grpc-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_grpc_full"
+        primary_resource_id: "grpc-region-health-check"
+        vars:
+          health_check_name: "grpc-region-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/health_check_type.erb
       resource_definition: templates/terraform/resource_definition/health_check.erb
@@ -1719,6 +1743,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       tcpHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
       sslHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'portDiffSuppress'
+      grpcHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
   RegionUrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
@@ -2098,6 +2124,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "managed_ssl_certificate_recreation"
         primary_resource_id: "default"
+        # Random provider
+        skip_vcr: true
         min_version: beta
     description: |
       {{description}}
@@ -2270,7 +2298,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
   Subnetwork: !ruby/object:Overrides::Terraform::ResourceOverride
     # Users were experiencing timeout. Bumping up to 6 minutes.
-    # https://github.com/terraform-providers/terraform-provider-google/issues/718
+    # https://github.com/hashicorp/terraform-provider-google/issues/718
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
       update_minutes: 6
@@ -2531,6 +2559,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "ha_vpn_gateway_gcp_to_gcp"
         primary_resource_id: "ha_gateway1"
+        # Multiple fine-grained resources
+        skip_vcr: true
         vars:
           ha_vpn_gateway1_name: "ha-vpn-1"
           network1_name: "network1"
@@ -2557,6 +2587,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "external_vpn_gateway"
         primary_resource_id: "external_gateway"
+        # Multiple fine-grained resources
+        skip_vcr: true
         vars:
           ha_vpn_gateway_name: "ha-vpn"
           network_name: "network"

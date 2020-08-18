@@ -1562,8 +1562,8 @@ objects:
                       - !ruby/object:Api::Type::Integer
                         name: max
                         at_least_one_of:
-                          - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.min
-                          - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.max
+                          - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.min
+                          - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.max
                         description: |
                           max value for the range (inclusive). If not given,
                           will be set to "infinity", defining an open range
@@ -1990,4 +1990,3 @@ objects:
         This field allows time series to be associated with the intersection of this metric
         type and the monitored resource types in this list.
       item_type: Api::Type::String
-

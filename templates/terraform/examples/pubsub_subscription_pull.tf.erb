@@ -22,4 +22,6 @@ resource "google_pubsub_subscription" "<%= ctx[:primary_resource_id] %>" {
   retry_policy {
     minimum_backoff = "10s"
   }
+
+  enable_message_ordering    = false
 }

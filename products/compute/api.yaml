@@ -19,10 +19,10 @@ display_name: Compute Engine
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://www.googleapis.com/compute/v1/
+    base_url: https://compute.googleapis.com/compute/v1/
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://www.googleapis.com/compute/beta/
+    base_url: https://compute.googleapis.com/compute/beta/
 scopes:
   - https://www.googleapis.com/auth/compute
 apis_required:
@@ -2673,7 +2673,7 @@ objects:
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
         # Larger disks were timing out at creation. Bumping up to 5 minutes.
-        # https://github.com/terraform-providers/terraform-provider-google/issues/703
+        # https://github.com/hashicorp/terraform-provider-google/issues/703
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
@@ -4188,6 +4188,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4311,6 +4312,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4434,6 +4436,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -4538,6 +4541,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -4642,6 +4646,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4758,6 +4763,76 @@ objects:
                 - :USE_NAMED_PORT
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
+        name: 'grpcHealthCheck'
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
+          - grpc_health_check
+        properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The port number for the health check request. 
+                Must be specified if portName and portSpecification are not set 
+                or if port_specification is USE_FIXED_PORT. Valid values are 1 through 65535.
+            - !ruby/object:Api::Type::String
+              name: 'portName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Port name as defined in InstanceGroup#NamedPort#name. If both port and
+                port_name are defined, port takes precedence.
+            - !ruby/object:Api::Type::Enum
+              name: 'portSpecification'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Specifies how port is selected for health checking, can be one of the
+                following values:
+
+                  * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+                  * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+                  * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+                  network endpoint is used for health checking. For other backends, the
+                  port or named port specified in the Backend Service is used for health
+                  checking.
+
+                If not specified, gRPC health check follows behavior specified in `port` and
+                `portName` fields.
+              values:
+                - :USE_FIXED_PORT
+                - :USE_NAMED_PORT
+                - :USE_SERVING_PORT
+            - !ruby/object:Api::Type::String
+              name: 'grpcServiceName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The gRPC service name for the health check. 
+                The value of grpcServiceName has the following meanings by convention:
+                  - Empty serviceName means the overall status of all services at the backend.
+                  - Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
+                The grpcServiceName can only be ASCII.
+      - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
         description: |
           Configure logging on this health check.
@@ -4768,6 +4843,7 @@ objects:
               description: |
                 Indicates whether or not to export logs. This is false by default,
                 which means no health check logging will be done.
+              default_value: false
   - !ruby/object:Api::Resource
     name: 'InstanceTemplate'
     kind: 'compute#instanceTemplate'
@@ -5571,6 +5647,32 @@ objects:
           The ID value of the disk used to create this image. This value may
           be used to determine whether the image was taken from the current
           or a previous instance of a given disk name.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'sourceImage'
+        description: |
+          URL of the source image used to create this image. In order to create an image, you must provide the full or partial
+          URL of one of the following:
+
+          The selfLink URL
+          This property
+          The rawDisk.source URL
+          The sourceDisk URL
+        resource: 'Image'
+        imports: 'selfLink'
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'sourceSnapshot'
+        description: |
+          URL of the source snapshot used to create this image.
+
+          In order to create an image, you must provide the full or partial URL of one of the following:
+
+          The selfLink URL
+          This property
+          The sourceImage URL
+          The rawDisk.source URL
+          The sourceDisk URL
+        resource: 'Snapshot'
+        imports: 'selfLink'
       - !ruby/object:Api::Type::Enum
         name: 'sourceType'
         description: |
@@ -5610,7 +5712,7 @@ objects:
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
         # Users were experiencing timeouts. Bumping up to 6 minutes.
-        # https://github.com/terraform-providers/terraform-provider-google/issues/852
+        # https://github.com/hashicorp/terraform-provider-google/issues/852
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 6
           update_minutes: 6
@@ -10972,6 +11074,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -11095,6 +11198,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -11218,6 +11322,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -11322,6 +11427,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -11426,6 +11532,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -11541,6 +11648,76 @@ objects:
                 - :USE_FIXED_PORT
                 - :USE_NAMED_PORT
                 - :USE_SERVING_PORT
+      - !ruby/object:Api::Type::NestedObject
+        name: 'grpcHealthCheck'
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
+          - grpc_health_check
+        properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The port number for the health check request. 
+                Must be specified if portName and portSpecification are not set 
+                or if port_specification is USE_FIXED_PORT. Valid values are 1 through 65535.
+            - !ruby/object:Api::Type::String
+              name: 'portName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Port name as defined in InstanceGroup#NamedPort#name. If both port and
+                port_name are defined, port takes precedence.
+            - !ruby/object:Api::Type::Enum
+              name: 'portSpecification'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Specifies how port is selected for health checking, can be one of the
+                following values:
+
+                  * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+                  * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+                  * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+                  network endpoint is used for health checking. For other backends, the
+                  port or named port specified in the Backend Service is used for health
+                  checking.
+
+                If not specified, gRPC health check follows behavior specified in `port` and
+                `portName` fields.
+              values:
+                - :USE_FIXED_PORT
+                - :USE_NAMED_PORT
+                - :USE_SERVING_PORT
+            - !ruby/object:Api::Type::String
+              name: 'grpcServiceName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The gRPC service name for the health check. 
+                The value of grpcServiceName has the following meanings by convention:
+                  - Empty serviceName means the overall status of all services at the backend.
+                  - Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
+                The grpcServiceName can only be ASCII.
       - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
         description: |
@@ -13304,7 +13481,7 @@ objects:
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
         # Users were experiencing timeout. Bumping up to 6 minutes.
-        # https://github.com/terraform-providers/terraform-provider-google/issues/718
+        # https://github.com/hashicorp/terraform-provider-google/issues/718
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 6
           update_minutes: 6
@@ -13472,8 +13649,6 @@ objects:
               Toggles the aggregation interval for collecting flow logs. Increasing the
               interval time will reduce the amount of generated flow logs for long
               lasting connections. Default is an interval of 5 seconds per connection.
-              Possible values are INTERVAL_5_SEC, INTERVAL_30_SEC, INTERVAL_1_MIN,
-              INTERVAL_5_MIN, INTERVAL_10_MIN, INTERVAL_15_MIN
             values:
               - :INTERVAL_5_SEC
               - :INTERVAL_30_SEC
@@ -14547,7 +14722,7 @@ objects:
               description: |
                 IP address of the interface in the external VPN gateway.
                 Only IPv4 is supported. This IP address can be either from
-                your on-premise gateway or another Cloud provider’s VPN gateway,
+                your on-premise gateway or another Cloud provider's VPN gateway,
                 it cannot be an IP address from Google Compute Engine.
   - !ruby/object:Api::Resource
     name: 'UrlMap'

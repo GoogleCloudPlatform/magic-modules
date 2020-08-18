@@ -27,6 +27,8 @@
           :version_added: '2.10'
         :valueType:
           :version_added: '2.10'
+      :displayName:
+        :version_added: '2.10'
     :labelExtractors:
       :version_added: '2.10'
     :valueExtractor:

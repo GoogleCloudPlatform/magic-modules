@@ -266,6 +266,8 @@ func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 }
 
 func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
+	// Uses generated time-based rotation time
+	skipIfVcr(t)
 	t.Parallel()
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
