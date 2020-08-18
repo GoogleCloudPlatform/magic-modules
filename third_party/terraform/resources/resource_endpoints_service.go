@@ -1,6 +1,7 @@
 package google
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -149,7 +150,7 @@ func resourceEndpointsService() *schema.Resource {
 	}
 }
 
-func predictServiceId(d *schema.ResourceDiff, meta interface{}) error {
+func predictServiceId(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	if !d.HasChange("openapi_config") && !d.HasChange("grpc_config") && !d.HasChange("protoc_output_base64") {
 		return nil
 	}
