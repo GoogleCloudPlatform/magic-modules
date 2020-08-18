@@ -1,0 +1,23 @@
+resource "google_dlp_job_trigger" "<%= ctx[:primary_resource_id] %>" {
+	parent = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+	description = "asdf"
+	display_name = "asdf"
+	inspect_template_name = "fake"
+
+	trigger {
+		schedule = {
+			reccurence_period_duration = "80000s"
+		}
+	}
+
+	action {
+		save_findings = {
+			output_config = {
+				table = {
+					project_id = "asdf"
+					dataset_id = "asdf"
+				}
+			}
+		}
+	}
+}

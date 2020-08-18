@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Data Loss Prevention
+name: DataLossPrevention
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

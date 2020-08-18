@@ -15,7 +15,14 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   JobTrigger: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{parent}}/jobTriggers/{{name}}"
-
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dlp_job_trigger_basic"
+        primary_resource_id: "basic"
+        vars:
+          trigger: "trigger"
+        test_env_vars:
+          org_id: :ORG_ID
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
