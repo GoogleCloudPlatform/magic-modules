@@ -26,8 +26,9 @@ This resource is specifically to create a compute instance from a given
 
 ```hcl
 resource "google_compute_instance_from_machine_image" "tpl" {
-  name = "instance-from-machine-image"
-  zone = "us-central1-a"
+  provider = google-beta
+  name     = "instance-from-machine-image"
+  zone     = "us-central1-a"
 
   source_machine_image = "projects/PROJECT-ID/global/machineImages/NAME"
 
@@ -57,6 +58,12 @@ The following arguments are supported:
 In addition to these, all arguments from `google_compute_instance` are supported
 as a way to override the properties in the machine image. All exported attributes
 from `google_compute_instance` are likewise exported here.
+
+## Attributes Reference
+
+All exported attributes from `google_compute_instance` are exported here.
+See https://www.terraform.io/docs/providers/google/r/compute_instance.html#attributes-reference
+for details.
 
 ## Timeouts
 

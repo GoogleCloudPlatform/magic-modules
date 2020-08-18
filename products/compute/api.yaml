@@ -7172,6 +7172,11 @@ objects:
           customer-supplied encryption key that protects this resource.
         item_type: Api::Type::String
         output: true
+      - !ruby/object:Api::Type::Boolean
+        name: guestFlush
+        description: |
+          Specify this to create an application consistent machine image by informing the OS to prepare for the snapshot process.
+          Currently only supported on Windows instances using the Volume Shadow Copy Service (VSS).
       - !ruby/object:Api::Type::NestedObject
         name: 'machineImageEncryptionKey'
         description: |
