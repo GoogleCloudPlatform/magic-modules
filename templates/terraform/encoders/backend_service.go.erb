@@ -43,8 +43,12 @@ for _, backendRaw := range backends {
 	if !ok {
 		continue
 	}
-	if strings.Contains(backendGroup.(string), "global/networkEndpointGroups") {
-		// Remove `max_utilization` from any backend that belongs to a global NEG. This field
+	match, err := regexp.MatchString("projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/networkEndpointGroups/(?P<name>[^/]+)", backendGroup.(string))
+	if err != nil {
+		return nil, err
+	}
+	if match || strings.Contains(backendGroup.(string), "global/networkEndpointGroups") {
+		// Remove `max_utilization` from any backend that belongs to a serverless NEG. This field
 		// has a default value and causes API validation errors
 		backend["maxUtilization"] = nil
 	}
