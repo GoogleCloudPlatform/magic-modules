@@ -176,16 +176,13 @@ resource "google_vpc_access_connector" "bar" {
 }
 
 resource "google_app_engine_standard_app_version" "foo" {
-	depends_on = [
-		google_vpc_access_connector.bar
-	]
   project    = google_project_service.project.project
   version_id = "v1"
   service    = "default"
   runtime    = "python38"
 
 	vpc_access_connector {
-		name = "projects/${google_project.my_project.project_id}/locations/us-central1/connectors/bar"
+		name = "${google_vpc_access_connector.bar.id}"
   }
 
   entrypoint {
