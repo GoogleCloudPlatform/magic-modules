@@ -43,14 +43,15 @@ for _, backendRaw := range backends {
 	if !ok {
 		continue
 	}
-	serverlessNegMatchers := [2]*regexp.Regexp{regexp.MustCompile("projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/networkEndpointGroups/(?P<name>[^/]+)"), regexp.MustCompile("projects/(?P<project>[^/]+)/global/networkEndpointGroups/(?P<name>[^/]+)")}
-	for _, regex := range serverlessNegMatchers {
-		if regex.MatchString(backendGroup.(string)) {
-			// Remove `max_utilization` from any backend that belongs to a serverless NEG. This field
-			// has a default value and causes API validation errors
-			backend["maxUtilization"] = nil
-			break
-		}
+
+	match, err := regexp.MatchString("(?:global|regions/[^/]+)/networkEndpointGroups", backendGroup.(string))
+	if err != nil {
+		return nil, err
+	}
+	if match {
+		// Remove `max_utilization` from any backend that belongs to a serverless NEG. This field
+		// has a default value and causes API validation errors
+		backend["maxUtilization"] = nil
 	}
 }
 
