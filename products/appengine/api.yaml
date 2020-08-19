@@ -186,7 +186,7 @@ objects:
     name: 'Service'
     description: |
       A Service resource is a logical component of an application that can share state and communicate in a secure fashion with other services.
-      For example, an application that handles customer requests might include separate services to handle tasks such as backend data analysis or API requests from mobile devices. 
+      For example, an application that handles customer requests might include separate services to handle tasks such as backend data analysis or API requests from mobile devices.
       Each service has a collection of versions that define a specific set of code used to implement the functionality of that service.
     base_url: 'apps/{{project}}/services'
     self_link: 'apps/{{project}}/services/{{id}}'
@@ -269,7 +269,7 @@ objects:
         name: 'id'
         input: true
         description: |
-          Relative name of the version within the service. For example, `v1`. Version names can contain only lowercase letters, numbers, or hyphens. Reserved names,"default", "latest", and any name with the prefix "ah-". 
+          Relative name of the version within the service. For example, `v1`. Version names can contain only lowercase letters, numbers, or hyphens. Reserved names,"default", "latest", and any name with the prefix "ah-".
       - !ruby/object:Api::Type::String
         name: 'runtime'
         description: |
@@ -458,6 +458,16 @@ objects:
             required: true
             description: |
               The format should be a shell command that can be fed to bash -c.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'vpcAccessConnector'
+        description: |
+          Enables VPC connectivity for standard apps.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'name'
+            required: true
+            description: |
+              Full Serverless VPC Access Connector name e.g. /projects/my-project/locations/us-central1/connectors/c1.
       - !ruby/object:Api::Type::Array
         name: 'inboundServices'
         description: |
@@ -568,7 +578,7 @@ objects:
             description: |
               Number of instances to assign to the service at the start.
 
-              **Note:** When managing the number of instances at runtime through the App Engine Admin API or the (now deprecated) Python 2 
+              **Note:** When managing the number of instances at runtime through the App Engine Admin API or the (now deprecated) Python 2
               Modules API set_num_instances() you must use `lifecycle.ignore_changes = ["manual_scaling"[0].instances]` to prevent drift detection.
 
   # StandardAppVersion and FlexibleAppVersion use the same API endpoint (apps.services.versions)
@@ -1451,4 +1461,4 @@ objects:
             name: 'allocations'
             required: true
             description: |
-              Mapping from version IDs within the service to fractional (0.000, 1] allocations of traffic for that version. Each version can be specified only once, but some versions in the service may not have any traffic allocation. Services that have traffic allocated cannot be deleted until either the service is deleted or their traffic allocation is removed. Allocations must sum to 1. Up to two decimal place precision is supported for IP-based splits and up to three decimal places is supported for cookie-based splits.           
+              Mapping from version IDs within the service to fractional (0.000, 1] allocations of traffic for that version. Each version can be specified only once, but some versions in the service may not have any traffic allocation. Services that have traffic allocated cannot be deleted until either the service is deleted or their traffic allocation is removed. Allocations must sum to 1. Up to two decimal place precision is supported for IP-based splits and up to three decimal places is supported for cookie-based splits.
