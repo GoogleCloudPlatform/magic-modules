@@ -157,15 +157,36 @@ resource "google_project_service" "project" {
   disable_dependent_services = false
 }
 
+resource "google_project_service" "vpcaccess_api" {
+  project = google_project.my_project.project_id
+  service = "vpcaccess.googleapis.com"
+
+  disable_dependent_services = false
+}
+
+resource "google_vpc_access_connector" "bar" {
+	depends_on = [
+    google_project_service.vpcaccess_api
+  ]
+	project = google_project.my_project.project_id
+	name = "bar"
+	region = "us-central1"
+	ip_cidr_range = "10.8.0.0/28"
+	network = "default"
+}
+
 resource "google_app_engine_standard_app_version" "foo" {
+	depends_on = [
+		google_vpc_access_connector.bar
+	]
   project    = google_project_service.project.project
   version_id = "v1"
   service    = "default"
   runtime    = "python38"
 
 	vpc_access_connector {
-		name = "projects/foo-project/locations/us-central1/connectors/foo-connector"
-  } 
+		name = "projects/${google_project.my_project.project_id}/locations/us-central1/connectors/bar"
+  }
 
   entrypoint {
     shell = "gunicorn -b :$PORT main:app"
