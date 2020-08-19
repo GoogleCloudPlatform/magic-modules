@@ -1537,7 +1537,7 @@ resource "google_compute_http_health_check" "zero" {
 func testAccComputeBackendService_regionNegBackend(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "backend" {
-  name                            = "backend%s"
+  name                            = "tf-test-backend%s"
   enable_cdn                      = true
   connection_draining_timeout_sec = 10
  
@@ -1547,7 +1547,7 @@ resource "google_compute_backend_service" "backend" {
 }
 
 resource "google_compute_region_network_endpoint_group" "cloudrun_neg" {
-  name                  = "cloudrun-neg%s"
+  name                  = "tf-test-neg%s"
   network_endpoint_type = "SERVERLESS"
   region                = "us-central1"
   cloud_run {
@@ -1556,7 +1556,7 @@ resource "google_compute_region_network_endpoint_group" "cloudrun_neg" {
 }
 
 resource "google_cloud_run_service" "cloudrun_neg" {
-  name     = "cloudrun-neg%s"
+  name     = "tf-test-cr%s"
   location = "us-central1"
 
   template {
