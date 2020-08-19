@@ -22,7 +22,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           trigger: "trigger"
         test_env_vars:
-          org_id: :ORG_ID
+          project: :PROJECT_NAME
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
