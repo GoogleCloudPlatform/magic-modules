@@ -3066,8 +3066,8 @@ objects:
           must be expressed in CIDR format. Only IPv4 is supported.
         item_type: Api::Type::String
         conflicts:
-          - sourceRanges
-          - sourceTags
+          - source_ranges
+          - source_tags
       - !ruby/object:Api::Type::Enum
         name: 'direction'
         description: |
@@ -3179,8 +3179,8 @@ objects:
         item_type: Api::Type::String
         max_size: 10
         conflicts:
-          - sourceTags
-          - targetTags
+          - source_tags
+          - target_tags
       - !ruby/object:Api::Type::Array
         name: 'sourceTags'
         description: |
@@ -3206,8 +3206,8 @@ objects:
         item_type: Api::Type::String
         max_size: 10
         conflicts:
-          - sourceTags
-          - targetTags
+          - source_tags
+          - target_tags
       - !ruby/object:Api::Type::Array
         name: 'targetTags'
         description: |
@@ -8060,7 +8060,7 @@ objects:
           Node type to use for nodes group that are created from this template.
           Only one of nodeTypeFlexibility and nodeType can be specified.
         conflicts:
-          - nodeTypeFlexibility
+          - node_type_flexibility
       - !ruby/object:Api::Type::NestedObject
         name: 'nodeTypeFlexibility'
         description: |
@@ -8069,7 +8069,7 @@ objects:
           these properties. Only one of nodeTypeFlexibility and nodeType can
           be specified.
         conflicts:
-          - nodeType
+          - node_type
         properties:
           - !ruby/object:Api::Type::String
             name: cpus
@@ -11779,7 +11779,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'snapshotSchedulePolicy'
         conflicts:
-          - 'groupPlacementPolicy'
+          - 'group_placement_policy'
         description: |
           Policy for creating snapshots of persistent disks.
         properties:
@@ -11923,7 +11923,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'groupPlacementPolicy'
         conflicts:
-          - 'snapshotSchedulePolicy'
+          - 'snapshot_schedule_policy'
         description: |
           Policy for creating snapshots of persistent disks.
         properties:
@@ -16204,7 +16204,7 @@ objects:
               name: 'defaultRouteAction'
               # TODO: (mbang) conflicts also won't work for array path matchers yet, uncomment here once supported.
               # conflicts:
-              #   - defaultUrlRedirect
+              #   - path_matcher.path_matcher.default_url_redirect
               description: |
                 defaultRouteAction takes effect when none of the pathRules or routeRules match. The load balancer performs
                 advanced routing actions like URL rewrites, header transformations, etc. prior to forwarding the request
@@ -16547,7 +16547,7 @@ objects:
           - default_url_redirect
           - default_route_action.0.weighted_backend_services
         conflicts:
-          - defaultRouteAction
+          - default_route_action
         description: |
           When none of the specified hostRules match, the request is redirected to a URL specified
           by defaultUrlRedirect. If defaultUrlRedirect is specified, defaultService or
@@ -16614,7 +16614,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'defaultRouteAction'
         conflicts:
-          - defaultUrlRedirect
+          - default_url_redirect
         description: |
           defaultRouteAction takes effect when none of the hostRules match. The load balancer performs advanced routing actions
           like URL rewrites, header transformations, etc. prior to forwarding the request to the selected backend.
