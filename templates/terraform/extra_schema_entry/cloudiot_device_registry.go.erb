@@ -2,6 +2,7 @@
     Type:     schema.TypeList,
     Description: `A PubSub topic to publish device state updates.`,
     Optional:    true,
+    Computed:    true,
     ConfigMode:  schema.SchemaConfigModeAttr,
     Elem: &schema.Resource{
         Schema: map[string]*schema.Schema{
