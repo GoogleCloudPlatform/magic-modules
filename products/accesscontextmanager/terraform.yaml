@@ -14,6 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   AccessPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
+    supports_indirect_user_project_override: true
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
       update_minutes: 6
@@ -36,6 +37,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/accesspolicy.erb
   AccessLevel: !ruby/object:Overrides::Terraform::ResourceOverride
+    supports_indirect_user_project_override: true
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
       update_minutes: 6
@@ -61,6 +63,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
       custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
   ServicePerimeter: !ruby/object:Overrides::Terraform::ResourceOverride
+    supports_indirect_user_project_override: true
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
       update_minutes: 6
@@ -99,6 +102,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
       custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
   ServicePerimeterResource: !ruby/object:Overrides::Terraform::ResourceOverride
+    supports_indirect_user_project_override: true
     autogen_async: true
     exclude_validator: true
     # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
