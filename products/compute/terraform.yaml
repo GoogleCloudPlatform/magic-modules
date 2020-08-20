@@ -923,12 +923,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       grpcHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
   Image: !ruby/object:Overrides::Terraform::ResourceOverride
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      allowed_iam_role: 'roles/compute.imageUser'
+      parent_resource_attribute: 'image'
+      iam_conditions_request_type: :QUERY_PARAM
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "image_basic"
         primary_resource_id: "example"
         vars:
           image_name: "example-image"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-example-image%s\", context[\"random_suffix\"])"
       - !ruby/object:Provider::Terraform::Examples
         name: "image_guest_os"
         primary_resource_id: "example"
