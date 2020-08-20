@@ -189,30 +189,28 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 <%    end -%>
 <%  end -%>
+    billingProject := ""
+
+    billingProject, _ = getBillingProject(d, config)
+    if billingProject != "" {
+        config.UserProjectOverride = true
+    }
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
         return err
     }
+    billingProject = project
 <%  end -%>
 <%  if object.supports_indirect_user_project_override -%>
-    var project string
+
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-        project = parts[1]
-    } else {
+        billingProject = parts[1]
+    }
 
-        // Send the billing_project ID in the X-Goog-User-Project header.
-        config.UserProjectOverride = true
-
-        billingProject, err := getBillingProject(d, config)
-        if err != nil {
-            return err
-        }
-        project = billingProject
-    } 
 <%  end -%>
 <%= lines(compile(pwd + '/' + object.custom_code.pre_create)) if object.custom_code.pre_create -%>
-    res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutCreate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", billingProject, url, obj, d.Timeout(schema.TimeoutCreate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
 <%  if object.custom_code.post_create_failure && object.async.nil? # Only add if not handled by async error handling -%>
         resource<%= resource_name -%>PostCreateFailure(d, meta)
@@ -345,29 +343,27 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
             return nil, err
         }
 
+        billingProject := ""
+
+        billingProject, _ = getBillingProject(d, config)
+        if billingProject != "" {
+            config.UserProjectOverride = true
+        }
     <%  if has_project -%>
         project, err := getProject(d, config)
         if err != nil {
             return nil, err
         }
+        billingProject = project
     <%  end -%>
     <%  if object.supports_indirect_user_project_override -%>
-        var project string
+        
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-            project = parts[1]
-        } else {
-
-            // Send the billing_project ID in the X-Goog-User-Project header.
-            config.UserProjectOverride = true
-
-            billingProject, err := getBillingProject(d, config)
-            if err != nil {
-                return err
-            }
-            project = billingProject
+            billingProject = parts[1]
         }
+
     <%  end -%>
-        res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+        res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return res, err
         }
@@ -414,29 +410,27 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         return err
     }
 
+    billingProject := ""
+
+    billingProject, _ = getBillingProject(d, config)
+    if billingProject != "" {
+        config.UserProjectOverride = true
+    }
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
         return err
     }
+    billingProject = project
 <%  end -%>
 <%  if object.supports_indirect_user_project_override -%>
-    var project string
+    
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-        project = parts[1]
-    } else {
-
-        // Send the billing_project ID in the X-Goog-User-Project header.
-        config.UserProjectOverride = true
-
-        billingProject, err := getBillingProject(d, config)
-        if err != nil {
-            return err
-        }
-        project = billingProject
+        billingProject = parts[1]
     }
+
 <%  end -%>
-    res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
 <%  if object.read_error_transform -%>
         return handleNotFoundError(<%= object.read_error_transform %>(err), d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
@@ -532,11 +526,18 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
 
+    billingProject := ""
+
+    billingProject, _ = getBillingProject(d, config)
+    if billingProject != "" {
+        config.UserProjectOverride = true
+    }
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
         return err
     }
+    billingProject = project
 <%  end -%>
 
 <%  if object.input -%>
@@ -556,20 +557,10 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         }
 <%         if object.supports_indirect_user_project_override -%>
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-            project = parts[1]
-        } else {
-
-            // Send the billing_project ID in the X-Goog-User-Project header.
-            config.UserProjectOverride = true
-
-            billingProject, err := getBillingProject(d, config)
-            if err != nil {
-                return err
-            }
-            project = billingProject
+            billingProject = parts[1]
         }
 <%         end -%>
-        getRes, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, getUrl, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+        getRes, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, getUrl, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
         }
@@ -634,22 +625,11 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             return err
         }
 <%      if object.supports_indirect_user_project_override -%>
-        var project string
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-            project = parts[1]
-        } else {
-
-            // Send the billing_project ID in the X-Goog-User-Project header.
-            config.UserProjectOverride = true
-
-            billingProject, err := getBillingProject(d, config)
-            if err != nil {
-                return err
-            }
-            project = billingProject
+            billingProject = parts[1]
         }
 <%      end -%>
-        res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+        res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", billingProject, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
         } else {
@@ -740,23 +720,11 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     }
 <%  end -%>
 <%  if object.supports_indirect_user_project_override -%>
-    var project string
-    if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-        project = parts[1]
-    } else {
-
-        // Send the billing_project ID in the X-Goog-User-Project header.
-        config.UserProjectOverride = true
-
-        billingProject, err := getBillingProject(d, config)
-        if err != nil {
-            return err
-        }
-        project = billingProject
+     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+        billingProject = parts[1]
     }
-
 <%  end -%>
-    res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", billingProject, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 
     if err != nil {
         return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
@@ -804,11 +772,18 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <% else -%>
     config := meta.(*Config)
 
+    billingProject := ""
+
+    billingProject, _ = getBillingProject(d, config)
+    if billingProject != "" {
+        config.UserProjectOverride = true
+    }
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
         return err
     }
+    billingProject = project
 <%  end -%>
 
 <%  if object.mutex -%>
@@ -842,24 +817,15 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%    end -%>
 <%  end -%>
 <%  if object.supports_indirect_user_project_override -%>
-    var project string
+    
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-        project = parts[1]
-    } else {
-
-        // Send the billing_project ID in the X-Goog-User-Project header.
-        config.UserProjectOverride = true
-
-        billingProject, err := getBillingProject(d, config)
-        if err != nil {
-            return err
-        }
-        project = billingProject
+        billingProject = parts[1]
     }
+
 <%  end -%>
     log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
 
-    res, err := sendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    res, err := sendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", billingProject, url, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
         return handleNotFoundError(err, d, "<%= object.name -%>")
     }
