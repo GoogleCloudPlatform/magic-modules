@@ -191,10 +191,6 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  end -%>
     billingProject := ""
 
-    billingProject, _ = getBillingProject(d, config)
-    if billingProject != "" {
-        config.UserProjectOverride = true
-    }
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
@@ -202,6 +198,13 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
     billingProject = project
 <%  end -%>
+
+    billingProject, _ = getBillingProject(d, config)
+
+<%  if product.send_x_goog_header || object.send_x_goog_header -%>
+    config.UserProjectOverride = true
+<%  end -%>
+
 <%  if object.supports_indirect_user_project_override -%>
 
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
@@ -412,10 +415,6 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
     billingProject := ""
 
-    billingProject, _ = getBillingProject(d, config)
-    if billingProject != "" {
-        config.UserProjectOverride = true
-    }
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
@@ -423,6 +422,13 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
     billingProject = project
 <%  end -%>
+
+    billingProject, _ = getBillingProject(d, config)
+
+<%  if product.send_x_goog_header || object.send_x_goog_header  -%>
+    config.UserProjectOverride = true
+<%  end -%>
+
 <%  if object.supports_indirect_user_project_override -%>
     
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
@@ -528,16 +534,18 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 
     billingProject := ""
 
-    billingProject, _ = getBillingProject(d, config)
-    if billingProject != "" {
-        config.UserProjectOverride = true
-    }
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
         return err
     }
     billingProject = project
+<%  end -%>
+
+    billingProject, _ = getBillingProject(d, config)
+
+<%  if product.send_x_goog_header || object.send_x_goog_header -%>
+    config.UserProjectOverride = true
 <%  end -%>
 
 <%  if object.input -%>
@@ -774,16 +782,18 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
     billingProject := ""
 
-    billingProject, _ = getBillingProject(d, config)
-    if billingProject != "" {
-        config.UserProjectOverride = true
-    }
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
         return err
     }
     billingProject = project
+<%  end -%>
+
+    billingProject, _ = getBillingProject(d, config)
+
+<%  if product.send_x_goog_header || object.send_x_goog_header -%>
+    config.UserProjectOverride = true
 <%  end -%>
 
 <%  if object.mutex -%>

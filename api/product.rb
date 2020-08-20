@@ -52,10 +52,13 @@ module Api
 
     attr_reader :async
 
+    attr_reader :send_x_goog_header
+
     def validate
       super
       set_variables @objects, :__product
       check :display_name, type: String
+      check :send_x_goog_header, type: :boolean
       check :objects, type: Array, item_type: Api::Resource, required: true
       check :scopes, type: Array, item_type: String, required: true
       check :apis_required, type: Array, item_type: Api::Product::ApiReference

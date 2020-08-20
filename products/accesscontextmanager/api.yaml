@@ -20,6 +20,7 @@ versions:
     base_url: https://accesscontextmanager.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+send_x_goog_header: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'

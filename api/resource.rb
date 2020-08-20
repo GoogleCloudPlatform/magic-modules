@@ -78,6 +78,8 @@ module Api
       attr_reader :update_verb
       # [Optional] The HTTP verb used during delete. Defaults to :DELETE.
       attr_reader :delete_verb
+      # [Optional] Sets the X-Goog-User-Project header on API Calls if set.
+      attr_reader :send_x_goog_header
       # ====================
       # Collection / Identity URL Configuration
       # ====================
@@ -138,6 +140,7 @@ module Api
       check :delete_url, type: String
       check :update_url, type: String
       check :update_mask, type: :boolean
+      check :send_x_goog_header, type: :boolean
       check :description, type: String, required: true
       check :exclude, type: :boolean
       check :kind, type: String
