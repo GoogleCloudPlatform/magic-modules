@@ -107,6 +107,10 @@ resource project for preconditions, quota, and billing, instead of the project
 the credentials belong to. Not all resources support this- see the
 documentation for each resource to learn whether it does.
 
+* `billing_project` - (Optional) This fields allows Terraform to set X-Goog-User-Project
+for APIs that require a billing project to be specified like Access Context Manager APIs if 
+User ADCs are being used.
+
 * `{{service}}_custom_endpoint` - (Optional) The endpoint for a service's APIs,
 such as `compute_custom_endpoint`. Defaults to the production GCP endpoint for
 the service. This can be used to configure the Google provider to communicate
@@ -176,6 +180,13 @@ following ordered by precedence.
     * GOOGLE_CLOUD_PROJECT
     * GCLOUD_PROJECT
     * CLOUDSDK_CORE_PROJECT
+
+---
+
+* `billing_project` - (Optional) This fields allows Terraform to set X-Goog-User-Project
+for APIs that require a billing project to be specified like Access Context Manager APIs if 
+User ADCs are being used. This can also be
+specified using the `GOOGLE_BILLING_PROJECT` environment variable.
 
 ---
 

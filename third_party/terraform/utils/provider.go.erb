@@ -434,6 +434,7 @@ func providerConfigure(d *schema.ResourceData, p *schema.Provider, terraformVers
 		Region:              d.Get("region").(string),
 		Zone:                d.Get("zone").(string),
 		UserProjectOverride: d.Get("user_project_override").(bool),
+		BillingProject:      d.Get("billing_project").(string),
 		terraformVersion:    terraformVersion,
 	}
 
