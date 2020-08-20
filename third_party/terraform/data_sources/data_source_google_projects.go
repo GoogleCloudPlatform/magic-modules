@@ -31,13 +31,13 @@ func dataSourceGoogleProjects() *schema.Resource {
 							Type:        schema.TypeMap,
 							Computed:    true,
 							Elem:        &schema.Schema{Type: schema.TypeString},
-							Description: `An optional reference to a parent Resource.`,
+							Description: `A set of key/value label pairs assigned on a project.`,
 						},
 						"parent": {
 							Type:        schema.TypeMap,
 							Computed:    true,
 							Elem:        &schema.Schema{Type: schema.TypeString},
-							Description: `A set of key/value label pairs assgined on a project.`,
+							Description: `An optional reference to a parent Resource.`,
 						},
 						"number": {
 							Type:        schema.TypeString,
