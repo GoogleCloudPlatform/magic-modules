@@ -372,7 +372,8 @@ to create the resource.  This may help in those cases.
 * `user_project_override` - (Optional) Defaults to false. If true, uses the
 resource project for preconditions, quota, and billing, instead of the project
 the credentials belong to. Not all resources support this- see the
-documentation for each resource to learn whether it does.
+documentation for each resource to learn whether it does. Alternatively, this can
+be specified using the `USER_PROJECT_OVERRIDE` environment variable.
 
 When set to false, the project the credentials belong to will be billed for the
 request, and quota / API enablement checks will be done against that project.

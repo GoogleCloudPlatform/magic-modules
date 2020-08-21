@@ -346,7 +346,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 <%  if has_project -%>
         project, err := getProject(d, config)
         if err != nil {
-            return err
+            return nil, err
         }
         billingProject = project
 <%  end -%>
