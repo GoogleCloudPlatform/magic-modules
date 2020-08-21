@@ -125,6 +125,10 @@ objects:
         name: 'createTime'
         description: Creation timestamp in RFC3339 text format.
         output: true
+      - !ruby/object:Api::Type::Time
+        name: 'discoveryEndpoint'
+        description:  Endpoint for Discovery API
+        output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
