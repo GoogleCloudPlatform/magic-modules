@@ -269,12 +269,6 @@ func extractNodePoolInformation(d *schema.ResourceData, config *Config) (*NodePo
 
 func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-
 	nodePoolInfo, err := extractNodePoolInformation(d, config)
 	if err != nil {
 		return err
@@ -304,7 +298,7 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		clusterNodePoolsCreateCall := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Create(nodePoolInfo.parent(), req)
 		if config.UserProjectOverride {
-			clusterNodePoolsCreateCall.Header().Add("X-Goog-User-Project", project)
+			clusterNodePoolsCreateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 		}
 		operation, err = clusterNodePoolsCreateCall.Do()
 
@@ -339,7 +333,7 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	state, err := containerNodePoolAwaitRestingState(config, d.Id(), project, d.Timeout(schema.TimeoutCreate))
+	state, err := containerNodePoolAwaitRestingState(config, d.Id(), nodePoolInfo.project, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}
@@ -353,11 +347,6 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 
 func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-
 	nodePoolInfo, err := extractNodePoolInformation(d, config)
 	if err != nil {
 		return err
@@ -367,7 +356,7 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 
 	clusterNodePoolsGetCall := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
 	if config.UserProjectOverride {
-		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", project)
+		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 	}
 	nodePool, err := clusterNodePoolsGetCall.Do()
 	if err != nil {
@@ -391,18 +380,13 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 
 func resourceContainerNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-
 	nodePoolInfo, err := extractNodePoolInformation(d, config)
 	if err != nil {
 		return err
 	}
 	name := getNodePoolName(d.Id())
 
-	_, err = containerNodePoolAwaitRestingState(config, nodePoolInfo.fullyQualifiedName(name), project, d.Timeout(schema.TimeoutUpdate))
+	_, err = containerNodePoolAwaitRestingState(config, nodePoolInfo.fullyQualifiedName(name), nodePoolInfo.project, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
@@ -413,7 +397,7 @@ func resourceContainerNodePoolUpdate(d *schema.ResourceData, meta interface{}) e
 	}
 	d.Partial(false)
 
-	_, err = containerNodePoolAwaitRestingState(config, nodePoolInfo.fullyQualifiedName(name), project, d.Timeout(schema.TimeoutUpdate))
+	_, err = containerNodePoolAwaitRestingState(config, nodePoolInfo.fullyQualifiedName(name), nodePoolInfo.project, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
@@ -423,11 +407,6 @@ func resourceContainerNodePoolUpdate(d *schema.ResourceData, meta interface{}) e
 
 func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-
 	nodePoolInfo, err := extractNodePoolInformation(d, config)
 	if err != nil {
 		return err
@@ -435,7 +414,7 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 
 	name := getNodePoolName(d.Id())
 
-	_, err = containerNodePoolAwaitRestingState(config, nodePoolInfo.fullyQualifiedName(name), project, d.Timeout(schema.TimeoutDelete))
+	_, err = containerNodePoolAwaitRestingState(config, nodePoolInfo.fullyQualifiedName(name), nodePoolInfo.project, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return err
 	}
@@ -451,7 +430,7 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		clusterNodePoolsDeleteCall := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Delete(nodePoolInfo.fullyQualifiedName(name))
 		if config.UserProjectOverride {
-			clusterNodePoolsDeleteCall.Header().Add("X-Goog-User-Project", project)
+			clusterNodePoolsDeleteCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 		}
 		operation, err = clusterNodePoolsDeleteCall.Do()
 
@@ -488,11 +467,6 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 
 func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (bool, error) {
 	config := meta.(*Config)
-	project, err := getProject(d, config)
-	if err != nil {
-		return false, err
-	}
-
 	nodePoolInfo, err := extractNodePoolInformation(d, config)
 	if err != nil {
 		return false, err
@@ -501,7 +475,7 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 	name := getNodePoolName(d.Id())
 	clusterNodePoolsGetCall := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
 	if config.UserProjectOverride {
-		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", project)
+		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 	}
 	_, err = clusterNodePoolsGetCall.Do()
 
@@ -517,11 +491,7 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 
 func resourceContainerNodePoolStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	project, err := getProject(d, config)
-	if err != nil {
-		return nil, err
-	}
-	if err = parseImportId([]string{"projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<cluster>[^/]+)/nodePools/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<cluster>[^/]+)/(?P<name>[^/]+)", "(?P<location>[^/]+)/(?P<cluster>[^/]+)/(?P<name>[^/]+)"}, d, config); err != nil {
+	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<cluster>[^/]+)/nodePools/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<cluster>[^/]+)/(?P<name>[^/]+)", "(?P<location>[^/]+)/(?P<cluster>[^/]+)/(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
 
@@ -531,6 +501,11 @@ func resourceContainerNodePoolStateImporter(d *schema.ResourceData, meta interfa
 	}
 
 	d.SetId(id)
+
+	project, err := getProject(d, config)
+	if err != nil {
+		return nil, err
+	}
 
 	if _, err := containerNodePoolAwaitRestingState(config, d.Id(), project, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return nil, err
