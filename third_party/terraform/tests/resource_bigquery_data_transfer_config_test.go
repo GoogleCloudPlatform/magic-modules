@@ -165,7 +165,7 @@ resource "google_bigquery_dataset" "my_dataset" {
 }
 
 resource "google_pubsub_topic" "my_topic" {
-  name = "my_topic"
+  name = "tf-test-my-topic-%s"
 }
 
 resource "google_bigquery_data_transfer_config" "query_config" {
@@ -183,7 +183,7 @@ resource "google_bigquery_data_transfer_config" "query_config" {
     query                           = "SELECT name FROM tabl WHERE x = '%s'"
   }
 }
-`, random_suffix, random_suffix, schedule, letter)
+`, random_suffix, random_suffix, random_suffix, schedule, letter)
 }
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_service_account(random_suffix string) string {
