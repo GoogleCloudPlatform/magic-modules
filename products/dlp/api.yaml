@@ -387,10 +387,6 @@ objects:
         name: 'inspectConfig'
         description: The core content of the template.
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'inspectTemplateName'
-            description: The name of the template to run when this job is triggered.
-            required: true
           - !ruby/object:Api::Type::Boolean
             name: 'excludeInfoTypes'
             description: When true, excludes type information of the findings.
@@ -398,7 +394,7 @@ objects:
             name: 'includeQuote'
             description: When true, a contextual quote from the data that triggered a finding is included in the response.
           - !ruby/object:Api::Type::Enum
-            name: 'minLikelyhood'
+            name: 'minLikelihood'
             description: |
               Only returns findings equal or above this threshold. See https://cloud.google.com/dlp/docs/likelihood for more info
             values:
@@ -532,14 +528,12 @@ objects:
                             properties:
                               - !ruby/object:Api::Type::Integer
                                 name: 'windowBefore'
-                                required: true
                                 description: |
-                                  Number of characters before the finding to consider.
+                                  Number of characters before the finding to consider. Either this or window_after must be specified
                               - !ruby/object:Api::Type::Integer
                                 name: 'windowAfter'
-                                required: true
                                 description: |
-                                  Number of characters after the finding to consider.
+                                  Number of characters after the finding to consider. Either this or window_before must be specified
                           - !ruby/object:Api::Type::NestedObject
                             name: 'likelihoodAdjustment'
                             required: true

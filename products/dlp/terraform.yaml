@@ -29,7 +29,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/wrap_object.go.erb
       custom_import: templates/terraform/custom_import/dlp_job_trigger.go.erb
-  JobTrigger: !ruby/object:Overrides::Terraform::ResourceOverride
+  InspectTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{parent}}/inspectTemplates/{{name}}"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -44,6 +44,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/wrap_object.go.erb
+      custom_import: templates/terraform/custom_import/dlp_inspect_template.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
