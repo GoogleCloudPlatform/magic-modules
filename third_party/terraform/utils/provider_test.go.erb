@@ -43,10 +43,6 @@ var projectEnvVars = []string{
 	"CLOUDSDK_CORE_PROJECT",
 }
 
-var billingProjectEnvVars = []string{
-	"GOOGLE_BILLING_PROJECT",
-}
-
 var firestoreProjectEnvVars = []string{
 	"GOOGLE_FIRESTORE_PROJECT",
 }
@@ -884,11 +880,6 @@ func getTestOrgFromEnv(t *testing.T) string {
 func getTestOrgDomainFromEnv(t *testing.T) string {
 	skipIfEnvNotSet(t, orgEnvDomainVars...)
 	return multiEnvSearch(orgEnvDomainVars)
-}
-
-func getTestBillingProjectFromEnv(t *testing.T) string {
-	skipIfEnvNotSet(t, billingProjectEnvVars...)
-	return multiEnvSearch(billingProjectEnvVars)
 }
 
 func getTestOrgTargetFromEnv(t *testing.T) string {

@@ -107,9 +107,10 @@ resource project for preconditions, quota, and billing, instead of the project
 the credentials belong to. Not all resources support this- see the
 documentation for each resource to learn whether it does.
 
-* `billing_project` - (Optional) This fields allows Terraform to set X-Goog-User-Project
-for APIs that require a billing project to be specified like Access Context Manager APIs if 
-User ADCs are being used.
+* `billing_project` - (Optional) This fields specifies a project that's used for 
+preconditions, quota, and billing for requests. All resources that support user project 
+overrides will use this project instead of the resource's project (if available). This 
+field is ignored if `user_project_override` is set to false or unset.
 
 * `{{service}}_custom_endpoint` - (Optional) The endpoint for a service's APIs,
 such as `compute_custom_endpoint`. Defaults to the production GCP endpoint for

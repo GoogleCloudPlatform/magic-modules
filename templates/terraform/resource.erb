@@ -199,19 +199,14 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     billingProject = project
 <%  end -%>
 
-    billingProject, _ = getBillingProject(d, config)
-
-<%  if product.send_x_goog_header || object.send_x_goog_header -%>
-    config.UserProjectOverride = true
-<%  end -%>
-
 <%  if object.supports_indirect_user_project_override -%>
-
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
     }
-
 <%  end -%>
+
+    billingProject, _ = getBillingProject(d, config)
+
 <%= lines(compile(pwd + '/' + object.custom_code.pre_create)) if object.custom_code.pre_create -%>
     res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", billingProject, url, obj, d.Timeout(schema.TimeoutCreate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
@@ -348,24 +343,22 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 
         billingProject := ""
 
-        billingProject, _ = getBillingProject(d, config)
-        if billingProject != "" {
-            config.UserProjectOverride = true
-        }
-    <%  if has_project -%>
+<%  if has_project -%>
         project, err := getProject(d, config)
         if err != nil {
-            return nil, err
+            return err
         }
         billingProject = project
-    <%  end -%>
-    <%  if object.supports_indirect_user_project_override -%>
-        
+<%  end -%>
+
+<%  if object.supports_indirect_user_project_override -%>
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
             billingProject = parts[1]
         }
+<%  end -%>
 
-    <%  end -%>
+        billingProject, _ = getBillingProject(d, config)
+
         res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return res, err
@@ -423,19 +416,14 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     billingProject = project
 <%  end -%>
 
-    billingProject, _ = getBillingProject(d, config)
-
-<%  if product.send_x_goog_header || object.send_x_goog_header  -%>
-    config.UserProjectOverride = true
-<%  end -%>
-
 <%  if object.supports_indirect_user_project_override -%>
-    
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
     }
-
 <%  end -%>
+
+    billingProject, _ = getBillingProject(d, config)
+
     res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
 <%  if object.read_error_transform -%>
@@ -542,12 +530,6 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     billingProject = project
 <%  end -%>
 
-    billingProject, _ = getBillingProject(d, config)
-
-<%  if product.send_x_goog_header || object.send_x_goog_header -%>
-    config.UserProjectOverride = true
-<%  end -%>
-
 <%  if object.input -%>
     d.Partial(true)
 
@@ -568,6 +550,8 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             billingProject = parts[1]
         }
 <%         end -%>
+        billingProject, _ = getBillingProject(d, config)
+
         getRes, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, getUrl, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
@@ -637,6 +621,9 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             billingProject = parts[1]
         }
 <%      end -%>
+
+        billingProject, _ = getBillingProject(d, config)
+
         res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", billingProject, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
@@ -732,6 +719,9 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         billingProject = parts[1]
     }
 <%  end -%>
+
+    billingProject, _ = getBillingProject(d, config)
+
     res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", billingProject, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 
     if err != nil {
@@ -790,12 +780,6 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     billingProject = project
 <%  end -%>
 
-    billingProject, _ = getBillingProject(d, config)
-
-<%  if product.send_x_goog_header || object.send_x_goog_header -%>
-    config.UserProjectOverride = true
-<%  end -%>
-
 <%  if object.mutex -%>
     lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
     if err != nil {
@@ -834,6 +818,8 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
 <%  end -%>
     log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
+
+    billingProject, _ = getBillingProject(d, config)
 
     res, err := sendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", billingProject, url, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
