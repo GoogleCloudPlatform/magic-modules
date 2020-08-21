@@ -1,7 +1,7 @@
 resource "google_data_loss_prevention_inspect_template" "<%= ctx[:primary_resource_id] %>" {
 	parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
-	description = "asdf"
-	display_name = "asdf"
+	description = "My description"
+	display_name = "display_name"
 
 	inspect_config {
 		info_types {

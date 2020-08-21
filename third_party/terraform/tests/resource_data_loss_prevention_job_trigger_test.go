@@ -59,8 +59,8 @@ func testAccDataLossPreventionJobTrigger_dlpJobTriggerBasic(context map[string]i
 	return Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "basic" {
 	parent = "projects/%{project}"
-	description = "asdf"
-	display_name = "asdf"
+	description = "Starting description"
+	display_name = "display"
 
 	triggers {
 		schedule {
@@ -74,8 +74,8 @@ resource "google_data_loss_prevention_job_trigger" "basic" {
 			save_findings {
 				output_config {
 					table {
-						project_id = "asdf"
-						dataset_id = "asdf"
+						project_id = "project"
+						dataset_id = "dataset123"
 					}
 				}
 			}
