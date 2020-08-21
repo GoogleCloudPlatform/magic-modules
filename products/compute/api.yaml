@@ -12977,6 +12977,7 @@ objects:
             name: 'filterExpr'
             description: |
               Export filter used to define which VPC flow logs should be logged.
+            default_value: "true"
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Private Google Access':

@@ -30,7 +30,16 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	transformed["flow_sampling"] = original["flowSampling"]
 	transformed["aggregation_interval"] = original["aggregationInterval"]
 	transformed["metadata"] = original["metadata"]
-	transformed["metadata_fields"] = original["metadataFields"]
+	if original["metadata"].(string) == "CUSTOM_METADATA" {
+		transformed["metadata_fields"] = original["metadataFields"]
+	} else {
+		// MetadataFields can only be set when metadata is CUSTOM_METADATA. However, when updating
+		// from custom to include/exclude, the API will return the previous values of the metadata fields,
+		// despite not actually having any custom fields at the moment. The API team has confirmed
+		// this as WAI (b/162771344), so we work around it by clearing the response if metadata is
+		// not custom.
+		transformed["metadata_fields"] = nil
+	}
 	transformed["filter_expr"] = original["filterExpr"]
 	
 	return []interface{}{transformed}
