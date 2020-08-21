@@ -1,27 +1,33 @@
 resource "google_data_loss_prevention_job_trigger" "<%= ctx[:primary_resource_id] %>" {
-	parent = "projects/${data.google_project.project.number}"
+	parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
 	description = "asdf"
 	display_name = "asdf"
-	inspect_template_name = "fake"
 
 	triggers {
 		schedule {
-			recurrence_period_duration = "80000s"
+			recurrence_period_duration = "86400s"
 		}
 	}
 
-	actions {
-		save_findings {
-			output_config {
-				table {
-					project_id = "asdf"
-					dataset_id = "asdf"
+	inspect_job {
+		inspect_template_name = "fake"
+		actions {
+			save_findings {
+				output_config {
+					table {
+						project_id = "asdf"
+						dataset_id = "asdf"
+					}
+				}
+			}
+		}
+		storage_config {
+			cloud_storage_options {
+				file_set {
+					url = "gs://mybucket/directory/"
 				}
 			}
 		}
 	}
-}
-
-data "google_project" "project" {
-  project_id = "<%= ctx[:test_env_vars]['project'] %>"
+	
 }
