@@ -58,10 +58,16 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		<% unless versioned_provider -%>
-		Providers:    testAccProviders,
+		Providers: testAccProviders,
 		<% else -%>
-		Providers:    testAccProvidersOiCS,
+		Providers: testAccProvidersOiCS,
 		<% end -%>
+		<%#- The Terraform test runner doesn't let us import resources with aliased providers (yet) -%>
+		<% if example.needs_random  && !versioned_provider -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
+		<%- end -%>
 		<% unless object.skip_delete -%>
 		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>DestroyProducer(t),
 		<% end -%>

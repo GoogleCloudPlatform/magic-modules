@@ -2174,6 +2174,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "name_prefix"
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_random_provider"
+        needs_random: true
         primary_resource_id: "default"
         # Uses resource.UniqueId
         skip_vcr: true
@@ -2225,6 +2226,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "name_prefix"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_ssl_certificate_random_provider"
+        needs_random: true
         primary_resource_id: "default"
         # Uses resource.UniqueId
         skip_vcr: true
