@@ -110,6 +110,9 @@ module Provider
       # These properties will likely be custom code.
       attr_reader :ignore_read_extra
 
+      # Needs the random provider defined in ExternalProviders
+      attr_reader :needs_random
+
       # Whether to skip generating tests for this resource
       attr_reader :skip_test
 
@@ -272,6 +275,7 @@ module Provider
         check :test_env_vars, type: Hash
         check :test_vars_overrides, type: Hash
         check :ignore_read_extra, type: Array, item_type: String, default: []
+        check :needs_random, type: TrueClass
         check :primary_resource_name, type: String
         check :skip_test, type: TrueClass
         check :skip_docs, type: TrueClass
