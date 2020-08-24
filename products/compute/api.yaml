@@ -2636,10 +2636,6 @@ objects:
         required: true
   - !ruby/object:Api::Resource
     name: 'Disk'
-    # TODO(nelsonjr): Implement disk special actions as defined in the API:
-    # - resize
-    # - createSnapshot
-    # - setLabels
     kind: 'compute#disk'
     input: true
     base_url: projects/{{project}}/zones/{{zone}}/disks
@@ -2717,6 +2713,11 @@ objects:
             name: 'kmsKeyName'
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key. 
+              If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::String
         name: 'sourceImageId'
@@ -2762,6 +2763,11 @@ objects:
               Your project's Compute Engine System service account
               (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
               `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key. 
+              If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'sourceSnapshot'
@@ -2799,6 +2805,11 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
               encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key. 
+              If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::String
         name: 'sourceSnapshotId'
@@ -2900,6 +2911,20 @@ objects:
         description: |
           URL of the disk type resource describing which disk type to use to
           create the disk. Provide this when creating the disk.
+      - !ruby/object:Api::Type::Boolean
+        name: 'multiWriter'
+        min_version: beta
+        default_value: false
+        description: |
+          Indicates whether or not the disk can be read/write attached 
+          to more than one instance.
+      - !ruby/object:Api::Type::Boolean
+        name: 'eraseWindowsVssSignature'
+        min_version: beta
+        default_value: false
+        description: |
+          Specifies whether the disk restored from a source snapshot
+          should erase Windows specific VSS signature.
       - !ruby/object:Api::Type::String
         name: 'sourceImage'
         description: |
@@ -2908,14 +2933,14 @@ objects:
 
           To create a disk with one of the public operating system images,
           specify the image by its family name. For example, specify
-          family/debian-8 to use the latest Debian 8 image:
+          family/debian-9 to use the latest Debian 9 image:
 
-          projects/debian-cloud/global/images/family/debian-8
+          projects/debian-cloud/global/images/family/debian-9
 
           Alternatively, use a specific version of a public operating system
           image:
 
-          projects/debian-cloud/global/images/debian-8-jessie-vYYYYMMDD
+          projects/debian-cloud/global/images/debian-9-stretch-vYYYYMMDD
 
           To create a disk with a private image that you created, specify the
           image name in the following format:
