@@ -457,6 +457,32 @@ func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 }
 <% end -%>
 
+<% unless version == 'ga' -%>
+func TestAccComputeDisk_multiWriterAndVSSWindows(t *testing.T) {
+	t.Parallel()
+
+	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	firstDiskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	snapshotName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	projectName := getTestProjectFromEnv()
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeDisk_multiWriterAndWindowsVSS(firstDiskName, projectName, snapshotName, diskName),
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
+
 func testAccCheckComputeDiskExists(t *testing.T, n, p string, disk *compute.Disk) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -773,5 +799,40 @@ resource "google_compute_disk" "foobar" {
   resource_policies = [google_compute_resource_policy.foo.self_link]
 }
 `, policyName, diskName)
+}
+<% end -%>
+
+
+<% unless version == 'ga' -%>
+func testAccComputeDisk_multiWriterAndWindowsVSS(firstDiskName, projectName, snapshotName, diskName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_disk" "sourcedisk" {
+  name    = "d1-%s"
+  image   = "windows-server-2019-dc-v20200813"
+  size    = 50
+  type    = "pd-ssd"
+  zone    = "us-central1-a"
+  project = "%s"
+}
+
+resource "google_compute_snapshot" "snapdisk" {
+  name        = "%s"
+  source_disk = google_compute_disk.sourcedisk.name
+  zone        = "us-central1-a"
+  project     = "%s"
+}
+
+resource "google_compute_disk" "foobar" {
+  name                        = "%s"
+  snapshot                    = google_compute_snapshot.snapdisk.self_link
+  size                        = 50
+  type                        = "pd-ssd"
+  zone                        = "us-central1-a"
+  erase_windows_vss_signature = true
+  timeouts {
+    create = "10m"
+  }
+}
+`, firstDiskName, projectName, snapshotName, projectName, diskName)
 }
 <% end -%>
