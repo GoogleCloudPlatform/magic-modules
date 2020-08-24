@@ -12680,6 +12680,11 @@ objects:
             name: 'kmsKeyName'
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key. 
+              If absent, the Compute Engine Service Agent service account is used.
       - !ruby/object:Api::Type::NestedObject
         # ignore_read in providers - this is only used in Create
         name: 'sourceDiskEncryptionKey'
@@ -12706,6 +12711,11 @@ objects:
             name: 'kmsKeyName'
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key. 
+              If absent, the Compute Engine Service Agent service account is used.
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -12745,6 +12755,12 @@ objects:
           creation/deletion.
         output: true
       # 'storageBytesStatus' not useful for object convergence.
+      - !ruby/object:Api::Type::Array
+        name: 'storageLocations'
+        description: |
+          Cloud Storage bucket storage location of the snapshot (regional or multi-regional).
+        item_type: Api::Type::String
+        output: true
       - !ruby/object:Api::Type::Array
         name: 'licenses'
         output: true
