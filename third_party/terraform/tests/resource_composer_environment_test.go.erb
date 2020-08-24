@@ -12,7 +12,11 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+<% if version == 'ga' -%>
+	"google.golang.org/api/composer/v1"
+<% else -%>
 	"google.golang.org/api/composer/v1beta1"
+<% end -%>
 	"google.golang.org/api/storage/v1"
 )
 
@@ -547,7 +551,9 @@ resource "google_composer_environment" "test" {
     }
 
     software_config {
+<% unless version == "ga" -%>
       image_version = data.google_composer_image_versions.all.image_versions[0].image_version_id
+<% end -%>
 
       airflow_config_overrides = {
         core-load_example = "True"

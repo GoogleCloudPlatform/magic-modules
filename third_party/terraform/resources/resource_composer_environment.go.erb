@@ -11,7 +11,11 @@ import (
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+<% if version == "ga" -%>
+	"google.golang.org/api/composer/v1"
+<% else -%>
 	"google.golang.org/api/composer/v1beta1"
+<% end -%>
 )
 
 const (
@@ -293,6 +297,9 @@ func resourceComposerEnvironment() *schema.Resource {
 										Type:             schema.TypeString,
 										Computed:         true,
 										Optional:         true,
+<% if version == "ga" -%>
+										ForceNew:         true,
+<% end -%>
 										AtLeastOneOf:     composerSoftwareConfigKeys,
 										ValidateFunc:     validateRegexp(composerEnvironmentVersionRegexp),
 										DiffSuppressFunc: composerImageVersionDiffSuppress,
@@ -617,6 +624,7 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 			d.SetPartial("config")
 		}
+<% unless version == "ga" -%>
 
 		// If web_server_network_access_control has more fields added it may require changes here.
 		// This is scoped specifically to allowed_ip_range due to https://github.com/hashicorp/terraform-plugin-sdk/issues/98
@@ -631,6 +639,7 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 			d.SetPartial("config")
 		}
+<% end -%>
 	}
 
 	if d.HasChange("labels") {
