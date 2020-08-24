@@ -314,7 +314,7 @@ func testAccCheckComputePerInstanceConfigDestroyed(t *testing.T, igmId, configNa
 func testAccComputePerInstanceConfigListNames(t *testing.T, igmId string) (map[string]struct{}, error) {
 	config := googleProviderConfig(t)
 
-	url := fmt.Sprintf("https://www.googleapis.com/compute/beta/%s/listPerInstanceConfigs", igmId)
+	url := fmt.Sprintf("https://compute.googleapis.com/compute/beta/%s/listPerInstanceConfigs", igmId)
 	res, err := sendRequest(config, "POST", "", url, nil)
 	if err != nil {
 		return nil, err
