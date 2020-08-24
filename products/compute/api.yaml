@@ -12985,7 +12985,8 @@ objects:
               - log_config.0.metadata
               - log_config.0.filterExpr
             description: |
-              Export filter used to define which VPC flow logs should be logged.
+              Export filter used to define which VPC flow logs should be logged, as as CEL expression. See
+              https://cloud.google.com/vpc/docs/flow-logs#filtering for details on how to format this field.
             default_value: "true"
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
