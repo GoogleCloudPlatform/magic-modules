@@ -10,14 +10,14 @@
 	} else if len(parts) == 4 {
 		d.Set("name", parts[3])
 	} else {
-		return nil, fmt.Errorf("Unexpected import id: %s, expected form {{parent}}/jobTriggers/{{name}}", d.Get("name").(string))
+		return nil, fmt.Errorf("Unexpected import id: %s, expected form {{parent}}/<%= object.name.camelize(:lower) -%>/{{name}}", d.Get("name").(string))
 	}
-	// Remove "/jobTriggers/{{name}}" from the id
+	// Remove "/<%= object.name.camelize(:lower) -%>/{{name}}" from the id
 	parts = parts[:len(parts)-2]
 	d.Set("parent", strings.Join(parts, "/"))
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "{{parent}}/jobTriggers/{{name}}")
+	id, err := replaceVars(d, config, "{{parent}}/<%= object.name.camelize(:lower) -%>/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
