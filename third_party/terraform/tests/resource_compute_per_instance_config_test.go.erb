@@ -22,7 +22,7 @@ func TestAccComputePerInstanceConfig_statefulBasic(t *testing.T) {
 		"config_name3" : fmt.Sprintf("instance-%s", randString(t, 10)),
 		"config_name4" : fmt.Sprintf("instance-%s", randString(t, 10)),
 	}
-	igmId := fmt.Sprintf("projects/%s/zones/%s/instanceGroupManagers/igm-%s",
+	igmId := fmt.Sprintf("projects/%s/zones/%s/instanceGroupManagers/tf-test-igm-%s",
 		getTestProjectFromEnv(), "us-central1-c", context["random_suffix"])
 
 	vcrTest(t, resource.TestCase{
@@ -314,7 +314,7 @@ func testAccCheckComputePerInstanceConfigDestroyed(t *testing.T, igmId, configNa
 func testAccComputePerInstanceConfigListNames(t *testing.T, igmId string) (map[string]struct{}, error) {
 	config := googleProviderConfig(t)
 
-	url := fmt.Sprintf("https://compute.googleapis.com/compute/beta/%s/listPerInstanceConfigs", igmId)
+	url := fmt.Sprintf("%s%s/listPerInstanceConfigs", config.ComputeBasePath, igmId)
 	res, err := sendRequest(config, "POST", "", url, nil)
 	if err != nil {
 		return nil, err

@@ -22,7 +22,7 @@ func TestAccComputeRegionPerInstanceConfig_statefulBasic(t *testing.T) {
 		"config_name3" : fmt.Sprintf("instance-%s", randString(t, 10)),
 		"config_name4" : fmt.Sprintf("instance-%s", randString(t, 10)),
 	}
-	rigmId := fmt.Sprintf("projects/%s/regions/%s/instanceGroupManagers/rigm-%s",
+	rigmId := fmt.Sprintf("projects/%s/regions/%s/instanceGroupManagers/tf-test-rigm-%s",
 		getTestProjectFromEnv(), "us-central1", context["random_suffix"])
 
 	vcrTest(t, resource.TestCase{
