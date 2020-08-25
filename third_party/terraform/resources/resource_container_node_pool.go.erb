@@ -674,11 +674,6 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *containerBeta.N
 
 func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *NodePoolInformation, prefix string, timeout time.Duration) error {
 	config := meta.(*Config)
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-
 	name := d.Get(prefix + "name").(string)
 
 	lockKey := nodePoolInfo.lockKey()
@@ -708,7 +703,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		updateF := func() error {
 			clusterUpdateCall := config.clientContainerBeta.Projects.Locations.Clusters.Update(nodePoolInfo.parent(), req)
 			if config.UserProjectOverride {
-				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
+				clusterUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 			}
 			op, err := clusterUpdateCall.Do()
 			if err != nil {
@@ -746,7 +741,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			updateF := func() error {
 				clusterUpdateCall := config.clientContainerBeta.Projects.Locations.Clusters.Update(nodePoolInfo.parent(), req)
 				if config.UserProjectOverride {
-					clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
+					clusterUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
 				op, err := clusterUpdateCall.Do()
 				if err != nil {
@@ -780,7 +775,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			updateF := func() error {
 				clusterNodePoolsUpdateCall := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", project)
+					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
 				op, err := clusterNodePoolsUpdateCall.Do()
 					
@@ -819,7 +814,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			updateF := func() error {
 				clusterNodePoolsUpdateCall := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", project)
+					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
 				op, err := clusterNodePoolsUpdateCall.Do()
 				if err != nil {
@@ -853,7 +848,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			updateF := func() error {
 				clusterNodePoolsUpdateCall := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", project)
+					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
 				op, err := clusterNodePoolsUpdateCall.Do()
 				if err != nil {
@@ -891,7 +886,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		updateF := func() error {
 			clusterNodePoolsSetSizeCall := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.SetSize(nodePoolInfo.fullyQualifiedName(name),req)
 			if config.UserProjectOverride {
-				clusterNodePoolsSetSizeCall.Header().Add("X-Goog-User-Project", project)
+				clusterNodePoolsSetSizeCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 			}
 			op, err := clusterNodePoolsSetSizeCall.Do()
 
@@ -933,7 +928,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		updateF := func() error {
 			clusterNodePoolsSetManagementCall := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.SetManagement(nodePoolInfo.fullyQualifiedName(name),req)
 			if config.UserProjectOverride {
-				clusterNodePoolsSetManagementCall.Header().Add("X-Goog-User-Project", project)
+				clusterNodePoolsSetManagementCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 			}
 			op, err := clusterNodePoolsSetManagementCall.Do()
 
@@ -967,7 +962,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		updateF := func() error {
 			clusterNodePoolsUpdateCall := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 			if config.UserProjectOverride {
-				clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", project)
+				clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 			}
 			op, err := clusterNodePoolsUpdateCall.Do()
 
@@ -1000,7 +995,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		updateF := func() error {
 			clusterNodePoolsUpdateCall := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 			if config.UserProjectOverride {
-				clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", project)
+				clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 			}
 			op, err := clusterNodePoolsUpdateCall.Do()
 
@@ -1037,7 +1032,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		updateF := func() error {
 			clusterNodePoolsUpdateCall := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 			if config.UserProjectOverride {
-				clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", project)
+				clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 			}
 			op, err := clusterNodePoolsUpdateCall.Do()
 
