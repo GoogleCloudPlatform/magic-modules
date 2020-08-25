@@ -205,7 +205,10 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 <%  end -%>
 
-    billingProject, _ = getBillingProject(d, config)
+    // err == nil indicates that the billing_project value was found
+    if bp, err := getBillingProject(d, config); err == nil {
+      billingProject = bp
+    }
 
 <%= lines(compile(pwd + '/' + object.custom_code.pre_create)) if object.custom_code.pre_create -%>
     res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", billingProject, url, obj, d.Timeout(schema.TimeoutCreate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
@@ -357,7 +360,10 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
         }
 <%  end -%>
 
-        billingProject, _ = getBillingProject(d, config)
+        // err == nil indicates that the billing_project value was found
+        if bp, err := getBillingProject(d, config); err == nil {
+        billingProject = bp
+        }
 
         res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
@@ -422,7 +428,10 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 <%  end -%>
 
-    billingProject, _ = getBillingProject(d, config)
+    // err == nil indicates that the billing_project value was found
+    if bp, err := getBillingProject(d, config); err == nil {
+      billingProject = bp
+    }
 
     res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
@@ -550,7 +559,11 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             billingProject = parts[1]
         }
 <%         end -%>
-        billingProject, _ = getBillingProject(d, config)
+
+        // err == nil indicates that the billing_project value was found
+        if bp, err := getBillingProject(d, config); err == nil {
+        billingProject = bp
+        }
 
         getRes, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, getUrl, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
@@ -622,7 +635,10 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         }
 <%      end -%>
 
-        billingProject, _ = getBillingProject(d, config)
+        // err == nil indicates that the billing_project value was found
+        if bp, err := getBillingProject(d, config); err == nil {
+        billingProject = bp
+        }
 
         res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", billingProject, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
@@ -720,7 +736,10 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     }
 <%  end -%>
 
-    billingProject, _ = getBillingProject(d, config)
+    // err == nil indicates that the billing_project value was found
+    if bp, err := getBillingProject(d, config); err == nil {
+      billingProject = bp
+    }
 
     res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", billingProject, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 
@@ -819,7 +838,10 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%  end -%>
     log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
 
-    billingProject, _ = getBillingProject(d, config)
+    // err == nil indicates that the billing_project value was found
+    if bp, err := getBillingProject(d, config); err == nil {
+      billingProject = bp
+    }
 
     res, err := sendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", billingProject, url, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
