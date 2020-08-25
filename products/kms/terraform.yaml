@@ -117,6 +117,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "import-job"
         vars:
           keyring: "keyring-example"
+          cryptokey: "cryptokey-example"
         skip_test: true
     properties:
       createTime: !ruby/object:Overrides::Terraform::PropertyOverride
