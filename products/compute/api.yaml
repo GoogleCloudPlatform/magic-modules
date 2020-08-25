@@ -12760,7 +12760,6 @@ objects:
         description: |
           Cloud Storage bucket storage location of the snapshot (regional or multi-regional).
         item_type: Api::Type::String
-        output: true
       - !ruby/object:Api::Type::Array
         name: 'licenses'
         output: true
