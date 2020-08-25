@@ -19,7 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
       ~> **Note:** KeyRings cannot be deleted from Google Cloud Platform.
       Destroying a Terraform-managed KeyRing will remove it from state but
-      *will not delete the resource on the server.*
+      *will not delete the resource from the project.*
     id_format: "projects/{{project}}/locations/{{location}}/keyRings/{{name}}"
     import_format: ["projects/{{project}}/locations/{{location}}/keyRings/{{name}}"]
     examples:
@@ -53,7 +53,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       ~> **Note:** CryptoKeys cannot be deleted from Google Cloud Platform.
       Destroying a Terraform-managed CryptoKey will remove it from state
       and delete all CryptoKeyVersions, rendering the key unusable, but *will
-      not delete the resource on the server.* When Terraform destroys these keys,
+      not delete the resource from the project.* When Terraform destroys these keys,
       any data previously encrypted with these keys will be irrecoverable.
       For this reason, it is strongly recommended that you add lifecycle hooks
       to the resource to prevent accidental destruction.
@@ -108,7 +108,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
       ~> **Note:** KeyRingImportJobs cannot be deleted from Google Cloud Platform.
       Destroying a Terraform-managed KeyRingImportJob will remove it from state but
-      *will not delete the resource on the server.* 
+      *will not delete the resource from the project.* 
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     examples:

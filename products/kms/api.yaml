@@ -65,7 +65,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'CryptoKey'
     base_url: '{{key_ring}}/cryptoKeys'
-    create_url: '{{key_ring}}/cryptoKeys?cryptoKeyId={{name}}'
+    create_url: '{{key_ring}}/cryptoKeys?cryptoKeyId={{name}}&skipInitialVersionCreation={{skipInitialVersionCreation}}'
     self_link: '{{key_ring}}/cryptoKeys/{{name}}'
     update_verb: :PATCH
     update_mask: true
@@ -78,6 +78,14 @@ objects:
           The KeyRing that this key belongs to.
           Format: `'projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}'`.
         required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'skipInitialVersionCreation'
+        description: |
+          If set to true, the request will create a CryptoKey without any CryptoKeyVersions. 
+          You must use the `google_kms_key_ring_import_job` resource to import the CryptoKeyVersion.
+        default_value: false
         input: true
         url_param_only: true
     properties:
