@@ -95,6 +95,7 @@ func TestAccComputeRegionPerInstanceConfig_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
+		"rigm_name": fmt.Sprintf("tf-test-rigm-%s", randString(t, 10)),
 		"config_name" : fmt.Sprintf("instance-%s", randString(t, 10)),
 	}
 

@@ -95,6 +95,7 @@ func TestAccComputePerInstanceConfig_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
+		"igm_name": fmt.Sprintf("tf-test-igm-%s", randString(t, 10)),
 		"config_name" : fmt.Sprintf("instance-%s", randString(t, 10)),
 	}
 
