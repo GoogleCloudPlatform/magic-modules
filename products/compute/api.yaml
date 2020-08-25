@@ -19,10 +19,10 @@ display_name: Compute Engine
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://www.googleapis.com/compute/v1/
+    base_url: https://compute.googleapis.com/compute/v1/
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://www.googleapis.com/compute/beta/
+    base_url: https://compute.googleapis.com/compute/beta/
 scopes:
   - https://www.googleapis.com/auth/compute
 apis_required:
@@ -2425,7 +2425,7 @@ objects:
     # corresponding type.
     description: |
       Represents a DiskType resource. A DiskType resource represents the type
-      of disk to use, such as a pd-ssd or pd-standard. To reference a disk
+      of disk to use, such as a pd-ssd, pd-balanced or pd-standard. To reference a disk
       type, use the disk type's full or partial URL.
     # TODO(nelsonjr): Temporarily make DiskType virtual so no tests gets
     # triggered for create. Implement support for read only objects, and delete
@@ -3066,8 +3066,8 @@ objects:
           must be expressed in CIDR format. Only IPv4 is supported.
         item_type: Api::Type::String
         conflicts:
-          - sourceRanges
-          - sourceTags
+          - source_ranges
+          - source_tags
       - !ruby/object:Api::Type::Enum
         name: 'direction'
         description: |
@@ -3179,8 +3179,8 @@ objects:
         item_type: Api::Type::String
         max_size: 10
         conflicts:
-          - sourceTags
-          - targetTags
+          - source_tags
+          - target_tags
       - !ruby/object:Api::Type::Array
         name: 'sourceTags'
         description: |
@@ -3206,8 +3206,8 @@ objects:
         item_type: Api::Type::String
         max_size: 10
         conflicts:
-          - sourceTags
-          - targetTags
+          - source_tags
+          - target_tags
       - !ruby/object:Api::Type::Array
         name: 'targetTags'
         description: |
@@ -4188,6 +4188,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4311,6 +4312,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4434,6 +4436,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -4538,6 +4541,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -4642,6 +4646,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4758,6 +4763,76 @@ objects:
                 - :USE_NAMED_PORT
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
+        name: 'grpcHealthCheck'
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
+          - grpc_health_check
+        properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The port number for the health check request. 
+                Must be specified if portName and portSpecification are not set 
+                or if port_specification is USE_FIXED_PORT. Valid values are 1 through 65535.
+            - !ruby/object:Api::Type::String
+              name: 'portName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Port name as defined in InstanceGroup#NamedPort#name. If both port and
+                port_name are defined, port takes precedence.
+            - !ruby/object:Api::Type::Enum
+              name: 'portSpecification'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Specifies how port is selected for health checking, can be one of the
+                following values:
+
+                  * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+                  * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+                  * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+                  network endpoint is used for health checking. For other backends, the
+                  port or named port specified in the Backend Service is used for health
+                  checking.
+
+                If not specified, gRPC health check follows behavior specified in `port` and
+                `portName` fields.
+              values:
+                - :USE_FIXED_PORT
+                - :USE_NAMED_PORT
+                - :USE_SERVING_PORT
+            - !ruby/object:Api::Type::String
+              name: 'grpcServiceName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The gRPC service name for the health check. 
+                The value of grpcServiceName has the following meanings by convention:
+                  - Empty serviceName means the overall status of all services at the backend.
+                  - Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
+                The grpcServiceName can only be ASCII.
+      - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
         description: |
           Configure logging on this health check.
@@ -4768,6 +4843,7 @@ objects:
               description: |
                 Indicates whether or not to export logs. This is false by default,
                 which means no health check logging will be done.
+              default_value: false
   - !ruby/object:Api::Resource
     name: 'InstanceTemplate'
     kind: 'compute#instanceTemplate'
@@ -7984,7 +8060,7 @@ objects:
           Node type to use for nodes group that are created from this template.
           Only one of nodeTypeFlexibility and nodeType can be specified.
         conflicts:
-          - nodeTypeFlexibility
+          - node_type_flexibility
       - !ruby/object:Api::Type::NestedObject
         name: 'nodeTypeFlexibility'
         description: |
@@ -7993,7 +8069,7 @@ objects:
           these properties. Only one of nodeTypeFlexibility and nodeType can
           be specified.
         conflicts:
-          - nodeType
+          - node_type
         properties:
           - !ruby/object:Api::Type::String
             name: cpus
@@ -9143,7 +9219,7 @@ objects:
     collection_url_key: 'items'
     description: |
       Represents a regional DiskType resource. A DiskType resource represents
-      the type of disk to use, such as a pd-ssd or pd-standard. To reference a
+      the type of disk to use, such as a pd-ssd, pd-balanced or pd-standard. To reference a
       disk type, use the disk type's full or partial URL.
     readonly: true
     has_self_link: true
@@ -10998,6 +11074,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -11121,6 +11198,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -11244,6 +11322,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -11348,6 +11427,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -11452,6 +11532,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -11568,6 +11649,76 @@ objects:
                 - :USE_NAMED_PORT
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
+        name: 'grpcHealthCheck'
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
+          - grpc_health_check
+        properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The port number for the health check request. 
+                Must be specified if portName and portSpecification are not set 
+                or if port_specification is USE_FIXED_PORT. Valid values are 1 through 65535.
+            - !ruby/object:Api::Type::String
+              name: 'portName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Port name as defined in InstanceGroup#NamedPort#name. If both port and
+                port_name are defined, port takes precedence.
+            - !ruby/object:Api::Type::Enum
+              name: 'portSpecification'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Specifies how port is selected for health checking, can be one of the
+                following values:
+
+                  * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+                  * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+                  * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+                  network endpoint is used for health checking. For other backends, the
+                  port or named port specified in the Backend Service is used for health
+                  checking.
+
+                If not specified, gRPC health check follows behavior specified in `port` and
+                `portName` fields.
+              values:
+                - :USE_FIXED_PORT
+                - :USE_NAMED_PORT
+                - :USE_SERVING_PORT
+            - !ruby/object:Api::Type::String
+              name: 'grpcServiceName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The gRPC service name for the health check. 
+                The value of grpcServiceName has the following meanings by convention:
+                  - Empty serviceName means the overall status of all services at the backend.
+                  - Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
+                The grpcServiceName can only be ASCII.
+      - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
         description: |
           Configure logging on this health check.
@@ -11628,7 +11779,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'snapshotSchedulePolicy'
         conflicts:
-          - 'groupPlacementPolicy'
+          - 'group_placement_policy'
         description: |
           Policy for creating snapshots of persistent disks.
         properties:
@@ -11772,7 +11923,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'groupPlacementPolicy'
         conflicts:
-          - 'snapshotSchedulePolicy'
+          - 'snapshot_schedule_policy'
         description: |
           Policy for creating snapshots of persistent disks.
         properties:
@@ -13493,13 +13644,12 @@ objects:
               - log_config.0.aggregation_interval
               - log_config.0.flow_sampling
               - log_config.0.metadata
+              - log_config.0.filterExpr
             description: |
               Can only be specified if VPC flow logging for this subnetwork is enabled.
               Toggles the aggregation interval for collecting flow logs. Increasing the
               interval time will reduce the amount of generated flow logs for long
               lasting connections. Default is an interval of 5 seconds per connection.
-              Possible values are INTERVAL_5_SEC, INTERVAL_30_SEC, INTERVAL_1_MIN,
-              INTERVAL_5_MIN, INTERVAL_10_MIN, INTERVAL_15_MIN
             values:
               - :INTERVAL_5_SEC
               - :INTERVAL_30_SEC
@@ -13514,6 +13664,7 @@ objects:
               - log_config.0.aggregation_interval
               - log_config.0.flow_sampling
               - log_config.0.metadata
+              - log_config.0.filterExpr
             description: |
               Can only be specified if VPC flow logging for this subnetwork is enabled.
               The value of the field must be in [0, 1]. Set the sampling rate of VPC
@@ -13527,6 +13678,7 @@ objects:
               - log_config.0.aggregation_interval
               - log_config.0.flow_sampling
               - log_config.0.metadata
+              - log_config.0.filterExpr
             description: |
               Can only be specified if VPC flow logging for this subnetwork is enabled.
               Configures whether metadata fields should be added to the reported VPC
@@ -13534,14 +13686,32 @@ objects:
             values:
               - :EXCLUDE_ALL_METADATA
               - :INCLUDE_ALL_METADATA
+              - :CUSTOM_METADATA
             default_value: :INCLUDE_ALL_METADATA
+          - !ruby/object:Api::Type::Array
+            name: 'metadataFields'
+            description: |
+              List of metadata fields that should be added to reported logs.
+              Can only be specified if VPC flow logs for this subnetwork is enabled and "metadata" is set to CUSTOM_METADATA.
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::String
+            name: 'filterExpr'
+            at_least_one_of:
+              - log_config.0.aggregation_interval
+              - log_config.0.flow_sampling
+              - log_config.0.metadata
+              - log_config.0.filterExpr
+            description: |
+              Export filter used to define which VPC flow logs should be logged, as as CEL expression. See
+              https://cloud.google.com/vpc/docs/flow-logs#filtering for details on how to format this field.
+            default_value: "true"
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Private Google Access':
           'https://cloud.google.com/vpc/docs/configure-private-google-access'
         'Cloud Networking':
           'https://cloud.google.com/vpc/docs/using-vpc'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/subnetworks'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/subnetworks'
   - !ruby/object:Api::Resource
     name: 'TargetHttpProxy'
     kind: 'compute#targetHttpProxy'
@@ -14573,7 +14743,7 @@ objects:
               description: |
                 IP address of the interface in the external VPN gateway.
                 Only IPv4 is supported. This IP address can be either from
-                your on-premise gateway or another Cloud provider’s VPN gateway,
+                your on-premise gateway or another Cloud provider's VPN gateway,
                 it cannot be an IP address from Google Compute Engine.
   - !ruby/object:Api::Resource
     name: 'UrlMap'
@@ -16055,7 +16225,7 @@ objects:
               name: 'defaultRouteAction'
               # TODO: (mbang) conflicts also won't work for array path matchers yet, uncomment here once supported.
               # conflicts:
-              #   - defaultUrlRedirect
+              #   - path_matcher.path_matcher.default_url_redirect
               description: |
                 defaultRouteAction takes effect when none of the pathRules or routeRules match. The load balancer performs
                 advanced routing actions like URL rewrites, header transformations, etc. prior to forwarding the request
@@ -16398,7 +16568,7 @@ objects:
           - default_url_redirect
           - default_route_action.0.weighted_backend_services
         conflicts:
-          - defaultRouteAction
+          - default_route_action
         description: |
           When none of the specified hostRules match, the request is redirected to a URL specified
           by defaultUrlRedirect. If defaultUrlRedirect is specified, defaultService or
@@ -16465,7 +16635,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'defaultRouteAction'
         conflicts:
-          - defaultUrlRedirect
+          - default_url_redirect
         description: |
           defaultRouteAction takes effect when none of the hostRules match. The load balancer performs advanced routing actions
           like URL rewrites, header transformations, etc. prior to forwarding the request to the selected backend.

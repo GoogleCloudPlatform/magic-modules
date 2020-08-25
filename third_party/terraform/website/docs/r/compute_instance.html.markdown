@@ -203,7 +203,7 @@ The `initialize_params` block supports:
 * `size` - (Optional) The size of the image in gigabytes. If not specified, it
     will inherit the size of its base image.
 
-* `type` - (Optional) The GCE disk type. May be set to pd-standard or pd-ssd.
+* `type` - (Optional) The GCE disk type. May be set to pd-standard, pd-balanced or pd-ssd.
 
 * `image` - (Optional) The image from which to initialize this disk. This can be
     one of: the image's `self_link`, `projects/{project}/global/images/{image}`,
@@ -337,7 +337,7 @@ The `node_affinities` block supports:
 * `operator` (Required) - The operator. Can be `IN` for node-affinities
     or `NOT_IN` for anti-affinities.
 
-* `value` (Required) - The values for the node affinity label.
+* `values` (Required) - The values for the node affinity label.
 
 The `shielded_instance_config` block supports:
 
