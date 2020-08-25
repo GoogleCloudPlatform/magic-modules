@@ -15,15 +15,18 @@ func TestAccComputeRegionPerInstanceConfig_statefulBasic(t *testing.T) {
 	skipIfVcr(t)
 	t.Parallel()
 
+	suffix := randString(t, 10)
+	rigmName := fmt.Sprintf("tf-test-rigm-%s", suffix)
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"rigm_name": rigmName,
+		"random_suffix": suffix,
 		"config_name" : fmt.Sprintf("instance-%s", randString(t, 10)),
 		"config_name2" : fmt.Sprintf("instance-%s", randString(t, 10)),
 		"config_name3" : fmt.Sprintf("instance-%s", randString(t, 10)),
 		"config_name4" : fmt.Sprintf("instance-%s", randString(t, 10)),
 	}
-	rigmId := fmt.Sprintf("projects/%s/regions/%s/instanceGroupManagers/tf-test-rigm-%s",
-		getTestProjectFromEnv(), "us-central1", context["random_suffix"])
+	rigmId := fmt.Sprintf("projects/%s/regions/%s/instanceGroupManagers/%s",
+		getTestProjectFromEnv(), "us-central1", rigmName)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -283,7 +286,7 @@ resource "google_compute_instance_template" "rigm-basic" {
 
 resource "google_compute_region_instance_group_manager" "rigm" {
   description = "Terraform test instance group manager"
-  name        = "tf-test-rigm-%{random_suffix}"
+  name        = "%{rigm_name}"
 
   version {
     name              = "prod"
