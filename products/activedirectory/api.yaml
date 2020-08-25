@@ -24,7 +24,8 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Domain'
     kind: 'activedirectory#domain'
-    base_url : projects/{{project}}/locations/global/domains?domainName={{domain_name}}
+    base_url: projects/{{project}}/locations/global/domains
+    create_url: projects/{{project}}/locations/global/domains?domainName={{domain_name}}
     update_verb: :PATCH
     update_mask: true
     self_link: '{{name}}'
