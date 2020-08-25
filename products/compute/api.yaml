@@ -13644,6 +13644,7 @@ objects:
               - log_config.0.aggregation_interval
               - log_config.0.flow_sampling
               - log_config.0.metadata
+              - log_config.0.filterExpr
             description: |
               Can only be specified if VPC flow logging for this subnetwork is enabled.
               Toggles the aggregation interval for collecting flow logs. Increasing the
@@ -13663,6 +13664,7 @@ objects:
               - log_config.0.aggregation_interval
               - log_config.0.flow_sampling
               - log_config.0.metadata
+              - log_config.0.filterExpr
             description: |
               Can only be specified if VPC flow logging for this subnetwork is enabled.
               The value of the field must be in [0, 1]. Set the sampling rate of VPC
@@ -13676,6 +13678,7 @@ objects:
               - log_config.0.aggregation_interval
               - log_config.0.flow_sampling
               - log_config.0.metadata
+              - log_config.0.filterExpr
             description: |
               Can only be specified if VPC flow logging for this subnetwork is enabled.
               Configures whether metadata fields should be added to the reported VPC
@@ -13683,14 +13686,32 @@ objects:
             values:
               - :EXCLUDE_ALL_METADATA
               - :INCLUDE_ALL_METADATA
+              - :CUSTOM_METADATA
             default_value: :INCLUDE_ALL_METADATA
+          - !ruby/object:Api::Type::Array
+            name: 'metadataFields'
+            description: |
+              List of metadata fields that should be added to reported logs.
+              Can only be specified if VPC flow logs for this subnetwork is enabled and "metadata" is set to CUSTOM_METADATA.
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::String
+            name: 'filterExpr'
+            at_least_one_of:
+              - log_config.0.aggregation_interval
+              - log_config.0.flow_sampling
+              - log_config.0.metadata
+              - log_config.0.filterExpr
+            description: |
+              Export filter used to define which VPC flow logs should be logged, as as CEL expression. See
+              https://cloud.google.com/vpc/docs/flow-logs#filtering for details on how to format this field.
+            default_value: "true"
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Private Google Access':
           'https://cloud.google.com/vpc/docs/configure-private-google-access'
         'Cloud Networking':
           'https://cloud.google.com/vpc/docs/using-vpc'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/subnetworks'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/subnetworks'
   - !ruby/object:Api::Resource
     name: 'TargetHttpProxy'
     kind: 'compute#targetHttpProxy'

@@ -35,6 +35,10 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 	transformed["aggregationInterval"] = original["aggregation_interval"]
 	transformed["flowSampling"] = original["flow_sampling"]
 	transformed["metadata"] = original["metadata"]
+	transformed["filterExpr"] = original["filter_expr"]
+	
+	// make it JSON marshallable
+	transformed["metadataFields"] = original["metadata_fields"].(*schema.Set).List()
 
 	return transformed, nil
 }
