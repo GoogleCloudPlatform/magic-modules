@@ -1891,6 +1891,28 @@ func TestAccComputeInstance_resourcePolicyCollocate(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+
+func TestAccComputeInstance_multiWriter(t *testing.T) {
+	t.Parallel()
+	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	diskName := fmt.Sprintf("tf-testd-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_multiWriter(instanceName, diskName, true),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+		},
+	})
+}
+
+<% end -%>
+
 func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -4763,3 +4785,48 @@ resource "google_compute_resource_policy" "foo" {
 
 `, instance, instance, suffix)
 }
+
+<% unless version == 'ga' -%>
+func testAccComputeInstance_multiWriter(instance string,  diskName string, enableMultiwriter bool) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name         = "%s"
+  size         = 10
+  type         = "pd-ssd"
+	zone         = "us-central1-a"
+	multi_writer  = %t
+}
+
+resource "google_compute_instance" "foobar" {
+  name           = "%s"
+  machine_type   = "n1-standard-1"
+  zone           = "us-central1-a"
+  can_ip_forward = false
+	tags           = ["foo", "bar"]
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+	}
+
+	attached_disk {
+    source = google_compute_disk.foobar.name
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+}
+`, diskName, enableMultiwriter, instance)
+}
+<% end -%>
