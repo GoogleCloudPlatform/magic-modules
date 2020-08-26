@@ -187,7 +187,7 @@ objects:
         description: |
             The proxy endpoint that is used to access the Jupyter notebook.
         output: true
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Array
         name: 'instanceOwners'
         description: |
             The owner of this instance after creation. 
@@ -195,6 +195,7 @@ objects:
             Currently supports one owner only. 
             If not specified, all of the service account users of 
             your VM instance's service account can use the instance.
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'serviceAccount'
         description: |
@@ -247,6 +248,7 @@ objects:
           - STOPPING
           - STOPPED
           - DELETED
+          - INITIALIZING
         description: |
             The state of this instance.
         output: true
