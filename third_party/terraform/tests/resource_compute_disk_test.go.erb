@@ -458,7 +458,7 @@ func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 <% end -%>
 
 <% unless version == 'ga' -%>
-func TestAccComputeDisk_multiWriterAndVSSWindows(t *testing.T) {
+func TestAccComputeDisk_VSSWindows(t *testing.T) {
 	t.Parallel()
 
 	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
@@ -471,7 +471,7 @@ func TestAccComputeDisk_multiWriterAndVSSWindows(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeDisk_multiWriterAndWindowsVSS(firstDiskName, projectName, snapshotName, diskName),
+				Config: testAccComputeDisk_WindowsVSS(firstDiskName, projectName, snapshotName, diskName),
 			},
 			{
 				ResourceName:      "google_compute_disk.foobar",
@@ -804,7 +804,7 @@ resource "google_compute_disk" "foobar" {
 
 
 <% unless version == 'ga' -%>
-func testAccComputeDisk_multiWriterAndWindowsVSS(firstDiskName, projectName, snapshotName, diskName string) string {
+func testAccComputeDisk_WindowsVSS(firstDiskName, projectName, snapshotName, diskName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_disk" "sourcedisk" {
   name    = "d1-%s"
