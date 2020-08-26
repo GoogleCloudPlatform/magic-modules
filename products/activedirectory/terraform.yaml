@@ -32,6 +32,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "ad-domain"
         vars:
           name: "myorg"
+          # the part of the domain before the first "." must be <15 chars, and
+          # the random suffix is 10 chars. In order to make sure these get swept,
+          # 'tfgen' is the only option here.
+          domain_name: tfgen
   DomainTrust: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/locations/global/domains/{{domain}}/{{target_domain_name}}"
     import_format: ["projects/{{project}}/locations/global/domains/{{domain}}/{{target_domain_name}}"]
