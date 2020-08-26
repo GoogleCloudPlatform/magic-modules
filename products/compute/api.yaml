@@ -2912,13 +2912,6 @@ objects:
           URL of the disk type resource describing which disk type to use to
           create the disk. Provide this when creating the disk.
       - !ruby/object:Api::Type::Boolean
-        name: 'multiWriter'
-        min_version: beta
-        default_value: false
-        description: |
-          Indicates whether or not the disk can be read/write attached 
-          to more than one instance.
-      - !ruby/object:Api::Type::Boolean
         name: 'eraseWindowsVssSignature'
         min_version: beta
         default_value: false
