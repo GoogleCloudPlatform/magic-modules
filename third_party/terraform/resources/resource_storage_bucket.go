@@ -325,10 +325,19 @@ func resourceStorageBucket() *schema.Resource {
 				Description: `The bucket's Access & Storage Logs configuration.`,
 			},
 			"bucket_policy_only": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Computed:    true,
-				Description: `Enables Bucket Policy Only access to a bucket.`,
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Computed:      true,
+				Description:   `Enables Bucket Policy Only access to a bucket.`,
+				Deprecated:    `Please use the uniform_bucket_level_access as this field has been renamed by Google.`,
+				ConflictsWith: []string{"uniform_bucket_level_access"},
+			},
+			"uniform_bucket_level_access": {
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Computed:      true,
+				Description:   `Enables uniform bucket-level access on a bucket.`,
+				ConflictsWith: []string{"bucket_policy_only"},
 			},
 		},
 	}
@@ -550,6 +559,9 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 	if d.HasChange("bucket_policy_only") {
 		sb.IamConfiguration = expandIamConfiguration(d)
 	}
+	if d.HasChange("uniform_bucket_level_access") {
+		sb.IamConfiguration = expandIamConfiguration(d)
+	}
 
 	res, err := config.clientStorage.Buckets.Patch(d.Get("name").(string), sb).Do()
 
@@ -632,10 +644,26 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("website", flattenBucketWebsite(res.Website))
 	d.Set("retention_policy", flattenBucketRetentionPolicy(res.RetentionPolicy))
 
-	if res.IamConfiguration != nil && res.IamConfiguration.BucketPolicyOnly != nil {
-		d.Set("bucket_policy_only", res.IamConfiguration.BucketPolicyOnly.Enabled)
-	} else {
-		d.Set("bucket_policy_only", false)
+	// Use this in the next major version of the provider.
+	// if res.IamConfiguration != nil && res.IamConfiguration.UniformBucketLevelAccess != nil {
+	// 	d.Set("uniform_bucket_level_access", res.IamConfiguration.UniformBucketLevelAccess.Enabled)
+	// } else {
+	// 	d.Set("uniform_bucket_level_access", false)
+	// }
+
+	// Delete this block in next major version of the provider.
+	if _, ok := d.GetOk("bucket_policy_only"); ok {
+		if res.IamConfiguration != nil && res.IamConfiguration.BucketPolicyOnly != nil {
+			d.Set("bucket_policy_only", res.IamConfiguration.BucketPolicyOnly.Enabled)
+		} else {
+			d.Set("bucket_policy_only", false)
+		}
+	} else if _, ok := d.GetOk("uniform_bucket_level_access"); ok {
+		if res.IamConfiguration != nil && res.IamConfiguration.UniformBucketLevelAccess != nil {
+			d.Set("uniform_bucket_level_access", res.IamConfiguration.UniformBucketLevelAccess.Enabled)
+		} else {
+			d.Set("uniform_bucket_level_access", false)
+		}
 	}
 
 	if res.Billing == nil {
@@ -995,19 +1023,42 @@ func expandBucketWebsite(v interface{}) *storage.BucketWebsite {
 	if v := website["main_page_suffix"]; v != "" {
 		w.MainPageSuffix = v.(string)
 	}
-
 	return w
 }
 
+// remove this on next major release of the provider.
 func expandIamConfiguration(d *schema.ResourceData) *storage.BucketIamConfiguration {
-	return &storage.BucketIamConfiguration{
-		ForceSendFields: []string{"BucketPolicyOnly"},
-		BucketPolicyOnly: &storage.BucketIamConfigurationBucketPolicyOnly{
-			Enabled:         d.Get("bucket_policy_only").(bool),
-			ForceSendFields: []string{"Enabled"},
-		},
+	var ret *storage.BucketIamConfiguration
+	if _, ok := d.GetOk("bucket_policy_only"); ok {
+		ret = &storage.BucketIamConfiguration{
+			ForceSendFields: []string{"BucketPolicyOnly"},
+			BucketPolicyOnly: &storage.BucketIamConfigurationBucketPolicyOnly{
+				Enabled:         d.Get("bucket_policy_only").(bool),
+				ForceSendFields: []string{"Enabled"},
+			},
+		}
+	} else if _, ok := d.GetOk("uniform_bucket_level_access"); ok {
+		ret = &storage.BucketIamConfiguration{
+			ForceSendFields: []string{"UniformBucketLevelAccess"},
+			UniformBucketLevelAccess: &storage.BucketIamConfigurationUniformBucketLevelAccess{
+				Enabled:         d.Get("uniform_bucket_level_access").(bool),
+				ForceSendFields: []string{"Enabled"},
+			},
+		}
 	}
+	return ret
 }
+
+// Uncomment once the previous function is removed.
+// func expandIamConfiguration(d *schema.ResourceData) *storage.BucketIamConfiguration {
+// 	return &storage.BucketIamConfiguration{
+// 		ForceSendFields: []string{"UniformBucketLevelAccess"},
+// 		UniformBucketLevelAccess: &storage.BucketIamConfigurationUniformBucketLevelAccess{
+// 			Enabled:         d.Get("uniform_bucket_level_access").(bool),
+// 			ForceSendFields: []string{"Enabled"},
+// 		},
+// 	}
+// }
 
 func expandStorageBucketLifecycle(v interface{}) (*storage.BucketLifecycle, error) {
 	if v == nil {
