@@ -644,26 +644,13 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("website", flattenBucketWebsite(res.Website))
 	d.Set("retention_policy", flattenBucketRetentionPolicy(res.RetentionPolicy))
 
-	// Use this in the next major version of the provider.
-	// if res.IamConfiguration != nil && res.IamConfiguration.UniformBucketLevelAccess != nil {
-	// 	d.Set("uniform_bucket_level_access", res.IamConfiguration.UniformBucketLevelAccess.Enabled)
-	// } else {
-	// 	d.Set("uniform_bucket_level_access", false)
-	// }
-
 	// Delete this block in next major version of the provider.
-	if _, ok := d.GetOk("bucket_policy_only"); ok {
-		if res.IamConfiguration != nil && res.IamConfiguration.BucketPolicyOnly != nil {
-			d.Set("bucket_policy_only", res.IamConfiguration.BucketPolicyOnly.Enabled)
-		} else {
-			d.Set("bucket_policy_only", false)
-		}
-	} else if _, ok := d.GetOk("uniform_bucket_level_access"); ok {
-		if res.IamConfiguration != nil && res.IamConfiguration.UniformBucketLevelAccess != nil {
-			d.Set("uniform_bucket_level_access", res.IamConfiguration.UniformBucketLevelAccess.Enabled)
-		} else {
-			d.Set("uniform_bucket_level_access", false)
-		}
+	if res.IamConfiguration != nil && res.IamConfiguration.UniformBucketLevelAccess != nil {
+		d.Set("uniform_bucket_level_access", res.IamConfiguration.UniformBucketLevelAccess.Enabled)
+		d.Set("bucket_policy_only", res.IamConfiguration.UniformBucketLevelAccess.Enabled)
+	} else {
+		d.Set("bucket_policy_only", false)
+		d.Set("uniform_bucket_level_access", false)
 	}
 
 	if res.Billing == nil {
@@ -1029,19 +1016,29 @@ func expandBucketWebsite(v interface{}) *storage.BucketWebsite {
 // remove this on next major release of the provider.
 func expandIamConfiguration(d *schema.ResourceData) *storage.BucketIamConfiguration {
 	var ret *storage.BucketIamConfiguration
-	if _, ok := d.GetOk("bucket_policy_only"); ok {
+
+	if d.HasChange("bucket_policy_only") {
 		ret = &storage.BucketIamConfiguration{
 			ForceSendFields: []string{"BucketPolicyOnly"},
-			BucketPolicyOnly: &storage.BucketIamConfigurationBucketPolicyOnly{
+			UniformBucketLevelAccess: &storage.BucketIamConfigurationUniformBucketLevelAccess{
 				Enabled:         d.Get("bucket_policy_only").(bool),
 				ForceSendFields: []string{"Enabled"},
 			},
 		}
-	} else if _, ok := d.GetOk("uniform_bucket_level_access"); ok {
+
+	} else if d.HasChange("uniform_bucket_level_access") {
 		ret = &storage.BucketIamConfiguration{
 			ForceSendFields: []string{"UniformBucketLevelAccess"},
 			UniformBucketLevelAccess: &storage.BucketIamConfigurationUniformBucketLevelAccess{
 				Enabled:         d.Get("uniform_bucket_level_access").(bool),
+				ForceSendFields: []string{"Enabled"},
+			},
+		}
+	} else {
+		ret = &storage.BucketIamConfiguration{
+			ForceSendFields: []string{"UniformBucketLevelAccess"},
+			UniformBucketLevelAccess: &storage.BucketIamConfigurationUniformBucketLevelAccess{
+				Enabled:         d.Get("bucket_policy_only").(bool) || d.Get("uniform_bucket_level_access").(bool),
 				ForceSendFields: []string{"Enabled"},
 			},
 		}
