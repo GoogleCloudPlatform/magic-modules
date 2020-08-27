@@ -646,7 +646,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'parent'
         description: |
-          The parent of the inspect template in any of the following formats:
+          The parent of the info type in any of the following formats:
 
           * `projects/{{project}}`
           * `projects/{{project}}/locations/{{location}}`
@@ -659,7 +659,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
-          The resource name of the inspect template. Set by the server.
+          The resource name of the info type. Set by the server.
         output: true
       - !ruby/object:Api::Type::String
         name: 'description'
@@ -668,7 +668,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'displayName'
         description: |
-          User set display name of the inspect template.
+          User set display name of the info type.
       - !ruby/object:Api::Type::NestedObject
         name: 'regex'
         description: Regular expression which defines the rule.
