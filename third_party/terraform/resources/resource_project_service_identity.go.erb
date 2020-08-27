@@ -1,5 +1,7 @@
+<% autogen_exception -%>
 package google
 
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"log"
@@ -88,3 +90,4 @@ func resourceProjectServiceIdentityRead(d *schema.ResourceData, meta interface{}
 func resourceProjectServiceIdentityDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
+<% end -%>

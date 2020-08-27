@@ -1,5 +1,7 @@
+<% autogen_exception -%>
 package google
 
+<% unless version == 'ga' -%>
 import (
 	"testing"
 
@@ -35,3 +37,4 @@ resource "google_project_iam_member" "hc_sa_bq_jobuser" {
 	member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-healthcare.iam.gserviceaccount.com"
 }`
 }
+<% end -%>
