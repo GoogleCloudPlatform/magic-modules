@@ -644,7 +644,7 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("website", flattenBucketWebsite(res.Website))
 	d.Set("retention_policy", flattenBucketRetentionPolicy(res.RetentionPolicy))
 
-	// Delete this block in next major version of the provider.
+	// Delete the bucket_policy_only field in the next major version of the provider.
 	if res.IamConfiguration != nil && res.IamConfiguration.UniformBucketLevelAccess != nil {
 		d.Set("uniform_bucket_level_access", res.IamConfiguration.UniformBucketLevelAccess.Enabled)
 		d.Set("bucket_policy_only", res.IamConfiguration.UniformBucketLevelAccess.Enabled)
