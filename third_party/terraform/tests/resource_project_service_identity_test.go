@@ -12,7 +12,6 @@ func TestAccProjectServiceIdentity_basic(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckHealthcareDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleProjectServiceIdentity_basic(),
