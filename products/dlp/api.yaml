@@ -672,6 +672,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'regex'
         description: Regular expression which defines the rule.
+        input: true
         exactly_one_of:
           - dictionary
           - regex
@@ -691,6 +692,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'dictionary'
         description: Dictionary which defines the rule.
+        input: true
         exactly_one_of:
           - dictionary
           - regex
@@ -725,6 +727,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'largeCustomDictionary'
         description: Dictionary which defines the rule.
+        input: true
         exactly_one_of:
           - dictionary
           - regex

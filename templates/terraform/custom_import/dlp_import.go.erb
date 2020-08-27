@@ -17,7 +17,7 @@
 	d.Set("parent", strings.Join(parts, "/"))
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "{{parent}}/<%= object.name.camelize(:lower) -%>/{{name}}")
+	id, err := replaceVars(d, config, "{{parent}}/<%= object.name.camelize(:lower) -%>s/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}

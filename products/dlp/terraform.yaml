@@ -59,6 +59,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           project: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/dlp_stored_info_type.go.erb
       encoder: templates/terraform/encoders/dlp_stored_info_type.go.erb
       custom_import: templates/terraform/custom_import/dlp_import.go.erb
 # This is for copying files over
