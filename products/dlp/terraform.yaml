@@ -46,6 +46,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: templates/terraform/encoders/wrap_object.go.erb
       custom_import: templates/terraform/custom_import/dlp_import.go.erb
   StoredInfoType: !ruby/object:Overrides::Terraform::ResourceOverride
+    async: !ruby/object:Provider::Terraform::PollAsync
+      check_response_func_existence: PollCheckForExistence
+      actions: ['create']
+      operation: !ruby/object:Api::Async::Operation
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 4
     id_format: "{{parent}}/storedInfoTypes/{{name}}"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -54,8 +60,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "dlp_stored_info_type_basic"
         primary_resource_id: "basic"
+        test_env_vars:
+          project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dlp_stored_info_type_dictionary"
+        primary_resource_id: "dictionary"
+        test_env_vars:
+          project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dlp_stored_info_type_large_custom_dictionary"
+        primary_resource_id: "large"
         vars:
-          template: "temp"
+          bucket_name: tf-test-bucket
+          object_name: tf-test-object
         test_env_vars:
           project: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode

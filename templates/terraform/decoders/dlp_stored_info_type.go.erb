@@ -3,13 +3,13 @@
 name := res["name"].(string)
 v, ok := res["currentVersion"]
 if !ok || v == nil {
-  return res, nil
+  return nil, nil
 }
 
 current := v.(map[string]interface{})
 configRaw, ok := current["config"]
 if !ok || configRaw == nil {
-  return res, nil
+  return nil, nil
 }
 
 config := configRaw.(map[string]interface{})
