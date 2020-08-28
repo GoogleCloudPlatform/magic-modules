@@ -76,7 +76,9 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 <% if provider_default_values.include?(param) -%>
 	<%= param -%>, _ := get<%= param.capitalize -%>(d, config)
 	if <%= param -%> != "" {
-		d.Set("<%= param -%>", <%= param -%>)
+		if err := d.Set("<%= param -%>", <%= param -%>); err != nil {
+			return nil, fmt.Errorf("Error reading <%= param -%>: %s", err)
+		}
 	}
 	values["<%= param -%>"] = <%= param -%>
 
@@ -111,13 +113,19 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 <% resource_params.each_with_index do |param, i| -%>
 <% if i == resource_params.size - 1 -%>
 <% if param == 'project' -%>
-	d.Set("project", u.project)
+	if err := d.Set("project", u.project); err != nil {
+		return nil, fmt.Errorf("Error reading project: %s", err)
+	}
 <% else -%>
 <%# Set the last parameter as the long name (unless it is project) -%>
-	d.Set("<%= parent_resource_name -%>", u.GetResourceId())
+	if err := d.Set("<%= parent_resource_name -%>", u.GetResourceId()); err != nil {
+		return nil, fmt.Errorf("Error reading <%= parent_resource_name -%>: %s", err)
+	}
 <% end -%>
 <% else -%>
-	d.Set("<%= param.underscore -%>", u.<%= param.camelize(:lower) -%>)
+	if err := d.Set("<%= param.underscore -%>", u.<%= param.camelize(:lower) -%>); err != nil {
+		return nil, fmt.Errorf("Error reading <%= param.underscore -%>: %s", err)
+	}
 <% end -%>
 <% end -%>
 
@@ -155,10 +163,14 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 	}
 <% if resource_params.last == 'project' -%>
 <%# Resource is only identified by project, so only set project -%>
-	d.Set("project", u.project)
+	if err := d.Set("project", u.project); err != nil {
+		return fmt.Errorf("Error reading project: %s", err)
+	}
 <% else -%>
 <%# Set resource long name in state, this has all the information that we need to identify it -%>
-	d.Set("<%= parent_resource_name -%>", u.GetResourceId())
+	if err := d.Set("<%= parent_resource_name -%>", u.GetResourceId()); err != nil {
+		return fmt.Errorf("Error reading <%= parent_resource_name -%>: %s", err)
+	}
 <% end -%>
 	d.SetId(u.GetResourceId())
 	return nil

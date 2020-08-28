@@ -475,7 +475,9 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
   // Explicitly set virtual fields to default values if unset
 <%-   object.virtual_fields.each do |field| -%>
     if _, ok := d.GetOk("<%= field.name -%>"); !ok {
-      d.Set("<%= field.name -%>", <%= go_literal(field.default_value) -%>)
+      if err := d.Set("<%= field.name -%>", <%= go_literal(field.default_value) -%>); err != nil {
+      	return fmt.Errorf("Error setting <%= field.name -%>: %s", err)
+      }
     }
 <%    end -%>
 <%  end -%>
@@ -506,7 +508,9 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         casted := flattenedProp.([]interface{})[0]
         if casted != nil {
             for k, v := range casted.(map[string]interface{}) {
-                d.Set(k, v)
+                if err := d.Set(k, v); err != nil {
+                	return fmt.Errorf("Error setting %s: %s", k, err)
+                }
             }
         }
     }
@@ -895,7 +899,9 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <%-  unless object.virtual_fields.empty? -%>
     // Explicitly set virtual fields to default values on import
   <%-  object.virtual_fields.each do |field| -%>
-    d.Set("<%= field.name %>", <%= go_literal(field.default_value) -%>)
+    if err := d.Set("<%= field.name %>", <%= go_literal(field.default_value) -%>); err != nil {
+    	return nil, fmt.Errorf("Error setting <%= field.name %>: %s", err)
+    }
   <%   end -%>
 <%   end -%>
 <%= lines(compile(pwd + '/' + object.custom_code.post_import)) if object.custom_code.post_import -%>

@@ -6,7 +6,11 @@
 		return nil, err
 	}
 
-	d.Set("key_ring", cryptoKeyId.KeyRingId.keyRingId())
-	d.Set("name", cryptoKeyId.Name)
+	if err := d.Set("key_ring", cryptoKeyId.KeyRingId.keyRingId()); err != nil {
+		return nil, fmt.Errorf("Error reading key_ring: %s", err)
+	}
+	if err := d.Set("name", cryptoKeyId.Name); err != nil {
+		return nil, fmt.Errorf("Error reading name: %s", err)
+	}
 
 	return []*schema.ResourceData{d}, nil
