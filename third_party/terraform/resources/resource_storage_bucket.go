@@ -1015,35 +1015,23 @@ func expandBucketWebsite(v interface{}) *storage.BucketWebsite {
 
 // remove this on next major release of the provider.
 func expandIamConfiguration(d *schema.ResourceData) *storage.BucketIamConfiguration {
-	var ret *storage.BucketIamConfiguration
-
+	// We are checking for a change because the last else block is only executed on Create.
+	enabled := false
 	if d.HasChange("bucket_policy_only") {
-		ret = &storage.BucketIamConfiguration{
-			ForceSendFields: []string{"BucketPolicyOnly"},
-			UniformBucketLevelAccess: &storage.BucketIamConfigurationUniformBucketLevelAccess{
-				Enabled:         d.Get("bucket_policy_only").(bool),
-				ForceSendFields: []string{"Enabled"},
-			},
-		}
-
+		enabled = d.Get("bucket_policy_only").(bool)
 	} else if d.HasChange("uniform_bucket_level_access") {
-		ret = &storage.BucketIamConfiguration{
-			ForceSendFields: []string{"UniformBucketLevelAccess"},
-			UniformBucketLevelAccess: &storage.BucketIamConfigurationUniformBucketLevelAccess{
-				Enabled:         d.Get("uniform_bucket_level_access").(bool),
-				ForceSendFields: []string{"Enabled"},
-			},
-		}
+		enabled = d.Get("uniform_bucket_level_access").(bool)
 	} else {
-		ret = &storage.BucketIamConfiguration{
-			ForceSendFields: []string{"UniformBucketLevelAccess"},
-			UniformBucketLevelAccess: &storage.BucketIamConfigurationUniformBucketLevelAccess{
-				Enabled:         d.Get("bucket_policy_only").(bool) || d.Get("uniform_bucket_level_access").(bool),
-				ForceSendFields: []string{"Enabled"},
-			},
-		}
+		enabled = d.Get("bucket_policy_only").(bool) || d.Get("uniform_bucket_level_access").(bool)
 	}
-	return ret
+
+	return &storage.BucketIamConfiguration{
+		ForceSendFields: []string{"UniformBucketLevelAccess"},
+		UniformBucketLevelAccess: &storage.BucketIamConfigurationUniformBucketLevelAccess{
+			Enabled:         enabled,
+			ForceSendFields: []string{"Enabled"},
+		},
+	}
 }
 
 // Uncomment once the previous function is removed.
