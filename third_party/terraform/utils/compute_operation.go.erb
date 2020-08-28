@@ -71,12 +71,14 @@ func (w *ComputeOperationWaiter) QueryOp() (interface{}, error) {
 	if w == nil || w.Op == nil {
 		return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
 	}
-	select {
-	case <-w.Context.Done():
-		log.Println("[WARN] request has been cancelled early")
-		return w.Op, errors.New("unable to finish polling, context has been cancelled")
-	default:
-		// default must be here to keep the previous case from blocking
+	if w.Context != nil {
+		select {
+		case <-w.Context.Done():
+			log.Println("[WARN] request has been cancelled early")
+			return w.Op, errors.New("unable to finish polling, context has been cancelled")
+		default:
+			// default must be here to keep the previous case from blocking
+		}
 	}
 	if w.Op.Zone != "" {
 		zone := GetResourceNameFromSelfLink(w.Op.Zone)
