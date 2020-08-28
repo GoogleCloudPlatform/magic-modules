@@ -485,7 +485,10 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 		d.Set("operation", "")
 		err = computeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", d.Timeout(schema.TimeoutCreate))
 		if err != nil {
-			return err
+			// remove from state to allow refresh to finish
+			log.Printf("[DEBUG] Resumed operation returned an error, removing from state: %s",err)
+			d.SetId("")
+			return nil
 		}
 	}
 
