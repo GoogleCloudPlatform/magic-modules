@@ -2142,6 +2142,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "managed_ssl_certificate_recreation"
         primary_resource_id: "default"
         # Random provider
+        needs_random: true
         skip_vcr: true
         min_version: beta
     description: |
