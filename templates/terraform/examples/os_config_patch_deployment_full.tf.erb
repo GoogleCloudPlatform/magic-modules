@@ -94,4 +94,11 @@ resource "google_os_config_patch_deployment" "<%= ctx[:primary_resource_id] %>" 
       }
     }
   }
+
+  rollout {
+    mode = "ZONE_BY_ZONE"
+    disruptionBudget {
+      fixed = 1
+    }
+  }
 }
