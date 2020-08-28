@@ -28,6 +28,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "bigquery_connection_basic"
         primary_resource_id: "connection"
         # Random provider
+        needs_random: true
         skip_vcr: true
         vars:
           database_instance_name: "my-database-instance"
@@ -37,6 +38,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "bigquery_connection_full"
         primary_resource_id: "connection"
         # Random provider
+        needs_random: true
         skip_vcr: true
         vars:
           database_instance_name: "my-database-instance"

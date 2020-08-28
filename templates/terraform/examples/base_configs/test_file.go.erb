@@ -63,7 +63,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 		Providers: testAccProvidersOiCS,
 		<% end -%>
 		<%#- The Terraform test runner doesn't let us import resources with aliased providers (yet) -%>
-		<% if example.needs_random  && !versioned_provider -%>
+		<% if example.needs_random  -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 		},
