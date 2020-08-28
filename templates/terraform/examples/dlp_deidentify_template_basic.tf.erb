@@ -31,9 +31,12 @@ resource "google_data_loss_prevention_deidentify_template" "<%= ctx[:primary_res
 				}
 
 				primitive_transformation {
-					replace_config {
-						new_value {
-							string_value = "X"
+					character_mask_config {
+						masking_character = "X"
+						number_to_mask = 4
+						reverse_order = true
+						characters_to_ignore {
+							common_characters_to_ignore = "PUNCTUATION"
 						}
 					}
 				}

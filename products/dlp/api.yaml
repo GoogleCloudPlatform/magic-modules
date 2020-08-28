@@ -954,7 +954,7 @@ objects:
                                     - :SATURDAY
                                     - :SUNDAY
                         - !ruby/object:Api::Type::NestedObject
-                          name: 'characterMaskingConfig'
+                          name: 'characterMaskConfig'
                           description: |
                             Partially mask a string by replacing a given number of characters with a fixed character.
                             Masking can start from the beginning or end of the string.
