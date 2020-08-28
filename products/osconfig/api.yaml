@@ -856,6 +856,7 @@ objects:
             values:
               - :ZONE_BY_ZONE
               - :CONCURRENT_ZONES
+            required: true
           - !ruby/object:Api::Type::NestedObject
             name: 'disruptionBudget'
             description: |
@@ -870,8 +871,8 @@ objects:
                 description: |
                   Specifies a fixed value.
                 exactly_one_of:
-                  - fixed
-                  - percentage
+                  - rollout.0.disruption_budget.0.fixed
+                  - rollout.0.disruption_budget.0.percentage
               - !ruby/object:Api::Type::Integer
                 name: percentage
                 description: |
@@ -879,6 +880,7 @@ objects:
                 exactly_one_of:
                   - fixed
                   - percentage
+            required: true
   - !ruby/object:Api::Resource
     name: 'GuestPolicies'
     base_url: "projects/{{project}}/guestPolicies"
