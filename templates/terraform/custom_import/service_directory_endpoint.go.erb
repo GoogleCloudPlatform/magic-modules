@@ -9,7 +9,7 @@ nameParts := strings.Split(d.Get("name").(string), "/")
 if len(nameParts) == 10 {
 	// `projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}/endpoints/{{endpoint_id}}`
 	if err := d.Set("service", fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", nameParts[1], nameParts[3], nameParts[5], nameParts[7])); err != nil {
-		return nil, fmt.Errorf("Error reading service", fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s: %s", err)
+		return nil, fmt.Errorf("Error reading service: %s", err)
 	}
 	if err := d.Set("endpoint_id", nameParts[9]); err != nil {
 		return nil, fmt.Errorf("Error reading endpoint_id: %s", err)
@@ -34,7 +34,7 @@ if len(nameParts) == 10 {
 			return nil, err
 	}
 	if err := d.Set("service", fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", project, nameParts[0], nameParts[1], nameParts[2])); err != nil {
-		return nil, fmt.Errorf("Error reading service%s: %s", err)
+		return nil, fmt.Errorf("Error reading service: %s", err)
 	}
 	if err := d.Set("endpoint_id", nameParts[3]); err != nil {
 		return nil, fmt.Errorf("Error reading endpoint_id: %s", err)

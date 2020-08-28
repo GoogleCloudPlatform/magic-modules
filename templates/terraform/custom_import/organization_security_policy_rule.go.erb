@@ -14,7 +14,7 @@ if len(nameParts) != 6 {
 		)
 }
 if err := d.Set("policy_id", fmt.Sprintf("locations/global/securityPolicies/%s", nameParts[3])); err != nil {
-	return fmt.Errorf("Error setting policy_id: %s", err)
+	return nil, fmt.Errorf("Error setting policy_id: %s", err)
 }
 
 if prio, err := strconv.ParseInt(nameParts[5], 10, 64); err != nil {
