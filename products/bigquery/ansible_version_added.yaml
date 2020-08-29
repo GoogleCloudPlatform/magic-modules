@@ -47,6 +47,10 @@
       :version_added: '2.8'
     :location:
       :version_added: '2.8'
+    :defaultEncryptionConfiguration:
+      :version_added: '2.10'
+      :kmsKeyName:
+        :version_added: '2.10'
   :Table:
     :version_added: '2.8'
     :tableReference:

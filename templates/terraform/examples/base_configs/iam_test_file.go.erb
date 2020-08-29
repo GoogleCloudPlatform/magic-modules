@@ -194,6 +194,8 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 }
 
 func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *testing.T) {
+	// Multiple fine-grained resources
+	skipIfVcr(t)
 	t.Parallel()
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
@@ -258,6 +260,8 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 }
 
 func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *testing.T) {
+	// Multiple fine-grained resources
+	skipIfVcr(t)
 	t.Parallel()
 
 <%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
