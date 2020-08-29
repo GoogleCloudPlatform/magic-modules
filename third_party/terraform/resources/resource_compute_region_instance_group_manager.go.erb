@@ -614,7 +614,7 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 	}
 
 	// Apply Update to Instances API call
-	if d.Get("update_policy.0.type") == "OPPORTUNISTIC" {
+	if d.Get("update_policy.0.type") == "OPPORTUNISTIC" && d.HasChange("version") {
 
 		update_parameters := &computeBeta.RegionInstanceGroupManagersApplyUpdatesRequest{
 			AllInstances:                d.Get("apply_updates_to_instances.0.all_instances").(bool),
