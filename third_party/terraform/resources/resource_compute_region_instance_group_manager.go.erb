@@ -316,13 +316,13 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 						"all_instances": {
 							Type:         schema.TypeBool,
 							Required:     true,
-							Description:  `Whether all instanes are updated, set to true.`,
+							Description:  `Whether all instances are updated, set to true.`,
 						},
 
 						"most_disruptive_allowed_action": {
 							Type:          schema.TypeString,
 							Required:      true,
-							Description:   `The maximum number of instances that can be created above the specified targetSize during the update process. Conflicts with max_surge_percent. It has to be either 0 or at least equal to the number of zones. If fixed values are used, at least one of max_unavailable_fixed or max_surge_fixed must be greater than 0.`,
+							Description:   `The most disruptive action that you want to perform on each instance during the update. By default, the most disruptive allowed action is REPLACE. If your update requires a more disruptive action than you set with this flag, the update request will fail.`,
 						},
 					},
 				},
