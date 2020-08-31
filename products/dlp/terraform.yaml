@@ -28,7 +28,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/wrap_object.go.erb
-      custom_import: templates/terraform/custom_import/dlp_job_trigger.go.erb
+      custom_import: templates/terraform/custom_import/dlp_import.go.erb
   InspectTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{parent}}/inspectTemplates/{{name}}"
     properties:
@@ -44,7 +44,41 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           project: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/wrap_object.go.erb
-      custom_import: templates/terraform/custom_import/dlp_inspect_template.go.erb
+      custom_import: templates/terraform/custom_import/dlp_import.go.erb
+  StoredInfoType: !ruby/object:Overrides::Terraform::ResourceOverride
+    async: !ruby/object:Provider::Terraform::PollAsync
+      check_response_func_existence: PollCheckForExistence
+      actions: ['create']
+      operation: !ruby/object:Api::Async::Operation
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 4
+    id_format: "{{parent}}/storedInfoTypes/{{name}}"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dlp_stored_info_type_basic"
+        primary_resource_id: "basic"
+        test_env_vars:
+          project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dlp_stored_info_type_dictionary"
+        primary_resource_id: "dictionary"
+        test_env_vars:
+          project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dlp_stored_info_type_large_custom_dictionary"
+        primary_resource_id: "large"
+        vars:
+          bucket_name: tf-test-bucket
+          object_name: tf-test-object
+        test_env_vars:
+          project: :PROJECT_NAME
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/dlp_stored_info_type.go.erb
+      encoder: templates/terraform/encoders/dlp_stored_info_type.go.erb
+      custom_import: templates/terraform/custom_import/dlp_import.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
