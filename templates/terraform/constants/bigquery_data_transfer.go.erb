@@ -1,0 +1,6 @@
+func resourceBigQueryDataTransferDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if k == "params.secret_access_key" {
+		return true
+	}
+	return false
+}

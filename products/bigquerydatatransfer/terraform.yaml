@@ -24,7 +24,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       location: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
       params: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceBigQueryDataTransferDiffSuppress
         custom_flatten: templates/terraform/custom_flatten/json_to_string_map.go.erb
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/bigquery_data_transfer.go.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
         skip_test: true
