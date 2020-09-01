@@ -211,7 +211,7 @@ objects:
           response to increases and decreases in traffic. Care should be taken
           to ramp up traffic according to the model's ability to scale or you
           will start seeing increases in latency and 429 response codes.
-        conflicts: ['manualScaling']
+        conflicts: ['manual_scaling']
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'minNodes'
