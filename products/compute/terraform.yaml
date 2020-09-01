@@ -2076,11 +2076,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # https://github.com/GoogleCloudPlatform/magic-modules/issues/1019
         ignore_read: true
         sensitive: true
-        required: true
         custom_flatten: templates/terraform/custom_flatten/compute_snapshot_snapshot_encryption_raw_key.go.erb
       snapshotEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
         # This is a beta field that showed up in GA. Removed from both.
-        exclude: true
+        name: "kmsKeySelfLink"
       sourceDisk: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       sourceDiskEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride

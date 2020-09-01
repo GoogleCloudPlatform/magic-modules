@@ -2717,6 +2717,11 @@ objects:
             name: 'kmsKeyName'
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key. 
+              If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::String
         name: 'sourceImageId'
@@ -2762,6 +2767,11 @@ objects:
               Your project's Compute Engine System service account
               (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
               `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key. 
+              If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'sourceSnapshot'
@@ -2793,6 +2803,11 @@ objects:
             name: 'kmsKeyName'
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key. 
+              If absent, the Compute Engine Service Agent service account is used.
           - !ruby/object:Api::Type::String
             name: 'sha256'
             description: |
