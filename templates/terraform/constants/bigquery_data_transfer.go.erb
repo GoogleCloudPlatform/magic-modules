@@ -1,6 +1,12 @@
-func resourceBigQueryDataTransferDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	if k == "params.secret_access_key" {
-		return true
+var sensitiveParams = []string{"secret_access_key"}
+
+func sensitiveParamCustomizeDiff(diff *schema.ResourceDiff, v interface{}) error {
+	for _, sp := range sensitiveParams {
+		mapLabel := diff.Get("params." + sp).(string)
+		authLabel := diff.Get("sensitive_params.0." + sp).(string)
+		if mapLabel != "" && authLabel != "" {
+			return fmt.Errorf("Sensitive param [%s] cannot be set in both `params` and the `sensitive_params` block.", sp)
+		}
 	}
-	return false
+	return nil
 }
