@@ -36,6 +36,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         diff_suppress_func: 'compareSelfLinkOrResourceName'
+      cidrBlock: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       schedulingConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareTpuNodeSchedulingConfig'
       schedulingConfig.preemptible: !ruby/object:Overrides::Terraform::PropertyOverride
