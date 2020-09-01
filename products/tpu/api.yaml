@@ -50,7 +50,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/tpu/docs/'
-      api: 'https://cloud.google.com/tpu/docs/reference/rest/'
+      api: 'https://cloud.google.com/tpu/docs/reference/rest/v1/projects.locations.nodes'
     parameters:
       - !ruby/object:Api::Type::String # TODO: resourceref?
         name: 'zone'
@@ -94,8 +94,9 @@ objects:
           used.
       - !ruby/object:Api::Type::String
         name: 'cidrBlock'
-        required: true
         input: true
+        conflicts:
+          - use_service_networking
         description: |
           The CIDR block that the TPU node will use when selecting an IP
           address. This CIDR block must be a /29 block; the Compute Engine
@@ -114,6 +115,17 @@ objects:
           node. To share resources, including Google Cloud Storage data, with
           the Tensorflow job running in the Node, this account must have
           permissions to that data.
+      - !ruby/object:Api::Type::Boolean
+        name: 'useServiceNetworking'
+        description: |
+          Whether the VPC peering for the node is set up through Service Networking API. 
+          The VPC Peering should be set up before provisioning the node. If this field is set, 
+          cidr_block field should not be specified. If the network that you want to peer the 
+          TPU Node to is a Shared VPC network, the node must be created with this this field enabled.
+        input: true
+        default_value: false
+        conflicts:
+          - cidr_block
       - !ruby/object:Api::Type::NestedObject
         name: 'schedulingConfig'
         input: true
