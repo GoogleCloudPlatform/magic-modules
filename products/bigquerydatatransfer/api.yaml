@@ -132,4 +132,4 @@ objects:
             name: secretAccessKey
             required: true
             description: |
-              The Secret Access Key of the AWS account transfering data from.
+              The Secret Access Key of the AWS account transferring data from.
