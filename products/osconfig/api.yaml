@@ -878,8 +878,8 @@ objects:
                 description: |
                   Specifies the relative value defined as a percentage, which will be multiplied by a reference value.
                 exactly_one_of:
-                  - fixed
-                  - percentage
+                  - rollout.0.disruption_budget.0.fixed
+                  - rollout.0.disruption_budget.0.percentage
             required: true
   - !ruby/object:Api::Resource
     name: 'GuestPolicies'

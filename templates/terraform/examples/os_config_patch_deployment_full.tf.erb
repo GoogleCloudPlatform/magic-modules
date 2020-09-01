@@ -97,7 +97,7 @@ resource "google_os_config_patch_deployment" "<%= ctx[:primary_resource_id] %>" 
 
   rollout {
     mode = "ZONE_BY_ZONE"
-    disruptionBudget {
+    disruption_budget {
       fixed = 1
     }
   }
