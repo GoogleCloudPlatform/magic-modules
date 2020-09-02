@@ -21,4 +21,4 @@ else
 fi
 
 # Pass PR number to runner, which expects it
-sh ./run_vcr_tests.sh $PR_NUMBER
+sh /run_vcr_tests.sh $PR_NUMBER
