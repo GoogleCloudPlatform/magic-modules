@@ -5,6 +5,6 @@ RUN apk add --no-cache curl
 RUN apk add --no-cache jq
 
 ADD teamcityparams.xml /teamcityparams.xml
-ADD vcr_test_terraform_community.sh /vcr_test_terraform_community.sh
+ADD run_vcr_tests.sh /run_vcr_tests.sh
 ADD teamcityparamsrecording.xml /teamcityparamsrecording.xml
-ENTRYPOINT ["/vcr_test_terraform_community.sh"]
+ENTRYPOINT ["/run_vcr_tests.sh"]
