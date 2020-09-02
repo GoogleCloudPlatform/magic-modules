@@ -132,7 +132,6 @@ resource "google_cloudbuild_trigger" "build_trigger" {
     repo_name   = "some-repo"
   }
   build {
-    images = ["gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA"]
     tags   = ["team-a", "service-b"]
     timeout = "1800s"
     step {
@@ -150,6 +149,19 @@ resource "google_cloudbuild_trigger" "build_trigger" {
       name = "gcr.io/cloud-builders/docker"
       args = ["build", "-t", "gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA", "-f", "Dockerfile", "."]
       timeout = "300s"
+    }
+    artifacts {
+      images = ["gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA"]
+      objects {
+        timing {
+            start_time = "2014-10-02T15:01:23Z"
+            end_time = "2014-10-02T15:01:23Z"
+        }
+      }
+    }
+    options {
+      disk_size_gb = 100
+      dynamic_substitutions = true
     }
   }
 }
