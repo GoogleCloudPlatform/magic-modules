@@ -102,7 +102,6 @@ objects:
           instances, this can be either [locationId] or [alternativeLocationId]
           and can change after a failover event.
         output: true
-        input: true
       - !ruby/object:Api::Type::String
         name: displayName
         description: |

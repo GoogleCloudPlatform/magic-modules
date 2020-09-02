@@ -48,7 +48,6 @@ module Provider
               end),
             'type' => python_type(prop),
             'aliases' => prop.aliases,
-            'version_added' => version_added(prop),
             'suboptions' => (
                 if prop.nested_properties?
                   prop.nested_properties.reject(&:output).map { |p| documentation_for_property(p) }
@@ -156,7 +155,8 @@ module Provider
           },
           'scopes' => {
             'description' => ['Array of scopes to be used'],
-            'type' => 'list'
+            'type' => 'list',
+            'elements' => 'str'
           },
           'env_type' => {
             'description' => [

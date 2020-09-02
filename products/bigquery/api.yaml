@@ -17,7 +17,7 @@ display_name: BigQuery
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://www.googleapis.com/bigquery/v2/
+    base_url: https://bigquery.googleapis.com/bigquery/v2/
 scopes:
   - https://www.googleapis.com/auth/bigquery
 apis_required:
@@ -435,6 +435,8 @@ objects:
                 name: 'query'
                 description: |
                   SQL query text to execute. The useLegacySql field can be used to indicate whether the query uses legacy SQL or standard SQL.
+                  *NOTE*: queries containing [DML language](https://cloud.google.com/bigquery/docs/reference/standard-sql/data-manipulation-language)
+                  (`DELETE`, `UPDATE`, `MERGE`, `INSERT`) must specify `create_disposition = ""` and `write_disposition = ""`.
                 required: true
               - !ruby/object:Api::Type::NestedObject
                 name: 'destinationTable'
@@ -549,7 +551,7 @@ objects:
                 description: |
                   Specifies whether to use BigQuery's legacy SQL dialect for this query. The default value is true.
                   If set to false, the query will use BigQuery's standard SQL.
-                default_value: true
+                send_empty_value: true
               - !ruby/object:Api::Type::String
                 name: 'parameterMode'
                 description: |
