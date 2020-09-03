@@ -27,6 +27,12 @@ func TestAccSpannerDatabase_basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccSpannerDatabase_basicUpdate(instanceName, databaseName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
+				),
+			},
+			{
 				// Test import with default Terraform ID
 				ResourceName:      "google_spanner_database.basic",
 				ImportState:       true,
