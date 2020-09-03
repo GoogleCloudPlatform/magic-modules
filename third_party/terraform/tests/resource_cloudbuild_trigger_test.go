@@ -153,10 +153,8 @@ resource "google_cloudbuild_trigger" "build_trigger" {
     artifacts {
       images = ["gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA"]
       objects {
-        timing {
-            start_time = "2014-10-02T15:01:23Z"
-            end_time = "2014-10-02T15:01:23Z"
-        }
+        location = "gs://bucket/path/to/somewhere/"
+        paths = ["path"]
       }
     }
     options {

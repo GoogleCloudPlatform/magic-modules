@@ -535,7 +535,6 @@ objects:
                     name: 'location'
                     description: |
                       Cloud Storage bucket and optional object path, in the form "gs://bucket/path/to/somewhere/".
-                      (see Bucket Name Requirements).
 
                       Files in the workspace matching any path pattern will be uploaded to Cloud Storage with
                       this location as a prefix.
@@ -548,6 +547,7 @@ objects:
                     name: 'timing'
                     description: |
                       Output only. Stores timing information for pushing all artifact objects.
+                    output: true
                     properties:
                       - !ruby/object:Api::Type::String
                         name: 'startTime'
