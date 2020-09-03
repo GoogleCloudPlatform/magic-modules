@@ -18,6 +18,11 @@ func resourceSpannerDBDdlCustomDiff(diff *schema.ResourceDiff, meta interface{})
 	oldDdls := old.([]interface{})
 	newDdls := new.([]interface{})
 
+    if len(newDdls) < len(oldDdls) {
+		diff.ForceNew("ddl")
+		return nil
+	}
+
 	for i := range oldDdls {
 		if newDdls[i].(string) != oldDdls[i].(string) {
 			diff.ForceNew("ddl")
