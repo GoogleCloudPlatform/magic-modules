@@ -2720,7 +2720,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'kmsKeyServiceAccount'
             description: |
-              The service account used for the encryption request for the given KMS key. 
+              The service account used for the encryption request for the given KMS key.
               If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::String
@@ -2770,7 +2770,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'kmsKeyServiceAccount'
             description: |
-              The service account used for the encryption request for the given KMS key. 
+              The service account used for the encryption request for the given KMS key.
               If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::ResourceRef
@@ -2806,7 +2806,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'kmsKeyServiceAccount'
             description: |
-              The service account used for the encryption request for the given KMS key. 
+              The service account used for the encryption request for the given KMS key.
               If absent, the Compute Engine Service Agent service account is used.
           - !ruby/object:Api::Type::String
             name: 'sha256'
@@ -12849,7 +12849,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'kmsKeyServiceAccount'
             description: |
-              The service account used for the encryption request for the given KMS key. 
+              The service account used for the encryption request for the given KMS key.
               If absent, the Compute Engine Service Agent service account is used.
       - !ruby/object:Api::Type::NestedObject
         # ignore_read in providers - this is only used in Create
@@ -12880,7 +12880,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'kmsKeyServiceAccount'
             description: |
-              The service account used for the encryption request for the given KMS key. 
+              The service account used for the encryption request for the given KMS key.
               If absent, the Compute Engine Service Agent service account is used.
     properties:
       - !ruby/object:Api::Type::Time

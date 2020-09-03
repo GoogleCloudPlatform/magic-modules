@@ -95,14 +95,16 @@ data "google_compute_image" "my_image" {
   project = "debian-cloud"
 }
 
-data "google_compute_default_service_account" "default" {
+resource "google_service_account" "test" {
+	account_id   = "%s"
+	display_name = "KMS Ops Account"
 }
 
 resource "google_kms_key_ring" "keyring" {
   name     = "%s"
   location = "us-central1"
 }
-  
+
 resource "google_kms_crypto_key" "example-key" {
   name            = "%s"
   key_ring        = google_kms_key_ring.keyring.id
@@ -111,10 +113,10 @@ resource "google_kms_crypto_key" "example-key" {
 
 resource "google_kms_crypto_key_iam_member" "example-key" {
   crypto_key_id = google_kms_crypto_key.example-key.id
-  role          = "roles/cloudkms.cryptoKeyEncrypter"
-  member        = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${google_service_account.test.email}"
 }
-  
+
 resource "google_compute_disk" "foobar" {
   name = "%s"
   size = 10
@@ -123,7 +125,7 @@ resource "google_compute_disk" "foobar" {
 
   disk_encryption_key {
 	kms_key_self_link = google_kms_crypto_key_iam_member.example-key.crypto_key_id
-	kms_key_service_account = data.google_compute_default_service_account.default.email	  
+	kms_key_service_account = google_service_account.test.email
   }
 }
 
@@ -133,8 +135,8 @@ resource "google_compute_snapshot" "foobar" {
   zone        = "us-central1-a"
   snapshot_encryption_key {
 	kms_key_self_link = google_kms_crypto_key_iam_member.example-key.crypto_key_id
-	kms_key_service_account = data.google_compute_default_service_account.default.email	  
+	kms_key_service_account = google_service_account.test.email
   }
 }
-`, diskName, diskName, diskName, snapshotName)
+`, diskName, diskName, diskName, diskName, snapshotName)
 }
