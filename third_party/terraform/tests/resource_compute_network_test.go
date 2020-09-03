@@ -189,7 +189,7 @@ func testAccCheckComputeNetworkDefaultRoutesDeleted(t *testing.T, n string, netw
 
 		config := googleProviderConfig(t)
 
-		routes, err := config.clientCompute.Routes.List("hc-terraform-testing").Filter(fmt.Sprintf("(network=\"%s\") AND (destRange=\"0.0.0.0/0\")", network.SelfLink)).Do()
+		routes, err := config.clientCompute.Routes.List(config.Project).Filter(fmt.Sprintf("(network=\"%s\") AND (destRange=\"0.0.0.0/0\")", network.SelfLink)).Do()
 		if err != nil {
 			return err
 		}
