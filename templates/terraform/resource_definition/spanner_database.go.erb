@@ -1,4 +1,4 @@
-<%- # the license inside this block applies to this file
+<%# The license inside this block applies to this file.
 	# Copyright 2020 Google Inc.
 	# Licensed under the Apache License, Version 2.0 (the "License");
 	# you may not use this file except in compliance with the License.
@@ -12,17 +12,4 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-// customizeDiff func for additional checks on google_spanner_database properties:
-func resourceSpannerDBDdlCustomDiff(diff *schema.ResourceDiff, meta interface{}) error {
-    old, new := diff.GetChange("ddl")
-	oldDdls := old.([]interface{})
-	newDdls := new.([]interface{})
-
-	for i := range oldDdls {
-		if newDdls[i].(string) != oldDdls[i].(string) {
-			diff.ForceNew("ddl")
-			return nil
-		}
-	}
-	return nil
-}
+CustomizeDiff: resourceSpannerDBDdlCustomDiff,
