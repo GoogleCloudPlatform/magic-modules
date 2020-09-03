@@ -51,6 +51,14 @@ func Provider() terraform.ResourceProvider {
 				}, nil),
 			},
 
+			"billing_project": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"GOOGLE_BILLING_PROJECT",
+				}, nil),
+			},
+
 			"region": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -101,6 +109,9 @@ func Provider() terraform.ResourceProvider {
 			"user_project_override": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"USER_PROJECT_OVERRIDE",
+				}, nil),
 			},
 
 			"request_timeout": {
@@ -374,6 +385,9 @@ end     # products.each do
 				"google_kms_crypto_key_iam_member":             ResourceIamMember(IamKmsCryptoKeySchema, NewKmsCryptoKeyIamUpdater, CryptoIdParseFunc),
 				"google_kms_crypto_key_iam_policy":             ResourceIamPolicy(IamKmsCryptoKeySchema, NewKmsCryptoKeyIamUpdater, CryptoIdParseFunc),
 				"google_monitoring_dashboard":                  resourceMonitoringDashboard(),
+				<% unless version == 'ga' -%>
+				"google_project_service_identity":              resourceProjectServiceIdentity(),
+				<% end -%>
 				"google_service_networking_connection":         resourceServiceNetworkingConnection(),
 				"google_spanner_instance_iam_binding":          ResourceIamBinding(IamSpannerInstanceSchema, NewSpannerInstanceIamUpdater, SpannerInstanceIdParseFunc),
 				"google_spanner_instance_iam_member":           ResourceIamMember(IamSpannerInstanceSchema, NewSpannerInstanceIamUpdater, SpannerInstanceIdParseFunc),
@@ -426,6 +440,7 @@ func providerConfigure(d *schema.ResourceData, p *schema.Provider, terraformVers
 		Region:              d.Get("region").(string),
 		Zone:                d.Get("zone").(string),
 		UserProjectOverride: d.Get("user_project_override").(bool),
+		BillingProject:      d.Get("billing_project").(string),
 		terraformVersion:    terraformVersion,
 	}
 
