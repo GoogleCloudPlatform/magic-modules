@@ -2800,11 +2800,6 @@ objects:
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
           - !ruby/object:Api::Type::String
-            name: 'kmsKeyServiceAccount'
-            description: |
-              The service account used for the encryption request for the given KMS key.
-              If absent, the Compute Engine Service Agent service account is used.
-          - !ruby/object:Api::Type::String
             name: 'sha256'
             description: |
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
