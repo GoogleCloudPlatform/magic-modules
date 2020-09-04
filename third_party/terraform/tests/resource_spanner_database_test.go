@@ -33,6 +33,12 @@ func TestAccSpannerDatabase_basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccSpannerDatabase_basicForceNew(instanceName, databaseName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
+				),
+			},
+			{
 				// Test import with default Terraform ID
 				ResourceName:      "google_spanner_database.basic",
 				ImportState:       true,
@@ -81,6 +87,27 @@ resource "google_spanner_database" "basic" {
 }
 
 func testAccSpannerDatabase_basicUpdate(instanceName, databaseName string) string {
+	return fmt.Sprintf(`
+resource "google_spanner_instance" "basic" {
+  name         = "%s"
+  config       = "regional-us-central1"
+  display_name = "display-%s"
+  num_nodes    = 1
+}
+
+resource "google_spanner_database" "basic" {
+  instance = google_spanner_instance.basic.name
+  name     = "%s"
+  ddl = [
+	"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+	"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
+	"CREATE TABLE t3 (t3 INT64 NOT NULL,) PRIMARY KEY(t3)",
+  ]
+}
+`, instanceName, instanceName, databaseName)
+}
+
+func testAccSpannerDatabase_basicForceNew(instanceName, databaseName string) string {
 	return fmt.Sprintf(`
 resource "google_spanner_instance" "basic" {
   name         = "%s"
