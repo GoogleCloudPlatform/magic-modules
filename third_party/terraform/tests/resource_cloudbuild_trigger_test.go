@@ -158,8 +158,21 @@ resource "google_cloudbuild_trigger" "build_trigger" {
       }
     }
     options {
+      source_provenance_hash = ["MD5"]
+      requested_verify_option = "VERIFIED"
+      machine_type = "N1_HIGHCPU_8"
       disk_size_gb = 100
-      dynamic_substitutions = true
+      substitution_option = "ALLOW_LOOSE"
+      dynamic_substitutions = false
+      log_streaming_option = "STREAM_OFF"
+      worker_pool = "pool"
+      logging = "LEGACY"
+      env = ["ekey = evalue"]
+      secret_env = ["secretenv = svalue"]
+      volumes {
+        name = "v1"
+        path = "v1"
+      }
     }
   }
 }
@@ -259,6 +272,10 @@ resource "google_cloudbuild_trigger" "build_trigger" {
       timeout = "300s"
     }
     logs_bucket = "gs://mybucket/logs"
+    options {
+      # this field is always enabled for triggered build and cannot be overridden in the build configuration file.
+      dynamic_substitutions = true
+    }
   }
 }
   `, name)

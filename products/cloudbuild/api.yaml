@@ -615,6 +615,7 @@ objects:
                   - :ALLOW_LOOSE
               - !ruby/object:Api::Type::Boolean
                 name: 'dynamicSubstitutions'
+                send_empty_value: true
                 description: |
                   Option to specify whether or not to apply bash style string operations to the substitutions.
 
