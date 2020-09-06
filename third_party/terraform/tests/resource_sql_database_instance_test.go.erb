@@ -293,6 +293,59 @@ func TestAccSqlDatabaseInstance_settings_basic(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_settings_deletionProtection(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + randString(t, 10)
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_settings_deletionProtection, databaseName, "true"),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"settings.0.deletion_protection"},
+			},
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_settings_deletionProtection, databaseName, "true"),
+				Destroy:     true,
+				ExpectError: regexp.MustCompile("Error, failed to delete instance because deletion_protection is set to true. Set it to false to proceed with instance deletion"),
+			},
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_settings_deletionProtection, databaseName, "false"),
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_settings_checkServiceNetworking(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + randString(t, 10)
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_settings_checkServiceNetworking, databaseName, databaseName),
+				ExpectError: regexp.MustCompile("Error, failed to create instance because the network doesn't have atleast 1 private services connections. Please review the docs on how to create this connection."),
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_replica(t *testing.T) {
 	t.Parallel()
 
@@ -834,6 +887,54 @@ resource "google_sql_database_instance" "instance" {
     }
 
     activation_policy = "ALWAYS"
+  }
+}
+`
+var testGoogleSqlDatabaseInstance_settings_deletionProtection = `
+resource "google_sql_database_instance" "instance" {
+  name   = "%s"
+  region = "us-central1"
+  settings {
+    tier                   = "db-f1-micro"
+    location_preference {
+      zone = "us-central1-f"
+	}
+
+	deletion_protection = %s
+
+    ip_configuration {
+	  ipv4_enabled = "true"
+      authorized_networks {
+        value           = "108.12.12.12"
+        name            = "misc"
+        expiration_time = "2037-11-15T16:19:00.094Z"
+      }
+    }
+
+    backup_configuration {
+      enabled    = "true"
+      start_time = "19:19"
+    }
+
+    activation_policy = "ALWAYS"
+  }
+}
+`
+
+var testGoogleSqlDatabaseInstance_settings_checkServiceNetworking = `
+resource "google_compute_network" "servicenet" {
+  name                    = "%s"
+}
+
+resource "google_sql_database_instance" "instance" {
+  name       = "%s"
+  region     = "us-central1"
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled    = "false"
+      private_network = google_compute_network.servicenet.self_link
+    }
   }
 }
 `
