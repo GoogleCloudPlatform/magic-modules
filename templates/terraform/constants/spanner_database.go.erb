@@ -13,21 +13,33 @@
 	# limitations under the License.
 -%>
 // customizeDiff func for additional checks on google_spanner_database properties:
-func resourceSpannerDBDdlCustomDiff(diff *schema.ResourceDiff, meta interface{}) error {
-    old, new := diff.GetChange("ddl")
-    oldDdls := old.([]interface{})
-    newDdls := new.([]interface{})
+func resourceSpannerDBDdlCustomDiffFunc(diff TerraformResourceDiff) error {
+	old, new := diff.GetChange("ddl")
+	oldDdls := old.([]interface{})
+	newDdls := new.([]interface{})
+	var err error
 
-    if len(newDdls) < len(oldDdls) {
-		diff.ForceNew("ddl")
+	if len(newDdls) < len(oldDdls) {
+		err = diff.ForceNew("ddl")
+		if err != nil {
+			return fmt.Errorf("ForceNew failed for ddl, old - %s and new - %s", oldDdls, newDdls)
+		}
 		return nil
 	}
 
 	for i := range oldDdls {
 		if newDdls[i].(string) != oldDdls[i].(string) {
-			diff.ForceNew("ddl")
+			err = diff.ForceNew("ddl")
+			if err != nil {
+				return fmt.Errorf("ForceNew failed for ddl, old - %s and new - %s", oldDdls, newDdls)
+			}
 			return nil
 		}
 	}
 	return nil
+}
+
+func resourceSpannerDBDdlCustomDiff(diff *schema.ResourceDiff, meta interface{}) error {
+	// separate func to allow unit testing
+	return resourceSpannerDBDdlCustomDiffFunc(diff)
 }

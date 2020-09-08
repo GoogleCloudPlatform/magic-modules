@@ -83,6 +83,10 @@ func (d *ResourceDiffMock) Clear(key string) error {
 	return nil
 }
 
+func (d *ResourceDiffMock) ForceNew(key string) error {
+	return nil
+}
+
 func checkDataSourceStateMatchesResourceState(dataSourceName, resourceName string) func(*terraform.State) error {
 	return checkDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourceName, map[string]struct{}{})
 }

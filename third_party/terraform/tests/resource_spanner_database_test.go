@@ -138,3 +138,21 @@ func TestDatabaseNameForApi(t *testing.T) {
 	expected := "projects/project123/instances/instance456/databases/db789"
 	expectEquals(t, expected, actual)
 }
+
+// Unit Tests for ForceNew when the change in ddl
+func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFunc(t *testing.T) {
+	t.Parallel()
+
+	d := &ResourceDiffMock{
+		Before: map[string]interface{}{
+			"ddl": []interface{}{"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)"},
+		},
+		After: map[string]interface{}{
+			"ddl": []interface{}{"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)"},
+		},
+	}
+	err := resourceSpannerDBDdlCustomDiffFunc(d)
+	if err != nil {
+		t.Errorf("failed, expected no error but received one", err)
+	}
+}
