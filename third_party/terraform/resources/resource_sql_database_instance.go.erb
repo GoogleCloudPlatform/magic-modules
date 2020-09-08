@@ -671,7 +671,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 			log.Printf("[WARNING] Failed to list Service Networking of the project. Skipping Service Networking check.")
 		} else {
 			if len(response.Connections) < 1 {
-				return fmt.Errorf("Error, failed to create instance because the network doesn't have atleast 1 private services connections. Please review the docs on how to create this connection.")
+				return fmt.Errorf("Error, failed to create instance because the network doesn't have at least 1 private services connection. Please see https://cloud.google.com/sql/docs/mysql/private-ip#network_requirements for how to create this connection.")
 			}
 		}
 	}
