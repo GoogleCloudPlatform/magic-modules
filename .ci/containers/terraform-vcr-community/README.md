@@ -1,1 +1,0 @@
-This container reuses the scripts and XML files from the terraform-vcr-tester image. To avoid drift copy them alongside this Dockerfile when building.

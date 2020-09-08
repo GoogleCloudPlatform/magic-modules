@@ -1,10 +1,4 @@
-FROM alpine
+FROM gcr.io/graphite-docker-images/terraform-vcr-tester:latest
 
-RUN apk add --no-cache bash
-RUN apk add --no-cache curl
-RUN apk add --no-cache jq
-
-ADD teamcityparams.xml /teamcityparams.xml
-ADD run_vcr_tests.sh /run_vcr_tests.sh
-ADD teamcityparamsrecording.xml /teamcityparamsrecording.xml
+# Same image, different entrypoint to skip checking org membership
 ENTRYPOINT ["/run_vcr_tests.sh"]
