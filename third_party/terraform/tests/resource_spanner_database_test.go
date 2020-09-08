@@ -153,6 +153,6 @@ func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFunc(t *testing.T) {
 	}
 	err := resourceSpannerDBDdlCustomDiffFunc(d)
 	if err != nil {
-		t.Errorf("failed, expected no error but received one", err)
+		t.Errorf("failed, expected no error but received one - %s", err)
 	}
 }
