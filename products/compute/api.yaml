@@ -2911,13 +2911,6 @@ objects:
         description: |
           URL of the disk type resource describing which disk type to use to
           create the disk. Provide this when creating the disk.
-      - !ruby/object:Api::Type::Boolean
-        name: 'eraseWindowsVssSignature'
-        min_version: beta
-        default_value: false
-        description: |
-          Specifies whether the disk restored from a source snapshot
-          should erase Windows specific VSS signature.
       - !ruby/object:Api::Type::String
         name: 'sourceImage'
         description: |
