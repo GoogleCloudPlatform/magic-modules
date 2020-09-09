@@ -63,6 +63,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "example"
         # Randomness
         skip_vcr: true
+      - !ruby/object:Provider::Terraform::Examples
+        name: "spanner_instance_multi_regional"
+        primary_resource_id: "example"
+        # Randomness
+        skip_vcr: true
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
