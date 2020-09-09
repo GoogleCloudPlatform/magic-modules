@@ -65,12 +65,6 @@ func TestAccDataflowJob_withRegion(t *testing.T) {
 					testAccRegionalDataflowJobExists(t, "google_dataflow_job.big_data", "us-central1"),
 				),
 			},
-			{
-				Config: testAccDataflowJob_regionUpdate(bucket, job),
-				Check: resource.ComposeTestCheckFunc(
-					testAccRegionalDataflowJobExists(t, "google_dataflow_job.big_data", "us-central1"),
-				),
-			},
 		},
 	})
 }
@@ -636,33 +630,6 @@ resource "google_dataflow_job" "big_data" {
 `, bucket, job, testDataflowJobTemplateWordCountUrl, testDataflowJobSampleFileUrl)
 }
 
-func testAccDataflowJob_regionUpdate(bucket, job string) string {
-	return fmt.Sprintf(`
-resource "google_storage_bucket" "temp" {
-  name = "%s"
-  force_destroy = true
-}
-
-resource "google_dataflow_job" "big_data" {
-  name = "%s"
-  region  = "us-central1"
-
-  template_gcs_path = "%s"
-  temp_gcs_location = google_storage_bucket.temp.url
-  parameters = {
-    inputFile = "%s"
-    output    = "${google_storage_bucket.temp.url}/output"
-  }
-  transform_name_mapping = {
-	name = "test_job"
-	env = "test"
-}
-
-  on_delete = "cancel"
-}
-`, bucket, job, testDataflowJobTemplateWordCountUrl, testDataflowJobSampleFileUrl)
-}
-
 func testAccDataflowJob_network(bucket, job, network string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
@@ -859,6 +826,10 @@ resource "google_dataflow_job" "pubsub_stream" {
 	parameters = {
 	  inputFilePattern = "${google_storage_bucket.bucket1.url}/*.json"
 	  outputTopic    = google_pubsub_topic.topic.id
+	}
+	transform_name_mapping = {
+		name = "test_job"
+		env = "test"
 	}
 	on_delete = "cancel"
 }
