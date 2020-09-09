@@ -14,12 +14,35 @@ func compareTpuNodeSchedulingConfig(k, old, new string, d *schema.ResourceData) 
 
 
 // The API takes the project_id in the network field and returns it as a number which causes permadiff.
-// So we permanently ignore the diff in this field as it is set to ForceNew.
 func compareTpuNodeNetwork(k, old, new string, d *schema.ResourceData) bool {
-	if d.HasChange("network") {
-		return false
-	} 
-	return true	
+	// 1st part of diffsuppress
+
+	retval := false
+	network := GetResourceNameFromSelfLink(old)
+
+	serviceNetworkingNetworkName, err := retrieveServiceNetworkingNetworkName(d, config, network)
+	if err != nil {
+		return err
+	}
+
+	if new == serviceNetworkingNetworkName {
+		retval = true
+	}
+
+	// 2nd part of diffsuppress
+	newParts := strings.Split(new, "/")
+
+	if len(newParts) == 1 {
+		// `new` is a name
+		// `old` is always a self_link
+		if GetResourceNameFromSelfLink(old) == newParts[0] {
+			retval = true
+		}
+	}
+
+	// The `new` string is a self_link
+	retval = retval && compareSelfLinkRelativePaths("", old, new, nil)
+	return retval
 }
 
 func validateHttpHeaders() schema.SchemaValidateFunc {
