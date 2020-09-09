@@ -210,7 +210,6 @@ func schemaNodeConfig() *schema.Schema {
 					},
 				},
 
-	<% unless version == 'ga' -%>
 				"workload_metadata_config": {
 					Computed:   true,
 					Type:       schema.TypeList,
@@ -227,6 +226,7 @@ func schemaNodeConfig() *schema.Schema {
 					},
 				},
 
+	<% unless version == 'ga' -%>
 				"sandbox_config": {
 					Type:       schema.TypeList,
 					Optional:   true,
