@@ -862,7 +862,6 @@ func TestAccContainerCluster_withNodeConfigShieldedInstanceConfig(t *testing.T) 
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
 func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 	t.Parallel()
 
@@ -890,6 +889,7 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 	})
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func TestAccContainerCluster_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
@@ -2883,7 +2883,6 @@ resource "google_container_cluster" "with_node_config" {
 `, clusterName)
 }
 
-<% unless version.nil? || version == 'ga' -%>
 func testAccContainerCluster_withWorkloadMetadataConfig(clusterName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -2948,6 +2947,7 @@ resource "google_container_cluster" "with_sandbox_config" {
 `, clusterName)
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func testAccContainerCluster_withSandboxConfig_changeLabels(clusterName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
