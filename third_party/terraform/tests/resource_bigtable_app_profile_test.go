@@ -59,10 +59,14 @@ resource "google_bigtable_app_profile" "ap" {
   instance       = google_bigtable_instance.instance.id
   app_profile_id = "test"
 
-  multi_cluster_routing_use_any = true
+  single_cluster_routing {
+    cluster_id                 = %q
+    allow_transactional_writes = true
+  }
+
   ignore_warnings               = true
 }
-`, instanceName, instanceName)
+`, instanceName, instanceName, instanceName)
 }
 
 func testAccBigtableAppProfile_update(instanceName string) string {
@@ -84,8 +88,12 @@ resource "google_bigtable_app_profile" "ap" {
   app_profile_id = "test"
   description    = "add a description"
 
-  multi_cluster_routing_use_any = true
+  single_cluster_routing {
+    cluster_id                 = %q
+    allow_transactional_writes = false
+  }
+
   ignore_warnings               = true
 }
-`, instanceName, instanceName)
+`, instanceName, instanceName, instanceName)
 }

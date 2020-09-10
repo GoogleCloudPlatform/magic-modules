@@ -79,7 +79,6 @@ objects:
           - multi_cluster_routing_use_any
         description: |
           Use a single-cluster routing policy.
-        input: true
         properties:
             - !ruby/object:Api::Type::String
               name: 'clusterId'
