@@ -28,7 +28,7 @@ After this intermediate phase, attempting to grant permissions to a principal th
 
 ## Using `*_iam_policy` resources
 
-`_iam_policy` is the authoritative way to handle IAM policies from within Terraform. Users may see diffs on `deleted:` members in some cirtumstances, but applying the policy should succeed and resolve any issues. Specifying `deleted:` members is not allowed in Terraform, so any policy entirely managed by Terraform should automatically remove any deleted members when Terraform is run.
+`_iam_policy` allows you to declare the entire IAM policy from within Terraform. Users may see diffs on `deleted:` members in some cirtumstances, but applying the policy should succeed and resolve any issues. Specifying `deleted:` members is not allowed in Terraform, so any policy entirely managed by Terraform should automatically remove any deleted members when Terraform is run.
 
 During the intermediate period it may be required to `taint` the `_iam_policy` resource to ensure any deleted principals are removed *before* the new principal is granted permission. This should only be necessary if you are continuing to see diffs after successful applies. For more information on using `taint` see the [official documentation](https://www.terraform.io/docs/commands/taint.html).
 
@@ -36,7 +36,22 @@ During the intermediate period it may be required to `taint` the `_iam_policy` r
 
 ## `*_iam_binding` resources
 
-`_iam_binding` resources handle all the members who are granted a specific role for an IAM policy. These resources may see diffs if a member they grant a role to is deleted and recreated. Due to these resources not controlling the entire IAM policy you may see issues around diffs not being resolved as requests can include both the deleted and non-deleted form of a principal. 
+`_iam_binding` resources handle all the members who are granted a specific role for an IAM policy. These resources may see diffs if a member they grant a role to is deleted and recreated. Due to these resources not controlling the entire IAM policy you may see issues around diffs not being resolved as requests can include both the deleted and non-deleted form of a principal.
+
+Example diff caused by `deleted:` member on an IAM binding resource:
+```hcl
+  # google_secret_manager_secret_iam_binding.binding will be updated in-place
+  ~ resource "google_secret_manager_secret_iam_binding" "binding" {
+        id        = "projects/my-project/secrets/secret/roles/secretmanager.secretAccessor"
+      ~ members   = [
+          - "deleted:serviceAccount:myaccount@my-project.iam.gserviceaccount.com?uid=10231234122325702",
+          + "serviceAccount:myaccount@my-project.iam.gserviceaccount.com",
+        ]
+        project   = "my-project"
+        role      = "roles/secretmanager.secretAccessor"
+        secret_id = "projects/my-project/secrets/secret"
+    }
+```
 
 Tainting the `_iam_binding` resource using the [taint command](https://www.terraform.io/docs/commands/taint.html) may resolve this diff. If it does not, or results in an API error, you may need to manually remove any references to the deleted version of the principal causing the diff. This can be done through the Cloud Console UI for the resource. This could also be done via Terraform by specifying the entire IAM policy authoritatively using the `_iam_policy` resource.
 
