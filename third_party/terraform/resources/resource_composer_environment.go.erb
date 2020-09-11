@@ -11,7 +11,13 @@ import (
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+<% if version == "ga" -%>
+	composer "google.golang.org/api/composer/v1"
+	"google.golang.org/api/composer/v1"
+<% else -%>
+	composer "google.golang.org/api/composer/v1beta1"
 	"google.golang.org/api/composer/v1beta1"
+<% end -%>
 )
 
 const (
@@ -665,6 +671,7 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 		}
 
+<% unless version == "ga" -%>
 		// If web_server_network_access_control has more fields added it may require changes here.
 		// This is scoped specifically to allowed_ip_range due to https://github.com/hashicorp/terraform-plugin-sdk/issues/98
 		if d.HasChange("config.0.web_server_network_access_control.0.allowed_ip_range") {
@@ -677,6 +684,7 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
+<% end -%>
 
 <% unless version == "ga" -%>
 		if d.HasChange("config.0.database_config.0.machine_type") {
