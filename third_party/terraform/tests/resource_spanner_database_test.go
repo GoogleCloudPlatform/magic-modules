@@ -183,7 +183,10 @@ func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncNewStatements(t *test
 				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)"},
 		},
 	}
-	resourceSpannerDBDdlCustomDiffFunc(d)
+	err := resourceSpannerDBDdlCustomDiffFunc(d)
+	if err != nil {
+		t.Errorf("failed, expected no error but received one - %s", err)
+	}
 
 	if d.IsForceNew {
 		t.Errorf("Resource shouldn't ForceNew for new ddl statements append")
@@ -207,7 +210,10 @@ func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncNoChange(t *testing.T
 			},
 		},
 	}
-	resourceSpannerDBDdlCustomDiffFunc(d)
+	err := resourceSpannerDBDdlCustomDiffFunc(d)
+	if err != nil {
+		t.Errorf("failed, expected no error but received one - %s", err)
+	}
 
 	if d.IsForceNew {
 		t.Errorf("Resource shouldn't ForceNew if older and new ddl statements are same")
@@ -233,7 +239,10 @@ func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncOrderChange(t *testin
 			},
 		},
 	}
-	resourceSpannerDBDdlCustomDiffFunc(d)
+	err := resourceSpannerDBDdlCustomDiffFunc(d)
+	if err != nil {
+		t.Errorf("failed, expected no error but received one - %s", err)
+	}
 
 	if !d.IsForceNew {
 		t.Errorf("Resource should ForceNew if order of statments are different between older and new")
@@ -258,7 +267,10 @@ func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncMissingStatements(t *
 			},
 		},
 	}
-	resourceSpannerDBDdlCustomDiffFunc(d)
+	err := resourceSpannerDBDdlCustomDiffFunc(d)
+	if err != nil {
+		t.Errorf("failed, expected no error but received one - %s", err)
+	}
 
 	if !d.IsForceNew {
 		t.Errorf("Resource should ForceNew if older ddl statments are removed")
