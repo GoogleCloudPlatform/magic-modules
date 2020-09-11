@@ -103,13 +103,6 @@ func resourceGoogleProjectService() *schema.Resource {
 	}
 }
 
-// Since we allow the project to now come from config in the form of
-// /projects/${myproject} we need to correct for this when reading the value.
-func adjustProjectReference(project string) string {
-	parts := strings.Split(project, "/")
-	return parts[len(parts)-1]
-}
-
 func resourceGoogleProjectServiceImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
@@ -127,7 +120,7 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 	if err != nil {
 		return err
 	}
-	project = adjustProjectReference(project)
+	project = GetResourceNameFromSelfLink(project)
 
 	srv := d.Get("service").(string)
 	id := project + "/" + srv
@@ -161,7 +154,7 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	if err != nil {
 		return err
 	}
-	project = adjustProjectReference(project)
+	project = GetResourceNameFromSelfLink(project)
 
 	// Verify project for services still exists
 	projectGetCall := config.clientResourceManager.Projects.Get(project)
@@ -213,7 +206,7 @@ func resourceGoogleProjectServiceDelete(d *schema.ResourceData, meta interface{}
 	if err != nil {
 		return err
 	}
-	project = adjustProjectReference(project)
+	project = GetResourceNameFromSelfLink(project)
 
 	service := d.Get("service").(string)
 	disableDependencies := d.Get("disable_dependent_services").(bool)
