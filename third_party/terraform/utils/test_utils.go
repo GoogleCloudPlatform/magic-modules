@@ -62,9 +62,10 @@ func (d *ResourceDataMock) Id() string {
 }
 
 type ResourceDiffMock struct {
-	Before  map[string]interface{}
-	After   map[string]interface{}
-	Cleared map[string]struct{}
+	Before     map[string]interface{}
+	After      map[string]interface{}
+	Cleared    map[string]struct{}
+	IsForceNew bool
 }
 
 func (d *ResourceDiffMock) GetChange(key string) (interface{}, interface{}) {
@@ -84,6 +85,7 @@ func (d *ResourceDiffMock) Clear(key string) error {
 }
 
 func (d *ResourceDiffMock) ForceNew(key string) error {
+	d.IsForceNew = true
 	return nil
 }
 

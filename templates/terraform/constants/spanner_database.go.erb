@@ -22,7 +22,7 @@ func resourceSpannerDBDdlCustomDiffFunc(diff TerraformResourceDiff) error {
 	if len(newDdls) < len(oldDdls) {
 		err = diff.ForceNew("ddl")
 		if err != nil {
-			return fmt.Errorf("ForceNew failed for ddl, old - %s and new - %s", oldDdls, newDdls)
+			return fmt.Errorf("ForceNew failed for ddl, old - %v and new - %v", oldDdls, newDdls)
 		}
 		return nil
 	}
@@ -31,7 +31,7 @@ func resourceSpannerDBDdlCustomDiffFunc(diff TerraformResourceDiff) error {
 		if newDdls[i].(string) != oldDdls[i].(string) {
 			err = diff.ForceNew("ddl")
 			if err != nil {
-				return fmt.Errorf("ForceNew failed for ddl, old - %s and new - %s", oldDdls, newDdls)
+				return fmt.Errorf("ForceNew failed for ddl, old - %v and new - %v", oldDdls, newDdls)
 			}
 			return nil
 		}

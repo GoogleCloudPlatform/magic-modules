@@ -27,10 +27,20 @@ func TestAccSpannerDatabase_basic(t *testing.T) {
 				),
 			},
 			{
+				// Test import with default Terraform ID
+				ResourceName: "google_spanner_database.basic",
+				ImportState:  true,
+			},
+			{
 				Config: testAccSpannerDatabase_basicUpdate(instanceName, databaseName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_spanner_database.basic", "state"),
 				),
+			},
+			{
+				// Test import with default Terraform ID
+				ResourceName: "google_spanner_database.basic",
+				ImportState:  true,
 			},
 			{
 				Config: testAccSpannerDatabase_basicForceNew(instanceName, databaseName),
@@ -140,7 +150,7 @@ func TestDatabaseNameForApi(t *testing.T) {
 }
 
 // Unit Tests for ForceNew when the change in ddl
-func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFunc(t *testing.T) {
+func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncForceNew(t *testing.T) {
 	t.Parallel()
 
 	d := &ResourceDiffMock{
@@ -154,5 +164,103 @@ func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFunc(t *testing.T) {
 	err := resourceSpannerDBDdlCustomDiffFunc(d)
 	if err != nil {
 		t.Errorf("failed, expected no error but received one - %s", err)
+	}
+	if !d.IsForceNew {
+		t.Errorf("Resource should ForceNew when older ddl statements are removed")
+	}
+}
+
+func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncNewStatements(t *testing.T) {
+	t.Parallel()
+
+	d := &ResourceDiffMock{
+		Before: map[string]interface{}{
+			"ddl": []interface{}{"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)"},
+		},
+		After: map[string]interface{}{
+			"ddl": []interface{}{
+				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)"},
+		},
+	}
+	resourceSpannerDBDdlCustomDiffFunc(d)
+
+	if d.IsForceNew {
+		t.Errorf("Resource shouldn't ForceNew for new ddl statements append")
+	}
+}
+
+func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncNoChange(t *testing.T) {
+	t.Parallel()
+
+	d := &ResourceDiffMock{
+		Before: map[string]interface{}{
+			"ddl": []interface{}{
+				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
+			},
+		},
+		After: map[string]interface{}{
+			"ddl": []interface{}{
+				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
+			},
+		},
+	}
+	resourceSpannerDBDdlCustomDiffFunc(d)
+
+	if d.IsForceNew {
+		t.Errorf("Resource shouldn't ForceNew if older and new ddl statements are same")
+	}
+}
+
+func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncOrderChange(t *testing.T) {
+	t.Parallel()
+
+	d := &ResourceDiffMock{
+		Before: map[string]interface{}{
+			"ddl": []interface{}{
+				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
+				"CREATE TABLE t3 (t3 INT64 NOT NULL,) PRIMARY KEY(t3)",
+			},
+		},
+		After: map[string]interface{}{
+			"ddl": []interface{}{
+				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+				"CREATE TABLE t3 (t3 INT64 NOT NULL,) PRIMARY KEY(t3)",
+				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
+			},
+		},
+	}
+	resourceSpannerDBDdlCustomDiffFunc(d)
+
+	if !d.IsForceNew {
+		t.Errorf("Resource should ForceNew if order of statments are different between older and new")
+	}
+}
+
+func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncMissingStatements(t *testing.T) {
+	t.Parallel()
+
+	d := &ResourceDiffMock{
+		Before: map[string]interface{}{
+			"ddl": []interface{}{
+				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
+				"CREATE TABLE t3 (t3 INT64 NOT NULL,) PRIMARY KEY(t3)",
+			},
+		},
+		After: map[string]interface{}{
+			"ddl": []interface{}{
+				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
+			},
+		},
+	}
+	resourceSpannerDBDdlCustomDiffFunc(d)
+
+	if !d.IsForceNew {
+		t.Errorf("Resource should ForceNew if older ddl statments are removed")
 	}
 }
