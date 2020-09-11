@@ -82,10 +82,11 @@ func resourceGoogleProjectService() *schema.Resource {
 				ValidateFunc: StringNotInSlice(append(ignoredProjectServices, bannedProjectServices...), false),
 			},
 			"project": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: compareResourceNames,
 			},
 
 			"disable_dependent_services": {
@@ -100,6 +101,13 @@ func resourceGoogleProjectService() *schema.Resource {
 			},
 		},
 	}
+}
+
+// Since we allow the project to now come from config in the form of
+// /projects/${myproject} we need to correct for this when reading the value.
+func adjustProjectReference(project string) string {
+	parts := strings.Split(project, "/")
+	return parts[len(parts)-1]
 }
 
 func resourceGoogleProjectServiceImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
@@ -119,12 +127,10 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 	if err != nil {
 		return err
 	}
+	project = adjustProjectReference(project)
 
 	srv := d.Get("service").(string)
-	id, err := replaceVars(d, config, "{{project}}/{{service}}")
-	if err != nil {
-		return fmt.Errorf("unable to construct ID: %s", err)
-	}
+	id := project + "/" + srv
 
 	// Check if the service has already been enabled
 	servicesRaw, err := BatchRequestReadServices(project, d, config)
@@ -155,6 +161,7 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	if err != nil {
 		return err
 	}
+	project = adjustProjectReference(project)
 
 	// Verify project for services still exists
 	projectGetCall := config.clientResourceManager.Projects.Get(project)
@@ -206,6 +213,7 @@ func resourceGoogleProjectServiceDelete(d *schema.ResourceData, meta interface{}
 	if err != nil {
 		return err
 	}
+	project = adjustProjectReference(project)
 
 	service := d.Get("service").(string)
 	disableDependencies := d.Get("disable_dependent_services").(bool)
