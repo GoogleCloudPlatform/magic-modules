@@ -1472,6 +1472,7 @@ objects:
           - :HTTP2
           - :TCP
           - :SSL
+          - :GRPC
       # TODO: make a ResourceRef to Security Policy
       - !ruby/object:Api::Type::String
         name: 'securityPolicy'
@@ -2302,6 +2303,7 @@ objects:
           - :SSL
           - :TCP
           - :UDP
+          - :GRPC
       - !ruby/object:Api::Type::Enum
         name: 'sessionAffinity'
         description: |
