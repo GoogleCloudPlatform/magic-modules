@@ -1472,6 +1472,7 @@ objects:
           - :HTTP2
           - :TCP
           - :SSL
+          - :GRPC
       # TODO: make a ResourceRef to Security Policy
       - !ruby/object:Api::Type::String
         name: 'securityPolicy'
@@ -2302,6 +2303,7 @@ objects:
           - :SSL
           - :TCP
           - :UDP
+          - :GRPC
       - !ruby/object:Api::Type::Enum
         name: 'sessionAffinity'
         description: |
@@ -2636,10 +2638,6 @@ objects:
         required: true
   - !ruby/object:Api::Resource
     name: 'Disk'
-    # TODO(nelsonjr): Implement disk special actions as defined in the API:
-    # - resize
-    # - createSnapshot
-    # - setLabels
     kind: 'compute#disk'
     input: true
     base_url: projects/{{project}}/zones/{{zone}}/disks
@@ -2717,6 +2715,11 @@ objects:
             name: 'kmsKeyName'
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key.
+              If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::String
         name: 'sourceImageId'
@@ -2762,6 +2765,11 @@ objects:
               Your project's Compute Engine System service account
               (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
               `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key.
+              If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'sourceSnapshot'
@@ -2799,6 +2807,11 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
               encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key. 
+              If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::String
         name: 'sourceSnapshotId'
@@ -2908,14 +2921,14 @@ objects:
 
           To create a disk with one of the public operating system images,
           specify the image by its family name. For example, specify
-          family/debian-8 to use the latest Debian 8 image:
+          family/debian-9 to use the latest Debian 9 image:
 
-          projects/debian-cloud/global/images/family/debian-8
+          projects/debian-cloud/global/images/family/debian-9
 
           Alternatively, use a specific version of a public operating system
           image:
 
-          projects/debian-cloud/global/images/debian-8-jessie-vYYYYMMDD
+          projects/debian-cloud/global/images/debian-9-stretch-vYYYYMMDD
 
           To create a disk with a private image that you created, specify the
           image name in the following format:
@@ -3003,7 +3016,7 @@ objects:
                 The IP protocol to which this rule applies. The protocol type is
                 required when creating a firewall rule. This value can either be
                 one of the following well known protocol strings (tcp, udp,
-                icmp, esp, ah, sctp, ipip), or the IP protocol number.
+                icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
               api_name: 'IPProtocol'
               required: true
             - !ruby/object:Api::Type::Array
@@ -3039,7 +3052,7 @@ objects:
                 The IP protocol to which this rule applies. The protocol type is
                 required when creating a firewall rule. This value can either be
                 one of the following well known protocol strings (tcp, udp,
-                icmp, esp, ah, sctp, ipip), or the IP protocol number.
+                icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
               api_name: 'IPProtocol'
               required: true
             - !ruby/object:Api::Type::Array
@@ -12831,6 +12844,11 @@ objects:
             name: 'kmsKeyName'
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key.
+              If absent, the Compute Engine Service Agent service account is used.
       - !ruby/object:Api::Type::NestedObject
         # ignore_read in providers - this is only used in Create
         name: 'sourceDiskEncryptionKey'
@@ -12857,6 +12875,11 @@ objects:
             name: 'kmsKeyName'
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key.
+              If absent, the Compute Engine Service Agent service account is used.
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -12896,6 +12919,11 @@ objects:
           creation/deletion.
         output: true
       # 'storageBytesStatus' not useful for object convergence.
+      - !ruby/object:Api::Type::Array
+        name: 'storageLocations'
+        description: |
+          Cloud Storage bucket storage location of the snapshot (regional or multi-regional).
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'licenses'
         output: true
@@ -14146,6 +14174,11 @@ objects:
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'network'
+        description: 'The URL of the network this target instance uses to forward traffic. If not specified, the traffic will be forwarded to the network that the default network interface belongs to.'
+        input: true
+        min_version: beta
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'

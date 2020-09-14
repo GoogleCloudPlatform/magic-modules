@@ -464,6 +464,7 @@ objects:
               name: boolValue
               description: |
                 Holds the value for a tag field with boolean type.
+              send_empty_value: true
             - !ruby/object:Api::Type::String
               name: timestampValue
               description: |
