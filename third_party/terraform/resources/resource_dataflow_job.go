@@ -114,7 +114,7 @@ func resourceDataflowJob() *schema.Resource {
 			"transform_name_mapping": {
 				Type:        schema.TypeMap,
 				Optional:    true,
-				Description: `The map of transform name prefixes of the job to be replaced to the corresponding name prefixes of the new job.`,
+				Description: `Only applicable when updating a pipeline. Map of transform name prefixes of the job to be replaced with the corresponding name prefixes of the new job.`,
 			},
 
 			"on_delete": {
