@@ -2142,7 +2142,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "managed_ssl_certificate_recreation"
         primary_resource_id: "default"
         # Random provider
-        needs_random: true
         skip_vcr: true
         min_version: beta
     description: |
@@ -2175,7 +2174,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "name_prefix"
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_random_provider"
-        needs_random: true
         primary_resource_id: "default"
         # Uses resource.UniqueId
         skip_vcr: true
@@ -2227,7 +2225,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           - "name_prefix"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_ssl_certificate_random_provider"
-        needs_random: true
         primary_resource_id: "default"
         # Uses resource.UniqueId
         skip_vcr: true
