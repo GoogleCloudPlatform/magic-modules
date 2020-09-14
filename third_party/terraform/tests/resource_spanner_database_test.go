@@ -106,26 +106,6 @@ resource "google_spanner_database" "basic" {
 `, instanceName, instanceName, databaseName)
 }
 
-func testAccSpannerDatabase_basicForceNew(instanceName, databaseName string) string {
-	return fmt.Sprintf(`
-resource "google_spanner_instance" "basic" {
-  name         = "%s"
-  config       = "regional-us-central1"
-  display_name = "display-%s"
-  num_nodes    = 1
-}
-
-resource "google_spanner_database" "basic" {
-  instance = google_spanner_instance.basic.name
-  name     = "%s"
-  ddl = [
-	"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
-	"CREATE TABLE t3 (t3 INT64 NOT NULL,) PRIMARY KEY(t3)",
-  ]
-}
-`, instanceName, instanceName, databaseName)
-}
-
 // Unit Tests for type spannerDatabaseId
 func TestDatabaseNameForApi(t *testing.T) {
 	id := spannerDatabaseId{
@@ -142,126 +122,76 @@ func TestDatabaseNameForApi(t *testing.T) {
 func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncForceNew(t *testing.T) {
 	t.Parallel()
 
-	d := &ResourceDiffMock{
-		Before: map[string]interface{}{
-			"ddl": []interface{}{"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)"},
-		},
-		After: map[string]interface{}{
-			"ddl": []interface{}{"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)"},
-		},
-	}
-	err := resourceSpannerDBDdlCustomDiffFunc(d)
-	if err != nil {
-		t.Errorf("failed, expected no error but received one - %s", err)
-	}
-	if !d.IsForceNew {
-		t.Errorf("Resource should ForceNew when older ddl statements are removed")
-	}
-}
-
-func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncNewStatements(t *testing.T) {
-	t.Parallel()
-
-	d := &ResourceDiffMock{
-		Before: map[string]interface{}{
-			"ddl": []interface{}{"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)"},
-		},
-		After: map[string]interface{}{
-			"ddl": []interface{}{
-				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+	cases := map[string]struct {
+		before   interface{}
+		after    interface{}
+		forcenew bool
+	}{
+		"remove_old_statements": {
+			before: []interface{}{
+				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)"},
+			after: []interface{}{
 				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)"},
+			forcenew: true,
 		},
-	}
-	err := resourceSpannerDBDdlCustomDiffFunc(d)
-	if err != nil {
-		t.Errorf("failed, expected no error but received one - %s", err)
-	}
-
-	if d.IsForceNew {
-		t.Errorf("Resource shouldn't ForceNew for new ddl statements append")
-	}
-}
-
-func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncNoChange(t *testing.T) {
-	t.Parallel()
-
-	d := &ResourceDiffMock{
-		Before: map[string]interface{}{
-			"ddl": []interface{}{
+		"append_new_statements": {
+			before: []interface{}{
+				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)"},
+			after: []interface{}{
 				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
 				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
 			},
+			forcenew: false,
 		},
-		After: map[string]interface{}{
-			"ddl": []interface{}{
-				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
-				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
-			},
+		"no_change": {
+			before: []interface{}{
+				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)"},
+			after: []interface{}{
+				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)"},
+			forcenew: false,
 		},
-	}
-	err := resourceSpannerDBDdlCustomDiffFunc(d)
-	if err != nil {
-		t.Errorf("failed, expected no error but received one - %s", err)
-	}
-
-	if d.IsForceNew {
-		t.Errorf("Resource shouldn't ForceNew if older and new ddl statements are same")
-	}
-}
-
-func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncOrderChange(t *testing.T) {
-	t.Parallel()
-
-	d := &ResourceDiffMock{
-		Before: map[string]interface{}{
-			"ddl": []interface{}{
+		"order_of_statments_change": {
+			before: []interface{}{
 				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
 				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
 				"CREATE TABLE t3 (t3 INT64 NOT NULL,) PRIMARY KEY(t3)",
 			},
-		},
-		After: map[string]interface{}{
-			"ddl": []interface{}{
+			after: []interface{}{
 				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
 				"CREATE TABLE t3 (t3 INT64 NOT NULL,) PRIMARY KEY(t3)",
 				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
 			},
+			forcenew: true,
 		},
-	}
-	err := resourceSpannerDBDdlCustomDiffFunc(d)
-	if err != nil {
-		t.Errorf("failed, expected no error but received one - %s", err)
-	}
-
-	if !d.IsForceNew {
-		t.Errorf("Resource should ForceNew if order of statments are different between older and new")
-	}
-}
-
-func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncMissingStatements(t *testing.T) {
-	t.Parallel()
-
-	d := &ResourceDiffMock{
-		Before: map[string]interface{}{
-			"ddl": []interface{}{
+		"missing_an_old_statement": {
+			before: []interface{}{
 				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
 				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
 				"CREATE TABLE t3 (t3 INT64 NOT NULL,) PRIMARY KEY(t3)",
 			},
-		},
-		After: map[string]interface{}{
-			"ddl": []interface{}{
+			after: []interface{}{
 				"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
 				"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
 			},
+			forcenew: true,
 		},
 	}
-	err := resourceSpannerDBDdlCustomDiffFunc(d)
-	if err != nil {
-		t.Errorf("failed, expected no error but received one - %s", err)
-	}
 
-	if !d.IsForceNew {
-		t.Errorf("Resource should ForceNew if older ddl statments are removed")
+	for tn, tc := range cases {
+		d := &ResourceDiffMock{
+			Before: map[string]interface{}{
+				"ddl": tc.before,
+			},
+			After: map[string]interface{}{
+				"ddl": tc.after,
+			},
+		}
+		err := resourceSpannerDBDdlCustomDiffFunc(d)
+		if err != nil {
+			t.Errorf("failed, expected no error but received - %s for the condition %s", err, tn)
+		}
+		if d.IsForceNew != tc.forcenew {
+			t.Errorf("ForceNew not setup correctly for the condition-'%s', expected:%v;actual:%v", tn, tc.forcenew, d.IsForceNew)
+		}
 	}
 }
