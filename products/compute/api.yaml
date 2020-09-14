@@ -17435,7 +17435,7 @@ objects:
       a URL map which specifies how traffic routes to gRPC backend services.
     references: !ruby/object:Api::Resource::ReferenceLinks
           guides:
-            'Using Target gRPC Proxies': 'https://cloud.google.com/compute/docs/reference/rest/v1/targetGrpcProxies'
+            'Using Target gRPC Proxies': 'https://cloud.google.com/traffic-director/docs/proxyless-overview'
           api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetGrpcProxies'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation

@@ -1,6 +1,7 @@
 resource "google_compute_target_grpc_proxy" "default" {
   name    = "tf-test-target-grpc-proxy%{random_suffix}"
   url_map = google_compute_url_map.urlmap.id
+  validate_for_proxyless = true
 }
 
 
@@ -67,7 +68,7 @@ resource "google_compute_url_map" "urlmap" {
   }
 }
 resource "google_compute_backend_service" "home" {
-  name        = "tf-test-backendservice%{random_suffix}"
+  name        = "tf-test-grpc-backendservice%{random_suffix}"
   port_name   = "grpc"
   protocol    = "GRPC"
   timeout_sec = 10
@@ -75,8 +76,12 @@ resource "google_compute_backend_service" "home" {
   load_balancing_scheme = "INTERNAL_SELF_MANAGED"
 }
 resource "google_compute_health_check" "default" {
-  name               = "tf-test-healthcheck%{random_suffix}"
-  http_health_check {
-    port = 80
+  name               = "tf-test-grpc-healthcheck%{random_suffix}"
+  timeout_sec        = 1
+  check_interval_sec = 1
+  grpc_health_check {
+    port_name          = "health-check-port"
+    port_specification = "USE_NAMED_PORT"
+    grpc_service_name  = "testservice"
   }
 }
