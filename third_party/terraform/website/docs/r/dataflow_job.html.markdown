@@ -26,7 +26,7 @@ resource "google_dataflow_job" "big_data_job" {
   }
 }
 ```
-
+## Example Usage - Streaming Job
 ```hcl
 resource "google_pubsub_topic" "topic" {
 	name     = "dataflow-job1"
