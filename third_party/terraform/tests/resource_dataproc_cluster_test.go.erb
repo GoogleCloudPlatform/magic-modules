@@ -727,6 +727,7 @@ func TestAccDataprocCluster_withAutoscalingPolicy(t *testing.T) {
 
 	rnd := randString(t, 10)
 
+	var cluster dataproc.Cluster
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -734,9 +735,17 @@ func TestAccDataprocCluster_withAutoscalingPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataprocCluster_withAutoscalingPolicy(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
+					testAccCheckDataprocClusterAutoscaling(t, &cluster, true),
+				),
 			},
 			{
 				Config: testAccDataprocCluster_removeAutoscalingPolicy(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
+					testAccCheckDataprocClusterAutoscaling(t, &cluster, false),
+				),
 			},
 		},
 	})
@@ -788,6 +797,18 @@ func testAccCheckDataprocClusterHasServiceScopes(t *testing.T, cluster *dataproc
 			return fmt.Errorf("Cluster does not contain expected set of service account scopes : %v : instead %v",
 				scopes, cluster.Config.GceClusterConfig.ServiceAccountScopes)
 		}
+		return nil
+	}
+}
+
+func testAccCheckDataprocClusterAutoscaling(t *testing.T, cluster *dataproc.Cluster, expectAutoscaling bool) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		if cluster.Config.AutoscalingConfig == nil && expectAutoscaling {
+			return fmt.Errorf("Cluster does not contain AutoscalingConfig, expected it would")
+		} else if cluster.Config.AutoscalingConfig != nil && !expectAutoscaling {
+			return fmt.Errorf("Cluster contains AutoscalingConfig, expected it not to")
+		}
+
 		return nil
 	}
 }
