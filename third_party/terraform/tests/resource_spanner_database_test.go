@@ -30,6 +30,8 @@ func TestAccSpannerDatabase_basic(t *testing.T) {
 				// Test import with default Terraform ID
 				ResourceName: "google_spanner_database.basic",
 				ImportState:  true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"ddl"}
 			},
 			{
 				Config: testAccSpannerDatabase_basicUpdate(instanceName, databaseName),
@@ -42,24 +44,28 @@ func TestAccSpannerDatabase_basic(t *testing.T) {
 				ResourceName:      "google_spanner_database.basic",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"ddl"}
 			},
 			{
 				ResourceName:      "google_spanner_database.basic",
 				ImportStateId:     fmt.Sprintf("projects/%s/instances/%s/databases/%s", project, instanceName, databaseName),
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"ddl"}
 			},
 			{
 				ResourceName:      "google_spanner_database.basic",
 				ImportStateId:     fmt.Sprintf("instances/%s/databases/%s", instanceName, databaseName),
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"ddl"}
 			},
 			{
 				ResourceName:      "google_spanner_database.basic",
 				ImportStateId:     fmt.Sprintf("%s/%s", instanceName, databaseName),
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"ddl"}
 			},
 		},
 	})
