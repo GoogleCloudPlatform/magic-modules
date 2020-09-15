@@ -12,37 +12,35 @@ func compareTpuNodeSchedulingConfig(k, old, new string, d *schema.ResourceData) 
 	return false
 }
 
+func tpuNodeCustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
+	old, new := diff.GetChange("network")
+    config := meta.(*Config)
 
-// The API takes the project_id in the network field and returns it as a number which causes permadiff.
-func compareTpuNodeNetwork(k, old, new string, d *schema.ResourceData) bool {
-	// 1st part of diffsuppress
+	networkLinkRegex := regexp.MustCompile("projects/(.+)/global/networks/(.+)")
 
-	retval := false
-	network := GetResourceNameFromSelfLink(old)
+	var pid string
 
-	serviceNetworkingNetworkName, err := retrieveServiceNetworkingNetworkName(d, config, network)
+	if networkLinkRegex.MatchString(old.(string)) {
+		parts := networkLinkRegex.FindStringSubmatch(old.(string))
+		pid = parts[1]
+	}
+
+	project, err := config.clientResourceManager.Projects.Get(pid).Do()
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to retrieve project, pid: %s, err: %s", pid, err)
 	}
 
-	if new == serviceNetworkingNetworkName {
-		retval = true
-	}
-
-	// 2nd part of diffsuppress
-	newParts := strings.Split(new, "/")
-
-	if len(newParts) == 1 {
-		// `new` is a name
-		// `old` is always a self_link
-		if GetResourceNameFromSelfLink(old) == newParts[0] {
-			retval = true
+	if networkLinkRegex.MatchString(new.(string)) {
+		parts := networkLinkRegex.FindStringSubmatch(new.(string))
+		i, err := strconv.ParseInt(parts[1], 10, 64)
+		if err == nil {
+			if project.ProjectNumber == i {
+				diff.SetNew("network", old)
+				return nil
+			}
 		}
 	}
-
-	// The `new` string is a self_link
-	retval = retval && compareSelfLinkRelativePaths("", old, new, nil)
-	return retval
+	return nil
 }
 
 func validateHttpHeaders() schema.SchemaValidateFunc {

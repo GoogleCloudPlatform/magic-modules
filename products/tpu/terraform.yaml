@@ -41,11 +41,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'compareTpuNodeSchedulingConfig'
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-        diff_suppress_func: 'compareTpuNodeNetwork'
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants:  'templates/terraform/constants/tpu_node.erb'
+      resource_definition: 'templates/terraform/resource_definition/tpu_node.erb'
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
