@@ -122,15 +122,15 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Database'
     base_url: projects/{{project}}/instances/{{instance}}/databases
+    input: true
     description: |
       A Cloud Spanner Database which is hosted on a Spanner instance.
-    input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/spanner/'
       api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances.databases'
     async: !ruby/object:Api::OpAsync
-      actions: ['create', 'update']
+      actions: ['create','update','delete']
       operation: !ruby/object:Api::OpAsync::Operation
         path: 'name'
         base_url: '{{op_id}}'
@@ -168,12 +168,13 @@ objects:
       - !ruby/object:Api::Type::Array
         item_type: Api::Type::String
         name: 'extraStatements'
+        update_url: projects/{{project}}/instances/{{instance}}/databases/{{name}}/ddl
+        update_verb: :PATCH
         description: |
           An optional list of DDL statements to run inside the newly created
           database. Statements can create tables, indexes, etc. These statements
           execute atomically with the creation of the database: if there is an
           error in any statement, the database is not created.
-        input: true
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: An explanation of the status of the database.
