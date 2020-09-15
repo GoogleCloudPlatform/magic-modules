@@ -187,7 +187,7 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 		return nil
 	}
 
-	// only remove the project from state when it's not found if this isn't
+	// only remove the resource from state when it's not found if this isn't
 	// a Read that was called through from Create. The call through from
 	// Create may be dealing with eventual consistency, and will try to
 	// remove the newly created resource from state, which doesn't match
