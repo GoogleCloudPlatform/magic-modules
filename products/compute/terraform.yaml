@@ -2843,9 +2843,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "target_grpc_proxy_basic"
         primary_resource_id: "default"
         vars:
-          production_ssl_policy_name: "production-ssl-policy"
-          nonprod_ssl_policy_name: "nonprod-ssl-policy"
-          custom_ssl_policy_name: "custom-ssl-policy"
+          proxy_name: "proxy"
+          urlmap_name: "urlmap"
+          backend_name: "backend"
+          healthcheck_name: "healthcheck"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

@@ -1,12 +1,57 @@
+package google
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	//	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+)
+
+func TestAccComputeTargetGrpcProxy_update(t *testing.T) {
+	t.Parallel()
+
+	proxy := fmt.Sprintf("tf-manual-proxy-%s", randString(t, 10))
+	urlmap1 := fmt.Sprintf("tf-manual-urlmap1-%s", randString(t, 10))
+	urlmap2 := fmt.Sprintf("tf-manual-urlmap2-%s", randString(t, 10))
+	backend := fmt.Sprintf("tf-manual-backend-%s", randString(t, 10))
+	healthcheck := fmt.Sprintf("tf-manual-healthcheck-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeTargetGrpcProxyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeTargetGrpcProxy_basic(proxy, urlmap1, backend, healthcheck),
+			},
+			{
+				ResourceName:      "google_compute_target_grpc_proxy.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+
+			{
+				Config: testAccComputeTargetGrpcProxy_basic(proxy, urlmap2, backend, healthcheck),
+			},
+			{
+				ResourceName:      "google_compute_target_grpc_proxy.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeTargetGrpcProxy_basic(proxy, urlmap, backend, healthcheck string) string {
+	return fmt.Sprintf(`
 resource "google_compute_target_grpc_proxy" "default" {
-  name    = "<%= ctx[:vars]['proxy_name'] %>"
+  name    = "%s"
   url_map = google_compute_url_map.urlmap.id
   validate_for_proxyless = true
 }
-
-
 resource "google_compute_url_map" "urlmap" {
-  name        = "<%= ctx[:vars]['urlmap_name'] %>"
+  name        = "%s"
   description = "a description"
   default_service = google_compute_backend_service.home.id
   host_rule {
@@ -68,7 +113,7 @@ resource "google_compute_url_map" "urlmap" {
   }
 }
 resource "google_compute_backend_service" "home" {
-  name        = "<%= ctx[:vars]['backend_name'] %>"
+  name        = "%s"
   port_name   = "grpc"
   protocol    = "GRPC"
   timeout_sec = 10
@@ -76,7 +121,7 @@ resource "google_compute_backend_service" "home" {
   load_balancing_scheme = "INTERNAL_SELF_MANAGED"
 }
 resource "google_compute_health_check" "default" {
-  name               = "<%= ctx[:vars]['healthcheck_name'] %>"
+  name               = "%s"
   timeout_sec        = 1
   check_interval_sec = 1
   grpc_health_check {
@@ -84,4 +129,6 @@ resource "google_compute_health_check" "default" {
     port_specification = "USE_NAMED_PORT"
     grpc_service_name  = "testservice"
   }
+}
+`, proxy, urlmap, backend, healthcheck)
 }

@@ -17475,7 +17475,6 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
-        input: true
       - !ruby/object:Api::Type::String
         name: 'selfLinkWithId'
         description: 'Server-defined URL with id for the resource.'
@@ -17486,8 +17485,14 @@ objects:
           URL to the UrlMap resource that defines the mapping from URL to
           the BackendService. The protocol field in the BackendService
           must be set to GRPC.
+        input: true
+        update_verb: :PATCH
+        update_url: projects/{{project}}/global/targetGrpcProxies
+        update_id: 'urlMap'
+        fingerprint_name: 'fingerprint'
       - !ruby/object:Api::Type::Boolean
         name: 'validateForProxyless'
+        input: true
         description: |
           If true, indicates that the BackendServices referenced by
           the urlMap may be accessed by gRPC applications without using
