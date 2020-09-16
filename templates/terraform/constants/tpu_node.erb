@@ -14,14 +14,14 @@ func compareTpuNodeSchedulingConfig(k, old, new string, d *schema.ResourceData) 
 
 func tpuNodeCustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
 	old, new := diff.GetChange("network")
-    config := meta.(*Config)
+	config := meta.(*Config)
 
 	networkLinkRegex := regexp.MustCompile("projects/(.+)/global/networks/(.+)")
 
 	var pid string
 
-	if networkLinkRegex.MatchString(old.(string)) {
-		parts := networkLinkRegex.FindStringSubmatch(old.(string))
+	if networkLinkRegex.MatchString(new.(string)) {
+		parts := networkLinkRegex.FindStringSubmatch(new.(string))
 		pid = parts[1]
 	}
 
@@ -30,8 +30,8 @@ func tpuNodeCustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
 		return fmt.Errorf("Failed to retrieve project, pid: %s, err: %s", pid, err)
 	}
 
-	if networkLinkRegex.MatchString(new.(string)) {
-		parts := networkLinkRegex.FindStringSubmatch(new.(string))
+	if networkLinkRegex.MatchString(old.(string)) {
+		parts := networkLinkRegex.FindStringSubmatch(old.(string))
 		i, err := strconv.ParseInt(parts[1], 10, 64)
 		if err == nil {
 			if project.ProjectNumber == i {
@@ -42,7 +42,6 @@ func tpuNodeCustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
 	}
 	return nil
 }
-
 func validateHttpHeaders() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 		headers := i.(map[string]interface{})
