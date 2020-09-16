@@ -428,8 +428,8 @@ objects:
             description: |
               JSON encoded string for schemas used to parse messages in this
               store if schematized parsing is desired.
-            conflicts:
-              - version
+            # conflicts:
+            #   - version
           - !ruby/object:Api::Type::Enum
             name: version
             description: |
@@ -441,8 +441,8 @@ objects:
             values:
               - :V1
               - :V2
-            conflicts:
-              - schema
+            # conflicts:
+            #   - schema
       - !ruby/object:Api::Type::KeyValuePairs
         name: labels
         required: false
