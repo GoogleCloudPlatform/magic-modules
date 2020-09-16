@@ -668,32 +668,6 @@ linux_node_config {
 }
 ```
 
-* `kubelet_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
-Kubelet configuration, currently supported attributes can be found [here](https://cloud.google.com/sdk/gcloud/reference/beta/container/node-pools/create#--system-config-from-file).
-Structure is documented below.
-
-```
-kubelet_config {
-  cpu_manager_policy   = "static"
-  cpu_cfs_quota        = true
-  cpu_cfs_quota_period = "100us"
-}
-```
-
-* `linux_node_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
-Linux node configuration, currently supported attributes can be found [here](https://cloud.google.com/sdk/gcloud/reference/beta/container/node-pools/create#--system-config-from-file).
-Note that validations happen all server side. All attributes are optional.
-Structure is documented below.
-
-```hcl
-linux_node_config {
-  sysctls = {
-    "net.core.netdev_max_backlog" = "10000"
-    "net.core.rmem_max"           = "10000"
-  }
-}
-```
-
 The `guest_accelerator` block supports:
 
 * `type` (Required) - The accelerator type resource to expose to this instance. E.g. `nvidia-tesla-k80`.

@@ -1277,7 +1277,6 @@ func TestAccComputeInstance_shieldedVmConfig(t *testing.T) {
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
-<<<<<<< HEAD
 			{
 				Config: testAccComputeInstance_shieldedVmConfig(instanceName, true, true, false),
 				Check: resource.ComposeTestCheckFunc(
@@ -1286,36 +1285,6 @@ func TestAccComputeInstance_shieldedVmConfig(t *testing.T) {
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
-		},
-	})
-}
-
-<% unless version == 'ga' -%>
-
-func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
-	t.Parallel()
-
-	var instance computeBeta.Instance
-	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-=======
->>>>>>> a7c5754fdda541d07ddce62d18fbd02e0352efe9
-			{
-				Config: testAccComputeInstanceConfidentialInstanceConfig(instanceName, true),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceHasShieldedVmConfig(&instance, true, true, false),
-				),
-			},
-<<<<<<< HEAD
-=======
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
->>>>>>> a7c5754fdda541d07ddce62d18fbd02e0352efe9
 		},
 	})
 }

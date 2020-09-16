@@ -189,11 +189,7 @@ func testAccProjectService_basic(services []string, pid, name, org string) strin
 	return fmt.Sprintf(`
 provider "google" {
   user_project_override = true
-<<<<<<< HEAD
-}	
-=======
 }
->>>>>>> a7c5754fdda541d07ddce62d18fbd02e0352efe9
 resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
