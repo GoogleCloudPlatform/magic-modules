@@ -411,7 +411,6 @@ func resourceComposerEnvironment() *schema.Resource {
 									"machine_type": {
 										Type:         schema.TypeString,
 										Required:     true,
-										ForceNew:     true,
 										Description: `Optional. Cloud SQL machine type used by Airflow database. It has to be one of: db-n1-standard-2, db-n1-standard-4, db-n1-standard-8 or db-n1-standard-16. If not specified, db-n1-standard-2 will be used.`,
 									},
 								},
@@ -429,7 +428,6 @@ func resourceComposerEnvironment() *schema.Resource {
 									"machine_type": {
 										Type:         schema.TypeString,
 										Required:     true,
-										ForceNew:     true,
 										Description: `Optional. Machine type on which Airflow web server is running. It has to be one of: composer-n1-webserver-2, composer-n1-webserver-4 or composer-n1-webserver-8. If not specified, composer-n1-webserver-2 will be used. Value custom is returned only in response, if Airflow web server parameters were manually changed to a non-standard values.`,
 									},
 								},
@@ -675,24 +673,24 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 		}
 
 <% unless version == "ga" -%>
-		if d.HasChange("config.0.database_config") {
+		if d.HasChange("config.0.database_config.0.machine_type") {
 			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
 			if config != nil {
 				patchObj.Config.DatabaseConfig = config.DatabaseConfig
 			}
-			err = resourceComposerEnvironmentPatchField("config.databaseConfig", patchObj, d, tfConfig)
+			err = resourceComposerEnvironmentPatchField("config.databaseConfig.machineType", patchObj, d, tfConfig)
 			if err != nil {
 				return err
 			}
 			d.SetPartial("config")
 		}
 
-		if d.HasChange("config.0.web_server_config") {
+		if d.HasChange("config.0.web_server_config.0.machine_type") {
 			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
 			if config != nil {
 				patchObj.Config.WebServerConfig = config.WebServerConfig
 			}
-			err = resourceComposerEnvironmentPatchField("config.webServerConfig", patchObj, d, tfConfig)
+			err = resourceComposerEnvironmentPatchField("config.webServerConfig.machineType", patchObj, d, tfConfig)
 			if err != nil {
 				return err
 			}

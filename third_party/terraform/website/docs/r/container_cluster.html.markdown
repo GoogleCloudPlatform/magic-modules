@@ -9,6 +9,9 @@ description: |-
 
 # google\_container\_cluster
 
+-> Visit the [Provision a GKE Cluster (Google Cloud)](https://learn.hashicorp.com/tutorials/terraform/gke?in=terraform/kubernetes&utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS) Learn tutorial to learn how to provision and interact
+with a GKE cluster.
+
 -> See the [Using GKE with Terraform](/docs/providers/google/guides/using_gke_with_terraform.html)
 guide for more information about using GKE with Terraform.
 
@@ -347,9 +350,7 @@ The `addons_config` block supports:
     It can only be disabled if the nodes already do not have network policies enabled.
     Defaults to disabled; set `disabled = false` to enable.
 
-* `cloudrun_config` - (Optional).
-    The status of the CloudRun addon. It is disabled by default.
-    Set `disabled = false` to enable.
+* `cloudrun_config` - (Optional). Structure is documented below.
 
 * `istio_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     Structure is documented below.
@@ -362,7 +363,7 @@ The `addons_config` block supports:
     All cluster nodes running GKE 1.15 and higher are recreated.**
 
 * `gce_persistent_disk_csi_driver_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
-    Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to disabled; set `enabled = true` to enable. 
+    Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to disabled; set `enabled = true` to enable.
 
 * `kalm_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/ provider_versions.html)).
     Configuration for the KALM addon, which manages the lifecycle of k8s. It is disabled by default; Set `enabled = true` to enable.
@@ -389,6 +390,13 @@ The `database_encryption` block supports:
 * `state` - (Required) `ENCRYPTED` or `DECRYPTED`
 
 * `key_name` - (Required) the key to use to encrypt/decrypt secrets.  See the [DatabaseEncryption definition](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#Cluster.DatabaseEncryption) for more information.
+
+The `cloudrun_config` block supports:
+
+* `disabled` - (Optional) The status of the CloudRun addon. It is disabled by default. Set `disabled=false` to enable.
+
+* `load_balancer_type` - (Optional) The load balancer type of CloudRun ingress service. It is external load balancer by default.
+    Set `load_balancer_type=LOAD_BALANCER_TYPE_INTERNAL` to configure it as internal load balancer.
 
 The `istio_config` block supports:
 
@@ -633,7 +641,7 @@ recommended. Structure is documented below.
 
 * `workload_metadata_config` - (Optional) Metadata configuration to expose to workloads on the node pool.
     Structure is documented below.
-    
+
 * `kubelet_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
 Kubelet configuration, currently supported attributes can be found [here](https://cloud.google.com/sdk/gcloud/reference/beta/container/node-pools/create#--system-config-from-file).
 Structure is documented below.
@@ -840,7 +848,7 @@ The `linux_node_config` block supports:
 
 * `sysctls` - (Required)  The Linux kernel parameters to be applied to the nodes
 and all pods running on the nodes. Specified as a map from the key, such as
-`net.core.wmem_max`, to a string value. 
+`net.core.wmem_max`, to a string value.
 
 The `vertical_pod_autoscaling` block supports:
 
@@ -852,6 +860,8 @@ In addition to the arguments listed above, the following computed attributes are
 exported:
 
 * `id` - an identifier for the resource with format `projects/{{project}}/locations/{{zone}}/clusters/{{name}}`
+
+* `self_link` - The server-defined URL for the resource.
 
 * `endpoint` - The IP address of this cluster's Kubernetes master.
 

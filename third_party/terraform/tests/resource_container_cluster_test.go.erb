@@ -160,6 +160,15 @@ func TestAccContainerCluster_withAddons(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"min_master_version"},
 			},
+			{
+				Config: testAccContainerCluster_withInternalLoadBalancer(pid, clusterName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version"},
+			},
 		},
 	})
 }
@@ -1801,6 +1810,30 @@ func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+func TestAccContainerCluster_withAdvancedDatapath(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withDatapathProvider(clusterName, "ADVANCED_DATAPATH"),
+			},
+			{
+				ResourceName:        "google_container_cluster.primary",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+		},
+	})
+}
+<% end -%>
+
 func TestAccContainerCluster_withResourceUsageExportConfig(t *testing.T) {
 	t.Parallel()
 
@@ -2202,6 +2235,42 @@ resource "google_container_cluster" "primary" {
 	  enabled = true
 	}
 <% end -%>
+  }
+}
+`, projectID, clusterName)
+}
+
+func testAccContainerCluster_withInternalLoadBalancer(projectID string, clusterName string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  min_master_version = "latest"
+
+  workload_identity_config {
+    identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+
+  addons_config {
+    http_load_balancing {
+      disabled = false
+    }
+    horizontal_pod_autoscaling {
+      disabled = false
+    }
+    network_policy_config {
+      disabled = false
+    }
+    cloudrun_config {
+	  disabled = false
+	  load_balancer_type = "LOAD_BALANCER_TYPE_INTERNAL"
+    }
   }
 }
 `, projectID, clusterName)
@@ -4019,6 +4088,24 @@ resource "google_container_cluster" "primary" {
 }
 `, kmsData.KeyRing.Name, kmsData.CryptoKey.Name, clusterName)
 }
+
+<% unless version == 'ga' -%>
+func testAccContainerCluster_withDatapathProvider(clusterName, datapathProvider string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  datapath_provider = "%s"
+
+  release_channel {
+    channel = "RAPID"
+  }
+}
+`, clusterName, datapathProvider)
+}
+<% end -%>
 
 func testAccContainerCluster_withMasterAuthorizedNetworksDisabled(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`

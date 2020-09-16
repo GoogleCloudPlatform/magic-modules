@@ -302,6 +302,10 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				},
 			},
 <% end -%>
+			"operation": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }

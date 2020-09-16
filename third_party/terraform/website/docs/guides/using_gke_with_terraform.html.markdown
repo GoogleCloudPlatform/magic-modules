@@ -8,6 +8,9 @@ description: |-
 
 # Using GKE with Terraform
 
+-> Visit the [Provision a GKE Cluster (Google Cloud)](https://learn.hashicorp.com/tutorials/terraform/gke?in=terraform/kubernetes&utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS) Learn tutorial to learn how to provision and interact 
+with a GKE cluster.
+
 This page is a brief overview of GKE usage with Terraform, based on the content
 available in the [How-to guides for GKE](https://cloud.google.com/kubernetes-engine/docs/how-to).
 It's intended as a supplement for intermediate users, covering cases that are
@@ -15,7 +18,7 @@ unintuitive or confusing when using Terraform instead of `gcloud`/the Cloud
 Console.
 
 Additionally, you may consider using Google's [`kubernetes-engine`](https://registry.terraform.io/modules/terraform-google-modules/kubernetes-engine/google)
-module, which implements many of this practices for you.
+module, which implements many of these practices for you.
 
 If the information on this page conflicts with recommendations available on
 `cloud.google.com`, `cloud.google.com` should be considered the correct source.

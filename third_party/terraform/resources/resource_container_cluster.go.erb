@@ -285,6 +285,11 @@ func resourceContainerCluster() *schema.Resource {
 										Type:     schema.TypeBool,
 										Required: true,
 									},
+									"load_balancer_type": {
+										Type:         schema.TypeString,
+										ValidateFunc: validation.StringInSlice([]string{"LOAD_BALANCER_TYPE_INTERNAL"}, false),
+										Optional:     true,
+									},
 								},
 							},
 						},
@@ -817,6 +822,12 @@ func resourceContainerCluster() *schema.Resource {
 				Description:      `The name or self_link of the Google Compute Engine subnetwork in which the cluster's instances are launched.`,
 			},
 
+			"self_link": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `Server-defined URL for the resource.`,
+			},
+
 			"endpoint": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -1108,7 +1119,7 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-			
+
 			"default_snat_status": {
 				Type: schema.TypeList,
 				MaxItems: 1,
@@ -1125,6 +1136,15 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+
+			"datapath_provider": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      `The desired datapath provider for this cluster. By default, uses the IPTables-based kube-proxy implementation.`,
+				ValidateFunc:     validation.StringInSlice([]string{"DATAPATH_PROVIDER_UNSPECIFIED", "LEGACY_DATAPATH", "ADVANCED_DATAPATH"}, false),
+				DiffSuppressFunc: emptyOrDefaultStringSuppress("DATAPATH_PROVIDER_UNSPECIFIED"),
+			},
 <% end -%>
 			"enable_intranode_visibility": {
 			   Type: schema.TypeBool,
@@ -1136,7 +1156,7 @@ func resourceContainerCluster() *schema.Resource {
 <% else -%>
 			   Default: false,
 <% end -%>
-			}, 
+			},
 
 			"resource_usage_export_config": {
 				Type:        schema.TypeList,
@@ -1299,8 +1319,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		NetworkConfig: &containerBeta.NetworkConfig{
 			EnableIntraNodeVisibility: d.Get("enable_intranode_visibility").(bool),
 			DefaultSnatStatus:         expandDefaultSnatStatus(d.Get("default_snat_status")),
-	    },	
-<% end -%>	
+		    DatapathProvider:          d.Get("datapath_provider").(string),
+	    },
+<% end -%>
 		MasterAuth:     expandMasterAuth(d.Get("master_auth")),
 		ResourceLabels: expandStringMap(d, "resource_labels"),
 	}
@@ -1579,12 +1600,13 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 <% unless version == 'ga' -%>
 	d.Set("enable_tpu", cluster.EnableTpu)
 	d.Set("tpu_ipv4_cidr_block", cluster.TpuIpv4CidrBlock)
+    d.Set("datapath_provider", cluster.NetworkConfig.DatapathProvider)
 
 	if err := d.Set("default_snat_status", flattenDefaultSnatStatus(cluster.NetworkConfig.DefaultSnatStatus)); err != nil {
 		return err
 	}
 	d.Set("enable_intranode_visibility", cluster.NetworkConfig.EnableIntraNodeVisibility)
-<% end -%>	
+<% end -%>
 	if err := d.Set("authenticator_groups_config", flattenAuthenticatorGroupsConfig(cluster.AuthenticatorGroupsConfig)); err != nil {
 		return err
 	}
@@ -1804,7 +1826,11 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating release_channel")
 			name := containerClusterFullName(project, location, clusterName)
-			op, err := config.clientContainerBeta.Projects.Locations.Clusters.Update(name, req).Do()
+			clusterUpdateCall := config.clientContainerBeta.Projects.Locations.Clusters.Update(name, req)
+			if config.UserProjectOverride {
+				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
+			}
+			op, err := clusterUpdateCall.Do()
 			if err != nil {
 				return err
 			}
@@ -1873,7 +1899,11 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating default_snat_status")
 			name := containerClusterFullName(project, location, clusterName)
-			op, err := config.clientContainerBeta.Projects.Locations.Clusters.Update(name, req).Do()
+			clusterUpdateCall := config.clientContainerBeta.Projects.Locations.Clusters.Update(name, req)
+			if config.UserProjectOverride {
+				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
+			}
+			op, err := clusterUpdateCall.Do()
 			if err != nil {
 				return err
 			}
@@ -2264,7 +2294,11 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			op, err := config.clientContainerBeta.Projects.Locations.Clusters.Update(name, req).Do()
+			clusterUpdateCall := config.clientContainerBeta.Projects.Locations.Clusters.Update(name, req)
+			if config.UserProjectOverride {
+				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
+			}
+			op, err := clusterUpdateCall.Do()
 			if err != nil {
 				return err
 			}
@@ -2399,7 +2433,11 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		updateF := func() error {
 			name := containerClusterFullName(project, location, clusterName)
-			op, err := config.clientContainerBeta.Projects.Locations.Clusters.Update(name, req).Do()
+			clusterUpdateCall := config.clientContainerBeta.Projects.Locations.Clusters.Update(name, req)
+			if config.UserProjectOverride {
+				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
+			}
+			op, err := clusterUpdateCall.Do()
 			if err != nil {
 				return err
 			}
@@ -2426,7 +2464,11 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		updateF := func() error {
 			log.Println("[DEBUG] updating cluster_telemetry")
 			name := containerClusterFullName(project, location, clusterName)
-			op, err := config.clientContainerBeta.Projects.Locations.Clusters.Update(name, req).Do()
+			clusterUpdateCall := config.clientContainerBeta.Projects.Locations.Clusters.Update(name, req)
+			if config.UserProjectOverride {
+				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
+			}
+			op, err := clusterUpdateCall.Do()
 			if err != nil {
 				return err
 			}
@@ -2657,6 +2699,9 @@ func expandClusterAddonsConfig(configured interface{}) *containerBeta.AddonsConf
 		ac.CloudRunConfig = &containerBeta.CloudRunConfig{
 			Disabled:        addon["disabled"].(bool),
 			ForceSendFields: []string{"Disabled"},
+		}
+		if addon["load_balancer_type"] != "" {
+			ac.CloudRunConfig.LoadBalancerType = addon["load_balancer_type"].(string)
 		}
 	}
 
@@ -3168,11 +3213,14 @@ func flattenClusterAddonsConfig(c *containerBeta.AddonsConfig) []map[string]inte
 	}
 
 	if c.CloudRunConfig != nil {
-		result["cloudrun_config"] = []map[string]interface{}{
-			{
-				"disabled": c.CloudRunConfig.Disabled,
-			},
+		cloudRunConfig := map[string]interface{}{
+			"disabled": c.CloudRunConfig.Disabled,
 		}
+		if c.CloudRunConfig.LoadBalancerType == "LOAD_BALANCER_TYPE_INTERNAL" {
+			// Currently we only allow setting load_balancer_type to LOAD_BALANCER_TYPE_INTERNAL
+			cloudRunConfig["load_balancer_type"] = "LOAD_BALANCER_TYPE_INTERNAL"
+		}
+		result["cloudrun_config"] = []map[string]interface{}{cloudRunConfig}
 	}
 
 <% unless version == 'ga' -%>

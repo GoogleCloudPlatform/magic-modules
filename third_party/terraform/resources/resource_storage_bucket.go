@@ -325,10 +325,19 @@ func resourceStorageBucket() *schema.Resource {
 				Description: `The bucket's Access & Storage Logs configuration.`,
 			},
 			"bucket_policy_only": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Computed:    true,
-				Description: `Enables Bucket Policy Only access to a bucket.`,
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Computed:      true,
+				Description:   `Enables Bucket Policy Only access to a bucket.`,
+				Deprecated:    `Please use the uniform_bucket_level_access as this field has been renamed by Google.`,
+				ConflictsWith: []string{"uniform_bucket_level_access"},
+			},
+			"uniform_bucket_level_access": {
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Computed:      true,
+				Description:   `Enables uniform bucket-level access on a bucket.`,
+				ConflictsWith: []string{"bucket_policy_only"},
 			},
 		},
 	}

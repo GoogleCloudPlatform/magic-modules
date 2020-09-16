@@ -87,6 +87,7 @@ each accept the following arguments:
   * **group:{emailid}**: An email address that represents a Google group. For example, admins@example.com.
   * **domain:{domain}**: A G Suite domain (primary, instead of alias) name that represents all the users of that domain. For example, google.com or example.com.
 
+<<<<<<< HEAD
 * `condition` - (Optional) An [IAM Condition](https://cloud.google.com/iam/docs/conditions-overview) for a given binding. Structure is documented below.
 
 The `condition` block supports:
@@ -95,6 +96,8 @@ The `condition` block supports:
 
 * `title` - (Required) A title for the expression, i.e. a short string describing its purpose.
 
+=======
+>>>>>>> a7c5754fdda541d07ddce62d18fbd02e0352efe9
 * `condition` - (Optional) An [IAM Condition](https://cloud.google.com/iam/docs/conditions-overview) for a given binding. Structure is documented below.
 
 The `condition` block supports:
