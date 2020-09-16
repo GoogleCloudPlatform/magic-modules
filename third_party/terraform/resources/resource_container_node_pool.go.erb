@@ -354,11 +354,7 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 
 	name := getNodePoolName(d.Id())
 
-	clusterNodePoolsGetCall := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
-	if config.UserProjectOverride {
-		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-	}
-	nodePool, err := clusterNodePoolsGetCall.Do()
+	nodePool, err := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name)).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("NodePool %q from cluster %q", name, nodePoolInfo.cluster))
 	}
@@ -380,6 +376,7 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 
 func resourceContainerNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+
 	nodePoolInfo, err := extractNodePoolInformation(d, config)
 	if err != nil {
 		return err
@@ -428,11 +425,8 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 
 	var operation *containerBeta.Operation
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		clusterNodePoolsDeleteCall := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Delete(nodePoolInfo.fullyQualifiedName(name))
-		if config.UserProjectOverride {
-			clusterNodePoolsDeleteCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-		}
-		operation, err = clusterNodePoolsDeleteCall.Do()
+		operation, err = config.clientContainerBeta.
+			Projects.Locations.Clusters.NodePools.Delete(nodePoolInfo.fullyQualifiedName(name)).Do()
 
 		if err != nil {
 			if isFailedPreconditionError(err) {
@@ -442,6 +436,7 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 			}
 			return resource.NonRetryableError(err)
 		}
+		operation, err = clusterNodePoolsDeleteCall.Do()
 
 		return nil
 	})
@@ -762,6 +757,106 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 
 			log.Printf("[INFO] Updated image type in Node Pool %s", d.Id())
 		}
+<% unless version == 'ga' -%>
+		if d.HasChange(prefix + "node_config.0.workload_metadata_config") {
+			req := &containerBeta.UpdateNodePoolRequest{
+				NodePoolId: name,
+				WorkloadMetadataConfig: expandWorkloadMetadataConfig(
+					d.Get(prefix + "node_config.0.workload_metadata_config")),
+			}
+			if req.WorkloadMetadataConfig == nil {
+				req.ForceSendFields = []string{"WorkloadMetadataConfig"}
+			}
+			updateF := func() error {
+				op, err := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.
+					Update(nodePoolInfo.fullyQualifiedName(name), req).Do()
+				if err != nil {
+					return err
+				}
+
+				// Wait until it's updated
+				return containerOperationWait(config, op,
+					nodePoolInfo.project,
+					nodePoolInfo.location,
+					"updating GKE node pool workload_metadata_config",
+					timeout)
+			}
+
+			// Call update serially.
+			if err := lockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] Updated workload_metadata_config for node pool %s", name)
+		}
+
+<% end -%>
+
+<% unless version == 'ga' -%>
+		if d.HasChange(prefix + "node_config.0.kubelet_config") {
+			req := &containerBeta.UpdateNodePoolRequest{
+				NodePoolId: name,
+				KubeletConfig: expandKubeletConfig(
+					d.Get(prefix + "node_config.0.kubelet_config")),
+			}
+			if req.KubeletConfig == nil {
+				req.ForceSendFields = []string{"KubeletConfig"}
+			}
+			updateF := func() error {
+				op, err := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.
+					Update(nodePoolInfo.fullyQualifiedName(name), req).Do()
+				if err != nil {
+					return err
+				}
+
+				// Wait until it's updated
+				return containerOperationWait(config, op,
+					nodePoolInfo.project,
+					nodePoolInfo.location,
+					"updating GKE node pool kubelet_config",
+					timeout)
+			}
+
+			// Call update serially.
+			if err := lockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] Updated kubelet_config for node pool %s", name)
+		}
+		if d.HasChange(prefix + "node_config.0.linux_node_config") {
+			req := &containerBeta.UpdateNodePoolRequest{
+				NodePoolId: name,
+				LinuxNodeConfig: expandLinuxNodeConfig(
+					d.Get(prefix + "node_config.0.linux_node_config")),
+			}
+			if req.LinuxNodeConfig == nil {
+				req.ForceSendFields = []string{"LinuxNodeConfig"}
+			}
+			updateF := func() error {
+				op, err := config.clientContainerBeta.Projects.Locations.Clusters.NodePools.
+					Update(nodePoolInfo.fullyQualifiedName(name), req).Do()
+				if err != nil {
+					return err
+				}
+
+				// Wait until it's updated
+				return containerOperationWait(config, op,
+					nodePoolInfo.project,
+					nodePoolInfo.location,
+					"updating GKE node pool linux_node_config",
+					timeout)
+			}
+
+			// Call update serially.
+			if err := lockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] Updated linux_node_config for node pool %s", name)
+		}
+
+<% end -%>
 
 		if d.HasChange(prefix + "node_config.0.workload_metadata_config") {
 			req := &containerBeta.UpdateNodePoolRequest{

@@ -1,4 +1,16 @@
-
+// This should never happen, but the linter complains otherwise with ineffectual assignment to `project`
+if project == "dummy lint" {
+  log.Printf("[DEBUG] Found project in url: %s", project)
+}
 // Send the project ID in the X-Goog-User-Project header.
 origUserProjectOverride := config.UserProjectOverride
 config.UserProjectOverride = true
+// If we have a billing project, use that one in the header.
+bp, bpok := d.GetOk("billing_project")
+if bpok && bp != "" {
+  project = bp.(string)
+} else {
+  // otherwise, use the resource's project
+  rp, _ := d.GetOk("project")
+  project = rp.(string)
+}

@@ -1665,6 +1665,23 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
+	if d.HasChange("shielded_instance_config") {
+		shieldedVmConfig := expandShieldedVmConfigs(d)
+
+		op, err := config.clientComputeBeta.Instances.UpdateShieldedInstanceConfig(project, zone, instance.Name, shieldedVmConfig).Do()
+		if err != nil {
+			return fmt.Errorf("Error updating shielded vm config: %s", err)
+		}
+
+		opErr := computeOperationWaitTime(config, op, project,
+			"shielded vm config update", d.Timeout(schema.TimeoutUpdate))
+		if opErr != nil {
+			return opErr
+		}
+
+		d.SetPartial("shielded_instance_config")
+	}
+
 	// We made it, disable partial mode
 	d.Partial(false)
 

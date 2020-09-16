@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"google.golang.org/api/compute/v1"
@@ -21,7 +20,6 @@ type ComputeOperationWaiter struct {
 	Service *computeBeta.Service
 	Op      *computeBeta.Operation
 <% end -%>
-	Context context.Context
 	Project string
 <% unless version == 'ga' -%>
 	Parent  string
@@ -127,7 +125,6 @@ func computeOperationWaitTime(config *Config, res interface{}, project, activity
 <% else -%>
 		Service: config.clientComputeBeta,
 <% end -%>
-		Context: config.context,
 		Op:      op,
 		Project: project,
 	}

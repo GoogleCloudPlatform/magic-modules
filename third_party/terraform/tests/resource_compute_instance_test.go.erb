@@ -1299,6 +1299,30 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceConfidentialInstanceConfig(instanceName, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceHasShieldedVmConfig(&instance, true, true, false),
+				),
+			},
+		},
+	})
+}
+
+<% unless version == 'ga' -%>
+
+func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
+	t.Parallel()
+
+	var instance computeBeta.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProvidersOiCS,
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{

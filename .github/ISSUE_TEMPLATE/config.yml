@@ -1,6 +1,6 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Terraform Issue
+  - name: Terraform-Specific Issue Tracking
     url: https://github.com/hashicorp/terraform-provider-google/issues/new/choose
     about: |
       Terraform-specific issues or FRs

@@ -191,11 +191,6 @@ objects:
       ~> **Note:** Only internal org clients can be created via declarative tools. Other types of clients must be
       manually created via the GCP console. This restriction is due to the existing APIs and not lack of support
       in this tool.
-    references: !ruby/object:Api::Resource::ReferenceLinks
-      guides:
-        'Setting up IAP Client':
-          'https://cloud.google.com/iap/docs/authentication-howto'
-      api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands.identityAwareProxyClients'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'clientId'

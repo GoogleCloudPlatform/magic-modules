@@ -457,32 +457,6 @@ func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
-func TestAccComputeDisk_VSSWindows(t *testing.T) {
-	t.Parallel()
-
-	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	firstDiskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	snapshotName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	projectName := getTestProjectFromEnv()
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeDisk_WindowsVSS(firstDiskName, projectName, snapshotName, diskName),
-			},
-			{
-				ResourceName:      "google_compute_disk.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-<% end -%>
-
 func testAccCheckComputeDiskExists(t *testing.T, n, p string, disk *compute.Disk) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
