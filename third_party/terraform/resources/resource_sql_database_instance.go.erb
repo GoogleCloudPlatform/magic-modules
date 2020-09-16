@@ -122,7 +122,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 							Description: `Used to make sure changes to the settings block are atomic.`,
 						},
 						"deletion_protection": {
-							Type:        schema.TypeString,
+							Type:        schema.TypeBool,
 							Default:     false,
 							Optional:    true,
 							Description: `Used to block Terraform from deleting a SQL Instance.`,
