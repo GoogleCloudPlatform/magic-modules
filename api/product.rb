@@ -30,8 +30,8 @@ module Api
     # Example inputs: "Compute", "AccessContextManager"
     # attr_reader :name
 
-    # The full name of the GCP product; eg "Cloud Bigtable"
-    attr_reader :display_name
+    # Display Name: The full name of the GCP product; eg "Cloud Bigtable"
+    # A custom getter is used for :display_name instead of `attr_reader`
 
     attr_reader :objects
 
@@ -76,9 +76,9 @@ module Api
 
     # The product full name is the "display name" in string form intended for
     # users to read in documentation; "Google Compute Engine", "Cloud Bigtable"
-    def product_full_name
-      if !display_name.nil?
-        display_name
+    def display_name
+      if !@display_name.nil?
+        @display_name
       else
         name.underscore.humanize
       end
@@ -92,7 +92,7 @@ module Api
           return product_version if ordered_version_name == product_version.name
         end
       end
-      raise "Unable to find lowest version for product #{product_full_name}"
+      raise "Unable to find lowest version for product #{display_name}"
     end
 
     def version_obj(name)
@@ -116,7 +116,7 @@ module Api
         return version_obj(version) if exists_at_version(version)
       end
 
-      raise "Could not find object for version #{name} and product #{product_full_name}"
+      raise "Could not find object for version #{name} and product #{display_name}"
     end
 
     def exists_at_version_or_lower(name)

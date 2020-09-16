@@ -1,8 +1,7 @@
 resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
-  provider        = "google-beta"
   name            = "<%= ctx[:vars]['region_url_map_name'] %>"
   description     = "a description"
-  default_service = google_compute_region_backend_service.home.self_link
+  default_service = google_compute_region_backend_service.home.id
 
   host_rule {
     hosts        = ["mysite.com"]
@@ -11,7 +10,7 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
 
   path_matcher {
     name = "allpaths"
-    default_service = google_compute_region_backend_service.home.self_link
+    default_service = google_compute_region_backend_service.home.id
 
     route_rules {
       priority = 1
@@ -60,24 +59,22 @@ resource "google_compute_region_url_map" "<%= ctx[:primary_resource_id] %>" {
   }
 
   test {
-    service = google_compute_region_backend_service.home.self_link
+    service = google_compute_region_backend_service.home.id
     host    = "hi.com"
     path    = "/home"
   }
 }
 
 resource "google_compute_region_backend_service" "home" {
-  provider    = "google-beta"
   name        = "<%= ctx[:vars]['home_region_backend_service_name'] %>"
   protocol    = "HTTP"
   timeout_sec = 10
 
-  health_checks = [google_compute_region_health_check.default.self_link]
+  health_checks = [google_compute_region_health_check.default.id]
   load_balancing_scheme = "INTERNAL_MANAGED"
 }
 
 resource "google_compute_region_health_check" "default" {
-  provider = "google-beta"
   name     = "<%= ctx[:vars]['region_health_check_name'] %>"
   http_health_check {
     port = 80

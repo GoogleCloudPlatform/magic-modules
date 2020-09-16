@@ -13,10 +13,13 @@
 
 --- !ruby/object:Api::Product
 name: GameServices
-display_name: Google Game Services
+display_name: Game Servers
 scopes:
 - https://www.googleapis.com/auth/compute
 versions:
+- !ruby/object:Api::Product::Version
+  name: ga
+  base_url: https://gameservices.googleapis.com/v1/
 - !ruby/object:Api::Product::Version
   name: beta
   base_url: https://gameservices.googleapis.com/v1beta/
@@ -30,7 +33,7 @@ objects:
       'Official Documentation': 'https://cloud.google.com/game-servers/docs'
     api: 'https://cloud.google.com/game-servers/docs/reference/rest/v1beta/projects.locations.realms'
   create_url: projects/{{project}}/locations/{{location}}/realms?realmId={{realm_id}}
-  base_url: projects/{{project}}/locations/{{location}}/realms/
+  base_url: projects/{{project}}/locations/{{location}}/realms
   self_link: projects/{{project}}/locations/{{location}}/realms/{{realm_id}}
   update_verb: :PATCH
   update_mask: true

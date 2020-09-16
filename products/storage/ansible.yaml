@@ -25,6 +25,12 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   Object: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Bucket: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      retentionPolicy: !ruby/object:Overrides::Ansible::PropertyOverride
+        exclude: true
+      encryption: !ruby/object:Overrides::Ansible::PropertyOverride
+        exclude: true
   ObjectAccessControl: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Object: !ruby/object:Overrides::Ansible::ResourceOverride

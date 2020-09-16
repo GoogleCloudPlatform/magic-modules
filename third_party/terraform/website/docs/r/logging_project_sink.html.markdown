@@ -1,5 +1,5 @@
 ---
-subcategory: "Stackdriver Logging"
+subcategory: "Cloud (Stackdriver) Logging"
 layout: "google"
 page_title: "Google: google_logging_project_sink"
 sidebar_current: "docs-google-logging-project-sink"
@@ -126,6 +126,8 @@ The `bigquery_options` block supports:
 
 In addition to the arguments listed above, the following computed attributes are
 exported:
+
+* `id` - an identifier for the resource with format `projects/{{project}}/sinks/{{name}}`
 
 * `writer_identity` - The identity associated with this sink. This identity must be granted write access to the
     configured `destination`.

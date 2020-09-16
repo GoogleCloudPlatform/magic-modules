@@ -14,7 +14,7 @@
 -%>
 # frozen_string_literal: false
 
-<%= lines(autogen_notice :ruby) -%>
+<%= lines(autogen_notice(:ruby, pwd)) -%>
 require 'gcp_backend'
 class <%= object.__product.name.camelize(:upper) -%><%= object.name -%>s < GcpResourceBase
 <%
@@ -64,7 +64,7 @@ link_query_items = object&.nested_query&.keys&.first || object.collection_url_ke
           hash_with_symbols[name] = value
         end
 <% if object.plural_custom_logic -%>
-<%= lines(indent(compile(object.plural_custom_logic), 8)) -%>
+<%= lines(indent(compile(pwd + '/' + object.plural_custom_logic), 8)) -%>
 <% end -%>
         converted.push(hash_with_symbols)
       end
@@ -96,7 +96,7 @@ link_query_items = object&.nested_query&.keys&.first || object.collection_url_ke
 
   private
 
-<%= compile('templates/inspec/product_url.erb') -%>
+<%= compile(pwd + '/templates/inspec/product_url.erb') -%>
 
   def resource_base_url
     '<%= object.base_url %>'

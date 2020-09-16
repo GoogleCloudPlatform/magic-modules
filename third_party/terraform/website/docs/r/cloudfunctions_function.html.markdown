@@ -107,7 +107,7 @@ The following arguments are supported:
 * `name` - (Required) A user-defined name of the function. Function names must be unique globally.
 
 * `runtime` - (Required) The runtime in which the function is going to run.
-Eg. `"nodejs8"`, `"nodejs10"`, `"python37"`, `"go111"`.
+Eg. `"nodejs8"`, `"nodejs10"`, `"python37"`, `"go111"`, `"go113"`.
 
 - - -
 
@@ -125,13 +125,13 @@ Eg. `"nodejs8"`, `"nodejs10"`, `"python37"`, `"go111"`.
 
 * `ingress_settings` - (Optional) String value that controls what traffic can reach the function. Allowed values are ALLOW_ALL and ALLOW_INTERNAL_ONLY. Changes to this field will recreate the cloud function.
 
-* `labels` - (Optional) A set of key/value label pairs to assign to the function.
+* `labels` - (Optional) A set of key/value label pairs to assign to the function. Label keys must follow the requirements at https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements.
 
 * `service_account_email` - (Optional) If provided, the self-provided service account to run the function with.
 
 * `environment_variables` - (Optional) A set of key/value environment variable pairs to assign to the function.
 
-* `vpc_connector` - (Optional) The VPC Network Connector that this cloud function can connect to. It can be either the fully-qualified URI, or the short name of the network connector resource. The format of this field is `projects/*/locations/*/connectors/*`.
+* `vpc_connector` - (Optional) The VPC Network Connector that this cloud function can connect to. It should be set up as fully-qualified URI. The format of this field is `projects/*/locations/*/connectors/*`.
 
 * `vpc_connector_egress_settings` - (Optional) The egress settings for the connector, controlling what traffic is diverted through it. Allowed values are `ALL_TRAFFIC` and `PRIVATE_RANGES_ONLY`. Defaults to `PRIVATE_RANGES_ONLY`. If unset, this field preserves the previously set value.
 
@@ -147,7 +147,7 @@ Eg. `"nodejs8"`, `"nodejs10"`, `"python37"`, `"go111"`.
 The `event_trigger` block supports:
 
 * `event_type` - (Required) The type of event to observe. For example: `"google.storage.object.finalize"`.
-See the documentation on [calling Cloud Functions](https://cloud.google.com/functions/docs/calling/) for a 
+See the documentation on [calling Cloud Functions](https://cloud.google.com/functions/docs/calling/) for a
 full reference of accepted triggers.
 
 * `resource` - (Required) Required. The name or partial URI of the resource from
@@ -193,8 +193,9 @@ This resource provides the following
 
 ## Import
 
-Functions can be imported using the `name`, e.g.
+Functions can be imported using the `name` or `{{project}}/{{region}}/name`, e.g.
 
 ```
 $ terraform import google_cloudfunctions_function.default function-test
+$ terraform import google_cloudfunctions_function.default {{project}}/{{region}}/function-test
 ```

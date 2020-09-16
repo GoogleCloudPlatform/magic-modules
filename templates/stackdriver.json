@@ -1,0 +1,421 @@
+{
+    "parameters": {
+        "key": {
+            "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
+            "type": "string",
+            "location": "query"
+        },
+        "access_token": {
+            "location": "query",
+            "description": "OAuth access token.",
+            "type": "string"
+        },
+        "upload_protocol": {
+            "location": "query",
+            "description": "Upload protocol for media (e.g. \"raw\", \"multipart\").",
+            "type": "string"
+        },
+        "prettyPrint": {
+            "location": "query",
+            "description": "Returns response with indentations and line breaks.",
+            "type": "boolean",
+            "default": "true"
+        },
+        "quotaUser": {
+            "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters.",
+            "type": "string",
+            "location": "query"
+        },
+        "uploadType": {
+            "location": "query",
+            "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
+            "type": "string"
+        },
+        "fields": {
+            "type": "string",
+            "location": "query",
+            "description": "Selector specifying which fields to include in a partial response."
+        },
+        "$.xgafv": {
+            "description": "V1 error format.",
+            "type": "string",
+            "enumDescriptions": [
+                "v1 error format",
+                "v2 error format"
+            ],
+            "location": "query",
+            "enum": [
+                "1",
+                "2"
+            ]
+        },
+        "oauth_token": {
+            "description": "OAuth 2.0 token for the current user.",
+            "type": "string",
+            "location": "query"
+        },
+        "callback": {
+            "description": "JSONP",
+            "type": "string",
+            "location": "query"
+        },
+        "alt": {
+            "default": "json",
+            "enum": [
+                "json",
+                "media",
+                "proto"
+            ],
+            "type": "string",
+            "enumDescriptions": [
+                "Responses with Content-Type of application/json",
+                "Media download with context-dependent Content-Type",
+                "Responses with Content-Type of application/x-protobuf"
+            ],
+            "location": "query",
+            "description": "Data format for response."
+        }
+    },
+    "version": "v2",
+    "baseUrl": "https://stackdriver.googleapis.com/",
+    "kind": "discovery#restDescription",
+    "description": "Provides users with programmatic access to Stackdriver endpoints that allow putting VM instances and other resources into maintenance mode.",
+    "servicePath": "",
+    "basePath": "",
+    "revision": "20200323",
+    "documentationLink": "https://cloud.google.com/stackdriver/docs/",
+    "id": "stackdriver:v2",
+    "discoveryVersion": "v1",
+    "version_module": true,
+    "schemas": {
+        "Status": {
+            "description": "The `Status` type defines a logical error model that is suitable for\ndifferent programming environments, including REST APIs and RPC APIs. It is\nused by [gRPC](https://github.com/grpc). Each `Status` message contains\nthree pieces of data: error code, error message, and error details.\n\nYou can find out more about this error model and how to work with it in the\n[API Design Guide](https://cloud.google.com/apis/design/errors).",
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "any",
+                            "description": "Properties of the object. Contains field @type with type URL."
+                        }
+                    },
+                    "description": "A list of messages that carry the error details.  There is a common set of\nmessage types for APIs to use."
+                },
+                "code": {
+                    "description": "The status code, which should be an enum value of google.rpc.Code.",
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "message": {
+                    "description": "A developer-facing error message, which should be in English. Any\nuser-facing error message should be localized and sent in the\ngoogle.rpc.Status.details field, or localized by the client.",
+                    "type": "string"
+                }
+            },
+            "id": "Status"
+        },
+        "Operation": {
+            "id": "Operation",
+            "description": "This resource represents a long-running operation that is the result of a\nnetwork API call.",
+            "type": "object",
+            "properties": {
+                "response": {
+                    "description": "The normal response of the operation in case of success.  If the original\nmethod returns no data on success, such as `Delete`, the response is\n`google.protobuf.Empty`.  If the original method is standard\n`Get`/`Create`/`Update`, the response should be the resource.  For other\nmethods, the response should have the type `XxxResponse`, where `Xxx`\nis the original method name.  For example, if the original method name\nis `TakeSnapshot()`, the inferred response type is\n`TakeSnapshotResponse`.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "description": "Properties of the object. Contains field @type with type URL.",
+                        "type": "any"
+                    }
+                },
+                "name": {
+                    "description": "The server-assigned name, which is only unique within the same service that\noriginally returns it. If you use the default HTTP mapping, the\n`name` should be a resource name ending with `operations/{unique_id}`.",
+                    "type": "string"
+                },
+                "error": {
+                    "$ref": "Status",
+                    "description": "The error result of the operation in case of failure or cancellation."
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "any",
+                        "description": "Properties of the object. Contains field @type with type URL."
+                    },
+                    "description": "Service-specific metadata associated with the operation.  It typically\ncontains progress information and common metadata such as create time.\nSome services might not provide such metadata.  Any method that returns a\nlong-running operation should document the metadata type, if any."
+                },
+                "done": {
+                    "description": "If the value is `false`, it means the operation is still in progress.\nIf `true`, the operation is completed, and either `error` or `response` is\navailable.",
+                    "type": "boolean"
+                }
+            }
+        },
+        "OperationMetadata": {
+            "id": "OperationMetadata",
+            "description": "Contains metadata for longrunning operations in the Stackdriver API.",
+            "type": "object",
+            "properties": {
+                "state": {
+                    "enum": [
+                        "STATE_UNSPECIFIED",
+                        "CREATED",
+                        "RUNNING",
+                        "DONE",
+                        "CANCELLED"
+                    ],
+                    "description": "Current state of the batch operation.",
+                    "type": "string",
+                    "enumDescriptions": [
+                        "Invalid.",
+                        "Request is received.",
+                        "Request is actively being processed.",
+                        "The batch processing is done.",
+                        "The batch processing was cancelled."
+                    ]
+                },
+                "updateTime": {
+                    "type": "string",
+                    "description": "The time when the operation result was last updated.",
+                    "format": "google-datetime"
+                },
+                "createTime": {
+                    "description": "The time when the batch request was received.",
+                    "format": "google-datetime",
+                    "type": "string"
+                }
+            }
+        },
+        "MonitoredProject": {
+            "description": "A single cloud account being monitored within a Stackdriver account.",
+            "type": "object",
+            "properties": {
+                "projectNumber": {
+                    "description": "Output only. The GCP-assigned project number.",
+                    "format": "int64",
+                    "type": "string"
+                },
+                "createTime": {
+                    "description": "Output only. The instant when this monitored project was created.",
+                    "format": "google-datetime",
+                    "type": "string"
+                },
+                "updateTime": {
+                    "description": "Output only. The instant when this monitored project was last updated.",
+                    "format": "google-datetime",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "The resource name of the monitored project within a Stackdriver account.\nIncludes the host project id and monitored project id.  On output it\nwill always contain the project number.\nExample: \u003ccode\u003eaccounts/my-project/projects/my-other-project\u003c/code\u003e",
+                    "type": "string"
+                },
+                "projectId": {
+                    "description": "Output only. The GCP-assigned project id.\nExample: \u003ccode\u003eprojecty-project-101\u003c/code\u003e",
+                    "type": "string"
+                },
+                "organizationId": {
+                    "description": "Optional, input only. The Id of the organization to hold the GCP Project\nfor a newly created monitored project.\nThis field is ignored if the GCP project already exists.",
+                    "type": "string"
+                }
+            },
+            "id": "MonitoredProject"
+        },
+        "StackdriverAccount": {
+            "id": "StackdriverAccount",
+            "description": "A Workspace in Stackdriver Monitoring, which specifies one or more GCP\nprojects and zero or more AWS accounts to monitor together.\nOne GCP project acts as the Workspace's host.\nGCP projects and AWS accounts cannot be monitored until they are associated\nwith a Workspace.",
+            "type": "object",
+            "properties": {
+                "monitoredProjects": {
+                    "description": "Output only. The GCP projects monitored in this Stackdriver account.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "MonitoredProject"
+                    }
+                },
+                "createTime": {
+                    "type": "string",
+                    "description": "Output only. The instant when this account was created.",
+                    "format": "google-datetime"
+                },
+                "hostProjectId": {
+                    "description": "Output only. The GCP project id for the host project of this account.",
+                    "type": "string"
+                },
+                "updateTime": {
+                    "description": "Output only. The instant when this account record was last updated.",
+                    "format": "google-datetime",
+                    "type": "string"
+                },
+                "hostProjectNumber": {
+                    "description": "Output only. The GCP project number for the host project of this account.",
+                    "format": "int64",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "The resource name of the Stackdriver account, including the host project\nid or number.  On output it will always be the host project number.\nExample: \u003ccode\u003eaccounts/[PROJECT_ID]\u003c/code\u003e or\n\u003ccode\u003eaccounts/[PROJECT_NUMBER]\u003c/code\u003e",
+                    "type": "string"
+                },
+                "organizationId": {
+                    "description": "Optional, input only. The Id of the organization to hold the GCP Project\nfor a newly created Stackdriver account.\nThis field is ignored if the GCP project already exists.",
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "protocol": "rest",
+    "icons": {
+        "x32": "http://www.google.com/images/icons/product/search-32.gif",
+        "x16": "http://www.google.com/images/icons/product/search-16.gif"
+    },
+    "canonicalName": "Stackdriver",
+    "auth": {
+        "oauth2": {
+            "scopes": {
+                "https://www.googleapis.com/auth/monitoring": {
+                    "description": "View and write monitoring data for all of your Google and third-party Cloud and API projects"
+                },
+                "https://www.googleapis.com/auth/monitoring.write": {
+                    "description": "Publish metric data to your Google Cloud projects"
+                },
+                "https://www.googleapis.com/auth/cloud-platform": {
+                    "description": "View and manage your data across Google Cloud Platform services"
+                },
+                "https://www.googleapis.com/auth/monitoring.read": {
+                    "description": "View monitoring data for all of your Google Cloud and third-party projects"
+                }
+            }
+        }
+    },
+    "rootUrl": "https://stackdriver.googleapis.com/",
+    "ownerDomain": "google.com",
+    "name": "stackdriver",
+    "batchPath": "batch",
+    "mtlsRootUrl": "https://stackdriver.mtls.googleapis.com/",
+    "fullyEncodeReservedExpansion": true,
+    "title": "Stackdriver API",
+    "ownerName": "Google",
+    "resources": {
+        "accounts": {
+            "methods": {
+                "get": {
+                    "httpMethod": "GET",
+                    "parameterOrder": [
+                        "name"
+                    ],
+                    "response": {
+                        "$ref": "StackdriverAccount"
+                    },
+                    "parameters": {
+                        "name": {
+                            "location": "path",
+                            "description": "The unique name of the Stackdriver account.\nCaller needs stackdriver.projects.get permission on the host project.",
+                            "required": true,
+                            "type": "string",
+                            "pattern": "^accounts/[^/]+$"
+                        },
+                        "includeProjects": {
+                            "type": "boolean",
+                            "location": "query",
+                            "description": "If true the monitored_projects collection will be populated with any\nentries, if false it will be empty."
+                        }
+                    },
+                    "scopes": [
+                        "https://www.googleapis.com/auth/cloud-platform",
+                        "https://www.googleapis.com/auth/monitoring",
+                        "https://www.googleapis.com/auth/monitoring.read"
+                    ],
+                    "flatPath": "v2/accounts/{accountsId}",
+                    "id": "stackdriver.accounts.get",
+                    "path": "v2/{+name}",
+                    "description": "Fetches a specific Stackdriver account."
+                },
+                "create": {
+                    "response": {
+                        "$ref": "Operation"
+                    },
+                    "parameterOrder": [],
+                    "httpMethod": "POST",
+                    "scopes": [
+                        "https://www.googleapis.com/auth/cloud-platform",
+                        "https://www.googleapis.com/auth/monitoring",
+                        "https://www.googleapis.com/auth/monitoring.write"
+                    ],
+                    "parameters": {},
+                    "flatPath": "v2/accounts",
+                    "path": "v2/accounts",
+                    "id": "stackdriver.accounts.create",
+                    "request": {
+                        "$ref": "StackdriverAccount"
+                    },
+                    "description": "Creates a new Stackdriver account with a given host project.\nA MonitoredProject for that project will be attached to it if successful.\n\nOperation\u003cresponse: StackdriverAccount\u003e"
+                }
+            },
+            "resources": {
+                "projects": {
+                    "methods": {
+                        "create": {
+                            "response": {
+                                "$ref": "Operation"
+                            },
+                            "parameterOrder": [
+                                "parent"
+                            ],
+                            "httpMethod": "POST",
+                            "parameters": {
+                                "parent": {
+                                    "description": "The unique name of the Stackdriver account that will host this project.\nCaller needs stackdriver.projects.edit permission on the host project.",
+                                    "required": true,
+                                    "type": "string",
+                                    "pattern": "^accounts/[^/]+$",
+                                    "location": "path"
+                                }
+                            },
+                            "scopes": [
+                                "https://www.googleapis.com/auth/cloud-platform",
+                                "https://www.googleapis.com/auth/monitoring",
+                                "https://www.googleapis.com/auth/monitoring.write"
+                            ],
+                            "flatPath": "v2/accounts/{accountsId}/projects",
+                            "path": "v2/{+parent}/projects",
+                            "id": "stackdriver.accounts.projects.create",
+                            "description": "Creates a new monitored project in a Stackdriver account.\nOperation\u003cresponse: MonitoredProject\u003e",
+                            "request": {
+                                "$ref": "MonitoredProject"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "operations": {
+            "methods": {
+                "get": {
+                    "httpMethod": "GET",
+                    "response": {
+                        "$ref": "Operation"
+                    },
+                    "parameterOrder": [
+                        "name"
+                    ],
+                    "parameters": {
+                        "name": {
+                            "pattern": "^operations/.*$",
+                            "location": "path",
+                            "description": "The name of the operation resource.",
+                            "required": true,
+                            "type": "string"
+                        }
+                    },
+                    "scopes": [
+                        "https://www.googleapis.com/auth/cloud-platform",
+                        "https://www.googleapis.com/auth/monitoring",
+                        "https://www.googleapis.com/auth/monitoring.read"
+                    ],
+                    "flatPath": "v2/operations/{operationsId}",
+                    "id": "stackdriver.operations.get",
+                    "path": "v2/{+name}",
+                    "description": "Gets the latest state of a long-running operation.  Clients can use this\nmethod to poll the operation result at intervals as recommended by the API\nservice."
+                }
+            }
+        }
+    }
+}

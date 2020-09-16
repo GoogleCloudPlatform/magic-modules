@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
@@ -13,13 +12,13 @@ import (
 func TestAccContainerNodePool_basic(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccContainerNodePool_basic(cluster, np),
@@ -33,18 +32,17 @@ func TestAccContainerNodePool_basic(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerNodePool_nodeLocations(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(10))
-	network := fmt.Sprintf("tf-test-net-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
+	network := fmt.Sprintf("tf-test-net-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerNodePool_nodeLocations(cluster, np, network),
@@ -57,19 +55,18 @@ func TestAccContainerNodePool_nodeLocations(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerNodePool_maxPodsPerNode(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(10))
-	network := fmt.Sprintf("tf-test-net-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
+	network := fmt.Sprintf("tf-test-net-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerNodePool_maxPodsPerNode(cluster, np, network),
@@ -84,14 +81,16 @@ func TestAccContainerNodePool_maxPodsPerNode(t *testing.T) {
 }
 
 func TestAccContainerNodePool_namePrefix(t *testing.T) {
+	// Randomness
+	skipIfVcr(t)
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccContainerNodePool_namePrefix(cluster, "tf-np-"),
@@ -107,14 +106,16 @@ func TestAccContainerNodePool_namePrefix(t *testing.T) {
 }
 
 func TestAccContainerNodePool_noName(t *testing.T) {
+	// Randomness
+	skipIfVcr(t)
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccContainerNodePool_noName(cluster),
@@ -131,13 +132,13 @@ func TestAccContainerNodePool_noName(t *testing.T) {
 func TestAccContainerNodePool_withNodeConfig(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	nodePool := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	nodePool := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccContainerNodePool_withNodeConfig(cluster, nodePool),
@@ -165,17 +166,18 @@ func TestAccContainerNodePool_withNodeConfig(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
-func TestAccContainerNodePool_withWorkloadMetadataConfig(t *testing.T) {
+
+func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(10))
+	pid := getTestProjectFromEnv()
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerNodePool_withWorkloadMetadataConfig(cluster, np),
@@ -194,22 +196,6 @@ func TestAccContainerNodePool_withWorkloadMetadataConfig(t *testing.T) {
 					"node_config.0.workload_metadata_config.0.node_metadata",
 				},
 			},
-		},
-	})
-}
-
-func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
-	t.Parallel()
-
-	pid := getTestProjectFromEnv()
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(10))
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
-		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerNodePool_withWorkloadMetadataConfig_gkeMetadataServer(pid, cluster, np),
 				Check: resource.ComposeTestCheckFunc(
@@ -226,16 +212,17 @@ func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 	})
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerNodePool_withSandboxConfig(cluster, np),
@@ -249,20 +236,136 @@ func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				// GKE sets automatic labels and taints on nodes. This makes
+				// sure we ignore the automatic ones and keep our own.
+				Config:   testAccContainerNodePool_withSandboxConfig(cluster, np),
+				// When we use PlanOnly without ExpectNonEmptyPlan, we're
+				// guaranteeing that the computed fields of the resources don't
+				// force an unintentional change to the plan. That is, we
+				// expect this part of the test to pass only if the plan
+				// doesn't change.
+				PlanOnly: true,
+			},
+			{
+				// Now we'll modify the taints, which should force a change to
+				// the plan. We make sure we don't over-suppress and end up
+				// eliminating the labels or taints we asked for. This will
+				// destroy and recreate the node pool as taints are immutable.
+				Config: testAccContainerNodePool_withSandboxConfig_changeTaints(cluster, np),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.with_sandbox_config",
+						"node_config.0.labels.test.terraform.io/gke-sandbox", "true"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_sandbox_config",
+						"node_config.0.taint.0.key", "test.terraform.io/gke-sandbox"),
+					resource.TestCheckResourceAttr("google_container_node_pool.with_sandbox_config",
+						"node_config.0.taint.1.key", "test.terraform.io/gke-sandbox-amended"),
+				),
+			},
+		},
+	})
+}
+<% end -%>
+
+<% unless version.nil? || version == 'ga' -%>
+func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "static", "100us", false),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_kubelet_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerNodePool_withKubeletConfig(cluster, np, "static", "200us", true),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_kubelet_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
 
-func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
+func TestAccContainerNodePool_withInvalidKubeletCpuManagerPolicy(t *testing.T) {
 	t.Parallel()
+	// Unit test, no interactions
+	skipIfVcr(t)
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccContainerNodePool_withKubeletConfig(cluster, np, "dontexist", "100us", true),
+				ExpectError: regexp.MustCompile(`.*to be one of \[static none\].*`),
+			},
+		},
+	})
+}
+
+func TestAccContainerNodePool_withLinuxNodeConfig(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withLinuxNodeConfig(cluster, np, 10000, 12800, "1000 20000 100000", 1),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_linux_node_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Perform an update.
+			{
+				Config: testAccContainerNodePool_withLinuxNodeConfig(cluster, np, 10000, 12800, "1000 20000 200000", 1),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_linux_node_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
+
+<% unless version.nil? || version == 'ga' -%>
+func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
+	// Uses generated time-based rotation time
+	skipIfVcr(t)
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerNodePool_withBootDiskKmsKey(getTestProjectFromEnv(), cluster, np),
@@ -280,13 +383,13 @@ func TestAccContainerNodePool_withBootDiskKmsKey(t *testing.T) {
 func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerNodePool_withUpgradeSettings(cluster, np, 2, 3),
@@ -311,13 +414,13 @@ func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 func TestAccContainerNodePool_withInvalidUpgradeSettings(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerNodePool_withUpgradeSettings(cluster, np, 0, 0),
@@ -330,13 +433,13 @@ func TestAccContainerNodePool_withInvalidUpgradeSettings(t *testing.T) {
 func TestAccContainerNodePool_withGPU(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccContainerNodePool_withGPU(cluster, np),
@@ -353,18 +456,18 @@ func TestAccContainerNodePool_withGPU(t *testing.T) {
 func TestAccContainerNodePool_withManagement(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	nodePool := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	nodePool := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
 	management := `
 	management {
-		auto_repair = "true"
-		auto_upgrade = "true"
+		auto_repair = "false"
+		auto_upgrade = "false"
 	}`
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccContainerNodePool_withManagement(cluster, nodePool, ""),
@@ -372,9 +475,9 @@ func TestAccContainerNodePool_withManagement(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_container_node_pool.np_with_management", "management.#", "1"),
 					resource.TestCheckResourceAttr(
-						"google_container_node_pool.np_with_management", "management.0.auto_repair", "false"),
+						"google_container_node_pool.np_with_management", "management.0.auto_repair", "true"),
 					resource.TestCheckResourceAttr(
-						"google_container_node_pool.np_with_management", "management.0.auto_repair", "false"),
+						"google_container_node_pool.np_with_management", "management.0.auto_upgrade", "true"),
 				),
 			},
 			resource.TestStep{
@@ -388,9 +491,9 @@ func TestAccContainerNodePool_withManagement(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_container_node_pool.np_with_management", "management.#", "1"),
 					resource.TestCheckResourceAttr(
-						"google_container_node_pool.np_with_management", "management.0.auto_repair", "true"),
+						"google_container_node_pool.np_with_management", "management.0.auto_repair", "false"),
 					resource.TestCheckResourceAttr(
-						"google_container_node_pool.np_with_management", "management.0.auto_repair", "true"),
+						"google_container_node_pool.np_with_management", "management.0.auto_upgrade", "false"),
 				),
 			},
 			resource.TestStep{
@@ -405,13 +508,13 @@ func TestAccContainerNodePool_withManagement(t *testing.T) {
 func TestAccContainerNodePool_withNodeConfigScopeAlias(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccContainerNodePool_withNodeConfigScopeAlias(cluster, np),
@@ -429,13 +532,13 @@ func TestAccContainerNodePool_withNodeConfigScopeAlias(t *testing.T) {
 func TestAccContainerNodePool_regionalAutoscaling(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccContainerNodePool_regionalAutoscaling(cluster, np),
@@ -483,13 +586,13 @@ func TestAccContainerNodePool_regionalAutoscaling(t *testing.T) {
 func TestAccContainerNodePool_autoscaling(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccContainerNodePool_autoscaling(cluster, np),
@@ -537,13 +640,13 @@ func TestAccContainerNodePool_autoscaling(t *testing.T) {
 func TestAccContainerNodePool_resize(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerNodePool_additionalZones(cluster, np),
@@ -571,16 +674,21 @@ func TestAccContainerNodePool_resize(t *testing.T) {
 	})
 }
 
+
 func TestAccContainerNodePool_version(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(10))
+	// Re-enable this test when there is more than one acceptable node pool version
+	// for the current master version
+	t.Skip()
 
-	resource.Test(t, resource.TestCase{
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerNodePool_version(cluster, np),
@@ -613,13 +721,13 @@ func TestAccContainerNodePool_version(t *testing.T) {
 func TestAccContainerNodePool_regionalClusters(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccContainerNodePool_regionalClusters(cluster, np),
@@ -636,13 +744,13 @@ func TestAccContainerNodePool_regionalClusters(t *testing.T) {
 func TestAccContainerNodePool_012_ConfigModeAttr(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerNodePool_012_ConfigModeAttr1(cluster, np),
@@ -667,13 +775,13 @@ func TestAccContainerNodePool_012_ConfigModeAttr(t *testing.T) {
 func TestAccContainerNodePool_EmptyGuestAccelerator(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				// Test alternative way to specify an empty node pool
@@ -712,13 +820,13 @@ func TestAccContainerNodePool_EmptyGuestAccelerator(t *testing.T) {
 func TestAccContainerNodePool_shieldedInstanceConfig(t *testing.T) {
 	t.Parallel()
 
-	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(10))
-	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(10))
+	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccContainerNodePool_shieldedInstanceConfig(cluster, np),
@@ -733,42 +841,47 @@ func TestAccContainerNodePool_shieldedInstanceConfig(t *testing.T) {
 	})
 }
 
-func testAccCheckContainerNodePoolDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func testAccCheckContainerNodePoolDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		config := googleProviderConfig(t)
 
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_container_node_pool" {
-			continue
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_container_node_pool" {
+				continue
+			}
+
+			attributes := rs.Primary.Attributes
+			location := attributes["location"]
+
+			var err error
+			if location != "" {
+				_, err = config.clientContainer.Projects.Zones.Clusters.NodePools.Get(
+					config.Project, attributes["location"], attributes["cluster"], attributes["name"]).Do()
+			} else {
+				name := fmt.Sprintf(
+					"projects/%s/locations/%s/clusters/%s/nodePools/%s",
+					config.Project,
+					attributes["location"],
+					attributes["cluster"],
+					attributes["name"],
+				)
+				_, err = config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Get(name).Do()
+			}
+
+			if err == nil {
+				return fmt.Errorf("NodePool still exists")
+			}
 		}
 
-		attributes := rs.Primary.Attributes
-		location := attributes["location"]
-
-		var err error
-		if location != "" {
-			_, err = config.clientContainer.Projects.Zones.Clusters.NodePools.Get(
-				config.Project, attributes["location"], attributes["cluster"], attributes["name"]).Do()
-		} else {
-			name := fmt.Sprintf(
-				"projects/%s/locations/%s/clusters/%s/nodePools/%s",
-				config.Project,
-				attributes["location"],
-				attributes["cluster"],
-				attributes["name"],
-			)
-			_, err = config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Get(name).Do()
-		}
-
-		if err == nil {
-			return fmt.Errorf("NodePool still exists")
-		}
+		return nil
 	}
-
-	return nil
 }
 
 func testAccContainerNodePool_basic(cluster, np string) string {
 	return fmt.Sprintf(`
+provider "google" {
+  user_project_override = true
+}	
 resource "google_container_cluster" "cluster" {
   name               = "%s"
   location           = "us-central1-a"
@@ -784,7 +897,6 @@ resource "google_container_node_pool" "np" {
 `, cluster, np)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerNodePool_nodeLocations(cluster, np, network string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -842,7 +954,6 @@ resource "google_container_node_pool" "np" {
 }
 `, network, cluster, np)
 }
-<% end -%>
 
 func testAccContainerNodePool_maxPodsPerNode(cluster, np, network string) string {
 	return fmt.Sprintf(`
@@ -1171,7 +1282,7 @@ resource "google_container_node_pool" "np_with_node_config" {
 `, cluster, nodePool)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+
 func testAccContainerNodePool_withWorkloadMetadataConfig(cluster, np string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -1244,7 +1355,7 @@ resource "google_container_node_pool" "with_workload_metadata_config" {
 `, projectID, cluster, np)
 }
 
-
+<% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_withSandboxConfig(cluster, np string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -1265,9 +1376,21 @@ resource "google_container_node_pool" "with_sandbox_config" {
   initial_node_count = 1
   node_config {
     image_type = "COS_CONTAINERD"
+
     sandbox_config {
       sandbox_type = "gvisor"
     }
+
+    labels = {
+      "test.terraform.io/gke-sandbox" = "true"
+    }
+
+    taint {
+      key    = "test.terraform.io/gke-sandbox"
+      value  = "true"
+      effect = "NO_SCHEDULE"
+    }
+
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring",
@@ -1277,6 +1400,136 @@ resource "google_container_node_pool" "with_sandbox_config" {
 `, cluster, np)
 }
 
+func testAccContainerNodePool_withSandboxConfig_changeTaints(cluster, np string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+}
+
+resource "google_container_node_pool" "with_sandbox_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    image_type = "COS_CONTAINERD"
+
+    sandbox_config {
+      sandbox_type = "gvisor"
+    }
+
+    labels = {
+      "test.terraform.io/gke-sandbox" = "true"
+    }
+
+    taint {
+      key    = "test.terraform.io/gke-sandbox"
+      value  = "true"
+      effect = "NO_SCHEDULE"
+    }
+
+    taint {
+      key    = "test.terraform.io/gke-sandbox-amended"
+      value  = "also-true"
+      effect = "NO_SCHEDULE"
+    }
+
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+`, cluster, np)
+}
+<% end -%>
+
+<% unless version.nil? || version == 'ga' -%>
+func testAccContainerNodePool_withKubeletConfig(cluster, np, policy, period string, quota bool) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+}
+
+resource "google_container_node_pool" "with_kubelet_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    image_type = "COS_CONTAINERD"
+    kubelet_config {
+      cpu_manager_policy   = %q
+      cpu_cfs_quota        = %v
+      cpu_cfs_quota_period = %q
+    }
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+`, cluster, np, policy, quota, period)
+}
+
+func testAccContainerNodePool_withLinuxNodeConfig(cluster, np string, maxBacklog, soMaxConn int, tcpMem string, twReuse int) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+}
+
+resource "google_container_node_pool" "with_linux_node_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    image_type = "COS_CONTAINERD"
+    linux_node_config {
+      sysctls = {
+        "net.core.netdev_max_backlog" = "%d"
+        "net.core.rmem_max"           = 10000
+        "net.core.wmem_default"       = 10000
+        "net.core.wmem_max"           = 20000
+        "net.core.optmem_max"         = 10000
+        "net.core.somaxconn"          = %d
+        "net.ipv4.tcp_rmem"           = "%s"
+        "net.ipv4.tcp_wmem"           = "%s"
+        "net.ipv4.tcp_tw_reuse"       = %d
+      }
+    }
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+`, cluster, np, maxBacklog, soMaxConn, tcpMem, tcpMem, twReuse)
+}
+<% end -%>
+
+<% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_withBootDiskKmsKey(project, cluster, np string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -1366,7 +1619,6 @@ resource "google_container_cluster" "cluster" {
   name               = "%s"
   location           = "us-central1-c"
   initial_node_count = 1
-  node_version       = data.google_container_engine_versions.central1c.latest_node_version
   min_master_version = data.google_container_engine_versions.central1c.latest_master_version
 }
 

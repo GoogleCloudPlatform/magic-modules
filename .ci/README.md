@@ -37,7 +37,21 @@ a) make no changes to any downstream and fail
 or
 b) atomically update every downstream to a fast-forward state that represents the appropriate HEAD as of the beginning of the run
 
-It's possible, if we assume the worst, for a job to be cancelled or fail in the middle of pushing downstreams in a transient way.  The sorts of failures that happen at scale - lightning strikes a datacenter or some other unlikely misfortune happens.  This has a chance to cause a hiccup in the downstream history, but isn't dangerous.  If that happens, the sync tags may need to be manually updated to sit at the same commit, just before the commit which needs to be generated.  Then, the downstream pusher workflow will need to be restarted.
+#### Something went wrong!
+Don't panic - this is all quite safe.  :)
+
+It's possible for a job to be cancelled or fail in the middle of pushing downstreams in a transient way.  The sorts of failures that happen at scale - lightning strikes a datacenter or some other unlikely misfortune happens.  This has a chance to cause a hiccup in the downstream history, but isn't dangerous.  If that happens, the sync tags may need to be manually updated to sit at the same commit, just before the commit which needs to be generated.  Then, the downstream pusher workflow will need to be restarted.
+
+Updating the sync tags is done like this:
+First, check their state: `git fetch origin && git rev-parse origin/tpg-sync origin/tpgb-sync origin/ansible-sync origin/inspec-sync origin/tf-oics-sync origin/tf-conv-sync` will list the commits for each of the sync tags.
+If you have changed the name of the `googlecloudplatform/magic-modules` remote from `origin`, substitute that name instead.
+In normal, steady-state operation, these tags will all be identical.  When a failure occurs, some of them may be one commit ahead of the others.  It is rare for any of them to be 2 or more commits ahead of any other.  If they are not all equal, and there is no pusher task currently running, this means you need to reset them by hand.  If they are all equal, skip the next step.
+
+Second, find which commit caused the error.  This will usually be easy - cloud build lists the commit which triggered a build, so you can probably just use that one.  You need to set all the sync tags to the parent of that commit.  Say the commit which caused the error is `12345abc`.  You can find the parent of that commit with `git rev-parse 12345abc~` (note the `~` suffix).  Some of the sync tags are likely set to this value already.  For the remainder, simply perform a git push.  Assuming that the parent commit is `98765fed`, that would be `git push origin 98765fed:tf-conv-sync`.
+
+If you are unlucky, there may be open PRs - this only happens if the failure occurred during the ~5 second period surrounding the merging of one of the downstreams.  Close those PRs before proceeding to the final step.
+
+Click "retry" on the failed job in Cloud Build.  Watch the retried job and see if it succeeds - it should!  If it does not, the underlying problem may not have been fixed.
 
 ## Deploying the pipeline
 The code on the PR's branch is used to plan actions - no merge is performed.
@@ -46,8 +60,15 @@ If you are making changes to the containers, your changes will not apply until t
 
 Pausing the pipeline is done in the cloud console, by setting the downstream-builder trigger to disabled.  You can find that trigger [here](https://console.cloud.google.com/cloud-build/triggers/edit/f80a7496-b2f4-4980-a706-c5425a52045b?project=graphite-docker-images)
 
-## Design choices & tradeoffs
-* The downstreams share some setup code in common - especially TPG and TPGB.  We violated the DRY principle by writing separate workflows for each repo.  In practice, this has substantially reduced the amount of code - the coordination layer above the two repos was larger than the code saved by combining them.  We also increase speed, since each Action runs separately.
+
+## Dependency change handbook:
+If someone (often a bot) creates a PR which updates Gemfile or Gemfile.lock, they will not be able to generate diffs.  This is because bundler doesn't allow you to run a binary unless your installed gems exactly match the Gemfile.lock, and since we have to run generation before and after the change, there is no possible container that will satisfy all requirements.
+
+The best approach is
+* Build the `downstream-generator` container locally, with the new Gemfile and Gemfile.lock.  This will involve hand-modifying the Dockerfile to use the local Gemfile/Gemfile.lock instead of wget from this repo's `master` branch.  You don't need to check in those changes.
+* When that container is built, and while nothing else is running in GCB (wait, if you need to), push the container to GCR, and as soon as possible afterwards, merge the dependency-changing PR.
+
+## Historical Note: Design choices & tradeoffs
 * The downstream push doesn't wait for checks on its PRs against downstreams.  This may inconvenience some existing workflows which rely on the downstream PR checks.  This ensures that merge conflicts never come into play, since the downstreams never have dangling PRs, but it requires some up-front work to get those checks into the differ.  If a new check is introduced into the downstream Travis, we will need to introduce it into the terraform-tester container.
 * The downstream push is disconnected from the output of the differ (but runs the same code).  This means that the diff which is approved isn't guaranteed to be applied *exactly*, if for instance magic modules' behavior changes on master between diff generation and downstream push.  This is also intended to avoid merge conflicts by, effectively, rebasing each commit on top of master before final generation is done.
     * Imagine the following situation: PR A and PR B are opened simultaneously. PR A changes the copyright date in each file to 2020. PR B adds a new resource. PR A is merged seconds before PR B, so they are picked up in the same push-downstream run.  The commit from PR B will produce a new file with the 2020 copyright date, even though the diff said 2019, since PR A was merged first.

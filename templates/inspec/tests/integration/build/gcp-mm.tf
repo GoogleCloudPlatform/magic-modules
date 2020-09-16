@@ -656,6 +656,10 @@ resource "google_storage_bucket" "bucket" {
   labels = {
     "key" = "value"
   }
+
+  retention_policy {
+    retention_period = 1000
+  }
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -904,6 +908,11 @@ resource "google_service_account" "spanner_service_account" {
   project = var.gcp_project_id
   account_id   = "${var.gcp_service_account_display_name}-sp"
   display_name = "${var.gcp_service_account_display_name}-sp"
+}
+
+resource "google_service_account_key" "userkey" {
+  service_account_id = google_service_account.spanner_service_account.name
+  public_key_type    = "TYPE_X509_PEM_FILE"
 }
 
 resource "google_spanner_instance" "spanner_instance" {
@@ -1214,4 +1223,78 @@ resource "google_organization_iam_custom_role" "generic_org_iam_custom_role" {
   title       = "GCP Inspec Generic Organization IAM Custom Role"
   description = "Custom role allowing to list IAM roles only"
   permissions = ["iam.roles.list"]
+}
+
+variable "security_policy" {
+  type = any
+}
+
+resource "google_compute_security_policy" "policy" {
+  project = var.gcp_project_id
+  name = var.security_policy["name"]
+
+  rule {
+    action   = var.security_policy["action"]
+    priority = var.security_policy["priority"]
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = [var.security_policy["ip_range"]]
+      }
+    }
+    description = var.security_policy["description"]
+  }
+
+  rule {
+    action   = "allow"
+    priority = "2147483647"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "default rule"
+  }
+}
+
+variable "memcache_instance" {
+  type = any
+}
+
+resource "google_compute_network" "memcache_network" {
+  provider = google-beta
+  project = var.gcp_project_id
+  name = "inspec-gcp-memcache"
+}
+
+resource "google_compute_global_address" "service_range" {
+  provider = google-beta
+  project = var.gcp_project_id
+  name          = "inspec-gcp-memcache"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.memcache_network.id
+}
+
+resource "google_service_networking_connection" "private_service_connection" {
+  provider = google-beta
+  network                 = google_compute_network.memcache_network.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.service_range.name]
+}
+
+resource "google_memcache_instance" "instance" {
+  provider = google-beta
+  name = var.memcache_instance["name"]
+  project = var.gcp_project_id
+  region = var.gcp_location
+  authorized_network = google_service_networking_connection.private_service_connection.network
+
+  node_config {
+    cpu_count      = 1
+    memory_size_mb = 1024
+  }
+  node_count = 1
 }

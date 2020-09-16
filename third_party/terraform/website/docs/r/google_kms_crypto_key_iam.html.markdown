@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud KMS"
+subcategory: "Cloud Key Management Service"
 layout: "google"
 page_title: "Google: google_kms_crypto_key_iam"
 sidebar_current: "docs-google-kms-crypto-key-iam"
@@ -196,6 +196,3 @@ IAM policy imports use the identifier of the resource in question.  This policy 
 ```
 $ terraform import google_kms_crypto_key_iam_policy.crypto_key your-project-id/location-name/key-ring-name/key-name
 ```
-
--> If you're importing a resource with beta features, make sure to include `-provider=google-beta`
-as an argument so that Terraform uses the correct provider to import your resource.

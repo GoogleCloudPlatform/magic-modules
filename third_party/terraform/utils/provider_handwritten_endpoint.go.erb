@@ -4,7 +4,7 @@ package google
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/terraform-providers/terraform-provider-google-beta/google-beta"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta"
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/mutexkv"
@@ -28,18 +28,6 @@ var CloudBillingCustomEndpointEntry = &schema.Schema{
 		"GOOGLE_CLOUD_BILLING_CUSTOM_ENDPOINT",
 	}, CloudBillingDefaultBasePath),
 }
-
-var CloudIoTDefaultBasePath = "https://cloudiot.googleapis.com/v1/"
-var CloudIoTCustomEndpointEntryKey = "cloud_iot_custom_endpoint"
-var CloudIoTCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: validateCustomEndpoint,
-	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_CLOUD_IOT_CUSTOM_ENDPOINT",
-	}, CloudIoTDefaultBasePath),
-}
-
 
 var ComposerDefaultBasePath = "https://composer.googleapis.com/v1beta1/"
 var ComposerCustomEndpointEntryKey = "composer_custom_endpoint"

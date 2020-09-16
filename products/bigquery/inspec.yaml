@@ -31,10 +31,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       lastModifiedTime: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude_plural: true
     additional_functions: 'third_party/inspec/custom_functions/bigquery_dataset_name.erb'
-
   DatasetAccess: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-
+  Job: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   Table: !ruby/object:Overrides::Inspec::ResourceOverride
     properties:
       description: !ruby/object:Overrides::Inspec::PropertyOverride

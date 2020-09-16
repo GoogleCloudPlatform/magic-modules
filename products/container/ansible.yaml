@@ -17,6 +17,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     properties:
       location: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ["region", "zone"]
+      initialClusterVersion: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ["cluster_version"]
       kubectlPath: !ruby/object:Overrides::Ansible::PropertyOverride
         exclude: true
       kubectlContext: !ruby/object:Overrides::Ansible::PropertyOverride

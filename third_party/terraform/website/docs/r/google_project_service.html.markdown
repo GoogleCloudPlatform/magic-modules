@@ -14,6 +14,8 @@ Allows management of a single API service for an existing Google Cloud Platform 
 For a list of services available, visit the
 [API library page](https://console.cloud.google.com/apis/library) or run `gcloud services list`.
 
+Requires [Service Usage API](https://console.cloud.google.com/apis/library/serviceusage.googleapis.com).
+
 ## Example Usage
 
 ```hcl
@@ -37,6 +39,12 @@ The following arguments are supported:
 If `false` or unset, an error will be generated if any enabled services depend on this service when destroying it.
 
 * `disable_on_destroy` - (Optional) If true, disable the service when the terraform resource is destroyed.  Defaults to true.  May be useful in the event that a project is long-lived but the infrastructure running in that project changes frequently.
+
+## Attributes Reference
+
+In addition to the arguments listed above, the following computed attributes are exported:
+
+* `id` - an identifier for the resource with format `{{project}}/{{service}}`
 
 ## Import
 

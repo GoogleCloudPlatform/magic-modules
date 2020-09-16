@@ -2,7 +2,6 @@
 package google
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -20,240 +19,284 @@ var defaultOauthScopes = []string{
 	"https://www.googleapis.com/auth/trace.append",
 }
 
-var schemaNodeConfig = &schema.Schema{
-	Type:     schema.TypeList,
-	Optional: true,
-	Computed: true,
-	ForceNew: true,
-	MaxItems: 1,
-	Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"disk_size_gb": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.IntAtLeast(10),
-			},
+func schemaNodeConfig() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		Computed: true,
+		ForceNew: true,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"disk_size_gb": {
+					Type:         schema.TypeInt,
+					Optional:     true,
+					Computed:     true,
+					ForceNew:     true,
+					ValidateFunc: validation.IntAtLeast(10),
+				},
 
-			"disk_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"pd-standard", "pd-ssd"}, false),
-			},
+				"disk_type": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					Computed:     true,
+					ForceNew:     true,
+					ValidateFunc: validation.StringInSlice([]string{"pd-standard", "pd-balanced", "pd-ssd"}, false),
+				},
 
-			"guest_accelerator": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-				// Legacy config mode allows removing GPU's from an existing resource
-				// See https://www.terraform.io/docs/configuration/attr-as-blocks.html
-				ConfigMode: schema.SchemaConfigModeAttr,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"count": &schema.Schema{
-							Type:     schema.TypeInt,
-							Required: true,
-							ForceNew: true,
-						},
-						"type": &schema.Schema{
-							Type:             schema.TypeString,
-							Required:         true,
-							ForceNew:         true,
-							DiffSuppressFunc: compareSelfLinkOrResourceName,
+				"guest_accelerator": &schema.Schema{
+					Type:     schema.TypeList,
+					Optional: true,
+					Computed: true,
+					ForceNew: true,
+					// Legacy config mode allows removing GPU's from an existing resource
+					// See https://www.terraform.io/docs/configuration/attr-as-blocks.html
+					ConfigMode: schema.SchemaConfigModeAttr,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"count": &schema.Schema{
+								Type:     schema.TypeInt,
+								Required: true,
+								ForceNew: true,
+							},
+							"type": &schema.Schema{
+								Type:             schema.TypeString,
+								Required:         true,
+								ForceNew:         true,
+								DiffSuppressFunc: compareSelfLinkOrResourceName,
+							},
 						},
 					},
 				},
-			},
 
-			"image_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-
-			"labels": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				// Computed=true because GKE Sandbox will automatically add labels to nodes that can/cannot run sandboxed pods.
-				Computed: true,
-				ForceNew: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-
-			"local_ssd_count": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.IntAtLeast(0),
-			},
-
-			"machine_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
-
-			"metadata": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-
-			"min_cpu_platform": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-
-			"oauth_scopes": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-					StateFunc: func(v interface{}) string {
-						return canonicalizeServiceScope(v.(string))
-					},
+				"image_type": {
+					Type:     schema.TypeString,
+					Optional: true,
+					Computed: true,
 				},
-				DiffSuppressFunc: containerClusterAddedScopesSuppress,
-				Set: stringScopeHashcode,
-			},
 
-			"preemptible": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-				Default:  false,
-			},
+				"labels": {
+					Type:     schema.TypeMap,
+					Optional: true,
+					// Computed=true because GKE Sandbox will automatically add labels to nodes that can/cannot run sandboxed pods.
+					Computed: true,
+					ForceNew: true,
+					Elem:     &schema.Schema{Type: schema.TypeString},
+	<% unless version.nil? || version == 'ga' -%>
+					DiffSuppressFunc: containerNodePoolLabelsSuppress,
+	<% end -%>
+				},
 
-			"service_account": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
+				"local_ssd_count": {
+					Type:         schema.TypeInt,
+					Optional:     true,
+					Computed:     true,
+					ForceNew:     true,
+					ValidateFunc: validation.IntAtLeast(0),
+				},
 
-			"tags": {
-				Type:     schema.TypeList,
-				Optional: true,
-				ForceNew: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
+				"machine_type": {
+					Type:     schema.TypeString,
+					Optional: true,
+					Computed: true,
+					ForceNew: true,
+				},
 
-			"shielded_instance_config": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"enable_secure_boot": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							ForceNew: true,
-							Default:  false,
-						},
-						"enable_integrity_monitoring": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							ForceNew: true,
-							Default:  true,
+				"metadata": {
+					Type:     schema.TypeMap,
+					Optional: true,
+					Computed: true,
+					ForceNew: true,
+					Elem:     &schema.Schema{Type: schema.TypeString},
+				},
+
+				"min_cpu_platform": {
+					Type:     schema.TypeString,
+					Optional: true,
+					ForceNew: true,
+				},
+
+				"oauth_scopes": {
+					Type:     schema.TypeSet,
+					Optional: true,
+					Computed: true,
+					ForceNew: true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+						StateFunc: func(v interface{}) string {
+							return canonicalizeServiceScope(v.(string))
 						},
 					},
+					DiffSuppressFunc: containerClusterAddedScopesSuppress,
+					Set: stringScopeHashcode,
 				},
-			},
 
-			"taint": {
-				Type:             schema.TypeList,
-				Optional:         true,
-				// Computed=true because GKE Sandbox will automatically add taints to nodes that can/cannot run sandboxed pods.
-				Computed:         true,
-				ForceNew:         true,
-				// Legacy config mode allows explicitly defining an empty taint.
-				// See https://www.terraform.io/docs/configuration/attr-as-blocks.html
-				ConfigMode: schema.SchemaConfigModeAttr,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"key": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-						"value": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-						"effect": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ForceNew:     true,
-							ValidateFunc: validation.StringInSlice([]string{"NO_SCHEDULE", "PREFER_NO_SCHEDULE", "NO_EXECUTE"}, false),
+				"preemptible": {
+					Type:     schema.TypeBool,
+					Optional: true,
+					ForceNew: true,
+					Default:  false,
+				},
+
+				"service_account": {
+					Type:     schema.TypeString,
+					Optional: true,
+					Computed: true,
+					ForceNew: true,
+				},
+
+				"tags": {
+					Type:     schema.TypeList,
+					Optional: true,
+					ForceNew: true,
+					Elem:     &schema.Schema{Type: schema.TypeString},
+				},
+
+				"shielded_instance_config": &schema.Schema{
+					Type:     schema.TypeList,
+					Optional: true,
+					Computed: true,
+					ForceNew: true,
+					MaxItems: 1,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"enable_secure_boot": {
+								Type:     schema.TypeBool,
+								Optional: true,
+								ForceNew: true,
+								Default:  false,
+							},
+							"enable_integrity_monitoring": {
+								Type:     schema.TypeBool,
+								Optional: true,
+								ForceNew: true,
+								Default:  true,
+							},
 						},
 					},
 				},
-			},
 
-			"workload_metadata_config": {
-<% if version.nil? || version == 'ga' -%>
-				Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/guides/provider_versions.html for more details.",
-				Computed: true,
-<% end -%>
-				Type:       schema.TypeList,
-				Optional:   true,
-				ForceNew:   true,
-				MaxItems:   1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"node_metadata": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ForceNew:     true,
-							ValidateFunc: validation.StringInSlice([]string{"UNSPECIFIED", "SECURE", "EXPOSE", "GKE_METADATA_SERVER"}, false),
+				"taint": {
+					Type:             schema.TypeList,
+					Optional:         true,
+					// Computed=true because GKE Sandbox will automatically add taints to nodes that can/cannot run sandboxed pods.
+					Computed:         true,
+					ForceNew:         true,
+					// Legacy config mode allows explicitly defining an empty taint.
+					// See https://www.terraform.io/docs/configuration/attr-as-blocks.html
+					ConfigMode: schema.SchemaConfigModeAttr,
+	<% unless version.nil? || version == 'ga' -%>
+					DiffSuppressFunc: containerNodePoolTaintSuppress,
+	<% end -%>
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"key": {
+								Type:     schema.TypeString,
+								Required: true,
+								ForceNew: true,
+							},
+							"value": {
+								Type:     schema.TypeString,
+								Required: true,
+								ForceNew: true,
+							},
+							"effect": {
+								Type:         schema.TypeString,
+								Required:     true,
+								ForceNew:     true,
+								ValidateFunc: validation.StringInSlice([]string{"NO_SCHEDULE", "PREFER_NO_SCHEDULE", "NO_EXECUTE"}, false),
+							},
 						},
 					},
 				},
-			},
 
-			"sandbox_config": {
-<% if version.nil? || version == 'ga' -%>
-				Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/guides/provider_versions.html for more details.",
-				Computed: true,
-<% end -%>
-				Type:       schema.TypeList,
-				Optional:   true,
-				ForceNew:   true,
-				MaxItems:   1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"sandbox_type": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"gvisor"}, false),
+				"workload_metadata_config": {
+					Computed:   true,
+					Type:       schema.TypeList,
+					Optional:   true,
+					MaxItems:   1,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"node_metadata": {
+								Type:         schema.TypeString,
+								Required:     true,
+								ValidateFunc: validation.StringInSlice([]string{"UNSPECIFIED", "SECURE", "EXPOSE", "GKE_METADATA_SERVER"}, false),
+							},
 						},
 					},
 				},
-			},
 
-<% unless version == 'ga' -%>
-			"boot_disk_kms_key": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				ForceNew:   true,
+				"sandbox_config": {
+	<% if version.nil? || version == 'ga' -%>
+					Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/guides/provider_versions.html for more details.",
+					Computed: true,
+	<% end -%>
+					Type:       schema.TypeList,
+					Optional:   true,
+					ForceNew:   true,
+					MaxItems:   1,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"sandbox_type": {
+								Type:         schema.TypeString,
+								Required:     true,
+								ValidateFunc: validation.StringInSlice([]string{"gvisor"}, false),
+							},
+						},
+					},
+				},
+
+	<% unless version == 'ga' -%>
+				"boot_disk_kms_key": {
+					Type:       schema.TypeString,
+					Optional:   true,
+					ForceNew:   true,
+				},
+	<% end -%>
+	<% unless version == 'ga' -%>
+				// Note that AtLeastOneOf can't be set because this schema is reused by
+				// two different resources.
+				"kubelet_config": {
+					Type:     schema.TypeList,
+					Optional: true,
+					MaxItems: 1,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"cpu_manager_policy": {
+								Type:         schema.TypeString,
+								Required:     true,
+								ValidateFunc: validation.StringInSlice([]string{"static", "none"}, false),
+							},
+							"cpu_cfs_quota": {
+								Type:     schema.TypeBool,
+								Optional: true,
+							},
+							"cpu_cfs_quota_period": {
+								Type:     schema.TypeString,
+								Optional: true,
+							},
+						},
+					},
+				},
+
+				"linux_node_config": {
+					Type:     schema.TypeList,
+					Optional: true,
+					MaxItems: 1,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"sysctls": {
+								Type:     schema.TypeMap,
+								Required: true,
+								Elem:     &schema.Schema{Type: schema.TypeString},
+							},
+						},
+					},
+				},
+	<% end -%>
 			},
-<% end -%>
 		},
-	},
+	}
 }
 
 func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
@@ -375,14 +418,12 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 		nc.Taints = nodeTaints
 	}
 
-<% unless version == 'ga' -%>
-	if v, ok := nodeConfig["workload_metadata_config"]; ok && len(v.([]interface{})) > 0 {
-		conf := v.([]interface{})[0].(map[string]interface{})
-		nc.WorkloadMetadataConfig = &containerBeta.WorkloadMetadataConfig{
-			NodeMetadata: conf["node_metadata"].(string),
-		}
+
+	if v, ok := nodeConfig["workload_metadata_config"]; ok {
+		nc.WorkloadMetadataConfig = expandWorkloadMetadataConfig(v)
 	}
 
+<% unless version == 'ga' -%>
 	if v, ok := nodeConfig["sandbox_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.SandboxConfig = &containerBeta.SandboxConfig{
@@ -393,10 +434,82 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 	if v, ok := nodeConfig["boot_disk_kms_key"]; ok {
 		nc.BootDiskKmsKey = v.(string)
 	}
-<% end -%>
 
+<% end -%>
+<% unless version == 'ga' -%>
+	if v, ok := nodeConfig["kubelet_config"]; ok {
+		nc.KubeletConfig = expandKubeletConfig(v)
+	}
+
+	if v, ok := nodeConfig["linux_node_config"]; ok {
+		nc.LinuxNodeConfig = expandLinuxNodeConfig(v)
+	}
+
+<% end -%>
 	return nc
 }
+
+func expandWorkloadMetadataConfig(v interface{}) *containerBeta.WorkloadMetadataConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+
+	cfg := ls[0].(map[string]interface{})
+	return &containerBeta.WorkloadMetadataConfig{
+		NodeMetadata: cfg["node_metadata"].(string),
+	}
+}
+
+<% unless version == 'ga' -%>
+func expandKubeletConfig(v interface{}) *containerBeta.NodeKubeletConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	cfg := ls[0].(map[string]interface{})
+	kConfig := &containerBeta.NodeKubeletConfig{}
+	if cpuManagerPolicy, ok := cfg["cpu_manager_policy"]; ok {
+		kConfig.CpuManagerPolicy = cpuManagerPolicy.(string)
+	}
+	if cpuCfsQuota, ok := cfg["cpu_cfs_quota"]; ok {
+		kConfig.CpuCfsQuota = cpuCfsQuota.(bool)
+	}
+	if cpuCfsQuotaPeriod, ok := cfg["cpu_cfs_quota_period"]; ok {
+		kConfig.CpuCfsQuotaPeriod = cpuCfsQuotaPeriod.(string)
+	}
+	return kConfig
+}
+
+func expandLinuxNodeConfig(v interface{}) *containerBeta.LinuxNodeConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	cfg := ls[0].(map[string]interface{})
+	sysCfgRaw, ok := cfg["sysctls"]
+	if !ok {
+		return nil
+	}
+	m := make(map[string]string)
+	for k, v := range sysCfgRaw.(map[string]interface{}) {
+		m[k] = v.(string)
+	}
+	return &containerBeta.LinuxNodeConfig{
+		Sysctls: m,
+	}
+}
+
+<% end -%>
 
 func flattenNodeConfig(c *containerBeta.NodeConfig) []map[string]interface{} {
 	config := make([]map[string]interface{}, 0, 1)
@@ -420,10 +533,14 @@ func flattenNodeConfig(c *containerBeta.NodeConfig) []map[string]interface{} {
 		"min_cpu_platform":         c.MinCpuPlatform,
 		"shielded_instance_config": flattenShieldedInstanceConfig(c.ShieldedInstanceConfig),
 		"taint":                    flattenTaints(c.Taints),
-<% unless version == 'ga' -%>
 		"workload_metadata_config": flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
+<% unless version == 'ga' -%>
 		"sandbox_config": 			flattenSandboxConfig(c.SandboxConfig),
 		"boot_disk_kms_key": 		c.BootDiskKmsKey,
+<% end -%>
+<% unless version == 'ga' -%>
+		"kubelet_config":           flattenKubeletConfig(c.KubeletConfig),
+		"linux_node_config":        flattenLinuxNodeConfig(c.LinuxNodeConfig),
 <% end -%>
 	})
 
@@ -468,7 +585,7 @@ func flattenTaints(c []*containerBeta.NodeTaint) []map[string]interface{} {
 	return result
 }
 
-<% unless version.nil? || version == 'ga' -%>
+
 func flattenWorkloadMetadataConfig(c *containerBeta.WorkloadMetadataConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -478,12 +595,151 @@ func flattenWorkloadMetadataConfig(c *containerBeta.WorkloadMetadataConfig) []ma
 	}
 	return result
 }
-
+<% unless version.nil? || version == 'ga' -%>
 func flattenSandboxConfig(c *containerBeta.SandboxConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
 			"sandbox_type": c.SandboxType,
+		})
+	}
+	return result
+}
+
+func containerNodePoolLabelsSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Node configs are embedded into multiple resources (container cluster and
+	// container node pool) so we determine the node config key dynamically.
+	idx := strings.Index(k, ".labels.")
+	if idx < 0 {
+		return false
+	}
+
+	root := k[:idx]
+
+	// Right now, GKE only applies its own out-of-band labels when you enable
+	// Sandbox. We only need to perform diff suppression in this case;
+	// otherwise, the default Terraform behavior is fine.
+	o, n := d.GetChange(root + ".sandbox_config.0.sandbox_type")
+	if o == nil || n == nil {
+		return false
+	}
+
+	// Pull the entire changeset as a list rather than trying to deal with each
+	// element individually.
+	o, n = d.GetChange(root + ".labels")
+	if o == nil || n == nil {
+		return false
+	}
+
+	labels := n.(map[string]interface{})
+
+	// Remove all current labels, skipping GKE-managed ones if not present in
+	// the new configuration.
+	for key, value := range o.(map[string]interface{}) {
+		if nv, ok := labels[key]; ok && nv == value {
+			delete(labels, key)
+		} else if !strings.HasPrefix(key, "sandbox.gke.io/") {
+			// User-provided label removed in new configuration.
+			return false
+		}
+	}
+
+	// If, at this point, the map still has elements, the new configuration
+	// added an additional taint.
+	if len(labels) > 0 {
+		return false
+	}
+
+	return true
+}
+
+func containerNodePoolTaintSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Node configs are embedded into multiple resources (container cluster and
+	// container node pool) so we determine the node config key dynamically.
+	idx := strings.Index(k, ".taint.")
+	if idx < 0 {
+		return false
+	}
+
+	root := k[:idx]
+
+	// Right now, GKE only applies its own out-of-band labels when you enable
+	// Sandbox. We only need to perform diff suppression in this case;
+	// otherwise, the default Terraform behavior is fine.
+	o, n := d.GetChange(root + ".sandbox_config.0.sandbox_type")
+	if o == nil || n == nil {
+		return false
+	}
+
+	// Pull the entire changeset as a list rather than trying to deal with each
+	// element individually.
+	o, n = d.GetChange(root + ".taint")
+	if o == nil || n == nil {
+		return false
+	}
+
+	type taintType struct {
+		Key, Value, Effect string
+	}
+
+	taintSet := make(map[taintType]struct{})
+
+	// Add all new taints to set.
+	for _, raw := range n.([]interface{}) {
+		data := raw.(map[string]interface{})
+		taint := taintType{
+			Key:    data["key"].(string),
+			Value:  data["value"].(string),
+			Effect: data["effect"].(string),
+		}
+		taintSet[taint] = struct{}{}
+	}
+
+	// Remove all current taints, skipping GKE-managed keys if not present in
+	// the new configuration.
+	for _, raw := range o.([]interface{}) {
+		data := raw.(map[string]interface{})
+		taint := taintType{
+			Key:    data["key"].(string),
+			Value:  data["value"].(string),
+			Effect: data["effect"].(string),
+		}
+		if _, ok := taintSet[taint]; ok {
+			delete(taintSet, taint)
+		} else if !strings.HasPrefix(taint.Key, "sandbox.gke.io/") {
+			// User-provided taint removed in new configuration.
+			return false
+		}
+	}
+
+	// If, at this point, the set still has elements, the new configuration
+	// added an additional taint.
+	if len(taintSet) > 0 {
+		return false
+	}
+
+	return true
+}
+<% end -%>
+
+<% unless version == 'ga' -%>
+func flattenKubeletConfig(c *containerBeta.NodeKubeletConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"cpu_cfs_quota":        c.CpuCfsQuota,
+			"cpu_cfs_quota_period": c.CpuCfsQuotaPeriod,
+			"cpu_manager_policy":   c.CpuManagerPolicy,
+		})
+	}
+	return result
+}
+
+func flattenLinuxNodeConfig(c *containerBeta.LinuxNodeConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"sysctls": c.Sysctls,
 		})
 	}
 	return result

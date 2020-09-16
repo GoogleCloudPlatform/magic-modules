@@ -6,20 +6,21 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccBigtableInstance_basic(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	skipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigtableInstanceDestroy,
+		CheckDestroy: testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccBigtableInstance_invalid(instanceName),
@@ -32,7 +33,7 @@ func TestAccBigtableInstance_basic(t *testing.T) {
 				ResourceName:            "google_bigtable_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance_type"}, // we don't read instance type back
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
 			{
 				Config: testAccBigtableInstance(instanceName, 4),
@@ -41,21 +42,23 @@ func TestAccBigtableInstance_basic(t *testing.T) {
 				ResourceName:            "google_bigtable_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance_type"}, // we don't read instance type back
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
 		},
 	})
 }
 
 func TestAccBigtableInstance_cluster(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	skipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigtableInstanceDestroy,
+		CheckDestroy: testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccBigtableInstance_clusterMax(instanceName),
@@ -68,7 +71,7 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 				ResourceName:            "google_bigtable_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance_type"}, // we don't read instance type back
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
 			{
 				Config: testAccBigtableInstance_clusterReordered(instanceName, 5),
@@ -77,7 +80,7 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 				ResourceName:            "google_bigtable_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance_type"}, // we don't read instance type back
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
 			{
 				Config: testAccBigtableInstance_clusterModified(instanceName, 5),
@@ -86,7 +89,7 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 				ResourceName:            "google_bigtable_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance_type"}, // we don't read instance type back
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
 			{
 				Config: testAccBigtableInstance_clusterReordered(instanceName, 5),
@@ -95,21 +98,23 @@ func TestAccBigtableInstance_cluster(t *testing.T) {
 				ResourceName:            "google_bigtable_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance_type"}, // we don't read instance type back
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
 		},
 	})
 }
 
 func TestAccBigtableInstance_development(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	skipIfVcr(t)
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigtableInstanceDestroy,
+		CheckDestroy: testAccCheckBigtableInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigtableInstance_development(instanceName),
@@ -118,34 +123,69 @@ func TestAccBigtableInstance_development(t *testing.T) {
 				ResourceName:            "google_bigtable_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance_type"}, // we don't read instance type back
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
 		},
 	})
 }
 
-func testAccCheckBigtableInstanceDestroy(s *terraform.State) error {
-	var ctx = context.Background()
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_bigtable_instance" {
-			continue
+func TestAccBigtableInstance_allowDestroy(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	skipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigtableInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigtableInstance_noAllowDestroy(instanceName, 3),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
+			},
+			{
+				Config:      testAccBigtableInstance_noAllowDestroy(instanceName, 3),
+				Destroy:     true,
+				ExpectError: regexp.MustCompile("deletion_protection"),
+			},
+			{
+				Config: testAccBigtableInstance(instanceName, 3),
+			},
+		},
+	})
+}
+
+func testAccCheckBigtableInstanceDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		var ctx = context.Background()
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_bigtable_instance" {
+				continue
+			}
+
+			config := googleProviderConfig(t)
+			c, err := config.bigtableClientFactory.NewInstanceAdminClient(config.Project)
+			if err != nil {
+				return fmt.Errorf("Error starting instance admin client. %s", err)
+			}
+
+			defer c.Close()
+
+			_, err = c.InstanceInfo(ctx, rs.Primary.Attributes["name"])
+			if err == nil {
+				return fmt.Errorf("Instance %s still exists.", rs.Primary.Attributes["name"])
+			}
 		}
 
-		config := testAccProvider.Meta().(*Config)
-		c, err := config.bigtableClientFactory.NewInstanceAdminClient(config.Project)
-		if err != nil {
-			return fmt.Errorf("Error starting instance admin client. %s", err)
-		}
-
-		defer c.Close()
-
-		_, err = c.InstanceInfo(ctx, rs.Primary.Attributes["name"])
-		if err == nil {
-			return fmt.Errorf("Instance %s still exists.", rs.Primary.Attributes["name"])
-		}
+		return nil
 	}
-
-	return nil
 }
 
 func testAccBigtableInstance(instanceName string, numNodes int) string {
@@ -157,6 +197,12 @@ resource "google_bigtable_instance" "instance" {
     zone         = "us-central1-b"
     num_nodes    = %d
     storage_type = "HDD"
+  }
+
+  deletion_protection = false
+
+  labels = {
+    env = "default"
   }
 }
 `, instanceName, instanceName, numNodes)
@@ -198,6 +244,8 @@ resource "google_bigtable_instance" "instance" {
     num_nodes    = %d
     storage_type = "HDD"
   }
+
+  deletion_protection = false
 }
 `, instanceName, instanceName, numNodes, instanceName, numNodes, instanceName, numNodes, instanceName, numNodes)
 }
@@ -236,6 +284,8 @@ resource "google_bigtable_instance" "instance" {
     num_nodes    = 3
     storage_type = "HDD"
   }
+
+  deletion_protection = false
 }
 `, instanceName, instanceName, instanceName, instanceName, instanceName, instanceName)
 }
@@ -268,6 +318,8 @@ resource "google_bigtable_instance" "instance" {
     num_nodes    = %d
     storage_type = "HDD"
   }
+
+  deletion_protection = false
 }
 `, instanceName, instanceName, numNodes, instanceName, numNodes, instanceName, numNodes, instanceName, numNodes)
 }
@@ -294,6 +346,12 @@ resource "google_bigtable_instance" "instance" {
     num_nodes    = %d
     storage_type = "HDD"
   }
+
+  deletion_protection = false
+
+  labels = {
+    env = "default"
+  }
 }
 `, instanceName, instanceName, numNodes, instanceName, numNodes, instanceName, numNodes)
 }
@@ -307,6 +365,22 @@ resource "google_bigtable_instance" "instance" {
     zone       = "us-central1-b"
   }
   instance_type = "DEVELOPMENT"
+
+  deletion_protection = false
 }
 `, instanceName, instanceName)
+}
+
+func testAccBigtableInstance_noAllowDestroy(instanceName string, numNodes int) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+  cluster {
+    cluster_id   = "%s"
+    zone         = "us-central1-b"
+    num_nodes    = %d
+    storage_type = "HDD"
+  }
+}
+`, instanceName, instanceName, numNodes)
 }

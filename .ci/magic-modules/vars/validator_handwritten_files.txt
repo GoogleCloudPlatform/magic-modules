@@ -1,7 +1,0 @@
-resource_compute_instance.go
-resource_google_project.go
-resource_sql_database_instance.go
-resource_storage_bucket.go
-iam_folder.go
-iam_organization.go
-iam_project.go.erb

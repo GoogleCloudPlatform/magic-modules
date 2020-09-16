@@ -43,10 +43,18 @@ module Provider
       # The description / docs for the field.
       attr_reader :description
 
+      # The API type of the field (defaults to boolean)
+      attr_reader :type
+
+      # The default value for the field (defaults to false)
+      attr_reader :default_value
+
       def validate
         super
         check :name, type: String, required: true
         check :description, type: String, required: true
+        check :type, type: Class, default: Api::Type::Boolean
+        check :default_value, default: false
       end
     end
   end

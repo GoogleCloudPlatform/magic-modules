@@ -24,6 +24,13 @@ module Overrides
     class ResourceOverride < Overrides::ResourceOverride
       def self.attributes
         [
+          # If non-empty, overrides the full filename prefix
+          # i.e. google/resource_product_{{resource_filename_override}}.go
+          # i.e. google/resource_product_{{resource_filename_override}}_test.go
+          # Note this doesn't override the actual resource name
+          # use :legacy_name instead.
+          :filename_override,
+
           # If non-empty, overrides the full given resource name.
           # i.e. 'google_project' for resourcemanager.Project
           # Use Provider::Terraform::Config.legacy_name to override just
@@ -75,7 +82,12 @@ module Overrides
 
           # This enables resources that get their project via a reference to a different resource
           # instead of a project field to use User Project Overrides
-          :supports_indirect_user_project_override
+          :supports_indirect_user_project_override,
+
+          # Function to transform a read error so that handleNotFound recognises
+          # it as a 404. This should be added as a handwritten fn that takes in
+          # an error and returns one.
+          :read_error_transform
         ]
       end
 
@@ -87,11 +99,12 @@ module Overrides
 
         @examples ||= []
 
+        check :filename_override, type: String
         check :legacy_name, type: String
         check :id_format, type: String
         check :examples, item_type: Provider::Terraform::Examples, type: Array, default: []
         check :virtual_fields,
-              item_type: Provider::Terraform::VirtualFields,
+              item_type: Api::Type,
               type: Array,
               default: []
 
@@ -108,6 +121,7 @@ module Overrides
         check :skip_sweeper, type: :boolean, default: false
         check :skip_delete, type: :boolean, default: false
         check :supports_indirect_user_project_override, type: :boolean, default: false
+        check :read_error_transform, type: String
       end
 
       def apply(resource)

@@ -112,7 +112,7 @@ resource "google_compute_instance_template" "instance_template" {
 
 resource "google_compute_instance_group_manager" "instance_group_manager" {
   name               = "instance-group-manager"
-  instance_template  = google_compute_instance_template.instance_template.self_link
+  instance_template  = google_compute_instance_template.instance_template.id
   base_instance_name = "instance-group-manager"
   zone               = "us-central1-f"
   target_size        = "1"
@@ -136,7 +136,7 @@ group manager.
 If you're not sure, we recommend deploying the latest image available when Terraform runs,
 because this means all the instances in your group will be based on the same image, always,
 and means that no upgrades or changes to your instances happen outside of a `terraform apply`.
-You can achieve this by using the [`google_compute_image`](../d/datasource_compute_image.html)
+You can achieve this by using the [`google_compute_image`](../d/compute_image.html)
 data source, which will retrieve the latest image on every `terraform apply`, and will update
 the template to use that specific image:
 
@@ -281,7 +281,7 @@ The `disk` block supports:
 ~> **Note:** Either `source` or `source_image` is **required** when creating a new instance except for when creating a local SSD. Check the API [docs](https://cloud.google.com/compute/docs/reference/rest/v1/instanceTemplates/insert) for details.
 
 * `disk_type` - (Optional) The GCE disk type. Can be either `"pd-ssd"`,
-    `"local-ssd"`, or `"pd-standard"`.
+    `"local-ssd"`, `"pd-balanced"` or `"pd-standard"`.
 
 * `disk_size_gb` - (Optional) The size of the image in gigabytes. If not
     specified, it will inherit the size of its base image. For SCRATCH disks,
@@ -413,6 +413,8 @@ The `shielded_instance_config` block supports:
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
+* `id` - an identifier for the resource with format `projects/{{project}}/global/instanceTemplates/{{name}}`
+
 * `metadata_fingerprint` - The unique fingerprint of the metadata.
 
 * `self_link` - The URI of the created resource.
@@ -421,6 +423,14 @@ exported:
 
 [1]: /docs/providers/google/r/compute_instance_group_manager.html
 [2]: /docs/configuration/resources.html#lifecycle
+
+## Timeouts
+
+This resource provides the following
+[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+
+- `create` - Default is 4 minutes.
+- `delete` - Default is 4 minutes.
 
 ## Import
 

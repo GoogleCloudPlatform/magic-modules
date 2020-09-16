@@ -112,12 +112,8 @@ The following arguments are supported:
 
 * `labels` - (Optional) A mapping of labels to assign to the resource.
 
-* `schema` - (Optional) A JSON schema for the table. Schema is required
-    for CSV and JSON formats and is disallowed for Google Cloud
-    Bigtable, Cloud Datastore backups, and Avro formats when using
-    external tables. For more information see the
-    [BigQuery API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#resource).
-    ~>**NOTE**: Because this field expects a JSON string, any changes to the
+* `schema` - (Optional) A JSON schema for the table.
+    ~>**NOTE:** Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
     If the API returns a different value for the same schema, e.g. it
     switched the order of values or replaced `STRUCT` field type with `RECORD`
@@ -127,7 +123,7 @@ The following arguments are supported:
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is documented below.
 
-* `range_partitioning` - (Optional, Beta) If specified, configures range-based
+* `range_partitioning` - (Optional) If specified, configures range-based
     partitioning for this table. Structure is documented below.
 
 * `clustering` - (Optional) Specifies column names to use for data clustering.
@@ -152,6 +148,11 @@ The `external_data_configuration` block supports:
     `source_format` is set to "GOOGLE_SHEETS". Structure is
     documented below.
 
+* `hive_partitioning_options` (Optional) - When set, configures hive partitioning
+    support. Not all storage formats support hive partitioning -- requesting hive
+    partitioning on an unsupported format will lead to an error, as will providing
+    an invalid specification.
+
 * `ignore_unknown_values` (Optional) - Indicates if BigQuery should
     allow extra values that are not represented in the table schema.
     If true, the extra values are ignored. If false, records with
@@ -161,6 +162,18 @@ The `external_data_configuration` block supports:
 
 * `max_bad_records` (Optional) - The maximum number of bad records that
     BigQuery can ignore when reading data.
+
+* `schema` - (Optional) A JSON schema for the external table. Schema is required
+    for CSV and JSON formats if autodetect is not on. Schema is disallowed
+    for Google Cloud Bigtable, Cloud Datastore backups, Avro, ORC and Parquet formats.
+    ~>**NOTE:** Because this field expects a JSON string, any changes to the
+    string will create a diff, even if the JSON itself hasn't changed.
+    Furthermore drift for this field cannot not be detected because BigQuery
+    only uses this schema to compute the effective schema for the table, therefore
+    any changes on the configured value will force the table to be recreated.
+    This schema is effectively only applied when creating a table from an external
+    datasource, after creation the computed schema will be stored in
+    `google_bigquery_table.schema`
 
 * `source_format` (Required) - The data format. Supported values are:
     "CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "PARQUET",
@@ -206,6 +219,26 @@ The `google_sheets_options` block supports:
 * `skip_leading_rows` (Optional) - The number of rows at the top of the sheet
     that BigQuery will skip when reading the data. At least one of `range` or
     `skip_leading_rows` must be set.
+
+The `hive_partitioning_options` block supports:
+
+* `mode` (Optional) - When set, what mode of hive partitioning to use when
+    reading data. The following modes are supported.
+    * AUTO: automatically infer partition key name(s) and type(s).
+    * STRINGS: automatically infer partition key name(s). All types are
+      Not all storage formats support hive partitioning. Requesting hive
+      partitioning on an unsupported format will lead to an error.
+      Currently supported formats are: JSON, CSV, ORC, Avro and Parquet.
+    * CUSTOM: when set to `CUSTOM`, you must encode the partition key schema within the `source_uri_prefix` by setting `source_uri_prefix` to `gs://bucket/path_to_table/{key1:TYPE1}/{key2:TYPE2}/{key3:TYPE3}`.
+
+* `source_uri_prefix` (Optional) - When hive partition detection is requested,
+    a common for all source uris must be required. The prefix must end immediately
+    before the partition key encoding begins. For example, consider files following
+    this data layout. `gs://bucket/path_to_table/dt=2019-06-01/country=USA/id=7/file.avro`
+    `gs://bucket/path_to_table/dt=2019-05-31/country=CA/id=3/file.avro` When hive
+    partitioning is requested with either AUTO or STRINGS detection, the common prefix
+    can be either of `gs://bucket/path_to_table` or `gs://bucket/path_to_table/`.
+    Note that when `mode` is set to `CUSTOM`, you must encode the partition key schema within the `source_uri_prefix` by setting `source_uri_prefix` to `gs://bucket/path_to_table/{key1:TYPE1}/{key2:TYPE2}/{key3:TYPE3}`.
 
 The `time_partitioning` block supports:
 
@@ -258,6 +291,8 @@ The `encryption_configuration` block supports the following arguments:
 
 In addition to the arguments listed above, the following computed attributes are
 exported:
+
+* `id` - an identifier for the resource with format `projects/{{project}}/datasets/{{dataset}}/tables/{{name}}`
 
 * `creation_time` - The time when this table was created, in milliseconds since the epoch.
 

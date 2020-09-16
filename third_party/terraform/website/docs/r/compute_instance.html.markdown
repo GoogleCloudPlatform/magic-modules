@@ -156,13 +156,16 @@ The following arguments are supported:
     Structure is documented below.
     **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
-* `tags` - (Optional) A list of tags to attach to the instance.
+* `tags` - (Optional) A list of network tags to attach to the instance.
 
 * `shielded_instance_config` - (Optional) Enable [Shielded VM](https://cloud.google.com/security/shielded-cloud/shielded-vm) on this instance. Shielded VM provides verifiable integrity to prevent against malware and rootkits. Defaults to disabled. Structure is documented below.
 	**Note**: [`shielded_instance_config`](#shielded_instance_config) can only be used with boot images with shielded vm support. See the complete list [here](https://cloud.google.com/compute/docs/images#shielded-images).
+  **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
 * `enable_display` - (Optional) Enable [Virtual Displays](https://cloud.google.com/compute/docs/instances/enable-instance-virtual-display#verify_display_driver) on this instance.
 **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
+
+* `resource_policies` (Optional) -- A list of short names or self_links of resource policies to attach to the instance. Modifying this list will cause the instance to recreate. Currently a max of 1 resource policy is supported.
 
 
 ---
@@ -201,7 +204,7 @@ The `initialize_params` block supports:
 * `size` - (Optional) The size of the image in gigabytes. If not specified, it
     will inherit the size of its base image.
 
-* `type` - (Optional) The GCE disk type. May be set to pd-standard or pd-ssd.
+* `type` - (Optional) The GCE disk type. May be set to pd-standard, pd-balanced or pd-ssd.
 
 * `image` - (Optional) The image from which to initialize this disk. This can be
     one of: the image's `self_link`, `projects/{project}/global/images/{image}`,
@@ -209,7 +212,7 @@ The `initialize_params` block supports:
     `global/images/family/{family}`, `family/{family}`, `{project}/{family}`,
     `{project}/{image}`, `{family}`, or `{image}`. If referred by family, the
     images names must include the family name. If they don't, use the
-    [google_compute_image data source](/docs/providers/google/d/datasource_compute_image.html).
+    [google_compute_image data source](/docs/providers/google/d/compute_image.html).
     For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
     These images can be referred by family name here.
 
@@ -335,20 +338,25 @@ The `node_affinities` block supports:
 * `operator` (Required) - The operator. Can be `IN` for node-affinities
     or `NOT_IN` for anti-affinities.
 
-* `value` (Required) - The values for the node affinity label.
+* `values` (Required) - The values for the node affinity label.
 
 The `shielded_instance_config` block supports:
 
 * `enable_secure_boot` (Optional) -- Verify the digital signature of all boot components, and halt the boot process if signature verification fails. Defaults to false.
+  **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
 * `enable_vtpm` (Optional) -- Use a virtualized trusted platform module, which is a specialized computer chip you can use to encrypt objects like keys and certificates. Defaults to true.
+  **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
 * `enable_integrity_monitoring` (Optional) -- Compare the most recent boot measurements to the integrity policy baseline and return a pair of pass/fail results depending on whether they match or not. Defaults to true.
+  **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
 exported:
+
+* `id` - an identifier for the resource with format `projects/{{project}}/zones/{{zone}}/instances/{{name}}`
 
 * `instance_id` - The server-assigned unique identifier of this instance.
 

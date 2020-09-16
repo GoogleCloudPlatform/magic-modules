@@ -19,9 +19,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # Because some users check whether the PubSub resource exists prior
     # to applying a new resource, we need to add this PollAsync to GET the
     # resource until it exists and the negative cached result goes away.
-    # Context: terraform-providers/terraform-provider-google#4993
+    # Context: hashicorp/terraform-provider-google#4993
     async: !ruby/object:Provider::Terraform::PollAsync
-      check_response_func: PollCheckForExistence
+      check_response_func_existence: PollCheckForExistence
       actions: ['create']
       operation: !ruby/object:Api::Async::Operation
         timeouts: !ruby/object:Api::Timeouts
@@ -69,9 +69,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # Because some users check whether the PubSub resource exists prior
     # to applying a new resource, we need to add this PollAsync to GET the
     # resource until it exists and the negative cached result goes away.
-    # Context: terraform-providers/terraform-provider-google#4993
+    # Context: hashicorp/terraform-provider-google#4993
     async: !ruby/object:Provider::Terraform::PollAsync
-      check_response_func: PollCheckForExistence
+      check_response_func_existence: PollCheckForExistence
       actions: ['create']
       operation: !ruby/object:Api::Async::Operation
         timeouts: !ruby/object:Api::Timeouts
@@ -124,6 +124,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       expirationPolicy.ttl: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'comparePubsubSubscriptionExpirationPolicy'
+      retryPolicy.minimumBackoff: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      retryPolicy.maximumBackoff: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true  
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/subscription.go.erb
       decoder: templates/terraform/decoders/pubsub_subscription.erb

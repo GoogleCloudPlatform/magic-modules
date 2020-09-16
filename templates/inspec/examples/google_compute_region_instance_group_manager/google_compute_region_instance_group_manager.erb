@@ -1,6 +1,6 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
-<% rigm = grab_attributes['rigm'] -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute(pwd, 'gcp_location', doc_generation)}" -%>
+<% rigm = grab_attributes(pwd)['rigm'] -%>
 describe google_compute_region_instance_group_manager(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: <%= doc_generation ? "'#{rigm['name']}'" : "rigm['name']" -%>) do
   it { should exist }
   its('base_instance_name') { should eq <%= doc_generation ? "'#{rigm['base_instance_name']}'" : "rigm['base_instance_name']" -%> }

@@ -1,0 +1,180 @@
+# Copyright 2020 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: ServiceDirectory
+display_name: Service Directory
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://servicedirectory.googleapis.com/v1beta1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Service Directory API
+    url: https://console.cloud.google.com/apis/library/servicedirectory.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Namespace'
+    base_url: '{{name}}'
+    create_url: 'projects/{{project}}/locations/{{location}}/namespaces?namespaceId={{namespace_id}}'
+    self_link: '{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Configuring a namespace': 'https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_a_namespace'
+      api: 'https://cloud.google.com/service-directory/docs/reference/rest/v1beta1/projects.locations.namespaces'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      parent_resource_attribute: 'name'
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      set_iam_policy_verb: :POST
+    min_version: beta
+    description: |
+      A container for `services`. Namespaces allow administrators to group services
+      together and define permissions for a collection of services.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        description: |
+          The location for the Namespace.
+          A full list of valid locations can be found by running
+          `gcloud beta service-directory locations list`.
+        required: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: namespaceId
+        description: |
+          The Resource ID must be 1-63 characters long, including digits,
+          lowercase letters or the hyphen character.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource name for the namespace
+          in the format `projects/*/locations/*/namespaces/*`.
+        output: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Resource labels associated with this Namespace. No more than 64 user
+          labels can be associated with a given resource. Label keys and values can
+          be no longer than 63 characters.
+  - !ruby/object:Api::Resource
+    name: 'Service'
+    base_url: '{{name}}'
+    create_url: '{{namespace}}/services?serviceId={{service_id}}'
+    self_link: '{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Configuring a service': 'https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_a_service'
+      api: 'https://cloud.google.com/service-directory/docs/reference/rest/v1beta1/projects.locations.namespaces.services'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      parent_resource_attribute: 'name'
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      set_iam_policy_verb: :POST
+    min_version: beta
+    description: |
+      An individual service. A service contains a name and optional metadata.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'namespace'
+        description: |
+          The resource name of the namespace this service will belong to.
+        required: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: serviceId
+        description: |
+          The Resource ID must be 1-63 characters long, including digits,
+          lowercase letters or the hyphen character.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource name for the service in the
+          format `projects/*/locations/*/namespaces/*/services/*`.
+        output: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'metadata'
+        description: |
+          Metadata for the service. This data can be consumed
+          by service clients. The entire metadata dictionary may contain
+          up to 2000 characters, spread across all key-value pairs.
+          Metadata that goes beyond any these limits will be rejected.
+  - !ruby/object:Api::Resource
+    name: 'Endpoint'
+    base_url: '{{name}}'
+    create_url: '{{service}}/endpoints?endpointId={{endpoint_id}}'
+    self_link: '{{name}}'
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Configuring an endpoint': 'https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_an_endpoint'
+      api: 'https://cloud.google.com/service-directory/docs/reference/rest/v1beta1/projects.locations.namespaces.services.endpoints'
+    min_version: beta
+    description: |
+      An individual endpoint that provides a service.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'service'
+        description: |
+          The resource name of the service that this endpoint provides.
+        required: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: endpointId
+        description: |
+          The Resource ID must be 1-63 characters long, including digits,
+          lowercase letters or the hyphen character.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource name for the endpoint in the format
+          `projects/*/locations/*/namespaces/*/services/*/endpoints/*`.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'address'
+        description: |
+          IPv4 or IPv6 address of the endpoint.
+      - !ruby/object:Api::Type::Integer
+        name: 'port'
+        description: |
+          Port that the endpoint is running on, must be in the
+          range of [0, 65535]. If unspecified, the default is 0.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'metadata'
+        description: |
+          Metadata for the endpoint. This data can be consumed
+          by service clients. The entire metadata dictionary may contain
+          up to 512 characters, spread across all key-value pairs.
+          Metadata that goes beyond any these limits will be rejected.
+

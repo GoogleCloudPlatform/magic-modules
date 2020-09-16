@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: DeploymentManager
-display_name: Deployment Manager
+display_name: Cloud Deployment Manager
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

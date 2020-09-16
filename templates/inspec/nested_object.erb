@@ -24,7 +24,7 @@
 -%>
 # frozen_string_literal: false
 
-<%= lines(autogen_notice :ruby) -%>
+<%= lines(autogen_notice(:ruby, pwd)) -%>
 <%
   requires = generate_requires(nested_property.nested_properties)
 -%>

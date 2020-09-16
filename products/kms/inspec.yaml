@@ -49,5 +49,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       base_url: 'projects/{{project}}/locations/{{location}}/keyRings/{{key_ring_name}}/cryptoKeys/{{crypto_key_name}}'
       exclude: false
       method_name_separator: ':'
+  KeyRingImportJob: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   SecretCiphertext: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true

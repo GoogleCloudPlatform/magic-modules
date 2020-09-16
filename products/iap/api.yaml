@@ -146,6 +146,11 @@ objects:
       OAuth brand data. Only "Organization Internal" brands can be created
       programatically via API. To convert it into an external brands
       please use the GCP Console.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Setting up IAP Brand':
+          'https://cloud.google.com/iap/docs/tutorial-gce#set_up_iap'
+      api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -182,6 +187,15 @@ objects:
     input: true
     description: |
       Contains the data that describes an Identity Aware Proxy owned client.
+
+      ~> **Note:** Only internal org clients can be created via declarative tools. Other types of clients must be
+      manually created via the GCP console. This restriction is due to the existing APIs and not lack of support
+      in this tool.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Setting up IAP Client':
+          'https://cloud.google.com/iap/docs/authentication-howto'
+      api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands.identityAwareProxyClients'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'clientId'

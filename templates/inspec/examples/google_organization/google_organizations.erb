@@ -1,5 +1,5 @@
-<% gcp_organization_id = "#{external_attribute('gcp_organization_id', doc_generation)}" -%>
-<% gcp_organization_display_name = "#{external_attribute('gcp_organization_display_name', doc_generation)}" -%>
+<% gcp_organization_id = "#{external_attribute(pwd, 'gcp_organization_id', doc_generation)}" -%>
+<% gcp_organization_display_name = "#{external_attribute(pwd, 'gcp_organization_display_name', doc_generation)}" -%>
 
 describe google_organizations do
   its('names') { should include "organizations/<%= doc_generation ? '123456' : "\#{gcp_organization_id}" -%>" }

@@ -17,10 +17,10 @@ display_name: Cloud DNS
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://www.googleapis.com/dns/v1/
+    base_url: https://dns.googleapis.com/dns/v1/
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://www.googleapis.com/dns/v1beta2/
+    base_url: https://dns.googleapis.com/dns/v1beta2/
 scopes:
   - https://www.googleapis.com/auth/ndev.clouddns.readwrite
 apis_required:
@@ -173,7 +173,6 @@ objects:
         description: |
           The zone's visibility: public zones are exposed to the Internet,
           while private zones are visible only to Virtual Private Cloud resources.
-          Must be one of: `public`, `private`.
         values:
         - :private
         - :public
@@ -183,6 +182,7 @@ objects:
         description: |
           For privately visible zones, the set of Virtual Private Cloud
           resources that the zone is visible from.
+        send_empty_value: true
         properties:
           - !ruby/object:Api::Type::Array
             name: 'networks'
@@ -228,9 +228,7 @@ objects:
                   values:
                   - :default
                   - :private
-        min_version: beta
       - !ruby/object:Api::Type::NestedObject
-        min_version: beta
         name: 'peeringConfig'
         description: |
           The presence of this field indicates that DNS Peering is enabled for this
@@ -259,6 +257,25 @@ objects:
           Specifies if this is a managed reverse lookup zone. If true, Cloud DNS will resolve reverse
           lookup queries using automatically configured records for VPC resources. This only applies
           to networks listed under `private_visibility_config`.
+      - !ruby/object:Api::Type::NestedObject
+        min_version: beta
+        input: true
+        name: 'serviceDirectoryConfig'
+        description:
+          The presence of this field indicates that this zone is backed by Service Directory. The value
+          of this field contains information related to the namespace associated with the zone.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'namespace'
+            required: true
+            description: 'The namespace associated with the zone.'
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'namespaceUrl'
+                required: true
+                description: |
+                  The fully qualified URL of the service directory namespace that should be
+                  associated with the zone. Ignored for `public` visibility zones.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Zones':
@@ -352,7 +369,6 @@ objects:
         'Using DNS server policies':
           'https://cloud.google.com/dns/zones/#using-dns-server-policies'
       api: 'https://cloud.google.com/dns/docs/reference/v1beta2/policies'
-    min_version: beta
   - !ruby/object:Api::Resource
     name: 'Project'
     kind: 'dns#project'

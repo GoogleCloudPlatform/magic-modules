@@ -26,7 +26,7 @@ else
 fi
 
 <% provider_name = version.nil? || version == 'ga' ? 'google' : 'google-' + version -%>
-PROVIDER_URL="https:\/\/github.com\/terraform-providers\/terraform-provider-<%= provider_name -%>\/issues"
+PROVIDER_URL="https:\/\/github.com\/hashicorp\/terraform-provider-<%= provider_name -%>\/issues"
 
 $SED "s/GH-([0-9]+)/\[#\1\]\($PROVIDER_URL\/\1\)/g" -e 's/\[\[#(.+)([0-9])\)]$/(\[#\1\2))/g' CHANGELOG.md
 

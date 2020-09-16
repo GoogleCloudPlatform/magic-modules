@@ -4,7 +4,6 @@ package google
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
@@ -14,10 +13,10 @@ func TestAccDialogflowAgent_update(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":          getTestOrgFromEnv(t),
 		"billing_account": getTestBillingAccountFromEnv(t),
-		"random_suffix":   acctest.RandString(10),
+		"random_suffix":   randString(t, 10),
 	}
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -116,7 +115,7 @@ func testAccDialogflowAgent_full2(context map[string]interface{}) string {
 		display_name = "tf-test-%{random_suffix}update"
 		default_language_code = "en"
 		supported_language_codes = ["no"]
-		time_zone = "America/New_York"
+		time_zone = "Europe/London"
 		description = "Description 2!"
 		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo-2.png"
 		enable_logging = false
