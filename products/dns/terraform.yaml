@@ -130,6 +130,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       reverseLookup: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/object_to_bool.go.erb
         custom_expand: templates/terraform/custom_expand/bool_to_object.go.erb
+    virtual_fields:
+      - !ruby/object:Api::Type::Boolean
+        name: 'force_destroy'
+        description: 'Set this true to delete all records in the zone.'
+        default_value: false
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_delete: templates/terraform/pre_delete/managed_dns_zone.go.erb
   Policy: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: 'projects/{{project}}/policies/{{name}}'
     examples:
