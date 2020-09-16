@@ -459,6 +459,16 @@ objects:
         description: |
           The name of the Google Compute Engine subnetwork to which the cluster
           is connected.
+      - !ruby/object:Api::Type::Enum
+        name: 'datapathProvider'
+        description: |
+          The desired datapath provider for this cluster. By default, uses the
+          IPTables-based kube-proxy implementation.
+        values:
+          - 'DATAPATH_PROVIDER_UNSPECIFIED'
+          - 'LEGACY_DATAPATH'
+          - 'ADVANCED_DATAPATH'
+        min_version: beta
       # TODO: figure out nodePools[]
       - !ruby/object:Api::Type::Array
         name: 'locations'
