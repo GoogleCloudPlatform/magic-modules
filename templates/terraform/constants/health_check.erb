@@ -25,7 +25,7 @@ func validatePortSpec(diff *schema.ResourceDiff, blockName string) error {
     return nil
 }
 
-func healthCheckCustomizeDiff(diff *schema.ResourceDiff, v interface{}) error {
+func healthCheckCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
     if diff.Get("http_health_check") != nil {
         return validatePortSpec(diff, "http_health_check")
     }
