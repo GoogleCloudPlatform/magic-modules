@@ -73,21 +73,26 @@ func testAccDataSourceComputeResourcePolicyCheck(t *testing.T, dataSourceName st
 	}
 }
 
-func testAccCheckDataSourceComputeResourcePolicyDestroy(t *testing.T, resourceName string) resource.TestCheckFunc {
+func testAccCheckDataSourceComputeResourcePolicyDestroy(t *testing.T, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_compute_resource_policy" {
+				continue
+			}
 
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("can't find %s in state", resourceName)
-		}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
 
-		policyAttrs := rs.Primary.Attributes
+			config := googleProviderConfig(t)
 
-		_, err := config.clientCompute.ResourcePolicies.Get(
-			config.Project, policyAttrs["region"], policyAttrs["name"]).Do()
-		if err == nil {
-			return fmt.Errorf("Resource Policy still exists")
+			policyAttrs := rs.Primary.Attributes
+
+			_, err := config.clientCompute.ResourcePolicies.Get(
+				config.Project, policyAttrs["region"], policyAttrs["name"]).Do()
+			if err == nil {
+				return fmt.Errorf("Resource Policy still exists")
+			}
 		}
 
 		return nil
