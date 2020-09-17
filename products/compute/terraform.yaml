@@ -627,7 +627,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           fw_name: "website-fw"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
-      extra_schema_entry: templates/terraform/extra_schema_entry/forwarding_rule.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -1112,7 +1111,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
-      extra_schema_entry: templates/terraform/extra_schema_entry/network.erb
   NetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{zone}}/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}"
     mutex: networkEndpoint/{{project}}/{{zone}}/{{network_endpoint_group}}
