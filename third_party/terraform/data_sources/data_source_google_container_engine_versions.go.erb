@@ -124,7 +124,7 @@ func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta in
 	for _, v := range resp.Channels {
 		channels[v.Channel] = v.DefaultVersion
 	}
-	if err := d.Set("release_channel_default_version", m); err != nil {
+	if err := d.Set("release_channel_default_version", channels); err != nil {
 		return fmt.Errorf("Error setting release_channel_default_version: %s", err)
 	}
 
