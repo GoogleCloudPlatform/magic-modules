@@ -496,6 +496,26 @@ func TestAccProviderBasePath_setInvalidBasePath(t *testing.T) {
 	})
 }
 
+func TestAccProviderMeta_setModuleKey(t *testing.T) {
+	t.Parallel()
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeAddressDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccProviderMeta_setModuleKey("my-module", randString(t, 10)),
+			},
+			{
+				ResourceName:      "google_compute_address.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccProviderUserProjectOverride(t *testing.T) {
 	// Parallel fine-grained resource creation
 	skipIfVcr(t)
@@ -594,6 +614,19 @@ provider "google" {
 resource "google_compute_address" "default" {
 	name = "address-test-%s"
 }`, endpoint, name)
+}
+
+func testAccProviderMeta_setModuleKey(key, name string) string {
+	return fmt.Sprintf(`
+terraform {
+  provider_meta "google" {
+    module_key = "%s"
+  }
+}
+
+resource "google_compute_address" "default" {
+	name = "address-test-%s"
+}`, key, name)
 }
 
 // Set up two projects. Project 1 has a service account that is used to create a
