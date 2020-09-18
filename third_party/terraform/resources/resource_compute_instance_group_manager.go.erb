@@ -378,7 +378,9 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		select {
 		case <-config.context.Done():
 			log.Printf("[DEBUG] Persisting %s so this operation can be resumed \n", op.Name)
-			d.Set("operation", op.Name)
+			if err := d.Set("operation", op.Name); err != nil {
+				return fmt.Errorf("Error setting operation: %s", err)
+			}
 			return nil
 		default:
 			// leaving default case to ensure this is non blocking
@@ -468,7 +470,9 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 			Name: operation,
 			Zone: zone,
 		}
-		d.Set("operation", "")
+		if err := d.Set("operation", op.Name); err != nil {
+			return fmt.Errorf("Error setting operation: %s", err)
+		}
 		err = computeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", d.Timeout(schema.TimeoutCreate))
 		if err != nil {
 			// remove from state to allow refresh to finish
