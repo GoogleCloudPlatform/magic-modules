@@ -217,7 +217,14 @@ func resourceDataflowJobTypeCustomizeDiff(_ context.Context, d *schema.ResourceD
 }
 
 func resourceDataflowJobCreate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientDataflow.UserAgent = fmt.Sprintf("%s %s", config.clientDataflow.UserAgent, m.ModuleKey)
 
 	project, err := getProject(d, config)
 	if err != nil {
