@@ -48,7 +48,14 @@ func dataSourceGoogleComputeVpnGateway() *schema.Resource {
 }
 
 func dataSourceGoogleComputeVpnGatewayRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleKey)
 
 	region, err := getRegion(d, config)
 	if err != nil {
