@@ -30,7 +30,7 @@ func NewOrganizationIamUpdater(d *schema.ResourceData, config *Config) (Resource
 
 func OrgIdParseFunc(d *schema.ResourceData, _ *Config) error {
 	if err := d.Set("org_id", d.Id()); err != nil {
-		return fmt.Errorf("Error reading org_id: %s", err)
+		return fmt.Errorf("Error setting org_id: %s", err)
 	}
 	return nil
 }

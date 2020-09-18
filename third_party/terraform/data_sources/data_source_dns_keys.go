@@ -199,7 +199,7 @@ func dataSourceDNSKeysRead(d *schema.ResourceData, meta interface{}) error {
 	managedZone := fv.Name
 
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	d.SetId(fmt.Sprintf("projects/%s/managedZones/%s", project, managedZone))
 

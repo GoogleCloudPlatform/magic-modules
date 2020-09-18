@@ -68,7 +68,7 @@ func resourceLoggingFolderSinkRead(d *schema.ResourceData, meta interface{}) err
 	}
 
 	if err := d.Set("include_children", sink.IncludeChildren); err != nil {
-		return fmt.Errorf("Error reading include_children: %s", err)
+		return fmt.Errorf("Error setting include_children: %s", err)
 	}
 
 	return nil

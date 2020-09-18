@@ -180,16 +180,16 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if err := d.Set("type", resp.Rrsets[0].Type); err != nil {
-		return fmt.Errorf("Error reading type: %s", err)
+		return fmt.Errorf("Error setting type: %s", err)
 	}
 	if err := d.Set("ttl", resp.Rrsets[0].Ttl); err != nil {
-		return fmt.Errorf("Error reading ttl: %s", err)
+		return fmt.Errorf("Error setting ttl: %s", err)
 	}
 	if err := d.Set("rrdatas", resp.Rrsets[0].Rrdatas); err != nil {
-		return fmt.Errorf("Error reading rrdatas: %s", err)
+		return fmt.Errorf("Error setting rrdatas: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 
 	return nil

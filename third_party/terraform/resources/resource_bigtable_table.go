@@ -88,7 +88,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
 	if err := d.Set("instance_name", instanceName); err != nil {
-		return fmt.Errorf("Error reading instance_name: %s", err)
+		return fmt.Errorf("Error setting instance_name: %s", err)
 	}
 
 	defer c.Close()
@@ -160,10 +160,10 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("column_family", flattenColumnFamily(table.Families)); err != nil {
-		return fmt.Errorf("Error reading column_family: %s", err)
+		return fmt.Errorf("Error setting column_family: %s", err)
 	}
 
 	return nil

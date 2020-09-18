@@ -203,19 +203,19 @@ func resourceComputeRouterInterfaceRead(d *schema.ResourceData, meta interface{}
 		if iface.Name == ifaceName {
 			d.SetId(fmt.Sprintf("%s/%s/%s", region, routerName, ifaceName))
 			if err := d.Set("vpn_tunnel", iface.LinkedVpnTunnel); err != nil {
-				return fmt.Errorf("Error reading vpn_tunnel: %s", err)
+				return fmt.Errorf("Error setting vpn_tunnel: %s", err)
 			}
 			if err := d.Set("interconnect_attachment", iface.LinkedInterconnectAttachment); err != nil {
-				return fmt.Errorf("Error reading interconnect_attachment: %s", err)
+				return fmt.Errorf("Error setting interconnect_attachment: %s", err)
 			}
 			if err := d.Set("ip_range", iface.IpRange); err != nil {
-				return fmt.Errorf("Error reading ip_range: %s", err)
+				return fmt.Errorf("Error setting ip_range: %s", err)
 			}
 			if err := d.Set("region", region); err != nil {
-				return fmt.Errorf("Error reading region: %s", err)
+				return fmt.Errorf("Error setting region: %s", err)
 			}
 			if err := d.Set("project", project); err != nil {
-				return fmt.Errorf("Error reading project: %s", err)
+				return fmt.Errorf("Error setting project: %s", err)
 			}
 			return nil
 		}

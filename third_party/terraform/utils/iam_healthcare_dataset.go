@@ -44,7 +44,7 @@ func DatasetIdParseFunc(d *schema.ResourceData, config *Config) error {
 	}
 
 	if err := d.Set("dataset_id", datasetId.datasetId()); err != nil {
-		return fmt.Errorf("Error reading dataset_id: %s", err)
+		return fmt.Errorf("Error setting dataset_id: %s", err)
 	}
 	d.SetId(datasetId.datasetId())
 	return nil

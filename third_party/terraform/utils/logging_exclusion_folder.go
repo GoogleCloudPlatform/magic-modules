@@ -44,7 +44,7 @@ func folderLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *Config) error 
 	}
 
 	if err := d.Set("folder", loggingExclusionId.resourceId); err != nil {
-		return fmt.Errorf("Error reading folder: %s", err)
+		return fmt.Errorf("Error setting folder: %s", err)
 	}
 	return nil
 }

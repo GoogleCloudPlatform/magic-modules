@@ -138,16 +138,16 @@ func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if err := d.Set("name", res["name"]); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("description", res["description"]); err != nil {
-		return fmt.Errorf("Error reading description: %s", err)
+		return fmt.Errorf("Error setting description: %s", err)
 	}
 	if err := d.Set("lifecycle_state", res["lifecycleState"]); err != nil {
-		return fmt.Errorf("Error reading lifecycle_state: %s", err)
+		return fmt.Errorf("Error setting lifecycle_state: %s", err)
 	}
 	if err := d.Set("retention_days", res["retentionDays"]); err != nil {
-		return fmt.Errorf("Error reading retention_days: %s", err)
+		return fmt.Errorf("Error setting retention_days: %s", err)
 	}
 
 	return nil

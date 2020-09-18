@@ -118,7 +118,7 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading Dashboard: %s", err)
+		return fmt.Errorf("Error setting Dashboard: %s", err)
 	}
 
 	str, err := structure.FlattenJsonToString(res)

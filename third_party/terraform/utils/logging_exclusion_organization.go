@@ -43,7 +43,7 @@ func organizationLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *Config) 
 	}
 
 	if err := d.Set("org_id", loggingExclusionId.resourceId); err != nil {
-		return fmt.Errorf("Error reading org_id: %s", err)
+		return fmt.Errorf("Error setting org_id: %s", err)
 	}
 	return nil
 }

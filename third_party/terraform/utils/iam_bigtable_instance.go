@@ -53,10 +53,10 @@ func BigtableInstanceIdParseFunc(d *schema.ResourceData, config *Config) error {
 	}
 
 	if err := d.Set("project", fv.Project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("instance", fv.Name); err != nil {
-		return fmt.Errorf("Error reading instance: %s", err)
+		return fmt.Errorf("Error setting instance: %s", err)
 	}
 
 	// Explicitly set the id so imported resources have the same ID format as non-imported ones.

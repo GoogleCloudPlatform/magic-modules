@@ -92,7 +92,7 @@ func resourceComputeProjectMetadataRead(d *schema.ResourceData, meta interface{}
 	}
 
 	if err := d.Set("project", projectId); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 
 	return nil

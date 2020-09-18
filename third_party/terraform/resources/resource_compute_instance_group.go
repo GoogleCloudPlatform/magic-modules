@@ -251,7 +251,7 @@ func resourceComputeInstanceGroupRead(d *schema.ResourceData, meta interface{}) 
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
 			// The resource doesn't have any instances
 			if err := d.Set("instances", nil); err != nil {
-				return fmt.Errorf("Error reading instances: %s", err)
+				return fmt.Errorf("Error setting instances: %s", err)
 			}
 		} else {
 			// any other errors return them
@@ -263,32 +263,32 @@ func resourceComputeInstanceGroupRead(d *schema.ResourceData, meta interface{}) 
 		}
 		log.Printf("[DEBUG] InstanceGroup members: %v", memberUrls)
 		if err := d.Set("instances", memberUrls); err != nil {
-			return fmt.Errorf("Error reading instances: %s", err)
+			return fmt.Errorf("Error setting instances: %s", err)
 		}
 	}
 
 	if err := d.Set("named_port", flattenNamedPorts(instanceGroup.NamedPorts)); err != nil {
-		return fmt.Errorf("Error reading named_port: %s", err)
+		return fmt.Errorf("Error setting named_port: %s", err)
 	}
 	if err := d.Set("description", instanceGroup.Description); err != nil {
-		return fmt.Errorf("Error reading description: %s", err)
+		return fmt.Errorf("Error setting description: %s", err)
 	}
 
 	// Set computed fields
 	if err := d.Set("network", instanceGroup.Network); err != nil {
-		return fmt.Errorf("Error reading network: %s", err)
+		return fmt.Errorf("Error setting network: %s", err)
 	}
 	if err := d.Set("size", instanceGroup.Size); err != nil {
-		return fmt.Errorf("Error reading size: %s", err)
+		return fmt.Errorf("Error setting size: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("zone", zone); err != nil {
-		return fmt.Errorf("Error reading zone: %s", err)
+		return fmt.Errorf("Error setting zone: %s", err)
 	}
 	if err := d.Set("self_link", instanceGroup.SelfLink); err != nil {
-		return fmt.Errorf("Error reading self_link: %s", err)
+		return fmt.Errorf("Error setting self_link: %s", err)
 	}
 
 	return nil

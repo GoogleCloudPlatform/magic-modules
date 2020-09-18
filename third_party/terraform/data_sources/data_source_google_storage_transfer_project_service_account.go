@@ -37,10 +37,10 @@ func dataSourceGoogleStorageTransferProjectServiceAccountRead(d *schema.Resource
 
 	d.SetId(serviceAccount.AccountEmail)
 	if err := d.Set("email", serviceAccount.AccountEmail); err != nil {
-		return fmt.Errorf("Error reading email: %s", err)
+		return fmt.Errorf("Error setting email: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	return nil
 }

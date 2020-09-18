@@ -66,22 +66,22 @@ func dataSourceDnsManagedZoneRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if err := d.Set("name_servers", zone.NameServers); err != nil {
-		return fmt.Errorf("Error reading name_servers: %s", err)
+		return fmt.Errorf("Error setting name_servers: %s", err)
 	}
 	if err := d.Set("name", zone.Name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("dns_name", zone.DnsName); err != nil {
-		return fmt.Errorf("Error reading dns_name: %s", err)
+		return fmt.Errorf("Error setting dns_name: %s", err)
 	}
 	if err := d.Set("description", zone.Description); err != nil {
-		return fmt.Errorf("Error reading description: %s", err)
+		return fmt.Errorf("Error setting description: %s", err)
 	}
 	if err := d.Set("visibility", zone.Visibility); err != nil {
-		return fmt.Errorf("Error reading visibility: %s", err)
+		return fmt.Errorf("Error setting visibility: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 
 	return nil

@@ -69,7 +69,7 @@ func resourceComputeSharedVpcHostProjectRead(d *schema.ResourceData, meta interf
 	}
 
 	if err := d.Set("project", hostProject); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 
 	return nil

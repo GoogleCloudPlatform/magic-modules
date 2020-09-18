@@ -131,28 +131,28 @@ func resourceStorageNotificationRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if err := d.Set("bucket", bucket); err != nil {
-		return fmt.Errorf("Error reading bucket: %s", err)
+		return fmt.Errorf("Error setting bucket: %s", err)
 	}
 	if err := d.Set("payload_format", res.PayloadFormat); err != nil {
-		return fmt.Errorf("Error reading payload_format: %s", err)
+		return fmt.Errorf("Error setting payload_format: %s", err)
 	}
 	if err := d.Set("topic", res.Topic); err != nil {
-		return fmt.Errorf("Error reading topic: %s", err)
+		return fmt.Errorf("Error setting topic: %s", err)
 	}
 	if err := d.Set("object_name_prefix", res.ObjectNamePrefix); err != nil {
-		return fmt.Errorf("Error reading object_name_prefix: %s", err)
+		return fmt.Errorf("Error setting object_name_prefix: %s", err)
 	}
 	if err := d.Set("event_types", res.EventTypes); err != nil {
-		return fmt.Errorf("Error reading event_types: %s", err)
+		return fmt.Errorf("Error setting event_types: %s", err)
 	}
 	if err := d.Set("notification_id", notificationID); err != nil {
-		return fmt.Errorf("Error reading notification_id: %s", err)
+		return fmt.Errorf("Error setting notification_id: %s", err)
 	}
 	if err := d.Set("self_link", res.SelfLink); err != nil {
-		return fmt.Errorf("Error reading self_link: %s", err)
+		return fmt.Errorf("Error setting self_link: %s", err)
 	}
 	if err := d.Set("custom_attributes", res.CustomAttributes); err != nil {
-		return fmt.Errorf("Error reading custom_attributes: %s", err)
+		return fmt.Errorf("Error setting custom_attributes: %s", err)
 	}
 
 	return nil

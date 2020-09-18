@@ -42,14 +42,14 @@ func computeInstanceSerialPortRead(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	zone, err := getZone(d, config)
 	if err != nil {
 		return err
 	}
 	if err := d.Set("zone", zone); err != nil {
-		return fmt.Errorf("Error reading zone: %s", err)
+		return fmt.Errorf("Error setting zone: %s", err)
 	}
 
 	port := int64(d.Get("port").(int))
@@ -59,7 +59,7 @@ func computeInstanceSerialPortRead(d *schema.ResourceData, meta interface{}) err
 	}
 
 	if err := d.Set("contents", output.Contents); err != nil {
-		return fmt.Errorf("Error reading contents: %s", err)
+		return fmt.Errorf("Error setting contents: %s", err)
 	}
 	d.SetId(output.SelfLink)
 	return nil

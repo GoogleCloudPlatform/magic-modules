@@ -79,13 +79,13 @@ func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) er
 	log.Printf("[DEBUG] Fetched CA certs from instance %s", instance)
 
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("certs", flattenServerCaCerts(response.Certs)); err != nil {
-		return fmt.Errorf("Error reading certs: %s", err)
+		return fmt.Errorf("Error setting certs: %s", err)
 	}
 	if err := d.Set("active_version", response.ActiveVersion); err != nil {
-		return fmt.Errorf("Error reading active_version: %s", err)
+		return fmt.Errorf("Error setting active_version: %s", err)
 	}
 	d.SetId(fmt.Sprintf("projects/%s/instance/%s", project, instance))
 

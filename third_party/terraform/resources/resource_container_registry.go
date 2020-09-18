@@ -95,7 +95,7 @@ func resourceContainerRegistryRead(d *schema.ResourceData, meta interface{}) err
 
 	// Update the ID according to the bucket ID
 	if err := d.Set("bucket_self_link", res.SelfLink); err != nil {
-		return fmt.Errorf("Error reading bucket_self_link: %s", err)
+		return fmt.Errorf("Error setting bucket_self_link: %s", err)
 	}
 
 	d.SetId(res.Id)

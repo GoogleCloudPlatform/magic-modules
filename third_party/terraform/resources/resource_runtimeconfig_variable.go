@@ -204,22 +204,22 @@ func setRuntimeConfigVariableToResourceData(d *schema.ResourceData, variable run
 		return err
 	}
 	if err := d.Set("name", name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("parent", parent); err != nil {
-		return fmt.Errorf("Error reading parent: %s", err)
+		return fmt.Errorf("Error setting parent: %s", err)
 	}
 	if err := d.Set("project", varProject); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("value", variable.Value); err != nil {
-		return fmt.Errorf("Error reading value: %s", err)
+		return fmt.Errorf("Error setting value: %s", err)
 	}
 	if err := d.Set("text", variable.Text); err != nil {
-		return fmt.Errorf("Error reading text: %s", err)
+		return fmt.Errorf("Error setting text: %s", err)
 	}
 	if err := d.Set("update_time", variable.UpdateTime); err != nil {
-		return fmt.Errorf("Error reading update_time: %s", err)
+		return fmt.Errorf("Error setting update_time: %s", err)
 	}
 
 	return nil

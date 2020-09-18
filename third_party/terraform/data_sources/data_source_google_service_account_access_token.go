@@ -74,7 +74,7 @@ func dataSourceGoogleServiceAccountAccessTokenRead(d *schema.ResourceData, meta 
 
 	d.SetId(time.Now().UTC().String())
 	if err := d.Set("access_token", at.AccessToken); err != nil {
-		return fmt.Errorf("Error reading access_token: %s", err)
+		return fmt.Errorf("Error setting access_token: %s", err)
 	}
 
 	return nil

@@ -204,7 +204,7 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 
 	clusters, err := c.Clusters(ctx, instance.Name)
@@ -224,13 +224,13 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if err := d.Set("name", instance.Name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("display_name", instance.DisplayName); err != nil {
-		return fmt.Errorf("Error reading display_name: %s", err)
+		return fmt.Errorf("Error setting display_name: %s", err)
 	}
 	if err := d.Set("labels", instance.Labels); err != nil {
-		return fmt.Errorf("Error reading labels: %s", err)
+		return fmt.Errorf("Error setting labels: %s", err)
 	}
 	// Don't set instance_type: we don't want to detect drift on it because it can
 	// change under-the-hood.

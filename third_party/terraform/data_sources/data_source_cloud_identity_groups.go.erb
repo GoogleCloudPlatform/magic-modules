@@ -62,7 +62,7 @@ func dataSourceGoogleCloudIdentityGroupsRead(d *schema.ResourceData, meta interf
 	}
 
 	if err := d.Set("groups", result); err != nil {
-		return fmt.Errorf("Error reading groups: %s", err)
+		return fmt.Errorf("Error setting groups: %s", err)
 	}
 	d.SetId(time.Now().UTC().String())
 	return nil

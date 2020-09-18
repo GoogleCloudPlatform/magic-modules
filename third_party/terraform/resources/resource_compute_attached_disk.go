@@ -126,10 +126,10 @@ func resourceAttachedDiskRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	if err := d.Set("project", zv.Project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("zone", zv.Zone); err != nil {
-		return fmt.Errorf("Error reading zone: %s", err)
+		return fmt.Errorf("Error setting zone: %s", err)
 	}
 
 	diskName := GetResourceNameFromSelfLink(d.Get("disk").(string))
@@ -149,10 +149,10 @@ func resourceAttachedDiskRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if err := d.Set("device_name", ad.DeviceName); err != nil {
-		return fmt.Errorf("Error reading device_name: %s", err)
+		return fmt.Errorf("Error setting device_name: %s", err)
 	}
 	if err := d.Set("mode", ad.Mode); err != nil {
-		return fmt.Errorf("Error reading mode: %s", err)
+		return fmt.Errorf("Error setting mode: %s", err)
 	}
 
 	// Force the referenced resources to a self-link in state because it's more specific then name.
@@ -161,14 +161,14 @@ func resourceAttachedDiskRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	if err := d.Set("instance", instancePath); err != nil {
-		return fmt.Errorf("Error reading instance: %s", err)
+		return fmt.Errorf("Error setting instance: %s", err)
 	}
 	diskPath, err := getRelativePath(ad.Source)
 	if err != nil {
 		return err
 	}
 	if err := d.Set("disk", diskPath); err != nil {
-		return fmt.Errorf("Error reading disk: %s", err)
+		return fmt.Errorf("Error setting disk: %s", err)
 	}
 
 	return nil

@@ -33,10 +33,10 @@ if iamMemberProp != "" {
 			return fmt.Errorf("Error setting member_type: %s", err)
 		}
 		if err := d.Set("iam_member", ""); err != nil {
-			return fmt.Errorf("Error reading iam_member: %s", err)
+			return fmt.Errorf("Error setting iam_member: %s", err)
 		}
 		if err := d.Set("api_updated_member", true); err != nil {
-			return fmt.Errorf("Error reading api_updated_member: %s", err)
+			return fmt.Errorf("Error setting api_updated_member: %s", err)
 		}
 	}
 }

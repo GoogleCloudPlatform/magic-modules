@@ -565,7 +565,7 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 
 	// Assign the bucket ID as the resource ID
 	if err := d.Set("self_link", res.SelfLink); err != nil {
-		return fmt.Errorf("Error reading self_link: %s", err)
+		return fmt.Errorf("Error setting self_link: %s", err)
 	}
 
 	if d.HasChange("retention_policy") {
@@ -615,7 +615,7 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 	if d.Get("project") == "" {
 		project, _ := getProject(d, config)
 		if err := d.Set("project", project); err != nil {
-			return fmt.Errorf("Error reading project: %s", err)
+			return fmt.Errorf("Error setting project: %s", err)
 		}
 	}
 	if d.Get("project") == "" {
@@ -625,75 +625,75 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 		}
 		log.Printf("[DEBUG] Bucket %v is in project number %v, which is project ID %s.\n", res.Name, res.ProjectNumber, proj.Name)
 		if err := d.Set("project", proj.Name); err != nil {
-			return fmt.Errorf("Error reading project: %s", err)
+			return fmt.Errorf("Error setting project: %s", err)
 		}
 	}
 
 	// Update the bucket ID according to the resource ID
 	if err := d.Set("self_link", res.SelfLink); err != nil {
-		return fmt.Errorf("Error reading self_link: %s", err)
+		return fmt.Errorf("Error setting self_link: %s", err)
 	}
 	if err := d.Set("url", fmt.Sprintf("gs://%s", bucket)); err != nil {
-		return fmt.Errorf("Error reading url: %s", err)
+		return fmt.Errorf("Error setting url: %s", err)
 	}
 	if err := d.Set("storage_class", res.StorageClass); err != nil {
-		return fmt.Errorf("Error reading storage_class: %s", err)
+		return fmt.Errorf("Error setting storage_class: %s", err)
 	}
 	if err := d.Set("encryption", flattenBucketEncryption(res.Encryption)); err != nil {
-		return fmt.Errorf("Error reading encryption: %s", err)
+		return fmt.Errorf("Error setting encryption: %s", err)
 	}
 	if err := d.Set("location", res.Location); err != nil {
-		return fmt.Errorf("Error reading location: %s", err)
+		return fmt.Errorf("Error setting location: %s", err)
 	}
 	if err := d.Set("cors", flattenCors(res.Cors)); err != nil {
-		return fmt.Errorf("Error reading cors: %s", err)
+		return fmt.Errorf("Error setting cors: %s", err)
 	}
 	if err := d.Set("default_event_based_hold", res.DefaultEventBasedHold); err != nil {
-		return fmt.Errorf("Error reading default_event_based_hold: %s", err)
+		return fmt.Errorf("Error setting default_event_based_hold: %s", err)
 	}
 	if err := d.Set("logging", flattenBucketLogging(res.Logging)); err != nil {
-		return fmt.Errorf("Error reading logging: %s", err)
+		return fmt.Errorf("Error setting logging: %s", err)
 	}
 	if err := d.Set("versioning", flattenBucketVersioning(res.Versioning)); err != nil {
-		return fmt.Errorf("Error reading versioning: %s", err)
+		return fmt.Errorf("Error setting versioning: %s", err)
 	}
 	if err := d.Set("lifecycle_rule", flattenBucketLifecycle(res.Lifecycle)); err != nil {
-		return fmt.Errorf("Error reading lifecycle_rule: %s", err)
+		return fmt.Errorf("Error setting lifecycle_rule: %s", err)
 	}
 	if err := d.Set("labels", res.Labels); err != nil {
-		return fmt.Errorf("Error reading labels: %s", err)
+		return fmt.Errorf("Error setting labels: %s", err)
 	}
 	if err := d.Set("website", flattenBucketWebsite(res.Website)); err != nil {
-		return fmt.Errorf("Error reading website: %s", err)
+		return fmt.Errorf("Error setting website: %s", err)
 	}
 	if err := d.Set("retention_policy", flattenBucketRetentionPolicy(res.RetentionPolicy)); err != nil {
-		return fmt.Errorf("Error reading retention_policy: %s", err)
+		return fmt.Errorf("Error setting retention_policy: %s", err)
 	}
 
 	// Delete the bucket_policy_only field in the next major version of the provider.
 	if res.IamConfiguration != nil && res.IamConfiguration.UniformBucketLevelAccess != nil {
 		if err := d.Set("uniform_bucket_level_access", res.IamConfiguration.UniformBucketLevelAccess.Enabled); err != nil {
-			return fmt.Errorf("Error reading uniform_bucket_level_access: %s", err)
+			return fmt.Errorf("Error setting uniform_bucket_level_access: %s", err)
 		}
 		if err := d.Set("bucket_policy_only", res.IamConfiguration.BucketPolicyOnly.Enabled); err != nil {
-			return fmt.Errorf("Error reading bucket_policy_only: %s", err)
+			return fmt.Errorf("Error setting bucket_policy_only: %s", err)
 		}
 	} else {
 		if err := d.Set("bucket_policy_only", false); err != nil {
-			return fmt.Errorf("Error reading bucket_policy_only: %s", err)
+			return fmt.Errorf("Error setting bucket_policy_only: %s", err)
 		}
 		if err := d.Set("uniform_bucket_level_access", false); err != nil {
-			return fmt.Errorf("Error reading uniform_bucket_level_access: %s", err)
+			return fmt.Errorf("Error setting uniform_bucket_level_access: %s", err)
 		}
 	}
 
 	if res.Billing == nil {
 		if err := d.Set("requester_pays", nil); err != nil {
-			return fmt.Errorf("Error reading requester_pays: %s", err)
+			return fmt.Errorf("Error setting requester_pays: %s", err)
 		}
 	} else {
 		if err := d.Set("requester_pays", res.Billing.RequesterPays); err != nil {
-			return fmt.Errorf("Error reading requester_pays: %s", err)
+			return fmt.Errorf("Error setting requester_pays: %s", err)
 		}
 	}
 

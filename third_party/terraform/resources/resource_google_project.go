@@ -231,33 +231,33 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if err := d.Set("project_id", pid); err != nil {
-		return fmt.Errorf("Error reading project_id: %s", err)
+		return fmt.Errorf("Error setting project_id: %s", err)
 	}
 	if err := d.Set("number", strconv.FormatInt(p.ProjectNumber, 10)); err != nil {
-		return fmt.Errorf("Error reading number: %s", err)
+		return fmt.Errorf("Error setting number: %s", err)
 	}
 	if err := d.Set("name", p.Name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("labels", p.Labels); err != nil {
-		return fmt.Errorf("Error reading labels: %s", err)
+		return fmt.Errorf("Error setting labels: %s", err)
 	}
 
 	if p.Parent != nil {
 		switch p.Parent.Type {
 		case "organization":
 			if err := d.Set("org_id", p.Parent.Id); err != nil {
-				return fmt.Errorf("Error reading org_id: %s", err)
+				return fmt.Errorf("Error setting org_id: %s", err)
 			}
 			if err := d.Set("folder_id", ""); err != nil {
-				return fmt.Errorf("Error reading folder_id: %s", err)
+				return fmt.Errorf("Error setting folder_id: %s", err)
 			}
 		case "folder":
 			if err := d.Set("folder_id", p.Parent.Id); err != nil {
-				return fmt.Errorf("Error reading folder_id: %s", err)
+				return fmt.Errorf("Error setting folder_id: %s", err)
 			}
 			if err := d.Set("org_id", ""); err != nil {
-				return fmt.Errorf("Error reading org_id: %s", err)
+				return fmt.Errorf("Error setting org_id: %s", err)
 			}
 		}
 	}
@@ -284,7 +284,7 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("Error parsing billing account for project %q. Expected value to begin with 'billingAccounts/' but got %s", prefixedProject(pid), ba.BillingAccountName)
 		}
 		if err := d.Set("billing_account", _ba); err != nil {
-			return fmt.Errorf("Error reading billing_account: %s", err)
+			return fmt.Errorf("Error setting billing_account: %s", err)
 		}
 	}
 
@@ -495,7 +495,7 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *Config) error {
 	err := retryTimeDuration(updateBillingInfoFunc, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		if err := d.Set("billing_account", ""); err != nil {
-			return fmt.Errorf("Error reading billing_account: %s", err)
+			return fmt.Errorf("Error setting billing_account: %s", err)
 		}
 		if _err, ok := err.(*googleapi.Error); ok {
 			return fmt.Errorf("Error setting billing account %q for project %q: %v", name, prefixedProject(pid), _err)

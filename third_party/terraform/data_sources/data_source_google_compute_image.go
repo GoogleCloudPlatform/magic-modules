@@ -140,58 +140,58 @@ func dataSourceGoogleComputeImageRead(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("name", image.Name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("family", image.Family); err != nil {
-		return fmt.Errorf("Error reading family: %s", err)
+		return fmt.Errorf("Error setting family: %s", err)
 	}
 	if err := d.Set("archive_size_bytes", image.ArchiveSizeBytes); err != nil {
-		return fmt.Errorf("Error reading archive_size_bytes: %s", err)
+		return fmt.Errorf("Error setting archive_size_bytes: %s", err)
 	}
 	if err := d.Set("creation_timestamp", image.CreationTimestamp); err != nil {
-		return fmt.Errorf("Error reading creation_timestamp: %s", err)
+		return fmt.Errorf("Error setting creation_timestamp: %s", err)
 	}
 	if err := d.Set("description", image.Description); err != nil {
-		return fmt.Errorf("Error reading description: %s", err)
+		return fmt.Errorf("Error setting description: %s", err)
 	}
 	if err := d.Set("disk_size_gb", image.DiskSizeGb); err != nil {
-		return fmt.Errorf("Error reading disk_size_gb: %s", err)
+		return fmt.Errorf("Error setting disk_size_gb: %s", err)
 	}
 	if err := d.Set("image_id", strconv.FormatUint(image.Id, 10)); err != nil {
-		return fmt.Errorf("Error reading image_id: %s", err)
+		return fmt.Errorf("Error setting image_id: %s", err)
 	}
 	if err := d.Set("image_encryption_key_sha256", ieks256); err != nil {
-		return fmt.Errorf("Error reading image_encryption_key_sha256: %s", err)
+		return fmt.Errorf("Error setting image_encryption_key_sha256: %s", err)
 	}
 	if err := d.Set("label_fingerprint", image.LabelFingerprint); err != nil {
-		return fmt.Errorf("Error reading label_fingerprint: %s", err)
+		return fmt.Errorf("Error setting label_fingerprint: %s", err)
 	}
 	if err := d.Set("labels", image.Labels); err != nil {
-		return fmt.Errorf("Error reading labels: %s", err)
+		return fmt.Errorf("Error setting labels: %s", err)
 	}
 	if err := d.Set("licenses", image.Licenses); err != nil {
-		return fmt.Errorf("Error reading licenses: %s", err)
+		return fmt.Errorf("Error setting licenses: %s", err)
 	}
 	if err := d.Set("self_link", image.SelfLink); err != nil {
-		return fmt.Errorf("Error reading self_link: %s", err)
+		return fmt.Errorf("Error setting self_link: %s", err)
 	}
 	if err := d.Set("source_disk", image.SourceDisk); err != nil {
-		return fmt.Errorf("Error reading source_disk: %s", err)
+		return fmt.Errorf("Error setting source_disk: %s", err)
 	}
 	if err := d.Set("source_disk_encryption_key_sha256", sdeks256); err != nil {
-		return fmt.Errorf("Error reading source_disk_encryption_key_sha256: %s", err)
+		return fmt.Errorf("Error setting source_disk_encryption_key_sha256: %s", err)
 	}
 	if err := d.Set("source_disk_id", image.SourceDiskId); err != nil {
-		return fmt.Errorf("Error reading source_disk_id: %s", err)
+		return fmt.Errorf("Error setting source_disk_id: %s", err)
 	}
 	if err := d.Set("source_image_id", image.SourceImageId); err != nil {
-		return fmt.Errorf("Error reading source_image_id: %s", err)
+		return fmt.Errorf("Error setting source_image_id: %s", err)
 	}
 	if err := d.Set("status", image.Status); err != nil {
-		return fmt.Errorf("Error reading status: %s", err)
+		return fmt.Errorf("Error setting status: %s", err)
 	}
 
 	id, err := replaceVars(d, config, "projects/{{project}}/global/images/{{name}}")

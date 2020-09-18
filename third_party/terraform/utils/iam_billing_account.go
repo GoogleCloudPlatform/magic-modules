@@ -30,7 +30,7 @@ func NewBillingAccountIamUpdater(d *schema.ResourceData, config *Config) (Resour
 
 func BillingAccountIdParseFunc(d *schema.ResourceData, _ *Config) error {
 	if err := d.Set("billing_account_id", d.Id()); err != nil {
-		return fmt.Errorf("Error reading billing_account_id: %s", err)
+		return fmt.Errorf("Error setting billing_account_id: %s", err)
 	}
 	return nil
 }

@@ -228,7 +228,7 @@ func resourceStorageBucketAclRead(d *schema.ResourceData, meta interface{}) erro
 		}
 
 		if err := d.Set("role_entity", entities); err != nil {
-			return fmt.Errorf("Error reading role_entity: %s", err)
+			return fmt.Errorf("Error setting role_entity: %s", err)
 		}
 	} else {
 		// if we don't set `role_entity` to nil (effectively setting it
@@ -237,7 +237,7 @@ func resourceStorageBucketAclRead(d *schema.ResourceData, meta interface{}) erro
 		// to be there, and throw up a diff for role_entity.#. So it
 		// must always be set in state.
 		if err := d.Set("role_entity", nil); err != nil {
-			return fmt.Errorf("Error reading role_entity: %s", err)
+			return fmt.Errorf("Error setting role_entity: %s", err)
 		}
 	}
 

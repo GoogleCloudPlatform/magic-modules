@@ -139,10 +139,10 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 		log.Printf("[DEBUG] service %s was already found to be enabled in project %s", srv, project)
 		d.SetId(id)
 		if err := d.Set("project", project); err != nil {
-			return fmt.Errorf("Error reading project: %s", err)
+			return fmt.Errorf("Error setting project: %s", err)
 		}
 		if err := d.Set("service", srv); err != nil {
-			return fmt.Errorf("Error reading service: %s", err)
+			return fmt.Errorf("Error setting service: %s", err)
 		}
 		return nil
 	}
@@ -191,10 +191,10 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	srv := d.Get("service").(string)
 	if _, ok := servicesList[srv]; ok {
 		if err := d.Set("project", project); err != nil {
-			return fmt.Errorf("Error reading project: %s", err)
+			return fmt.Errorf("Error setting project: %s", err)
 		}
 		if err := d.Set("service", srv); err != nil {
-			return fmt.Errorf("Error reading service: %s", err)
+			return fmt.Errorf("Error setting service: %s", err)
 		}
 		return nil
 	}

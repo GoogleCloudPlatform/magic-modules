@@ -41,13 +41,13 @@ func dataSourceGoogleIamRoleRead(d *schema.ResourceData, meta interface{}) error
 
 	d.SetId(role.Name)
 	if err := d.Set("title", role.Title); err != nil {
-		return fmt.Errorf("Error reading title: %s", err)
+		return fmt.Errorf("Error setting title: %s", err)
 	}
 	if err := d.Set("stage", role.Stage); err != nil {
-		return fmt.Errorf("Error reading stage: %s", err)
+		return fmt.Errorf("Error setting stage: %s", err)
 	}
 	if err := d.Set("included_permissions", role.IncludedPermissions); err != nil {
-		return fmt.Errorf("Error reading included_permissions: %s", err)
+		return fmt.Errorf("Error setting included_permissions: %s", err)
 	}
 
 	return nil

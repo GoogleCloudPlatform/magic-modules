@@ -64,13 +64,13 @@ func dataSourceTpuTensorFlowVersionsRead(d *schema.ResourceData, meta interface{
 	log.Printf("[DEBUG] Received Google TPU Tensorflow Versions: %q", versions)
 
 	if err := d.Set("versions", versions); err != nil {
-		return fmt.Errorf("Error reading versions: %s", err)
+		return fmt.Errorf("Error setting versions: %s", err)
 	}
 	if err := d.Set("zone", zone); err != nil {
-		return fmt.Errorf("Error reading zone: %s", err)
+		return fmt.Errorf("Error setting zone: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	d.SetId(time.Now().UTC().String())
 

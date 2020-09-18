@@ -164,12 +164,12 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 <% if resource_params.last == 'project' -%>
 <%# Resource is only identified by project, so only set project -%>
 	if err := d.Set("project", u.project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 <% else -%>
 <%# Set resource long name in state, this has all the information that we need to identify it -%>
 	if err := d.Set("<%= parent_resource_name -%>", u.GetResourceId()); err != nil {
-		return fmt.Errorf("Error reading <%= parent_resource_name -%>: %s", err)
+		return fmt.Errorf("Error setting <%= parent_resource_name -%>: %s", err)
 	}
 <% end -%>
 	d.SetId(u.GetResourceId())

@@ -35,7 +35,7 @@ func containerRegistryRepoRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	region, ok := d.GetOk("region")
 	escapedProject := strings.Replace(project, ":", "/", -1)

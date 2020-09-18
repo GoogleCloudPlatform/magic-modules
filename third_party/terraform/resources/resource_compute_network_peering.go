@@ -158,28 +158,28 @@ func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{})
 	}
 
 	if err := d.Set("peer_network", peering.Network); err != nil {
-		return fmt.Errorf("Error reading peer_network: %s", err)
+		return fmt.Errorf("Error setting peer_network: %s", err)
 	}
 	if err := d.Set("name", peering.Name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("import_custom_routes", peering.ImportCustomRoutes); err != nil {
-		return fmt.Errorf("Error reading import_custom_routes: %s", err)
+		return fmt.Errorf("Error setting import_custom_routes: %s", err)
 	}
 	if err := d.Set("export_custom_routes", peering.ExportCustomRoutes); err != nil {
-		return fmt.Errorf("Error reading export_custom_routes: %s", err)
+		return fmt.Errorf("Error setting export_custom_routes: %s", err)
 	}
 	if err := d.Set("import_subnet_routes_with_public_ip", peering.ImportSubnetRoutesWithPublicIp); err != nil {
-		return fmt.Errorf("Error reading import_subnet_routes_with_public_ip: %s", err)
+		return fmt.Errorf("Error setting import_subnet_routes_with_public_ip: %s", err)
 	}
 	if err := d.Set("export_subnet_routes_with_public_ip", peering.ExportSubnetRoutesWithPublicIp); err != nil {
-		return fmt.Errorf("Error reading export_subnet_routes_with_public_ip: %s", err)
+		return fmt.Errorf("Error setting export_subnet_routes_with_public_ip: %s", err)
 	}
 	if err := d.Set("state", peering.State); err != nil {
-		return fmt.Errorf("Error reading state: %s", err)
+		return fmt.Errorf("Error setting state: %s", err)
 	}
 	if err := d.Set("state_details", peering.StateDetails); err != nil {
-		return fmt.Errorf("Error reading state_details: %s", err)
+		return fmt.Errorf("Error setting state_details: %s", err)
 	}
 
 	return nil

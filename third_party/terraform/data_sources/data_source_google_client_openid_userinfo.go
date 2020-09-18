@@ -28,7 +28,7 @@ func dataSourceGoogleClientOpenIDUserinfoRead(d *schema.ResourceData, meta inter
 	}
 	d.SetId(time.Now().UTC().String())
 	if err := d.Set("email", email); err != nil {
-		return fmt.Errorf("Error reading email: %s", err)
+		return fmt.Errorf("Error setting email: %s", err)
 	}
 	return nil
 }

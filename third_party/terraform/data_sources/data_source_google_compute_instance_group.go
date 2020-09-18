@@ -98,13 +98,13 @@ func dataSourceComputeInstanceGroupRead(d *schema.ResourceData, meta interface{}
 			return err
 		}
 		if err := d.Set("name", parsed.Name); err != nil {
-			return fmt.Errorf("Error reading name: %s", err)
+			return fmt.Errorf("Error setting name: %s", err)
 		}
 		if err := d.Set("zone", parsed.Zone); err != nil {
-			return fmt.Errorf("Error reading zone: %s", err)
+			return fmt.Errorf("Error setting zone: %s", err)
 		}
 		if err := d.Set("project", parsed.Project); err != nil {
-			return fmt.Errorf("Error reading project: %s", err)
+			return fmt.Errorf("Error setting project: %s", err)
 		}
 		d.SetId(fmt.Sprintf("projects/%s/zones/%s/instanceGroups/%s", parsed.Project, parsed.Zone, parsed.Name))
 	} else {

@@ -67,13 +67,13 @@ func resourceProjectUsageBucketRead(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("prefix", p.UsageExportLocation.ReportNamePrefix); err != nil {
-		return fmt.Errorf("Error reading prefix: %s", err)
+		return fmt.Errorf("Error setting prefix: %s", err)
 	}
 	if err := d.Set("bucket_name", p.UsageExportLocation.BucketName); err != nil {
-		return fmt.Errorf("Error reading bucket_name: %s", err)
+		return fmt.Errorf("Error setting bucket_name: %s", err)
 	}
 	return nil
 }
@@ -101,7 +101,7 @@ func resourceProjectUsageBucketCreate(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 
 	return resourceProjectUsageBucketRead(d, meta)

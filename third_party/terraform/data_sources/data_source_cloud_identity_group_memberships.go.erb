@@ -59,7 +59,7 @@ func dataSourceGoogleCloudIdentityGroupMembershipsRead(d *schema.ResourceData, m
 	}
 
 	if err := d.Set("memberships", result); err != nil {
-		return fmt.Errorf("Error reading memberships: %s", err)
+		return fmt.Errorf("Error setting memberships: %s", err)
 	}
 	d.SetId(time.Now().UTC().String())
 	return nil

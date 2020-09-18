@@ -35,7 +35,7 @@ func FolderIdParseFunc(d *schema.ResourceData, _ *Config) error {
 		d.SetId(fmt.Sprintf("folders/%s", d.Id()))
 	}
 	if err := d.Set("folder", d.Id()); err != nil {
-		return fmt.Errorf("Error reading folder: %s", err)
+		return fmt.Errorf("Error setting folder: %s", err)
 	}
 	return nil
 }

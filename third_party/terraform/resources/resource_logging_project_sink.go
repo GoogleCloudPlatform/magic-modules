@@ -71,7 +71,7 @@ func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 
 	if err := flattenResourceLoggingSink(d, sink); err != nil {
@@ -80,11 +80,11 @@ func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) er
 
 	if sink.WriterIdentity != nonUniqueWriterAccount {
 		if err := d.Set("unique_writer_identity", true); err != nil {
-			return fmt.Errorf("Error reading unique_writer_identity: %s", err)
+			return fmt.Errorf("Error setting unique_writer_identity: %s", err)
 		}
 	} else {
 		if err := d.Set("unique_writer_identity", false); err != nil {
-			return fmt.Errorf("Error reading unique_writer_identity: %s", err)
+			return fmt.Errorf("Error setting unique_writer_identity: %s", err)
 		}
 	}
 	return nil

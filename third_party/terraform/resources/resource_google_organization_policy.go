@@ -202,25 +202,25 @@ func resourceGoogleOrganizationPolicyRead(d *schema.ResourceData, meta interface
 	}
 
 	if err := d.Set("constraint", policy.Constraint); err != nil {
-		return fmt.Errorf("Error reading constraint: %s", err)
+		return fmt.Errorf("Error setting constraint: %s", err)
 	}
 	if err := d.Set("boolean_policy", flattenBooleanOrganizationPolicy(policy.BooleanPolicy)); err != nil {
-		return fmt.Errorf("Error reading boolean_policy: %s", err)
+		return fmt.Errorf("Error setting boolean_policy: %s", err)
 	}
 	if err := d.Set("list_policy", flattenListOrganizationPolicy(policy.ListPolicy)); err != nil {
-		return fmt.Errorf("Error reading list_policy: %s", err)
+		return fmt.Errorf("Error setting list_policy: %s", err)
 	}
 	if err := d.Set("version", policy.Version); err != nil {
-		return fmt.Errorf("Error reading version: %s", err)
+		return fmt.Errorf("Error setting version: %s", err)
 	}
 	if err := d.Set("etag", policy.Etag); err != nil {
-		return fmt.Errorf("Error reading etag: %s", err)
+		return fmt.Errorf("Error setting etag: %s", err)
 	}
 	if err := d.Set("update_time", policy.UpdateTime); err != nil {
-		return fmt.Errorf("Error reading update_time: %s", err)
+		return fmt.Errorf("Error setting update_time: %s", err)
 	}
 	if err := d.Set("restore_policy", flattenRestoreOrganizationPolicy(policy.RestoreDefault)); err != nil {
-		return fmt.Errorf("Error reading restore_policy: %s", err)
+		return fmt.Errorf("Error setting restore_policy: %s", err)
 	}
 
 	return nil

@@ -132,28 +132,28 @@ func resourceGoogleOrganizationIamCustomRoleRead(d *schema.ResourceData, meta in
 	}
 
 	if err := d.Set("role_id", parsedRoleName.Name); err != nil {
-		return fmt.Errorf("Error reading role_id: %s", err)
+		return fmt.Errorf("Error setting role_id: %s", err)
 	}
 	if err := d.Set("org_id", parsedRoleName.OrgId); err != nil {
-		return fmt.Errorf("Error reading org_id: %s", err)
+		return fmt.Errorf("Error setting org_id: %s", err)
 	}
 	if err := d.Set("title", role.Title); err != nil {
-		return fmt.Errorf("Error reading title: %s", err)
+		return fmt.Errorf("Error setting title: %s", err)
 	}
 	if err := d.Set("name", role.Name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("description", role.Description); err != nil {
-		return fmt.Errorf("Error reading description: %s", err)
+		return fmt.Errorf("Error setting description: %s", err)
 	}
 	if err := d.Set("permissions", role.IncludedPermissions); err != nil {
-		return fmt.Errorf("Error reading permissions: %s", err)
+		return fmt.Errorf("Error setting permissions: %s", err)
 	}
 	if err := d.Set("stage", role.Stage); err != nil {
-		return fmt.Errorf("Error reading stage: %s", err)
+		return fmt.Errorf("Error setting stage: %s", err)
 	}
 	if err := d.Set("deleted", role.Deleted); err != nil {
-		return fmt.Errorf("Error reading deleted: %s", err)
+		return fmt.Errorf("Error setting deleted: %s", err)
 	}
 
 	return nil

@@ -73,19 +73,19 @@ func expandResourceLoggingSink(d *schema.ResourceData, resourceType, resourceId 
 
 func flattenResourceLoggingSink(d *schema.ResourceData, sink *logging.LogSink) error {
 	if err := d.Set("name", sink.Name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("destination", sink.Destination); err != nil {
-		return fmt.Errorf("Error reading destination: %s", err)
+		return fmt.Errorf("Error setting destination: %s", err)
 	}
 	if err := d.Set("filter", sink.Filter); err != nil {
-		return fmt.Errorf("Error reading filter: %s", err)
+		return fmt.Errorf("Error setting filter: %s", err)
 	}
 	if err := d.Set("writer_identity", sink.WriterIdentity); err != nil {
-		return fmt.Errorf("Error reading writer_identity: %s", err)
+		return fmt.Errorf("Error setting writer_identity: %s", err)
 	}
 	if err := d.Set("bigquery_options", flattenLoggingSinkBigqueryOptions(sink.BigqueryOptions)); err != nil {
-		return fmt.Errorf("Error reading bigquery_options: %s", err)
+		return fmt.Errorf("Error setting bigquery_options: %s", err)
 	}
 
 	return nil

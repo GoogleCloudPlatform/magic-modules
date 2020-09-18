@@ -59,19 +59,19 @@ func dataSourceGoogleComputeDefaultServiceAccountRead(d *schema.ResourceData, me
 
 	d.SetId(sa.Name)
 	if err := d.Set("email", sa.Email); err != nil {
-		return fmt.Errorf("Error reading email: %s", err)
+		return fmt.Errorf("Error setting email: %s", err)
 	}
 	if err := d.Set("unique_id", sa.UniqueId); err != nil {
-		return fmt.Errorf("Error reading unique_id: %s", err)
+		return fmt.Errorf("Error setting unique_id: %s", err)
 	}
 	if err := d.Set("project", sa.ProjectId); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("name", sa.Name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("display_name", sa.DisplayName); err != nil {
-		return fmt.Errorf("Error reading display_name: %s", err)
+		return fmt.Errorf("Error setting display_name: %s", err)
 	}
 
 	return nil

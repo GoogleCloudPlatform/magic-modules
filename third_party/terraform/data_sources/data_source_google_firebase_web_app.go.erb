@@ -31,7 +31,7 @@ func dataSourceGoogleFirebaseWebAppRead(d *schema.ResourceData, meta interface{}
 	name := fmt.Sprintf("projects/%s/webApps/%s", project, appId.(string))
 	d.SetId(name)
 	if err := d.Set("name", name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	return resourceFirebaseWebAppRead(d, meta)
 }

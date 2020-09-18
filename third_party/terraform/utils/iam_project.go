@@ -61,7 +61,7 @@ func NewProjectIamPolicyUpdater(d *schema.ResourceData, config *Config) (Resourc
 
 func ProjectIdParseFunc(d *schema.ResourceData, _ *Config) error {
 	if err := d.Set("project", d.Id()); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	return nil
 }

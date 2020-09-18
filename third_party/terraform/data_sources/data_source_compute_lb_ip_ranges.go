@@ -36,7 +36,7 @@ func dataSourceGoogleComputeLbIpRangesRead(d *schema.ResourceData, meta interfac
 		"35.191.0.0/16",
 	}
 	if err := d.Set("network", networkIpRanges); err != nil {
-		return fmt.Errorf("Error reading network: %s", err)
+		return fmt.Errorf("Error setting network: %s", err)
 	}
 
 	httpSslTcpInternalRanges := []string{
@@ -44,7 +44,7 @@ func dataSourceGoogleComputeLbIpRangesRead(d *schema.ResourceData, meta interfac
 		"35.191.0.0/16",
 	}
 	if err := d.Set("http_ssl_tcp_internal", httpSslTcpInternalRanges); err != nil {
-		return fmt.Errorf("Error reading http_ssl_tcp_internal: %s", err)
+		return fmt.Errorf("Error setting http_ssl_tcp_internal: %s", err)
 	}
 
 	return nil

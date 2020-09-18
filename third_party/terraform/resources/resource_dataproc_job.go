@@ -274,59 +274,59 @@ func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if err := d.Set("force_delete", d.Get("force_delete")); err != nil {
-		return fmt.Errorf("Error reading force_delete: %s", err)
+		return fmt.Errorf("Error setting force_delete: %s", err)
 	}
 	if err := d.Set("labels", job.Labels); err != nil {
-		return fmt.Errorf("Error reading labels: %s", err)
+		return fmt.Errorf("Error setting labels: %s", err)
 	}
 	if err := d.Set("driver_output_resource_uri", job.DriverOutputResourceUri); err != nil {
-		return fmt.Errorf("Error reading driver_output_resource_uri: %s", err)
+		return fmt.Errorf("Error setting driver_output_resource_uri: %s", err)
 	}
 	if err := d.Set("driver_controls_files_uri", job.DriverControlFilesUri); err != nil {
-		return fmt.Errorf("Error reading driver_controls_files_uri: %s", err)
+		return fmt.Errorf("Error setting driver_controls_files_uri: %s", err)
 	}
 
 	if err := d.Set("placement", flattenJobPlacement(job.Placement)); err != nil {
-		return fmt.Errorf("Error reading placement: %s", err)
+		return fmt.Errorf("Error setting placement: %s", err)
 	}
 	if err := d.Set("status", flattenJobStatus(job.Status)); err != nil {
-		return fmt.Errorf("Error reading status: %s", err)
+		return fmt.Errorf("Error setting status: %s", err)
 	}
 	if err := d.Set("reference", flattenJobReference(job.Reference)); err != nil {
-		return fmt.Errorf("Error reading reference: %s", err)
+		return fmt.Errorf("Error setting reference: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 
 	if job.PysparkJob != nil {
 		if err := d.Set("pyspark_config", flattenPySparkJob(job.PysparkJob)); err != nil {
-			return fmt.Errorf("Error reading pyspark_config: %s", err)
+			return fmt.Errorf("Error setting pyspark_config: %s", err)
 		}
 	}
 	if job.SparkJob != nil {
 		if err := d.Set("spark_config", flattenSparkJob(job.SparkJob)); err != nil {
-			return fmt.Errorf("Error reading spark_config: %s", err)
+			return fmt.Errorf("Error setting spark_config: %s", err)
 		}
 	}
 	if job.HadoopJob != nil {
 		if err := d.Set("hadoop_config", flattenHadoopJob(job.HadoopJob)); err != nil {
-			return fmt.Errorf("Error reading hadoop_config: %s", err)
+			return fmt.Errorf("Error setting hadoop_config: %s", err)
 		}
 	}
 	if job.HiveJob != nil {
 		if err := d.Set("hive_config", flattenHiveJob(job.HiveJob)); err != nil {
-			return fmt.Errorf("Error reading hive_config: %s", err)
+			return fmt.Errorf("Error setting hive_config: %s", err)
 		}
 	}
 	if job.PigJob != nil {
 		if err := d.Set("pig_config", flattenPigJob(job.PigJob)); err != nil {
-			return fmt.Errorf("Error reading pig_config: %s", err)
+			return fmt.Errorf("Error setting pig_config: %s", err)
 		}
 	}
 	if job.SparkSqlJob != nil {
 		if err := d.Set("sparksql_config", flattenSparkSqlJob(job.SparkSqlJob)); err != nil {
-			return fmt.Errorf("Error reading sparksql_config: %s", err)
+			return fmt.Errorf("Error setting sparksql_config: %s", err)
 		}
 	}
 	return nil

@@ -401,7 +401,7 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if err := d.Set("name", res.Name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 
 	name := GetResourceNameFromSelfLink(res.Name)
@@ -426,22 +426,22 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 	log.Printf("[DEBUG] Read transfer job: %v in project: %v \n\n", res.Name, res.ProjectId)
 
 	if err := d.Set("project", res.ProjectId); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("description", res.Description); err != nil {
-		return fmt.Errorf("Error reading description: %s", err)
+		return fmt.Errorf("Error setting description: %s", err)
 	}
 	if err := d.Set("status", res.Status); err != nil {
-		return fmt.Errorf("Error reading status: %s", err)
+		return fmt.Errorf("Error setting status: %s", err)
 	}
 	if err := d.Set("last_modification_time", res.LastModificationTime); err != nil {
-		return fmt.Errorf("Error reading last_modification_time: %s", err)
+		return fmt.Errorf("Error setting last_modification_time: %s", err)
 	}
 	if err := d.Set("creation_time", res.CreationTime); err != nil {
-		return fmt.Errorf("Error reading creation_time: %s", err)
+		return fmt.Errorf("Error setting creation_time: %s", err)
 	}
 	if err := d.Set("deletion_time", res.DeletionTime); err != nil {
-		return fmt.Errorf("Error reading deletion_time: %s", err)
+		return fmt.Errorf("Error setting deletion_time: %s", err)
 	}
 
 	err = d.Set("schedule", flattenTransferSchedule(res.Schedule))

@@ -43,7 +43,7 @@ func Hl7V2StoreIdParseFunc(d *schema.ResourceData, config *Config) error {
 		return err
 	}
 	if err := d.Set("hl7_v2_store_id", hl7V2StoreId.hl7V2StoreId()); err != nil {
-		return fmt.Errorf("Error reading hl7_v2_store_id: %s", err)
+		return fmt.Errorf("Error setting hl7_v2_store_id: %s", err)
 	}
 	d.SetId(hl7V2StoreId.hl7V2StoreId())
 	return nil

@@ -71,7 +71,7 @@ func dataSourceFolderRead(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		if err := d.Set("organization", organization); err != nil {
-			return fmt.Errorf("Error reading organization: %s", err)
+			return fmt.Errorf("Error setting organization: %s", err)
 		}
 	}
 

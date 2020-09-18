@@ -43,7 +43,7 @@ func billingAccountLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *Config
 	}
 
 	if err := d.Set("billing_account", loggingExclusionId.resourceId); err != nil {
-		return fmt.Errorf("Error reading billing_account: %s", err)
+		return fmt.Errorf("Error setting billing_account: %s", err)
 	}
 	return nil
 }

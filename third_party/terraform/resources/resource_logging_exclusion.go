@@ -94,7 +94,7 @@ func resourceLoggingExclusionRead(newUpdaterFunc newResourceLoggingExclusionUpda
 
 		if updater.GetResourceType() == "projects" {
 			if err := d.Set("project", updater.GetResourceId()); err != nil {
-				return fmt.Errorf("Error reading project: %s", err)
+				return fmt.Errorf("Error setting project: %s", err)
 			}
 		}
 
@@ -180,16 +180,16 @@ func expandResourceLoggingExclusion(d *schema.ResourceData, resourceType, resour
 
 func flattenResourceLoggingExclusion(d *schema.ResourceData, exclusion *logging.LogExclusion) error {
 	if err := d.Set("name", exclusion.Name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("description", exclusion.Description); err != nil {
-		return fmt.Errorf("Error reading description: %s", err)
+		return fmt.Errorf("Error setting description: %s", err)
 	}
 	if err := d.Set("filter", exclusion.Filter); err != nil {
-		return fmt.Errorf("Error reading filter: %s", err)
+		return fmt.Errorf("Error setting filter: %s", err)
 	}
 	if err := d.Set("disabled", exclusion.Disabled); err != nil {
-		return fmt.Errorf("Error reading disabled: %s", err)
+		return fmt.Errorf("Error setting disabled: %s", err)
 	}
 
 	return nil

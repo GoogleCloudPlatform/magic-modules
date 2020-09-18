@@ -146,16 +146,16 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 	}
 
 	if err := d.Set("network", connectionId.Network); err != nil {
-		return fmt.Errorf("Error reading network: %s", err)
+		return fmt.Errorf("Error setting network: %s", err)
 	}
 	if err := d.Set("service", connectionId.Service); err != nil {
-		return fmt.Errorf("Error reading service: %s", err)
+		return fmt.Errorf("Error setting service: %s", err)
 	}
 	if err := d.Set("peering", connection.Peering); err != nil {
-		return fmt.Errorf("Error reading peering: %s", err)
+		return fmt.Errorf("Error setting peering: %s", err)
 	}
 	if err := d.Set("reserved_peering_ranges", connection.ReservedPeeringRanges); err != nil {
-		return fmt.Errorf("Error reading reserved_peering_ranges: %s", err)
+		return fmt.Errorf("Error setting reserved_peering_ranges: %s", err)
 	}
 	return nil
 }

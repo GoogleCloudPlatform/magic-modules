@@ -111,7 +111,7 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 	job := response.Job
 	d.SetId(job.Id)
 	if err := d.Set("job_id", job.Id); err != nil {
-		return fmt.Errorf("Error reading job_id: %s", err)
+		return fmt.Errorf("Error setting job_id: %s", err)
 	}
 
 	return resourceDataflowFlexTemplateJobRead(d, meta)
@@ -139,16 +139,16 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	}
 
 	if err := d.Set("state", job.CurrentState); err != nil {
-		return fmt.Errorf("Error reading state: %s", err)
+		return fmt.Errorf("Error setting state: %s", err)
 	}
 	if err := d.Set("name", job.Name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("labels", job.Labels); err != nil {
-		return fmt.Errorf("Error reading labels: %s", err)
+		return fmt.Errorf("Error setting labels: %s", err)
 	}
 
 	if _, ok := dataflowTerminalStatesMap[job.CurrentState]; ok {

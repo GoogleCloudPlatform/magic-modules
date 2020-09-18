@@ -90,14 +90,14 @@ func resourceIamAuditConfigRead(newUpdaterFunc newResourceIamUpdaterFunc) schema
 		}
 
 		if err := d.Set("etag", p.Etag); err != nil {
-			return fmt.Errorf("Error reading etag: %s", err)
+			return fmt.Errorf("Error setting etag: %s", err)
 		}
 		err = d.Set("audit_log_config", flattenAuditLogConfigs(ac.AuditLogConfigs))
 		if err != nil {
 			return fmt.Errorf("Error flattening audit log config: %s", err)
 		}
 		if err := d.Set("service", ac.Service); err != nil {
-			return fmt.Errorf("Error reading service: %s", err)
+			return fmt.Errorf("Error setting service: %s", err)
 		}
 		return nil
 	}

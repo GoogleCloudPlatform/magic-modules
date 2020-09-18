@@ -101,23 +101,23 @@ func dataSourceOrganizationRead(d *schema.ResourceData, meta interface{}) error 
 
 	d.SetId(organization.Name)
 	if err := d.Set("name", organization.Name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("org_id", GetResourceNameFromSelfLink(organization.Name)); err != nil {
-		return fmt.Errorf("Error reading org_id: %s", err)
+		return fmt.Errorf("Error setting org_id: %s", err)
 	}
 	if err := d.Set("domain", organization.DisplayName); err != nil {
-		return fmt.Errorf("Error reading domain: %s", err)
+		return fmt.Errorf("Error setting domain: %s", err)
 	}
 	if err := d.Set("create_time", organization.CreationTime); err != nil {
-		return fmt.Errorf("Error reading create_time: %s", err)
+		return fmt.Errorf("Error setting create_time: %s", err)
 	}
 	if err := d.Set("lifecycle_state", organization.LifecycleState); err != nil {
-		return fmt.Errorf("Error reading lifecycle_state: %s", err)
+		return fmt.Errorf("Error setting lifecycle_state: %s", err)
 	}
 	if organization.Owner != nil {
 		if err := d.Set("directory_customer_id", organization.Owner.DirectoryCustomerId); err != nil {
-			return fmt.Errorf("Error reading directory_customer_id: %s", err)
+			return fmt.Errorf("Error setting directory_customer_id: %s", err)
 		}
 	}
 

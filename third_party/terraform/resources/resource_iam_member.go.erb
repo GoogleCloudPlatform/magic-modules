@@ -243,16 +243,16 @@ func resourceIamMemberRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.Read
 		}
 
 		if err := d.Set("etag", p.Etag); err != nil {
-			return fmt.Errorf("Error reading etag: %s", err)
+			return fmt.Errorf("Error setting etag: %s", err)
 		}
 		if err := d.Set("member", member); err != nil {
-			return fmt.Errorf("Error reading member: %s", err)
+			return fmt.Errorf("Error setting member: %s", err)
 		}
 		if err := d.Set("role", binding.Role); err != nil {
-			return fmt.Errorf("Error reading role: %s", err)
+			return fmt.Errorf("Error setting role: %s", err)
 		}
 		if err := d.Set("condition", flattenIamCondition(binding.Condition)); err != nil {
-			return fmt.Errorf("Error reading condition: %s", err)
+			return fmt.Errorf("Error setting condition: %s", err)
 		}
 		return nil
 	}

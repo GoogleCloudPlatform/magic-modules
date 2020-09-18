@@ -40,13 +40,13 @@ func dataSourceClientConfigRead(d *schema.ResourceData, meta interface{}) error 
 
 	d.SetId(time.Now().UTC().String())
 	if err := d.Set("project", config.Project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("region", config.Region); err != nil {
-		return fmt.Errorf("Error reading region: %s", err)
+		return fmt.Errorf("Error setting region: %s", err)
 	}
 	if err := d.Set("zone", config.Zone); err != nil {
-		return fmt.Errorf("Error reading zone: %s", err)
+		return fmt.Errorf("Error setting zone: %s", err)
 	}
 
 	token, err := config.tokenSource.Token()
@@ -54,7 +54,7 @@ func dataSourceClientConfigRead(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 	if err := d.Set("access_token", token.AccessToken); err != nil {
-		return fmt.Errorf("Error reading access_token: %s", err)
+		return fmt.Errorf("Error setting access_token: %s", err)
 	}
 
 	return nil

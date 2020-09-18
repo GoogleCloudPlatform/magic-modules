@@ -160,16 +160,16 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if err := d.Set("host", user.Host); err != nil {
-		return fmt.Errorf("Error reading host: %s", err)
+		return fmt.Errorf("Error setting host: %s", err)
 	}
 	if err := d.Set("instance", user.Instance); err != nil {
-		return fmt.Errorf("Error reading instance: %s", err)
+		return fmt.Errorf("Error setting instance: %s", err)
 	}
 	if err := d.Set("name", user.Name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
 	return nil

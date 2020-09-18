@@ -401,40 +401,40 @@ func resourceComputeTargetPoolRead(d *schema.ResourceData, meta interface{}) err
 	}
 
 	if err := d.Set("self_link", tpool.SelfLink); err != nil {
-		return fmt.Errorf("Error reading self_link: %s", err)
+		return fmt.Errorf("Error setting self_link: %s", err)
 	}
 	if err := d.Set("backup_pool", tpool.BackupPool); err != nil {
-		return fmt.Errorf("Error reading backup_pool: %s", err)
+		return fmt.Errorf("Error setting backup_pool: %s", err)
 	}
 	if err := d.Set("description", tpool.Description); err != nil {
-		return fmt.Errorf("Error reading description: %s", err)
+		return fmt.Errorf("Error setting description: %s", err)
 	}
 	if err := d.Set("failover_ratio", tpool.FailoverRatio); err != nil {
-		return fmt.Errorf("Error reading failover_ratio: %s", err)
+		return fmt.Errorf("Error setting failover_ratio: %s", err)
 	}
 	if err := d.Set("health_checks", tpool.HealthChecks); err != nil {
-		return fmt.Errorf("Error reading health_checks: %s", err)
+		return fmt.Errorf("Error setting health_checks: %s", err)
 	}
 	if tpool.Instances != nil {
 		if err := d.Set("instances", convertInstancesFromUrls(tpool.Instances)); err != nil {
-			return fmt.Errorf("Error reading instances: %s", err)
+			return fmt.Errorf("Error setting instances: %s", err)
 		}
 	} else {
 		if err := d.Set("instances", nil); err != nil {
-			return fmt.Errorf("Error reading instances: %s", err)
+			return fmt.Errorf("Error setting instances: %s", err)
 		}
 	}
 	if err := d.Set("name", tpool.Name); err != nil {
-		return fmt.Errorf("Error reading name: %s", err)
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("region", GetResourceNameFromSelfLink(tpool.Region)); err != nil {
-		return fmt.Errorf("Error reading region: %s", err)
+		return fmt.Errorf("Error setting region: %s", err)
 	}
 	if err := d.Set("session_affinity", tpool.SessionAffinity); err != nil {
-		return fmt.Errorf("Error reading session_affinity: %s", err)
+		return fmt.Errorf("Error setting session_affinity: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 	return nil
 }

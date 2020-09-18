@@ -362,10 +362,10 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 	}
 
 	if err := d.Set("location", nodePoolInfo.location); err != nil {
-		return fmt.Errorf("Error reading location: %s", err)
+		return fmt.Errorf("Error setting location: %s", err)
 	}
 	if err := d.Set("project", nodePoolInfo.project); err != nil {
-		return fmt.Errorf("Error reading project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
 	}
 
 	return nil

@@ -365,16 +365,16 @@ func resourceEndpointsServiceRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if err := d.Set("config_id", service.Id); err != nil {
-		return fmt.Errorf("Error reading config_id: %s", err)
+		return fmt.Errorf("Error setting config_id: %s", err)
 	}
 	if err := d.Set("dns_address", service.Name); err != nil {
-		return fmt.Errorf("Error reading dns_address: %s", err)
+		return fmt.Errorf("Error setting dns_address: %s", err)
 	}
 	if err := d.Set("apis", flattenServiceManagementAPIs(service.Apis)); err != nil {
-		return fmt.Errorf("Error reading apis: %s", err)
+		return fmt.Errorf("Error setting apis: %s", err)
 	}
 	if err := d.Set("endpoints", flattenServiceManagementEndpoints(service.Endpoints)); err != nil {
-		return fmt.Errorf("Error reading endpoints: %s", err)
+		return fmt.Errorf("Error setting endpoints: %s", err)
 	}
 
 	return nil
