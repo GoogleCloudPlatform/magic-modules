@@ -2,7 +2,7 @@ newObj := make(map[string]interface{})
 newObj["instance"] = obj
 if obj["name"] == nil {
 	if err := d.Set("name", resource.PrefixedUniqueId("tfgen-spanid-")[:30]); err != nil {
-		return nil, fmt.Errorf("Error reading name: %s", err)
+		return nil, fmt.Errorf("Error setting name: %s", err)
 	}
 	newObj["instanceId"] = d.Get("name").(string)
 } else {

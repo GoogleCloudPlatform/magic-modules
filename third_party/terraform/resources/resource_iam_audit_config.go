@@ -119,7 +119,7 @@ func iamAuditConfigImport(resourceIdParser resourceIdParserFunc) schema.StateFun
 		// Set the ID only to the first part so all IAM types can share the same resourceIdParserFunc.
 		d.SetId(id)
 		if err := d.Set("service", service); err != nil {
-			return nil, fmt.Errorf("Error reading service: %s", err)
+			return nil, fmt.Errorf("Error setting service: %s", err)
 		}
 		err := resourceIdParser(d, config)
 		if err != nil {

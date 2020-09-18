@@ -41,7 +41,7 @@ func NewProjectIamUpdater(d *schema.ResourceData, config *Config) (ResourceIamUp
 	}
 
 	if err := d.Set("project", pid); err != nil {
-		return nil, fmt.Errorf("Error reading project: %s", err)
+		return nil, fmt.Errorf("Error setting project: %s", err)
 	}
 
 	return &ProjectIamUpdater{

@@ -262,10 +262,10 @@ func resourceGoogleOrganizationPolicyImportState(d *schema.ResourceData, meta in
 	}
 
 	if err := d.Set("org_id", parts[0]); err != nil {
-		return nil, fmt.Errorf("Error reading org_id: %s", err)
+		return nil, fmt.Errorf("Error setting org_id: %s", err)
 	}
 	if err := d.Set("constraint", parts[1]); err != nil {
-		return nil, fmt.Errorf("Error reading constraint: %s", err)
+		return nil, fmt.Errorf("Error setting constraint: %s", err)
 	}
 
 	return []*schema.ResourceData{d}, nil

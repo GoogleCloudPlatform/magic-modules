@@ -23,7 +23,7 @@ if prio, err := strconv.ParseInt(nameParts[5], 10, 64); err != nil {
 	)
 } else {
 	if err := d.Set("priority", prio); err != nil {
-		return nil, fmt.Errorf("Error reading priority: %s", err)
+		return nil, fmt.Errorf("Error setting priority: %s", err)
 	}
 }
 

@@ -278,10 +278,10 @@ func resourceComputeNetworkPeeringImport(d *schema.ResourceData, meta interface{
 	}
 
 	if err := d.Set("network", ConvertSelfLinkToV1(net.SelfLink)); err != nil {
-		return nil, fmt.Errorf("Error reading network: %s", err)
+		return nil, fmt.Errorf("Error setting network: %s", err)
 	}
 	if err := d.Set("name", name); err != nil {
-		return nil, fmt.Errorf("Error reading name: %s", err)
+		return nil, fmt.Errorf("Error setting name: %s", err)
 	}
 
 	// Replace import id for the resource id

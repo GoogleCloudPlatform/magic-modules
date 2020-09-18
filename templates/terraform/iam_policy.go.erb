@@ -77,7 +77,7 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 	<%= param -%>, _ := get<%= param.capitalize -%>(d, config)
 	if <%= param -%> != "" {
 		if err := d.Set("<%= param -%>", <%= param -%>); err != nil {
-			return nil, fmt.Errorf("Error reading <%= param -%>: %s", err)
+			return nil, fmt.Errorf("Error setting <%= param -%>: %s", err)
 		}
 	}
 	values["<%= param -%>"] = <%= param -%>
@@ -114,17 +114,17 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 <% if i == resource_params.size - 1 -%>
 <% if param == 'project' -%>
 	if err := d.Set("project", u.project); err != nil {
-		return nil, fmt.Errorf("Error reading project: %s", err)
+		return nil, fmt.Errorf("Error setting project: %s", err)
 	}
 <% else -%>
 <%# Set the last parameter as the long name (unless it is project) -%>
 	if err := d.Set("<%= parent_resource_name -%>", u.GetResourceId()); err != nil {
-		return nil, fmt.Errorf("Error reading <%= parent_resource_name -%>: %s", err)
+		return nil, fmt.Errorf("Error setting <%= parent_resource_name -%>: %s", err)
 	}
 <% end -%>
 <% else -%>
 	if err := d.Set("<%= param.underscore -%>", u.<%= param.camelize(:lower) -%>); err != nil {
-		return nil, fmt.Errorf("Error reading <%= param.underscore -%>: %s", err)
+		return nil, fmt.Errorf("Error setting <%= param.underscore -%>: %s", err)
 	}
 <% end -%>
 <% end -%>

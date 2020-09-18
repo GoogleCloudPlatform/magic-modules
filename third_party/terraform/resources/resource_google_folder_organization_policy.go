@@ -56,7 +56,7 @@ func resourceFolderOrgPolicyImporter(d *schema.ResourceData, meta interface{}) (
 	}
 
 	if err := d.Set("folder", "folders/"+d.Get("folder").(string)); err != nil {
-		return nil, fmt.Errorf("Error reading folder: %s", err)
+		return nil, fmt.Errorf("Error setting folder: %s", err)
 	}
 
 	return []*schema.ResourceData{d}, nil

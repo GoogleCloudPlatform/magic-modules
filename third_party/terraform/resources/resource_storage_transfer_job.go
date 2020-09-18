@@ -561,10 +561,10 @@ func resourceStorageTransferJobStateImporter(d *schema.ResourceData, meta interf
 	switch len(parts) {
 	case 2:
 		if err := d.Set("project", parts[0]); err != nil {
-			return nil, fmt.Errorf("Error reading project: %s", err)
+			return nil, fmt.Errorf("Error setting project: %s", err)
 		}
 		if err := d.Set("name", fmt.Sprintf("transferJobs/%s", parts[1])); err != nil {
-			return nil, fmt.Errorf("Error reading name: %s", err)
+			return nil, fmt.Errorf("Error setting name: %s", err)
 		}
 	default:
 		return nil, fmt.Errorf("Invalid transfer job specifier. Expecting {projectId}/{transferJobName}")

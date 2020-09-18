@@ -48,10 +48,10 @@ func NewDataprocClusterUpdater(d *schema.ResourceData, config *Config) (Resource
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return nil, fmt.Errorf("Error reading project: %s", err)
+		return nil, fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("region", region); err != nil {
-		return nil, fmt.Errorf("Error reading region: %s", err)
+		return nil, fmt.Errorf("Error setting region: %s", err)
 	}
 
 	return &DataprocClusterIamUpdater{

@@ -18,7 +18,7 @@
 	// complain that the returned `res` is never used afterwards.
 	// Some field needs to be actually set, and we chose `name`.
 	if err := d.Set("self_link", res["name"].(string)); err != nil {
-		return nil, fmt.Errorf("Error reading self_link: %s", err)
+		return nil, fmt.Errorf("Error setting self_link: %s", err)
 	}
 	res["name"] = d.Get("name").(string)
 return res, nil

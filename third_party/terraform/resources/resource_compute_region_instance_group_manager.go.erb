@@ -735,7 +735,7 @@ func hashZoneFromSelfLinkOrResourceName(value interface{}) int {
 
 func resourceRegionInstanceGroupManagerStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	if err := d.Set("wait_for_instances", false); err != nil {
-		return nil, fmt.Errorf("Error reading wait_for_instances: %s", err)
+		return nil, fmt.Errorf("Error setting wait_for_instances: %s", err)
 	}
 	config := meta.(*Config)
 	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/instanceGroupManagers/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)", "(?P<region>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {

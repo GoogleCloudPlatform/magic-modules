@@ -3338,14 +3338,14 @@ func flattenIPAllocationPolicy(c *containerBeta.Cluster, d *schema.ResourceData,
 	if c == nil || c.IpAllocationPolicy == nil || !c.IpAllocationPolicy.UseIpAliases {
 <% unless version == 'ga' -%>
 		if err := d.Set("networking_mode", "ROUTES"); err != nil {
-			return nil, fmt.Errorf("Error reading networking_mode: %s", err)
+			return nil, fmt.Errorf("Error setting networking_mode: %s", err)
 		}
 <% end -%>
 		return nil, nil
 	}
 <% unless version == 'ga' -%>
 		if err := d.Set("networking_mode", "VPC_NATIVE"); err != nil {
-			return nil, fmt.Errorf("Error reading networking_mode: %s", err)
+			return nil, fmt.Errorf("Error setting networking_mode: %s", err)
 		}
 <% end -%>
 
@@ -3548,7 +3548,7 @@ func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interfac
 	clusterName := d.Get("name").(string)
 
 	if err := d.Set("location", location); err != nil {
-		return nil, fmt.Errorf("Error reading location: %s", err)
+		return nil, fmt.Errorf("Error setting location: %s", err)
 	}
 	if _, err := containerClusterAwaitRestingState(config, project, location, clusterName, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return nil, err

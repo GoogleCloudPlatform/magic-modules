@@ -13,9 +13,9 @@
 		return nil, fmt.Errorf("entry name does not fit the format %s", egRegex)
 	}
 	if err := d.Set("entry_group", parts[1]); err != nil {
-		return nil, fmt.Errorf("Error reading entry_group: %s", err)
+		return nil, fmt.Errorf("Error setting entry_group: %s", err)
 	}
 	if err := d.Set("entry_id", parts[2]); err != nil {
-		return nil, fmt.Errorf("Error reading entry_id: %s", err)
+		return nil, fmt.Errorf("Error setting entry_id: %s", err)
 	}
 	return []*schema.ResourceData{d}, nil

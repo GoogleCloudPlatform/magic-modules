@@ -264,26 +264,26 @@ func resourceSqlUserImporter(d *schema.ResourceData, meta interface{}) ([]*schem
 
 	if len(parts) == 3 {
 		if err := d.Set("project", parts[0]); err != nil {
-			return nil, fmt.Errorf("Error reading project: %s", err)
+			return nil, fmt.Errorf("Error setting project: %s", err)
 		}
 		if err := d.Set("instance", parts[1]); err != nil {
-			return nil, fmt.Errorf("Error reading instance: %s", err)
+			return nil, fmt.Errorf("Error setting instance: %s", err)
 		}
 		if err := d.Set("name", parts[2]); err != nil {
-			return nil, fmt.Errorf("Error reading name: %s", err)
+			return nil, fmt.Errorf("Error setting name: %s", err)
 		}
 	} else if len(parts) == 4 {
 		if err := d.Set("project", parts[0]); err != nil {
-			return nil, fmt.Errorf("Error reading project: %s", err)
+			return nil, fmt.Errorf("Error setting project: %s", err)
 		}
 		if err := d.Set("instance", parts[1]); err != nil {
-			return nil, fmt.Errorf("Error reading instance: %s", err)
+			return nil, fmt.Errorf("Error setting instance: %s", err)
 		}
 		if err := d.Set("host", parts[2]); err != nil {
-			return nil, fmt.Errorf("Error reading host: %s", err)
+			return nil, fmt.Errorf("Error setting host: %s", err)
 		}
 		if err := d.Set("name", parts[3]); err != nil {
-			return nil, fmt.Errorf("Error reading name: %s", err)
+			return nil, fmt.Errorf("Error setting name: %s", err)
 		}
 	} else {
 		return nil, fmt.Errorf("Invalid specifier. Expecting {project}/{instance}/{name} for postgres instance and {project}/{instance}/{host}/{name} for MySQL instance")

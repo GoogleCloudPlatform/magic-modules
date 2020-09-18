@@ -809,19 +809,19 @@ func resourceStorageBucketStateImporter(d *schema.ResourceData, meta interface{}
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) == 1 {
 		if err := d.Set("name", parts[0]); err != nil {
-			return nil, fmt.Errorf("Error reading name: %s", err)
+			return nil, fmt.Errorf("Error setting name: %s", err)
 		}
 	} else if len(parts) > 1 {
 		if err := d.Set("project", parts[0]); err != nil {
-			return nil, fmt.Errorf("Error reading project: %s", err)
+			return nil, fmt.Errorf("Error setting project: %s", err)
 		}
 		if err := d.Set("name", parts[1]); err != nil {
-			return nil, fmt.Errorf("Error reading name: %s", err)
+			return nil, fmt.Errorf("Error setting name: %s", err)
 		}
 	}
 
 	if err := d.Set("force_destroy", false); err != nil {
-		return nil, fmt.Errorf("Error reading force_destroy: %s", err)
+		return nil, fmt.Errorf("Error setting force_destroy: %s", err)
 	}
 	return []*schema.ResourceData{d}, nil
 }

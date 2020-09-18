@@ -21,6 +21,6 @@
 	}
 
 	if err := d.Set("parent", fmt.Sprintf("accessPolicies/%s", parts["accessPolicy"])); err != nil {
-		return nil, fmt.Errorf("Error reading parent: %s", err)
+		return nil, fmt.Errorf("Error setting parent: %s", err)
 	}
 	return []*schema.ResourceData{d}, nil

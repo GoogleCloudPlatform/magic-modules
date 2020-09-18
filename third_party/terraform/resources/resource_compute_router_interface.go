@@ -310,13 +310,13 @@ func resourceComputeRouterInterfaceImportState(d *schema.ResourceData, meta inte
 	}
 
 	if err := d.Set("region", parts[0]); err != nil {
-		return nil, fmt.Errorf("Error reading region: %s", err)
+		return nil, fmt.Errorf("Error setting region: %s", err)
 	}
 	if err := d.Set("router", parts[1]); err != nil {
-		return nil, fmt.Errorf("Error reading router: %s", err)
+		return nil, fmt.Errorf("Error setting router: %s", err)
 	}
 	if err := d.Set("name", parts[2]); err != nil {
-		return nil, fmt.Errorf("Error reading name: %s", err)
+		return nil, fmt.Errorf("Error setting name: %s", err)
 	}
 
 	return []*schema.ResourceData{d}, nil

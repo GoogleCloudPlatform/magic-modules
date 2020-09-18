@@ -437,7 +437,7 @@ func resourceProjectImportState(d *schema.ResourceData, meta interface{}) ([]*sc
 	// Explicitly set to default as a workaround for `ImportStateVerify` tests, and so that users
 	// don't see a diff immediately after import.
 	if err := d.Set("auto_create_network", true); err != nil {
-		return nil, fmt.Errorf("Error reading auto_create_network: %s", err)
+		return nil, fmt.Errorf("Error setting auto_create_network: %s", err)
 	}
 	return []*schema.ResourceData{d}, nil
 }

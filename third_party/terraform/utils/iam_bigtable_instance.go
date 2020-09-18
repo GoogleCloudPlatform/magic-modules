@@ -36,7 +36,7 @@ func NewBigtableInstanceUpdater(d *schema.ResourceData, config *Config) (Resourc
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return nil, fmt.Errorf("Error reading project: %s", err)
+		return nil, fmt.Errorf("Error setting project: %s", err)
 	}
 
 	return &BigtableInstanceIamUpdater{

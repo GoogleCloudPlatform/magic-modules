@@ -93,11 +93,11 @@ func resourceLoggingBucketConfigImportState(parent string) schema.StateFunc {
 		}
 
 		if err := d.Set("location", parts[3]); err != nil {
-			return nil, fmt.Errorf("Error reading location: %s", err)
+			return nil, fmt.Errorf("Error setting location: %s", err)
 		}
 
 		if err := d.Set("bucket_id", parts[4]); err != nil {
-			return nil, fmt.Errorf("Error reading bucket_id: %s", err)
+			return nil, fmt.Errorf("Error setting bucket_id: %s", err)
 		}
 
 		return []*schema.ResourceData{d}, nil

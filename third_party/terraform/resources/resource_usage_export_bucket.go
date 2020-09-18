@@ -133,7 +133,7 @@ func resourceProjectUsageBucketDelete(d *schema.ResourceData, meta interface{}) 
 func resourceProjectUsageBucketImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	project := d.Id()
 	if err := d.Set("project", project); err != nil {
-		return nil, fmt.Errorf("Error reading project: %s", err)
+		return nil, fmt.Errorf("Error setting project: %s", err)
 	}
 	return []*schema.ResourceData{d}, nil
 }

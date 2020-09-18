@@ -322,26 +322,26 @@ func resourceDnsRecordSetImportState(d *schema.ResourceData, _ interface{}) ([]*
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) == 3 {
 		if err := d.Set("managed_zone", parts[0]); err != nil {
-			return nil, fmt.Errorf("Error reading managed_zone: %s", err)
+			return nil, fmt.Errorf("Error setting managed_zone: %s", err)
 		}
 		if err := d.Set("name", parts[1]); err != nil {
-			return nil, fmt.Errorf("Error reading name: %s", err)
+			return nil, fmt.Errorf("Error setting name: %s", err)
 		}
 		if err := d.Set("type", parts[2]); err != nil {
-			return nil, fmt.Errorf("Error reading type: %s", err)
+			return nil, fmt.Errorf("Error setting type: %s", err)
 		}
 	} else if len(parts) == 4 {
 		if err := d.Set("project", parts[0]); err != nil {
-			return nil, fmt.Errorf("Error reading project: %s", err)
+			return nil, fmt.Errorf("Error setting project: %s", err)
 		}
 		if err := d.Set("managed_zone", parts[1]); err != nil {
-			return nil, fmt.Errorf("Error reading managed_zone: %s", err)
+			return nil, fmt.Errorf("Error setting managed_zone: %s", err)
 		}
 		if err := d.Set("name", parts[2]); err != nil {
-			return nil, fmt.Errorf("Error reading name: %s", err)
+			return nil, fmt.Errorf("Error setting name: %s", err)
 		}
 		if err := d.Set("type", parts[3]); err != nil {
-			return nil, fmt.Errorf("Error reading type: %s", err)
+			return nil, fmt.Errorf("Error setting type: %s", err)
 		}
 		d.SetId(parts[1] + "/" + parts[2] + "/" + parts[3])
 	} else {

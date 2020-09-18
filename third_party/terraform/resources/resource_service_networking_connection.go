@@ -245,10 +245,10 @@ func resourceServiceNetworkingConnectionImportState(d *schema.ResourceData, meta
 	}
 
 	if err := d.Set("network", connectionId.Network); err != nil {
-		return nil, fmt.Errorf("Error reading network: %s", err)
+		return nil, fmt.Errorf("Error setting network: %s", err)
 	}
 	if err := d.Set("service", connectionId.Service); err != nil {
-		return nil, fmt.Errorf("Error reading service: %s", err)
+		return nil, fmt.Errorf("Error setting service: %s", err)
 	}
 	return []*schema.ResourceData{d}, nil
 }

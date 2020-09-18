@@ -109,10 +109,10 @@ func resourceGoogleProjectServiceImport(d *schema.ResourceData, m interface{}) (
 		return nil, fmt.Errorf("Invalid google_project_service id format for import, expecting `{project}/{service}`, found %s", d.Id())
 	}
 	if err := d.Set("project", parts[0]); err != nil {
-		return nil, fmt.Errorf("Error reading project: %s", err)
+		return nil, fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("service", parts[1]); err != nil {
-		return nil, fmt.Errorf("Error reading service: %s", err)
+		return nil, fmt.Errorf("Error setting service: %s", err)
 	}
 	return []*schema.ResourceData{d}, nil
 }
