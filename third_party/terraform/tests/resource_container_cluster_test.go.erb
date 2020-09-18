@@ -2915,6 +2915,7 @@ resource "google_container_cluster" "with_workload_metadata_config" {
 `, clusterName)
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func testAccContainerCluster_withSandboxConfig(clusterName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -2953,7 +2954,6 @@ resource "google_container_cluster" "with_sandbox_config" {
 `, clusterName)
 }
 
-<% unless version.nil? || version == 'ga' -%>
 func testAccContainerCluster_withSandboxConfig_changeLabels(clusterName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {

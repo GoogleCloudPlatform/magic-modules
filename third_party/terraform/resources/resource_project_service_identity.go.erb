@@ -91,7 +91,9 @@ func resourceProjectServiceIdentityCreate(d *schema.ResourceData, meta interface
 	if !ok {
 		return fmt.Errorf("unexpected type for email: got %T, want string", email)
 	}
-	d.Set("email", email)
+	if err := d.Set("email", email); err != nil {
+		return fmt.Errorf("Error setting email: %s", err)
+	}
 	return nil
 }
 
