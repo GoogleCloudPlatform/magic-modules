@@ -145,11 +145,19 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 <% end -%>
 
 func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
+    var m providerMeta
+
+    err := d.GetProviderMeta(&m)
+    if err != nil {
+        return err
+    }
+
+    config := meta.(*Config)
+    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleKey)
+
 <%  if object.custom_code.custom_create -%>
     <%= lines(compile(pwd + '/' + object.custom_code.custom_create))  -%>
 <%  else  -%>
-    config := meta.(*Config)
-
     obj := make(map[string]interface{})
 <%  object.settable_properties.each do |prop| -%>
     <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
@@ -419,7 +427,15 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 <%  end -%>
 
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
+    var m providerMeta
+
+    err := d.GetProviderMeta(&m)
+    if err != nil {
+        return err
+    }
+
     config := meta.(*Config)
+    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleKey)
 
     url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
     if err != nil {
@@ -541,7 +557,15 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
 <% if updatable?(object, object.root_properties) -%>
 func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
+    var m providerMeta
+
+    err := d.GetProviderMeta(&m)
+    if err != nil {
+        return err
+    }
+
     config := meta.(*Config)
+    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleKey)
 
     billingProject := ""
 
@@ -794,10 +818,20 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     d.SetId("")
 
     return nil
-<% elsif object.custom_code.custom_delete -%>
+<% else -%>
+    var m providerMeta
+
+    err := d.GetProviderMeta(&m)
+    if err != nil {
+        return err
+    }
+
+    config := meta.(*Config)
+    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleKey)
+
+<% if object.custom_code.custom_delete -%>
 <%= lines(compile(pwd + '/' + object.custom_code.custom_delete)) -%>
 <% else -%>
-    config := meta.(*Config)
 
     billingProject := ""
 
@@ -882,7 +916,8 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
     log.Printf("[DEBUG] Finished deleting <%= object.name -%> %q: %#v", d.Id(), res)
     return nil
-<% end -%>
+<% end # custom code -%>
+<% end # skip_delete -%>
 }
 
 <% unless object.exclude_import -%>
