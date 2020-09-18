@@ -5521,6 +5521,7 @@ objects:
                 - :UEFI_COMPATIBLE
                 - :VIRTIO_SCSI_MULTIQUEUE
                 - :WINDOWS
+                - :SEV_CAPABLE
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: |
