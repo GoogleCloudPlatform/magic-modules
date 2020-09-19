@@ -40,6 +40,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/set_computed_name.erb
       custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.erb
+      encoder: templates/terraform/encoders/identitygroup.go.erb
   GroupMembership: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{name}}"]
     # These will be sweeped with the parent groups
