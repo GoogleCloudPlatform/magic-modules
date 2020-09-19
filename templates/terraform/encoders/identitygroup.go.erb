@@ -13,8 +13,5 @@
   # limitations under the License.
 -%>
 
-wrappedReq := map[string]interface{}{
-	"resource": obj,
-	"initialGroupConfig": "WITH_INITIAL_OWNER",
-}
-return wrappedReq, nil
+obj["initialGroupConfig"] = "WITH_INITIAL_OWNER"
+return obj, nil
