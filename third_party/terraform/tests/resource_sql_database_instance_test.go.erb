@@ -311,7 +311,7 @@ func TestAccSqlDatabaseInstance_settings_deletionProtection(t *testing.T) {
 				ResourceName:            "google_sql_database_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"settings.0.deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: fmt.Sprintf(
@@ -752,6 +752,7 @@ var testGoogleSqlDatabaseInstance_basic3 = `
 resource "google_sql_database_instance" "instance" {
   name   = "%s"
   region = "us-central1"
+  deletion_protection = false
   settings {
     tier = "db-f1-micro"
   }
@@ -763,6 +764,7 @@ resource "google_sql_database_instance" "instance" {
   name             = "%s"
   database_version = "SQLSERVER_2017_STANDARD"
   root_password    = "%s"
+  deletion_protection = false
   settings {
     tier = "db-custom-1-3840"
   }
@@ -775,6 +777,7 @@ resource "google_sql_database_instance" "instance" {
   name             = "%s"
   region           = "us-central1"
   database_version = "MYSQL_5_7"
+  deletion_protection = false
 
   settings {
     tier = "db-n1-standard-1"
@@ -795,6 +798,7 @@ resource "google_sql_database_instance" "instance" {
   name             = "%s"
   region           = "us-central1"
   database_version = "MYSQL_5_7"
+  deletion_protection = false
 
   settings {
     tier = "db-n1-standard-1"
@@ -812,6 +816,7 @@ resource "google_sql_database_instance" "instance-failover" {
   region               = "us-central1"
   database_version     = "MYSQL_5_7"
   master_instance_name = google_sql_database_instance.instance.name
+  deletion_protection = false
 
   replica_configuration {
     failover_target = "true"
@@ -850,6 +855,7 @@ resource "google_sql_database_instance" "instance" {
   depends_on = [google_service_networking_connection.foobar]
   name       = "%s"
   region     = "us-central1"
+  deletion_protection = false
   settings {
     tier = "db-f1-micro"
     ip_configuration {
@@ -866,6 +872,7 @@ var testGoogleSqlDatabaseInstance_settings = `
 resource "google_sql_database_instance" "instance" {
   name   = "%s"
   region = "us-central1"
+  deletion_protection = false
   settings {
     tier                   = "db-f1-micro"
     location_preference {
@@ -894,13 +901,12 @@ var testGoogleSqlDatabaseInstance_settings_deletionProtection = `
 resource "google_sql_database_instance" "instance" {
   name   = "%s"
   region = "us-central1"
+  deletion_protection = %s
   settings {
     tier                   = "db-f1-micro"
     location_preference {
       zone = "us-central1-f"
 	}
-
-	deletion_protection = %s
 
     ip_configuration {
 	  ipv4_enabled = "true"
@@ -929,6 +935,7 @@ resource "google_compute_network" "servicenet" {
 resource "google_sql_database_instance" "instance" {
   name       = "%s"
   region     = "us-central1"
+  deletion_protection = false
   settings {
     tier = "db-f1-micro"
     ip_configuration {
@@ -944,6 +951,7 @@ resource "google_sql_database_instance" "instance_master" {
   name             = "tf-lw-%d"
   database_version = "MYSQL_5_6"
   region           = "us-central1"
+  deletion_protection = false
 
   settings {
     tier = "db-n1-standard-1"
@@ -960,6 +968,7 @@ resource "google_sql_database_instance" "replica1" {
   name             = "tf-lw-%d-1"
   database_version = "MYSQL_5_6"
   region           = "us-central1"
+  deletion_protection = false
 
   settings {
     tier = "db-n1-standard-1"
@@ -981,6 +990,7 @@ resource "google_sql_database_instance" "replica2" {
   name             = "tf-lw-%d-2"
   database_version = "MYSQL_5_6"
   region           = "us-central1"
+  deletion_protection = false
 
   settings {
     tier = "db-n1-standard-1"
@@ -1003,6 +1013,7 @@ var testGoogleSqlDatabaseInstance_slave = `
 resource "google_sql_database_instance" "instance_master" {
   name   = "tf-lw-%d"
   region = "us-central1"
+  deletion_protection = false
 
   settings {
     tier = "db-f1-micro"
@@ -1017,6 +1028,7 @@ resource "google_sql_database_instance" "instance_master" {
 resource "google_sql_database_instance" "instance_slave" {
   name   = "tf-lw-%d"
   region = "us-central1"
+  deletion_protection = false
 
   master_instance_name = google_sql_database_instance.instance_master.name
 
@@ -1031,6 +1043,7 @@ resource "google_sql_database_instance" "instance" {
   name             = "tf-lw-%d"
   region           = "us-central1"
   database_version = "POSTGRES_9_6"
+  deletion_protection = false
 
   settings {
     tier = "db-f1-micro"
@@ -1049,6 +1062,7 @@ var testGoogleSqlDatabaseInstance_diskspecs = `
 resource "google_sql_database_instance" "instance" {
   name   = "tf-lw-%d"
   region = "us-central1"
+  deletion_protection = false
 
   settings {
     tier            = "db-f1-micro"
@@ -1063,6 +1077,7 @@ var testGoogleSqlDatabaseInstance_maintenance = `
 resource "google_sql_database_instance" "instance" {
   name   = "tf-lw-%d"
   region = "us-central1"
+  deletion_protection = false
 
   settings {
     tier = "db-f1-micro"
@@ -1080,6 +1095,7 @@ var testGoogleSqlDatabaseInstance_authNets_step1 = `
 resource "google_sql_database_instance" "instance" {
   name   = "tf-lw-%d"
   region = "us-central1"
+  deletion_protection = false
   settings {
     tier                   = "db-f1-micro"
 
@@ -1098,6 +1114,7 @@ var testGoogleSqlDatabaseInstance_authNets_step2 = `
 resource "google_sql_database_instance" "instance" {
   name   = "tf-lw-%d"
   region = "us-central1"
+  deletion_protection = false
   settings {
     tier                   = "db-f1-micro"
 
@@ -1112,6 +1129,7 @@ var testGoogleSqlDatabaseInstance_multipleOperations = `
 resource "google_sql_database_instance" "instance" {
   name   = "tf-test-%s"
   region = "us-central1"
+  deletion_protection = false
   settings {
     tier                   = "db-f1-micro"
   }
@@ -1134,6 +1152,7 @@ var testGoogleSqlDatabaseInstance_basic_with_user_labels = `
 resource "google_sql_database_instance" "instance" {
   name   = "%s"
   region = "us-central1"
+  deletion_protection = false
   settings {
     tier = "db-f1-micro"
     user_labels = {
@@ -1147,6 +1166,7 @@ var testGoogleSqlDatabaseInstance_basic_with_user_labels_update = `
 resource "google_sql_database_instance" "instance" {
   name   = "%s"
   region = "us-central1"
+  deletion_protection = false
   settings {
     tier = "db-f1-micro"
     user_labels = {
@@ -1162,6 +1182,7 @@ resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%d"
   region           = "us-central1"
   database_version = "POSTGRES_9_6"
+  deletion_protection = false
   settings {
     tier = "db-f1-micro"
     backup_configuration {

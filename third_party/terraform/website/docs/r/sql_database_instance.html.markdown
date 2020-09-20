@@ -39,6 +39,10 @@ default 'root'@'%' user with no password. This user will be deleted by Terraform
 instance creation. You should use `google_sql_user` to define a custom user with
 a restricted host and strong password.
 
+-> **Note**: On newer versions of the provider, you must explicitly set `deletion_protection=false`
+(and run `terraform apply` to write the field to state) in order to destroy an instance.
+It is recommended to not set this field (or set it to true) until you're ready to destroy the instance and it's databases.
+
 ## Example Usage
 
 ### SQL Second Generation Instance
@@ -194,7 +198,7 @@ The following arguments are supported:
 
 * `database_version` - (Optional, Default: `MYSQL_5_6`) The MySQL, PostgreSQL or
 SQL Server (beta) version to use. Supported values include `MYSQL_5_6`,
-`MYSQL_5_7`, `MYSQL_8`, `POSTGRES_9_6`, `POSTGRES_10`, `POSTGRES_11`, `POSTGRES_12`, `SQLSERVER_2017_STANDARD`,
+`MYSQL_5_7`, `POSTGRES_9_6`,`POSTGRES_10`, `POSTGRES_11`, `POSTGRES_12`, `SQLSERVER_2017_STANDARD`,
 `SQLSERVER_2017_ENTERPRISE`, `SQLSERVER_2017_EXPRESS`, `SQLSERVER_2017_WEB`.
 [Database Version Policies](https://cloud.google.com/sql/docs/sqlserver/db-versions)
 includes an up-to-date reference of supported versions.
@@ -226,6 +230,9 @@ includes an up-to-date reference of supported versions.
     That service account needs the `Cloud KMS > Cloud KMS CryptoKey Encrypter/Decrypter` role on your
     key - please see [this step](https://cloud.google.com/sql/docs/mysql/configure-cmek#grantkey).
 
+* `deletion_protection` - (Optional, Default: `true` ) Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
+in Terraform state, a `terraform destroy` or `terraform apply` command that deletes the instance will fail.
+
 The required `settings` block supports:
 
 * `tier` - (Required) The machine type to use. See [tiers](https://cloud.google.com/sql/docs/admin-api/v1beta4/tiers)
@@ -239,9 +246,6 @@ The required `settings` block supports:
     First Generation instances are now deprecated, see [here](https://cloud.google.com/sql/docs/mysql/upgrade-2nd-gen)
     for information on how to upgrade to Second Generation instances.
     A list of Google App Engine (GAE) project names that are allowed to access this instance.
-
-* `delete_protection` - (Optional, Default: `false`) Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
-in Terraform state, a `terraform destroy` or `terraform apply` that would delete the instance will fail.
 
 * `availability_type` - (Optional) The availability type of the Cloud SQL
 instance, high availability (`REGIONAL`) or single zone (`ZONAL`).' For MySQL

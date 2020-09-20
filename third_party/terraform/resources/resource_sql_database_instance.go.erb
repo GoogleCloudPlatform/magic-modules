@@ -109,7 +109,12 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 				ForceNew:    true,
 				Description: `The region the instance will sit in. Note, Cloud SQL is not available in all regions - choose from one of the options listed here. A valid region must be provided to use this resource. If a region is not provided in the resource definition, the provider region will be used instead, but this will be an apply-time error for instances if the provider region is not supported with Cloud SQL. If you choose not to provide the region argument for this resource, make sure you understand this.`,
 			},
-
+			"deletion_protection": {
+				Type:        schema.TypeBool,
+				Default:     true,
+				Optional:    true,
+				Description: `Used to block Terraform from deleting a SQL Instance.`,
+			},
 			"settings": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -120,12 +125,6 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 							Type:        schema.TypeInt,
 							Computed:    true,
 							Description: `Used to make sure changes to the settings block are atomic.`,
-						},
-						"deletion_protection": {
-							Type:        schema.TypeBool,
-							Default:     false,
-							Optional:    true,
-							Description: `Used to block Terraform from deleting a SQL Instance.`,
 						},
 						"tier": {
 							Type:        schema.TypeString,
@@ -1034,7 +1033,7 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 
 	// Check if deletion protection is enabled.
  
-	if d.Get("settings.0.deletion_protection").(bool) {
+	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("Error, failed to delete instance because deletion_protection is set to true. Set it to false to proceed with instance deletion")
 	}
 
@@ -1072,7 +1071,7 @@ func resourceSqlDatabaseInstanceImport(d *schema.ResourceData, meta interface{})
 		return nil, err
 	}
 
-	d.Set("settings.0.deletion_protection", false)
+	d.Set("deletion_protection", true)
 
 	// Replace import id for the resource id
 	id, err := replaceVars(d, config, "projects/{{project}}/instances/{{name}}")
