@@ -26,6 +26,7 @@ var ignoredReplicaConfigurationFields = []string{
 	"replica_configuration.0.ssl_cipher",
 	"replica_configuration.0.username",
 	"replica_configuration.0.verify_server_certificate",
+	"deletion_protection",
 }
 
 func init() {
@@ -168,6 +169,7 @@ func TestAccSqlDatabaseInstance_basicInferredName(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -192,6 +194,7 @@ func TestAccSqlDatabaseInstance_basicSecondGen(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -216,7 +219,7 @@ func TestAccSqlDatabaseInstance_basicMSSQL(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"root_password"},
+				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
 			},
 		},
 	})
@@ -243,6 +246,7 @@ func TestAccSqlDatabaseInstance_dontDeleteDefaultUserOnReplica(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			resource.TestStep{
 				PreConfig: func() {
@@ -288,6 +292,7 @@ func TestAccSqlDatabaseInstance_settings_basic(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -364,6 +369,7 @@ func TestAccSqlDatabaseInstance_replica(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance_master",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			resource.TestStep{
 				ResourceName:            "google_sql_database_instance.replica1",
@@ -400,11 +406,13 @@ func TestAccSqlDatabaseInstance_slave(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance_master",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			resource.TestStep{
 				ResourceName:      "google_sql_database_instance.instance_slave",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -428,6 +436,7 @@ func TestAccSqlDatabaseInstance_highAvailability(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -451,6 +460,7 @@ func TestAccSqlDatabaseInstance_diskspecs(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -474,6 +484,7 @@ func TestAccSqlDatabaseInstance_maintenance(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -497,6 +508,7 @@ func TestAccSqlDatabaseInstance_settings_upgrade(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			resource.TestStep{
 				Config: fmt.Sprintf(
@@ -506,6 +518,7 @@ func TestAccSqlDatabaseInstance_settings_upgrade(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -529,6 +542,7 @@ func TestAccSqlDatabaseInstance_settingsDowngrade(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			resource.TestStep{
 				Config: fmt.Sprintf(
@@ -538,6 +552,7 @@ func TestAccSqlDatabaseInstance_settingsDowngrade(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -562,6 +577,7 @@ func TestAccSqlDatabaseInstance_authNets(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			resource.TestStep{
 				Config: fmt.Sprintf(
@@ -571,6 +587,7 @@ func TestAccSqlDatabaseInstance_authNets(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			resource.TestStep{
 				Config: fmt.Sprintf(
@@ -580,6 +597,7 @@ func TestAccSqlDatabaseInstance_authNets(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -605,6 +623,7 @@ func TestAccSqlDatabaseInstance_multipleOperations(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -629,6 +648,7 @@ func TestAccSqlDatabaseInstance_basic_with_user_labels(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			resource.TestStep{
 				Config: fmt.Sprintf(
@@ -638,6 +658,7 @@ func TestAccSqlDatabaseInstance_basic_with_user_labels(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -664,6 +685,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
