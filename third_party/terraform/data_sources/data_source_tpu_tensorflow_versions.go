@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceTpuTensorflowVersions() *schema.Resource {
@@ -63,9 +63,15 @@ func dataSourceTpuTensorFlowVersionsRead(d *schema.ResourceData, meta interface{
 
 	log.Printf("[DEBUG] Received Google TPU Tensorflow Versions: %q", versions)
 
-	d.Set("versions", versions)
-	d.Set("zone", zone)
-	d.Set("project", project)
+	if err := d.Set("versions", versions); err != nil {
+		return fmt.Errorf("Error setting versions: %s", err)
+	}
+	if err := d.Set("zone", zone); err != nil {
+		return fmt.Errorf("Error setting zone: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 	d.SetId(time.Now().UTC().String())
 
 	return nil

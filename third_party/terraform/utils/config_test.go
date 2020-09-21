@@ -6,15 +6,13 @@ import (
 	"os"
 	"testing"
 	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 const testFakeCredentialsPath = "./test-fixtures/fake_account.json"
 
 func TestAccConfigLoadValidate_credentials(t *testing.T) {
-	if os.Getenv(resource.TestEnvVar) == "" {
-		t.Skip(fmt.Sprintf("Network access not allowed; use %s=1 to enable", resource.TestEnvVar))
+	if os.Getenv(TestEnvVar) == "" {
+		t.Skip(fmt.Sprintf("Network access not allowed; use %s=1 to enable", TestEnvVar))
 	}
 	testAccPreCheck(t)
 
@@ -40,7 +38,7 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 
 func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 	if os.Getenv(resource.TestEnvVar) == "" {
-		t.Skip(fmt.Sprintf("Network access not allowed; use %s=1 to enable", resource.TestEnvVar))
+		t.Skip(fmt.Sprintf("Network access not allowed; use %s=1 to enable", TestEnvVar))
 	}
 	testAccPreCheck(t)
 

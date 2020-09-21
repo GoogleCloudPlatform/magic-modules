@@ -9,7 +9,7 @@ import (
 
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/googleapi"
 )
 
@@ -94,8 +94,12 @@ func resourceComputeSharedVpcServiceProjectRead(d *schema.ResourceData, meta int
 		return nil
 	}
 
-	d.Set("host_project", hostProject)
-	d.Set("service_project", serviceProject)
+	if err := d.Set("host_project", hostProject); err != nil {
+		return fmt.Errorf("Error setting host_project: %s", err)
+	}
+	if err := d.Set("service_project", serviceProject); err != nil {
+		return fmt.Errorf("Error setting service_project: %s", err)
+	}
 
 	return nil
 }

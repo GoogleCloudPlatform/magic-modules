@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/googleapi"
 )
@@ -95,13 +95,6 @@ func resourceComputeNetworkPeering() *schema.Resource {
 				Computed:    true,
 				Description: `Details about the current state of the peering.`,
 			},
-
-			"auto_create_routes": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Removed:  "auto_create_routes has been removed because it's redundant and not user-configurable. It can safely be removed from your config",
-				Computed: true,
-			},
 		},
 	}
 }
@@ -164,14 +157,30 @@ func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{})
 		return nil
 	}
 
-	d.Set("peer_network", peering.Network)
-	d.Set("name", peering.Name)
-	d.Set("import_custom_routes", peering.ImportCustomRoutes)
-	d.Set("export_custom_routes", peering.ExportCustomRoutes)
-	d.Set("import_subnet_routes_with_public_ip", peering.ImportSubnetRoutesWithPublicIp)
-	d.Set("export_subnet_routes_with_public_ip", peering.ExportSubnetRoutesWithPublicIp)
-	d.Set("state", peering.State)
-	d.Set("state_details", peering.StateDetails)
+	if err := d.Set("peer_network", peering.Network); err != nil {
+		return fmt.Errorf("Error setting peer_network: %s", err)
+	}
+	if err := d.Set("name", peering.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("import_custom_routes", peering.ImportCustomRoutes); err != nil {
+		return fmt.Errorf("Error setting import_custom_routes: %s", err)
+	}
+	if err := d.Set("export_custom_routes", peering.ExportCustomRoutes); err != nil {
+		return fmt.Errorf("Error setting export_custom_routes: %s", err)
+	}
+	if err := d.Set("import_subnet_routes_with_public_ip", peering.ImportSubnetRoutesWithPublicIp); err != nil {
+		return fmt.Errorf("Error setting import_subnet_routes_with_public_ip: %s", err)
+	}
+	if err := d.Set("export_subnet_routes_with_public_ip", peering.ExportSubnetRoutesWithPublicIp); err != nil {
+		return fmt.Errorf("Error setting export_subnet_routes_with_public_ip: %s", err)
+	}
+	if err := d.Set("state", peering.State); err != nil {
+		return fmt.Errorf("Error setting state: %s", err)
+	}
+	if err := d.Set("state_details", peering.StateDetails); err != nil {
+		return fmt.Errorf("Error setting state_details: %s", err)
+	}
 
 	return nil
 }
@@ -268,8 +277,12 @@ func resourceComputeNetworkPeeringImport(d *schema.ResourceData, meta interface{
 		return nil, handleNotFoundError(err, d, fmt.Sprintf("Network %q", splits[1]))
 	}
 
-	d.Set("network", ConvertSelfLinkToV1(net.SelfLink))
-	d.Set("name", name)
+	if err := d.Set("network", ConvertSelfLinkToV1(net.SelfLink)); err != nil {
+		return nil, fmt.Errorf("Error setting network: %s", err)
+	}
+	if err := d.Set("name", name); err != nil {
+		return nil, fmt.Errorf("Error setting name: %s", err)
+	}
 
 	// Replace import id for the resource id
 	id := fmt.Sprintf("%s/%s", network, name)

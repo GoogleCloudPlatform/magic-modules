@@ -119,7 +119,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validation.ValidateJsonString'
+          function: 'validation.StringIsJSON'
       selfLink: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
