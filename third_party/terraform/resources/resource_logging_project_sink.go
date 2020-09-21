@@ -65,7 +65,14 @@ func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -98,12 +105,19 @@ func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
 
 	sink, updateMask := expandResourceLoggingSinkForUpdate(d)
 	uniqueWriterIdentity := d.Get("unique_writer_identity").(bool)
 
-	_, err := config.clientLogging.Projects.Sinks.Patch(d.Id(), sink).
+	_, err = config.clientLogging.Projects.Sinks.Patch(d.Id(), sink).
 		UpdateMask(updateMask).UniqueWriterIdentity(uniqueWriterIdentity).Do()
 	if err != nil {
 		return err
@@ -113,9 +127,16 @@ func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceLoggingProjectSinkDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	var m providerMeta
 
-	_, err := config.clientLogging.Projects.Sinks.Delete(d.Id()).Do()
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
+	config := meta.(*Config)
+	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
+
+	_, err = config.clientLogging.Projects.Sinks.Delete(d.Id()).Do()
 	if err != nil {
 		return err
 	}

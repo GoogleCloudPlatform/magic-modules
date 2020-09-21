@@ -903,7 +903,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
+	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -953,7 +953,14 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -1209,7 +1216,15 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
+	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -1959,7 +1974,14 @@ func desiredStatusDiff(_ context.Context, diff *schema.ResourceDiff, meta interf
 }
 
 func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

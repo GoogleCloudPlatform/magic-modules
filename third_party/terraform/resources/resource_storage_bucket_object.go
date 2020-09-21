@@ -256,7 +256,14 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
 
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
@@ -316,7 +323,14 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
 
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
@@ -324,7 +338,7 @@ func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{})
 	objectsService := storage.NewObjectsService(config.clientStorage)
 
 	DeleteCall := objectsService.Delete(bucket, name)
-	err := DeleteCall.Do()
+	err = DeleteCall.Do()
 
 	if err != nil {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {

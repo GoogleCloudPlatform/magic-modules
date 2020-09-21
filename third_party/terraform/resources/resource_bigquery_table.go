@@ -714,7 +714,14 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientBigQuery.UserAgent = fmt.Sprintf("%s %s", config.clientBigQuery.UserAgent, m.ModuleName)
 
 	log.Printf("[INFO] Reading BigQuery table: %s", d.Id())
 
@@ -854,7 +861,14 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientBigQuery.UserAgent = fmt.Sprintf("%s %s", config.clientBigQuery.UserAgent, m.ModuleName)
 
 	table, err := resourceTable(d, meta)
 	if err != nil {
@@ -879,7 +893,14 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientBigQuery.UserAgent = fmt.Sprintf("%s %s", config.clientBigQuery.UserAgent, m.ModuleName)
 
 	log.Printf("[INFO] Deleting BigQuery table: %s", d.Id())
 

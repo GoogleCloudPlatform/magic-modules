@@ -264,7 +264,14 @@ func resourceDataflowJobCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceDataflowJobRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientDataflow.UserAgent = fmt.Sprintf("%s %s", config.clientDataflow.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -343,7 +350,14 @@ func resourceDataflowJobUpdateByReplacement(d *schema.ResourceData, meta interfa
 		return nil
 	}
 
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientDataflow.UserAgent = fmt.Sprintf("%s %s", config.clientDataflow.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -390,7 +404,14 @@ func resourceDataflowJobUpdateByReplacement(d *schema.ResourceData, meta interfa
 }
 
 func resourceDataflowJobDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientDataflow.UserAgent = fmt.Sprintf("%s %s", config.clientDataflow.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

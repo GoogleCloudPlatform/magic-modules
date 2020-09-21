@@ -153,7 +153,14 @@ func resourceDnsRecordSetCreate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientDns.UserAgent = fmt.Sprintf("%s %s", config.clientDns.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -203,7 +210,14 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientDns.UserAgent = fmt.Sprintf("%s %s", config.clientDns.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -266,7 +280,14 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceDnsRecordSetUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientDns.UserAgent = fmt.Sprintf("%s %s", config.clientDns.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

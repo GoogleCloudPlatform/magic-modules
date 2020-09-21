@@ -418,7 +418,14 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientStorageTransfer.UserAgent = fmt.Sprintf("%s %s", config.clientStorageTransfer.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -465,7 +472,14 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientStorageTransfer.UserAgent = fmt.Sprintf("%s %s", config.clientStorageTransfer.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -520,7 +534,14 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceStorageTransferJobDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientStorageTransfer.UserAgent = fmt.Sprintf("%s %s", config.clientStorageTransfer.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

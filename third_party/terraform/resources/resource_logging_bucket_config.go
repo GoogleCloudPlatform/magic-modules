@@ -120,7 +120,14 @@ func resourceLoggingBucketConfigAcquire(iDFunc loggingBucketConfigIDFunc) func(*
 }
 
 func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 	log.Printf("[DEBUG] Fetching logging bucket config: %#v", d.Id())
 
@@ -151,11 +158,17 @@ func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	return nil
-
 }
 
 func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 	obj := make(map[string]interface{})
 

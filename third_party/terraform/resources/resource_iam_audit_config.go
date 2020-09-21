@@ -62,7 +62,14 @@ func ResourceIamAuditConfigWithBatching(parentSpecificSchema map[string]*schema.
 
 func resourceIamAuditConfigRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.ReadFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
+		var m providerMeta
+
+		err := d.GetProviderMeta(&m)
+		if err != nil {
+			return err
+		}
 		config := meta.(*Config)
+		config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
 			return err
@@ -171,7 +178,14 @@ func resourceIamAuditConfigCreateUpdate(newUpdaterFunc newResourceIamUpdaterFunc
 
 func resourceIamAuditConfigDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBatching bool) schema.DeleteFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
+		var m providerMeta
+
+		err := d.GetProviderMeta(&m)
+		if err != nil {
+			return err
+		}
 		config := meta.(*Config)
+		config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
 			return err

@@ -239,7 +239,14 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientAppEngine.UserAgent = fmt.Sprintf("%s %s", config.clientAppEngine.UserAgent, m.ModuleName)
 	pid := d.Id()
 
 	app, err := config.clientAppEngine.Apps.Get(pid).Do()
@@ -307,7 +314,14 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientAppEngine.UserAgent = fmt.Sprintf("%s %s", config.clientAppEngine.UserAgent, m.ModuleName)
 	pid := d.Id()
 	app, err := expandAppEngineApplication(d, pid)
 	if err != nil {
