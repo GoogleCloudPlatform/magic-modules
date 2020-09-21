@@ -126,7 +126,14 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientSqlAdmin.UserAgent = fmt.Sprintf("%s %s", config.clientSqlAdmin.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -183,7 +190,14 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientSqlAdmin.UserAgent = fmt.Sprintf("%s %s", config.clientSqlAdmin.UserAgent, m.ModuleName)
 
 	if d.HasChange("password") {
 		project, err := getProject(d, config)
@@ -230,7 +244,14 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientSqlAdmin.UserAgent = fmt.Sprintf("%s %s", config.clientSqlAdmin.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

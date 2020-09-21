@@ -61,7 +61,14 @@ func resourceComputeSharedVpcHostProjectCreate(d *schema.ResourceData, meta inte
 }
 
 func resourceComputeSharedVpcHostProjectRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleName)
 
 	hostProject := d.Id()
 
@@ -83,7 +90,14 @@ func resourceComputeSharedVpcHostProjectRead(d *schema.ResourceData, meta interf
 }
 
 func resourceComputeSharedVpcHostProjectDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleName)
 	hostProject := d.Get("project").(string)
 
 	op, err := config.clientComputeBeta.Projects.DisableXpnHost(hostProject).Do()

@@ -78,7 +78,14 @@ func resourceComputeSharedVpcServiceProjectCreate(d *schema.ResourceData, meta i
 }
 
 func resourceComputeSharedVpcServiceProjectRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
 
 	split := strings.Split(d.Id(), "/")
 	if len(split) != 2 {
@@ -112,7 +119,14 @@ func resourceComputeSharedVpcServiceProjectRead(d *schema.ResourceData, meta int
 }
 
 func resourceComputeSharedVpcServiceProjectDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleName)
 	hostProject := d.Get("host_project").(string)
 	serviceProject := d.Get("service_project").(string)
 

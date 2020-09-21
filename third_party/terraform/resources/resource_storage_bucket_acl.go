@@ -213,7 +213,14 @@ func resourceStorageBucketAclCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceStorageBucketAclRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
 
 	bucket := d.Get("bucket").(string)
 
@@ -252,7 +259,14 @@ func resourceStorageBucketAclRead(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceStorageBucketAclUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
 
 	bucket := d.Get("bucket").(string)
 
@@ -346,7 +360,14 @@ func resourceStorageBucketAclUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceStorageBucketAclDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
 
 	bucket := d.Get("bucket").(string)
 

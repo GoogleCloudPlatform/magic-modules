@@ -93,7 +93,14 @@ func resourceRuntimeconfigVariableCreate(d *schema.ResourceData, meta interface{
 }
 
 func resourceRuntimeconfigVariableRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientRuntimeconfig.UserAgent = fmt.Sprintf("%s %s", config.clientRuntimeconfig.UserAgent, m.ModuleName)
 
 	fullName := d.Id()
 	createdVariable, err := config.clientRuntimeconfig.Projects.Configs.Variables.Get(fullName).Do()
@@ -105,7 +112,14 @@ func resourceRuntimeconfigVariableRead(d *schema.ResourceData, meta interface{})
 }
 
 func resourceRuntimeconfigVariableUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientRuntimeconfig.UserAgent = fmt.Sprintf("%s %s", config.clientRuntimeconfig.UserAgent, m.ModuleName)
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
@@ -129,10 +143,18 @@ func resourceRuntimeconfigVariableUpdate(d *schema.ResourceData, meta interface{
 }
 
 func resourceRuntimeconfigVariableDelete(d *schema.ResourceData, meta interface{}) error {
-	fullName := d.Id()
-	config := meta.(*Config)
+	var m providerMeta
 
-	_, err := config.clientRuntimeconfig.Projects.Configs.Variables.Delete(fullName).Do()
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
+	config := meta.(*Config)
+	config.clientRuntimeconfig.UserAgent = fmt.Sprintf("%s %s", config.clientRuntimeconfig.UserAgent, m.ModuleName)
+
+	fullName := d.Id()
+
+	_, err = config.clientRuntimeconfig.Projects.Configs.Variables.Delete(fullName).Do()
 	if err != nil {
 		return err
 	}

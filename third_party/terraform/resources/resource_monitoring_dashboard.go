@@ -110,7 +110,14 @@ func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 	url := config.MonitoringBasePath + "v1/" + d.Id()
 
@@ -140,7 +147,14 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 	o, n := d.GetChange("dashboard_json")
 	oObj, err := structure.ExpandJsonFromString(o.(string))
@@ -169,7 +183,14 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceMonitoringDashboardDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 	url := config.MonitoringBasePath + "v1/" + d.Id()
 

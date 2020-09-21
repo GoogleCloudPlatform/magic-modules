@@ -452,7 +452,14 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientCloudFunctions.UserAgent = fmt.Sprintf("%s %s", config.clientCloudFunctions.UserAgent, m.ModuleName)
 
 	cloudFuncId, err := parseCloudFunctionId(d, config)
 	if err != nil {
@@ -552,7 +559,14 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 
 func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG]: Updating google_cloudfunctions_function")
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientCloudFunctions.UserAgent = fmt.Sprintf("%s %s", config.clientCloudFunctions.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -661,7 +675,14 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceCloudFunctionsDestroy(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientCloudFunctions.UserAgent = fmt.Sprintf("%s %s", config.clientCloudFunctions.UserAgent, m.ModuleName)
 
 	cloudFuncId, err := parseCloudFunctionId(d, config)
 	if err != nil {
