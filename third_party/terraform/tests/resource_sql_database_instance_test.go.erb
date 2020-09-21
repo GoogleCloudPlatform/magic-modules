@@ -748,6 +748,7 @@ func TestAccSqlDatabaseInstance_PointInTimeRecoveryEnabled(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testGoogleSqlDatabaseInstance_PointInTimeRecoveryEnabled(masterID, false),
@@ -756,6 +757,7 @@ func TestAccSqlDatabaseInstance_PointInTimeRecoveryEnabled(t *testing.T) {
 				ResourceName:      "google_sql_database_instance.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -764,6 +766,7 @@ func TestAccSqlDatabaseInstance_PointInTimeRecoveryEnabled(t *testing.T) {
 var testGoogleSqlDatabaseInstance_basic2 = `
 resource "google_sql_database_instance" "instance" {
   region = "us-central1"
+  deletion_protection = false
   settings {
     tier = "db-f1-micro"
   }
