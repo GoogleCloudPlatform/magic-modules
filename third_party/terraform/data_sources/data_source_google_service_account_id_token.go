@@ -74,8 +74,8 @@ func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta inte
 
 	ts := creds.TokenSource
 
-	// If the source token is just an access_token, all we can do is use the iamcredentials api to get an id_token
-	if _, ok := ts.(staticTokenSource); ok {
+	// The idToken doesn't support impersonatedcredentials method yet :( https://github.com/googleapis/google-api-go-client/blob/master/idtoken/idtoken.go#L67
+	if config.ImpersonateServiceAccount != "" {
 		// Use
 		// https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/generateIdToken
 		service := config.clientIamCredentials
