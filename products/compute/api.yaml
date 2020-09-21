@@ -7340,6 +7340,45 @@ objects:
           values:
             - :REGIONAL
             - :GLOBAL
+      - !ruby/object:Api::Type::Array
+        name: 'peerings'
+        # This is only used in InSpec, handled via fine-grained in Terraform
+        exclude: true
+        output: true
+        description: |
+          Peerings for a network
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: subnetworks
+          description: The subnetworks that should be mirrored.
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              description: |
+                Name of the peering.
+            - !ruby/object:Api::Type::String
+              name: 'state'
+              description: |
+                State of the peering.
+            - !ruby/object:Api::Type::String
+              name: 'stateDetails'
+              description: |
+                Details about the current state of the peering.
+            - !ruby/object:Api::Type::String
+              name: 'network'
+              description: |
+                URL of the peer network
+            - !ruby/object:Api::Type::Boolean
+              name: 'exportCustomRoutes'
+              description: |
+                Whether to export the custom routes to the peer network.
+            - !ruby/object:Api::Type::Boolean
+              name: 'importCustomRoutes'
+              description: |
+                Whether to import the custom routes to the peer network.
+            - !ruby/object:Api::Type::Integer
+              name: 'peerMtu'
+              description: |
+                Maximum Transmission Unit in bytes.
   - !ruby/object:Api::Resource
     name: 'NetworkEndpoint'
     kind: 'compute#networkEndpoint'
