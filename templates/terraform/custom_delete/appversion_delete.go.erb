@@ -3,7 +3,6 @@ if d.Get("noop_on_destroy") == true {
 	log.Printf("[DEBUG] Keeping the AppVersion %q", d.Id())
 	return nil
 }
-config := meta.(*Config)
 
 project, err := getProject(d, config)
 if err != nil {
