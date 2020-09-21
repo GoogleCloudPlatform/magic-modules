@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/structure"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func monitoringDashboardDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
@@ -52,7 +52,7 @@ func resourceMonitoringDashboard() *schema.Resource {
 			"dashboard_json": {
 				Type:             schema.TypeString,
 				Required:         true,
-				ValidateFunc:     validation.ValidateJsonString,
+				ValidateFunc:     validation.StringIsJSON,
 				DiffSuppressFunc: monitoringDashboardDiffSuppress,
 				StateFunc: func(v interface{}) string {
 					json, _ := structure.NormalizeJsonString(v)
@@ -118,7 +118,7 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error reading Dashboard: %s", err)
+		return fmt.Errorf("Error setting Dashboard: %s", err)
 	}
 
 	str, err := structure.FlattenJsonToString(res)
@@ -188,7 +188,9 @@ func resourceMonitoringDashboardImport(d *schema.ResourceData, meta interface{})
 		return nil, err
 	}
 
-	d.Set("project", parts["project"])
+	if err := d.Set("project", parts["project"]); err != nil {
+		return nil, fmt.Errorf("Error setting project: %s", err)
+	}
 	d.SetId(fmt.Sprintf("projects/%s/dashboards/%s", parts["project"], parts["id"]))
 
 	return []*schema.ResourceData{d}, nil

@@ -1,5 +1,5 @@
 <build>
-    <buildType id="GoogleCloud_ProviderGoogleCloudMmUpstreamVcr"/>
+    <buildType id="GoogleCloudBeta_ProviderGoogleCloudBetaMmUpstreamVcr"/>
     <properties>
       <property name="TEST_PATTERN" value="TestAcc"/>
       <property name="BRANCH_NAME" value="refs/heads/auto-pr-{{PR_NUMBER}}"/>

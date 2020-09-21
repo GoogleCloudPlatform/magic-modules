@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -42,7 +42,7 @@ func tryEnableRenamedService(service, altName string, project string, d *schema.
 	// use a short timeout- failures are likely
 
 	log.Printf("[DEBUG] attempting enabling service with user-specified name %s", service)
-	err := enableServiceUsageProjectServices([]string{altName}, project, config, 1*time.Minute)
+	err := enableServiceUsageProjectServices([]string{service}, project, config, 1*time.Minute)
 	if err != nil {
 		log.Printf("[DEBUG] saw error %s. attempting alternate name %v", err, altName)
 		err2 := enableServiceUsageProjectServices([]string{altName}, project, config, 1*time.Minute)

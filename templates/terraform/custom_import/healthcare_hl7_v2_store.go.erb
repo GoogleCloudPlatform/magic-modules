@@ -6,7 +6,11 @@
     return nil, err
   }
 
-  d.Set("dataset", hl7v2StoreId.DatasetId.datasetId())
-  d.Set("name", hl7v2StoreId.Name)
+  if err := d.Set("dataset", hl7v2StoreId.DatasetId.datasetId()); err != nil {
+  	return nil, fmt.Errorf("Error setting dataset: %s", err)
+  }
+  if err := d.Set("name", hl7v2StoreId.Name); err != nil {
+  	return nil, fmt.Errorf("Error setting name: %s", err)
+  }
 
   return []*schema.ResourceData{d}, nil

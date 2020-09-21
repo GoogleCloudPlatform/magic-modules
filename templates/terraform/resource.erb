@@ -16,6 +16,20 @@
 
 package google
 
+import (
+<%- # We list all the v2 imports here, because we run 'goimports' to guess the correct
+    # set of imports, which will never guess the major version correctly. -%>
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+)
+
 <%= lines(compile(pwd + '/' + object.custom_code.constants)) if object.custom_code.constants -%>
 
 <%
@@ -121,7 +135,7 @@ func resource<%= resource_name -%>() *schema.Resource {
 <% end -%>
 
 <% object.settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
-func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(diff *schema.ResourceDiff, meta interface{}) error {
+func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 <%=
     compile_template(pwd + '/templates/terraform/unordered_list_customize_diff.erb',
                      prop: prop,
@@ -189,20 +203,29 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 <%    end -%>
 <%  end -%>
+    billingProject := ""
+
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
         return err
     }
+    billingProject = project
 <%  end -%>
+
 <%  if object.supports_indirect_user_project_override -%>
-    var project string
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-        project = parts[1]
+        billingProject = parts[1]
     }
 <%  end -%>
+
+    // err == nil indicates that the billing_project value was found
+    if bp, err := getBillingProject(d, config); err == nil {
+      billingProject = bp
+    }
+
 <%= lines(compile(pwd + '/' + object.custom_code.pre_create)) if object.custom_code.pre_create -%>
-    res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutCreate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", billingProject, url, obj, d.Timeout(schema.TimeoutCreate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
 <%  if object.custom_code.post_create_failure && object.async.nil? # Only add if not handled by async error handling -%>
         resource<%= resource_name -%>PostCreateFailure(d, meta)
@@ -335,19 +358,28 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
             return nil, err
         }
 
-    <%  if has_project -%>
+        billingProject := ""
+
+<%  if has_project -%>
         project, err := getProject(d, config)
         if err != nil {
             return nil, err
         }
-    <%  end -%>
-    <%  if object.supports_indirect_user_project_override -%>
-        var project string
+        billingProject = project
+<%  end -%>
+
+<%  if object.supports_indirect_user_project_override -%>
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-            project = parts[1]
+            billingProject = parts[1]
         }
-    <%  end -%>
-        res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+<%  end -%>
+
+        // err == nil indicates that the billing_project value was found
+        if bp, err := getBillingProject(d, config); err == nil {
+        billingProject = bp
+        }
+
+        res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return res, err
         }
@@ -394,19 +426,28 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         return err
     }
 
+    billingProject := ""
+
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
         return err
     }
+    billingProject = project
 <%  end -%>
+
 <%  if object.supports_indirect_user_project_override -%>
-    var project string
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-        project = parts[1]
+        billingProject = parts[1]
     }
 <%  end -%>
-    res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+
+    // err == nil indicates that the billing_project value was found
+    if bp, err := getBillingProject(d, config); err == nil {
+      billingProject = bp
+    }
+
+    res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
 <%  if object.read_error_transform -%>
         return handleNotFoundError(<%= object.read_error_transform %>(err), d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
@@ -448,7 +489,9 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
   // Explicitly set virtual fields to default values if unset
 <%-   object.virtual_fields.each do |field| -%>
     if _, ok := d.GetOk("<%= field.name -%>"); !ok {
-      d.Set("<%= field.name -%>", <%= go_literal(field.default_value) -%>)
+      if err := d.Set("<%= field.name -%>", <%= go_literal(field.default_value) -%>); err != nil {
+      	return fmt.Errorf("Error setting <%= field.name -%>: %s", err)
+      }
     }
 <%    end -%>
 <%  end -%>
@@ -479,7 +522,9 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         casted := flattenedProp.([]interface{})[0]
         if casted != nil {
             for k, v := range casted.(map[string]interface{}) {
-                d.Set(k, v)
+                if err := d.Set(k, v); err != nil {
+                	return fmt.Errorf("Error setting %s: %s", k, err)
+                }
             }
         }
     }
@@ -502,11 +547,14 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
 
+    billingProject := ""
+
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
         return err
     }
+    billingProject = project
 <%  end -%>
 
 <%  if object.input -%>
@@ -526,10 +574,16 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         }
 <%         if object.supports_indirect_user_project_override -%>
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-            project = parts[1]
+            billingProject = parts[1]
         }
 <%         end -%>
-        getRes, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, getUrl, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+
+        // err == nil indicates that the billing_project value was found
+        if bp, err := getBillingProject(d, config); err == nil {
+        billingProject = bp
+        }
+
+        getRes, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", billingProject, getUrl, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
         }
@@ -594,12 +648,17 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             return err
         }
 <%      if object.supports_indirect_user_project_override -%>
-        var project string
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-            project = parts[1]
+            billingProject = parts[1]
         }
 <%      end -%>
-        res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+
+        // err == nil indicates that the billing_project value was found
+        if bp, err := getBillingProject(d, config); err == nil {
+        billingProject = bp
+        }
+
+        res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", billingProject, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
         if err != nil {
             return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
         } else {
@@ -624,10 +683,6 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%              end -%>
         }
 <%          end -%>
-<%      end -%>
-
-<%      props.each do |prop|    -%>
-        d.SetPartial("<%= prop.name.underscore -%>")
 <%      end -%>
     }
 <%  end -%>
@@ -690,12 +745,17 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     }
 <%  end -%>
 <%  if object.supports_indirect_user_project_override -%>
-    var project string
-    if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-        project = parts[1]
+     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+        billingProject = parts[1]
     }
 <%  end -%>
-    res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+
+    // err == nil indicates that the billing_project value was found
+    if bp, err := getBillingProject(d, config); err == nil {
+      billingProject = bp
+    }
+
+    res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", billingProject, url, obj, d.Timeout(schema.TimeoutUpdate)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 
     if err != nil {
         return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
@@ -743,11 +803,14 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <% else -%>
     config := meta.(*Config)
 
+    billingProject := ""
+
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
         return err
     }
+    billingProject = project
 <%  end -%>
 
 <%  if object.mutex -%>
@@ -781,14 +844,20 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%    end -%>
 <%  end -%>
 <%  if object.supports_indirect_user_project_override -%>
-    var project string
+    
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-        project = parts[1]
+        billingProject = parts[1]
     }
+
 <%  end -%>
     log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
 
-    res, err := sendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", <% if has_project || object.supports_indirect_user_project_override %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    // err == nil indicates that the billing_project value was found
+    if bp, err := getBillingProject(d, config); err == nil {
+      billingProject = bp
+    }
+
+    res, err := sendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", billingProject, url, obj, d.Timeout(schema.TimeoutDelete)<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
         return handleNotFoundError(err, d, "<%= object.name -%>")
     }
@@ -844,7 +913,9 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <%-  unless object.virtual_fields.empty? -%>
     // Explicitly set virtual fields to default values on import
   <%-  object.virtual_fields.each do |field| -%>
-    d.Set("<%= field.name %>", <%= go_literal(field.default_value) -%>)
+    if err := d.Set("<%= field.name %>", <%= go_literal(field.default_value) -%>); err != nil {
+    	return nil, fmt.Errorf("Error setting <%= field.name %>: %s", err)
+    }
   <%   end -%>
 <%   end -%>
 <%= lines(compile(pwd + '/' + object.custom_code.post_import)) if object.custom_code.post_import -%>

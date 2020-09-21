@@ -8,7 +8,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceGoogleKmsSecretCiphertext() *schema.Resource {
@@ -60,7 +60,9 @@ func dataSourceGoogleKmsSecretCiphertextRead(d *schema.ResourceData, meta interf
 
 	log.Printf("[INFO] Successfully encrypted plaintext")
 
-	d.Set("ciphertext", encryptResponse.Ciphertext)
+	if err := d.Set("ciphertext", encryptResponse.Ciphertext); err != nil {
+		return fmt.Errorf("Error setting ciphertext: %s", err)
+	}
 	d.SetId(time.Now().UTC().String())
 
 	return nil

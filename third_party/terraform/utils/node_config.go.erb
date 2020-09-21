@@ -4,8 +4,8 @@ package google
 import (
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	containerBeta "google.golang.org/api/container/v1beta1"
 )
 
@@ -211,10 +211,7 @@ func schemaNodeConfig() *schema.Schema {
 				},
 
 				"workload_metadata_config": {
-	<% if version.nil? || version == 'ga' -%>
-					Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/guides/provider_versions.html for more details.",
-	<% end -%>
-					Computed: true,
+					Computed:   true,
 					Type:       schema.TypeList,
 					Optional:   true,
 					MaxItems:   1,
@@ -229,11 +226,8 @@ func schemaNodeConfig() *schema.Schema {
 					},
 				},
 
+	<% unless version == 'ga' -%>
 				"sandbox_config": {
-	<% if version.nil? || version == 'ga' -%>
-					Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/guides/provider_versions.html for more details.",
-					Computed: true,
-	<% end -%>
 					Type:       schema.TypeList,
 					Optional:   true,
 					ForceNew:   true,
@@ -249,7 +243,6 @@ func schemaNodeConfig() *schema.Schema {
 					},
 				},
 
-	<% unless version == 'ga' -%>
 				"boot_disk_kms_key": {
 					Type:       schema.TypeString,
 					Optional:   true,
@@ -421,11 +414,12 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 		nc.Taints = nodeTaints
 	}
 
-<% unless version == 'ga' -%>
+
 	if v, ok := nodeConfig["workload_metadata_config"]; ok {
 		nc.WorkloadMetadataConfig = expandWorkloadMetadataConfig(v)
 	}
 
+<% unless version == 'ga' -%>
 	if v, ok := nodeConfig["sandbox_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.SandboxConfig = &containerBeta.SandboxConfig{
@@ -451,7 +445,6 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 	return nc
 }
 
-<% unless version == 'ga' -%>
 func expandWorkloadMetadataConfig(v interface{}) *containerBeta.WorkloadMetadataConfig {
 	if v == nil {
 		return nil
@@ -466,8 +459,6 @@ func expandWorkloadMetadataConfig(v interface{}) *containerBeta.WorkloadMetadata
 		NodeMetadata: cfg["node_metadata"].(string),
 	}
 }
-
-<% end -%>
 
 <% unless version == 'ga' -%>
 func expandKubeletConfig(v interface{}) *containerBeta.NodeKubeletConfig {
@@ -538,8 +529,8 @@ func flattenNodeConfig(c *containerBeta.NodeConfig) []map[string]interface{} {
 		"min_cpu_platform":         c.MinCpuPlatform,
 		"shielded_instance_config": flattenShieldedInstanceConfig(c.ShieldedInstanceConfig),
 		"taint":                    flattenTaints(c.Taints),
-<% unless version == 'ga' -%>
 		"workload_metadata_config": flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
+<% unless version == 'ga' -%>
 		"sandbox_config": 			flattenSandboxConfig(c.SandboxConfig),
 		"boot_disk_kms_key": 		c.BootDiskKmsKey,
 <% end -%>
@@ -590,7 +581,7 @@ func flattenTaints(c []*containerBeta.NodeTaint) []map[string]interface{} {
 	return result
 }
 
-<% unless version.nil? || version == 'ga' -%>
+
 func flattenWorkloadMetadataConfig(c *containerBeta.WorkloadMetadataConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -600,7 +591,7 @@ func flattenWorkloadMetadataConfig(c *containerBeta.WorkloadMetadataConfig) []ma
 	}
 	return result
 }
-
+<% unless version.nil? || version == 'ga' -%>
 func flattenSandboxConfig(c *containerBeta.SandboxConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
