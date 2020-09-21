@@ -46,7 +46,7 @@ func resourceLoggingFolderSinkCreate(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 	config := meta.(*Config)
-	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleKey)
+	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
 
 	folder := parseFolderId(d.Get("folder"))
 	id, sink := expandResourceLoggingSink(d, "folders", folder)

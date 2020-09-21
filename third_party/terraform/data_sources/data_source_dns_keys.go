@@ -196,7 +196,7 @@ func dataSourceDNSKeysRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	config := meta.(*Config)
-	config.clientDns.UserAgent = fmt.Sprintf("%s %s", config.clientDns.UserAgent, m.ModuleKey)
+	config.clientDns.UserAgent = fmt.Sprintf("%s %s", config.clientDns.UserAgent, m.ModuleName)
 
 	fv, err := parseProjectFieldValue("managedZones", d.Get("managed_zone").(string), "project", d, config, false)
 	if err != nil {

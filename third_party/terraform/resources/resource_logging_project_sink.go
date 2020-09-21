@@ -44,7 +44,7 @@ func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 	config := meta.(*Config)
-	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleKey)
+	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

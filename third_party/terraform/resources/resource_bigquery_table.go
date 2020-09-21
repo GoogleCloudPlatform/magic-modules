@@ -686,7 +686,7 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 	config := meta.(*Config)
-	config.clientBigQuery.UserAgent = fmt.Sprintf("%s %s", config.clientBigQuery.UserAgent, m.ModuleKey)
+	config.clientBigQuery.UserAgent = fmt.Sprintf("%s %s", config.clientBigQuery.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

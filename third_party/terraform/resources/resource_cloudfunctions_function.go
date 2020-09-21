@@ -339,7 +339,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 	config := meta.(*Config)
-	config.clientCloudFunctions.UserAgent = fmt.Sprintf("%s %s", config.clientCloudFunctions.UserAgent, m.ModuleKey)
+	config.clientCloudFunctions.UserAgent = fmt.Sprintf("%s %s", config.clientCloudFunctions.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

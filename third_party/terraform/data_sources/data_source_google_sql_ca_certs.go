@@ -67,7 +67,7 @@ func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 	config := meta.(*Config)
-	config.clientSqlAdmin.UserAgent = fmt.Sprintf("%s %s", config.clientSqlAdmin.UserAgent, m.ModuleKey)
+	config.clientSqlAdmin.UserAgent = fmt.Sprintf("%s %s", config.clientSqlAdmin.UserAgent, m.ModuleName)
 
 	fv, err := parseProjectFieldValue("instances", d.Get("instance").(string), "project", d, config, false)
 	if err != nil {

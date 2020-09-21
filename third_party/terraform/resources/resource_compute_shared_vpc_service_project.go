@@ -52,7 +52,7 @@ func resourceComputeSharedVpcServiceProjectCreate(d *schema.ResourceData, meta i
 		return err
 	}
 	config := meta.(*Config)
-	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleKey)
+	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleName)
 
 	hostProject := d.Get("host_project").(string)
 	serviceProject := d.Get("service_project").(string)

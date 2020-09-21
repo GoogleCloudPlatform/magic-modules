@@ -52,7 +52,7 @@ func dataSourceBillingAccountRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 	config := meta.(*Config)
-	config.clientBilling.UserAgent = fmt.Sprintf("%s %s", config.clientBilling.UserAgent, m.ModuleKey)
+	config.clientBilling.UserAgent = fmt.Sprintf("%s %s", config.clientBilling.UserAgent, m.ModuleName)
 
 	open, openOk := d.GetOkExists("open")
 

@@ -69,7 +69,7 @@ func datasourceGoogleProjectsRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 	config := meta.(*Config)
-	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleKey)
+	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 	params := make(map[string]string)
 	projects := make([]map[string]interface{}, 0)

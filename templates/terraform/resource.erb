@@ -153,7 +153,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 
     config := meta.(*Config)
-    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleKey)
+    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 <%  if object.custom_code.custom_create -%>
     <%= lines(compile(pwd + '/' + object.custom_code.custom_create))  -%>
@@ -435,7 +435,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 
     config := meta.(*Config)
-    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleKey)
+    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
     url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
     if err != nil {
@@ -569,7 +569,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     }
 
     config := meta.(*Config)
-    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleKey)
+    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
     billingProject := ""
 
@@ -831,7 +831,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     }
 
     config := meta.(*Config)
-    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleKey)
+    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 <% if object.custom_code.custom_delete -%>
 <%= lines(compile(pwd + '/' + object.custom_code.custom_delete)) -%>

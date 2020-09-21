@@ -108,7 +108,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 	config := meta.(*Config)
-	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleKey)
+	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleName)
 
 	if err = resourceGoogleProjectCheckPreRequisites(config, d); err != nil {
 		return fmt.Errorf("failed pre-requisites: %v", err)

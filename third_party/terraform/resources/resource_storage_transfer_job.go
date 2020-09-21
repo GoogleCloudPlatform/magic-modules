@@ -385,7 +385,7 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 	if err != nil {
 		return err
 	}
-	config.clientStorageTransfer.UserAgent = fmt.Sprintf("%s %s", config.clientStorageTransfer.UserAgent, m.ModuleKey)
+	config.clientStorageTransfer.UserAgent = fmt.Sprintf("%s %s", config.clientStorageTransfer.UserAgent, m.ModuleName)
 
 	transferJob := &storagetransfer.TransferJob{
 		Description:  d.Get("description").(string),

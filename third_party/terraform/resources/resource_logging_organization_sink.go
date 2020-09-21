@@ -45,7 +45,7 @@ func resourceLoggingOrganizationSinkCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 	config := meta.(*Config)
-	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleKey)
+	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
 
 	org := d.Get("org_id").(string)
 	id, sink := expandResourceLoggingSink(d, "organizations", org)

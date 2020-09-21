@@ -117,7 +117,7 @@ func resourceStorageObjectAclCreate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 	config := meta.(*Config)
-	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleKey)
+	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 	bucket := d.Get("bucket").(string)
 	object := d.Get("object").(string)

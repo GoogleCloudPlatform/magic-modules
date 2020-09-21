@@ -774,7 +774,7 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 	config := meta.(*Config)
-	config.clientDataprocBeta.UserAgent = fmt.Sprintf("%s %s", config.clientDataprocBeta.UserAgent, m.ModuleKey)
+	config.clientDataprocBeta.UserAgent = fmt.Sprintf("%s %s", config.clientDataprocBeta.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

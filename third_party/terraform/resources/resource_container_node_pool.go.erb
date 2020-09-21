@@ -262,7 +262,7 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 	config := meta.(*Config)
-	config.clientContainerBeta.UserAgent = fmt.Sprintf("%s %s", config.clientContainerBeta.UserAgent, m.ModuleKey)
+	config.clientContainerBeta.UserAgent = fmt.Sprintf("%s %s", config.clientContainerBeta.UserAgent, m.ModuleName)
 
 	nodePoolInfo, err := extractNodePoolInformation(d, config)
 	if err != nil {

@@ -187,7 +187,7 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	config := meta.(*Config)
-	config.clientDataproc.UserAgent = fmt.Sprintf("%s %s", config.clientDataproc.UserAgent, m.ModuleKey)
+	config.clientDataproc.UserAgent = fmt.Sprintf("%s %s", config.clientDataproc.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

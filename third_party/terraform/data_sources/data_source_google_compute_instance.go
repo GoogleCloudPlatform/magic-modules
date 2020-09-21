@@ -27,7 +27,7 @@ func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{
 		return err
 	}
 	config := meta.(*Config)
-	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleKey)
+	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleName)
 
 	project, zone, name, err := GetZonalResourcePropertiesFromSelfLinkOrSchema(d, config)
 	if err != nil {

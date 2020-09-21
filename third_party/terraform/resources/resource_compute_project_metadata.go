@@ -53,7 +53,7 @@ func resourceComputeProjectMetadataCreateOrUpdate(d *schema.ResourceData, meta i
 		return err
 	}
 	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleKey)
+	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
 
 	projectID, err := getProject(d, config)
 	if err != nil {

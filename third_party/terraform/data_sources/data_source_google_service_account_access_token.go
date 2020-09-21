@@ -63,7 +63,7 @@ func dataSourceGoogleServiceAccountAccessTokenRead(d *schema.ResourceData, meta 
 		return err
 	}
 	config := meta.(*Config)
-	config.clientIamCredentials.UserAgent = fmt.Sprintf("%s %s", config.clientIamCredentials.UserAgent, m.ModuleKey)
+	config.clientIamCredentials.UserAgent = fmt.Sprintf("%s %s", config.clientIamCredentials.UserAgent, m.ModuleName)
 
 	log.Printf("[INFO] Acquire Service Account AccessToken for %s", d.Get("target_service_account").(string))
 

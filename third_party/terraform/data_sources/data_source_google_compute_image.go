@@ -112,7 +112,7 @@ func dataSourceGoogleComputeImageRead(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleKey)
+	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

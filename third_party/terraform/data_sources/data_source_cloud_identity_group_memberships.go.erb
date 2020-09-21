@@ -45,7 +45,7 @@ func dataSourceGoogleCloudIdentityGroupMembershipsRead(d *schema.ResourceData, m
 		return err
 	}
 	config := meta.(*Config)
-	config.clientCloudIdentity.UserAgent = fmt.Sprintf("%s %s", config.clientCloudIdentity.UserAgent, m.ModuleKey)
+	config.clientCloudIdentity.UserAgent = fmt.Sprintf("%s %s", config.clientCloudIdentity.UserAgent, m.ModuleName)
 
 	result := []map[string]interface{}{}
 	err = config.clientCloudIdentity.Groups.Memberships.List(d.Get("group").(string)).View("FULL").Pages(config.context, func(resp *cloudidentity.ListMembershipsResponse) error {

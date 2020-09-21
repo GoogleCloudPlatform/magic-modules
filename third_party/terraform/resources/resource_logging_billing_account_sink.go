@@ -34,7 +34,7 @@ func resourceLoggingBillingAccountSinkCreate(d *schema.ResourceData, meta interf
 		return err
 	}
 	config := meta.(*Config)
-	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleKey)
+	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
 
 	id, sink := expandResourceLoggingSink(d, "billingAccounts", d.Get("billing_account").(string))
 

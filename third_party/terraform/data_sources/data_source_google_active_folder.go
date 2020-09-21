@@ -37,7 +37,7 @@ func dataSourceGoogleActiveFolderRead(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 	config := meta.(*Config)
-	config.clientResourceManagerV2Beta1.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManagerV2Beta1.UserAgent, m.ModuleKey)
+	config.clientResourceManagerV2Beta1.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManagerV2Beta1.UserAgent, m.ModuleName)
 
 	parent := d.Get("parent").(string)
 	displayName := d.Get("display_name").(string)

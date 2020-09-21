@@ -470,7 +470,7 @@ func resourceComposerEnvironmentCreate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 	config := meta.(*Config)
-	config.clientComposer.UserAgent = fmt.Sprintf("%s %s", config.clientComposer.UserAgent, m.ModuleKey)
+	config.clientComposer.UserAgent = fmt.Sprintf("%s %s", config.clientComposer.UserAgent, m.ModuleName)
 
 	envName, err := resourceComposerEnvironmentName(d, config)
 	if err != nil {

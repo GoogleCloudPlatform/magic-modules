@@ -55,7 +55,7 @@ func resourceRuntimeconfigConfigCreate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 	config := meta.(*Config)
-	config.clientRuntimeconfig.UserAgent = fmt.Sprintf("%s %s", config.clientRuntimeconfig.UserAgent, m.ModuleKey)
+	config.clientRuntimeconfig.UserAgent = fmt.Sprintf("%s %s", config.clientRuntimeconfig.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

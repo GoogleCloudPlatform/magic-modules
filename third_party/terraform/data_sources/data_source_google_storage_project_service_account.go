@@ -36,7 +36,7 @@ func dataSourceGoogleStorageProjectServiceAccountRead(d *schema.ResourceData, me
 		return err
 	}
 	config := meta.(*Config)
-	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleKey)
+	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

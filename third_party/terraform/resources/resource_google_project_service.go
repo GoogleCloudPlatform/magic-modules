@@ -125,7 +125,7 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 	config := meta.(*Config)
-	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleKey)
+	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

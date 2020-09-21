@@ -72,7 +72,7 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 	config := meta.(*Config)
-	config.clientServiceNetworking.UserAgent = fmt.Sprintf("%s %s", config.clientServiceNetworking.UserAgent, m.ModuleKey)
+	config.clientServiceNetworking.UserAgent = fmt.Sprintf("%s %s", config.clientServiceNetworking.UserAgent, m.ModuleName)
 
 	network := d.Get("network").(string)
 	serviceNetworkingNetworkName, err := retrieveServiceNetworkingNetworkName(d, config, network)

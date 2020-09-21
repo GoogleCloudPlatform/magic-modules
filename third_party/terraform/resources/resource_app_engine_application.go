@@ -201,7 +201,7 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 	config := meta.(*Config)
-	config.clientAppEngine.UserAgent = fmt.Sprintf("%s %s", config.clientAppEngine.UserAgent, m.ModuleKey)
+	config.clientAppEngine.UserAgent = fmt.Sprintf("%s %s", config.clientAppEngine.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

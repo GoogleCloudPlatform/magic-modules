@@ -41,7 +41,7 @@ func resourceComputeSharedVpcHostProjectCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 	config := meta.(*Config)
-	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleKey)
+	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleName)
 
 	hostProject := d.Get("project").(string)
 	op, err := config.clientComputeBeta.Projects.EnableXpnHost(hostProject).Do()

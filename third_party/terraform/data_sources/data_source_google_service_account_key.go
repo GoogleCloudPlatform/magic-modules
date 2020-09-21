@@ -48,7 +48,7 @@ func dataSourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interfac
 		return err
 	}
 	config := meta.(*Config)
-	config.clientIAM.UserAgent = fmt.Sprintf("%s %s", config.clientIAM.UserAgent, m.ModuleKey)
+	config.clientIAM.UserAgent = fmt.Sprintf("%s %s", config.clientIAM.UserAgent, m.ModuleName)
 
 	keyName := d.Get("name").(string)
 

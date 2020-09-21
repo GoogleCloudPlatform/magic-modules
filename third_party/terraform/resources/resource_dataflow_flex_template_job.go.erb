@@ -90,7 +90,7 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 	config := meta.(*Config)
-	config.clientDataflow.UserAgent = fmt.Sprintf("%s %s", config.clientDataflow.UserAgent, m.ModuleKey)
+	config.clientDataflow.UserAgent = fmt.Sprintf("%s %s", config.clientDataflow.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

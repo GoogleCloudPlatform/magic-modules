@@ -56,7 +56,7 @@ func dataSourceOrganizationRead(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 	config := meta.(*Config)
-	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleKey)
+	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleName)
 
 	var organization *cloudresourcemanager.Organization
 	if v, ok := d.GetOk("domain"); ok {

@@ -228,7 +228,7 @@ func resourceDataflowJobCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	config := meta.(*Config)
-	config.clientDataflow.UserAgent = fmt.Sprintf("%s %s", config.clientDataflow.UserAgent, m.ModuleKey)
+	config.clientDataflow.UserAgent = fmt.Sprintf("%s %s", config.clientDataflow.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

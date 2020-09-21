@@ -57,7 +57,7 @@ func resourceLoggingExclusionCreate(newUpdaterFunc newResourceLoggingExclusionUp
 			return err
 		}
 		config := meta.(*Config)
-		config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleKey)
+		config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {

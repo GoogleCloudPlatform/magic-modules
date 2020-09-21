@@ -30,7 +30,7 @@ func dataSourceGoogleStorageTransferProjectServiceAccountRead(d *schema.Resource
 		return err
 	}
 	config := meta.(*Config)
-	config.clientStorageTransfer.UserAgent = fmt.Sprintf("%s %s", config.clientStorageTransfer.UserAgent, m.ModuleKey)
+	config.clientStorageTransfer.UserAgent = fmt.Sprintf("%s %s", config.clientStorageTransfer.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

@@ -71,7 +71,7 @@ func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta inte
 		return err
 	}
 	config := meta.(*Config)
-	config.clientIamCredentials.UserAgent = fmt.Sprintf("%s %s", config.clientIamCredentials.UserAgent, m.ModuleKey)
+	config.clientIamCredentials.UserAgent = fmt.Sprintf("%s %s", config.clientIamCredentials.UserAgent, m.ModuleName)
 
 	targetAudience := d.Get("target_audience").(string)
 	creds, err := config.GetCredentials([]string{userInfoScope})

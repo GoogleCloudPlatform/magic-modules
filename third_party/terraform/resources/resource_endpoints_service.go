@@ -222,7 +222,7 @@ func resourceEndpointsServiceCreate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 	config := meta.(*Config)
-	config.clientServiceMan.UserAgent = fmt.Sprintf("%s %s", config.clientServiceMan.UserAgent, m.ModuleKey)
+	config.clientServiceMan.UserAgent = fmt.Sprintf("%s %s", config.clientServiceMan.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

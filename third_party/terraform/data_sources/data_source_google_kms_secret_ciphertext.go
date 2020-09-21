@@ -41,7 +41,7 @@ func dataSourceGoogleKmsSecretCiphertextRead(d *schema.ResourceData, meta interf
 		return err
 	}
 	config := meta.(*Config)
-	config.clientKms.UserAgent = fmt.Sprintf("%s %s", config.clientKms.UserAgent, m.ModuleKey)
+	config.clientKms.UserAgent = fmt.Sprintf("%s %s", config.clientKms.UserAgent, m.ModuleName)
 
 	cryptoKeyId, err := parseKmsCryptoKeyId(d.Get("crypto_key").(string), config)
 

@@ -144,7 +144,7 @@ func setProjectOrganizationPolicy(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 	config := meta.(*Config)
-	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleKey)
+	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleName)
 
 	project := prefixedProject(d.Get("project").(string))
 
