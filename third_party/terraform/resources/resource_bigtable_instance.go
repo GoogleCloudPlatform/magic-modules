@@ -133,7 +133,7 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 	config := meta.(*Config)
-	// Need to set UserAgent
+	config.bigtableClientFactory.UserAgent = fmt.Sprintf("%s %s", config.bigtableClientFactory.UserAgent, m.ModuleName)
 
 	ctx := context.Background()
 
@@ -187,7 +187,14 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.bigtableClientFactory.UserAgent = fmt.Sprintf("%s %s", config.bigtableClientFactory.UserAgent, m.ModuleName)
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -247,7 +254,14 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.bigtableClientFactory.UserAgent = fmt.Sprintf("%s %s", config.bigtableClientFactory.UserAgent, m.ModuleName)
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -296,7 +310,15 @@ func resourceBigtableInstanceDestroy(d *schema.ResourceData, meta interface{}) e
 	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("cannot destroy instance without setting deletion_protection=false and running `terraform apply`")
 	}
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.bigtableClientFactory.UserAgent = fmt.Sprintf("%s %s", config.bigtableClientFactory.UserAgent, m.ModuleName)
+
 	ctx := context.Background()
 
 	project, err := getProject(d, config)

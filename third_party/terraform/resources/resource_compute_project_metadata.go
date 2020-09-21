@@ -75,7 +75,14 @@ func resourceComputeProjectMetadataCreateOrUpdate(d *schema.ResourceData, meta i
 }
 
 func resourceComputeProjectMetadataRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
 
 	// At import time, we have no state to draw from. We'll wrongly pull the
 	// provider default project if we use a normal getProject, so we need to
@@ -106,7 +113,14 @@ func resourceComputeProjectMetadataRead(d *schema.ResourceData, meta interface{}
 }
 
 func resourceComputeProjectMetadataDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
 
 	projectID, err := getProject(d, config)
 	if err != nil {

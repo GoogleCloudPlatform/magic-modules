@@ -122,7 +122,14 @@ func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientResourceManagerV2Beta1.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManagerV2Beta1.UserAgent, m.ModuleName)
 
 	folder, err := getGoogleFolder(d.Id(), d, config)
 	if err != nil {
@@ -153,7 +160,14 @@ func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientResourceManagerV2Beta1.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManagerV2Beta1.UserAgent, m.ModuleName)
 	displayName := d.Get("display_name").(string)
 
 	d.Partial(true)
@@ -201,10 +215,17 @@ func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceGoogleFolderDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientResourceManagerV2Beta1.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManagerV2Beta1.UserAgent, m.ModuleName)
 	displayName := d.Get("display_name").(string)
 
-	err := retryTimeDuration(func() error {
+	err = retryTimeDuration(func() error {
 		_, reqErr := config.clientResourceManagerV2Beta1.Folders.Delete(d.Id()).Do()
 		return reqErr
 	}, d.Timeout(schema.TimeoutDelete))

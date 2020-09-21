@@ -264,7 +264,14 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientDataproc.UserAgent = fmt.Sprintf("%s %s", config.clientDataproc.UserAgent, m.ModuleName)
 	region := d.Get("region").(string)
 
 	project, err := getProject(d, config)
@@ -340,7 +347,14 @@ func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientDataproc.UserAgent = fmt.Sprintf("%s %s", config.clientDataproc.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

@@ -119,7 +119,14 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 }
 
 func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientServiceNetworking.UserAgent = fmt.Sprintf("%s %s", config.clientServiceNetworking.UserAgent, m.ModuleName)
 
 	connectionId, err := parseConnectionId(d.Id())
 	if err != nil {
@@ -168,7 +175,14 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 }
 
 func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientServiceNetworking.UserAgent = fmt.Sprintf("%s %s", config.clientServiceNetworking.UserAgent, m.ModuleName)
 
 	connectionId, err := parseConnectionId(d.Id())
 	if err != nil {
@@ -203,7 +217,14 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 }
 
 func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 	network := d.Get("network").(string)
 	serviceNetworkingNetworkName, err := retrieveServiceNetworkingNetworkName(d, config, network)

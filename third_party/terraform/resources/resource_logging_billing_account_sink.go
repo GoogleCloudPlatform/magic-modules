@@ -49,7 +49,14 @@ func resourceLoggingBillingAccountSinkCreate(d *schema.ResourceData, meta interf
 }
 
 func resourceLoggingBillingAccountSinkRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
 
 	sink, err := config.clientLogging.BillingAccounts.Sinks.Get(d.Id()).Do()
 	if err != nil {
@@ -64,12 +71,19 @@ func resourceLoggingBillingAccountSinkRead(d *schema.ResourceData, meta interfac
 }
 
 func resourceLoggingBillingAccountSinkUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
 
 	sink, updateMask := expandResourceLoggingSinkForUpdate(d)
 
 	// The API will reject any requests that don't explicitly set 'uniqueWriterIdentity' to true.
-	_, err := config.clientLogging.BillingAccounts.Sinks.Patch(d.Id(), sink).
+	_, err = config.clientLogging.BillingAccounts.Sinks.Patch(d.Id(), sink).
 		UpdateMask(updateMask).UniqueWriterIdentity(true).Do()
 	if err != nil {
 		return err
@@ -79,9 +93,16 @@ func resourceLoggingBillingAccountSinkUpdate(d *schema.ResourceData, meta interf
 }
 
 func resourceLoggingBillingAccountSinkDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	var m providerMeta
 
-	_, err := config.clientLogging.Projects.Sinks.Delete(d.Id()).Do()
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
+	config := meta.(*Config)
+	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
+
+	_, err = config.clientLogging.Projects.Sinks.Delete(d.Id()).Do()
 	if err != nil {
 		return err
 	}

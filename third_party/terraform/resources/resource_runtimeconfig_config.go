@@ -83,7 +83,14 @@ func resourceRuntimeconfigConfigCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceRuntimeconfigConfigRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientRuntimeconfig.UserAgent = fmt.Sprintf("%s %s", config.clientRuntimeconfig.UserAgent, m.ModuleName)
 
 	fullName := d.Id()
 	runConfig, err := config.clientRuntimeconfig.Projects.Configs.Get(fullName).Do()
@@ -120,7 +127,14 @@ func resourceRuntimeconfigConfigRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceRuntimeconfigConfigUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientRuntimeconfig.UserAgent = fmt.Sprintf("%s %s", config.clientRuntimeconfig.UserAgent, m.ModuleName)
 
 	// Update works more like an 'overwrite' method - we build a new runtimeconfig.RuntimeConfig struct and it becomes
 	// the new config. This means our Update logic looks an awful lot like Create (and hence, doesn't use
@@ -133,7 +147,7 @@ func resourceRuntimeconfigConfigUpdate(d *schema.ResourceData, meta interface{})
 		runtimeConfig.Description = v.(string)
 	}
 
-	_, err := config.clientRuntimeconfig.Projects.Configs.Update(fullName, &runtimeConfig).Do()
+	_, err = config.clientRuntimeconfig.Projects.Configs.Update(fullName, &runtimeConfig).Do()
 	if err != nil {
 		return err
 	}
@@ -141,11 +155,18 @@ func resourceRuntimeconfigConfigUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceRuntimeconfigConfigDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientRuntimeconfig.UserAgent = fmt.Sprintf("%s %s", config.clientRuntimeconfig.UserAgent, m.ModuleName)
 
 	fullName := d.Id()
 
-	_, err := config.clientRuntimeconfig.Projects.Configs.Delete(fullName).Do()
+	_, err = config.clientRuntimeconfig.Projects.Configs.Delete(fullName).Do()
 	if err != nil {
 		return err
 	}

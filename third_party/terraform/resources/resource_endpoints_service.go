@@ -293,7 +293,15 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 	// be tweaked if the user is using gcloud.  In the interest of simplicity,
 	// we currently only support full rollouts - anyone trying to do incremental
 	// rollouts or A/B testing is going to need a more precise tool than this resource.
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientServiceMan.UserAgent = fmt.Sprintf("%s %s", config.clientServiceMan.UserAgent, m.ModuleName)
+
 	serviceName := d.Get("service_name").(string)
 
 	log.Printf("[DEBUG] Updating ManagedService %q", serviceName)
@@ -349,7 +357,14 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceEndpointsServiceDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientServiceMan.UserAgent = fmt.Sprintf("%s %s", config.clientServiceMan.UserAgent, m.ModuleName)
 
 	log.Printf("[DEBUG] Deleting ManagedService %q", d.Id())
 
@@ -363,7 +378,14 @@ func resourceEndpointsServiceDelete(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceEndpointsServiceRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientServiceMan.UserAgent = fmt.Sprintf("%s %s", config.clientServiceMan.UserAgent, m.ModuleName)
 
 	log.Printf("[DEBUG] Reading ManagedService %q", d.Id())
 

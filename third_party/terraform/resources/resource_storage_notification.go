@@ -128,7 +128,14 @@ func resourceStorageNotificationCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceStorageNotificationRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
 
 	bucket, notificationID := resourceStorageNotificationParseID(d.Id())
 
@@ -166,11 +173,18 @@ func resourceStorageNotificationRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceStorageNotificationDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
 
 	bucket, notificationID := resourceStorageNotificationParseID(d.Id())
 
-	err := config.clientStorage.Notifications.Delete(bucket, notificationID).Do()
+	err = config.clientStorage.Notifications.Delete(bucket, notificationID).Do()
 	if err != nil {
 		return fmt.Errorf("Error deleting notification configuration %s for bucket %s: %v", notificationID, bucket, err)
 	}

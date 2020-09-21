@@ -126,7 +126,14 @@ func resourceGoogleOrganizationIamCustomRoleCreate(d *schema.ResourceData, meta 
 }
 
 func resourceGoogleOrganizationIamCustomRoleRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientIAM.UserAgent = fmt.Sprintf("%s %s", config.clientIAM.UserAgent, m.ModuleName)
 
 	role, err := config.clientIAM.Organizations.Roles.Get(d.Id()).Do()
 	if err != nil {
@@ -167,7 +174,14 @@ func resourceGoogleOrganizationIamCustomRoleRead(d *schema.ResourceData, meta in
 }
 
 func resourceGoogleOrganizationIamCustomRoleUpdate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientIAM.UserAgent = fmt.Sprintf("%s %s", config.clientIAM.UserAgent, m.ModuleName)
 
 	d.Partial(true)
 
@@ -203,7 +217,14 @@ func resourceGoogleOrganizationIamCustomRoleUpdate(d *schema.ResourceData, meta 
 }
 
 func resourceGoogleOrganizationIamCustomRoleDelete(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientIAM.UserAgent = fmt.Sprintf("%s %s", config.clientIAM.UserAgent, m.ModuleName)
 
 	r, err := config.clientIAM.Organizations.Roles.Get(d.Id()).Do()
 	if err == nil && r != nil && r.Deleted && d.Get("deleted").(bool) {

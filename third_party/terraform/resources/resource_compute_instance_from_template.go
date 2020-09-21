@@ -96,7 +96,7 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
+	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
