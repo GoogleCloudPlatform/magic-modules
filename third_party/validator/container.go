@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func expandContainerEnabledObject(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {

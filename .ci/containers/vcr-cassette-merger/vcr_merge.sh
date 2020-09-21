@@ -24,4 +24,5 @@ if [ $? -eq 0 ]; then
   gsutil -m rm -r gs://vcr-$GOOGLE_PROJECT/beta/refs/heads/auto-pr-$PR_NUMBER/
 fi
 
+
 set -e

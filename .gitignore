@@ -43,3 +43,6 @@ tools/ansible-pr/templates/*
 
 # Used by OiCS tutorial
 build/*
+
+# vscode workspace settings
+.vscode

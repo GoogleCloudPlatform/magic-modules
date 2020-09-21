@@ -14,6 +14,13 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   AccessPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        If you are using User ADCs (Application Default Credentials) with this resource,
+        you must specify a `billing_project` and set `user_project_override` to true 
+        in the provider configuration. Otherwise the ACM API will return a 403 error. 
+        Your account must have the `serviceusage.services.use` permission on the 
+        `billing_project` you defined.
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
       update_minutes: 6
@@ -36,6 +43,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/accesspolicy.erb
   AccessLevel: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        If you are using User ADCs (Application Default Credentials) with this resource,
+        you must specify a `billing_project` and set `user_project_override` to true 
+        in the provider configuration. Otherwise the ACM API will return a 403 error. 
+        Your account must have the `serviceusage.services.use` permission on the 
+        `billing_project` you defined.
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
       update_minutes: 6
@@ -89,6 +103,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.erb
       custom_delete: templates/terraform/custom_delete/replace_all_access_levels_empty_list.go.erb
   ServicePerimeter: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        If you are using User ADCs (Application Default Credentials) with this resource,
+        you must specify a `billing_project` and set `user_project_override` to true 
+        in the provider configuration. Otherwise the ACM API will return a 403 error. 
+        Your account must have the `serviceusage.services.use` permission on the 
+        `billing_project` you defined.
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
       update_minutes: 6
@@ -160,6 +181,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.erb
       custom_delete: templates/terraform/custom_delete/replace_all_service_perimeters_empty_list.go.erb
   ServicePerimeterResource: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        If you are using User ADCs (Application Default Credentials) with this resource,
+        you must specify a `billing_project` and set `user_project_override` to true 
+        in the provider configuration. Otherwise the ACM API will return a 403 error. 
+        Your account must have the `serviceusage.services.use` permission on the 
+        `billing_project` you defined.
     autogen_async: true
     exclude_validator: true
     # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter

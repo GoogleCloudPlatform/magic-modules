@@ -14,5 +14,7 @@ if len(nameParts) != 4 {
 		)
 }
 
-d.Set("project", nameParts[1])
+if err := d.Set("project", nameParts[1]); err != nil {
+	return nil, fmt.Errorf("Error setting project: %s", err)
+}
 return []*schema.ResourceData{d}, nil

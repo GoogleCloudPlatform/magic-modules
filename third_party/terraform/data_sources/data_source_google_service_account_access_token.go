@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	iamcredentials "google.golang.org/api/iamcredentials/v1"
 )
 
@@ -73,7 +73,9 @@ func dataSourceGoogleServiceAccountAccessTokenRead(d *schema.ResourceData, meta 
 	}
 
 	d.SetId(time.Now().UTC().String())
-	d.Set("access_token", at.AccessToken)
+	if err := d.Set("access_token", at.AccessToken); err != nil {
+		return fmt.Errorf("Error setting access_token: %s", err)
+	}
 
 	return nil
 }

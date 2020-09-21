@@ -1,12 +1,13 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"google.golang.org/api/storage/v1"
 )
@@ -53,7 +54,7 @@ func resourceStorageBucketAcl() *schema.Resource {
 	}
 }
 
-func resourceStorageRoleEntityCustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
+func resourceStorageRoleEntityCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	keys := diff.GetChangedKeysPrefix("role_entity")
 	if len(keys) < 1 {
 		return nil
@@ -226,14 +227,18 @@ func resourceStorageBucketAclRead(d *schema.ResourceData, meta interface{}) erro
 			entities = append(entities, item.Role+":"+item.Entity)
 		}
 
-		d.Set("role_entity", entities)
+		if err := d.Set("role_entity", entities); err != nil {
+			return fmt.Errorf("Error setting role_entity: %s", err)
+		}
 	} else {
 		// if we don't set `role_entity` to nil (effectively setting it
 		// to empty in Terraform state), because it's computed now,
 		// Terraform will think it's missing from state, is supposed
 		// to be there, and throw up a diff for role_entity.#. So it
 		// must always be set in state.
-		d.Set("role_entity", nil)
+		if err := d.Set("role_entity", nil); err != nil {
+			return fmt.Errorf("Error setting role_entity: %s", err)
+		}
 	}
 
 	return nil

@@ -218,3 +218,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionNetworkEndpointGroup: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  TargetGrpcProxy: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true

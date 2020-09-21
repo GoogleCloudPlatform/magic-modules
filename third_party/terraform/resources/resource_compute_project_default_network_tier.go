@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -88,7 +88,9 @@ func resourceComputeProjectDefaultNetworkTierRead(d *schema.ResourceData, meta i
 		return fmt.Errorf("Error setting default network tier: %s", err)
 	}
 
-	d.Set("project", projectId)
+	if err := d.Set("project", projectId); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 
 	return nil
 }
