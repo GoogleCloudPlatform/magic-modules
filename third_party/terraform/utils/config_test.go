@@ -37,7 +37,7 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 }
 
 func TestAccConfigLoadValidate_impersonated(t *testing.T) {
-	if os.Getenv(resource.TestEnvVar) == "" {
+	if os.Getenv(TestEnvVar) == "" {
 		t.Skip(fmt.Sprintf("Network access not allowed; use %s=1 to enable", TestEnvVar))
 	}
 	testAccPreCheck(t)

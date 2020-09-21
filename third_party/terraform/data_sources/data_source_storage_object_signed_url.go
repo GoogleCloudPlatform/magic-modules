@@ -49,12 +49,6 @@ func dataSourceGoogleSignedUrl() *schema.Resource {
 				Optional: true,
 				Default:  "",
 			},
-			"credentials": {
-				Type:      schema.TypeString,
-				Sensitive: true,
-				Optional:  true,
-				Removed:   "The provider has deprecated specifying Service Accounts keys through the credentials file. Set the key using the GOOGLE_APPLICATION_CREDENTIALS environment value as mentioned in the docs",
-			},
 			"duration": {
 				Type:     schema.TypeString,
 				Optional: true,
