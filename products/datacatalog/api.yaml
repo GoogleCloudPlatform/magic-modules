@@ -462,6 +462,7 @@ objects:
                 Holds the value for a tag field with string type.
             - !ruby/object:Api::Type::Boolean
               name: boolValue
+              send_empty_value: true
               description: |
                 Holds the value for a tag field with boolean type.
             - !ruby/object:Api::Type::String
