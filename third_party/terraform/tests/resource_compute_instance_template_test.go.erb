@@ -846,7 +846,7 @@ func TestAccComputeInstanceTemplate_invalidDiskType(t *testing.T) {
 	})
 }
 
-func TestAccComputeInstanceTemplate_ScratchDisk(t *testing.T) {
+func TestAccComputeInstanceTemplate_withScratchDisk(t *testing.T) {
 	t.Parallel()
 
 	vcrTest(t, resource.TestCase{
