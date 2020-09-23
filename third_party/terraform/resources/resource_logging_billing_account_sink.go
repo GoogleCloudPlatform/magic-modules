@@ -3,7 +3,7 @@ package google
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceLoggingBillingAccountSink() *schema.Resource {
@@ -49,9 +49,11 @@ func resourceLoggingBillingAccountSinkRead(d *schema.ResourceData, meta interfac
 		return handleNotFoundError(err, d, fmt.Sprintf("Billing Logging Sink %s", d.Get("name").(string)))
 	}
 
-	flattenResourceLoggingSink(d, sink)
-	return nil
+	if err := flattenResourceLoggingSink(d, sink); err != nil {
+		return err
+	}
 
+	return nil
 }
 
 func resourceLoggingBillingAccountSinkUpdate(d *schema.ResourceData, meta interface{}) error {

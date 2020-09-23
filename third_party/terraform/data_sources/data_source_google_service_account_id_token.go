@@ -10,7 +10,7 @@ import (
 	"google.golang.org/api/idtoken"
 	"google.golang.org/api/option"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"golang.org/x/net/context"
 )
 
@@ -91,7 +91,9 @@ func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta inte
 		}
 
 		d.SetId(time.Now().UTC().String())
-		d.Set("id_token", at.Token)
+		if err := d.Set("id_token", at.Token); err != nil {
+			return fmt.Errorf("Error setting id_token: %s", err)
+		}
 
 		return nil
 	}
@@ -121,7 +123,9 @@ func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta inte
 	}
 
 	d.SetId(time.Now().UTC().String())
-	d.Set("id_token", idToken.AccessToken)
+	if err := d.Set("id_token", idToken.AccessToken); err != nil {
+		return fmt.Errorf("Error setting id_token: %s", err)
+	}
 
 	return nil
 }

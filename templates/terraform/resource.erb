@@ -16,6 +16,20 @@
 
 package google
 
+import (
+<%- # We list all the v2 imports here, because we run 'goimports' to guess the correct
+    # set of imports, which will never guess the major version correctly. -%>
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+)
+
 <%= lines(compile(pwd + '/' + object.custom_code.constants)) if object.custom_code.constants -%>
 
 <%
@@ -121,7 +135,7 @@ func resource<%= resource_name -%>() *schema.Resource {
 <% end -%>
 
 <% object.settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
-func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(diff *schema.ResourceDiff, meta interface{}) error {
+func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 <%=
     compile_template(pwd + '/templates/terraform/unordered_list_customize_diff.erb',
                      prop: prop,
@@ -475,7 +489,9 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
   // Explicitly set virtual fields to default values if unset
 <%-   object.virtual_fields.each do |field| -%>
     if _, ok := d.GetOk("<%= field.name -%>"); !ok {
-      d.Set("<%= field.name -%>", <%= go_literal(field.default_value) -%>)
+      if err := d.Set("<%= field.name -%>", <%= go_literal(field.default_value) -%>); err != nil {
+      	return fmt.Errorf("Error setting <%= field.name -%>: %s", err)
+      }
     }
 <%    end -%>
 <%  end -%>
@@ -506,7 +522,9 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         casted := flattenedProp.([]interface{})[0]
         if casted != nil {
             for k, v := range casted.(map[string]interface{}) {
-                d.Set(k, v)
+                if err := d.Set(k, v); err != nil {
+                	return fmt.Errorf("Error setting %s: %s", k, err)
+                }
             }
         }
     }
@@ -665,10 +683,6 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%              end -%>
         }
 <%          end -%>
-<%      end -%>
-
-<%      props.each do |prop|    -%>
-        d.SetPartial("<%= prop.name.underscore -%>")
 <%      end -%>
     }
 <%  end -%>
@@ -899,7 +913,9 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <%-  unless object.virtual_fields.empty? -%>
     // Explicitly set virtual fields to default values on import
   <%-  object.virtual_fields.each do |field| -%>
-    d.Set("<%= field.name %>", <%= go_literal(field.default_value) -%>)
+    if err := d.Set("<%= field.name %>", <%= go_literal(field.default_value) -%>); err != nil {
+    	return nil, fmt.Errorf("Error setting <%= field.name %>: %s", err)
+    }
   <%   end -%>
 <%   end -%>
 <%= lines(compile(pwd + '/' + object.custom_code.post_import)) if object.custom_code.post_import -%>

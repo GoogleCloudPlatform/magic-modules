@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceComputeSharedVpcHostProject() *schema.Resource {
@@ -68,7 +68,9 @@ func resourceComputeSharedVpcHostProjectRead(d *schema.ResourceData, meta interf
 		d.SetId("")
 	}
 
-	d.Set("project", hostProject)
+	if err := d.Set("project", hostProject); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 
 	return nil
 }

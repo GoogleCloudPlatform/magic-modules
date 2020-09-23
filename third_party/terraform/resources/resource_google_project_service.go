@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/serviceusage/v1"
 )
@@ -108,8 +108,12 @@ func resourceGoogleProjectServiceImport(d *schema.ResourceData, m interface{}) (
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("Invalid google_project_service id format for import, expecting `{project}/{service}`, found %s", d.Id())
 	}
-	d.Set("project", parts[0])
-	d.Set("service", parts[1])
+	if err := d.Set("project", parts[0]); err != nil {
+		return nil, fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("service", parts[1]); err != nil {
+		return nil, fmt.Errorf("Error setting service: %s", err)
+	}
 	return []*schema.ResourceData{d}, nil
 }
 
@@ -134,8 +138,12 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 	if _, ok := servicesList[srv]; ok {
 		log.Printf("[DEBUG] service %s was already found to be enabled in project %s", srv, project)
 		d.SetId(id)
-		d.Set("project", project)
-		d.Set("service", srv)
+		if err := d.Set("project", project); err != nil {
+			return fmt.Errorf("Error setting project: %s", err)
+		}
+		if err := d.Set("service", srv); err != nil {
+			return fmt.Errorf("Error setting service: %s", err)
+		}
 		return nil
 	}
 
@@ -182,14 +190,24 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 
 	srv := d.Get("service").(string)
 	if _, ok := servicesList[srv]; ok {
-		d.Set("project", project)
-		d.Set("service", srv)
+		if err := d.Set("project", project); err != nil {
+			return fmt.Errorf("Error setting project: %s", err)
+		}
+		if err := d.Set("service", srv); err != nil {
+			return fmt.Errorf("Error setting service: %s", err)
+		}
 		return nil
 	}
 
-	// The service is was not found in enabled services - remove it from state
-	log.Printf("[DEBUG] service %s not in enabled services for project %s, removing from state", srv, project)
-	d.SetId("")
+	// If we get here due to eventual consistency, the next apply will fix things
+	// instead of re-creating the resource and if we didn't get here by error,
+	// the next apply will (correctly) remove it from state, anyways. Seeing as
+	// no downstreams can possibly get the result, as we're halting execution,
+	// it's safe to rely on refresh for putting the state back in order.
+	if !d.IsNewResource() {
+		// The service is was not found in enabled services - return an error
+		return fmt.Errorf("service %s not in enabled services for project %s", srv, project)
+	}
 	return nil
 }
 

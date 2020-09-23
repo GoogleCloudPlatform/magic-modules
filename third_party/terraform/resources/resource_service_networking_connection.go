@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/servicenetworking/v1"
 )
@@ -145,10 +145,18 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 		return nil
 	}
 
-	d.Set("network", connectionId.Network)
-	d.Set("service", connectionId.Service)
-	d.Set("peering", connection.Peering)
-	d.Set("reserved_peering_ranges", connection.ReservedPeeringRanges)
+	if err := d.Set("network", connectionId.Network); err != nil {
+		return fmt.Errorf("Error setting network: %s", err)
+	}
+	if err := d.Set("service", connectionId.Service); err != nil {
+		return fmt.Errorf("Error setting service: %s", err)
+	}
+	if err := d.Set("peering", connection.Peering); err != nil {
+		return fmt.Errorf("Error setting peering: %s", err)
+	}
+	if err := d.Set("reserved_peering_ranges", connection.ReservedPeeringRanges); err != nil {
+		return fmt.Errorf("Error setting reserved_peering_ranges: %s", err)
+	}
 	return nil
 }
 
@@ -236,8 +244,12 @@ func resourceServiceNetworkingConnectionImportState(d *schema.ResourceData, meta
 		return nil, err
 	}
 
-	d.Set("network", connectionId.Network)
-	d.Set("service", connectionId.Service)
+	if err := d.Set("network", connectionId.Network); err != nil {
+		return nil, fmt.Errorf("Error setting network: %s", err)
+	}
+	if err := d.Set("service", connectionId.Service); err != nil {
+		return nil, fmt.Errorf("Error setting service: %s", err)
+	}
 	return []*schema.ResourceData{d}, nil
 }
 

@@ -1,5 +1,5 @@
 <%# The license inside this block applies to this file.
-	# Copyright 2019 Google Inc.
+	# Copyright 2020 Google Inc.
 	# Licensed under the Apache License, Version 2.0 (the "License");
 	# you may not use this file except in compliance with the License.
 	# You may obtain a copy of the License at
@@ -12,9 +12,18 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-"ip_version": {
-	Type:     schema.TypeString,
-	Optional: true,
-	Removed:  "ipVersion is not used for regional forwarding rules. Please remove this field if you are using it.",
-	Computed: true,
-},
+old, new := d.GetChange("ddl")
+oldDdls := old.([]interface{})
+newDdls := new.([]interface{})
+updateDdls := []string{}
+
+//Only new ddl statments to be add to update call
+for i := len(oldDdls); i < len(newDdls); i++ {
+    updateDdls = append(updateDdls, newDdls[i].(string))
+}
+
+obj["statements"] = strings.Join(updateDdls, ",")
+delete(obj, "name")
+delete(obj, "instance")
+delete(obj, "extraStatements")
+return obj, nil

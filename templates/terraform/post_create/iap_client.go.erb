@@ -1,5 +1,7 @@
 brand := d.Get("brand")
 clientId := flattenIapClientClientId(res["name"], d, config)
 
-d.Set("client_id", clientId)
+if err := d.Set("client_id", clientId); err != nil {
+	return fmt.Errorf("Error setting client_id: %s", err)
+}
 d.SetId(fmt.Sprintf("%s/identityAwareProxyClients/%s", brand, clientId))

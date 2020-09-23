@@ -14,5 +14,7 @@ if len(stringParts) != 4 {
 		)
 }
 
-d.Set("organization", stringParts[1])
+if err := d.Set("organization", stringParts[1]); err != nil {
+	return nil, fmt.Errorf("Error setting organization: %s", err)
+}
 return []*schema.ResourceData{d}, nil
