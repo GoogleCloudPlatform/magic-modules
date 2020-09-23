@@ -1086,7 +1086,9 @@ func resourceSqlDatabaseInstanceImport(d *schema.ResourceData, meta interface{})
 		return nil, err
 	}
 
-	d.Set("deletion_protection", true)
+	if err := d.Set("deletion_protection", true); err != nil {
+		return nil, fmt.Errorf("Error setting deletion_protection: %s", err)
+	}
 
 	// Replace import id for the resource id
 	id, err := replaceVars(d, config, "projects/{{project}}/instances/{{name}}")
