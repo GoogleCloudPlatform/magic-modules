@@ -6,7 +6,7 @@ import (
 	"google.golang.org/api/bigtableadmin/v2"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -42,7 +42,9 @@ func NewBigtableTableUpdater(d *schema.ResourceData, config *Config) (ResourceIa
 		return nil, err
 	}
 
-	d.Set("project", project)
+	if err := d.Set("project", project); err != nil {
+		return nil, fmt.Errorf("Error setting project: %s", err)
+	}
 
 	return &BigtableTableIamUpdater{
 		project:  project,
@@ -66,9 +68,17 @@ func BigtableTableIdParseFunc(d *schema.ResourceData, config *Config) error {
 		values[k] = v
 	}
 
-	d.Set("project", project)
-	d.Set("instance", values["instance"])
-	d.Set("table", values["table"])
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+
+	if err := d.Set("instance", values["instance"]); err != nil {
+		return fmt.Errorf("Error setting instance: %s", err)
+	}
+
+	if err := d.Set("table", values["table"]); err != nil {
+		return fmt.Errorf("Error setting table: %s", err)
+	}
 
 	// Explicitly set the id so imported resources have the same ID format as non-imported ones.
 	d.SetId(fmt.Sprintf("projects/%s/instances/%s/tables/%s", project, values["instance"], values["table"]))
