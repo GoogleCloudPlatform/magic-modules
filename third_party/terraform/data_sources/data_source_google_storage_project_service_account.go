@@ -1,7 +1,8 @@
 package google
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceGoogleStorageProjectServiceAccount() *schema.Resource {
@@ -46,8 +47,12 @@ func dataSourceGoogleStorageProjectServiceAccountRead(d *schema.ResourceData, me
 		return handleNotFoundError(err, d, "GCS service account not found")
 	}
 
-	d.Set("project", project)
-	d.Set("email_address", serviceAccount.EmailAddress)
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("email_address", serviceAccount.EmailAddress); err != nil {
+		return fmt.Errorf("Error setting email_address: %s", err)
+	}
 
 	d.SetId(serviceAccount.EmailAddress)
 

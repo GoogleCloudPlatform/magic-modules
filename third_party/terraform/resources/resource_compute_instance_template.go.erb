@@ -3,16 +3,17 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	computeBeta "google.golang.org/api/compute/v0.beta"
 )
@@ -138,7 +139,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 							Optional:    true,
 							ForceNew:    true,
 							Computed:    true,
-							Description: `The GCE disk type. Can be either "pd-ssd", "local-ssd", or "pd-standard".`,
+							Description: `The GCE disk type. Can be either "pd-ssd", "local-ssd", "pd-balanced" or "pd-standard".`,
 						},
 
 						"labels": {
@@ -526,7 +527,25 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 					},
 				},
 			},
-
+<% unless version == 'ga' -%>
+			"confidential_instance_config": {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				Description: `The Confidential VM config being used by the instance. on_host_maintenance has to be set to TERMINATE or this will fail to create.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enable_confidential_compute": {
+							Type:         schema.TypeBool,
+							Required:     true,
+							Description:  `Defines whether the instance should have confidential compute enabled.`,
+						},
+					},
+				},
+			},
+<% end -%>
 			"guest_accelerator": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -585,7 +604,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 	}
 }
 
-func resourceComputeInstanceTemplateSourceImageCustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
+func resourceComputeInstanceTemplateSourceImageCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	config := meta.(*Config)
 
 	numDisks := diff.Get("disk.#").(int)
@@ -632,7 +651,7 @@ func resourceComputeInstanceTemplateSourceImageCustomizeDiff(diff *schema.Resour
 	return nil
 }
 
-func resourceComputeInstanceTemplateScratchDiskCustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
+func resourceComputeInstanceTemplateScratchDiskCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	// separate func to allow unit testing
 	return resourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(diff)
 }
@@ -660,7 +679,7 @@ func resourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(diff TerraformR
 	return nil
 }
 
-func resourceComputeInstanceTemplateBootDiskCustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
+func resourceComputeInstanceTemplateBootDiskCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	numDisks := diff.Get("disk.#").(int)
 	// No disk except the first can be the boot disk
 	for i := 1; i < numDisks; i++ {
@@ -835,6 +854,9 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		Scheduling:        scheduling,
 		ServiceAccounts:   expandServiceAccounts(d.Get("service_account").([]interface{})),
 		Tags:              resourceInstanceTags(d),
+		<% unless version == 'ga' -%>
+		ConfidentialInstanceConfig:  expandConfidentialInstanceConfig(d),
+		<% end -%>
 		ShieldedInstanceConfig:  expandShieldedVmConfigs(d),
 		DisplayDevice:     expandDisplayDevice(d),
 	}
@@ -1118,10 +1140,14 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error setting tags_fingerprint: %s", err)
 		}
 	} else {
-		d.Set("tags_fingerprint", "")
+		if err := d.Set("tags_fingerprint", ""); err != nil {
+			return fmt.Errorf("Error setting tags_fingerprint: %s", err)
+		}
 	}
 	if instanceTemplate.Properties.Labels != nil {
-		d.Set("labels", instanceTemplate.Properties.Labels)
+		if err := d.Set("labels", instanceTemplate.Properties.Labels); err != nil {
+			return fmt.Errorf("Error setting labels: %s", err)
+		}
 	}
 	if err = d.Set("self_link", instanceTemplate.SelfLink); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
@@ -1203,6 +1229,14 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error setting shielded_instance_config: %s", err)
 		}
 	}
+
+	<% unless version == 'ga' -%>
+	if instanceTemplate.Properties.ConfidentialInstanceConfig != nil {
+		if err = d.Set("confidential_instance_config", flattenConfidentialInstanceConfig(instanceTemplate.Properties.ConfidentialInstanceConfig)); err != nil {
+			return fmt.Errorf("Error setting confidential_instance_config: %s", err)
+		}
+	}
+	<% end -%>
 	if instanceTemplate.Properties.DisplayDevice != nil {
 		if err = d.Set("enable_display", flattenEnableDisplay(instanceTemplate.Properties.DisplayDevice)); err != nil {
 			return fmt.Errorf("Error setting enable_display: %s", err)

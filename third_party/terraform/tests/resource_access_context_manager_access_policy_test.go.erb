@@ -7,8 +7,8 @@ import (
 	"testing"
 	neturl "net/url"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 
@@ -85,6 +85,8 @@ func TestAccAccessContextManager(t *testing.T) {
 		"access_level":               testAccAccessContextManagerAccessLevel_basicTest,
 		"access_level_full":          testAccAccessContextManagerAccessLevel_fullTest,
 		"access_level_custom":        testAccAccessContextManagerAccessLevel_customTest,
+		"access_levels":              testAccAccessContextManagerAccessLevels_basicTest,
+		"service_perimeters":         testAccAccessContextManagerServicePerimeters_basicTest,
 	}
 
 	for name, tc := range testCases {

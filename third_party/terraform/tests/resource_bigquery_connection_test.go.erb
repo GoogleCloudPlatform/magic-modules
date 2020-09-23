@@ -5,10 +5,12 @@ package google
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic(t *testing.T) {
+	// Uses random provider
+	skipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -16,9 +18,12 @@ func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic(t *testing.T) {
 	}
 
 	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckBigqueryConnectionConnectionDestroyProducer(t),
+		PreCheck:          func() { testAccPreCheck(t) },
+		Providers:         testAccProvidersOiCS,
+		CheckDestroy:      testAccCheckBigqueryConnectionConnectionDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryConnectionConnection_bigqueryConnectionBasic(context),

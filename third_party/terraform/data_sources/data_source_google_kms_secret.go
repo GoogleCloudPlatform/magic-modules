@@ -5,7 +5,7 @@ import (
 
 	"encoding/base64"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
 	"time"
 )
@@ -68,7 +68,9 @@ func dataSourceGoogleKmsSecretRead(d *schema.ResourceData, meta interface{}) err
 
 	log.Printf("[INFO] Successfully decrypted ciphertext: %s", ciphertext)
 
-	d.Set("plaintext", string(plaintext[:]))
+	if err := d.Set("plaintext", string(plaintext[:])); err != nil {
+		return fmt.Errorf("Error setting plaintext: %s", err)
+	}
 	d.SetId(time.Now().UTC().String())
 
 	return nil

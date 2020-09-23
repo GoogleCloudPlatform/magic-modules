@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cloudidentity "google.golang.org/api/cloudidentity/v1beta1"
 )
 
@@ -43,23 +43,27 @@ groups or customers/{customer_id} for Google Groups.`,
 func dataSourceGoogleCloudIdentityGroupsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	resp, err := config.clientCloudIdentity.Groups.List().Parent(d.Get("parent").(string)).View("FULL").Do()
+	result := []map[string]interface{}{}
+	err := config.clientCloudIdentity.Groups.List().Parent(d.Get("parent").(string)).View("FULL").Pages(config.context, func(resp *cloudidentity.ListGroupsResponse) error {
+		for _, group := range resp.Groups {
+			result = append(result, map[string]interface{}{
+				"name":         group.Name,
+				"display_name": group.DisplayName,
+				"labels":       group.Labels,
+				"description":  group.Description,
+				"group_key":    flattenCloudIdentityGroupsEntityKey(group.GroupKey),
+			})
+		}
+
+		return nil
+	})
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("CloudIdentityGroups %q", d.Id()))
 	}
 
-	result := []map[string]interface{}{}
-	for _, group := range resp.Groups {
-		result = append(result, map[string]interface{}{
-			"name":         group.Name,
-			"display_name": group.DisplayName,
-			"labels":       group.Labels,
-			"description":  group.Description,
-			"group_key":    flattenCloudIdentityGroupsEntityKey(group.GroupKey),
-		})
+	if err := d.Set("groups", result); err != nil {
+		return fmt.Errorf("Error setting groups: %s", err)
 	}
-
-	d.Set("groups", result)
 	d.SetId(time.Now().UTC().String())
 	return nil
 }

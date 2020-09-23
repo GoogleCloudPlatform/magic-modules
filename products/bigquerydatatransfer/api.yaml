@@ -98,6 +98,11 @@ objects:
           about the format here:
           https://cloud.google.com/appengine/docs/flexible/python/scheduling-jobs-with-cron-yaml#the_schedule_format
           NOTE: the granularity should be at least 8 hours, or less frequent.
+      - !ruby/object:Api::Type::String
+          name: 'notificationPubsubTopic'
+          description: |
+            Pub/Sub topic where notifications will be sent after transfer runs
+            associated with this transfer config finish.
       - !ruby/object:Api::Type::Integer
         name: 'dataRefreshWindowDays'
         description: |
@@ -115,3 +120,16 @@ objects:
         required: true
         description: |
           These parameters are specific to each data source.
+      - !ruby/object:Api::Type::NestedObject
+        name: sensitiveParams
+        # This is a helper object for Terraform only
+        exclude: true
+        url_param_only: true
+        description: |
+          Terraform only field
+        properties:
+          - !ruby/object:Api::Type::String
+            name: secretAccessKey
+            required: true
+            description: |
+              The Secret Access Key of the AWS account transferring data from.

@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
+    // This resource uses custom retry logic that cannot be sped up without
+    // modifying the actual resource
+    skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)

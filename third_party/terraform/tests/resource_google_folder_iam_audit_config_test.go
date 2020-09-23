@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 // Test that an IAM audit config can be applied to a folder
@@ -36,6 +36,8 @@ func TestAccFolderIamAuditConfig_basic(t *testing.T) {
 
 // Test that multiple IAM audit configs can be applied to a folder, one at a time
 func TestAccFolderIamAuditConfig_multiple(t *testing.T) {
+	// Multiple fine-grained resources
+	skipIfVcr(t)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)

@@ -17,5 +17,7 @@
 metadata := res["metadata"].(map[string]interface{})
 name := metadata["index"].(string)
 log.Printf("[DEBUG] Setting Index name, id to %s", name)
-d.Set("name", name)
+if err := d.Set("name", name); err != nil {
+	return fmt.Errorf("Error setting name: %s", err)
+}
 d.SetId(name)

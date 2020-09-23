@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cloudidentity "google.golang.org/api/cloudidentity/v1beta1"
 )
 
@@ -40,22 +40,27 @@ func dataSourceGoogleCloudIdentityGroupMemberships() *schema.Resource {
 func dataSourceGoogleCloudIdentityGroupMembershipsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	resp, err := config.clientCloudIdentity.Groups.Memberships.List(d.Get("group").(string)).View("FULL").Do()
-	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("CloudIdentityGroups %q", d.Id()))
-	}
-
 	result := []map[string]interface{}{}
-	for _, member := range resp.Memberships {
-		result = append(result, map[string]interface{}{
-			"name":                 member.Name,
-			"roles":                flattenCloudIdentityGroupMembershipsRoles(member.Roles),
-			"member_key":           flattenCloudIdentityGroupsEntityKey(member.MemberKey),
-			"preferred_member_key": flattenCloudIdentityGroupsEntityKey(member.PreferredMemberKey),
-		})
+	err := config.clientCloudIdentity.Groups.Memberships.List(d.Get("group").(string)).View("FULL").Pages(config.context, func(resp *cloudidentity.ListMembershipsResponse) error {
+
+		for _, member := range resp.Memberships {
+			result = append(result, map[string]interface{}{
+				"name":                 member.Name,
+				"roles":                flattenCloudIdentityGroupMembershipsRoles(member.Roles),
+				"member_key":           flattenCloudIdentityGroupsEntityKey(member.MemberKey),
+				"preferred_member_key": flattenCloudIdentityGroupsEntityKey(member.PreferredMemberKey),
+			})
+		}
+
+		return nil
+	})
+	if err != nil {
+		return handleNotFoundError(err, d, fmt.Sprintf("CloudIdentityGroupMemberships %q", d.Id()))
 	}
 
-	d.Set("memberships", result)
+	if err := d.Set("memberships", result); err != nil {
+		return fmt.Errorf("Error setting memberships: %s", err)
+	}
 	d.SetId(time.Now().UTC().String())
 	return nil
 }

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceGoogleKmsCryptoKeyVersion() *schema.Resource {
@@ -38,7 +38,6 @@ func dataSourceGoogleKmsCryptoKeyVersion() *schema.Resource {
 			"public_key": {
 				Type:     schema.TypeList,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"algorithm": {
@@ -76,16 +75,16 @@ func dataSourceGoogleKmsCryptoKeyVersionRead(d *schema.ResourceData, meta interf
 	}
 
 	if err := d.Set("version", flattenKmsCryptoKeyVersionVersion(res["name"], d)); err != nil {
-		return fmt.Errorf("Error reading CryptoKeyVersion: %s", err)
+		return fmt.Errorf("Error setting CryptoKeyVersion: %s", err)
 	}
 	if err := d.Set("state", flattenKmsCryptoKeyVersionState(res["state"], d)); err != nil {
-		return fmt.Errorf("Error reading CryptoKeyVersion: %s", err)
+		return fmt.Errorf("Error setting CryptoKeyVersion: %s", err)
 	}
 	if err := d.Set("protection_level", flattenKmsCryptoKeyVersionProtectionLevel(res["protectionLevel"], d)); err != nil {
-		return fmt.Errorf("Error reading CryptoKeyVersion: %s", err)
+		return fmt.Errorf("Error setting CryptoKeyVersion: %s", err)
 	}
 	if err := d.Set("algorithm", flattenKmsCryptoKeyVersionAlgorithm(res["algorithm"], d)); err != nil {
-		return fmt.Errorf("Error reading CryptoKeyVersion: %s", err)
+		return fmt.Errorf("Error setting CryptoKeyVersion: %s", err)
 	}
 
 	url, err = replaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}")
@@ -114,7 +113,7 @@ func dataSourceGoogleKmsCryptoKeyVersionRead(d *schema.ResourceData, meta interf
 		}
 
 		if err := d.Set("public_key", flattenKmsCryptoKeyVersionPublicKey(res, d)); err != nil {
-			return fmt.Errorf("Error reading CryptoKeyVersion public key: %s", err)
+			return fmt.Errorf("Error setting CryptoKeyVersion public key: %s", err)
 		}
 	}
 	d.SetId(fmt.Sprintf("//cloudkms.googleapis.com/v1/%s/cryptoKeyVersions/%d", d.Get("crypto_key"), d.Get("version")))
