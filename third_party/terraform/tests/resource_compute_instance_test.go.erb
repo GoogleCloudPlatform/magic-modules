@@ -4796,7 +4796,7 @@ func testAccComputeInstance_subnetworkChange(suffix, instance string) string {
 		name          = "tf-test-compute-subnet-%s"
 		ip_cidr_range = "10.0.0.0/16"
 		region        = "us-east1"
-		network       = google_compute_network.inst-test-network.self_link
+		network       = google_compute_network.inst-test-network.id
 		secondary_ip_range {
 			range_name    = "inst-test-secondary"
 			ip_cidr_range = "172.16.0.0/20"
@@ -4811,7 +4811,7 @@ func testAccComputeInstance_subnetworkChange(suffix, instance string) string {
 		name          = "tf-test-compute-subnet2-%s"
 		ip_cidr_range = "10.3.0.0/16"
 		region        = "us-east1"
-		network       = google_compute_network.inst-test-network2.self_link
+		network       = google_compute_network.inst-test-network2.id
 		secondary_ip_range {
 			range_name    = "inst-test-secondary2"
 			ip_cidr_range = "173.16.0.0/20"
@@ -4830,12 +4830,12 @@ func testAccComputeInstance_subnetworkChange(suffix, instance string) string {
 
 		boot_disk {
 			initialize_params {
-				image = data.google_compute_image.my_image.self_link
+				image = data.google_compute_image.my_image.id
 			}
 		}
 
 		network_interface {
-			subnetwork = google_compute_subnetwork.inst-test-subnetwork.self_link
+			subnetwork = google_compute_subnetwork.inst-test-subnetwork.id
 			access_config {
 				network_tier = "STANDARD"
 			}
@@ -4874,7 +4874,7 @@ func testAccComputeInstance_subnetworkChangeUpdate(suffix, instance string) stri
 		name          = "tf-test-compute-subnet-%s"
 		ip_cidr_range = "10.0.0.0/16"
 		region        = "us-east1"
-		network       = google_compute_network.inst-test-network.self_link
+		network       = google_compute_network.inst-test-network.id
 		secondary_ip_range {
 			range_name    = "inst-test-secondary"
 			ip_cidr_range = "172.16.0.0/20"
@@ -4889,7 +4889,7 @@ func testAccComputeInstance_subnetworkChangeUpdate(suffix, instance string) stri
 		name          = "tf-test-compute-subnet2-%s"
 		ip_cidr_range = "10.3.0.0/16"
 		region        = "us-east1"
-		network       = google_compute_network.inst-test-network2.self_link
+		network       = google_compute_network.inst-test-network2.id
 		secondary_ip_range {
 			range_name    = "inst-test-secondary2"
 			ip_cidr_range = "173.16.0.0/20"
@@ -4908,12 +4908,12 @@ func testAccComputeInstance_subnetworkChangeUpdate(suffix, instance string) stri
 
 		boot_disk {
 			initialize_params {
-				image = data.google_compute_image.my_image.self_link
+				image = data.google_compute_image.my_image.id
 			}
 		}
 
 		network_interface {
-			subnetwork = google_compute_subnetwork.inst-test-subnetwork2.self_link
+			subnetwork = google_compute_subnetwork.inst-test-subnetwork2.id
 
 			alias_ip_range {
 				subnetwork_range_name = google_compute_subnetwork.inst-test-subnetwork2.secondary_ip_range[0].range_name
