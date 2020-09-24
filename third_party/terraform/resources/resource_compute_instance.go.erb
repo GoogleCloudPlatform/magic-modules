@@ -1436,9 +1436,6 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		// This will opt them out from being modified in the patch call.
 		networkInterface.NetworkIP = ""
 		networkInterface.AccessConfigs = nil
-		networkInterface.Fingerprint = instNetworkInterface.Fingerprint
-		updateCall := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterface).Do
-
 		if !updateDuringStop && d.HasChange(prefix + ".alias_ip_range") {
 			// Alias IP ranges cannot be updated; they must be removed and then added.
 			// unless you are changing subnetwork/network
@@ -1462,6 +1459,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				}
 				instNetworkInterface = instance.NetworkInterfaces[i]
 			}
+
+			networkInterface.Fingerprint = instNetworkInterface.Fingerprint
+			updateCall := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterface).Do
 			op, err := updateCall()
 			if err != nil {
 				return errwrap.Wrapf("Error updating network interface: {{err}}", err)
@@ -1471,6 +1471,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				return opErr
 			}
 		} else {
+
+			networkInterface.Fingerprint = instNetworkInterface.Fingerprint
+			updateCall := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterface).Do
 			updatesToNIWhileStopped = append(updatesToNIWhileStopped, updateCall)
 		}
 	}
