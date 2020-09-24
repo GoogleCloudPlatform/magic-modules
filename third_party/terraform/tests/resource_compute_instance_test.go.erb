@@ -1878,8 +1878,6 @@ func TestAccComputeInstance_resourcePolicyCollocate(t *testing.T) {
 
 func TestAccComputeInstance_subnetworkChange(t *testing.T) {
 	t.Parallel()
-
-	var instance compute.Instance
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	suffix := fmt.Sprintf("%s", randString(t, 10))
 
