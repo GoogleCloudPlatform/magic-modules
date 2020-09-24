@@ -2968,6 +2968,7 @@ func expandAuthenticatorGroupsConfig(configured interface{}) *containerBeta.Auth
 	return result
 }
 
+<% unless version == 'ga' -%>
 func expandNotificationConfig(configured interface{}) *containerBeta.NotificationConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -2998,6 +2999,7 @@ func expandNotificationConfig(configured interface{}) *containerBeta.Notificatio
 		},
 	}
 }
+<% end -%>
 
 func expandMasterAuth(configured interface{}) *containerBeta.MasterAuth {
 	l := configured.([]interface{})
