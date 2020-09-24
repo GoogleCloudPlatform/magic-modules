@@ -1882,19 +1882,6 @@ func TestAccComputeInstance_subnetworkChange(t *testing.T) {
 	var instance compute.Instance
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	suffix := fmt.Sprintf("%s", randString(t, 10))
-	subnet := ""
-
-	checkAndUpdateSubnet := func(instance *compute.Instance) resource.TestCheckFunc {
-		oldSubnetwork := subnet
-		return func(s *terraform.State) error {
-			subnet = instance.NetworkInterfaces[0].Subnetwork
-			if oldSubnetwork != subnet {
-				return nil
-			}
-
-			return fmt.Errorf("subnetwork equivalent to previous... expected change; %s : %s", oldSubnetwork, subnet)
-		}
-	}
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -1903,20 +1890,10 @@ func TestAccComputeInstance_subnetworkChange(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_subnetworkChange(suffix, instanceName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceHasAliasIpRange(&instance, "inst-test-tertiary", "10.1.0.0/20"),
-					checkAndUpdateSubnet(&instance),
-				),
 			},
 			computeInstanceImportStep("us-east1-d", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstance_subnetworkChangeUpdate(suffix, instanceName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceHasAliasIpRange(&instance, "inst-test-secondary2", "173.16.0.0/24"),
-					checkAndUpdateSubnet(&instance),
-				),
 			},
 			computeInstanceImportStep("us-east1-d", instanceName, []string{"allow_stopping_for_update"}),
 		},
@@ -4807,10 +4784,12 @@ func testAccComputeInstance_subnetworkChange(suffix, instance string) string {
 
 	resource "google_compute_network" "inst-test-network" {
 		name = "tf-test-network-%s"
+		auto_create_subnetworks = false
 	}
 
 	resource "google_compute_network" "inst-test-network2" {
 		name = "tf-test-network2-%s"
+		auto_create_subnetworks = false
 	}
 
 	resource "google_compute_subnetwork" "inst-test-subnetwork" {
@@ -4883,10 +4862,12 @@ func testAccComputeInstance_subnetworkChangeUpdate(suffix, instance string) stri
 
 	resource "google_compute_network" "inst-test-network" {
 		name = "tf-test-network-%s"
+		auto_create_subnetworks = false
 	}
 
 	resource "google_compute_network" "inst-test-network2" {
 		name = "tf-test-network2-%s"
+		auto_create_subnetworks = false
 	}
 
 	resource "google_compute_subnetwork" "inst-test-subnetwork" {
