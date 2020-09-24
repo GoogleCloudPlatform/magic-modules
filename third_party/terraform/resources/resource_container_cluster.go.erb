@@ -594,15 +594,13 @@ func resourceContainerCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
-				MaxItems: 	 1
+				MaxItems: 	 1,
 				Description: `The notification config for sending cluster upgrade notifications`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"pubsub": {
 							Type:        schema.TypeList,
-							Optional:    true,
-							Computed:    true,
-							Required:    true
+							Required:    true,
 							MaxItems:    1,
 							Description: `Notification config for pubsub`,
 							Elem: &schema.Resource{
@@ -614,7 +612,7 @@ func resourceContainerCluster() *schema.Resource {
 									},
 									"topic": {
 										Type:        schema.TypeString,
-										Optional:    true
+										Optional:    true,
 										Description: `The pubsub topic to send the notification to, must be in the format: projects/{project}/topics/{topic}`,
 									},
 								},
@@ -3241,8 +3239,8 @@ func flattenNotificationConfig(c *containerBeta.NotificationConfig) []map[string
 		{
 			"pubsub": []map[string]interface{}{
 				{
-					"enabled": c.PubSub.Enabled
-					"topic": c.PubSub.Topic
+					"enabled": c.Pubsub.Enabled,
+					"topic": c.Pubsub.Topic,
 				},
 			},
 		},
