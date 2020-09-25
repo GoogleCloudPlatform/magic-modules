@@ -62,14 +62,12 @@ func dataSourceGoogleProjects() *schema.Resource {
 }
 
 func datasourceGoogleProjectsRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
+	config.userAgent = userAgent
 
 	params := make(map[string]string)
 	projects := make([]map[string]interface{}, 0)

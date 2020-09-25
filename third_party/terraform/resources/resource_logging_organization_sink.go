@@ -38,14 +38,12 @@ func resourceLoggingOrganizationSink() *schema.Resource {
 }
 
 func resourceLoggingOrganizationSinkCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
+	config.clientLogging.UserAgent = userAgent
 
 	org := d.Get("org_id").(string)
 	id, sink := expandResourceLoggingSink(d, "organizations", org)
@@ -63,14 +61,12 @@ func resourceLoggingOrganizationSinkCreate(d *schema.ResourceData, meta interfac
 }
 
 func resourceLoggingOrganizationSinkRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
+	config.clientLogging.UserAgent = userAgent
 
 	sink, err := config.clientLogging.Organizations.Sinks.Get(d.Id()).Do()
 	if err != nil {
@@ -89,14 +85,12 @@ func resourceLoggingOrganizationSinkRead(d *schema.ResourceData, meta interface{
 }
 
 func resourceLoggingOrganizationSinkUpdate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
+	config.clientLogging.UserAgent = userAgent
 
 	sink, updateMask := expandResourceLoggingSinkForUpdate(d)
 	// It seems the API might actually accept an update for include_children; this is not in the list of updatable
@@ -115,14 +109,12 @@ func resourceLoggingOrganizationSinkUpdate(d *schema.ResourceData, meta interfac
 }
 
 func resourceLoggingOrganizationSinkDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
+	config.clientLogging.UserAgent = userAgent
 
 	_, err = config.clientLogging.Projects.Sinks.Delete(d.Id()).Do()
 	if err != nil {

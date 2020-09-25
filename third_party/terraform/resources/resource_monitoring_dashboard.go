@@ -72,14 +72,12 @@ func resourceMonitoringDashboard() *schema.Resource {
 }
 
 func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
+	config.userAgent = userAgent
 
 	obj, err := structure.ExpandJsonFromString(d.Get("dashboard_json").(string))
 	if err != nil {
@@ -110,14 +108,12 @@ func resourceMonitoringDashboardCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
+	config.userAgent = userAgent
 
 	url := config.MonitoringBasePath + "v1/" + d.Id()
 
@@ -147,14 +143,12 @@ func resourceMonitoringDashboardRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
+	config.userAgent = userAgent
 
 	o, n := d.GetChange("dashboard_json")
 	oObj, err := structure.ExpandJsonFromString(o.(string))
@@ -183,14 +177,12 @@ func resourceMonitoringDashboardUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceMonitoringDashboardDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
+	config.userAgent = userAgent
 
 	url := config.MonitoringBasePath + "v1/" + d.Id()
 

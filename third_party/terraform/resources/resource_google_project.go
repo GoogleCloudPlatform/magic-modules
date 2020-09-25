@@ -101,14 +101,12 @@ func resourceGoogleProject() *schema.Resource {
 }
 
 func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleName)
+	config.clientResourceManager.UserAgent = userAgent
 
 	if err = resourceGoogleProjectCheckPreRequisites(config, d); err != nil {
 		return fmt.Errorf("failed pre-requisites: %v", err)
@@ -217,14 +215,12 @@ func resourceGoogleProjectCheckPreRequisites(config *Config, d *schema.ResourceD
 }
 
 func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleName)
+	config.clientResourceManager.UserAgent = userAgent
 	parts := strings.Split(d.Id(), "/")
 	pid := parts[len(parts)-1]
 
@@ -342,14 +338,12 @@ func parseFolderId(v interface{}) string {
 }
 
 func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleName)
+	config.clientResourceManager.UserAgent = userAgent
 	parts := strings.Split(d.Id(), "/")
 	pid := parts[len(parts)-1]
 	project_name := d.Get("name").(string)
@@ -422,14 +416,12 @@ func updateProject(config *Config, d *schema.ResourceData, projectName string, d
 }
 
 func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleName)
+	config.clientResourceManager.UserAgent = userAgent
 	// Only delete projects if skip_delete isn't set
 	if !d.Get("skip_delete").(bool) {
 		parts := strings.Split(d.Id(), "/")

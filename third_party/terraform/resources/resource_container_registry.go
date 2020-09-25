@@ -43,14 +43,12 @@ func resourceContainerRegistry() *schema.Resource {
 }
 
 func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
+	config.userAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -80,14 +78,12 @@ func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceContainerRegistryRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
+	config.clientStorage.UserAgent = userAgent
 
 	location := d.Get("location").(string)
 	project, err := getProject(d, config)

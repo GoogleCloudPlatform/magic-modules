@@ -68,14 +68,12 @@ func resourceGoogleFolder() *schema.Resource {
 }
 
 func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientResourceManagerV2Beta1.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManagerV2Beta1.UserAgent, m.ModuleName)
+	config.clientResourceManagerV2Beta1.UserAgent = userAgent
 
 	displayName := d.Get("display_name").(string)
 	parent := d.Get("parent").(string)
@@ -122,14 +120,12 @@ func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientResourceManagerV2Beta1.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManagerV2Beta1.UserAgent, m.ModuleName)
+	config.clientResourceManagerV2Beta1.UserAgent = userAgent
 
 	folder, err := getGoogleFolder(d.Id(), d, config)
 	if err != nil {
@@ -160,14 +156,12 @@ func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientResourceManagerV2Beta1.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManagerV2Beta1.UserAgent, m.ModuleName)
+	config.clientResourceManagerV2Beta1.UserAgent = userAgent
 	displayName := d.Get("display_name").(string)
 
 	d.Partial(true)
@@ -215,14 +209,12 @@ func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceGoogleFolderDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientResourceManagerV2Beta1.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManagerV2Beta1.UserAgent, m.ModuleName)
+	config.clientResourceManagerV2Beta1.UserAgent = userAgent
 	displayName := d.Get("display_name").(string)
 
 	err = retryTimeDuration(func() error {

@@ -48,14 +48,12 @@ func resourceRuntimeconfigConfig() *schema.Resource {
 }
 
 func resourceRuntimeconfigConfigCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientRuntimeconfig.UserAgent = fmt.Sprintf("%s %s", config.clientRuntimeconfig.UserAgent, m.ModuleName)
+	config.clientRuntimeconfig.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -83,14 +81,12 @@ func resourceRuntimeconfigConfigCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceRuntimeconfigConfigRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientRuntimeconfig.UserAgent = fmt.Sprintf("%s %s", config.clientRuntimeconfig.UserAgent, m.ModuleName)
+	config.clientRuntimeconfig.UserAgent = userAgent
 
 	fullName := d.Id()
 	runConfig, err := config.clientRuntimeconfig.Projects.Configs.Get(fullName).Do()
@@ -127,14 +123,12 @@ func resourceRuntimeconfigConfigRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceRuntimeconfigConfigUpdate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientRuntimeconfig.UserAgent = fmt.Sprintf("%s %s", config.clientRuntimeconfig.UserAgent, m.ModuleName)
+	config.clientRuntimeconfig.UserAgent = userAgent
 
 	// Update works more like an 'overwrite' method - we build a new runtimeconfig.RuntimeConfig struct and it becomes
 	// the new config. This means our Update logic looks an awful lot like Create (and hence, doesn't use
@@ -155,14 +149,12 @@ func resourceRuntimeconfigConfigUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceRuntimeconfigConfigDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientRuntimeconfig.UserAgent = fmt.Sprintf("%s %s", config.clientRuntimeconfig.UserAgent, m.ModuleName)
+	config.clientRuntimeconfig.UserAgent = userAgent
 
 	fullName := d.Id()
 

@@ -84,14 +84,12 @@ func resourceComputeRouterInterface() *schema.Resource {
 }
 
 func resourceComputeRouterInterfaceCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
+	config.clientCompute.UserAgent = userAgent
 
 	region, err := getRegion(d, config)
 	if err != nil {
@@ -175,14 +173,12 @@ func resourceComputeRouterInterfaceCreate(d *schema.ResourceData, meta interface
 }
 
 func resourceComputeRouterInterfaceRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
+	config.clientCompute.UserAgent = userAgent
 
 	region, err := getRegion(d, config)
 	if err != nil {
@@ -239,14 +235,12 @@ func resourceComputeRouterInterfaceRead(d *schema.ResourceData, meta interface{}
 }
 
 func resourceComputeRouterInterfaceDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
+	config.clientCompute.UserAgent = userAgent
 
 	region, err := getRegion(d, config)
 	if err != nil {

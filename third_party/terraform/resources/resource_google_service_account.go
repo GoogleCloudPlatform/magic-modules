@@ -68,14 +68,12 @@ func resourceGoogleServiceAccount() *schema.Resource {
 }
 
 func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientIAM.UserAgent = fmt.Sprintf("%s %s", config.clientIAM.UserAgent, m.ModuleName)
+	config.clientIAM.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -115,14 +113,12 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientIAM.UserAgent = fmt.Sprintf("%s %s", config.clientIAM.UserAgent, m.ModuleName)
+	config.clientIAM.UserAgent = userAgent
 
 	// Confirm the service account exists
 	sa, err := config.clientIAM.Projects.ServiceAccounts.Get(d.Id()).Do()
@@ -155,14 +151,12 @@ func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientIAM.UserAgent = fmt.Sprintf("%s %s", config.clientIAM.UserAgent, m.ModuleName)
+	config.clientIAM.UserAgent = userAgent
 	name := d.Id()
 	_, err = config.clientIAM.Projects.ServiceAccounts.Delete(name).Do()
 	if err != nil {
@@ -173,14 +167,12 @@ func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}
 }
 
 func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientIAM.UserAgent = fmt.Sprintf("%s %s", config.clientIAM.UserAgent, m.ModuleName)
+	config.clientIAM.UserAgent = userAgent
 	sa, err := config.clientIAM.Projects.ServiceAccounts.Get(d.Id()).Do()
 	if err != nil {
 		return fmt.Errorf("Error retrieving service account %q: %s", d.Id(), err)

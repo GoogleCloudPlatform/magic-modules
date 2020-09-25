@@ -97,14 +97,12 @@ func resourceBigtableGCPolicy() *schema.Resource {
 }
 
 func resourceBigtableGCPolicyCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.bigtableClientFactory.UserAgent = fmt.Sprintf("%s %s", config.bigtableClientFactory.UserAgent, m.ModuleName)
+	config.bigtableClientFactory.UserAgent = userAgent
 
 	ctx := context.Background()
 
@@ -151,14 +149,12 @@ func resourceBigtableGCPolicyCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.bigtableClientFactory.UserAgent = fmt.Sprintf("%s %s", config.bigtableClientFactory.UserAgent, m.ModuleName)
+	config.bigtableClientFactory.UserAgent = userAgent
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -197,14 +193,12 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.bigtableClientFactory.UserAgent = fmt.Sprintf("%s %s", config.bigtableClientFactory.UserAgent, m.ModuleName)
+	config.bigtableClientFactory.UserAgent = userAgent
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
