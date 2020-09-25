@@ -125,7 +125,6 @@ func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) e
 	if err != nil {
 		return err
 	}
-	config.userAgent = userAgent
 
 	log.Printf("[DEBUG] Fetching logging bucket config: %#v", d.Id())
 
@@ -134,7 +133,7 @@ func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	res, err := sendRequest(config, "GET", "", url, nil)
+	res, err := sendRequest(config, "GET", "", url, userAgent, nil)
 	if err != nil {
 		log.Printf("[WARN] Unable to acquire logging bucket config at %s", d.Id())
 
@@ -164,7 +163,6 @@ func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return err
 	}
-	config.userAgent = userAgent
 
 	obj := make(map[string]interface{})
 
@@ -188,7 +186,7 @@ func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	_, err = sendRequestWithTimeout(config, "PATCH", "", url, obj, d.Timeout(schema.TimeoutUpdate))
+	_, err = sendRequestWithTimeout(config, "PATCH", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return fmt.Errorf("Error updating Logging Bucket Config %q: %s", d.Id(), err)
 	}

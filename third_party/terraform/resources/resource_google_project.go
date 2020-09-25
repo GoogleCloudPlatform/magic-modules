@@ -149,7 +149,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	waitErr := resourceManagerOperationWaitTime(config, opAsMap, "creating folder", d.Timeout(schema.TimeoutCreate))
+	waitErr := resourceManagerOperationWaitTime(config, opAsMap, "creating folder", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		// The resource wasn't actually created
 		d.SetId("")
@@ -179,7 +179,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	// a network and deleting it in the background.
 	if !d.Get("auto_create_network").(bool) {
 		// The compute API has to be enabled before we can delete a network.
-		if err = enableServiceUsageProjectServices([]string{"compute.googleapis.com"}, project.ProjectId, config, d.Timeout(schema.TimeoutCreate)); err != nil {
+		if err = enableServiceUsageProjectServices([]string{"compute.googleapis.com"}, project.ProjectId, userAgent, config, d.Timeout(schema.TimeoutCreate)); err != nil {
 			return errwrap.Wrapf("Error enabling the Compute Engine API required to delete the default network: {{err}} ", err)
 		}
 
@@ -463,6 +463,11 @@ func resourceProjectImportState(d *schema.ResourceData, meta interface{}) ([]*sc
 
 // Delete a compute network along with the firewall rules inside it.
 func forceDeleteComputeNetwork(d *schema.ResourceData, config *Config, projectId, networkName string) error {
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	// Read the network from the API so we can get the correct self link format. We can't construct it from the
 	// base path because it might not line up exactly (compute.googleapis.com vs www.googleapis.com)
 	net, err := config.clientCompute.Networks.Get(projectId, networkName).Do()
@@ -485,7 +490,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *Config, projectId
 			if err != nil {
 				return errwrap.Wrapf("Error deleting firewall: {{err}}", err)
 			}
-			err = computeOperationWaitTime(config, op, projectId, "Deleting Firewall", d.Timeout(schema.TimeoutCreate))
+			err = computeOperationWaitTime(config, op, projectId, "Deleting Firewall", userAgent, d.Timeout(schema.TimeoutCreate))
 			if err != nil {
 				return err
 			}
@@ -495,7 +500,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *Config, projectId
 		paginate = token != ""
 	}
 
-	return deleteComputeNetwork(projectId, networkName, config)
+	return deleteComputeNetwork(projectId, networkName, userAgent, config)
 }
 
 func updateProjectBillingAccount(d *schema.ResourceData, config *Config) error {
@@ -540,14 +545,14 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *Config) error {
 		name, strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/"))
 }
 
-func deleteComputeNetwork(project, network string, config *Config) error {
+func deleteComputeNetwork(project, network, userAgent string, config *Config) error {
 	op, err := config.clientCompute.Networks.Delete(
 		project, network).Do()
 	if err != nil {
 		return errwrap.Wrapf("Error deleting network: {{err}}", err)
 	}
 
-	err = computeOperationWaitTime(config, op, project, "Deleting Network", 10*time.Minute)
+	err = computeOperationWaitTime(config, op, project, "Deleting Network", userAgent, 10*time.Minute)
 	if err != nil {
 		return err
 	}
@@ -567,7 +572,7 @@ func readGoogleProject(d *schema.ResourceData, config *Config) (*cloudresourcema
 }
 
 // Enables services. WARNING: Use BatchRequestEnableServices for better batching if possible.
-func enableServiceUsageProjectServices(services []string, project string, config *Config, timeout time.Duration) error {
+func enableServiceUsageProjectServices(services []string, project, userAgent string, config *Config, timeout time.Duration) error {
 	// ServiceUsage does not allow more than 20 services to be enabled per
 	// batchEnable API call. See
 	// https://cloud.google.com/service-usage/docs/reference/rest/v1/services/batchEnable
@@ -582,7 +587,7 @@ func enableServiceUsageProjectServices(services []string, project string, config
 			return nil
 		}
 
-		if err := doEnableServicesRequest(nextBatch, project, config, timeout); err != nil {
+		if err := doEnableServicesRequest(nextBatch, project, userAgent, config, timeout); err != nil {
 			return err
 		}
 		log.Printf("[DEBUG] Finished enabling next batch of %d project services: %+v", len(nextBatch), nextBatch)
@@ -592,7 +597,7 @@ func enableServiceUsageProjectServices(services []string, project string, config
 	return waitForServiceUsageEnabledServices(services, project, config, timeout)
 }
 
-func doEnableServicesRequest(services []string, project string, config *Config, timeout time.Duration) error {
+func doEnableServicesRequest(services []string, project, userAgent string, config *Config, timeout time.Duration) error {
 	var op *serviceusage.Operation
 
 	err := retryTimeDuration(func() error {
@@ -615,7 +620,7 @@ func doEnableServicesRequest(services []string, project string, config *Config, 
 		return errwrap.Wrapf("failed to send enable services request: {{err}}", err)
 	}
 	// Poll for the API to return
-	waitErr := serviceUsageOperationWait(config, op, project, fmt.Sprintf("Enable Project %q Services: %+v", project, services), timeout)
+	waitErr := serviceUsageOperationWait(config, op, project, fmt.Sprintf("Enable Project %q Services: %+v", project, services), userAgent, timeout)
 	if waitErr != nil {
 		return waitErr
 	}

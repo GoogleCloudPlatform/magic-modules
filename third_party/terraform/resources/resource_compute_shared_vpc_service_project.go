@@ -65,7 +65,7 @@ func resourceComputeSharedVpcServiceProjectCreate(d *schema.ResourceData, meta i
 	if err != nil {
 		return err
 	}
-	err = computeOperationWaitTime(config, op, hostProject, "Enabling Shared VPC Resource", d.Timeout(schema.TimeoutCreate))
+	err = computeOperationWaitTime(config, op, hostProject, "Enabling Shared VPC Resource", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}
@@ -135,6 +135,11 @@ func resourceComputeSharedVpcServiceProjectDelete(d *schema.ResourceData, meta i
 }
 
 func disableXpnResource(d *schema.ResourceData, config *Config, hostProject, project string) error {
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	req := &computeBeta.ProjectsDisableXpnResourceRequest{
 		XpnResource: &computeBeta.XpnResourceId{
 			Id:   project,
@@ -145,7 +150,7 @@ func disableXpnResource(d *schema.ResourceData, config *Config, hostProject, pro
 	if err != nil {
 		return err
 	}
-	err = computeOperationWaitTime(config, op, hostProject, "Disabling Shared VPC Resource", d.Timeout(schema.TimeoutDelete))
+	err = computeOperationWaitTime(config, op, hostProject, "Disabling Shared VPC Resource", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return err
 	}

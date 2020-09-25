@@ -48,7 +48,6 @@ func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) e
 	if err != nil {
 		return err
 	}
-	config.userAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -69,7 +68,7 @@ func resourceContainerRegistryCreate(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	_, err = sendRequestWithTimeout(config, "GET", project, url, nil, d.Timeout(schema.TimeoutCreate))
+	_, err = sendRequestWithTimeout(config, "GET", project, url, userAgent, nil, d.Timeout(schema.TimeoutCreate))
 
 	if err != nil {
 		return err

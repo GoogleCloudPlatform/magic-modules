@@ -104,7 +104,7 @@ func resourceProjectUsageBucketCreate(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 	d.SetId(project)
-	err = computeOperationWaitTime(config, op, project, "Setting usage export bucket.", d.Timeout(schema.TimeoutCreate))
+	err = computeOperationWaitTime(config, op, project, "Setting usage export bucket.", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		d.SetId("")
 		return err
@@ -136,7 +136,7 @@ func resourceProjectUsageBucketDelete(d *schema.ResourceData, meta interface{}) 
 	}
 
 	err = computeOperationWaitTime(config, op, project,
-		"Setting usage export bucket to nil, automatically disabling usage export.", d.Timeout(schema.TimeoutDelete))
+		"Setting usage export bucket to nil, automatically disabling usage export.", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return err
 	}

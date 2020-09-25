@@ -67,7 +67,6 @@ func datasourceGoogleProjectsRead(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return err
 	}
-	config.userAgent = userAgent
 
 	params := make(map[string]string)
 	projects := make([]map[string]interface{}, 0)
@@ -81,7 +80,7 @@ func datasourceGoogleProjectsRead(d *schema.ResourceData, meta interface{}) erro
 			return err
 		}
 
-		res, err := sendRequest(config, "GET", "", url, nil)
+		res, err := sendRequest(config, "GET", "", url, userAgent, nil)
 		if err != nil {
 			return fmt.Errorf("Error retrieving projects: %s", err)
 		}

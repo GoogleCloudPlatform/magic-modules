@@ -132,7 +132,7 @@ func resourceComputeNetworkPeeringCreate(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("Error adding network peering: %s", err)
 	}
 
-	err = computeOperationWaitTime(config, addOp, networkFieldValue.Project, "Adding Network Peering", d.Timeout(schema.TimeoutCreate))
+	err = computeOperationWaitTime(config, addOp, networkFieldValue.Project, "Adding Network Peering", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}
@@ -235,7 +235,7 @@ func resourceComputeNetworkPeeringDelete(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error removing peering `%s` from network `%s`: %s", name, networkFieldValue.Name, err)
 		}
 	} else {
-		err = computeOperationWaitTime(config, removeOp, networkFieldValue.Project, "Removing Network Peering", d.Timeout(schema.TimeoutDelete))
+		err = computeOperationWaitTime(config, removeOp, networkFieldValue.Project, "Removing Network Peering", userAgent, d.Timeout(schema.TimeoutDelete))
 		if err != nil {
 			return err
 		}
