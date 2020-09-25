@@ -79,7 +79,7 @@ func sendRequestWithTimeout(config *Config, method, project, rawurl, userAgent s
 			}
 
 			req.Header = reqHeaders
-			res, err = config.NewClient().Do(req)
+			res, err = config.client.Do(req)
 			if err != nil {
 				return err
 			}
