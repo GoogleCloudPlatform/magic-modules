@@ -99,13 +99,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_hl7_v2_store_basic"
-        primary_resource_id: "default"
+        primary_resource_id: "store"
         vars:
           dataset_name: "example-dataset"
           hl7_v2_store_name: "example-hl7-v2-store"
           pubsub_topic: "hl7-v2-notifications"
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_hl7_v2_store_parser_config"
+        min_version: beta
+        primary_resource_id: "store"
+        vars:
+          dataset_name: "example-dataset"
+          hl7_v2_store_name: "example-hl7-v2-store"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "healthcare_hl7_v2_store_unschematized"
         min_version: beta
         primary_resource_id: "store"
         vars:
