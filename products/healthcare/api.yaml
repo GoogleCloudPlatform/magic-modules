@@ -432,8 +432,7 @@ objects:
             name: version
             description: |
               The version of the unschematized parser to be used when a custom `schema` is not set.
-            exact_version: beta
-            required: false
+            min_version: beta
             input: true
             default_value: :V1
             values:
