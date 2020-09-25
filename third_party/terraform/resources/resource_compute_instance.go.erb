@@ -1437,7 +1437,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		networkInterface.NetworkIP = ""
 		networkInterface.AccessConfigs = nil
 		if !updateDuringStop && d.HasChange(prefix + ".alias_ip_range") {
-			// Alias IP ranges cannot be updated; they must be removed and then added.
+			// Alias IP ranges cannot be updated; they must be removed and then added
 			// unless you are changing subnetwork/network
 			if len(instNetworkInterface.AliasIpRanges) > 0 {
 				ni := &computeBeta.NetworkInterface{
