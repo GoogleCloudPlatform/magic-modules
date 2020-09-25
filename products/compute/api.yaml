@@ -5531,6 +5531,7 @@ objects:
               values:
                 - :MULTI_IP_SUBNET
                 - :SECURE_BOOT
+                - :SEV_CAPABLE
                 - :UEFI_COMPATIBLE
                 - :VIRTIO_SCSI_MULTIQUEUE
                 - :WINDOWS
@@ -7339,6 +7340,45 @@ objects:
           values:
             - :REGIONAL
             - :GLOBAL
+      - !ruby/object:Api::Type::Array
+        name: 'peerings'
+        # This is only used in InSpec, handled via fine-grained in Terraform
+        exclude: true
+        output: true
+        description: |
+          Peerings for a network
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: subnetworks
+          description: The subnetworks that should be mirrored.
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              description: |
+                Name of the peering.
+            - !ruby/object:Api::Type::String
+              name: 'state'
+              description: |
+                State of the peering.
+            - !ruby/object:Api::Type::String
+              name: 'stateDetails'
+              description: |
+                Details about the current state of the peering.
+            - !ruby/object:Api::Type::String
+              name: 'network'
+              description: |
+                URL of the peer network
+            - !ruby/object:Api::Type::Boolean
+              name: 'exportCustomRoutes'
+              description: |
+                Whether to export the custom routes to the peer network.
+            - !ruby/object:Api::Type::Boolean
+              name: 'importCustomRoutes'
+              description: |
+                Whether to import the custom routes to the peer network.
+            - !ruby/object:Api::Type::Integer
+              name: 'peerMtu'
+              description: |
+                Maximum Transmission Unit in bytes.
   - !ruby/object:Api::Resource
     name: 'NetworkEndpoint'
     kind: 'compute#networkEndpoint'
@@ -17466,7 +17506,7 @@ objects:
           Name of the resource. Provided by the client when the resource
           is created. The name must be 1-63 characters long, and comply
           with RFC1035. Specifically, the name must be 1-63 characters long
-          and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])? which
+          and match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which
           means the first character must be a lowercase letter, and all
           following characters must be a dash, lowercase letter, or digit,
           except the last character, which cannot be a dash.

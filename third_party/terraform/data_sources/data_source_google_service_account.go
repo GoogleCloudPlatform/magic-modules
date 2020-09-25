@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceGoogleServiceAccount() *schema.Resource {
@@ -41,7 +41,14 @@ func dataSourceGoogleServiceAccount() *schema.Resource {
 }
 
 func dataSourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientIAM.UserAgent = fmt.Sprintf("%s %s", config.clientIAM.UserAgent, m.ModuleName)
 
 	serviceAccountName, err := serviceAccountFQN(d.Get("account_id").(string), d, config)
 	if err != nil {
@@ -54,12 +61,24 @@ func dataSourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}
 	}
 
 	d.SetId(sa.Name)
-	d.Set("email", sa.Email)
-	d.Set("unique_id", sa.UniqueId)
-	d.Set("project", sa.ProjectId)
-	d.Set("account_id", strings.Split(sa.Email, "@")[0])
-	d.Set("name", sa.Name)
-	d.Set("display_name", sa.DisplayName)
+	if err := d.Set("email", sa.Email); err != nil {
+		return fmt.Errorf("Error setting email: %s", err)
+	}
+	if err := d.Set("unique_id", sa.UniqueId); err != nil {
+		return fmt.Errorf("Error setting unique_id: %s", err)
+	}
+	if err := d.Set("project", sa.ProjectId); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("account_id", strings.Split(sa.Email, "@")[0]); err != nil {
+		return fmt.Errorf("Error setting account_id: %s", err)
+	}
+	if err := d.Set("name", sa.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("display_name", sa.DisplayName); err != nil {
+		return fmt.Errorf("Error setting display_name: %s", err)
+	}
 
 	return nil
 }

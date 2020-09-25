@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -40,7 +40,14 @@ func dataSourceGoogleComputeZones() *schema.Resource {
 }
 
 func dataSourceGoogleComputeZonesRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
 
 	region := config.Region
 	if r, ok := d.GetOk("region"); ok {
@@ -76,9 +83,15 @@ func dataSourceGoogleComputeZonesRead(d *schema.ResourceData, meta interface{}) 
 	sort.Strings(zones)
 	log.Printf("[DEBUG] Received Google Compute Zones: %q", zones)
 
-	d.Set("names", zones)
-	d.Set("region", region)
-	d.Set("project", project)
+	if err := d.Set("names", zones); err != nil {
+		return fmt.Errorf("Error setting names: %s", err)
+	}
+	if err := d.Set("region", region); err != nil {
+		return fmt.Errorf("Error setting region: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 	d.SetId(time.Now().UTC().String())
 
 	return nil

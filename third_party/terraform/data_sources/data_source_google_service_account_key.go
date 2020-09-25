@@ -3,8 +3,8 @@ package google
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"regexp"
 )
 
@@ -41,7 +41,14 @@ func dataSourceGoogleServiceAccountKey() *schema.Resource {
 }
 
 func dataSourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientIAM.UserAgent = fmt.Sprintf("%s %s", config.clientIAM.UserAgent, m.ModuleName)
 
 	keyName := d.Get("name").(string)
 
@@ -62,9 +69,15 @@ func dataSourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interfac
 
 	d.SetId(sak.Name)
 
-	d.Set("name", sak.Name)
-	d.Set("key_algorithm", sak.KeyAlgorithm)
-	d.Set("public_key", sak.PublicKeyData)
+	if err := d.Set("name", sak.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("key_algorithm", sak.KeyAlgorithm); err != nil {
+		return fmt.Errorf("Error setting key_algorithm: %s", err)
+	}
+	if err := d.Set("public_key", sak.PublicKeyData); err != nil {
+		return fmt.Errorf("Error setting public_key: %s", err)
+	}
 
 	return nil
 }

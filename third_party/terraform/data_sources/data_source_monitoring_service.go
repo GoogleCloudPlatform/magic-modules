@@ -4,7 +4,7 @@ import (
 	"fmt"
 	neturl "net/url"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 type monitoringServiceTypeStateSetter func(map[string]interface{}, *schema.ResourceData, interface{}) error
@@ -36,7 +36,14 @@ func dataSourceMonitoringServiceType(
 // It takes the list query filter (i.e. ?filter=$listFilter) and a ReadFunc to handle reading any type-specific schema.
 func dataSourceMonitoringServiceTypeReadFromList(listFilter string, typeStateSetter monitoringServiceTypeStateSetter) schema.ReadFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
+		var m providerMeta
+
+		err := d.GetProviderMeta(&m)
+		if err != nil {
+			return err
+		}
 		config := meta.(*Config)
+		config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 		project, err := getProject(d, config)
 		if err != nil {
@@ -76,23 +83,25 @@ func dataSourceMonitoringServiceTypeReadFromList(listFilter string, typeStateSet
 		res := ls[0].(map[string]interface{})
 
 		if err := d.Set("project", project); err != nil {
-			return fmt.Errorf("Error reading Service: %s", err)
+			return fmt.Errorf("Error setting Service: %s", err)
 		}
 		if err := d.Set("display_name", flattenMonitoringServiceDisplayName(res["displayName"], d, config)); err != nil {
-			return fmt.Errorf("Error reading Service: %s", err)
+			return fmt.Errorf("Error setting Service: %s", err)
 		}
 		if err := d.Set("telemetry", flattenMonitoringServiceTelemetry(res["telemetry"], d, config)); err != nil {
-			return fmt.Errorf("Error reading Service: %s", err)
+			return fmt.Errorf("Error setting Service: %s", err)
 		}
 		if err := d.Set("service_id", flattenMonitoringServiceServiceId(res["name"], d, config)); err != nil {
-			return fmt.Errorf("Error reading Service: %s", err)
+			return fmt.Errorf("Error setting Service: %s", err)
 		}
 		if err := typeStateSetter(res, d, config); err != nil {
 			return fmt.Errorf("Error reading Service: %s", err)
 		}
 
 		name := flattenMonitoringServiceName(res["name"], d, config).(string)
-		d.Set("name", name)
+		if err := d.Set("name", name); err != nil {
+			return fmt.Errorf("Error setting name: %s", err)
+		}
 		d.SetId(name)
 
 		return nil

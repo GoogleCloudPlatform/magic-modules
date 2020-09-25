@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/dns/v1"
 )
 
@@ -189,7 +189,14 @@ func flattenDigests(dnsKeyDigests []*dns.DnsKeyDigest) []map[string]interface{} 
 }
 
 func dataSourceDNSKeysRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientDns.UserAgent = fmt.Sprintf("%s %s", config.clientDns.UserAgent, m.ModuleName)
 
 	fv, err := parseProjectFieldValue("managedZones", d.Get("managed_zone").(string), "project", d, config, false)
 	if err != nil {
@@ -198,7 +205,9 @@ func dataSourceDNSKeysRead(d *schema.ResourceData, meta interface{}) error {
 	project := fv.Project
 	managedZone := fv.Name
 
-	d.Set("project", project)
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 	d.SetId(fmt.Sprintf("projects/%s/managedZones/%s", project, managedZone))
 
 	log.Printf("[DEBUG] Fetching DNS keys from managed zone %s", managedZone)
@@ -212,8 +221,12 @@ func dataSourceDNSKeysRead(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Fetched DNS keys from managed zone %s", managedZone)
 
-	d.Set("key_signing_keys", flattenSigningKeys(response.DnsKeys, "keySigning"))
-	d.Set("zone_signing_keys", flattenSigningKeys(response.DnsKeys, "zoneSigning"))
+	if err := d.Set("key_signing_keys", flattenSigningKeys(response.DnsKeys, "keySigning")); err != nil {
+		return fmt.Errorf("Error setting key_signing_keys: %s", err)
+	}
+	if err := d.Set("zone_signing_keys", flattenSigningKeys(response.DnsKeys, "zoneSigning")); err != nil {
+		return fmt.Errorf("Error setting zone_signing_keys: %s", err)
+	}
 
 	return nil
 }

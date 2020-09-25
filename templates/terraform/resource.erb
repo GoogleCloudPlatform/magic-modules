@@ -16,6 +16,20 @@
 
 package google
 
+import (
+<%- # We list all the v2 imports here, because we run 'goimports' to guess the correct
+    # set of imports, which will never guess the major version correctly. -%>
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+)
+
 <%= lines(compile(pwd + '/' + object.custom_code.constants)) if object.custom_code.constants -%>
 
 <%
@@ -121,7 +135,7 @@ func resource<%= resource_name -%>() *schema.Resource {
 <% end -%>
 
 <% object.settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
-func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(diff *schema.ResourceDiff, meta interface{}) error {
+func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 <%=
     compile_template(pwd + '/templates/terraform/unordered_list_customize_diff.erb',
                      prop: prop,
@@ -131,11 +145,19 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 <% end -%>
 
 func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
+    var m providerMeta
+
+    err := d.GetProviderMeta(&m)
+    if err != nil {
+        return err
+    }
+
+    config := meta.(*Config)
+    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
+
 <%  if object.custom_code.custom_create -%>
     <%= lines(compile(pwd + '/' + object.custom_code.custom_create))  -%>
 <%  else  -%>
-    config := meta.(*Config)
-
     obj := make(map[string]interface{})
 <%  object.settable_properties.each do |prop| -%>
     <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
@@ -405,7 +427,15 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 <%  end -%>
 
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
+    var m providerMeta
+
+    err := d.GetProviderMeta(&m)
+    if err != nil {
+        return err
+    }
+
     config := meta.(*Config)
+    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
     url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
     if err != nil {
@@ -475,7 +505,9 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
   // Explicitly set virtual fields to default values if unset
 <%-   object.virtual_fields.each do |field| -%>
     if _, ok := d.GetOk("<%= field.name -%>"); !ok {
-      d.Set("<%= field.name -%>", <%= go_literal(field.default_value) -%>)
+      if err := d.Set("<%= field.name -%>", <%= go_literal(field.default_value) -%>); err != nil {
+      	return fmt.Errorf("Error setting <%= field.name -%>: %s", err)
+      }
     }
 <%    end -%>
 <%  end -%>
@@ -506,7 +538,9 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         casted := flattenedProp.([]interface{})[0]
         if casted != nil {
             for k, v := range casted.(map[string]interface{}) {
-                d.Set(k, v)
+                if err := d.Set(k, v); err != nil {
+                	return fmt.Errorf("Error setting %s: %s", k, err)
+                }
             }
         }
     }
@@ -527,7 +561,15 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
 <% if updatable?(object, object.root_properties) -%>
 func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
+    var m providerMeta
+
+    err := d.GetProviderMeta(&m)
+    if err != nil {
+        return err
+    }
+
     config := meta.(*Config)
+    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
     billingProject := ""
 
@@ -666,10 +708,6 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         }
 <%          end -%>
 <%      end -%>
-
-<%      props.each do |prop|    -%>
-        d.SetPartial("<%= prop.name.underscore -%>")
-<%      end -%>
     }
 <%  end -%>
 
@@ -784,10 +822,20 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     d.SetId("")
 
     return nil
-<% elsif object.custom_code.custom_delete -%>
+<% else -%>
+    var m providerMeta
+
+    err := d.GetProviderMeta(&m)
+    if err != nil {
+        return err
+    }
+
+    config := meta.(*Config)
+    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
+
+<% if object.custom_code.custom_delete -%>
 <%= lines(compile(pwd + '/' + object.custom_code.custom_delete)) -%>
 <% else -%>
-    config := meta.(*Config)
 
     billingProject := ""
 
@@ -872,7 +920,8 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
     log.Printf("[DEBUG] Finished deleting <%= object.name -%> %q: %#v", d.Id(), res)
     return nil
-<% end -%>
+<% end # custom code -%>
+<% end # skip_delete -%>
 }
 
 <% unless object.exclude_import -%>
@@ -899,7 +948,9 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <%-  unless object.virtual_fields.empty? -%>
     // Explicitly set virtual fields to default values on import
   <%-  object.virtual_fields.each do |field| -%>
-    d.Set("<%= field.name %>", <%= go_literal(field.default_value) -%>)
+    if err := d.Set("<%= field.name %>", <%= go_literal(field.default_value) -%>); err != nil {
+    	return nil, fmt.Errorf("Error setting <%= field.name %>: %s", err)
+    }
   <%   end -%>
 <%   end -%>
 <%= lines(compile(pwd + '/' + object.custom_code.post_import)) if object.custom_code.post_import -%>

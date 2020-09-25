@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/logging/v2"
 )
 
@@ -50,7 +50,15 @@ func ResourceLoggingExclusion(parentSpecificSchema map[string]*schema.Schema, ne
 
 func resourceLoggingExclusionCreate(newUpdaterFunc newResourceLoggingExclusionUpdaterFunc) schema.CreateFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
+		var m providerMeta
+
+		err := d.GetProviderMeta(&m)
+		if err != nil {
+			return err
+		}
 		config := meta.(*Config)
+		config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
+
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
 			return err
@@ -88,10 +96,14 @@ func resourceLoggingExclusionRead(newUpdaterFunc newResourceLoggingExclusionUpda
 			return handleNotFoundError(err, d, fmt.Sprintf("Logging Exclusion %s", d.Get("name").(string)))
 		}
 
-		flattenResourceLoggingExclusion(d, exclusion)
+		if err := flattenResourceLoggingExclusion(d, exclusion); err != nil {
+			return err
+		}
 
 		if updater.GetResourceType() == "projects" {
-			d.Set("project", updater.GetResourceId())
+			if err := d.Set("project", updater.GetResourceId()); err != nil {
+				return fmt.Errorf("Error setting project: %s", err)
+			}
 		}
 
 		return nil
@@ -174,11 +186,21 @@ func expandResourceLoggingExclusion(d *schema.ResourceData, resourceType, resour
 	return id, &exclusion
 }
 
-func flattenResourceLoggingExclusion(d *schema.ResourceData, exclusion *logging.LogExclusion) {
-	d.Set("name", exclusion.Name)
-	d.Set("description", exclusion.Description)
-	d.Set("filter", exclusion.Filter)
-	d.Set("disabled", exclusion.Disabled)
+func flattenResourceLoggingExclusion(d *schema.ResourceData, exclusion *logging.LogExclusion) error {
+	if err := d.Set("name", exclusion.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("description", exclusion.Description); err != nil {
+		return fmt.Errorf("Error setting description: %s", err)
+	}
+	if err := d.Set("filter", exclusion.Filter); err != nil {
+		return fmt.Errorf("Error setting filter: %s", err)
+	}
+	if err := d.Set("disabled", exclusion.Disabled); err != nil {
+		return fmt.Errorf("Error setting disabled: %s", err)
+	}
+
+	return nil
 }
 
 func expandResourceLoggingExclusionForUpdate(d *schema.ResourceData) (*logging.LogExclusion, string) {

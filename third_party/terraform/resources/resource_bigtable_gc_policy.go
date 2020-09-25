@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/bigtable"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 const (
@@ -97,7 +97,15 @@ func resourceBigtableGCPolicy() *schema.Resource {
 }
 
 func resourceBigtableGCPolicyCreate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	// Need to set UserAgent
+
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -110,7 +118,9 @@ func resourceBigtableGCPolicyCreate(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
-	d.Set("instance_name", instanceName)
+	if err := d.Set("instance_name", instanceName); err != nil {
+		return fmt.Errorf("Error setting instance_name: %s", err)
+	}
 
 	defer c.Close()
 
@@ -172,7 +182,9 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 		}
 	}
 
-	d.Set("project", project)
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 
 	return nil
 }

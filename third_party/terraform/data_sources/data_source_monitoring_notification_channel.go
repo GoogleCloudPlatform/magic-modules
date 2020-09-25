@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceMonitoringNotificationChannel() *schema.Resource {
@@ -24,7 +24,14 @@ func dataSourceMonitoringNotificationChannel() *schema.Resource {
 }
 
 func dataSourceMonitoringNotificationChannelRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 	url, err := replaceVars(d, config, "{{MonitoringBasePath}}v3/projects/{{project}}/notificationChannels")
 	if err != nil {
@@ -98,7 +105,9 @@ func dataSourceMonitoringNotificationChannelRead(d *schema.ResourceData, meta in
 	res := channels[0].(map[string]interface{})
 
 	name := flattenMonitoringNotificationChannelName(res["name"], d, config).(string)
-	d.Set("name", name)
+	if err := d.Set("name", name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
 	d.SetId(name)
 
 	return resourceMonitoringNotificationChannelRead(d, meta)

@@ -1,7 +1,8 @@
 package google
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceGoogleBigqueryDefaultServiceAccount() *schema.Resource {
@@ -22,7 +23,14 @@ func dataSourceGoogleBigqueryDefaultServiceAccount() *schema.Resource {
 }
 
 func dataSourceGoogleBigqueryDefaultServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientBigQuery.UserAgent = fmt.Sprintf("%s %s", config.clientBigQuery.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -35,7 +43,11 @@ func dataSourceGoogleBigqueryDefaultServiceAccountRead(d *schema.ResourceData, m
 	}
 
 	d.SetId(projectResource.Email)
-	d.Set("email", projectResource.Email)
-	d.Set("project", project)
+	if err := d.Set("email", projectResource.Email); err != nil {
+		return fmt.Errorf("Error setting email: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 	return nil
 }

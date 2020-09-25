@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceComputeSharedVpcHostProject() *schema.Resource {
@@ -34,7 +34,14 @@ func resourceComputeSharedVpcHostProject() *schema.Resource {
 }
 
 func resourceComputeSharedVpcHostProjectCreate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleName)
 
 	hostProject := d.Get("project").(string)
 	op, err := config.clientComputeBeta.Projects.EnableXpnHost(hostProject).Do()
@@ -68,7 +75,9 @@ func resourceComputeSharedVpcHostProjectRead(d *schema.ResourceData, meta interf
 		d.SetId("")
 	}
 
-	d.Set("project", hostProject)
+	if err := d.Set("project", hostProject); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 
 	return nil
 }

@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceProjectServiceIdentity() *schema.Resource {
@@ -43,7 +43,14 @@ func resourceProjectServiceIdentity() *schema.Resource {
 }
 
 func resourceProjectServiceIdentityCreate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 	url, err := replaceVars(d, config, "{{ServiceUsageBasePath}}projects/{{project}}/services/{{service}}:generateServiceIdentity")
 	if err != nil {
@@ -91,7 +98,9 @@ func resourceProjectServiceIdentityCreate(d *schema.ResourceData, meta interface
 	if !ok {
 		return fmt.Errorf("unexpected type for email: got %T, want string", email)
 	}
-	d.Set("email", email)
+	if err := d.Set("email", email); err != nil {
+		return fmt.Errorf("Error setting email: %s", err)
+	}
 	return nil
 }
 

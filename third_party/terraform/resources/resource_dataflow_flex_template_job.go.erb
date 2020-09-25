@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"google.golang.org/api/googleapi"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dataflow "google.golang.org/api/dataflow/v1b3"
 )
 
@@ -83,7 +83,14 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 
 // resourceDataflowFlexTemplateJobCreate creates a Flex Template Job from TF code.
 func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientDataflow.UserAgent = fmt.Sprintf("%s %s", config.clientDataflow.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -110,7 +117,9 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 
 	job := response.Job
 	d.SetId(job.Id)
-	d.Set("job_id", job.Id)
+	if err := d.Set("job_id", job.Id); err != nil {
+		return fmt.Errorf("Error setting job_id: %s", err)
+	}
 
 	return resourceDataflowFlexTemplateJobRead(d, meta)
 }
@@ -136,10 +145,18 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 		return handleNotFoundError(err, d, fmt.Sprintf("Dataflow job %s", jobId))
 	}
 
-	d.Set("state", job.CurrentState)
-	d.Set("name", job.Name)
-	d.Set("project", project)
-	d.Set("labels", job.Labels)
+	if err := d.Set("state", job.CurrentState); err != nil {
+		return fmt.Errorf("Error setting state: %s", err)
+	}
+	if err := d.Set("name", job.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("labels", job.Labels); err != nil {
+		return fmt.Errorf("Error setting labels: %s", err)
+	}
 
 	if _, ok := dataflowTerminalStatesMap[job.CurrentState]; ok {
 		log.Printf("[DEBUG] Removing resource '%s' because it is in state %s.\n", job.Name, job.CurrentState)
