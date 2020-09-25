@@ -42,9 +42,10 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 			},
 
 			"region": {
-				Type:        shema.TypeString,
+				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
+				Computed:    true,
 				Description: `The region in which the created job should run.`,
 			),
 
