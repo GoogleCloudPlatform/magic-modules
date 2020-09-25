@@ -1354,9 +1354,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 		// On creation the network is inferred if only subnetwork is given.
 		// Unforunately for us there is no way to determine if the user is
-		// explicitly asigning network or we are reusing the one that was inferred
+		// explicitly assigning network or we are reusing the one that was inferred
 		// from state. So here we check if subnetwork changed and network did not.
-		// In the scenario we assume network was inferred and attempt to figure out
+		// In this scenario we assume network was inferred and attempt to figure out
 		// the new corresponding network.
 
 		if d.HasChange(prefix + ".subnetwork") {
@@ -1437,7 +1437,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		networkInterface.NetworkIP = ""
 		networkInterface.AccessConfigs = nil
 		if !updateDuringStop && d.HasChange(prefix + ".alias_ip_range") {
-			// Alias IP ranges cannot be updated; they must be removed and then added.
+			// Alias IP ranges cannot be updated; they must be removed and then added
 			// unless you are changing subnetwork/network
 			if len(instNetworkInterface.AliasIpRanges) > 0 {
 				ni := &computeBeta.NetworkInterface{
