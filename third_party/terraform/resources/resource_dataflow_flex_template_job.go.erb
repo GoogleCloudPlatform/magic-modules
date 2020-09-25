@@ -41,6 +41,13 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"region": {
+				Type:        shema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `The region in which the created job should run.`,
+			),
+
 			"on_delete": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"cancel", "drain"}, false),
