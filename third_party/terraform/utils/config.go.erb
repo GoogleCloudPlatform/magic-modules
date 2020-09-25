@@ -644,7 +644,7 @@ func (c *Config) getTokenSource(clientScopes []string) (oauth2.TokenSource, erro
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
 type staticTokenSource struct {
-    oauth2.TokenSource
+      oauth2.TokenSource
 }
 
 func (c *Config) GetCredentials(clientScopes []string) (googleoauth.Credentials, error) {
