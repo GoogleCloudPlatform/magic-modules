@@ -32,8 +32,9 @@ func sharedConfigForRegion(region string) (*Config, error) {
 	}
 
 	conf := &Config{
-		Region:  region,
-		Project: project,
+		Credentials: creds,
+		Region:      region,
+		Project:     project,
 	}
 
 	ConfigureBasePaths(conf)

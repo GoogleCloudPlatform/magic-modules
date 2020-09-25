@@ -49,6 +49,11 @@ func dataSourceGoogleSignedUrl() *schema.Resource {
 				Optional: true,
 				Default:  "",
 			},
+			"credentials": {
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
+			},
 			"duration": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -170,10 +175,21 @@ func dataSourceGoogleSignedUrlRead(d *schema.ResourceData, meta interface{}) err
 //   3. A JSON file whose path is specified by the
 //      GOOGLE_APPLICATION_CREDENTIALS environment variable.
 func loadJwtConfig(d *schema.ResourceData, meta interface{}) (*jwt.Config, error) {
+	config := meta.(*Config)
+
 	credentials := ""
-	if filename := os.Getenv(googleCredentialsEnvVar); filename != "" {
+	if v, ok := d.GetOk("credentials"); ok {
+		log.Println("[DEBUG] using data source credentials to sign URL")
+		credentials = v.(string)
+
+	} else if config.Credentials != "" {
+		log.Println("[DEBUG] using provider credentials to sign URL")
+		credentials = config.Credentials
+
+	} else if filename := os.Getenv(googleCredentialsEnvVar); filename != "" {
 		log.Println("[DEBUG] using env GOOGLE_APPLICATION_CREDENTIALS credentials to sign URL")
 		credentials = filename
+
 	}
 
 	if strings.TrimSpace(credentials) != "" {
