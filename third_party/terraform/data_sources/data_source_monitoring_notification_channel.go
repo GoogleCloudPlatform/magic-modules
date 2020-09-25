@@ -29,7 +29,6 @@ func dataSourceMonitoringNotificationChannelRead(d *schema.ResourceData, meta in
 	if err != nil {
 		return err
 	}
-	config.userAgent = userAgent
 
 	url, err := replaceVars(d, config, "{{MonitoringBasePath}}v3/projects/{{project}}/notificationChannels")
 	if err != nil {
@@ -85,7 +84,7 @@ func dataSourceMonitoringNotificationChannelRead(d *schema.ResourceData, meta in
 		return err
 	}
 
-	response, err := sendRequest(config, "GET", project, url, nil)
+	response, err := sendRequest(config, "GET", project, url, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error retrieving NotificationChannels: %s", err)
 	}

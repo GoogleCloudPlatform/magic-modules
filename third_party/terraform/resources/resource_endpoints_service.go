@@ -251,7 +251,7 @@ func resourceEndpointsServiceCreate(d *schema.ResourceData, meta interface{}) er
 			return err
 		}
 
-		_, err = serviceManagementOperationWaitTime(config, op, "Creating new ManagedService.", d.Timeout(schema.TimeoutCreate))
+		_, err = serviceManagementOperationWaitTime(config, op, "Creating new ManagedService.", userAgent, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
 			return err
 		}
@@ -322,7 +322,7 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return err
 	}
-	s, err := serviceManagementOperationWaitTime(config, op, "Submitting service config.", d.Timeout(schema.TimeoutUpdate))
+	s, err := serviceManagementOperationWaitTime(config, op, "Submitting service config.", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
@@ -344,7 +344,7 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return err
 	}
-	_, err = serviceManagementOperationWaitTime(config, op, "Performing service rollout.", d.Timeout(schema.TimeoutUpdate))
+	_, err = serviceManagementOperationWaitTime(config, op, "Performing service rollout.", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
@@ -366,7 +366,7 @@ func resourceEndpointsServiceDelete(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return err
 	}
-	_, err = serviceManagementOperationWaitTime(config, op, "Deleting service.", d.Timeout(schema.TimeoutDelete))
+	_, err = serviceManagementOperationWaitTime(config, op, "Deleting service.", userAgent, d.Timeout(schema.TimeoutDelete))
 	d.SetId("")
 	return err
 }

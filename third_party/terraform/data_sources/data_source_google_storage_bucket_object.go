@@ -27,7 +27,6 @@ func dataSourceGoogleStorageBucketObjectRead(d *schema.ResourceData, meta interf
 	if err != nil {
 		return err
 	}
-	config.userAgent = userAgent
 
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
@@ -41,7 +40,7 @@ func dataSourceGoogleStorageBucketObjectRead(d *schema.ResourceData, meta interf
 	// Using REST apis because the storage go client doesn't support folders
 	url := fmt.Sprintf("https://www.googleapis.com/storage/v1/b/%s/o/%s", bucket, name)
 
-	res, err := sendRequest(config, "GET", "", url, nil)
+	res, err := sendRequest(config, "GET", "", url, userAgent, nil)
 	if err != nil {
 		return fmt.Errorf("Error retrieving storage bucket object: %s", err)
 	}

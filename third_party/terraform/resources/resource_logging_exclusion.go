@@ -51,12 +51,6 @@ func ResourceLoggingExclusion(parentSpecificSchema map[string]*schema.Schema, ne
 func resourceLoggingExclusionCreate(newUpdaterFunc newResourceLoggingExclusionUpdaterFunc) schema.CreateFunc {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*Config)
-		userAgent, err := generateUserAgentString(d, config.userAgent)
-		if err != nil {
-			return err
-		}
-		config.userAgent = userAgent
-
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
 			return err

@@ -25,9 +25,8 @@ func dataSourceGoogleClientOpenIDUserinfoRead(d *schema.ResourceData, meta inter
 	if err != nil {
 		return err
 	}
-	config.userAgent = userAgent
 
-	email, err := GetCurrentUserEmail(config)
+	email, err := GetCurrentUserEmail(config, userAgent)
 	if err != nil {
 		return err
 	}

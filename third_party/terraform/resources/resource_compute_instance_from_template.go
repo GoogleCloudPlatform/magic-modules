@@ -169,7 +169,7 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 
 	// Wait for the operation to complete
 	waitErr := computeOperationWaitTime(config, op, project,
-		"instance to create", d.Timeout(schema.TimeoutCreate))
+		"instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		// The resource didn't actually create
 		d.SetId("")

@@ -206,6 +206,17 @@ var DefaultClientScopes = []string{
 	"https://www.googleapis.com/auth/userinfo.email",
 }
 
+func (c *Config) NewClient() *http.Client {
+	cleanCtx := context.WithValue(c.context, oauth2.HTTPClient, cleanhttp.DefaultClient())
+
+	// 1. OAUTH2 TRANSPORT/CLIENT - sets up proper auth headers
+	client := oauth2.NewClient(cleanCtx, c.tokenSource)
+
+	// This timeout is a timeout per HTTP request, not per logical operation.
+	client.Timeout = c.synchronousTimeout()
+	return client
+}
+
 func (c *Config) LoadAndValidate(ctx context.Context) error {
 	if len(c.Scopes) == 0 {
 		c.Scopes = DefaultClientScopes

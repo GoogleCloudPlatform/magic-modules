@@ -42,11 +42,10 @@ func dataSourceGoogleMonitoringUptimeCheckIpsRead(d *schema.ResourceData, meta i
 	if err != nil {
 		return err
 	}
-	config.userAgent = userAgent
 
 	url := "https://monitoring.googleapis.com/v3/uptimeCheckIps"
 
-	uptimeCheckIps, err := paginatedListRequest("", url, config, flattenUptimeCheckIpsList)
+	uptimeCheckIps, err := paginatedListRequest("", url, userAgent, config, flattenUptimeCheckIpsList)
 	if err != nil {
 		return fmt.Errorf("Error retrieving monitoring uptime check ips: %s", err)
 	}

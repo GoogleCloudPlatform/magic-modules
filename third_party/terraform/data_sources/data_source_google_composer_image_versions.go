@@ -49,7 +49,6 @@ func dataSourceGoogleComposerImageVersionsRead(d *schema.ResourceData, meta inte
 	if err != nil {
 		return err
 	}
-	config.userAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -66,7 +65,7 @@ func dataSourceGoogleComposerImageVersionsRead(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	versions, err := paginatedListRequest(project, url, config, flattenGoogleComposerImageVersions)
+	versions, err := paginatedListRequest(project, url, userAgent, config, flattenGoogleComposerImageVersions)
 	if err != nil {
 		return fmt.Errorf("Error listing Composer image versions: %s", err)
 	}

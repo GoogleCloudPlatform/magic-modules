@@ -103,7 +103,7 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	if err := serviceNetworkingOperationWaitTime(config, op, "Create Service Networking Connection", d.Timeout(schema.TimeoutCreate)); err != nil {
+	if err := serviceNetworkingOperationWaitTime(config, op, "Create Service Networking Connection", userAgent, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return err
 	}
 
@@ -203,7 +203,7 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 		if err != nil {
 			return err
 		}
-		if err := serviceNetworkingOperationWaitTime(config, op, "Update Service Networking Connection", d.Timeout(schema.TimeoutUpdate)); err != nil {
+		if err := serviceNetworkingOperationWaitTime(config, op, "Update Service Networking Connection", userAgent, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return err
 		}
 	}
@@ -216,7 +216,6 @@ func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta inte
 	if err != nil {
 		return err
 	}
-	config.userAgent = userAgent
 
 	network := d.Get("network").(string)
 	serviceNetworkingNetworkName, err := retrieveServiceNetworkingNetworkName(d, config, network)
@@ -235,7 +234,7 @@ func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta inte
 	}
 
 	project := networkFieldValue.Project
-	res, err := sendRequestWithTimeout(config, "POST", project, url, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := sendRequestWithTimeout(config, "POST", project, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("ServiceNetworkingConnection %q", d.Id()))
 	}
@@ -247,7 +246,7 @@ func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta inte
 	}
 
 	err = computeOperationWaitTime(
-		config, op, project, "Updating Network", d.Timeout(schema.TimeoutDelete))
+		config, op, project, "Updating Network", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return err
 	}
