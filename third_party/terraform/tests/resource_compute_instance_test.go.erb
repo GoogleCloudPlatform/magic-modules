@@ -1876,7 +1876,7 @@ func TestAccComputeInstance_resourcePolicyCollocate(t *testing.T) {
 	})
 }
 
-func TestAccComputeInstance_subnetworkChange(t *testing.T) {
+func TestAccComputeInstance_subnetworkUpdate(t *testing.T) {
 	t.Parallel()
 	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 	suffix := fmt.Sprintf("%s", randString(t, 10))
@@ -1887,11 +1887,11 @@ func TestAccComputeInstance_subnetworkChange(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_subnetworkChange(suffix, instanceName),
+				Config: testAccComputeInstance_subnetworkUpdate(suffix, instanceName),
 			},
 			computeInstanceImportStep("us-east1-d", instanceName, []string{"allow_stopping_for_update"}),
 			{
-				Config: testAccComputeInstance_subnetworkChangeUpdate(suffix, instanceName),
+				Config: testAccComputeInstance_subnetworkUpdateTwo(suffix, instanceName),
 			},
 			computeInstanceImportStep("us-east1-d", instanceName, []string{"allow_stopping_for_update"}),
 		},
@@ -4773,7 +4773,7 @@ resource "google_compute_resource_policy" "foo" {
 `, instance, instance, suffix)
 }
 
-func testAccComputeInstance_subnetworkChange(suffix, instance string) string {
+func testAccComputeInstance_subnetworkUpdate(suffix, instance string) string {
 	return fmt.Sprintf(`
 	data "google_compute_image" "my_image" {
 		family  = "debian-9"
@@ -4851,7 +4851,7 @@ func testAccComputeInstance_subnetworkChange(suffix, instance string) string {
 `, suffix, suffix, suffix, suffix, instance)
 }
 
-func testAccComputeInstance_subnetworkChangeUpdate(suffix, instance string) string {
+func testAccComputeInstance_subnetworkUpdateTwo(suffix, instance string) string {
 	return fmt.Sprintf(`
 	data "google_compute_image" "my_image" {
 		family  = "debian-9"
