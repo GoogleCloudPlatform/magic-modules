@@ -690,14 +690,12 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 }
 
 func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientBigQuery.UserAgent = fmt.Sprintf("%s %s", config.clientBigQuery.UserAgent, m.ModuleName)
+	config.clientBigQuery.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -725,14 +723,12 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientBigQuery.UserAgent = fmt.Sprintf("%s %s", config.clientBigQuery.UserAgent, m.ModuleName)
+	config.clientBigQuery.UserAgent = userAgent
 
 	log.Printf("[INFO] Reading BigQuery table: %s", d.Id())
 
@@ -872,14 +868,12 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientBigQuery.UserAgent = fmt.Sprintf("%s %s", config.clientBigQuery.UserAgent, m.ModuleName)
+	config.clientBigQuery.UserAgent = userAgent
 
 	table, err := resourceTable(d, meta)
 	if err != nil {
@@ -904,14 +898,12 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientBigQuery.UserAgent = fmt.Sprintf("%s %s", config.clientBigQuery.UserAgent, m.ModuleName)
+	config.clientBigQuery.UserAgent = userAgent
 
 	log.Printf("[INFO] Deleting BigQuery table: %s", d.Id())
 

@@ -77,14 +77,12 @@ func resourceGoogleFolderOrganizationPolicyCreate(d *schema.ResourceData, meta i
 }
 
 func resourceGoogleFolderOrganizationPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleName)
+	config.clientResourceManager.UserAgent = userAgent
 	folder := canonicalFolderId(d.Get("folder").(string))
 
 	var policy *cloudresourcemanager.OrgPolicy
@@ -136,14 +134,12 @@ func resourceGoogleFolderOrganizationPolicyUpdate(d *schema.ResourceData, meta i
 }
 
 func resourceGoogleFolderOrganizationPolicyDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleName)
+	config.clientResourceManager.UserAgent = userAgent
 	folder := canonicalFolderId(d.Get("folder").(string))
 
 	return retryTimeDuration(func() (delErr error) {
@@ -155,14 +151,12 @@ func resourceGoogleFolderOrganizationPolicyDelete(d *schema.ResourceData, meta i
 }
 
 func setFolderOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleName)
+	config.clientResourceManager.UserAgent = userAgent
 
 	folder := canonicalFolderId(d.Get("folder").(string))
 

@@ -89,14 +89,12 @@ func recurseOnSchema(s map[string]*schema.Schema, f func(*schema.Schema)) {
 }
 
 func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleName)
+	config.clientComputeBeta.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {

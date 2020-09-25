@@ -145,15 +145,12 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 <% end -%>
 
 func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
-    var m providerMeta
-
-    err := d.GetProviderMeta(&m)
-    if err != nil {
-        return err
-    }
-
     config := meta.(*Config)
-    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
+    userAgent, err := generateUserAgentString(d, config.userAgent)
+    if err != nil {
+    	return err
+    }
+    config.userAgent = userAgent
 
 <%  if object.custom_code.custom_create -%>
     <%= lines(compile(pwd + '/' + object.custom_code.custom_create))  -%>
@@ -426,15 +423,12 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 <%  end -%>
 
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
-    var m providerMeta
-
-    err := d.GetProviderMeta(&m)
-    if err != nil {
-        return err
-    }
-
     config := meta.(*Config)
-    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
+    userAgent, err := generateUserAgentString(d, config.userAgent)
+    if err != nil {
+    	return err
+    }
+    config.userAgent = userAgent
 
     url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
     if err != nil {
@@ -560,15 +554,12 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
 <% if updatable?(object, object.root_properties) -%>
 func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
-    var m providerMeta
-
-    err := d.GetProviderMeta(&m)
-    if err != nil {
-        return err
-    }
-
     config := meta.(*Config)
-    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
+    userAgent, err := generateUserAgentString(d, config.userAgent)
+    if err != nil {
+    	return err
+    }
+    config.userAgent = userAgent
 
     billingProject := ""
 
@@ -822,15 +813,12 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
     return nil
 <% else -%>
-    var m providerMeta
-
-    err := d.GetProviderMeta(&m)
-    if err != nil {
-        return err
-    }
-
     config := meta.(*Config)
-    config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
+    userAgent, err := generateUserAgentString(d, config.userAgent)
+    if err != nil {
+    	return err
+    }
+    config.userAgent = userAgent
 
 <% if object.custom_code.custom_delete -%>
 <%= lines(compile(pwd + '/' + object.custom_code.custom_delete)) -%>

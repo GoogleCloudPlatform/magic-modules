@@ -194,14 +194,12 @@ func appEngineApplicationLocationIDCustomizeDiff(_ context.Context, d *schema.Re
 }
 
 func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientAppEngine.UserAgent = fmt.Sprintf("%s %s", config.clientAppEngine.UserAgent, m.ModuleName)
+	config.clientAppEngine.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -239,14 +237,12 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientAppEngine.UserAgent = fmt.Sprintf("%s %s", config.clientAppEngine.UserAgent, m.ModuleName)
+	config.clientAppEngine.UserAgent = userAgent
 	pid := d.Id()
 
 	app, err := config.clientAppEngine.Apps.Get(pid).Do()
@@ -314,14 +310,12 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientAppEngine.UserAgent = fmt.Sprintf("%s %s", config.clientAppEngine.UserAgent, m.ModuleName)
+	config.clientAppEngine.UserAgent = userAgent
 	pid := d.Id()
 	app, err := expandAppEngineApplication(d, pid)
 	if err != nil {

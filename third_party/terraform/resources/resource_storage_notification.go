@@ -88,14 +88,12 @@ func resourceStorageNotification() *schema.Resource {
 }
 
 func resourceStorageNotificationCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
+	config.clientStorage.UserAgent = userAgent
 
 	bucket := d.Get("bucket").(string)
 
@@ -128,14 +126,12 @@ func resourceStorageNotificationCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceStorageNotificationRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
+	config.clientStorage.UserAgent = userAgent
 
 	bucket, notificationID := resourceStorageNotificationParseID(d.Id())
 
@@ -173,14 +169,12 @@ func resourceStorageNotificationRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceStorageNotificationDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
+	config.clientStorage.UserAgent = userAgent
 
 	bucket, notificationID := resourceStorageNotificationParseID(d.Id())
 

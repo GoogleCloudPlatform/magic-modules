@@ -463,14 +463,12 @@ func resourceComposerEnvironment() *schema.Resource {
 }
 
 func resourceComposerEnvironmentCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientComposer.UserAgent = fmt.Sprintf("%s %s", config.clientComposer.UserAgent, m.ModuleName)
+	config.clientComposer.UserAgent = userAgent
 
 	envName, err := resourceComposerEnvironmentName(d, config)
 	if err != nil {
@@ -532,14 +530,12 @@ func resourceComposerEnvironmentCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientComposer.UserAgent = fmt.Sprintf("%s %s", config.clientComposer.UserAgent, m.ModuleName)
+	config.clientComposer.UserAgent = userAgent
 
 	envName, err := resourceComposerEnvironmentName(d, config)
 	if err != nil {
@@ -572,14 +568,12 @@ func resourceComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	tfConfig := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, tfConfig.userAgent)
 	if err != nil {
 		return err
 	}
-	tfConfig := meta.(*Config)
-	tfConfig.clientComposer.UserAgent = fmt.Sprintf("%s %s", tfConfig.clientComposer.UserAgent, m.ModuleName)
+	tfConfig.clientComposer.UserAgent = userAgent
 
 	d.Partial(true)
 
@@ -772,14 +766,12 @@ func resourceComposerEnvironmentPatchField(updateMask string, env *composer.Envi
 }
 
 func resourceComposerEnvironmentDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientComposer.UserAgent = fmt.Sprintf("%s %s", config.clientComposer.UserAgent, m.ModuleName)
+	config.clientComposer.UserAgent = userAgent
 
 	envName, err := resourceComposerEnvironmentName(d, config)
 	if err != nil {

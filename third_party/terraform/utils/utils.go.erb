@@ -452,3 +452,14 @@ func changeFieldSchemaToForceNew(sch *schema.Schema) {
 		}
 	}
 }
+
+func generateUserAgentString(d *schema.ResourceData, currentUserAgent string) (string, error) {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return currentUserAgent, err
+	}
+
+	return strings.Join([]string{currentUserAgent, m.ModuleName}, " "), nil
+}

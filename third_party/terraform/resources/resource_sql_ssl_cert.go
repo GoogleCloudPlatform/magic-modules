@@ -92,14 +92,12 @@ func resourceSqlSslCert() *schema.Resource {
 }
 
 func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientSqlAdmin.UserAgent = fmt.Sprintf("%s %s", config.clientSqlAdmin.UserAgent, m.ModuleName)
+	config.clientSqlAdmin.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -145,14 +143,12 @@ func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientSqlAdmin.UserAgent = fmt.Sprintf("%s %s", config.clientSqlAdmin.UserAgent, m.ModuleName)
+	config.clientSqlAdmin.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -205,14 +201,12 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientSqlAdmin.UserAgent = fmt.Sprintf("%s %s", config.clientSqlAdmin.UserAgent, m.ModuleName)
+	config.clientSqlAdmin.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {

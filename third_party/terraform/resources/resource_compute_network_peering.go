@@ -100,14 +100,12 @@ func resourceComputeNetworkPeering() *schema.Resource {
 }
 
 func resourceComputeNetworkPeeringCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
+	config.clientCompute.UserAgent = userAgent
 
 	networkFieldValue, err := ParseNetworkFieldValue(d.Get("network").(string), d, config)
 	if err != nil {
@@ -145,14 +143,12 @@ func resourceComputeNetworkPeeringCreate(d *schema.ResourceData, meta interface{
 }
 
 func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
+	config.clientCompute.UserAgent = userAgent
 
 	peeringName := d.Get("name").(string)
 	networkFieldValue, err := ParseNetworkFieldValue(d.Get("network").(string), d, config)
@@ -201,14 +197,12 @@ func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{})
 }
 
 func resourceComputeNetworkPeeringDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
+	config.clientCompute.UserAgent = userAgent
 
 	// Remove the `network` to `peer_network` peering
 	name := d.Get("name").(string)

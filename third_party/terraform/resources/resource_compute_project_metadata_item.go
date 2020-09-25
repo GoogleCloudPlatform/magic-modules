@@ -56,14 +56,12 @@ func resourceComputeProjectMetadataItem() *schema.Resource {
 }
 
 func resourceComputeProjectMetadataItemCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
+	config.clientCompute.UserAgent = userAgent
 
 	projectID, err := getProject(d, config)
 	if err != nil {
@@ -84,14 +82,12 @@ func resourceComputeProjectMetadataItemCreate(d *schema.ResourceData, meta inter
 }
 
 func resourceComputeProjectMetadataItemRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
+	config.clientCompute.UserAgent = userAgent
 
 	projectID, err := getProject(d, config)
 	if err != nil {
@@ -126,14 +122,12 @@ func resourceComputeProjectMetadataItemRead(d *schema.ResourceData, meta interfa
 }
 
 func resourceComputeProjectMetadataItemUpdate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
+	config.clientCompute.UserAgent = userAgent
 
 	projectID, err := getProject(d, config)
 	if err != nil {
@@ -154,14 +148,12 @@ func resourceComputeProjectMetadataItemUpdate(d *schema.ResourceData, meta inter
 }
 
 func resourceComputeProjectMetadataItemDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
+	config.clientCompute.UserAgent = userAgent
 
 	projectID, err := getProject(d, config)
 	if err != nil {

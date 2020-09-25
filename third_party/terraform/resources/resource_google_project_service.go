@@ -118,14 +118,12 @@ func resourceGoogleProjectServiceImport(d *schema.ResourceData, m interface{}) (
 }
 
 func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
+	config.userAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -163,14 +161,12 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleName)
+	config.clientResourceManager.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -226,14 +222,12 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceGoogleProjectServiceDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientServiceUsage.UserAgent = fmt.Sprintf("%s %s", config.clientServiceUsage.UserAgent, m.ModuleName)
+	config.clientServiceUsage.UserAgent = userAgent
 
 	if disable := d.Get("disable_on_destroy"); !(disable.(bool)) {
 		log.Printf("[WARN] Project service %q disable_on_destroy is false, skip disabling service", d.Id())

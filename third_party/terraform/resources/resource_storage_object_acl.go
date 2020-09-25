@@ -110,14 +110,12 @@ func getObjectAclId(object string) string {
 }
 
 func resourceStorageObjectAclCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
+	config.clientStorage.UserAgent = userAgent
 
 	bucket := d.Get("bucket").(string)
 	object := d.Get("object").(string)
@@ -171,14 +169,12 @@ func resourceStorageObjectAclCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceStorageObjectAclRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
+	config.clientStorage.UserAgent = userAgent
 
 	bucket := d.Get("bucket").(string)
 	object := d.Get("object").(string)
@@ -198,14 +194,12 @@ func resourceStorageObjectAclRead(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceStorageObjectAclUpdate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
+	config.clientStorage.UserAgent = userAgent
 
 	bucket := d.Get("bucket").(string)
 	object := d.Get("object").(string)
@@ -256,14 +250,12 @@ func resourceStorageObjectAclUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceStorageObjectAclDelete(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
+	config.clientStorage.UserAgent = userAgent
 
 	bucket := d.Get("bucket").(string)
 	object := d.Get("object").(string)

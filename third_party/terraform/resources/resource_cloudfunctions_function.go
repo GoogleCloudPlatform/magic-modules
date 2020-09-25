@@ -332,14 +332,12 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 }
 
 func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCloudFunctions.UserAgent = fmt.Sprintf("%s %s", config.clientCloudFunctions.UserAgent, m.ModuleName)
+	config.clientCloudFunctions.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -452,14 +450,12 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCloudFunctions.UserAgent = fmt.Sprintf("%s %s", config.clientCloudFunctions.UserAgent, m.ModuleName)
+	config.clientCloudFunctions.UserAgent = userAgent
 
 	cloudFuncId, err := parseCloudFunctionId(d, config)
 	if err != nil {
@@ -559,14 +555,12 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 
 func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG]: Updating google_cloudfunctions_function")
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCloudFunctions.UserAgent = fmt.Sprintf("%s %s", config.clientCloudFunctions.UserAgent, m.ModuleName)
+	config.clientCloudFunctions.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -675,14 +669,12 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceCloudFunctionsDestroy(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCloudFunctions.UserAgent = fmt.Sprintf("%s %s", config.clientCloudFunctions.UserAgent, m.ModuleName)
+	config.clientCloudFunctions.UserAgent = userAgent
 
 	cloudFuncId, err := parseCloudFunctionId(d, config)
 	if err != nil {
