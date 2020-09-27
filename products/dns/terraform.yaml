@@ -66,6 +66,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       nameServerSet: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      privateVisibilityConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/dns_managed_zone_private_visibility_config.go.erb'
       privateVisibilityConfig.networks: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: |-
@@ -79,7 +81,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZonePrivateVisibilityConfigNetworksSchema())
-            return hashcode.String(buf.String())
+            return hashcode(buf.String())
           }
         # TODO(drebes) Remove this description override once the Terraform 0.12 SDK is used.
         description: |
@@ -89,7 +91,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           and apply an incorrect update to the resource. If you encounter this issue, remove all `networks`
           blocks in an update and then apply another update adding all of them back simultaneously.
       privateVisibilityConfig.networks.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/network_full_url.erb'
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         description: |
           The id or fully qualified URL of the VPC network to bind to.
@@ -101,11 +102,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           func(v interface{}) int {
             raw := v.(map[string]interface{})
             if address, ok := raw["ipv4_address"]; ok {
-              hashcode.String(address.(string))
+              hashcode(address.(string))
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZoneForwardingConfigTargetNameServersSchema())
-            return hashcode.String(buf.String())
+            return hashcode(buf.String())
           }
       serviceDirectoryConfig.namespace.namespaceUrl: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/sd_full_url.erb'
@@ -129,6 +130,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       reverseLookup: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/object_to_bool.go.erb
         custom_expand: templates/terraform/custom_expand/bool_to_object.go.erb
+    virtual_fields:
+      - !ruby/object:Api::Type::Boolean
+        name: 'force_destroy'
+        description: 'Set this true to delete all records in the zone.'
+        default_value: false
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_delete: templates/terraform/pre_delete/managed_dns_zone.go.erb
   Policy: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: 'projects/{{project}}/policies/{{name}}'
     examples:
@@ -146,11 +154,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           func(v interface{}) int {
             raw := v.(map[string]interface{})
             if address, ok := raw["ipv4_address"]; ok {
-              hashcode.String(address.(string))
+              hashcode(address.(string))
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsPolicyAlternativeNameServerConfigTargetNameServersSchema())
-            return hashcode.String(buf.String())
+            return hashcode(buf.String())
           }
       description: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
@@ -169,7 +177,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
             }
             var buf bytes.Buffer
             schema.SerializeResourceForHash(&buf, raw, dnsPolicyNetworksSchema())
-            return hashcode.String(buf.String())
+            return hashcode(buf.String())
           }
       networks.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/network_full_url.erb

@@ -21,7 +21,7 @@ support the same version.
 
 ```hcl
 data "google_container_engine_versions" "central1b" {
-  provider       = "google-beta"
+  provider       = google-beta
   location       = "us-central1-b"
   version_prefix = "1.12."
 }
@@ -71,4 +71,4 @@ The following attributes are exported:
 * `latest_master_version` - The latest version available in the given zone for use with master instances.
 * `latest_node_version` - The latest version available in the given zone for use with node instances.
 * `default_cluster_version` - Version of Kubernetes the service deploys by default.
-* `release_channel_default_version` ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - A map from a release channel name to the channel's default version.
+* `release_channel_default_version` - A map from a release channel name to the channel's default version.

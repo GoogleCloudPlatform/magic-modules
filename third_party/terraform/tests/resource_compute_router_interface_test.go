@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccComputeRouterInterface_basic(t *testing.T) {
@@ -256,7 +256,7 @@ resource "google_compute_network" "foobar" {
 }
 
 resource "google_compute_subnetwork" "foobar" {
-  name          = "router-interface-test-subnetwork-%s"
+  name          = "tf-test-router-interface-subnetwork-%s"
   network       = google_compute_network.foobar.self_link
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
@@ -317,7 +317,7 @@ resource "google_compute_network" "foobar" {
 }
 
 resource "google_compute_subnetwork" "foobar" {
-  name          = "router-interface-test-subnetwork-%s"
+  name          = "tf-test-router-interface-subnetwork-%s"
   network       = google_compute_network.foobar.self_link
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"

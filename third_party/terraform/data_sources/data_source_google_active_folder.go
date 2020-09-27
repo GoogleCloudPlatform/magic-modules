@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	resourceManagerV2Beta1 "google.golang.org/api/cloudresourcemanager/v2beta1"
 )
 
@@ -30,7 +30,14 @@ func dataSourceGoogleActiveFolder() *schema.Resource {
 }
 
 func dataSourceGoogleActiveFolderRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientResourceManagerV2Beta1.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManagerV2Beta1.UserAgent, m.ModuleName)
 
 	parent := d.Get("parent").(string)
 	displayName := d.Get("display_name").(string)
@@ -47,7 +54,9 @@ func dataSourceGoogleActiveFolderRead(d *schema.ResourceData, meta interface{}) 
 	for _, folder := range searchResponse.Folders {
 		if folder.DisplayName == displayName {
 			d.SetId(folder.Name)
-			d.Set("name", folder.Name)
+			if err := d.Set("name", folder.Name); err != nil {
+				return fmt.Errorf("Error setting folder name: %s", err)
+			}
 			return nil
 		}
 	}

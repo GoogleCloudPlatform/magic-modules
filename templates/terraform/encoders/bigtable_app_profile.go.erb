@@ -16,5 +16,7 @@
   # the URL is constructed from ResourceData. Set it in
   # state and use a encoder instead of a field expander -%>
 // Instance is a URL parameter only, so replace self-link/path with resource name only.
-d.Set("instance", GetResourceNameFromSelfLink(d.Get("instance").(string)))
+if err := d.Set("instance", GetResourceNameFromSelfLink(d.Get("instance").(string))); err != nil {
+	return nil, fmt.Errorf("Error setting instance: %s", err)
+}
 return obj, nil

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
 )
 
@@ -64,7 +64,15 @@ func resourceRuntimeconfigVariable() *schema.Resource {
 }
 
 func resourceRuntimeconfigVariableCreate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientRuntimeconfig.UserAgent = fmt.Sprintf("%s %s", config.clientRuntimeconfig.UserAgent, m.ModuleName)
+
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
@@ -203,12 +211,24 @@ func setRuntimeConfigVariableToResourceData(d *schema.ResourceData, variable run
 	if err != nil {
 		return err
 	}
-	d.Set("name", name)
-	d.Set("parent", parent)
-	d.Set("project", varProject)
-	d.Set("value", variable.Value)
-	d.Set("text", variable.Text)
-	d.Set("update_time", variable.UpdateTime)
+	if err := d.Set("name", name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("parent", parent); err != nil {
+		return fmt.Errorf("Error setting parent: %s", err)
+	}
+	if err := d.Set("project", varProject); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("value", variable.Value); err != nil {
+		return fmt.Errorf("Error setting value: %s", err)
+	}
+	if err := d.Set("text", variable.Text); err != nil {
+		return fmt.Errorf("Error setting text: %s", err)
+	}
+	if err := d.Set("update_time", variable.UpdateTime); err != nil {
+		return fmt.Errorf("Error setting update_time: %s", err)
+	}
 
 	return nil
 }

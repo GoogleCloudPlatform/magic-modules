@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -48,7 +48,6 @@ func TestAccComputeImage_update(t *testing.T) {
 						t, "google_compute_image.foobar", &image),
 					testAccCheckComputeImageContainsLabel(&image, "my-label", "my-label-value"),
 					testAccCheckComputeImageContainsLabel(&image, "empty-label", ""),
-					testAccCheckComputeImageHasComputedFingerprint(&image, "google_compute_image.foobar"),
 				),
 			},
 			{
@@ -59,7 +58,6 @@ func TestAccComputeImage_update(t *testing.T) {
 					testAccCheckComputeImageDoesNotContainLabel(&image, "my-label"),
 					testAccCheckComputeImageContainsLabel(&image, "empty-label", "oh-look-theres-a-label-now"),
 					testAccCheckComputeImageContainsLabel(&image, "new-field", "only-shows-up-when-updated"),
-					testAccCheckComputeImageHasComputedFingerprint(&image, "google_compute_image.foobar"),
 				),
 			},
 			{
@@ -87,7 +85,66 @@ func TestAccComputeImage_basedondisk(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeImageExists(
 						t, "google_compute_image.foobar", &image),
-					testAccCheckComputeImageHasSourceDisk(&image),
+					testAccCheckComputeImageHasSourceType(&image),
+				),
+			},
+			{
+				ResourceName:      "google_compute_image.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeImage_sourceImage(t *testing.T) {
+	t.Parallel()
+
+	var image compute.Image
+	imageName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeImage_sourceImage(imageName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeImageExists(
+						t, "google_compute_image.foobar", &image),
+					testAccCheckComputeImageHasSourceType(&image),
+				),
+			},
+			{
+				ResourceName:      "google_compute_image.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeImage_sourceSnapshot(t *testing.T) {
+	t.Parallel()
+
+	var image compute.Image
+
+	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	snapshotName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	imageName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeImage_sourceSnapshot(diskName, snapshotName, imageName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeImageExists(
+						t, "google_compute_image.foobar", &image),
+					testAccCheckComputeImageHasSourceType(&image),
 				),
 			},
 			{
@@ -238,29 +295,7 @@ func testAccCheckComputeImageDoesNotContainLabel(image *compute.Image, key strin
 	}
 }
 
-func testAccCheckComputeImageHasComputedFingerprint(image *compute.Image, resource string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		// First ensure we actually have a fingerprint
-		if image.LabelFingerprint == "" {
-			return fmt.Errorf("No fingerprint set in API read result")
-		}
-
-		state := s.RootModule().Resources[resource]
-		if state == nil {
-			return fmt.Errorf("Unable to find resource named %s in resources", resource)
-		}
-
-		storedFingerprint := state.Primary.Attributes["label_fingerprint"]
-		if storedFingerprint != image.LabelFingerprint {
-			return fmt.Errorf("Stored fingerprint doesn't match fingerprint found on server; stored '%s', server '%s'",
-				storedFingerprint, image.LabelFingerprint)
-		}
-
-		return nil
-	}
-}
-
-func testAccCheckComputeImageHasSourceDisk(image *compute.Image) resource.TestCheckFunc {
+func testAccCheckComputeImageHasSourceType(image *compute.Image) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if image.SourceType == "" {
 			return fmt.Errorf("No source disk")
@@ -371,4 +406,46 @@ resource "google_compute_image" "foobar" {
   source_disk = google_compute_disk.foobar.self_link
 }
 `, diskName, imageName)
+}
+
+func testAccComputeImage_sourceImage(imageName string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_image" "foobar" {
+  name         = "%s"
+  source_image = data.google_compute_image.my_image.self_link
+}
+`, imageName)
+}
+
+func testAccComputeImage_sourceSnapshot(diskName, snapshotName, imageName string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name  = "%s"
+  image = data.google_compute_image.my_image.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_snapshot" "foobar" {
+  name        = "%s"
+  source_disk = google_compute_disk.foobar.name
+  zone        = "us-central1-a"
+}
+
+resource "google_compute_image" "foobar" {
+  name            = "%s"
+  source_snapshot = google_compute_snapshot.foobar.self_link
+}
+`, diskName, snapshotName, imageName)
 }

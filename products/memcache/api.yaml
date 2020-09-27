@@ -51,6 +51,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/memcache/docs/creating-instances'
+      api: 'https://cloud.google.com/memorystore/docs/memcached/reference/rest'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'region'
@@ -92,20 +93,57 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'message'
               description: The message to be displayed to a user.
+      - !ruby/object:Api::Type::Array
+        name: 'memcacheNodes'
+        description: |
+          Additional information about the instance state, if available.
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'nodeId'
+              description: Identifier of the Memcached node. 
+                The node id does not include project or location like the Memcached instance name.
+              output: true
+            - !ruby/object:Api::Type::String
+              name: 'zone'
+              description: Location (GCP Zone) for the Memcached node.
+              output: true
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              description: The port number of the Memcached server on this node.
+              output: true
+            - !ruby/object:Api::Type::String
+              name: 'host'
+              description: Hostname or IP address of the Memcached node used by the clients to connect to the Memcached server on this node.
+              output: true
+            - !ruby/object:Api::Type::String
+              name: state
+              description: Current state of the Memcached node.               
+              output: true
       - !ruby/object:Api::Type::Time
         name: 'createTime'
         description: Creation timestamp in RFC3339 text format.
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'discoveryEndpoint'
+        description:  Endpoint for Discovery API
         output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
           Resource labels to represent user-provided metadata.
+      - !ruby/object:Api::Type::String
+        name: 'memcacheFullVersion'
+        output: true
+        description: |
+          The full version of memcached server running on this instance.
       - !ruby/object:Api::Type::Array
         name: 'zones'
         input: true
         description: |
-                Zones where memcache nodes should be provisioned.  If not
-                provided, all zones will be used.
+          Zones where memcache nodes should be provisioned.  If not
+          provided, all zones will be used.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'authorizedNetwork'
@@ -118,6 +156,15 @@ objects:
         description: |
           Number of nodes in the memcache instance.
         required: true
+      - !ruby/object:Api::Type::Enum
+        name: memcacheVersion
+        description: |
+          The major version of Memcached software. If not provided, latest supported version will be used.
+          Currently the latest supported major version is MEMCACHE_1_5. The minor version will be automatically
+          determined by our system based on the latest supported minor version.
+        default_value: :MEMCACHE_1_5
+        values:
+          - :MEMCACHE_1_5
       - !ruby/object:Api::Type::NestedObject
         name: nodeConfig
         description: |

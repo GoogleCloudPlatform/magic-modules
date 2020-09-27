@@ -53,7 +53,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       preview: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
-          {{description}} ~>**NOTE**: Deployment Manager does not allow update
+          {{description}} ~>**NOTE:** Deployment Manager does not allow update
           of a deployment in preview (unless updating to preview=false). Thus,
           Terraform will force-recreate deployments if either preview is updated
           to true or if other fields are updated while preview is true.

@@ -60,7 +60,7 @@ One of the following is required:
 * `content_type` - (Optional) [Content-Type](https://tools.ietf.org/html/rfc7231#section-3.1.1.5) of the object data. Defaults to "application/octet-stream" or "text/plain; charset=utf-8".
 
 * `storage_class` - (Optional) The [StorageClass](https://cloud.google.com/storage/docs/storage-classes) of the new bucket object.
-    Supported values include: `MULTI_REGIONAL`, `REGIONAL`, `NEARLINE`, `COLDLINE`. If not provided, this defaults to the bucket's default
+    Supported values include: `MULTI_REGIONAL`, `REGIONAL`, `NEARLINE`, `COLDLINE`, `ARCHIVE`. If not provided, this defaults to the bucket's default
     storage class or to a [standard](https://cloud.google.com/storage/docs/storage-classes#standard) class.
 
 ## Attributes Reference
@@ -76,3 +76,5 @@ exported:
 
 * `output_name` - (Computed) The name of the object. Use this field in interpolations with `google_storage_object_acl` to recreate
 `google_storage_object_acl` resources when your `google_storage_bucket_object` is recreated.
+
+* `media_link` - (Computed) A url reference to download this object.

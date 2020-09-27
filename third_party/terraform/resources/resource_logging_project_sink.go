@@ -3,7 +3,7 @@ package google
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const nonUniqueWriterAccount = "serviceAccount:cloud-logs@system.gserviceaccount.com"
@@ -37,7 +37,14 @@ func resourceLoggingProjectSink() *schema.Resource {
 }
 
 func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -70,12 +77,22 @@ func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) er
 		return handleNotFoundError(err, d, fmt.Sprintf("Project Logging Sink %s", d.Get("name").(string)))
 	}
 
-	d.Set("project", project)
-	flattenResourceLoggingSink(d, sink)
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+
+	if err := flattenResourceLoggingSink(d, sink); err != nil {
+		return err
+	}
+
 	if sink.WriterIdentity != nonUniqueWriterAccount {
-		d.Set("unique_writer_identity", true)
+		if err := d.Set("unique_writer_identity", true); err != nil {
+			return fmt.Errorf("Error setting unique_writer_identity: %s", err)
+		}
 	} else {
-		d.Set("unique_writer_identity", false)
+		if err := d.Set("unique_writer_identity", false); err != nil {
+			return fmt.Errorf("Error setting unique_writer_identity: %s", err)
+		}
 	}
 	return nil
 }

@@ -198,6 +198,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_service_name: "backend-service"
           health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_network_endpoint"
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+          neg_name: "network-endpoint"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/backend_service.go.erb'
       encoder: 'templates/terraform/encoders/backend_service.go.erb'
@@ -340,6 +346,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           key_name: "test-key"
           backend_name: "my-backend-service"
+          igm_name: "my-webservers"
         skip_test: true
     properties:
       backendService: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -398,7 +405,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
   Disk: !ruby/object:Overrides::Terraform::ResourceOverride
     # Larger disks were timing out at creation. Bumping up to 5 minutes.
-    # https://github.com/terraform-providers/terraform-provider-google/issues/703
+    # https://github.com/hashicorp/terraform-provider-google/issues/703
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 5
     properties:
@@ -497,11 +504,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "disk_basic"
         primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-test-disk%s\", context[\"random_suffix\"])"
         vars:
           disk_name: "test-disk"
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: '/'
+      fetch_iam_policy_verb: :GET
+      parent_resource_attribute: 'name'
+      import_format: ["projects/{{project}}/zones/{{zone}}/disks/{{name}}", "{{name}}"]
+      base_url: projects/{{project}}/zones/{{zone}}/disks/{{name}}
   DiskType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |+
+        * `enable_logging` - (Optional, Deprecated) This field denotes whether to enable logging for a particular firewall rule.
+        If logging is enabled, logs will be exported to Stackdriver. Deprecated in favor of `log_config`
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firewall_basic"
@@ -512,6 +530,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/firewall.erb
       resource_definition: templates/terraform/resource_definition/firewall.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/firewall.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -540,9 +559,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # See terraform issue #2713 for more context.
         input: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
-        flatten_object: true
-      logConfig.enableLogging: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          This field denotes the logging options for a particular firewall rule.
+          If defined, logging is enabled, and logs will be exported to Cloud Logging.
         send_empty_value: true
+        custom_expand: 'templates/terraform/custom_expand/firewall_log_config.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/firewall_log_config.go.erb'
+        diff_suppress_func: 'diffSuppressEnableLogging'
+      logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      logConfig.metadata: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
@@ -600,7 +627,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           fw_name: "website-fw"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
-      extra_schema_entry: templates/terraform/extra_schema_entry/forwarding_rule.erb
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -633,7 +659,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           internal IP address will be automatically allocated from the IP range
           of the subnet or network configured for this forwarding rule.
 
-          An address must be specified by a literal IP address. ~> **NOTE**: While
+          An address must be specified by a literal IP address. ~> **NOTE:** While
           the API allows you to specify various resource paths for an address resource
           instead, Terraform requires this to specifically be an IP address to
           avoid needing to fetching the IP address from resource paths on refresh
@@ -705,6 +731,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           forwarding_rule_name: "global-rule"
           http_proxy_name: "target-proxy"
           backend_service_name: "backend"
+          igm_name: "igm-internal"
     properties:
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -864,6 +891,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           health_check_name: "http2-health-check"
       - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_grpc"
+        primary_resource_id: "grpc-health-check"
+        vars:
+          health_check_name: "grpc-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_grpc_full"
+        primary_resource_id: "grpc-health-check"
+        vars:
+          health_check_name: "grpc-health-check"
+      - !ruby/object:Provider::Terraform::Examples
         name: "health_check_with_logging"
         primary_resource_id: "health-check-with-logging"
         min_version: beta
@@ -889,13 +926,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'portDiffSuppress'
       sslHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
+      grpcHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'portDiffSuppress'
   Image: !ruby/object:Overrides::Terraform::ResourceOverride
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      allowed_iam_role: 'roles/compute.imageUser'
+      parent_resource_attribute: 'image'
+      iam_conditions_request_type: :QUERY_PARAM
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "image_basic"
         primary_resource_id: "example"
         vars:
           image_name: "example-image"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-example-image%s\", context[\"random_suffix\"])"
       - !ruby/object:Provider::Terraform::Examples
         name: "image_guest_os"
         primary_resource_id: "example"
@@ -929,7 +973,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     # Users were experiencing timeouts. Bumping up to 6 minutes.
-    # https://github.com/terraform-providers/terraform-provider-google/issues/852
+    # https://github.com/hashicorp/terraform-provider-google/issues/852
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
       update_minutes: 6
@@ -1067,7 +1111,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
-      extra_schema_entry: templates/terraform/extra_schema_entry/network.erb
   NetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{zone}}/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}"
     mutex: networkEndpoint/{{project}}/{{zone}}/{{network_endpoint_group}}
@@ -1168,6 +1211,32 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
+  RegionNetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_functions"
+        primary_resource_id: "function_neg"
+        vars:
+          neg_name: "function-neg"
+          function_name: "function-neg"
+          bucket_name: "cloudfunctions-function-example-bucket"
+          zip_path: "path/to/index.zip"
+        test_vars_overrides:
+          zip_path: 'createZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_cloudrun"
+        primary_resource_id: "cloudrun_neg"
+        vars:
+          neg_name: "cloudrun-neg"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_network_endpoint_group_appengine"
+        primary_resource_id: "appengine_neg"
+        vars:
+          neg_name: "appengine-neg"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"
     import_format: ["projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"]
@@ -1256,6 +1325,71 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           If it is not provided, the provider region is used.
       serverBinding: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  OrganizationSecurityPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "locations/global/securityPolicies/{{policy_id}}"
+    self_link: "locations/global/securityPolicies/{{policy_id}}"
+    import_format: ["locations/global/securityPolicies/{{policy_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "organization_security_policy_basic"
+        primary_resource_id: "policy"
+        min_version: 'beta'
+        test_env_vars:
+          org_id: :ORG_ID
+    parameters:
+      displayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateRFC1035Name(2, 63)'
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: policy_id
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/org_security_policy.go.erb
+      post_update: templates/terraform/post_update/org_security_policy.go.erb
+      post_delete: templates/terraform/post_delete/org_security_policy.go.erb
+      # TODO: Remove once b/154369201 is closed.
+      test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
+  OrganizationSecurityPolicyAssociation: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{policy_id}}/association/{{name}}"
+    import_format: ["{{policy_id}}/association/{{name}}"]
+    base_url: '{{policy_id}}'
+    self_link: '{{policy_id}}/getAssociation?name={{name}}'
+    create_url: '{{policy_id}}/addAssociation'
+    delete_url: '{{policy_id}}/removeAssociation?name={{name}}'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "organization_security_policy_association_basic"
+        primary_resource_id: "policy"
+        min_version: 'beta'
+        test_env_vars:
+          org_id: :ORG_ID
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/org_security_policy_association.go.erb
+      post_delete: templates/terraform/post_create/org_security_policy_association.go.erb
+      # TODO: Remove once b/154369201 is closed.
+      test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
+  OrganizationSecurityPolicyRule: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{policy_id}}/priority/{{priority}}"
+    import_format: ["{{policy_id}}/priority/{{priority}}"]
+    base_url: '{{policy_id}}'
+    self_link: '{{policy_id}}/getRule?priority={{priority}}'
+    create_url: '{{policy_id}}/addRule?priority={{priority}}'
+    update_url: '{{policy_id}}/patchRule?priority={{priority}}'
+    delete_url: '{{policy_id}}/removeRule?priority={{priority}}'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "organization_security_policy_rule_basic"
+        primary_resource_id: "policy"
+        min_version: 'beta'
+        test_env_vars:
+          org_id: :ORG_ID
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/organization_security_policy_rule.go.erb
+      post_create: templates/terraform/post_create/org_security_policy_rule.go.erb
+      post_delete: templates/terraform/post_create/org_security_policy_rule.go.erb
+      post_update: templates/terraform/post_create/org_security_policy_rule.go.erb
+      # TODO: Remove once b/154369201 is closed.
+      test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
   PacketMirroring: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1520,10 +1654,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "region_disk_basic"
         primary_resource_id: "regiondisk"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-my-region-disk%s\", context[\"random_suffix\"])"
         vars:
           region_disk_name: "my-region-disk"
           disk_name: "my-disk"
           snapshot_name: "my-snapshot"
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: '/'
+      fetch_iam_policy_verb: :GET
+      parent_resource_attribute: 'name'
+      import_format: ["projects/{{project}}/regions/{{region}}/disks/{{name}}", "{{name}}"]
+      base_url: projects/{{project}}/regions/{{region}}/disks/{{name}}
   RegionDiskType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   RegionHealthCheck: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -1584,6 +1725,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "http2-region-health-check"
         vars:
           health_check_name: "http2-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_grpc"
+        primary_resource_id: "grpc-region-health-check"
+        vars:
+          health_check_name: "grpc-region-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_health_check_grpc_full"
+        primary_resource_id: "grpc-region-health-check"
+        vars:
+          health_check_name: "grpc-region-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/health_check_type.erb
       resource_definition: templates/terraform/resource_definition/health_check.erb
@@ -1609,6 +1760,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       tcpHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
       sslHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'portDiffSuppress'
+      grpcHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portDiffSuppress'
   RegionUrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
@@ -1935,11 +2088,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # https://github.com/GoogleCloudPlatform/magic-modules/issues/1019
         ignore_read: true
         sensitive: true
-        required: true
         custom_flatten: templates/terraform/custom_flatten/compute_snapshot_snapshot_encryption_raw_key.go.erb
       snapshotEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
-        # This is a beta field that showed up in GA. Removed from both.
-        exclude: true
+        name: "kmsKeySelfLink"
       sourceDisk: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       sourceDiskEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1949,6 +2100,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       sourceDiskEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
         # This is a beta field that showed up in GA. Removed from both.
         exclude: true
+      storageLocations: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/snapshot.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/snapshot.erb
@@ -1988,6 +2141,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "managed_ssl_certificate_recreation"
         primary_resource_id: "default"
+        # Random provider
+        skip_vcr: true
         min_version: beta
     description: |
       {{description}}
@@ -2160,7 +2315,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
   Subnetwork: !ruby/object:Overrides::Terraform::ResourceOverride
     # Users were experiencing timeout. Bumping up to 6 minutes.
-    # https://github.com/terraform-providers/terraform-provider-google/issues/718
+    # https://github.com/hashicorp/terraform-provider-google/issues/718
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
       update_minutes: 6
@@ -2200,6 +2355,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.erb'
       logConfig.enable: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      logConfig.metadataFields: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
       ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
@@ -2325,6 +2482,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           target_name: "target"
           instance_name: "target-vm"
+      - !ruby/object:Provider::Terraform::Examples
+        min_version: beta
+        name: "target_instance_custom_network"
+        primary_resource_id: "custom_network"
+        vars:
+          target_name: "custom-network"
+          instance_name: "cusom-network-target-vm"
     properties:
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -2421,6 +2585,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "ha_vpn_gateway_gcp_to_gcp"
         primary_resource_id: "ha_gateway1"
+        # Multiple fine-grained resources
+        skip_vcr: true
         vars:
           ha_vpn_gateway1_name: "ha-vpn-1"
           network1_name: "network1"
@@ -2447,6 +2613,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "external_vpn_gateway"
         primary_resource_id: "external_gateway"
+        # Multiple fine-grained resources
+        skip_vcr: true
         vars:
           ha_vpn_gateway_name: "ha-vpn"
           network_name: "network"
@@ -2664,6 +2832,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/labels.erb
   Zone: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
+  TargetGrpcProxy: !ruby/object:Overrides::Terraform::ResourceOverride
+    properties:
+      urlMap: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "target_grpc_proxy_basic"
+        primary_resource_id: "default"
+        vars:
+          proxy_name: "proxy"
+          urlmap_name: "urlmap"
+          backend_name: "backend"
+          healthcheck_name: "healthcheck"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

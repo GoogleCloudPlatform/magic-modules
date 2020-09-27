@@ -27,6 +27,12 @@
       :version_added: '2.8'
     :pushConfig:
       :version_added: '2.6'
+      :oidcToken:
+        :version_added: '2.10'
+        :serviceAccountEmail:
+          :version_added: '2.10'
+        :audience:
+          :version_added: '2.10'
       :pushEndpoint:
         :version_added: '2.6'
       :attributes:

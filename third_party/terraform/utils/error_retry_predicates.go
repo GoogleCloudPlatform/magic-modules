@@ -82,7 +82,7 @@ func isConnectionResetNetworkError(err error) (bool, string) {
 //
 //The only way right now to determine it is a retryable 409 due to
 // concurrent calls is to look at the contents of the error message.
-// See https://github.com/terraform-providers/terraform-provider-google/issues/3279
+// See https://github.com/hashicorp/terraform-provider-google/issues/3279
 func is409OperationInProgressError(err error) (bool, string) {
 	gerr, ok := err.(*googleapi.Error)
 	if !ok {
@@ -150,7 +150,7 @@ func iamMemberMissing(err error) (bool, string) {
 
 // Cloud PubSub returns a 400 error if a topic's parent project was recently created and an
 // organization policy has not propagated.
-// See https://github.com/terraform-providers/terraform-provider-google/issues/4349
+// See https://github.com/hashicorp/terraform-provider-google/issues/4349
 func pubsubTopicProjectNotReady(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 400 && strings.Contains(gerr.Body, "retry this operation") {
@@ -186,6 +186,21 @@ func isSqlOperationInProgressError(err error) (bool, string) {
 		}
 
 		return true, "Waiting for other concurrent Cloud SQL operations to finish"
+	}
+	return false, ""
+}
+
+// Retry if service usage decides you're activating the same service multiple
+// times. This can happen if a service and a dependent service aren't batched
+// together- eg container.googleapis.com in one request followed by compute.g.c
+// in the next (container relies on compute and implicitly activates it)
+func serviceUsageServiceBeingActivated(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 400 {
+		if strings.Contains(gerr.Body, "Another activation or deactivation is in progress") {
+			return false, ""
+		}
+
+		return true, "Waiting for same service activation/deactivation to finish"
 	}
 	return false, ""
 }

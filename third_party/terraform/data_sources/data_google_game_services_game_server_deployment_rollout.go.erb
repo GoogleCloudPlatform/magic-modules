@@ -1,10 +1,9 @@
 <% autogen_exception -%>
 package google
 
-<% unless version == 'ga' -%>
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceGameServicesGameServerDeploymentRollout() *schema.Resource {
@@ -30,4 +29,3 @@ func dataSourceGameServicesGameServerDeploymentRolloutRead(d *schema.ResourceDat
 	return resourceGameServicesGameServerDeploymentRolloutRead(d, meta)
 
 }
-<% end -%>

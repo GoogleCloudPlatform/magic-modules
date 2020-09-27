@@ -102,13 +102,25 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # converting IAM roles set in state to their primitive equivalents
         # before comparison.
         custom_expand: "templates/terraform/custom_expand/bigquery_access_role.go.erb"
+      iamMember: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
+      userByEmail: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
+      groupByEmail: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
+      specialGroup: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
+      domain: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      constants: templates/terraform/constants/bigquery_dataset_access.go
+      constants: templates/terraform/constants/bigquery_dataset_access.go.erb
+      post_create: templates/terraform/post_create/bigquery_dataset_access.go.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/bigquery_dataset_access.go.erb
   Job: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/jobs/{{job_id}}"]
     skip_delete: true
     async: !ruby/object:Provider::Terraform::PollAsync
-      check_response_func: PollCheckForExistence
+      check_response_func_existence: PollCheckForExistence
       actions: ['create']
       operation: !ruby/object:Api::Async::Operation
         timeouts: !ruby/object:Api::Timeouts
@@ -299,7 +311,29 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       constants: templates/terraform/constants/bigquery_job.go
       encoder: templates/terraform/encoders/bigquery_job.go.erb
   Table: !ruby/object:Overrides::Terraform::ResourceOverride
-    exclude: true
+    base_url: 'projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}'
+    self_link: 'projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}'
+    exclude_resource: true
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      parent_resource_type: 'google_bigquery_table'
+      parent_resource_attribute: 'table_id'
+      fetch_iam_policy_verb: :POST
+      allowed_iam_role: 'roles/bigquery.dataOwner'
+      iam_conditions_request_type: :REQUEST_BODY
+      iam_policy_version: '1'
+    id_format: "{{table_id}}"
+    import_format: [
+        "projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}", "{{table_id}}"
+    ]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigquery_bigquery_table"
+        primary_resource_id: "test"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_dataset_id%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf_test_table_id%s\", context[\"random_suffix\"])"
+        vars:
+          dataset_id: "dataset_id"
+          table_id: "table_id"
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -66,14 +66,27 @@ func resourceProjectUsageBucketRead(d *schema.ResourceData, meta interface{}) er
 		return nil
 	}
 
-	d.Set("project", project)
-	d.Set("prefix", p.UsageExportLocation.ReportNamePrefix)
-	d.Set("bucket_name", p.UsageExportLocation.BucketName)
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("prefix", p.UsageExportLocation.ReportNamePrefix); err != nil {
+		return fmt.Errorf("Error setting prefix: %s", err)
+	}
+	if err := d.Set("bucket_name", p.UsageExportLocation.BucketName); err != nil {
+		return fmt.Errorf("Error setting bucket_name: %s", err)
+	}
 	return nil
 }
 
 func resourceProjectUsageBucketCreate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -94,7 +107,9 @@ func resourceProjectUsageBucketCreate(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
-	d.Set("project", project)
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 
 	return resourceProjectUsageBucketRead(d, meta)
 }
@@ -124,6 +139,8 @@ func resourceProjectUsageBucketDelete(d *schema.ResourceData, meta interface{}) 
 
 func resourceProjectUsageBucketImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	project := d.Id()
-	d.Set("project", project)
+	if err := d.Set("project", project); err != nil {
+		return nil, fmt.Errorf("Error setting project: %s", err)
+	}
 	return []*schema.ResourceData{d}, nil
 }

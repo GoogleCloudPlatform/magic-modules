@@ -17,7 +17,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"
     import_format: ["locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"]
     async: !ruby/object:Provider::Terraform::PollAsync
-      check_response_func: PollCheckKnativeStatus
+      check_response_func_existence: PollCheckKnativeStatus
       actions: ['create', 'update']
       operation: !ruby/object:Api::Async::Operation
         timeouts: !ruby/object:Api::Timeouts
@@ -58,7 +58,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "locations/{{location}}/namespaces/{{project}}/services/{{name}}"
     import_format: ["locations/{{location}}/namespaces/{{project}}/services/{{name}}"]
     async: !ruby/object:Provider::Terraform::PollAsync
-      check_response_func: PollCheckKnativeStatus
+      check_response_func_existence: PollCheckKnativeStatus
       actions: ['create', 'update']
       operation: !ruby/object:Api::Async::Operation
         timeouts: !ruby/object:Api::Timeouts
@@ -155,6 +155,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       spec.template.spec.timeoutSeconds: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       spec.template.spec.containers: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      spec.template.spec.containers.ports: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       spec.template.spec.containers.resources: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true

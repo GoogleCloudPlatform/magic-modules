@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -13,7 +13,7 @@ var schemaOrganizationPolicy = map[string]*schema.Schema{
 	// Although the API suggests that boolean_policy, list_policy, or restore_policy must be set,
 	// Organization policies can be "inherited from parent" in the UI, and this is the default
 	// state of the resource without any policy set.
-	// See https://github.com/terraform-providers/terraform-provider-google/issues/3607
+	// See https://github.com/hashicorp/terraform-provider-google/issues/3607
 	"constraint": {
 		Type:             schema.TypeString,
 		Required:         true,
@@ -201,13 +201,27 @@ func resourceGoogleOrganizationPolicyRead(d *schema.ResourceData, meta interface
 		return handleNotFoundError(err, d, fmt.Sprintf("Organization policy for %s", org))
 	}
 
-	d.Set("constraint", policy.Constraint)
-	d.Set("boolean_policy", flattenBooleanOrganizationPolicy(policy.BooleanPolicy))
-	d.Set("list_policy", flattenListOrganizationPolicy(policy.ListPolicy))
-	d.Set("version", policy.Version)
-	d.Set("etag", policy.Etag)
-	d.Set("update_time", policy.UpdateTime)
-	d.Set("restore_policy", flattenRestoreOrganizationPolicy(policy.RestoreDefault))
+	if err := d.Set("constraint", policy.Constraint); err != nil {
+		return fmt.Errorf("Error setting constraint: %s", err)
+	}
+	if err := d.Set("boolean_policy", flattenBooleanOrganizationPolicy(policy.BooleanPolicy)); err != nil {
+		return fmt.Errorf("Error setting boolean_policy: %s", err)
+	}
+	if err := d.Set("list_policy", flattenListOrganizationPolicy(policy.ListPolicy)); err != nil {
+		return fmt.Errorf("Error setting list_policy: %s", err)
+	}
+	if err := d.Set("version", policy.Version); err != nil {
+		return fmt.Errorf("Error setting version: %s", err)
+	}
+	if err := d.Set("etag", policy.Etag); err != nil {
+		return fmt.Errorf("Error setting etag: %s", err)
+	}
+	if err := d.Set("update_time", policy.UpdateTime); err != nil {
+		return fmt.Errorf("Error setting update_time: %s", err)
+	}
+	if err := d.Set("restore_policy", flattenRestoreOrganizationPolicy(policy.RestoreDefault)); err != nil {
+		return fmt.Errorf("Error setting restore_policy: %s", err)
+	}
 
 	return nil
 }
@@ -247,8 +261,12 @@ func resourceGoogleOrganizationPolicyImportState(d *schema.ResourceData, meta in
 		return nil, fmt.Errorf("Invalid id format. Expecting {org_id}/{constraint}, got '%s' instead.", d.Id())
 	}
 
-	d.Set("org_id", parts[0])
-	d.Set("constraint", parts[1])
+	if err := d.Set("org_id", parts[0]); err != nil {
+		return nil, fmt.Errorf("Error setting org_id: %s", err)
+	}
+	if err := d.Set("constraint", parts[1]); err != nil {
+		return nil, fmt.Errorf("Error setting constraint: %s", err)
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -257,7 +275,7 @@ func resourceGoogleOrganizationPolicyImportState(d *schema.ResourceData, meta in
 // state of the resource without any policy set. In order to revert to this state the current
 // resource cannot be updated it must instead be Deleted. This allows Terraform to assert that
 // no policy has been set even if previously one had.
-// See https://github.com/terraform-providers/terraform-provider-google/issues/3607
+// See https://github.com/hashicorp/terraform-provider-google/issues/3607
 func isOrganizationPolicyUnset(d *schema.ResourceData) bool {
 	listPolicy := d.Get("list_policy").([]interface{})
 	booleanPolicy := d.Get("boolean_policy").([]interface{})
@@ -267,7 +285,15 @@ func isOrganizationPolicyUnset(d *schema.ResourceData) bool {
 }
 
 func setOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleName)
+
 	org := "organizations/" + d.Get("org_id").(string)
 
 	listPolicy, err := expandListOrganizationPolicy(d.Get("list_policy").([]interface{}))

@@ -106,6 +106,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         override_name: "network_id"
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: "network_name"
+      peerings: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: false
   NetworkEndpoint: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   GlobalNetworkEndpoint: !ruby/object:Overrides::Inspec::ResourceOverride
@@ -113,6 +115,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   GlobalNetworkEndpointGroup: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   NetworkPeeringRoutesConfig: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  OrganizationSecurityPolicy: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  OrganizationSecurityPolicyAssociation: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  OrganizationSecurityPolicyRule: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   PacketMirroring:  !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
@@ -209,4 +217,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   PerInstanceConfig: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   RegionPerInstanceConfig: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  RegionNetworkEndpointGroup: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  TargetGrpcProxy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true

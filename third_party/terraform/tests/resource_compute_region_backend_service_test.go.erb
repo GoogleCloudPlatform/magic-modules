@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -210,7 +210,7 @@ func TestAccComputeRegionBackendService_ilbUpdateFull(t *testing.T) {
 
 	backendName := fmt.Sprintf("foo-%s", randString)
 	checkName := fmt.Sprintf("bar-%s", randString)
-  igName := fmt.Sprintf("baz-%s", randString)
+  igName := fmt.Sprintf("tf-test-%s", randString)
   instanceName := fmt.Sprintf("tf-test-%s", randString)
 
 	vcrTest(t, resource.TestCase{

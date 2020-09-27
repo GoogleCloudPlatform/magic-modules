@@ -2,14 +2,15 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"time"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/compute/v0.beta"
 )
 
@@ -90,7 +91,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 													MinItems:    1,
 													MaxItems:    10,
 													Elem:        &schema.Schema{Type: schema.TypeString},
-													Description: `Set of IP addresses or ranges (IPV4 or IPV6) in CIDR notation to match against inbound traffic. There is a limit of 5 IP ranges per rule. A value of '*' matches all IPs (can be used to override the default behavior).`,
+													Description: `Set of IP addresses or ranges (IPV4 or IPV6) in CIDR notation to match against inbound traffic. There is a limit of 10 IP ranges per rule. A value of '*' matches all IPs (can be used to override the default behavior).`,
 												},
 											},
 										},
@@ -115,7 +116,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 													Required:    true,
 													Description: `Textual representation of an expression in Common Expression Language syntax. The application context of the containing message determines which well-known feature set of CEL is supported.`,
 												},
-												// These fields are not yet supported (Issue terraform-providers/terraform-provider-google#4497: mbang)
+												// These fields are not yet supported (Issue hashicorp/terraform-provider-google#4497: mbang)
 												// "title": {
 												// 	Type:     schema.TypeString,
 												// 	Optional: true,
@@ -168,7 +169,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 	}
 }
 
-func rulesCustomizeDiff(diff *schema.ResourceDiff, _ interface{}) error {
+func rulesCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 	_, n := diff.GetChange("rule")
 	nSet := n.(*schema.Set)
 
@@ -185,7 +186,14 @@ func rulesCustomizeDiff(diff *schema.ResourceDiff, _ interface{}) error {
 }
 
 func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -237,14 +245,24 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 		return handleNotFoundError(err, d, fmt.Sprintf("SecurityPolicy %q", d.Id()))
 	}
 
-	d.Set("name", securityPolicy.Name)
-	d.Set("description", securityPolicy.Description)
+	if err := d.Set("name", securityPolicy.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("description", securityPolicy.Description); err != nil {
+		return fmt.Errorf("Error setting description: %s", err)
+	}
 	if err := d.Set("rule", flattenSecurityPolicyRules(securityPolicy.Rules)); err != nil {
 		return err
 	}
-	d.Set("fingerprint", securityPolicy.Fingerprint)
-	d.Set("project", project)
-	d.Set("self_link", ConvertSelfLinkToV1(securityPolicy.SelfLink))
+	if err := d.Set("fingerprint", securityPolicy.Fingerprint); err != nil {
+		return fmt.Errorf("Error setting fingerprint: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("self_link", ConvertSelfLinkToV1(securityPolicy.SelfLink)); err != nil {
+		return fmt.Errorf("Error setting self_link: %s", err)
+	}
 
 	return nil
 }
@@ -414,7 +432,7 @@ func expandSecurityPolicyMatchExpr(expr []interface{}) *compute.Expr {
 	data := expr[0].(map[string]interface{})
 	return &compute.Expr{
 		Expression: data["expression"].(string),
-		// These fields are not yet supported  (Issue terraform-providers/terraform-provider-google#4497: mbang)
+		// These fields are not yet supported  (Issue hashicorp/terraform-provider-google#4497: mbang)
 		// Title:       data["title"].(string),
 		// Description: data["description"].(string),
 		// Location:    data["location"].(string),
@@ -470,7 +488,7 @@ func flattenMatchExpr(match *compute.SecurityPolicyRuleMatcher) []map[string]int
 
 	data := map[string]interface{}{
 		"expression": match.Expr.Expression,
-		// These fields are not yet supported (Issue terraform-providers/terraform-provider-google#4497: mbang)
+		// These fields are not yet supported (Issue hashicorp/terraform-provider-google#4497: mbang)
 		// "title":       match.Expr.Title,
 		// "description": match.Expr.Description,
 		// "location":    match.Expr.Location,

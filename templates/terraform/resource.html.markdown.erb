@@ -185,12 +185,9 @@ This resource provides the following
 
 ```
 <% import_id_formats_from_resource(object).map{ |id| id.gsub('%', '') }.each do |id_format| -%>
-$ terraform import <% if object.min_version.name == 'beta' %>-provider=google-beta <% end -%><%= terraform_name -%>.default <%= id_format %>
+$ terraform import <%= terraform_name -%>.default <%= id_format %>
 <% end -%>
 ```
-
--> If you're importing a resource with beta features, make sure to include `-provider=google-beta`
-as an argument so that Terraform uses the correct provider to import your resource.
 
 <% end -%>
 <% if object.base_url.include?("{{project}}") || object.supports_indirect_user_project_override -%>

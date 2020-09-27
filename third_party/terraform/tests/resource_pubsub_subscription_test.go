@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccPubsubSubscription_emptyTTL(t *testing.T) {
@@ -118,7 +118,7 @@ func TestAccPubsubSubscription_push(t *testing.T) {
 	})
 }
 
-// Context: terraform-providers/terraform-provider-google#4993
+// Context: hashicorp/terraform-provider-google#4993
 // This test makes a call to GET an subscription before it is actually created.
 // The PubSub API negative-caches responses so this tests we are
 // correctly polling for existence post-creation.
@@ -172,6 +172,7 @@ resource "google_pubsub_subscription" "foo" {
   expiration_policy {
     ttl = ""
   }
+  enable_message_ordering    = false
 }
 `, topic, subscription)
 }
@@ -219,8 +220,9 @@ resource "google_pubsub_topic" "foo" {
 }
 
 resource "google_pubsub_subscription" "foo" {
-  name  = "%s"
-  topic = google_pubsub_topic.foo.id
+  name   = "%s"
+  topic  = google_pubsub_topic.foo.id
+  filter = "attributes.foo = \"bar\""
   labels = {
     foo = "%s"
   }

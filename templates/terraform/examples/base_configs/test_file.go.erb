@@ -6,7 +6,8 @@ import (
   "fmt"
   "testing"
 
-  "github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 <%
 raise 'skip_test should be true if resource is not importable' \
@@ -29,7 +30,7 @@ object.examples
     test_slug = "#{resource_name}_#{example.name.camelize(:lower)}Example"
 
     ignore_read = object.all_user_properties
-      .select{|p| p.url_param_only || p.ignore_read }
+      .select{|p| p.url_param_only || p.ignore_read || p.is_a?(Api::Type::ResourceRef) }
       .map { |p| p.name.underscore }
       .concat(example.ignore_read_extra)
 
@@ -58,10 +59,13 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		<% unless versioned_provider -%>
-		Providers:    testAccProviders,
+		Providers: testAccProviders,
 		<% else -%>
-		Providers:    testAccProvidersOiCS,
+		Providers: testAccProvidersOiCS,
 		<% end -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
 		<% unless object.skip_delete -%>
 		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>DestroyProducer(t),
 		<% end -%>

@@ -48,13 +48,13 @@ the Google provider.
 
 ```hcl
 resource "google_compute_instance" "ga-instance" {
-  provider = "google"
+  provider = google
 
   # ...
 }
 
 resource "google_compute_instance" "beta-instance" {
-  provider = "google-beta"
+  provider = google-beta
 
   # ...
 }
@@ -74,7 +74,12 @@ same configuration.
 
 * `credentials` - (Optional) Either the path to or the contents of a
 [service account key file] in JSON format. You can
-[manage key files using the Cloud Console].
+[manage key files using the Cloud Console].  If not provided, the
+application default credentials will be used.  You can configure
+Application Default Credentials on your personal machine by
+running `gcloud auth application-default login`. If
+terraform is running on a GCP machine, and this value is unset,
+it will automatically use that machine's configured service account.
 
 * `project` - (Optional) The default project to manage resources in. If another
 project is specified on a resource, it will take precedence.
@@ -102,6 +107,11 @@ resource project for preconditions, quota, and billing, instead of the project
 the credentials belong to. Not all resources support this- see the
 documentation for each resource to learn whether it does.
 
+* `billing_project` - (Optional) This fields specifies a project that's used for 
+preconditions, quota, and billing for requests. All resources that support user project 
+overrides will use this project instead of the resource's project (if available). This 
+field is ignored if `user_project_override` is set to false or unset.
+
 * `{{service}}_custom_endpoint` - (Optional) The endpoint for a service's APIs,
 such as `compute_custom_endpoint`. Defaults to the production GCP endpoint for
 the service. This can be used to configure the Google provider to communicate
@@ -110,7 +120,7 @@ Values are expected to include the version of the service, such as
 `https://www.googleapis.com/compute/v1/`.
 
 * `batching` - (Optional) This block controls batching GCP calls for groups of specific resource types. Structure is documented below.
-~>**NOTE**: Batching is not implemented for the majority or resources/request types and is bounded by two values. If you are running into issues with slow batches
+~>**NOTE:** Batching is not implemented for the majority or resources/request types and is bounded by two values. If you are running into issues with slow batches
 resources, you may need to adjust one or both of 1) the core [`-parallelism`](https://www.terraform.io/docs/commands/apply.html#parallelism-n) flag, which controls how many concurrent resources are being operated on and 2) `send_after`, the time interval after which a batch is sent.
 
 * `request_timeout` - (Optional) A duration string controlling the amount of time
@@ -171,6 +181,13 @@ following ordered by precedence.
     * GOOGLE_CLOUD_PROJECT
     * GCLOUD_PROJECT
     * CLOUDSDK_CORE_PROJECT
+
+---
+
+* `billing_project` - (Optional) This fields allows Terraform to set X-Goog-User-Project
+for APIs that require a billing project to be specified like Access Context Manager APIs if 
+User ADCs are being used. This can also be
+specified using the `GOOGLE_BILLING_PROJECT` environment variable.
 
 ---
 
@@ -355,7 +372,8 @@ to create the resource.  This may help in those cases.
 * `user_project_override` - (Optional) Defaults to false. If true, uses the
 resource project for preconditions, quota, and billing, instead of the project
 the credentials belong to. Not all resources support this- see the
-documentation for each resource to learn whether it does.
+documentation for each resource to learn whether it does. Alternatively, this can
+be specified using the `USER_PROJECT_OVERRIDE` environment variable.
 
 When set to false, the project the credentials belong to will be billed for the
 request, and quota / API enablement checks will be done against that project.

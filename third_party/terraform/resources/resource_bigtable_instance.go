@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"cloud.google.com/go/bigtable"
 )
@@ -52,7 +52,7 @@ func resourceBigtableInstance() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
-				Description: `A block of cluster configuration options. This can be specified 1 or 2 times.`,
+				Description: `A block of cluster configuration options. This can be specified at least once, and up to 4 times.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"cluster_id": {
@@ -97,6 +97,7 @@ func resourceBigtableInstance() *schema.Resource {
 				Default:      "PRODUCTION",
 				ValidateFunc: validation.StringInSlice([]string{"DEVELOPMENT", "PRODUCTION"}, false),
 				Description:  `The instance type to create. One of "DEVELOPMENT" or "PRODUCTION". Defaults to "PRODUCTION".`,
+				Deprecated:   `It is recommended to leave this field unspecified since the distinction between "DEVELOPMENT" and "PRODUCTION" instances is going away, and all instances will become "PRODUCTION" instances. This means that new and existing "DEVELOPMENT" instances will be converted to "PRODUCTION" instances. It is recommended for users to use "PRODUCTION" instances in any case, since a 1-node "PRODUCTION" instance is functionally identical to a "DEVELOPMENT" instance, but without the accompanying restrictions.`,
 			},
 
 			"deletion_protection": {
@@ -104,6 +105,13 @@ func resourceBigtableInstance() *schema.Resource {
 				Optional:    true,
 				Default:     true,
 				Description: `Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a terraform destroy or terraform apply that would delete the instance will fail.`,
+			},
+
+			"labels": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: `A mapping of labels to assign to the resource.`,
 			},
 
 			"project": {
@@ -118,7 +126,15 @@ func resourceBigtableInstance() *schema.Resource {
 }
 
 func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	// Need to set UserAgent
+
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -135,6 +151,10 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 		displayName = conf.InstanceID
 	}
 	conf.DisplayName = displayName.(string)
+
+	if _, ok := d.GetOk("labels"); ok {
+		conf.Labels = expandLabels(d)
+	}
 
 	switch d.Get("instance_type").(string) {
 	case "DEVELOPMENT":
@@ -191,7 +211,9 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 		return nil
 	}
 
-	d.Set("project", project)
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 
 	clusters, err := c.Clusters(ctx, instance.Name)
 	if err != nil {
@@ -209,8 +231,15 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error setting clusters in state: %s", err.Error())
 	}
 
-	d.Set("name", instance.Name)
-	d.Set("display_name", instance.DisplayName)
+	if err := d.Set("name", instance.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("display_name", instance.DisplayName); err != nil {
+		return fmt.Errorf("Error setting display_name: %s", err)
+	}
+	if err := d.Set("labels", instance.Labels); err != nil {
+		return fmt.Errorf("Error setting labels: %s", err)
+	}
 	// Don't set instance_type: we don't want to detect drift on it because it can
 	// change under-the-hood.
 
@@ -241,6 +270,10 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 		displayName = conf.InstanceID
 	}
 	conf.DisplayName = displayName.(string)
+
+	if d.HasChange("labels") {
+		conf.Labels = expandLabels(d)
+	}
 
 	switch d.Get("instance_type").(string) {
 	case "DEVELOPMENT":
@@ -336,7 +369,7 @@ func expandBigtableClusters(clusters []interface{}, instanceID string) []bigtabl
 // This doesn't use the standard unordered list utility (https://github.com/GoogleCloudPlatform/magic-modules/blob/master/templates/terraform/unordered_list_customize_diff.erb)
 // because some fields can't be modified using the API and we recreate the instance
 // when they're changed.
-func resourceBigtableInstanceClusterReorderTypeList(diff *schema.ResourceDiff, meta interface{}) error {
+func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	oldCount, newCount := diff.GetChange("cluster.#")
 
 	// simulate Required:true, MinItems:1, MaxItems:4 for "cluster"

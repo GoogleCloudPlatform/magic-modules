@@ -19,10 +19,10 @@ display_name: Compute Engine
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://www.googleapis.com/compute/v1/
+    base_url: https://compute.googleapis.com/compute/v1/
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://www.googleapis.com/compute/beta/
+    base_url: https://compute.googleapis.com/compute/beta/
 scopes:
   - https://www.googleapis.com/auth/compute
 apis_required:
@@ -1108,13 +1108,14 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'healthChecks'
         item_type: Api::Type::String
-        required: true
         min_size: 1
         max_size: 1
         description: |
            The set of URLs to the HttpHealthCheck or HttpsHealthCheck resource
            for health checking this BackendService. Currently at most one health
-           check can be specified, and a health check is required.
+           check can be specified.
+
+           A health check must be specified unless the backend service uses an internet NEG as a backend.
 
            For internal load balancing, a URL to a HealthCheck resource must be specified instead.
       - !ruby/object:Api::Type::Integer
@@ -1471,6 +1472,7 @@ objects:
           - :HTTP2
           - :TCP
           - :SSL
+          - :GRPC
       # TODO: make a ResourceRef to Security Policy
       - !ruby/object:Api::Type::String
         name: 'securityPolicy'
@@ -2301,6 +2303,7 @@ objects:
           - :SSL
           - :TCP
           - :UDP
+          - :GRPC
       - !ruby/object:Api::Type::Enum
         name: 'sessionAffinity'
         description: |
@@ -2424,7 +2427,7 @@ objects:
     # corresponding type.
     description: |
       Represents a DiskType resource. A DiskType resource represents the type
-      of disk to use, such as a pd-ssd or pd-standard. To reference a disk
+      of disk to use, such as a pd-ssd, pd-balanced or pd-standard. To reference a disk
       type, use the disk type's full or partial URL.
     # TODO(nelsonjr): Temporarily make DiskType virtual so no tests gets
     # triggered for create. Implement support for read only objects, and delete
@@ -2635,10 +2638,6 @@ objects:
         required: true
   - !ruby/object:Api::Resource
     name: 'Disk'
-    # TODO(nelsonjr): Implement disk special actions as defined in the API:
-    # - resize
-    # - createSnapshot
-    # - setLabels
     kind: 'compute#disk'
     input: true
     base_url: projects/{{project}}/zones/{{zone}}/disks
@@ -2672,7 +2671,7 @@ objects:
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
         # Larger disks were timing out at creation. Bumping up to 5 minutes.
-        # https://github.com/terraform-providers/terraform-provider-google/issues/703
+        # https://github.com/hashicorp/terraform-provider-google/issues/703
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 5
       result: !ruby/object:Api::OpAsync::Result
@@ -2716,6 +2715,11 @@ objects:
             name: 'kmsKeyName'
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key.
+              If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::String
         name: 'sourceImageId'
@@ -2761,6 +2765,11 @@ objects:
               Your project's Compute Engine System service account
               (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
               `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key.
+              If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'sourceSnapshot'
@@ -2798,6 +2807,11 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
               encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key. 
+              If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::String
         name: 'sourceSnapshotId'
@@ -2907,14 +2921,14 @@ objects:
 
           To create a disk with one of the public operating system images,
           specify the image by its family name. For example, specify
-          family/debian-8 to use the latest Debian 8 image:
+          family/debian-9 to use the latest Debian 9 image:
 
-          projects/debian-cloud/global/images/family/debian-8
+          projects/debian-cloud/global/images/family/debian-9
 
           Alternatively, use a specific version of a public operating system
           image:
 
-          projects/debian-cloud/global/images/debian-8-jessie-vYYYYMMDD
+          projects/debian-cloud/global/images/debian-9-stretch-vYYYYMMDD
 
           To create a disk with a private image that you created, specify the
           image name in the following format:
@@ -3002,7 +3016,7 @@ objects:
                 The IP protocol to which this rule applies. The protocol type is
                 required when creating a firewall rule. This value can either be
                 one of the following well known protocol strings (tcp, udp,
-                icmp, esp, ah, sctp, ipip), or the IP protocol number.
+                icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
               api_name: 'IPProtocol'
               required: true
             - !ruby/object:Api::Type::Array
@@ -3038,7 +3052,7 @@ objects:
                 The IP protocol to which this rule applies. The protocol type is
                 required when creating a firewall rule. This value can either be
                 one of the following well known protocol strings (tcp, udp,
-                icmp, esp, ah, sctp, ipip), or the IP protocol number.
+                icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
               api_name: 'IPProtocol'
               required: true
             - !ruby/object:Api::Type::Array
@@ -3065,8 +3079,8 @@ objects:
           must be expressed in CIDR format. Only IPv4 is supported.
         item_type: Api::Type::String
         conflicts:
-          - sourceRanges
-          - sourceTags
+          - source_ranges
+          - source_tags
       - !ruby/object:Api::Type::Enum
         name: 'direction'
         description: |
@@ -3088,17 +3102,22 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
         description: |
-          This field denotes whether to enable logging for a particular
-          firewall rule. If logging is enabled, logs will be exported to
-          Stackdriver.
+          This field denotes the logging options for a particular firewall rule.
+          If logging is enabled, logs will be exported to Cloud Logging.
         properties:
           - !ruby/object:Api::Type::Boolean
-            name: 'enableLogging'
-            api_name: enable
+            name: 'enable'
             description: |
               This field denotes whether to enable logging for a particular
               firewall rule. If logging is enabled, logs will be exported to
               Stackdriver.
+          - !ruby/object:Api::Type::Enum
+            name: 'metadata'
+            description: |
+              This field denotes whether to include or exclude metadata for firewall logs.
+            values:
+              - :EXCLUDE_ALL_METADATA
+              - :INCLUDE_ALL_METADATA
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -3173,8 +3192,8 @@ objects:
         item_type: Api::Type::String
         max_size: 10
         conflicts:
-          - sourceTags
-          - targetTags
+          - source_tags
+          - target_tags
       - !ruby/object:Api::Type::Array
         name: 'sourceTags'
         description: |
@@ -3200,8 +3219,8 @@ objects:
         item_type: Api::Type::String
         max_size: 10
         conflicts:
-          - sourceTags
-          - targetTags
+          - source_tags
+          - target_tags
       - !ruby/object:Api::Type::Array
         name: 'targetTags'
         description: |
@@ -4182,6 +4201,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4305,6 +4325,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4428,6 +4449,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -4532,6 +4554,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -4636,6 +4659,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -4752,6 +4776,76 @@ objects:
                 - :USE_NAMED_PORT
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
+        name: 'grpcHealthCheck'
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
+          - grpc_health_check
+        properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The port number for the health check request. 
+                Must be specified if portName and portSpecification are not set 
+                or if port_specification is USE_FIXED_PORT. Valid values are 1 through 65535.
+            - !ruby/object:Api::Type::String
+              name: 'portName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Port name as defined in InstanceGroup#NamedPort#name. If both port and
+                port_name are defined, port takes precedence.
+            - !ruby/object:Api::Type::Enum
+              name: 'portSpecification'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Specifies how port is selected for health checking, can be one of the
+                following values:
+
+                  * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+                  * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+                  * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+                  network endpoint is used for health checking. For other backends, the
+                  port or named port specified in the Backend Service is used for health
+                  checking.
+
+                If not specified, gRPC health check follows behavior specified in `port` and
+                `portName` fields.
+              values:
+                - :USE_FIXED_PORT
+                - :USE_NAMED_PORT
+                - :USE_SERVING_PORT
+            - !ruby/object:Api::Type::String
+              name: 'grpcServiceName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The gRPC service name for the health check. 
+                The value of grpcServiceName has the following meanings by convention:
+                  - Empty serviceName means the overall status of all services at the backend.
+                  - Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
+                The grpcServiceName can only be ASCII.
+      - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
         description: |
           Configure logging on this health check.
@@ -4762,6 +4856,7 @@ objects:
               description: |
                 Indicates whether or not to export logs. This is false by default,
                 which means no health check logging will be done.
+              default_value: false
   - !ruby/object:Api::Resource
     name: 'InstanceTemplate'
     kind: 'compute#instanceTemplate'
@@ -5436,6 +5531,7 @@ objects:
               values:
                 - :MULTI_IP_SUBNET
                 - :SECURE_BOOT
+                - :SEV_CAPABLE
                 - :UEFI_COMPATIBLE
                 - :VIRTIO_SCSI_MULTIQUEUE
                 - :WINDOWS
@@ -5565,6 +5661,32 @@ objects:
           The ID value of the disk used to create this image. This value may
           be used to determine whether the image was taken from the current
           or a previous instance of a given disk name.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'sourceImage'
+        description: |
+          URL of the source image used to create this image. In order to create an image, you must provide the full or partial
+          URL of one of the following:
+
+          The selfLink URL
+          This property
+          The rawDisk.source URL
+          The sourceDisk URL
+        resource: 'Image'
+        imports: 'selfLink'
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'sourceSnapshot'
+        description: |
+          URL of the source snapshot used to create this image.
+
+          In order to create an image, you must provide the full or partial URL of one of the following:
+
+          The selfLink URL
+          This property
+          The sourceImage URL
+          The rawDisk.source URL
+          The sourceDisk URL
+        resource: 'Snapshot'
+        imports: 'selfLink'
       - !ruby/object:Api::Type::Enum
         name: 'sourceType'
         description: |
@@ -5604,7 +5726,7 @@ objects:
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
         # Users were experiencing timeouts. Bumping up to 6 minutes.
-        # https://github.com/terraform-providers/terraform-provider-google/issues/852
+        # https://github.com/hashicorp/terraform-provider-google/issues/852
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 6
           update_minutes: 6
@@ -7218,6 +7340,45 @@ objects:
           values:
             - :REGIONAL
             - :GLOBAL
+      - !ruby/object:Api::Type::Array
+        name: 'peerings'
+        # This is only used in InSpec, handled via fine-grained in Terraform
+        exclude: true
+        output: true
+        description: |
+          Peerings for a network
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: subnetworks
+          description: The subnetworks that should be mirrored.
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              description: |
+                Name of the peering.
+            - !ruby/object:Api::Type::String
+              name: 'state'
+              description: |
+                State of the peering.
+            - !ruby/object:Api::Type::String
+              name: 'stateDetails'
+              description: |
+                Details about the current state of the peering.
+            - !ruby/object:Api::Type::String
+              name: 'network'
+              description: |
+                URL of the peer network
+            - !ruby/object:Api::Type::Boolean
+              name: 'exportCustomRoutes'
+              description: |
+                Whether to export the custom routes to the peer network.
+            - !ruby/object:Api::Type::Boolean
+              name: 'importCustomRoutes'
+              description: |
+                Whether to import the custom routes to the peer network.
+            - !ruby/object:Api::Type::Integer
+              name: 'peerMtu'
+              description: |
+                Maximum Transmission Unit in bytes.
   - !ruby/object:Api::Resource
     name: 'NetworkEndpoint'
     kind: 'compute#networkEndpoint'
@@ -7548,6 +7709,176 @@ objects:
           The default port used if the port number is not specified in the
           network endpoint.
   - !ruby/object:Api::Resource
+    name: 'RegionNetworkEndpointGroup'
+    kind: 'compute#networkEndpointGroup'
+    base_url: 'projects/{{project}}/regions/{{region}}/networkEndpointGroups'
+    input: true
+    min_version: beta
+    has_self_link: true
+    collection_url_key: 'items'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/serverless-neg-concepts'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups'
+    description: |
+      A regional NEG that can support Serverless Products.
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        description: |
+          A reference to the region where the Serverless NEGs Reside.
+        required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource; provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource. Provide this property when
+          you create the resource.
+      - !ruby/object:Api::Type::Enum
+        name: 'networkEndpointType'
+        description: |
+          Type of network endpoints in this network endpoint group. Defaults to SERVERLESS
+        values:
+          - :SERVERLESS
+        default_value: :SERVERLESS
+      - !ruby/object:Api::Type::NestedObject
+        name: 'cloudRun'
+        exactly_one_of:
+          - cloudRun
+          - cloudFunction
+          - appEngine
+        description: |
+          Only valid when networkEndpointType is "SERVERLESS".
+          Only one of cloud_run, app_engine or cloud_function may be set.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'service'
+            at_least_one_of: 
+              - cloud_run.0.service
+              - cloud_run.0.url_mask
+            description: |
+              Cloud Run service is the main resource of Cloud Run.
+              The service must be 1-63 characters long, and comply with RFC1035.
+              Example value: "run-service".
+          - !ruby/object:Api::Type::String
+            name: 'tag'
+            description: |
+              Cloud Run tag represents the "named-revision" to provide
+              additional fine-grained traffic routing information.
+              The tag must be 1-63 characters long, and comply with RFC1035.
+              Example value: "revision-0010".
+          - !ruby/object:Api::Type::String
+            name: 'urlMask'
+            at_least_one_of: 
+              - cloud_run.0.service
+              - cloud_run.0.url_mask
+            description: |
+              A template to parse service and tag fields from a request URL. 
+              URL mask allows for routing to multiple Run services without having 
+              to create multiple network endpoint groups and backend services.
+
+              For example, request URLs "foo1.domain.com/bar1" and "foo1.domain.com/bar2" 
+              an be backed by the same Serverless Network Endpoint Group (NEG) with 
+              URL mask ".domain.com/". The URL mask will parse them to { service="bar1", tag="foo1" } 
+              and { service="bar2", tag="foo2" } respectively. 
+      - !ruby/object:Api::Type::NestedObject
+        name: 'appEngine'
+        exactly_one_of:
+          - appEngine
+          - cloudFunction
+          - cloudRun
+        allow_empty_object: true
+        description: |
+          Only valid when networkEndpointType is "SERVERLESS".
+          Only one of cloud_run, app_engine or cloud_function may be set.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'service'
+            description: |
+              Optional serving service.
+              The service name must be 1-63 characters long, and comply with RFC1035.
+              Example value: "default", "my-service".
+          - !ruby/object:Api::Type::String
+            name: 'version'
+            description: |
+              Optional serving version.
+              The version must be 1-63 characters long, and comply with RFC1035.
+              Example value: "v1", "v2".
+          - !ruby/object:Api::Type::String
+            name: 'urlMask'
+            description: |
+              A template to parse service and version fields from a request URL.
+              URL mask allows for routing to multiple App Engine services without
+              having to create multiple Network Endpoint Groups and backend services.
+              
+              For example, the request URLs "foo1-dot-appname.appspot.com/v1" and
+              "foo1-dot-appname.appspot.com/v2" can be backed by the same Serverless NEG with
+              URL mask "-dot-appname.appspot.com/". The URL mask will parse
+              them to { service = "foo1", version = "v1" } and { service = "foo1", version = "v2" } respectively.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'cloudFunction'
+        exactly_one_of:
+          - appEngine
+          - cloudFunction
+          - cloudRun
+        description: |
+          Only valid when networkEndpointType is "SERVERLESS".
+          Only one of cloud_run, app_engine or cloud_function may be set.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'function'
+            at_least_one_of: 
+              - cloud_function.0.function
+              - cloud_function.0.url_mask
+            description: |
+              A user-defined name of the Cloud Function.
+              The function name is case-sensitive and must be 1-63 characters long.
+              Example value: "func1".
+          - !ruby/object:Api::Type::String
+            name: 'urlMask'
+            at_least_one_of: 
+              - cloud_function.0.function
+              - cloud_function.0.url_mask
+            description: |
+              A template to parse function field from a request URL. URL mask allows
+              for routing to multiple Cloud Functions without having to create
+              multiple Network Endpoint Groups and backend services.
+
+              For example, request URLs "mydomain.com/function1" and "mydomain.com/function2"
+              can be backed by the same Serverless NEG with URL mask "/". The URL mask
+              will parse them to { function = "function1" } and { function = "function2" } respectively.
+  - !ruby/object:Api::Resource
     name: 'NodeGroup'
     kind: 'compute#NodeGroup'
     base_url: projects/{{project}}/zones/{{zone}}/nodeGroups
@@ -7782,7 +8113,7 @@ objects:
           Node type to use for nodes group that are created from this template.
           Only one of nodeTypeFlexibility and nodeType can be specified.
         conflicts:
-          - nodeTypeFlexibility
+          - node_type_flexibility
       - !ruby/object:Api::Type::NestedObject
         name: 'nodeTypeFlexibility'
         description: |
@@ -7791,7 +8122,7 @@ objects:
           these properties. Only one of nodeTypeFlexibility and nodeType can
           be specified.
         conflicts:
-          - nodeType
+          - node_type
         properties:
           - !ruby/object:Api::Type::String
             name: cpus
@@ -7847,6 +8178,247 @@ objects:
           - :ENABLED
           - :NONE
         default_value: :NONE
+  - !ruby/object:Api::Resource
+    name: 'OrganizationSecurityPolicy'
+    min_version: beta
+    base_url: 'locations/global/securityPolicies?parentId={{parent}}'
+    self_link: 'locations/global/securityPolicies/{{id}}'
+    create_url: 'locations/global/securityPolicies?parentId={{parent}}'
+    update_verb: :PATCH
+    description: |
+      Organization security policies are used to control incoming/outgoing traffic.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating a firewall policy':
+          'https://cloud.google.com/vpc/docs/using-firewall-policies#create-policy'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: parent
+        description: |
+          The parent of this OrganizationSecurityPolicy in the Cloud Resource Hierarchy.
+          Format: organizations/{organization_id} or folders/{folder_id}
+        required: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: displayName
+        description: |
+          A textual name of the security policy.
+        input: true
+        required: true
+      - !ruby/object:Api::Type::String
+        name: description
+        description: |
+          A textual description for the organization security policy.
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'fingerprint'
+        description: |
+          Fingerprint of this resource. This field is used internally during
+          updates of this resource.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: id
+        description: |
+          The unique identifier for the resource. This identifier is defined by the server.
+        output: true
+      - !ruby/object:Api::Type::Enum
+        name: type
+        description: |
+          The type indicates the intended use of the security policy.
+          For organization security policies, the only supported type
+          is "FIREWALL".
+        input: true
+        values:
+          - :FIREWALL
+        default_value: :FIREWALL
+  - !ruby/object:Api::Resource
+    name: 'OrganizationSecurityPolicyAssociation'
+    min_version: beta
+    base_url: 'locations/global/securityPolicies/{{policy_id}}'
+    self_link: 'locations/global/securityPolicies/{{policy_id}}/getAssociation?name={{name}}'
+    create_url: 'locations/global/securityPolicies/{{policy_id}}/addAssociation'
+    delete_verb: :POST
+    delete_url: 'locations/global/securityPolicies/{{policy_id}}/removeAssociation?name={{name}}'
+    description: |
+      An association for the OrganizationSecurityPolicy.
+    input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Associating a policy with the organization or folder':
+          'https://cloud.google.com/vpc/docs/using-firewall-policies#associate'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addAssociation'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'policyId'
+        description: |
+          The security policy ID of the association.
+        required: true
+        url_param_only: true
+        api_name: 'securityPolicyId'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          The name for an association.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'attachmentId'
+        description: |
+          The resource that the security policy is attached to.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          The display name of the security policy of the association.
+        output: true
+  - !ruby/object:Api::Resource
+    name: 'OrganizationSecurityPolicyRule'
+    min_version: beta
+    base_url: 'locations/global/securityPolicies/{{policy_id}}'
+    self_link: 'locations/global/securityPolicies/{{policy_id}}/getRule?priority={{priority}}'
+    create_url: 'locations/global/securityPolicies/{{policy_id}}/addRule?priority={{priority}}'
+    update_verb: :POST
+    update_url: 'locations/global/securityPolicies/{{policy_id}}/patchRule?priority={{priority}}'
+    delete_verb: :POST
+    delete_url: 'locations/global/securityPolicies/{{policy_id}}/removeRule?priority={{priority}}'
+    description: |
+      A rule for the OrganizationSecurityPolicy.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Creating firewall rules':
+          'https://cloud.google.com/vpc/docs/using-firewall-policies#create-rules'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addRule'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: policyId
+        description: |
+          The ID of the OrganizationSecurityPolicy this rule applies to.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          A description of the rule.
+      - !ruby/object:Api::Type::Integer
+        name: 'priority'
+        description: |
+          An integer indicating the priority of a rule in the list. The priority must be a value
+          between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
+          highest priority and 2147483647 is the lowest prority.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'match'
+        description:
+          A match condition that incoming traffic is evaluated against. If it evaluates to true,
+          the corresponding 'action' is enforced.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'description'
+            description: |
+              A description of the rule.
+          - !ruby/object:Api::Type::Enum
+            name: 'versionedExpr'
+            description: |
+              Preconfigured versioned expression. For organization security policy rules,
+              the only supported type is "FIREWALL".
+            values:
+              - :FIREWALL
+            default_value: :FIREWALL
+          - !ruby/object:Api::Type::NestedObject
+            name: 'config'
+            description:
+              The configuration options for matching the rule.
+            required: true
+            properties:
+            - !ruby/object:Api::Type::Array
+              name: 'srcIpRanges'
+              description: |
+                Source IP address range in CIDR format. Required for
+                INGRESS rules.
+              item_type: Api::Type::String
+              exactly_one_of:
+                - match.0.config.0.src_ip_ranges
+                - match.0.config.0.dest_ip_ranges
+            - !ruby/object:Api::Type::Array
+              name: 'destIpRanges'
+              description: |
+                Destination IP address range in CIDR format. Required for
+                EGRESS rules.
+              item_type: Api::Type::String
+              exactly_one_of:
+                - match.0.config.0.src_ip_ranges
+                - match.0.config.0.dest_ip_ranges
+            - !ruby/object:Api::Type::Array
+              name: 'layer4Config'
+              api_name: 'layer4Configs'
+              description: |
+                Pairs of IP protocols and ports that the rule should match.
+              required: true
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'ipProtocol'
+                    description: |
+                      The IP protocol to which this rule applies. The protocol
+                      type is required when creating a firewall rule.
+                      This value can either be one of the following well
+                      known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
+                      or the IP protocol number.
+                    required: true
+                  - !ruby/object:Api::Type::Array
+                    item_type: Api::Type::String
+                    name: 'ports'
+                    description: |
+                      An optional list of ports to which this rule applies. This field
+                      is only applicable for UDP or TCP protocol. Each entry must be
+                      either an integer or a range. If not specified, this rule
+                      applies to connections through any port.
+                      
+                      Example inputs include: ["22"], ["80","443"], and
+                      ["12345-12349"].
+      - !ruby/object:Api::Type::String
+        name: 'action'
+        description: |
+          The Action to perform when the client connection triggers the rule. Can currently be either
+          "allow", "deny" or "goto_next".
+        required: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'preview'
+        description: |
+          If set to true, the specified action is not enforced.
+      - !ruby/object:Api::Type::Enum
+        name: 'direction'
+        description: |
+          The direction in which this rule applies. If unspecified an INGRESS rule is created.
+        values:
+        - :INGRESS
+        - :EGRESS
+      - !ruby/object:Api::Type::Array
+        name: 'targetResources'
+        description: |
+          A list of network resource URLs to which this rule applies.
+          This field allows you to control which network's VMs get
+          this rule. If this field is left blank, all VMs
+          within the organization will receive the rule.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableLogging'
+        description: |
+          Denotes whether to enable logging for a particular rule.
+          If logging is enabled, logs will be exported to the
+          configured export destination in Stackdriver.
+        send_empty_value: true
+      - !ruby/object:Api::Type::Array
+        name: 'targetServiceAccounts'
+        description: |
+          A list of service accounts indicating the sets of
+          instances that are applied with this rule.
+        item_type: Api::Type::String
   - !ruby/object:Api::Resource
     name: 'PacketMirroring'
     min_version: beta
@@ -8700,7 +9272,7 @@ objects:
     collection_url_key: 'items'
     description: |
       Represents a regional DiskType resource. A DiskType resource represents
-      the type of disk to use, such as a pd-ssd or pd-standard. To reference a
+      the type of disk to use, such as a pd-ssd, pd-balanced or pd-standard. To reference a
       disk type, use the disk type's full or partial URL.
     readonly: true
     has_self_link: true
@@ -9819,13 +10391,19 @@ objects:
                         name: 'redirectResponseCode'
                         description: |
                           The HTTP Status code to use for this RedirectAction. Supported values are:
-                          - MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-                          - FOUND, which corresponds to 302.
-                          - SEE_OTHER which corresponds to 303.
-                          - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
+
+                          * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+                          
+                          * FOUND, which corresponds to 302.
+                          
+                          * SEE_OTHER which corresponds to 303.
+                          
+                          * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
                           will be retained.
-                          - PERMANENT_REDIRECT, which corresponds to 308. In this case,
+                          
+                          * PERMANENT_REDIRECT, which corresponds to 308. In this case,
                           the request method will be retained.
+                        skip_docs_values: true
                         values:
                           - :FOUND
                           - :MOVED_PERMANENTLY_DEFAULT
@@ -10238,13 +10816,19 @@ objects:
                         name: 'redirectResponseCode'
                         description: |
                           The HTTP Status code to use for this RedirectAction. Supported values are:
-                          - MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-                          - FOUND, which corresponds to 302.
-                          - SEE_OTHER which corresponds to 303.
-                          - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
+
+                          * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+                          
+                          * FOUND, which corresponds to 302.
+                          
+                          * SEE_OTHER which corresponds to 303.
+                          
+                          * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
                           will be retained.
-                          - PERMANENT_REDIRECT, which corresponds to 308. In this case,
+                          
+                          * PERMANENT_REDIRECT, which corresponds to 308. In this case,
                           the request method will be retained.
+                        skip_docs_values: true
                         values:
                           - :FOUND
                           - :MOVED_PERMANENTLY_DEFAULT
@@ -10301,13 +10885,19 @@ objects:
                   name: 'redirectResponseCode'
                   description: |
                     The HTTP Status code to use for this RedirectAction. Supported values are:
-                    - MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-                    - FOUND, which corresponds to 302.
-                    - SEE_OTHER which corresponds to 303.
-                    - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
+                    
+                    * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+                    
+                    * FOUND, which corresponds to 302.
+                    
+                    * SEE_OTHER which corresponds to 303.
+                    
+                    * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
                     will be retained.
-                    - PERMANENT_REDIRECT, which corresponds to 308. In this case,
+                    
+                    * PERMANENT_REDIRECT, which corresponds to 308. In this case,
                     the request method will be retained.
+                  skip_docs_values: true
                   values:
                     - :FOUND
                     - :MOVED_PERMANENTLY_DEFAULT
@@ -10390,13 +10980,19 @@ objects:
             name: 'redirectResponseCode'
             description: |
               The HTTP Status code to use for this RedirectAction. Supported values are:
-              - MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-              - FOUND, which corresponds to 302.
-              - SEE_OTHER which corresponds to 303.
-              - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
+              
+              * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+
+              * FOUND, which corresponds to 302.
+
+              * SEE_OTHER which corresponds to 303.
+              
+              * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
               will be retained.
-              - PERMANENT_REDIRECT, which corresponds to 308. In this case,
+              
+              * PERMANENT_REDIRECT, which corresponds to 308. In this case,
               the request method will be retained.
+            skip_docs_values: true
             values:
               - :FOUND
               - :MOVED_PERMANENTLY_DEFAULT
@@ -10531,6 +11127,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -10654,6 +11251,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -10777,6 +11375,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -10881,6 +11480,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'request'
@@ -10985,6 +11585,7 @@ objects:
           - http2_health_check
           - tcp_health_check
           - ssl_health_check
+          - grpc_health_check
         properties:
             - !ruby/object:Api::Type::String
               name: 'host'
@@ -11101,6 +11702,76 @@ objects:
                 - :USE_NAMED_PORT
                 - :USE_SERVING_PORT
       - !ruby/object:Api::Type::NestedObject
+        name: 'grpcHealthCheck'
+        exactly_one_of:
+          - http_health_check
+          - https_health_check
+          - http2_health_check
+          - tcp_health_check
+          - ssl_health_check
+          - grpc_health_check
+        properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The port number for the health check request. 
+                Must be specified if portName and portSpecification are not set 
+                or if port_specification is USE_FIXED_PORT. Valid values are 1 through 65535.
+            - !ruby/object:Api::Type::String
+              name: 'portName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Port name as defined in InstanceGroup#NamedPort#name. If both port and
+                port_name are defined, port takes precedence.
+            - !ruby/object:Api::Type::Enum
+              name: 'portSpecification'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                Specifies how port is selected for health checking, can be one of the
+                following values:
+
+                  * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+                  * `USE_NAMED_PORT`: The `portName` is used for health checking.
+
+                  * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+                  network endpoint is used for health checking. For other backends, the
+                  port or named port specified in the Backend Service is used for health
+                  checking.
+
+                If not specified, gRPC health check follows behavior specified in `port` and
+                `portName` fields.
+              values:
+                - :USE_FIXED_PORT
+                - :USE_NAMED_PORT
+                - :USE_SERVING_PORT
+            - !ruby/object:Api::Type::String
+              name: 'grpcServiceName'
+              at_least_one_of:
+                - grpc_health_check.0.port
+                - grpc_health_check.0.port_name
+                - grpc_health_check.0.port_specification
+                - grpc_health_check.0.grpc_service_name
+              description: |
+                The gRPC service name for the health check. 
+                The value of grpcServiceName has the following meanings by convention:
+                  - Empty serviceName means the overall status of all services at the backend.
+                  - Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
+                The grpcServiceName can only be ASCII.
+      - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
         description: |
           Configure logging on this health check.
@@ -11161,7 +11832,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'snapshotSchedulePolicy'
         conflicts:
-          - 'groupPlacementPolicy'
+          - 'group_placement_policy'
         description: |
           Policy for creating snapshots of persistent disks.
         properties:
@@ -11305,7 +11976,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'groupPlacementPolicy'
         conflicts:
-          - 'snapshotSchedulePolicy'
+          - 'snapshot_schedule_policy'
         description: |
           Policy for creating snapshots of persistent disks.
         properties:
@@ -12060,7 +12731,7 @@ objects:
             - !ruby/object:Api::Type::Integer
               name: 'priority'
               description: |
-                An integer indicating the priority of a rule in the list. The priority must be a positive value
+                An integer indicating the priority of a rule in the list. The priority must be a value
                 between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
                 highest priority and 2147483647 is the lowest prority.
             - !ruby/object:Api::Type::String
@@ -12213,6 +12884,11 @@ objects:
             name: 'kmsKeyName'
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key.
+              If absent, the Compute Engine Service Agent service account is used.
       - !ruby/object:Api::Type::NestedObject
         # ignore_read in providers - this is only used in Create
         name: 'sourceDiskEncryptionKey'
@@ -12239,6 +12915,11 @@ objects:
             name: 'kmsKeyName'
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key.
+              If absent, the Compute Engine Service Agent service account is used.
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -12278,6 +12959,11 @@ objects:
           creation/deletion.
         output: true
       # 'storageBytesStatus' not useful for object convergence.
+      - !ruby/object:Api::Type::Array
+        name: 'storageLocations'
+        description: |
+          Cloud Storage bucket storage location of the snapshot (regional or multi-regional).
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'licenses'
         output: true
@@ -12863,7 +13549,7 @@ objects:
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
         # Users were experiencing timeout. Bumping up to 6 minutes.
-        # https://github.com/terraform-providers/terraform-provider-google/issues/718
+        # https://github.com/hashicorp/terraform-provider-google/issues/718
         timeouts: !ruby/object:Api::Timeouts
           insert_minutes: 6
           update_minutes: 6
@@ -13026,13 +13712,12 @@ objects:
               - log_config.0.aggregation_interval
               - log_config.0.flow_sampling
               - log_config.0.metadata
+              - log_config.0.filterExpr
             description: |
               Can only be specified if VPC flow logging for this subnetwork is enabled.
               Toggles the aggregation interval for collecting flow logs. Increasing the
               interval time will reduce the amount of generated flow logs for long
               lasting connections. Default is an interval of 5 seconds per connection.
-              Possible values are INTERVAL_5_SEC, INTERVAL_30_SEC, INTERVAL_1_MIN,
-              INTERVAL_5_MIN, INTERVAL_10_MIN, INTERVAL_15_MIN
             values:
               - :INTERVAL_5_SEC
               - :INTERVAL_30_SEC
@@ -13047,6 +13732,7 @@ objects:
               - log_config.0.aggregation_interval
               - log_config.0.flow_sampling
               - log_config.0.metadata
+              - log_config.0.filterExpr
             description: |
               Can only be specified if VPC flow logging for this subnetwork is enabled.
               The value of the field must be in [0, 1]. Set the sampling rate of VPC
@@ -13060,6 +13746,7 @@ objects:
               - log_config.0.aggregation_interval
               - log_config.0.flow_sampling
               - log_config.0.metadata
+              - log_config.0.filterExpr
             description: |
               Can only be specified if VPC flow logging for this subnetwork is enabled.
               Configures whether metadata fields should be added to the reported VPC
@@ -13067,14 +13754,32 @@ objects:
             values:
               - :EXCLUDE_ALL_METADATA
               - :INCLUDE_ALL_METADATA
+              - :CUSTOM_METADATA
             default_value: :INCLUDE_ALL_METADATA
+          - !ruby/object:Api::Type::Array
+            name: 'metadataFields'
+            description: |
+              List of metadata fields that should be added to reported logs.
+              Can only be specified if VPC flow logs for this subnetwork is enabled and "metadata" is set to CUSTOM_METADATA.
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::String
+            name: 'filterExpr'
+            at_least_one_of:
+              - log_config.0.aggregation_interval
+              - log_config.0.flow_sampling
+              - log_config.0.metadata
+              - log_config.0.filterExpr
+            description: |
+              Export filter used to define which VPC flow logs should be logged, as as CEL expression. See
+              https://cloud.google.com/vpc/docs/flow-logs#filtering for details on how to format this field.
+            default_value: "true"
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Private Google Access':
           'https://cloud.google.com/vpc/docs/configure-private-google-access'
         'Cloud Networking':
           'https://cloud.google.com/vpc/docs/using-vpc'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/subnetworks'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/subnetworks'
   - !ruby/object:Api::Resource
     name: 'TargetHttpProxy'
     kind: 'compute#targetHttpProxy'
@@ -13509,6 +14214,11 @@ objects:
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'network'
+        description: 'The URL of the network this target instance uses to forward traffic. If not specified, the traffic will be forwarded to the network that the default network interface belongs to.'
+        input: true
+        min_version: beta
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
@@ -14106,7 +14816,7 @@ objects:
               description: |
                 IP address of the interface in the external VPN gateway.
                 Only IPv4 is supported. This IP address can be either from
-                your on-premise gateway or another Cloud provider’s VPN gateway,
+                your on-premise gateway or another Cloud provider's VPN gateway,
                 it cannot be an IP address from Google Compute Engine.
   - !ruby/object:Api::Resource
     name: 'UrlMap'
@@ -14803,13 +15513,19 @@ objects:
                         name: 'redirectResponseCode'
                         description: |
                           The HTTP Status code to use for this RedirectAction. Supported values are:
-                          - MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-                          - FOUND, which corresponds to 302.
-                          - SEE_OTHER which corresponds to 303.
-                          - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
+
+                          * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+
+                          * FOUND, which corresponds to 302.
+
+                          * SEE_OTHER which corresponds to 303.
+
+                          * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
                           will be retained.
-                          - PERMANENT_REDIRECT, which corresponds to 308. In this case,
+
+                          * PERMANENT_REDIRECT, which corresponds to 308. In this case,
                           the request method will be retained.
+                        skip_docs_values: true
                         values:
                           - :FOUND
                           - :MOVED_PERMANENTLY_DEFAULT
@@ -15482,12 +16198,18 @@ objects:
                       - !ruby/object:Api::Type::Enum
                         name: 'redirectResponseCode'
                         description: |
-                          The HTTP Status code to use for this RedirectAction. Supported values are:   -
-                          MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.  -
-                          FOUND, which corresponds to 302.  - SEE_OTHER which corresponds to 303.  -
-                          TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
-                          will be retained.  - PERMANENT_REDIRECT, which corresponds to 308. In this case,
-                          the request method will be retained.
+                          The HTTP Status code to use for this RedirectAction. Supported values are:
+
+                          * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+
+                          * FOUND, which corresponds to 302.
+
+                          * SEE_OTHER which corresponds to 303.
+                          
+                          * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method will be retained.
+
+                          * PERMANENT_REDIRECT, which corresponds to 308. In this case, the request method will be retained.
+                        skip_docs_values: true
                         values:
                           - :FOUND
                           - :MOVED_PERMANENTLY_DEFAULT
@@ -15547,13 +16269,19 @@ objects:
                   name: 'redirectResponseCode'
                   description: |
                     The HTTP Status code to use for this RedirectAction. Supported values are:
-                    - MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-                    - FOUND, which corresponds to 302.
-                    - SEE_OTHER which corresponds to 303.
-                    - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
+                    
+                    * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+                    
+                    * FOUND, which corresponds to 302.
+                    
+                    * SEE_OTHER which corresponds to 303.
+                    
+                    * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
                     will be retained.
-                    - PERMANENT_REDIRECT, which corresponds to 308. In this case,
+                    
+                    * PERMANENT_REDIRECT, which corresponds to 308. In this case,
                     the request method will be retained.
+                  skip_docs_values: true
                   values:
                     - :FOUND
                     - :MOVED_PERMANENTLY_DEFAULT
@@ -15570,7 +16298,7 @@ objects:
               name: 'defaultRouteAction'
               # TODO: (mbang) conflicts also won't work for array path matchers yet, uncomment here once supported.
               # conflicts:
-              #   - defaultUrlRedirect
+              #   - path_matcher.path_matcher.default_url_redirect
               description: |
                 defaultRouteAction takes effect when none of the pathRules or routeRules match. The load balancer performs
                 advanced routing actions like URL rewrites, header transformations, etc. prior to forwarding the request
@@ -15913,7 +16641,7 @@ objects:
           - default_url_redirect
           - default_route_action.0.weighted_backend_services
         conflicts:
-          - defaultRouteAction
+          - default_route_action
         description: |
           When none of the specified hostRules match, the request is redirected to a URL specified
           by defaultUrlRedirect. If defaultUrlRedirect is specified, defaultService or
@@ -15952,13 +16680,19 @@ objects:
             name: 'redirectResponseCode'
             description: |
               The HTTP Status code to use for this RedirectAction. Supported values are:
-              - MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
-              - FOUND, which corresponds to 302.
-              - SEE_OTHER which corresponds to 303.
-              - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
+
+              * MOVED_PERMANENTLY_DEFAULT, which is the default value and corresponds to 301.
+              
+              * FOUND, which corresponds to 302.
+              
+              * SEE_OTHER which corresponds to 303.
+              
+              * TEMPORARY_REDIRECT, which corresponds to 307. In this case, the request method
               will be retained.
-              - PERMANENT_REDIRECT, which corresponds to 308. In this case,
+              
+              * PERMANENT_REDIRECT, which corresponds to 308. In this case,
               the request method will be retained.
+            skip_docs_values: true
             values:
               - :FOUND
               - :MOVED_PERMANENTLY_DEFAULT
@@ -15974,7 +16708,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'defaultRouteAction'
         conflicts:
-          - defaultUrlRedirect
+          - default_url_redirect
         description: |
           defaultRouteAction takes effect when none of the hostRules match. The load balancer performs advanced routing actions
           like URL rewrites, header transformations, etc. prior to forwarding the request to the selected backend.
@@ -16727,3 +17461,96 @@ objects:
         description: 'The available CPU platforms in this zone'
         item_type: Api::Type::String
         output: true
+  - !ruby/object:Api::Resource
+    name: 'TargetGrpcProxy'
+    kind: 'compute#targetGrpcProxy'
+    base_url: projects/{{project}}/global/targetGrpcProxies
+    collection_url_key: 'items'
+    update_verb: :PATCH
+    has_self_link: true
+    description: |
+      Represents a Target gRPC Proxy resource. A target gRPC proxy is a component
+      of load balancers intended for load balancing gRPC traffic. Global forwarding
+      rules reference a target gRPC proxy. The Target gRPC Proxy references
+      a URL map which specifies how traffic routes to gRPC backend services.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+          guides:
+            'Using Target gRPC Proxies': 'https://cloud.google.com/traffic-director/docs/proxyless-overview'
+          api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetGrpcProxies'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource. Provided by the client when the resource
+          is created. The name must be 1-63 characters long, and comply
+          with RFC1035. Specifically, the name must be 1-63 characters long
+          and match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which
+          means the first character must be a lowercase letter, and all
+          following characters must be a dash, lowercase letter, or digit,
+          except the last character, which cannot be a dash.
+        input: true
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'selfLinkWithId'
+        description: 'Server-defined URL with id for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'urlMap'
+        description: |
+          URL to the UrlMap resource that defines the mapping from URL to
+          the BackendService. The protocol field in the BackendService
+          must be set to GRPC.
+        input: true
+        update_verb: :PATCH
+        update_url: projects/{{project}}/global/targetGrpcProxies
+        update_id: 'urlMap'
+        fingerprint_name: 'fingerprint'
+      - !ruby/object:Api::Type::Boolean
+        name: 'validateForProxyless'
+        input: true
+        description: |
+          If true, indicates that the BackendServices referenced by
+          the urlMap may be accessed by gRPC applications without using
+          a sidecar proxy. This will enable configuration checks on urlMap
+          and its referenced BackendServices to not allow unsupported features.
+          A gRPC application must use "xds:///" scheme in the target URI
+          of the service it is connecting to. If false, indicates that the
+          BackendServices referenced by the urlMap will be accessed by gRPC
+          applications via a sidecar proxy. In this case, a gRPC application
+          must not use "xds:///" scheme in the target URI of the service
+          it is connecting to
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'fingerprint'
+        description: |
+          Fingerprint of this resource. A hash of the contents stored in
+          this object. This field is used in optimistic locking. This field
+          will be ignored when inserting a TargetGrpcProxy. An up-to-date
+          fingerprint must be provided in order to patch/update the
+          TargetGrpcProxy; otherwise, the request will fail with error
+          412 conditionNotMet. To see the latest fingerprint, make a get()
+          request to retrieve the TargetGrpcProxy. A base64-encoded string.

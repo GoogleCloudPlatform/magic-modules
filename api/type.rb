@@ -77,7 +77,8 @@ module Api
       attr_reader :min_version
       attr_reader :exact_version
 
-      # A list of properties that conflict with this property.
+      # A list of properties that conflict with this property. Uses the "lineage"
+      # field to identify the property eg: parent.meta.label.foo
       attr_reader :conflicts
 
       # A list of properties that at least one of must be set.
@@ -203,8 +204,7 @@ module Api
 
       return if @conflicts.empty?
 
-      names = @__resource.all_user_properties.map(&:api_name) +
-              @__resource.all_user_properties.map(&:name)
+      names = @__resource.all_user_properties.map(&:lineage)
       @conflicts.each do |p|
         raise "#{p} does not exist" unless names.include?(p)
       end
@@ -214,8 +214,8 @@ module Api
     def conflicting
       return [] unless @__resource
 
-      (@__resource.all_user_properties.select { |p| @conflicts.include?(p.api_name) } +
-       @__resource.all_user_properties.select { |p| p.conflicts.include?(@api_name) }).uniq
+      (@__resource.all_user_properties.select { |p| @conflicts.include?(p.lineage) } +
+      @__resource.all_user_properties.select { |p| p.conflicts.include?(lineage) }).uniq
     end
 
     # Checks that all properties that needs at least one of their fields actually exist.
@@ -456,10 +456,12 @@ module Api
     # Represents an enum, and store is valid values
     class Enum < Primitive
       attr_reader :values
+      attr_reader :skip_docs_values
 
       def validate
         super
         check :values, type: ::Array, item_type: [Symbol, ::String, ::Integer], required: true
+        check :skip_docs_values, type: :boolean
       end
     end
 

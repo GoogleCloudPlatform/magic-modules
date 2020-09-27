@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/storage/v1"
@@ -127,6 +127,8 @@ func TestAccStorageBucket_customAttributes(t *testing.T) {
 }
 
 func TestAccStorageBucket_lifecycleRulesMultiple(t *testing.T) {
+	// Multiple fine-grained resources
+	skipIfVcr(t)
 	t.Parallel()
 
 	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", randInt(t))
@@ -760,6 +762,35 @@ func TestAccStorageBucket_bucketPolicyOnly(t *testing.T) {
 	})
 }
 
+func TestAccStorageBucket_uniformBucketAccessOnly(t *testing.T) {
+	t.Parallel()
+
+	bucketName := fmt.Sprintf("tf-test-acl-bucket-%d", randInt(t))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_uniformBucketAccessOnly(bucketName, true),
+			},
+			{
+				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccStorageBucket_uniformBucketAccessOnly(bucketName, false),
+			},
+			{
+				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccStorageBucket_labels(t *testing.T) {
 	t.Parallel()
 
@@ -833,7 +864,7 @@ func TestAccStorageBucket_website(t *testing.T) {
 	t.Parallel()
 
 	bucketSuffix := fmt.Sprintf("tf-website-test-%d", randInt(t))
-	errRe := regexp.MustCompile("one of `((website.0.main_page_suffix,website.0.not_found_page)|(website.0.not_found_page,website.0.main_page_suffix))` must be specified")
+	errRe := regexp.MustCompile("one of\n`website.0.main_page_suffix,website.0.not_found_page` must be specified")
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -1269,6 +1300,15 @@ resource "google_storage_bucket" "bucket" {
       num_newer_versions = 10
     }
   }
+  lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "ARCHIVE"
+    }
+    condition {
+      with_state = "ARCHIVED"
+    }
+  }
 }
 `, bucketName)
 }
@@ -1364,6 +1404,15 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName, enabled)
 }
 
+func testAccStorageBucket_uniformBucketAccessOnly(bucketName string, enabled bool) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name               = "%s"
+  uniform_bucket_level_access = %t
+}
+`, bucketName, enabled)
+}
+
 func testAccStorageBucket_encryption(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_project" "acceptance" {
@@ -1390,11 +1439,22 @@ resource "google_kms_crypto_key" "crypto_key" {
   rotation_period = "1000000s"
 }
 
+data "google_storage_project_service_account" "gcs_account" {
+}
+
+resource "google_kms_crypto_key_iam_member" "iam" {
+  crypto_key_id = google_kms_crypto_key.crypto_key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
+}
+
 resource "google_storage_bucket" "bucket" {
   name = "tf-test-crypto-bucket-%{random_int}"
   encryption {
     default_kms_key_name = google_kms_crypto_key.crypto_key.self_link
   }
+
+  depends_on = [google_kms_crypto_key_iam_member.iam]
 }
 `, context)
 }

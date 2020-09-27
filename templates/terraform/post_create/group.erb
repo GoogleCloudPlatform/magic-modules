@@ -1,2 +1,4 @@
 d.SetId(flattenMonitoringGroupName(res["name"]).(string))
-d.Set("name", flattenMonitoringGroupName(res["name"]))
+if err := d.Set("name", flattenMonitoringGroupName(res["name"])); err != nil {
+	return fmt.Errorf("Error setting name: %s", err)
+}

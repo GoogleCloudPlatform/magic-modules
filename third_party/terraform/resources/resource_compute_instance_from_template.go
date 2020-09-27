@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	strcase "github.com/stoewer/go-strcase"
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	compute "google.golang.org/api/compute/v1"
@@ -62,7 +62,7 @@ func computeInstanceFromTemplateSchema() map[string]*schema.Schema {
 
 		// Make non-required fields computed since they'll be set by the template.
 		// Leave deprecated and removed fields alone because we don't set them.
-		if !field.Required && !(field.Deprecated != "" || field.Removed != "") {
+		if !field.Required && !(field.Deprecated != "") {
 			field.Computed = true
 		}
 	})
@@ -89,7 +89,14 @@ func recurseOnSchema(s map[string]*schema.Schema, f func(*schema.Schema)) {
 }
 
 func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {

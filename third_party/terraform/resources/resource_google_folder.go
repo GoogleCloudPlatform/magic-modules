@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	resourceManagerV2Beta1 "google.golang.org/api/cloudresourcemanager/v2beta1"
 )
 
@@ -41,7 +41,11 @@ func resourceGoogleFolder() *schema.Resource {
 				Required:    true,
 				Description: `The folder's display name. A folder's display name must be unique amongst its siblings, e.g. no two folders with the same parent can share the same display name. The display name must start and end with a letter or digit, may contain letters, digits, spaces, hyphens and underscores and can be no longer than 30 characters.`,
 			},
-
+			"folder_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `The folder id from the name "folders/{folder_id}"`,
+			},
 			// Format is 'folders/{folder_id}.
 			// The terraform id holds the same value.
 			"name": {
@@ -64,13 +68,20 @@ func resourceGoogleFolder() *schema.Resource {
 }
 
 func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientResourceManagerV2Beta1.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManagerV2Beta1.UserAgent, m.ModuleName)
 
 	displayName := d.Get("display_name").(string)
 	parent := d.Get("parent").(string)
 
 	var op *resourceManagerV2Beta1.Operation
-	err := retryTimeDuration(func() error {
+	err = retryTimeDuration(func() error {
 		var reqErr error
 		op, reqErr = config.clientResourceManagerV2Beta1.Folders.Create(&resourceManagerV2Beta1.Folder{
 			DisplayName: displayName,
@@ -118,11 +129,25 @@ func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
 		return handleNotFoundError(err, d, fmt.Sprintf("Folder Not Found : %s", d.Id()))
 	}
 
-	d.Set("name", folder.Name)
-	d.Set("parent", folder.Parent)
-	d.Set("display_name", folder.DisplayName)
-	d.Set("lifecycle_state", folder.LifecycleState)
-	d.Set("create_time", folder.CreateTime)
+	if err := d.Set("name", folder.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	folderId := strings.TrimPrefix(folder.Name, "folders/")
+	if err := d.Set("folder_id", folderId); err != nil {
+		return fmt.Errorf("Error setting folder_id: %s", err)
+	}
+	if err := d.Set("parent", folder.Parent); err != nil {
+		return fmt.Errorf("Error setting parent: %s", err)
+	}
+	if err := d.Set("display_name", folder.DisplayName); err != nil {
+		return fmt.Errorf("Error setting display_name: %s", err)
+	}
+	if err := d.Set("lifecycle_state", folder.LifecycleState); err != nil {
+		return fmt.Errorf("Error setting lifecycle_state: %s", err)
+	}
+	if err := d.Set("create_time", folder.CreateTime); err != nil {
+		return fmt.Errorf("Error setting create_time: %s", err)
+	}
 
 	return nil
 }
@@ -142,8 +167,6 @@ func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error 
 		if err != nil {
 			return fmt.Errorf("Error updating display_name to '%s': %s", displayName, err)
 		}
-
-		d.SetPartial("display_name")
 	}
 
 	if d.HasChange("parent") {
@@ -170,8 +193,6 @@ func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error 
 		if err != nil {
 			return fmt.Errorf("Error moving folder '%s' to '%s': %s", displayName, newParent, err)
 		}
-
-		d.SetPartial("parent")
 	}
 
 	d.Partial(false)

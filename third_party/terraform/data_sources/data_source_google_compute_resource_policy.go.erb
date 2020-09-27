@@ -5,7 +5,7 @@ package google
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceGoogleComputeResourcePolicy() *schema.Resource {
@@ -42,7 +42,14 @@ func dataSourceGoogleComputeResourcePolicy() *schema.Resource {
 }
 
 func dataSourceGoogleComputeResourcePolicyRead(d *schema.ResourceData, meta interface{}) error {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return err
+	}
 	config := meta.(*Config)
+	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -57,8 +64,12 @@ func dataSourceGoogleComputeResourcePolicyRead(d *schema.ResourceData, meta inte
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("ResourcePolicy Not Found : %s", name))
 	}
-	d.Set("self_link", resourcePolicy.SelfLink)
-	d.Set("description", resourcePolicy.Description)
+	if err := d.Set("self_link", resourcePolicy.SelfLink); err != nil {
+		return fmt.Errorf("Error setting self_link: %s", err)
+	}
+	if err := d.Set("description", resourcePolicy.Description); err != nil {
+		return fmt.Errorf("Error setting description: %s", err)
+	}
 	d.SetId(fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", project, region, name))
 	return nil
 }
