@@ -217,6 +217,154 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// while most only want the host URL, some older ones also want the version and some
 	// of those "projects" as well. You can find out if this is required by looking at
 	// the basePath value in the client library file.
+	containerBetaClientBasePath := removeBasePathVersion(c.ContainerBetaBasePath)
+	log.Printf("[INFO] Instantiating GKE Beta client for path %s", containerBetaClientBasePath)
+	c.clientContainerBeta, err = containerBeta.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientContainerBeta.UserAgent = c.userAgent
+	c.clientContainerBeta.BasePath = containerBetaClientBasePath
+
+	dnsClientBasePath := removeBasePathVersion(c.DNSBasePath)
+	dnsClientBasePath = strings.ReplaceAll(dnsClientBasePath, "/dns/", "")
+	log.Printf("[INFO] Instantiating Google Cloud DNS client for path %s", dnsClientBasePath)
+	c.clientDns, err = dns.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientDns.UserAgent = c.userAgent
+	c.clientDns.BasePath = dnsClientBasePath
+
+	dnsBetaClientBasePath := removeBasePathVersion(c.DnsBetaBasePath)
+	dnsBetaClientBasePath = strings.ReplaceAll(dnsBetaClientBasePath, "/dns/", "")
+	log.Printf("[INFO] Instantiating Google Cloud DNS Beta client for path %s", dnsBetaClientBasePath)
+	c.clientDnsBeta, err = dnsBeta.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientDnsBeta.UserAgent = c.userAgent
+	c.clientDnsBeta.BasePath = dnsBetaClientBasePath
+
+	kmsClientBasePath := removeBasePathVersion(c.KMSBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud KMS client for path %s", kmsClientBasePath)
+	c.clientKms, err = cloudkms.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientKms.UserAgent = c.userAgent
+	c.clientKms.BasePath = kmsClientBasePath
+
+	loggingClientBasePath := removeBasePathVersion(c.LoggingBasePath)
+	log.Printf("[INFO] Instantiating Google Stackdriver Logging client for path %s", loggingClientBasePath)
+	c.clientLogging, err = cloudlogging.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientLogging.UserAgent = c.userAgent
+	c.clientLogging.BasePath = loggingClientBasePath
+
+	storageClientBasePath := c.StorageBasePath
+	log.Printf("[INFO] Instantiating Google Storage client for path %s", storageClientBasePath)
+	c.clientStorage, err = storage.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientStorage.UserAgent = c.userAgent
+	c.clientStorage.BasePath = storageClientBasePath
+
+	sqlClientBasePath := removeBasePathVersion(removeBasePathVersion(c.SQLBasePath))
+	log.Printf("[INFO] Instantiating Google SqlAdmin client for path %s", sqlClientBasePath)
+	c.clientSqlAdmin, err = sqladmin.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientSqlAdmin.UserAgent = c.userAgent
+	c.clientSqlAdmin.BasePath = sqlClientBasePath
+
+	pubsubClientBasePath := removeBasePathVersion(c.PubsubBasePath)
+	log.Printf("[INFO] Instantiating Google Pubsub client for path %s", pubsubClientBasePath)
+	wrappedPubsubClient := ClientWithAdditionalRetries(client, retryTransport, pubsubTopicProjectNotReady)
+	c.wrappedPubsubClient = wrappedPubsubClient
+	c.clientPubsub, err = pubsub.NewService(ctx, option.WithHTTPClient(wrappedPubsubClient))
+	if err != nil {
+		return err
+	}
+	c.clientPubsub.UserAgent = c.userAgent
+	c.clientPubsub.BasePath = pubsubClientBasePath
+
+	dataflowClientBasePath := removeBasePathVersion(c.DataflowBasePath)
+	log.Printf("[INFO] Instantiating Google Dataflow client for path %s", dataflowClientBasePath)
+	c.clientDataflow, err = dataflow.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientDataflow.UserAgent = c.userAgent
+	c.clientDataflow.BasePath = dataflowClientBasePath
+
+	resourceManagerBasePath := removeBasePathVersion(c.ResourceManagerBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud ResourceManager client for path %s", resourceManagerBasePath)
+	c.clientResourceManager, err = cloudresourcemanager.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientResourceManager.UserAgent = c.userAgent
+	c.clientResourceManager.BasePath = resourceManagerBasePath
+
+	resourceManagerV2Beta1BasePath := removeBasePathVersion(c.ResourceManagerV2Beta1BasePath)
+	log.Printf("[INFO] Instantiating Google Cloud ResourceManager V client for path %s", resourceManagerV2Beta1BasePath)
+	c.clientResourceManagerV2Beta1, err = resourceManagerV2Beta1.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientResourceManagerV2Beta1.UserAgent = c.userAgent
+	c.clientResourceManagerV2Beta1.BasePath = resourceManagerV2Beta1BasePath
+
+	runtimeConfigClientBasePath := removeBasePathVersion(c.RuntimeConfigBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud Runtimeconfig client for path %s", runtimeConfigClientBasePath)
+	c.clientRuntimeconfig, err = runtimeconfig.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientRuntimeconfig.UserAgent = c.userAgent
+	c.clientRuntimeconfig.BasePath = runtimeConfigClientBasePath
+
+	iamClientBasePath := removeBasePathVersion(c.IAMBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud IAM client for path %s", iamClientBasePath)
+	c.clientIAM, err = iam.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientIAM.UserAgent = c.userAgent
+	c.clientIAM.BasePath = iamClientBasePath
+
+	iamCredentialsClientBasePath := removeBasePathVersion(c.IamCredentialsBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud IAMCredentials client for path %s", iamCredentialsClientBasePath)
+	c.clientIamCredentials, err = iamcredentials.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientIamCredentials.UserAgent = c.userAgent
+	c.clientIamCredentials.BasePath = iamCredentialsClientBasePath
+
+	serviceManagementClientBasePath := removeBasePathVersion(c.ServiceManagementBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud Service Management client for path %s", serviceManagementClientBasePath)
+	c.clientServiceMan, err = servicemanagement.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientServiceMan.UserAgent = c.userAgent
+	c.clientServiceMan.BasePath = serviceManagementClientBasePath
+
+	serviceUsageClientBasePath := removeBasePathVersion(c.ServiceUsageBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud Service Usage client for path %s", serviceUsageClientBasePath)
+	c.clientServiceUsage, err = serviceusage.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientServiceUsage.UserAgent = c.userAgent
+	c.clientServiceUsage.BasePath = serviceUsageClientBasePath
+
 	cloudBillingClientBasePath := removeBasePathVersion(c.CloudBillingBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud Billing client for path %s", cloudBillingClientBasePath)
 	c.clientBilling, err = cloudbilling.NewService(ctx, option.WithHTTPClient(client))
