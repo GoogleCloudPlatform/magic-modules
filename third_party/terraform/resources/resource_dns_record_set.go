@@ -136,7 +136,7 @@ func resourceDnsRecordSetCreate(d *schema.ResourceData, meta interface{}) error 
 	d.SetId(fmt.Sprintf("%s/%s/%s", zone, name, rType))
 
 	w := &DnsChangeWaiter{
-		Service:     config.clientDns,
+		Service:     config.NewDnsClient(userAgent),
 		Change:      chg,
 		Project:     project,
 		ManagedZone: zone,
@@ -256,7 +256,7 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	w := &DnsChangeWaiter{
-		Service:     config.clientDns,
+		Service:     config.NewDnsClient(userAgent),
 		Change:      chg,
 		Project:     project,
 		ManagedZone: zone,
@@ -322,7 +322,7 @@ func resourceDnsRecordSetUpdate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	w := &DnsChangeWaiter{
-		Service:     config.clientDns,
+		Service:     config.NewDnsClient(userAgent),
 		Change:      chg,
 		Project:     project,
 		ManagedZone: zone,
