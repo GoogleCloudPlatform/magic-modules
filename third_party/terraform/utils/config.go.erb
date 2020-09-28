@@ -244,16 +244,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// while most only want the host URL, some older ones also want the version and some
 	// of those "projects" as well. You can find out if this is required by looking at
 	// the basePath value in the client library file.
-
-	containerClientBasePath := removeBasePathVersion(c.ContainerBasePath)
-	log.Printf("[INFO] Instantiating GKE client for path %s", containerClientBasePath)
-	c.clientContainer, err = container.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientContainer.UserAgent = c.userAgent
-	c.clientContainer.BasePath = containerClientBasePath
-
 	containerBetaClientBasePath := removeBasePathVersion(c.ContainerBetaBasePath)
 	log.Printf("[INFO] Instantiating GKE Beta client for path %s", containerBetaClientBasePath)
 	c.clientContainerBeta, err = containerBeta.NewService(ctx, option.WithHTTPClient(client))
@@ -651,6 +641,20 @@ func (c *Config) NewComputeBetaClient(userAgent string) *computeBeta.Service {
 	clientComputeBeta.BasePath = computeBetaClientBasePath
 
 	return clientComputeBeta
+}
+
+func (c *Config) NewContainerClient(userAgent string) *container.Service {
+	containerClientBasePath := removeBasePathVersion(c.ContainerBasePath)
+	log.Printf("[INFO] Instantiating GKE client for path %s", containerClientBasePath)
+	clientContainer, err := container.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client container: %s", err)
+		return nil
+	}
+	clientContainer.UserAgent = userAgent
+	clientContainer.BasePath = containerClientBasePath
+
+	return clientContainer
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
