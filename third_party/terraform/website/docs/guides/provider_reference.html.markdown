@@ -67,6 +67,8 @@ provider "google-beta" {}
 If you are using terraform on your workstation, you will need to install the Google Cloud SDK and authenticate using [User Application Default
 Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default).
 
+A quota project must be set which gcloud automatically reads from the `core/project` value. You can override this project by specifying `--project` flag when running `gcloud auth application-default login`. The SDK should return this message if you have set the correct billing project. `Quota project "your-project" was added to ADC which can be used by Google client libraries for billing and quota.`
+
 ### Running Terraform on Google Cloud
 
 If you are running terraform on Google Cloud, you can configure that instance or cluster to use a [Google Service
