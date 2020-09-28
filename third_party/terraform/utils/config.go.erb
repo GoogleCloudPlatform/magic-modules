@@ -643,6 +643,22 @@ func (c *Config) getTokenSource(clientScopes []string) (oauth2.TokenSource, erro
 	return creds.TokenSource, nil
 }
 
+
+// methods to create new services from config
+func (c *Config) NewComputeClient(userAgent string) *compute.Service {
+	computeClientBasePath := c.ComputeBasePath + "projects/"
+	log.Printf("[INFO] Instantiating GCE client for path %s", computeClientBasePath)
+	clientCompute, err := compute.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client compute: %s", err)
+		return nil
+	}
+	clientCompute.UserAgent = userAgent
+	clientCompute.BasePath = computeClientBasePath
+
+	return clientCompute
+}
+
 // staticTokenSource is used to be able to identify static token sources without reflection.
 type staticTokenSource struct {
 	oauth2.TokenSource
