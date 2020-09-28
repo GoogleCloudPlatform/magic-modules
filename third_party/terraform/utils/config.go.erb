@@ -217,16 +217,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// while most only want the host URL, some older ones also want the version and some
 	// of those "projects" as well. You can find out if this is required by looking at
 	// the basePath value in the client library file.
-	dnsClientBasePath := removeBasePathVersion(c.DNSBasePath)
-	dnsClientBasePath = strings.ReplaceAll(dnsClientBasePath, "/dns/", "")
-	log.Printf("[INFO] Instantiating Google Cloud DNS client for path %s", dnsClientBasePath)
-	c.clientDns, err = dns.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientDns.UserAgent = c.userAgent
-	c.clientDns.BasePath = dnsClientBasePath
-
 	dnsBetaClientBasePath := removeBasePathVersion(c.DnsBetaBasePath)
 	dnsBetaClientBasePath = strings.ReplaceAll(dnsBetaClientBasePath, "/dns/", "")
 	log.Printf("[INFO] Instantiating Google Cloud DNS Beta client for path %s", dnsBetaClientBasePath)
