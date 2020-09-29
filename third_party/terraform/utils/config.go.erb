@@ -243,15 +243,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// while most only want the host URL, some older ones also want the version and some
 	// of those "projects" as well. You can find out if this is required by looking at
 	// the basePath value in the client library file.
-	kmsClientBasePath := removeBasePathVersion(c.KMSBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud KMS client for path %s", kmsClientBasePath)
-	c.clientKms, err = cloudkms.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientKms.UserAgent = c.userAgent
-	c.clientKms.BasePath = kmsClientBasePath
-
 	loggingClientBasePath := removeBasePathVersion(c.LoggingBasePath)
 	log.Printf("[INFO] Instantiating Google Stackdriver Logging client for path %s", loggingClientBasePath)
 	c.clientLogging, err = cloudlogging.NewService(ctx, option.WithHTTPClient(client))
@@ -671,6 +662,19 @@ func (c *Config) NewDnsBetaClient(userAgent string) *dnsBeta.Service {
 	return clientDnsBeta
 }
 
+func (c *Config) NewKmsClient(userAgent string) *cloudkms.Service {
+	kmsClientBasePath := removeBasePathVersion(c.KMSBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud KMS client for path %s", kmsClientBasePath)
+	clientKms, err := cloudkms.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client kms: %s", err)
+		return nil
+	}
+	clientKms.UserAgent = userAgent
+	clientKms.BasePath = kmsClientBasePath
+
+	return clientKms
+}
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
 type staticTokenSource struct {
