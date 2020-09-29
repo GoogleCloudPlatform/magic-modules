@@ -590,7 +590,7 @@ func enableServiceUsageProjectServices(services []string, project, userAgent str
 	}
 
 	log.Printf("[DEBUG] Verifying that all services are enabled")
-	return waitForServiceUsageEnabledServices(services, project, config, timeout)
+	return waitForServiceUsageEnabledServices(services, project, userAgent, config, timeout)
 }
 
 func doEnableServicesRequest(services []string, project, userAgent string, config *Config, timeout time.Duration) error {
@@ -603,12 +603,12 @@ func doEnableServicesRequest(services []string, project, userAgent string, confi
 			// using service endpoint.
 			name := fmt.Sprintf("projects/%s/services/%s", project, services[0])
 			req := &serviceusage.EnableServiceRequest{}
-			op, rerr = config.clientServiceUsage.Services.Enable(name, req).Do()
+			op, rerr = config.NewServiceUsageClient(userAgent).Services.Enable(name, req).Do()
 		} else {
 			// Batch enable for multiple services.
 			name := fmt.Sprintf("projects/%s", project)
 			req := &serviceusage.BatchEnableServicesRequest{ServiceIds: services}
-			op, rerr = config.clientServiceUsage.Services.BatchEnable(name, req).Do()
+			op, rerr = config.NewServiceUsageClient(userAgent).Services.BatchEnable(name, req).Do()
 		}
 		return handleServiceUsageRetryableError(rerr)
 	}, timeout, serviceUsageServiceBeingActivated)
@@ -627,12 +627,12 @@ func doEnableServicesRequest(services []string, project, userAgent string, confi
 // if a service has been renamed, this function will list both the old and new
 // forms of the service. LIST responses are expected to return only the old or
 // new form, but we'll always return both.
-func listCurrentlyEnabledServices(project string, config *Config, timeout time.Duration) (map[string]struct{}, error) {
+func listCurrentlyEnabledServices(project, userAgent string, config *Config, timeout time.Duration) (map[string]struct{}, error) {
 	log.Printf("[DEBUG] Listing enabled services for project %s", project)
 	apiServices := make(map[string]struct{})
 	err := retryTimeDuration(func() error {
 		ctx := context.Background()
-		return config.clientServiceUsage.Services.
+		return config.NewServiceUsageClient(userAgent).Services.
 			List(fmt.Sprintf("projects/%s", project)).
 			Fields("services/name,nextPageToken").
 			Filter("state:ENABLED").
@@ -665,13 +665,13 @@ func listCurrentlyEnabledServices(project string, config *Config, timeout time.D
 // waitForServiceUsageEnabledServices doesn't resend enable requests - it just
 // waits for service enablement status to propagate. Essentially, it waits until
 // all services show up as enabled when listing services on the project.
-func waitForServiceUsageEnabledServices(services []string, project string, config *Config, timeout time.Duration) error {
+func waitForServiceUsageEnabledServices(services []string, project, userAgent string, config *Config, timeout time.Duration) error {
 	missing := make([]string, 0, len(services))
 	delay := time.Duration(0)
 	interval := time.Second
 	err := retryTimeDuration(func() error {
 		// Get the list of services that are enabled on the project
-		enabledServices, err := listCurrentlyEnabledServices(project, config, timeout)
+		enabledServices, err := listCurrentlyEnabledServices(project, userAgent, config, timeout)
 		if err != nil {
 			return err
 		}

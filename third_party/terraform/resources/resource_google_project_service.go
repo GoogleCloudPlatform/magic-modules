@@ -222,11 +222,6 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceGoogleProjectServiceDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
-	if err != nil {
-		return err
-	}
-	config.clientServiceUsage.UserAgent = userAgent
 
 	if disable := d.Get("disable_on_destroy"); !(disable.(bool)) {
 		log.Printf("[WARN] Project service %q disable_on_destroy is false, skip disabling service", d.Id())
@@ -265,7 +260,7 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 		}
 
 		name := fmt.Sprintf("projects/%s/services/%s", project, service)
-		servicesDisableCall := config.clientServiceUsage.Services.Disable(name, &serviceusage.DisableServiceRequest{
+		servicesDisableCall := config.NewServiceUsageClient(userAgent).Services.Disable(name, &serviceusage.DisableServiceRequest{
 			DisableDependentServices: disableDependentServices,
 		})
 		if config.UserProjectOverride {
