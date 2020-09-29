@@ -1887,6 +1887,10 @@ func TestAccComputeInstance_subnetworkUpdate(t *testing.T) {
 				Config: testAccComputeInstance_subnetworkUpdateTwo(suffix, instanceName),
 			},
 			computeInstanceImportStep("us-east1-d", instanceName, []string{"allow_stopping_for_update"}),
+			{
+				Config: testAccComputeInstance_subnetworkUpdate(suffix, instanceName),
+			},
+			computeInstanceImportStep("us-east1-d", instanceName, []string{"allow_stopping_for_update"}),
 		},
 	})
 }
@@ -4896,6 +4900,11 @@ func testAccComputeInstance_subnetworkUpdateTwo(suffix, instance string) string 
 		machine_type = "n1-standard-1"
 		zone         = "us-east1-d"
 		allow_stopping_for_update = true
+		network_ip = "10.3.0.3"
+
+		access_config {
+      network_tier = "STANDARD"
+		}
 
 		boot_disk {
 			initialize_params {

@@ -58,6 +58,31 @@ var (
 	}
 )
 
+// network_interface.[d].network_ip can only changge when subnet/network
+// is also changing. Validate that if network_ip is changing this scenario
+// holds up to par.
+func forceNewIfNetworkIPChangedAndNotAble(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	oldcount, newcount := d.GetChange("network_interface.#")
+	if oldcount.(int) != newcount.(int) {
+		return nil
+	}
+
+	for i := 0; i < newcount.(int); i++ {
+		prefix := fmt.Sprintf("network_interface.%d", i)
+		networkKey := prefix + ".network"
+		subnetworkKey := prefix + ".subnetwork"
+		subnetworkProjectKey := prefix + ".subnetwork_project"
+		networkIPKey := prefix + ".network_ip"
+		if d.HasChange(networkIPKey) {
+			if !d.HasChange(networkKey) && !d.HasChange(subnetworkKey) && !d.HasChange(subnetworkProjectKey) {
+				d.ForceNew(networkIPKey)
+			}
+		}
+	}
+
+	return nil
+}
+
 func resourceComputeInstance() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeInstanceCreate,
@@ -256,7 +281,6 @@ func resourceComputeInstance() *schema.Resource {
 						"network_ip": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							ForceNew:    true,
 							Computed:    true,
 							Description: `The private IP address assigned to the instance.`,
 						},
@@ -717,6 +741,7 @@ func resourceComputeInstance() *schema.Resource {
 				suppressEmptyGuestAcceleratorDiff,
 			),
 			desiredStatusDiff,
+			forceNewIfNetworkIPChangedAndNotAble,
 		),
 	}
 }
@@ -1337,7 +1362,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Instance had unexpected number of network interfaces: %d", len(instance.NetworkInterfaces))
 	}
 
-	var updatesToNIWhileStopped []func(...googleapi.CallOption) (*computeBeta.Operation, error)
+	var updatesToNIWhileStopped []func(*computeBeta.Instance) error
 	for i := 0; i < len(networkInterfaces); i++ {
 		prefix := fmt.Sprintf("network_interface.%d", i)
 		networkInterface := networkInterfaces[i]
@@ -1378,14 +1403,17 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 		}
 
-		if d.HasChange(prefix + ".access_config") {
+		readFingerPrint := func() error {
+			// re-read fingerprint
+			instance, err = config.clientComputeBeta.Instances.Get(project, zone, instance.Name).Do()
+			if err != nil {
+				return err
+			}
+			instNetworkInterface = instance.NetworkInterfaces[i]
+			return nil
+		}
 
-			// TODO: This code deletes then recreates accessConfigs.  This is bad because it may
-			// leave the machine inaccessible from either ip if the creation part fails (network
-			// timeout etc).  However right now there is a GCE limit of 1 accessConfig so it is
-			// the only way to do it.  In future this should be revised to only change what is
-			// necessary, and also add before removing.
-
+		deleteAccessConfigs := func() error {
 			// Delete any accessConfig that currently exists in instNetworkInterface
 			for _, ac := range instNetworkInterface.AccessConfigs {
 				op, err := config.clientCompute.Instances.DeleteAccessConfig(
@@ -1398,7 +1426,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					return opErr
 				}
 			}
+			return nil
+		}
 
+		createAccessConfigs := func() error {
 			// Create new ones
 			accessConfigsCount := d.Get(prefix + ".access_config.#").(int)
 			for j := 0; j < accessConfigsCount; j++ {
@@ -1423,22 +1454,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					return opErr
 				}
 			}
-
-			// re-read fingerprint
-			instance, err = config.clientComputeBeta.Instances.Get(project, zone, instance.Name).Do()
-			if err != nil {
-				return err
-			}
-			instNetworkInterface = instance.NetworkInterfaces[i]
+			return nil
 		}
 
-		// Setting NetworkIP to empty and AccessConfigs to nil.
-		// This will opt them out from being modified in the patch call.
-		networkInterface.NetworkIP = ""
-		networkInterface.AccessConfigs = nil
-		if !updateDuringStop && d.HasChange(prefix + ".alias_ip_range") {
-			// Alias IP ranges cannot be updated; they must be removed and then added
-			// unless you are changing subnetwork/network
+		deleteAliasIPRanges := func() error {
 			if len(instNetworkInterface.AliasIpRanges) > 0 {
 				ni := &computeBeta.NetworkInterface{
 					Fingerprint:     instNetworkInterface.Fingerprint,
@@ -1452,28 +1471,99 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				if opErr != nil {
 					return opErr
 				}
-				// re-read fingerprint
-				instance, err = config.clientComputeBeta.Instances.Get(project, zone, instance.Name).Do()
+			}
+			return nil
+		}
+
+		if !updateDuringStop {
+			if d.HasChange(prefix + ".access_config") {
+				// Access configs cannot be updated, they must first be removed
+				if d.HasChange(prefix + ".access_config") {
+					err := deleteAccessConfigs()
+					if err != nil {
+						return err
+					}
+					err = createAccessConfigs()
+					if err != nil {
+						return err
+					}
+					err = readFingerPrint()
+					if err != nil {
+						return err
+					}
+				}
+			}
+			if d.HasChange(prefix + ".alias_ip_range") {
+				// Lets be explicit about what we are changing in the patch call
+				networkInterfacePatchObj := &computeBeta.NetworkInterface{}
+
+				// Alias IP ranges cannot be updated; they must be removed and then added
+				// unless you are changing subnetwork/network
+				if d.HasChange(prefix + ".alias_ip_range") {
+					err := deleteAliasIPRanges()
+					if err != nil {
+						return err
+					}
+					networkInterfacePatchObj.AliasIpRanges = networkInterface.AliasIpRanges
+					networkInterfacePatchObj.Fingerprint = instNetworkInterface.Fingerprint
+				}
+
+				patchCall := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
+				op, err := patchCall()
+				if err != nil {
+					return errwrap.Wrapf("Error updating network interface: {{err}}", err)
+				}
+				opErr := computeOperationWaitTime(config, op, project, "network interface to update", d.Timeout(schema.TimeoutUpdate))
+				if opErr != nil {
+					return opErr
+				}
+			}
+		} else {
+			// Lets be explicit about what we are changing in the patch call
+			networkInterfacePatchObj := &computeBeta.NetworkInterface{
+				Network:       networkInterface.Network,
+				Subnetwork:    networkInterface.Subnetwork,
+				AliasIpRanges: networkInterface.AliasIpRanges,
+			}
+
+			// network_ip can be inferred if not declared. Let's only patch if it's being changed by user
+			// otherwise this could fail if the network ip is not compatible with the new Subnetwork/Network.
+			if d.HasChange(prefix + ".network_ip") {
+				networkInterfacePatchObj.NetworkIP = networkInterface.NetworkIP
+			}
+
+			// Access config can run into some issues since we can't derive users original intent due to
+			// terraform limitation. Lets only update it if we need to.
+			if d.HasChange(prefix + ".access_config") {
+				err := deleteAccessConfigs()
 				if err != nil {
 					return err
 				}
-				instNetworkInterface = instance.NetworkInterfaces[i]
 			}
 
-			networkInterface.Fingerprint = instNetworkInterface.Fingerprint
-			updateCall := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterface).Do
-			op, err := updateCall()
-			if err != nil {
-				return errwrap.Wrapf("Error updating network interface: {{err}}", err)
+			// Access configs' ip changes when the instance stops invalidating our fingerprint
+			// expect caller to re-validate instance before calling patch
+			patchIndex := i
+			patch := func(instance *computeBeta.Instance) error {
+				networkInterfacePatchObj.Fingerprint = instance.NetworkInterfaces[patchIndex].Fingerprint
+				op, err := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do()
+				if err != nil {
+					return errwrap.Wrapf("Error updating network interface: {{err}}", err)
+				}
+				opErr := computeOperationWaitTime(config, op, project, "network interface to update", d.Timeout(schema.TimeoutUpdate))
+				if opErr != nil {
+					return opErr
+				}
+				if d.HasChange(prefix + ".access_config") {
+					err := createAccessConfigs()
+					if err != nil {
+						return err
+					}
+				}
+				return nil
 			}
-			opErr := computeOperationWaitTime(config, op, project, "network interface to update", d.Timeout(schema.TimeoutUpdate))
-			if opErr != nil {
-				return opErr
-			}
-		} else if updateDuringStop {
-			networkInterface.Fingerprint = instNetworkInterface.Fingerprint
-			updateCall := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterface).Do
-			updatesToNIWhileStopped = append(updatesToNIWhileStopped, updateCall)
+
+			updatesToNIWhileStopped = append(updatesToNIWhileStopped, patch)
 		}
 	}
 
@@ -1738,14 +1828,18 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 		}
 
-		for _, updateCall := range updatesToNIWhileStopped {
-			op, err := updateCall()
+		// If the instance stops it can invalidate the fingerprint for network interface.
+		// refresh the instance to get a new fingerprint
+		if len(updatesToNIWhileStopped) > 0 {
+			instance, err = config.clientComputeBeta.Instances.Get(project, zone, instance.Name).Do()
 			if err != nil {
-				return errwrap.Wrapf("Error updating network interface: {{err}}", err)
+				return err
 			}
-			opErr := computeOperationWaitTime(config, op, project, "network interface to update", d.Timeout(schema.TimeoutUpdate))
-			if opErr != nil {
-				return opErr
+		}
+		for _, patch := range updatesToNIWhileStopped {
+			err := patch(instance)
+			if err != nil {
+				return err
 			}
 		}
 
