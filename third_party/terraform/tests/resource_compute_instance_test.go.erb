@@ -4900,11 +4900,6 @@ func testAccComputeInstance_subnetworkUpdateTwo(suffix, instance string) string 
 		machine_type = "n1-standard-1"
 		zone         = "us-east1-d"
 		allow_stopping_for_update = true
-		network_ip = "10.3.0.3"
-
-		access_config {
-      network_tier = "STANDARD"
-		}
 
 		boot_disk {
 			initialize_params {
@@ -4914,7 +4909,10 @@ func testAccComputeInstance_subnetworkUpdateTwo(suffix, instance string) string 
 
 		network_interface {
 			subnetwork = google_compute_subnetwork.inst-test-subnetwork2.id
-
+			network_ip = "10.3.0.3"
+			access_config {
+				network_tier = "STANDARD"
+			}
 			alias_ip_range {
 				subnetwork_range_name = google_compute_subnetwork.inst-test-subnetwork2.secondary_ip_range[0].range_name
 				ip_cidr_range         = "173.16.0.0/24"
