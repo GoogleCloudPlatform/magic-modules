@@ -134,8 +134,6 @@ type Config struct {
 
 	clientHealthcare   *healthcare.Service
 
-	clientServiceMan          *servicemanagement.APIService
-
 	clientServiceUsage         *serviceusage.Service
 
 	clientBigQuery   *bigquery.Service
@@ -221,15 +219,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// while most only want the host URL, some older ones also want the version and some
 	// of those "projects" as well. You can find out if this is required by looking at
 	// the basePath value in the client library file.
-	serviceManagementClientBasePath := removeBasePathVersion(c.ServiceManagementBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud Service Management client for path %s", serviceManagementClientBasePath)
-	c.clientServiceMan, err = servicemanagement.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientServiceMan.UserAgent = c.userAgent
-	c.clientServiceMan.BasePath = serviceManagementClientBasePath
-
 	serviceUsageClientBasePath := removeBasePathVersion(c.ServiceUsageBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud Service Usage client for path %s", serviceUsageClientBasePath)
 	c.clientServiceUsage, err = serviceusage.NewService(ctx, option.WithHTTPClient(client))
@@ -700,6 +689,20 @@ func (c *Config) NewIamCredentialsClient(userAgent string) *iamcredentials.Servi
 	clientIamCredentials.BasePath = iamCredentialsClientBasePath
 
 	return clientIamCredentials
+}
+
+func (c *Config) NewServiceManClient(userAgent string) *servicemanagement.APIService {
+	serviceManagementClientBasePath := removeBasePathVersion(c.ServiceManagementBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud Service Management client for path %s", serviceManagementClientBasePath)
+	clientServiceMan, err := servicemanagement.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client service management: %s", err)
+		return nil
+	}
+	clientServiceMan.UserAgent = userAgent
+	clientServiceMan.BasePath = serviceManagementClientBasePath
+
+	return clientServiceMan
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
