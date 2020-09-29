@@ -132,8 +132,6 @@ type Config struct {
 
 	clientBigQuery   *bigquery.Service
 
-	clientCloudFunctions   *cloudfunctions.Service
-
 	CloudIoTBasePath string
 	clientCloudIoT   *cloudiot.Service
 
@@ -224,15 +222,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	}
 	c.clientBigQuery.UserAgent = c.userAgent
 	c.clientBigQuery.BasePath = bigQueryClientBasePath
-
-	cloudFunctionsClientBasePath := removeBasePathVersion(c.CloudFunctionsBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud CloudFunctions Client for path %s", cloudFunctionsClientBasePath)
-	c.clientCloudFunctions, err = cloudfunctions.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientCloudFunctions.UserAgent = c.userAgent
-	c.clientCloudFunctions.BasePath = cloudFunctionsClientBasePath
 
 	c.bigtableClientFactory = &BigtableClientFactory{
 		UserAgent:   c.userAgent,
@@ -693,7 +682,7 @@ func (c *Config) NewBillingClient(userAgent string) *cloudbilling.APIService {
 	log.Printf("[INFO] Instantiating Google Cloud Billing client for path %s", cloudBillingClientBasePath)
 	clientBilling, err := cloudbilling.NewService(c.context, option.WithHTTPClient(c.client))
 	if err != nil {
-		log.Printf("[WARN] Error creating client service usage: %s", err)
+		log.Printf("[WARN] Error creating client billing: %s", err)
 		return nil
 	}
 	clientBilling.UserAgent = userAgent
@@ -707,13 +696,27 @@ func (c *Config) NewBuildClient(userAgent string) *cloudbuild.Service {
 	log.Printf("[INFO] Instantiating Google Cloud Build client for path %s", cloudBuildClientBasePath)
 	clientBuild, err := cloudbuild.NewService(c.context, option.WithHTTPClient(c.client))
 	if err != nil {
-		log.Printf("[WARN] Error creating client service usage: %s", err)
+		log.Printf("[WARN] Error creating client build: %s", err)
 		return nil
 	}
 	clientBuild.UserAgent = userAgent
 	clientBuild.BasePath = cloudBuildClientBasePath
 
 	return clientBuild
+}
+
+func (c *Config) NewCloudFunctionsClient(userAgent string) *cloudfunctions.Service {
+	cloudFunctionsClientBasePath := removeBasePathVersion(c.CloudFunctionsBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud CloudFunctions Client for path %s", cloudFunctionsClientBasePath)
+	clientCloudFunctions, err := cloudfunctions.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client cloud functions: %s", err)
+		return nil
+	}
+	clientCloudFunctions.UserAgent = userAgent
+	clientCloudFunctions.BasePath = cloudFunctionsClientBasePath
+
+	return clientCloudFunctions
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
