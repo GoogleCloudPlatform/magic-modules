@@ -123,7 +123,7 @@ func computeOperationWaitTime(config *Config, res interface{}, project, activity
 
 	w := &ComputeOperationWaiter{
 <% if version == 'ga' -%>
-		Service: config.clientCompute,
+		Service: config.NewComputeClient(userAgent),
 <% else -%>
 		Service: config.clientComputeBeta,
 <% end -%>
