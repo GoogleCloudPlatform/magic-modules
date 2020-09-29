@@ -229,7 +229,7 @@ func testAccCheckManagedZoneCreateRRs(t *testing.T, zoneSuffix string, project s
 		}
 
 		w := &DnsChangeWaiter{
-			Service:     config.NewDnsClient(userAgent),
+			Service:     config.NewDnsClient(config.userAgent),
 			Change:      chg,
 			Project:     project,
 			ManagedZone: zone,

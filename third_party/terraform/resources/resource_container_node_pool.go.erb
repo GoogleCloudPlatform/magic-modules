@@ -311,7 +311,7 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 
 	waitErr := containerOperationWait(config,
 		operation, nodePoolInfo.project,
-		nodePoolInfo.location, "creating GKE NodePool", timeout)
+		nodePoolInfo.location, "creating GKE NodePool", userAgent, timeout)
 
 	if waitErr != nil {
 		// The resource didn't actually create
@@ -473,7 +473,7 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 	timeout -= time.Since(startTime)
 
 	// Wait until it's deleted
-	waitErr := containerOperationWait(config, operation, nodePoolInfo.project, nodePoolInfo.location, "deleting GKE NodePool", timeout)
+	waitErr := containerOperationWait(config, operation, nodePoolInfo.project, nodePoolInfo.location, "deleting GKE NodePool", userAgent, timeout)
 	if waitErr != nil {
 		return waitErr
 	}
@@ -754,7 +754,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			// Wait until it's updated
 			return containerOperationWait(config, op,
 				nodePoolInfo.project,
-				nodePoolInfo.location, "updating GKE node pool",
+				nodePoolInfo.location, "updating GKE node pool", userAgent,
 				timeout)
 		}
 
@@ -788,7 +788,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 				// Wait until it's updated
 				return containerOperationWait(config, op,
 					nodePoolInfo.project,
-					nodePoolInfo.location, "updating GKE node pool",
+					nodePoolInfo.location, "updating GKE node pool", userAgent,
 					timeout)
 			}
 
@@ -824,7 +824,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 				return containerOperationWait(config, op,
 					nodePoolInfo.project,
 					nodePoolInfo.location,
-					"updating GKE node pool workload_metadata_config",
+					"updating GKE node pool workload_metadata_config", userAgent,
 					timeout)
 			}
 
@@ -860,7 +860,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 				return containerOperationWait(config, op,
 					nodePoolInfo.project,
 					nodePoolInfo.location,
-					"updating GKE node pool kubelet_config",
+					"updating GKE node pool kubelet_config", userAgent,
 					timeout)
 			}
 
@@ -894,7 +894,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 				return containerOperationWait(config, op,
 					nodePoolInfo.project,
 					nodePoolInfo.location,
-					"updating GKE node pool linux_node_config",
+					"updating GKE node pool linux_node_config", userAgent,
 					timeout)
 			}
 
@@ -928,7 +928,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			// Wait until it's updated
 			return containerOperationWait(config, op,
 				nodePoolInfo.project,
-				nodePoolInfo.location, "updating GKE node pool size",
+				nodePoolInfo.location, "updating GKE node pool size", userAgent,
 				timeout)
 		}
 
@@ -966,7 +966,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			// Wait until it's updated
 			return containerOperationWait(config, op,
 				nodePoolInfo.project,
-				nodePoolInfo.location, "updating GKE node pool management", timeout)
+				nodePoolInfo.location, "updating GKE node pool management", userAgent, timeout)
 		}
 
 		// Call update serially.
@@ -996,7 +996,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			// Wait until it's updated
 			return containerOperationWait(config, op,
 				nodePoolInfo.project,
-				nodePoolInfo.location, "updating GKE node pool version", timeout)
+				nodePoolInfo.location, "updating GKE node pool version", userAgent, timeout)
 		}
 
 		// Call update serially.
@@ -1023,7 +1023,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			}
 
 			// Wait until it's updated
-			return containerOperationWait(config, op, nodePoolInfo.project, nodePoolInfo.location, "updating GKE node pool node locations", timeout)
+			return containerOperationWait(config, op, nodePoolInfo.project, nodePoolInfo.location, "updating GKE node pool node locations", userAgent, timeout)
 		}
 
 		// Call update serially.
@@ -1056,7 +1056,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			}
 
 			// Wait until it's updated
-			return containerOperationWait(config, op, nodePoolInfo.project, nodePoolInfo.location, "updating GKE node pool upgrade settings", timeout)
+			return containerOperationWait(config, op, nodePoolInfo.project, nodePoolInfo.location, "updating GKE node pool upgrade settings", userAgent, timeout)
 		}
 
 		// Call update serially.
