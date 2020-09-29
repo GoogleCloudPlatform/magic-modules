@@ -584,8 +584,11 @@ func (c *Config) NewSqlAdminClient(userAgent string) *sqladmin.Service {
 func (c *Config) NewPubsubClient(userAgent string) *pubsub.Service {
 	pubsubClientBasePath := removeBasePathVersion(c.PubsubBasePath)
 	log.Printf("[INFO] Instantiating Google Pubsub client for path %s", pubsubClientBasePath)
-	wrappedPubsubClient := ClientWithAdditionalRetries(c.client, c.client.Transport.(*retryTransport), pubsubTopicProjectNotReady)
-	clientPubsub, err := pubsub.NewService(c.context, option.WithHTTPClient(wrappedPubsubClient))
+	if c.wrappedPubsubClient == nil {
+		wrappedPubsubClient := ClientWithAdditionalRetries(c.client, c.client.Transport.(*retryTransport), pubsubTopicProjectNotReady)
+		c.wrappedPubsubClient = wrappedPubsubClient
+	}
+	clientPubsub, err := pubsub.NewService(c.context, option.WithHTTPClient(c.wrappedPubsubClient))
 	if err != nil {
 		log.Printf("[WARN] Error creating client pubsub: %s", err)
 		return nil
