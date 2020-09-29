@@ -119,7 +119,6 @@ type Config struct {
 	clientDataprocBeta   *dataprocBeta.Service
 
 	DataflowBasePath string
-	clientDataflow   *dataflow.Service
 
 	clientDns   *dns.Service
 
@@ -233,15 +232,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// while most only want the host URL, some older ones also want the version and some
 	// of those "projects" as well. You can find out if this is required by looking at
 	// the basePath value in the client library file.
-	dataflowClientBasePath := removeBasePathVersion(c.DataflowBasePath)
-	log.Printf("[INFO] Instantiating Google Dataflow client for path %s", dataflowClientBasePath)
-	c.clientDataflow, err = dataflow.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientDataflow.UserAgent = c.userAgent
-	c.clientDataflow.BasePath = dataflowClientBasePath
-
 	resourceManagerBasePath := removeBasePathVersion(c.ResourceManagerBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud ResourceManager client for path %s", resourceManagerBasePath)
 	c.clientResourceManager, err = cloudresourcemanager.NewService(ctx, option.WithHTTPClient(client))
@@ -683,6 +673,20 @@ func (c *Config) NewPubsubClient(userAgent string) *pubsub.Service {
 	clientPubsub.BasePath = pubsubClientBasePath
 
 	return clientPubsub
+}
+
+func (c *Config) NewDataflowClient(userAgent string) *dataflow.Service {
+	dataflowClientBasePath := removeBasePathVersion(c.DataflowBasePath)
+	log.Printf("[INFO] Instantiating Google Dataflow client for path %s", dataflowClientBasePath)
+	clientDataflow, err := dataflow.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client dataflow: %s", err)
+		return nil
+	}
+	clientDataflow.UserAgent = userAgent
+	clientDataflow.BasePath = dataflowClientBasePath
+
+	return clientDataflow
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
