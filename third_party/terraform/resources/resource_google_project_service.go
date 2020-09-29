@@ -166,7 +166,6 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	if err != nil {
 		return err
 	}
-	config.clientResourceManager.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -175,7 +174,7 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	project = GetResourceNameFromSelfLink(project)
 
 	// Verify project for services still exists
-	projectGetCall := config.clientResourceManager.Projects.Get(project)
+	projectGetCall := config.NewResourceManagerClient(userAgent).Projects.Get(project)
 	if config.UserProjectOverride {
 		projectGetCall.Header().Add("X-Goog-User-Project", project)
 	}

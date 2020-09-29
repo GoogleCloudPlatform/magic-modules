@@ -101,7 +101,7 @@ func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	// Since we waited above, the operation is guaranteed to have been successful by this point.
-	waitOp, err := config.clientResourceManager.Operations.Get(op.Name).Do()
+	waitOp, err := config.NewResourceManagerClient(userAgent).Operations.Get(op.Name).Do()
 	if err != nil {
 		return fmt.Errorf("The folder '%s' has been created but we could not retrieve its id. Delete the folder manually and retry or use 'terraform import': %s", displayName, err)
 	}

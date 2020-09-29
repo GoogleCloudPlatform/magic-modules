@@ -274,7 +274,7 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 	// doesn't seem to allow for prefix matching. Don't change this to include the parent type unless
 	// that API behavior changes.
 	prefixFilter := fmt.Sprintf("id:%s* parent.id:%s", SharedServicePerimeterProjectPrefix, org)
-	res, err := config.clientResourceManager.Projects.List().Filter(prefixFilter).Do()
+	res, err := config.NewResourceManagerClient(config.userAgent).Projects.List().Filter(prefixFilter).Do()
 	if err != nil {
 		t.Fatalf("Error getting shared test projects: %s", err)
 	}
@@ -290,7 +290,7 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 				Id:   org,
 			},
 		}
-		op, err := config.clientResourceManager.Projects.Create(project).Do()
+		op, err := config.NewResourceManagerClient(config.userAgent).Projects.Create(project).Do()
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared test project: %s", err)
 		}
@@ -305,7 +305,7 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 			t.Fatalf("Error bootstrapping shared test project: %s", err)
 		}
 
-		p, err := config.clientResourceManager.Projects.Get(pid).Do()
+		p, err := config.NewResourceManagerClient(config.userAgent).Projects.Get(pid).Do()
 		if err != nil {
 			t.Fatalf("Error getting shared test project: %s", err)
 		}
