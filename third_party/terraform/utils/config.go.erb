@@ -130,8 +130,6 @@ type Config struct {
 	IamCredentialsBasePath string
 	clientIamCredentials   *iamcredentials.Service
 
-	clientPubsub   *pubsub.Service
-
 	clientResourceManager   *cloudresourcemanager.Service
 
 	ResourceManagerV2Beta1BasePath string
@@ -235,17 +233,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// while most only want the host URL, some older ones also want the version and some
 	// of those "projects" as well. You can find out if this is required by looking at
 	// the basePath value in the client library file.
-	pubsubClientBasePath := removeBasePathVersion(c.PubsubBasePath)
-	log.Printf("[INFO] Instantiating Google Pubsub client for path %s", pubsubClientBasePath)
-	wrappedPubsubClient := ClientWithAdditionalRetries(client, retryTransport, pubsubTopicProjectNotReady)
-	c.wrappedPubsubClient = wrappedPubsubClient
-	c.clientPubsub, err = pubsub.NewService(ctx, option.WithHTTPClient(wrappedPubsubClient))
-	if err != nil {
-		return err
-	}
-	c.clientPubsub.UserAgent = c.userAgent
-	c.clientPubsub.BasePath = pubsubClientBasePath
-
 	dataflowClientBasePath := removeBasePathVersion(c.DataflowBasePath)
 	log.Printf("[INFO] Instantiating Google Dataflow client for path %s", dataflowClientBasePath)
 	c.clientDataflow, err = dataflow.NewService(ctx, option.WithHTTPClient(client))
@@ -680,6 +667,22 @@ func (c *Config) NewSqlAdminClient(userAgent string) *sqladmin.Service {
 	clientSqlAdmin.BasePath = sqlClientBasePath
 
 	return clientSqlAdmin
+}
+
+func (c *Config) NewPubsubClient(userAgent string) *pubsub.Service {
+	pubsubClientBasePath := removeBasePathVersion(c.PubsubBasePath)
+	log.Printf("[INFO] Instantiating Google Pubsub client for path %s", pubsubClientBasePath)
+	wrappedPubsubClient := ClientWithAdditionalRetries(c.client, c.client.Transport.(*retryTransport), pubsubTopicProjectNotReady)
+	wrappedPubsubClient = wrappedPubsubClient
+	clientPubsub, err := pubsub.NewService(c.context, option.WithHTTPClient(wrappedPubsubClient))
+	if err != nil {
+		log.Printf("[WARN] Error creating client pubsub: %s", err)
+		return nil
+	}
+	clientPubsub.UserAgent = userAgent
+	clientPubsub.BasePath = pubsubClientBasePath
+
+	return clientPubsub
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
