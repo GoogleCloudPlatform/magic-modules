@@ -108,10 +108,8 @@ type Config struct {
 	ComputeBetaBasePath string
 
 	ContainerBasePath string
-	clientContainer   *container.Service
 
 	ContainerBetaBasePath string
-	clientContainerBeta   *containerBeta.Service
 
 	clientDataproc   *dataproc.Service
 
@@ -119,8 +117,6 @@ type Config struct {
 	clientDataprocBeta   *dataprocBeta.Service
 
 	DataflowBasePath string
-
-	clientDns   *dns.Service
 
 	DnsBetaBasePath string
 
@@ -642,7 +638,6 @@ func (c *Config) NewPubsubClient(userAgent string) *pubsub.Service {
 	pubsubClientBasePath := removeBasePathVersion(c.PubsubBasePath)
 	log.Printf("[INFO] Instantiating Google Pubsub client for path %s", pubsubClientBasePath)
 	wrappedPubsubClient := ClientWithAdditionalRetries(c.client, c.client.Transport.(*retryTransport), pubsubTopicProjectNotReady)
-	wrappedPubsubClient = wrappedPubsubClient
 	clientPubsub, err := pubsub.NewService(c.context, option.WithHTTPClient(wrappedPubsubClient))
 	if err != nil {
 		log.Printf("[WARN] Error creating client pubsub: %s", err)
