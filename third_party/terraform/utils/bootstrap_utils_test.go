@@ -137,7 +137,7 @@ func getOrCreateServiceAccount(config *Config, project string) (*iam.ServiceAcco
 	name := fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", project, serviceAccountEmail, project)
 	log.Printf("[DEBUG] Verifying %s as bootstrapped service account.\n", name)
 
-	sa, err := config.clientIAM.Projects.ServiceAccounts.Get(name).Do()
+	sa, err := config.NewIamClient(config.userAgent).Projects.ServiceAccounts.Get(name).Do()
 	if err != nil && !isGoogleApiErrorWithCode(err, 404) {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func getOrCreateServiceAccount(config *Config, project string) (*iam.ServiceAcco
 			AccountId:      serviceAccountEmail,
 			ServiceAccount: sa,
 		}
-		sa, err = config.clientIAM.Projects.ServiceAccounts.Create("projects/"+project, r).Do()
+		sa, err = config.NewIamClient(config.userAgent).Projects.ServiceAccounts.Create("projects/"+project, r).Do()
 		if err != nil {
 			return nil, err
 		}
@@ -180,7 +180,7 @@ func impersonationServiceAccountPermissions(config *Config, sa *iam.ServiceAccou
 	// Overwrite the roles each time on this service account. This is because this account is
 	// only created for the test suite and will stop snowflaking of permissions to get tests
 	// to run. Overwriting permissions on 1 service account shouldn't affect others.
-	_, err := config.clientIAM.Projects.ServiceAccounts.SetIamPolicy(sa.Name, &iam.SetIamPolicyRequest{
+	_, err := config.NewIamClient(config.userAgent).Projects.ServiceAccounts.SetIamPolicy(sa.Name, &iam.SetIamPolicyRequest{
 		Policy: &policy,
 	}).Do()
 	if err != nil {
