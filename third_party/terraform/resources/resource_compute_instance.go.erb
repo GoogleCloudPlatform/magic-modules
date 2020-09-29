@@ -1522,7 +1522,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				if err != nil {
 					return errwrap.Wrapf("Error updating network interface: {{err}}", err)
 				}
-				opErr := computeOperationWaitTime(config, op, project, "network interface to update", d.Timeout(schema.TimeoutUpdate))
+				opErr := computeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 				if opErr != nil {
 					return opErr
 				}
@@ -1559,7 +1559,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				if err != nil {
 					return errwrap.Wrapf("Error updating network interface: {{err}}", err)
 				}
-				opErr := computeOperationWaitTime(config, op, project, "network interface to update", d.Timeout(schema.TimeoutUpdate))
+				opErr := computeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 				if opErr != nil {
 					return opErr
 				}
