@@ -75,7 +75,9 @@ func forceNewIfNetworkIPChangedAndNotAble(ctx context.Context, d *schema.Resourc
 		networkIPKey := prefix + ".network_ip"
 		if d.HasChange(networkIPKey) {
 			if !d.HasChange(networkKey) && !d.HasChange(subnetworkKey) && !d.HasChange(subnetworkProjectKey) {
-				d.ForceNew(networkIPKey)
+				if err := d.ForceNew(networkIPKey); err != nil {
+					return err
+				}
 			}
 		}
 	}
