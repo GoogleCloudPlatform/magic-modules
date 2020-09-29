@@ -94,8 +94,6 @@ type Config struct {
 
 	CloudBillingBasePath string
 
-	clientBuild        *cloudbuild.Service
-
 <% unless version == 'ga' -%>
 	clientCloudIdentity   *cloudidentity.Service
 <% end -%>
@@ -216,15 +214,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// while most only want the host URL, some older ones also want the version and some
 	// of those "projects" as well. You can find out if this is required by looking at
 	// the basePath value in the client library file.
-	cloudBuildClientBasePath := removeBasePathVersion(c.CloudBuildBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud Build client for path %s", cloudBuildClientBasePath)
-	c.clientBuild, err = cloudbuild.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientBuild.UserAgent = c.userAgent
-	c.clientBuild.BasePath = cloudBuildClientBasePath
-
 	bigQueryClientBasePath := c.BigQueryBasePath
 	log.Printf("[INFO] Instantiating Google Cloud BigQuery client for path %s", bigQueryClientBasePath)
 	wrappedBigQueryClient := ClientWithAdditionalRetries(client, iamMemberMissing)
@@ -711,6 +700,20 @@ func (c *Config) NewBillingClient(userAgent string) *cloudbilling.APIService {
 	clientBilling.BasePath = cloudBillingClientBasePath
 
 	return clientBilling
+}
+
+func (c *Config) NewBuildClient(userAgent string) *cloudbuild.Service {
+	cloudBuildClientBasePath := removeBasePathVersion(c.CloudBuildBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud Build client for path %s", cloudBuildClientBasePath)
+	clientBuild, err := cloudbuild.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client service usage: %s", err)
+		return nil
+	}
+	clientBuild.UserAgent = userAgent
+	clientBuild.BasePath = cloudBuildClientBasePath
+
+	return clientBuild
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
