@@ -93,7 +93,6 @@ type Config struct {
 	<% end -%>
 
 	CloudBillingBasePath string
-	clientBilling        *cloudbilling.APIService
 
 	clientBuild        *cloudbuild.Service
 
@@ -217,15 +216,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// while most only want the host URL, some older ones also want the version and some
 	// of those "projects" as well. You can find out if this is required by looking at
 	// the basePath value in the client library file.
-	cloudBillingClientBasePath := removeBasePathVersion(c.CloudBillingBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud Billing client for path %s", cloudBillingClientBasePath)
-	c.clientBilling, err = cloudbilling.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientBilling.UserAgent = c.userAgent
-	c.clientBilling.BasePath = cloudBillingClientBasePath
-
 	cloudBuildClientBasePath := removeBasePathVersion(c.CloudBuildBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud Build client for path %s", cloudBuildClientBasePath)
 	c.clientBuild, err = cloudbuild.NewService(ctx, option.WithHTTPClient(client))
@@ -700,13 +690,27 @@ func (c *Config) NewServiceUsageClient(userAgent string) *serviceusage.Service {
 	log.Printf("[INFO] Instantiating Google Cloud Service Usage client for path %s", serviceUsageClientBasePath)
 	clientServiceUsage, err := serviceusage.NewService(c.context, option.WithHTTPClient(c.client))
 	if err != nil {
-		log.Printf("[WARN] Error creating client service management: %s", err)
+		log.Printf("[WARN] Error creating client service usage: %s", err)
 		return nil
 	}
 	clientServiceUsage.UserAgent = userAgent
 	clientServiceUsage.BasePath = serviceUsageClientBasePath
 
 	return clientServiceUsage
+}
+
+func (c *Config) NewBillingClient(userAgent string) *cloudbilling.APIService {
+	cloudBillingClientBasePath := removeBasePathVersion(c.CloudBillingBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud Billing client for path %s", cloudBillingClientBasePath)
+	clientBilling, err := cloudbilling.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client service usage: %s", err)
+		return nil
+	}
+	clientBilling.UserAgent = userAgent
+	clientBilling.BasePath = cloudBillingClientBasePath
+
+	return clientBilling
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
