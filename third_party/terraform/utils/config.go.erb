@@ -217,15 +217,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// while most only want the host URL, some older ones also want the version and some
 	// of those "projects" as well. You can find out if this is required by looking at
 	// the basePath value in the client library file.
-	iamClientBasePath := removeBasePathVersion(c.IAMBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud IAM client for path %s", iamClientBasePath)
-	c.clientIAM, err = iam.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientIAM.UserAgent = c.userAgent
-	c.clientIAM.BasePath = iamClientBasePath
-
 	iamCredentialsClientBasePath := removeBasePathVersion(c.IamCredentialsBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud IAMCredentials client for path %s", iamCredentialsClientBasePath)
 	c.clientIamCredentials, err = iamcredentials.NewService(ctx, option.WithHTTPClient(client))
