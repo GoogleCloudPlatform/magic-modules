@@ -143,8 +143,6 @@ type Config struct {
 
 	clientSourceRepo   *sourcerepo.Service
 
-	clientSqlAdmin   *sqladmin.Service
-
 	IAMBasePath string
 	clientIAM   *iam.Service
 
@@ -237,15 +235,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// while most only want the host URL, some older ones also want the version and some
 	// of those "projects" as well. You can find out if this is required by looking at
 	// the basePath value in the client library file.
-	sqlClientBasePath := removeBasePathVersion(removeBasePathVersion(c.SQLBasePath))
-	log.Printf("[INFO] Instantiating Google SqlAdmin client for path %s", sqlClientBasePath)
-	c.clientSqlAdmin, err = sqladmin.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientSqlAdmin.UserAgent = c.userAgent
-	c.clientSqlAdmin.BasePath = sqlClientBasePath
-
 	pubsubClientBasePath := removeBasePathVersion(c.PubsubBasePath)
 	log.Printf("[INFO] Instantiating Google Pubsub client for path %s", pubsubClientBasePath)
 	wrappedPubsubClient := ClientWithAdditionalRetries(client, retryTransport, pubsubTopicProjectNotReady)
@@ -655,10 +644,10 @@ func (c *Config) NewLoggingClient(userAgent string) *cloudlogging.Service {
 	loggingClientBasePath := removeBasePathVersion(c.LoggingBasePath)
 	log.Printf("[INFO] Instantiating Google Stackdriver Logging client for path %s", loggingClientBasePath)
 	clientLogging, err := cloudlogging.NewService(c.context, option.WithHTTPClient(c.client))
-		if err != nil {
-			log.Printf("[WARN] Error creating client logging: %s", err)
-			return nil
-		}
+	if err != nil {
+		log.Printf("[WARN] Error creating client logging: %s", err)
+		return nil
+	}
 	clientLogging.UserAgent = userAgent
 	clientLogging.BasePath = loggingClientBasePath
 
@@ -670,13 +659,27 @@ func (c *Config) NewStorageClient(userAgent string) *storage.Service {
 	log.Printf("[INFO] Instantiating Google Storage client for path %s", storageClientBasePath)
 	clientStorage, err := storage.NewService(c.context, option.WithHTTPClient(c.client))
 	if err != nil {
-			log.Printf("[WARN] Error creating client storage: %s", err)
-			return nil
+		log.Printf("[WARN] Error creating client storage: %s", err)
+		return nil
 	}
 	clientStorage.UserAgent = userAgent
 	clientStorage.BasePath = storageClientBasePath
 
 	return clientStorage
+}
+
+func (c *Config) NewSqlAdminClient(userAgent string) *sqladmin.Service {
+	sqlClientBasePath := removeBasePathVersion(removeBasePathVersion(c.SQLBasePath))
+	log.Printf("[INFO] Instantiating Google SqlAdmin client for path %s", sqlClientBasePath)
+	clientSqlAdmin, err := sqladmin.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client storage: %s", err)
+		return nil
+	}
+	clientSqlAdmin.UserAgent = userAgent
+	clientSqlAdmin.BasePath = sqlClientBasePath
+
+	return clientSqlAdmin
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
