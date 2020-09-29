@@ -7,7 +7,7 @@ if err != nil {
 }
 
 log.Printf("[DEBUG] Deleting servicePerimeters %q: %#v", d.Id(), obj)
-res, err := sendRequestWithTimeout(config, "POST", "", url, obj, d.Timeout(schema.TimeoutUpdate))
+res, err := sendRequestWithTimeout(config, "POST", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 
 if err != nil {
 	return fmt.Errorf("Error deleting ServicePerimeters %q: %s", d.Id(), err)
@@ -16,7 +16,7 @@ if err != nil {
 }
 
 err = accessContextManagerOperationWaitTime(
-	config, res, "Updating ServicePerimeters",
+	config, res, "Updating ServicePerimeters", userAgent,
 	d.Timeout(schema.TimeoutUpdate))
 
 if err != nil {

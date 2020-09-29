@@ -10,7 +10,8 @@ import (
 )
 
 type <%= product_name -%>OperationWaiter struct {
-  Config *Config
+  Config    *Config
+  UserAgent string
 <% if has_project -%>
   Project string
 <% end -%>
@@ -23,16 +24,18 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
   }
   // Returns the proper get.
   url := fmt.Sprintf("<%= [object.__product.base_url, async.operation.base_url].flatten.join.gsub('{{op_id}}', '%s') -%>", w.CommonOperationWaiter.Op.Name)
-  return sendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+
+  return sendRequest(w.Config, "GET", <% if has_project %>w.Project<% else %>""<% end %>, url, w.UserAgent, nil<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
 }
 
-func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, <% if has_project -%> project, <% end -%> activity string) (*<%=product_name%>OperationWaiter, error) {
+func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, <% if has_project -%> project, <% end -%> activity, userAgent string) (*<%=product_name%>OperationWaiter, error) {
   if val, ok := op["name"]; !ok || val == "" {
     // This was a synchronous call - there is no operation to wait for.
     return nil, nil
   }
   w := &<%= product_name -%>OperationWaiter{
-    Config: config,
+    Config:    config,
+    UserAgent: userAgent,
 <% if has_project -%>
     Project: project,
 <% end -%>
@@ -49,8 +52,8 @@ func create<%= product_name %>Waiter(config *Config, op map[string]interface{}, 
     Might as well just nolint it so we can pass the linter checks.
 -%>
 // nolint: deadcode,unused
-func <%= product_name.camelize(:lower) -%>OperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{},<% if has_project -%> project,<% end -%> activity string, timeout time.Duration) error {
-  w, err := create<%= product_name %>Waiter(config, op, <% if has_project -%> project, <%end-%> activity)
+func <%= product_name.camelize(:lower) -%>OperationWaitTimeWithResponse(config *Config, op map[string]interface{}, response *map[string]interface{},<% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
+  w, err := create<%= product_name %>Waiter(config, op, <% if has_project -%> project, <%end-%> activity, userAgent)
   if err != nil || w == nil {
       // If w is nil, the op was synchronous.
       return err
@@ -62,8 +65,8 @@ func <%= product_name.camelize(:lower) -%>OperationWaitTimeWithResponse(config *
 }
 <% end -%>
 
-func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op map[string]interface{}, <% if has_project -%> project,<% end -%> activity string, timeout time.Duration) error {
-  w, err := create<%= product_name %>Waiter(config, op, <% if has_project -%> project, <%end-%> activity)
+func <%= product_name.camelize(:lower) -%>OperationWaitTime(config *Config, op map[string]interface{}, <% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
+  w, err := create<%= product_name %>Waiter(config, op, <% if has_project -%> project, <%end-%> activity, userAgent)
   if err != nil || w == nil {
       // If w is nil, the op was synchronous.
       return err

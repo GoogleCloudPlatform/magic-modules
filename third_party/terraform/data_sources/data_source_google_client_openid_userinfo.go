@@ -2,7 +2,6 @@ package google
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -20,20 +19,17 @@ func dataSourceGoogleClientOpenIDUserinfo() *schema.Resource {
 }
 
 func dataSourceGoogleClientOpenIDUserinfoRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
-	if err != nil {
-		return err
-	}
 	config := meta.(*Config)
-	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
-
-	email, err := GetCurrentUserEmail(config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	d.SetId(time.Now().UTC().String())
+
+	email, err := GetCurrentUserEmail(config, userAgent)
+	if err != nil {
+		return err
+	}
+	d.SetId(email)
 	if err := d.Set("email", email); err != nil {
 		return fmt.Errorf("Error setting email: %s", err)
 	}

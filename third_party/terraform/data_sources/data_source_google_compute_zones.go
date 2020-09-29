@@ -5,7 +5,6 @@ import (
 	"log"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -40,14 +39,12 @@ func dataSourceGoogleComputeZones() *schema.Resource {
 }
 
 func dataSourceGoogleComputeZonesRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
+	config.clientCompute.UserAgent = userAgent
 
 	region := config.Region
 	if r, ok := d.GetOk("region"); ok {
@@ -92,7 +89,7 @@ func dataSourceGoogleComputeZonesRead(d *schema.ResourceData, meta interface{}) 
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	d.SetId(time.Now().UTC().String())
+	d.SetId(fmt.Sprintf("projects/%s/regions/%s", project, region))
 
 	return nil
 }
