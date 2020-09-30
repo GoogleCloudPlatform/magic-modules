@@ -15,24 +15,24 @@ func dataSourceGoogleComputeImage() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				Computed:      true,
-				ConflictsWith: []string{"family", "filter"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ExactlyOneOf: []string{"name", "family", "filter"},
 			},
 			"family": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				Computed:      true,
-				ConflictsWith: []string{"name", "filter"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ExactlyOneOf: []string{"name", "family", "filter"},
 			},
 			"filter": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"name", "family"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"name", "family", "filter"},
 			},
 			"archive_size_bytes": {
 				Type:     schema.TypeInt,
