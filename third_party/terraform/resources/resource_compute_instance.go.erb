@@ -1419,6 +1419,11 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				if err != nil {
 					return err
 				}
+				// refresh the instance to get an up to date fingerpint for subsequent changes
+				err = niH.RefreshInstance()
+				if err != nil {
+					return err
+				}
 				err = niH.CreateAliasIPRanges()
 				if err != nil {
 					return err
