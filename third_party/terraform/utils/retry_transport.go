@@ -56,12 +56,12 @@ func NewTransportWithDefaultRetries(t http.RoundTripper) *retryTransport {
 
 // Helper method to create a shallow copy of an HTTP client with a shallow-copied retryTransport
 // s.t. the base HTTP transport is the same (i.e. client connection pools are shared, retryPredicates are different)
-func ClientWithAdditionalRetries(baseClient *http.Client, baseRetryTransport *retryTransport, predicates ...RetryErrorPredicateFunc) *http.Client {
+func ClientWithAdditionalRetries(baseClient *http.Client, baseRetryTransport interface{}, predicates ...RetryErrorPredicateFunc) *http.Client {
 	copied := *baseClient
 	if baseRetryTransport == nil {
 		baseRetryTransport = NewTransportWithDefaultRetries(baseClient.Transport)
 	}
-	copied.Transport = baseRetryTransport.WithAddedPredicates(predicates...)
+	copied.Transport = baseRetryTransport.(*retryTransport).WithAddedPredicates(predicates...)
 	return &copied
 }
 
