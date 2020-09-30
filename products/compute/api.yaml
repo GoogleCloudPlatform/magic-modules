@@ -13648,7 +13648,8 @@ objects:
         name: 'privateIpv6GoogleAccess'
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
-        description: The private IPv6 google access type for the VMs in this subnet. 
+        description: The private IPv6 google access type for the VMs in this subnet.
+        default_value: :DISABLE_GOOGLE_ACCESS
         values:
           - :DISABLE_GOOGLE_ACCESS
           - :ENABLE_BIDIRECTIONAL_ACCESS_TO_GOOGLE
