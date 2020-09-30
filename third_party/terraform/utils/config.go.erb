@@ -128,8 +128,6 @@ type Config struct {
 
 	clientHealthcare   *healthcare.Service
 
-	clientBigQuery   *bigquery.Service
-
 	CloudIoTBasePath string
 	clientCloudIoT   *cloudiot.Service
 
@@ -210,17 +208,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// while most only want the host URL, some older ones also want the version and some
 	// of those "projects" as well. You can find out if this is required by looking at
 	// the basePath value in the client library file.
-	bigQueryClientBasePath := c.BigQueryBasePath
-	log.Printf("[INFO] Instantiating Google Cloud BigQuery client for path %s", bigQueryClientBasePath)
-	wrappedBigQueryClient := ClientWithAdditionalRetries(client, iamMemberMissing)
-	c.wrappedBigQueryClient = wrappedBigQueryClient
-	c.clientBigQuery, err = bigquery.NewService(ctx, option.WithHTTPClient(wrappedBigQueryClient))
-	if err != nil {
-		return err
-	}
-	c.clientBigQuery.UserAgent = c.userAgent
-	c.clientBigQuery.BasePath = bigQueryClientBasePath
-
 	c.bigtableClientFactory = &BigtableClientFactory{
 		UserAgent:   c.userAgent,
 		TokenSource: tokenSource,
@@ -720,6 +707,21 @@ func (c *Config) NewSourceRepoClient(userAgent string) *sourcerepo.Service {
 	clientSourceRepo.BasePath = sourceRepoClientBasePath
 
 	return clientSourceRepo
+}
+
+func (c *Config) NewBigQueryClient(userAgent string) *bigquery.Service {
+	bigQueryClientBasePath := c.BigQueryBasePath
+	log.Printf("[INFO] Instantiating Google Cloud BigQuery client for path %s", bigQueryClientBasePath)
+	wrappedBigQueryClient := ClientWithAdditionalRetries(c.client, c.client.Transport.(*retryTransport), iamMemberMissing)
+	clientBigQuery, err := bigquery.NewService(c.context, option.WithHTTPClient(wrappedBigQueryClient))
+	if err != nil {
+		log.Printf("[WARN] Error creating client big query: %s", err)
+		return nil
+	}
+	clientBigQuery.UserAgent = userAgent
+	clientBigQuery.BasePath = bigQueryClientBasePath
+
+	return clientBigQuery
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
