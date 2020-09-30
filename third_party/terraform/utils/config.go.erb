@@ -123,7 +123,6 @@ type Config struct {
 	CloudIoTBasePath string
 
 	ServiceNetworkingBasePath string
-	clientServiceNetworking   *servicenetworking.APIService
 
 	StorageTransferBasePath string
 	clientStorageTransfer   *storagetransfer.Service
@@ -213,15 +212,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	clientBigtable.BasePath = bigtableAdminBasePath
 	c.clientBigtableProjectsInstances = bigtableadmin.NewProjectsInstancesService(clientBigtable)
 	c.clientBigtableProjectsInstancesTables = bigtableadmin.NewProjectsInstancesTablesService(clientBigtable)
-
-	serviceNetworkingClientBasePath := removeBasePathVersion(c.ServiceNetworkingBasePath)
-	log.Printf("[INFO] Instantiating Service Networking client for path %s", serviceNetworkingClientBasePath)
-	c.clientServiceNetworking, err = servicenetworking.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientServiceNetworking.UserAgent = c.userAgent
-	c.clientServiceNetworking.BasePath = serviceNetworkingClientBasePath
 
 	storageTransferClientBasePath := removeBasePathVersion(c.StorageTransferBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud Storage Transfer client for path %s", storageTransferClientBasePath)
@@ -746,6 +736,20 @@ func (c *Config) NewComposerClient(userAgent string) *composer.Service {
 	clientComposer.BasePath = composerClientBasePath
 
 	return clientComposer
+}
+
+func (c *Config) NewServiceNetworkingClient(userAgent string) *servicenetworking.APIService {
+	serviceNetworkingClientBasePath := removeBasePathVersion(c.ServiceNetworkingBasePath)
+	log.Printf("[INFO] Instantiating Service Networking client for path %s", serviceNetworkingClientBasePath)
+	clientServiceNetworking, err := servicenetworking.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client service networking: %s", err)
+		return nil
+	}
+	clientServiceNetworking.UserAgent = userAgent
+	clientServiceNetworking.BasePath = serviceNetworkingClientBasePath
+
+	return clientServiceNetworking
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
