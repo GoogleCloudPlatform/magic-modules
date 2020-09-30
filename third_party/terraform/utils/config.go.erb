@@ -122,8 +122,6 @@ type Config struct {
 
 	ResourceManagerV2Beta1BasePath string
 
-	clientSpanner   *spanner.Service
-
 	IAMBasePath string
 
 	clientHealthcare   *healthcare.Service
@@ -224,15 +222,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	clientBigtable.BasePath = bigtableAdminBasePath
 	c.clientBigtableProjectsInstances = bigtableadmin.NewProjectsInstancesService(clientBigtable)
 	c.clientBigtableProjectsInstancesTables = bigtableadmin.NewProjectsInstancesTablesService(clientBigtable)
-
-	spannerClientBasePath := removeBasePathVersion(c.SpannerBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud Spanner client for path %s", spannerClientBasePath)
-	c.clientSpanner, err = spanner.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientSpanner.UserAgent = c.userAgent
-	c.clientSpanner.BasePath = spannerClientBasePath
 
 	dataprocClientBasePath := removeBasePathVersion(c.DataprocBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud Dataproc client for path %s", dataprocClientBasePath)
@@ -722,6 +711,20 @@ func (c *Config) NewBigQueryClient(userAgent string) *bigquery.Service {
 	clientBigQuery.BasePath = bigQueryClientBasePath
 
 	return clientBigQuery
+}
+
+func (c *Config) NewSpannerClient(userAgent string) *spanner.Service {
+	spannerClientBasePath := removeBasePathVersion(c.SpannerBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud Spanner client for path %s", spannerClientBasePath)
+	clientSpanner, err := spanner.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client source repo: %s", err)
+		return nil
+	}
+	clientSpanner.UserAgent = userAgent
+	clientSpanner.BasePath = spannerClientBasePath
+
+	return clientSpanner
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
