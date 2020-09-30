@@ -125,7 +125,6 @@ type Config struct {
 	ServiceNetworkingBasePath string
 
 	StorageTransferBasePath string
-	clientStorageTransfer   *storagetransfer.Service
 
 	bigtableClientFactory *BigtableClientFactory
 	BigtableAdminBasePath string
@@ -212,15 +211,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	clientBigtable.BasePath = bigtableAdminBasePath
 	c.clientBigtableProjectsInstances = bigtableadmin.NewProjectsInstancesService(clientBigtable)
 	c.clientBigtableProjectsInstancesTables = bigtableadmin.NewProjectsInstancesTablesService(clientBigtable)
-
-	storageTransferClientBasePath := removeBasePathVersion(c.StorageTransferBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud Storage Transfer client for path %s", storageTransferClientBasePath)
-	c.clientStorageTransfer, err = storagetransfer.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientStorageTransfer.UserAgent = c.userAgent
-	c.clientStorageTransfer.BasePath = storageTransferClientBasePath
 
 	healthcareClientBasePath := removeBasePathVersion(c.HealthcareBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud Healthcare client for path %s", healthcareClientBasePath)
@@ -750,6 +740,20 @@ func (c *Config) NewServiceNetworkingClient(userAgent string) *servicenetworking
 	clientServiceNetworking.BasePath = serviceNetworkingClientBasePath
 
 	return clientServiceNetworking
+}
+
+func (c *Config) NewStorageTransferClient(userAgent string) *storagetransfer.Service {
+	storageTransferClientBasePath := removeBasePathVersion(c.StorageTransferBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud Storage Transfer client for path %s", storageTransferClientBasePath)
+	clientStorageTransfer, err := storagetransfer.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client service networking: %s", err)
+		return nil
+	}
+	clientStorageTransfer.UserAgent = userAgent
+	clientStorageTransfer.BasePath = storageTransferClientBasePath
+
+	return clientStorageTransfer
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
