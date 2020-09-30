@@ -236,7 +236,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 
 	bigQueryClientBasePath := c.BigQueryBasePath
 	log.Printf("[INFO] Instantiating Google Cloud BigQuery client for path %s", bigQueryClientBasePath)
-	wrappedBigQueryClient := ClientWithAdditionalRetries(client, retryTransport, iamMemberMissing)
+	wrappedBigQueryClient := ClientWithAdditionalRetries(client, iamMemberMissing)
 	c.wrappedBigQueryClient = wrappedBigQueryClient
 	c.clientBigQuery, err = bigquery.NewService(ctx, option.WithHTTPClient(wrappedBigQueryClient))
 	if err != nil {
@@ -583,7 +583,7 @@ func (c *Config) NewSqlAdminClient(userAgent string) *sqladmin.Service {
 func (c *Config) NewPubsubClient(userAgent string) *pubsub.Service {
 	pubsubClientBasePath := removeBasePathVersion(c.PubsubBasePath)
 	log.Printf("[INFO] Instantiating Google Pubsub client for path %s", pubsubClientBasePath)
-	wrappedPubsubClient := ClientWithAdditionalRetries(c.client, c.client.Transport, pubsubTopicProjectNotReady)
+	wrappedPubsubClient := ClientWithAdditionalRetries(c.client, pubsubTopicProjectNotReady)
 	clientPubsub, err := pubsub.NewService(c.context, option.WithHTTPClient(wrappedPubsubClient))
 	if err != nil {
 		log.Printf("[WARN] Error creating client pubsub: %s", err)
