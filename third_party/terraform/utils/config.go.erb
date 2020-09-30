@@ -106,8 +106,6 @@ type Config struct {
 	CloudIoTBasePath string
 	ServiceNetworkingBasePath string
 	StorageTransferBasePath string
-
-	bigtableClientFactory *BigtableClientFactory
 	BigtableAdminBasePath string
 	// Unlike other clients, the Bigtable Admin client doesn't use a single
 	// service. Instead, there are several distinct services created off
@@ -176,11 +174,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// while most only want the host URL, some older ones also want the version and some
 	// of those "projects" as well. You can find out if this is required by looking at
 	// the basePath value in the client library file.
-	c.bigtableClientFactory = &BigtableClientFactory{
-		UserAgent:   c.userAgent,
-		TokenSource: tokenSource,
-	}
-
 	bigtableAdminBasePath := removeBasePathVersion(c.BigtableAdminBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud BigtableAdmin for path %s", bigtableAdminBasePath)
 
@@ -744,6 +737,15 @@ func (c *Config) NewCloudIdentityClient(userAgent string) *cloudidentity.Service
 	return clientCloudIdentity
 }
 <% end -%>
+
+func (c *Config) BigQueryClientFactory(userAgent string) *BigtableClientFactory {
+	bigtableClientFactory := &BigtableClientFactory{
+		UserAgent:   userAgent,
+		TokenSource: c.tokenSource,
+	}
+
+	return bigtableClientFactory
+}
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
 type staticTokenSource struct {
