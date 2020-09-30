@@ -99,7 +99,6 @@ type Config struct {
 <% end -%>
 
 	ComposerBasePath string
-	clientComposer   *composer.Service
 
 	ComputeBetaBasePath string
 
@@ -214,15 +213,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	clientBigtable.BasePath = bigtableAdminBasePath
 	c.clientBigtableProjectsInstances = bigtableadmin.NewProjectsInstancesService(clientBigtable)
 	c.clientBigtableProjectsInstancesTables = bigtableadmin.NewProjectsInstancesTablesService(clientBigtable)
-
-	composerClientBasePath := removeBasePathVersion(c.ComposerBasePath)
-	log.Printf("[INFO] Instantiating Cloud Composer client for path %s", composerClientBasePath)
-	c.clientComposer, err = composer.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientComposer.UserAgent = c.userAgent
-	c.clientComposer.BasePath = composerClientBasePath
 
 	serviceNetworkingClientBasePath := removeBasePathVersion(c.ServiceNetworkingBasePath)
 	log.Printf("[INFO] Instantiating Service Networking client for path %s", serviceNetworkingClientBasePath)
@@ -742,6 +732,20 @@ func (c *Config) NewAppEngineClient(userAgent string) *appengine.APIService {
 	clientAppEngine.BasePath = appEngineClientBasePath
 
 	return clientAppEngine
+}
+
+func (c *Config) NewComposerClient(userAgent string) *composer.Service {
+	composerClientBasePath := removeBasePathVersion(c.ComposerBasePath)
+	log.Printf("[INFO] Instantiating Cloud Composer client for path %s", composerClientBasePath)
+	clientComposer, err := composer.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client composer: %s", err)
+		return nil
+	}
+	clientComposer.UserAgent = userAgent
+	clientComposer.BasePath = composerClientBasePath
+
+	return clientComposer
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
