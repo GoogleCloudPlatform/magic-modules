@@ -107,13 +107,6 @@ type Config struct {
 	ServiceNetworkingBasePath string
 	StorageTransferBasePath string
 	BigtableAdminBasePath string
-	// Unlike other clients, the Bigtable Admin client doesn't use a single
-	// service. Instead, there are several distinct services created off
-	// the base service object. To imitate most other handwritten clients,
-	// we expose those directly instead of providing the `Service` object
-	// as a factory.
-	clientBigtableProjectsInstances *bigtableadmin.ProjectsInstancesService
-	clientBigtableProjectsInstancesTables *bigtableadmin.ProjectsInstancesTablesService
 
 	requestBatcherServiceUsage *RequestBatcher
 	requestBatcherIam          *RequestBatcher
@@ -168,23 +161,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 
 	c.client = client
 	c.context = ctx
-
-	// This base path and some others below need the version and possibly more of the path
-	// set on them. The client libraries are inconsistent about which values they need;
-	// while most only want the host URL, some older ones also want the version and some
-	// of those "projects" as well. You can find out if this is required by looking at
-	// the basePath value in the client library file.
-	bigtableAdminBasePath := removeBasePathVersion(c.BigtableAdminBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud BigtableAdmin for path %s", bigtableAdminBasePath)
-
-	clientBigtable, err := bigtableadmin.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	clientBigtable.UserAgent = c.userAgent
-	clientBigtable.BasePath = bigtableAdminBasePath
-	c.clientBigtableProjectsInstances = bigtableadmin.NewProjectsInstancesService(clientBigtable)
-	c.clientBigtableProjectsInstancesTables = bigtableadmin.NewProjectsInstancesTablesService(clientBigtable)
 
 	c.Region = GetRegionFromRegionSelfLink(c.Region)
 
@@ -241,7 +217,12 @@ func (c *Config) getTokenSource(clientScopes []string) (oauth2.TokenSource, erro
 	return creds.TokenSource, nil
 }
 
-// methods to create new services from config
+// Methods to create new services from config
+// Some base paths below need the version and possibly more of the path
+// set on them. The client libraries are inconsistent about which values they need;
+// while most only want the host URL, some older ones also want the version and some
+// of those "projects" as well. You can find out if this is required by looking at
+// the basePath value in the client library file.
 func (c *Config) NewComputeClient(userAgent string) *compute.Service {
 	computeClientBasePath := c.ComputeBasePath + "projects/"
 	log.Printf("[INFO] Instantiating GCE client for path %s", computeClientBasePath)
@@ -745,6 +726,41 @@ func (c *Config) BigQueryClientFactory(userAgent string) *BigtableClientFactory 
 	}
 
 	return bigtableClientFactory
+}
+
+// Unlike other clients, the Bigtable Admin client doesn't use a single
+// service. Instead, there are several distinct services created off
+// the base service object. To imitate most other handwritten clients,
+// we expose those directly instead of providing the `Service` object
+// as a factory.
+func (c *Config) NewBigTableProjectsInstancesClient(userAgent string) *bigtableadmin.ProjectsInstancesService {
+	bigtableAdminBasePath := removeBasePathVersion(c.BigtableAdminBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud BigtableAdmin for path %s", bigtableAdminBasePath)
+	clientBigtable, err := bigtableadmin.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client big table projects instances: %s", err)
+		return nil
+	}
+	clientBigtable.UserAgent = userAgent
+	clientBigtable.BasePath = bigtableAdminBasePath
+	clientBigtableProjectsInstances := bigtableadmin.NewProjectsInstancesService(clientBigtable)
+
+	return clientBigtableProjectsInstances
+}
+
+func (c *Config) NewBigTableProjectsInstancesTablesClient(userAgent string) *bigtableadmin.ProjectsInstancesTablesService {
+	bigtableAdminBasePath := removeBasePathVersion(c.BigtableAdminBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud BigtableAdmin for path %s", bigtableAdminBasePath)
+	clientBigtable, err := bigtableadmin.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client projects instances tables: %s", err)
+		return nil
+	}
+	clientBigtable.UserAgent = userAgent
+	clientBigtable.BasePath = bigtableAdminBasePath
+	clientBigtableProjectsInstancesTables = bigtableadmin.NewProjectsInstancesTablesService(clientBigtable)
+
+	return clientBigtableProjectsInstancesTables
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
