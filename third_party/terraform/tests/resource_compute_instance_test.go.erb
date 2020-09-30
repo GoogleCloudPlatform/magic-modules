@@ -1966,7 +1966,12 @@ func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
 		},
 	}
 
-	forceNewIfNetworkIPNotUpdatableFunc(d)
+	err := forceNewIfNetworkIPNotUpdatableFunc(d);
+
+	if err != nil {
+		t.Errorf(err)
+	}
+
 	if d.IsForceNew {
 		t.Errorf("Expected not force new if network_interface array size static")
 	}
@@ -2073,7 +2078,10 @@ func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
 				"network_interface.0.network_ip":         tc.NetworkIPAfter,
 			},
 		}
-		forceNewIfNetworkIPNotUpdatableFunc(d)
+		err := forceNewIfNetworkIPNotUpdatableFunc(d);
+		if  err != nil {
+			t.Errorf(err)
+		}
 		if tc.ExpectedForceNew != d.IsForceNew {
 			t.Errorf("%v: Scenario got unexpected result", tn)
 		}

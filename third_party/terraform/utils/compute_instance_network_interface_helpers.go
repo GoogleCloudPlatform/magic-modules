@@ -22,15 +22,14 @@ func networkInterfaceHelperFactory(d *schema.ResourceData, config *Config, insta
 	prefix := fmt.Sprintf("network_interface.%d", index)
 	networkInterface := networkInterfaces[index]
 	instNetworkInterface := instance.NetworkInterfaces[index]
-
 	networkName := d.Get(prefix + ".name").(string)
-	subnetwork := networkInterface.Subnetwork
 
 	if networkName != instNetworkInterface.Name {
 		return networkInterfaceHelper{}, fmt.Errorf("Instance networkInterface had unexpected name: %s", instNetworkInterface.Name)
 	}
 
 	inferNetworkFromSubnetwork := func() error {
+		subnetwork := networkInterface.Subnetwork
 		subnetProjectField := prefix + ".subnetwork_project"
 		sf, err := ParseSubnetworkFieldValueWithProjectField(subnetwork, subnetProjectField, d, config)
 		if err != nil {
