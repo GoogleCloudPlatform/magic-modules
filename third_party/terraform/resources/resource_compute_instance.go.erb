@@ -62,6 +62,11 @@ var (
 // is also changing. Validate that if network_ip is changing this scenario
 // holds up to par.
 func forceNewIfNetworkIPNotUpdatable(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	// separate func to allow unit testing
+	return forceNewIfNetworkIPNotUpdatableFunc(d)
+}
+
+func forceNewIfNetworkIPNotUpdatableFunc(d TerraformResourceDiff) error {
 	oldCount, newCount := d.GetChange("network_interface.#")
 	if oldCount.(int) != newCount.(int) {
 		return nil
