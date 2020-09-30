@@ -108,7 +108,6 @@ type Config struct {
 	ContainerBetaBasePath string
 
 	DataprocBetaBasePath string
-	clientDataprocBeta   *dataprocBeta.Service
 
 	DataflowBasePath string
 
@@ -220,15 +219,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	clientBigtable.BasePath = bigtableAdminBasePath
 	c.clientBigtableProjectsInstances = bigtableadmin.NewProjectsInstancesService(clientBigtable)
 	c.clientBigtableProjectsInstancesTables = bigtableadmin.NewProjectsInstancesTablesService(clientBigtable)
-
-	dataprocBetaClientBasePath := removeBasePathVersion(c.DataprocBetaBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud Dataproc Beta client for path %s", dataprocBetaClientBasePath)
-	c.clientDataprocBeta, err = dataprocBeta.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientDataprocBeta.UserAgent = c.userAgent
-	c.clientDataprocBeta.BasePath = dataprocBetaClientBasePath
 
 	filestoreClientBasePath := removeBasePathVersion(c.FilestoreBasePath)
 	log.Printf("[INFO] Instantiating Filestore client for path %s", filestoreClientBasePath)
@@ -728,6 +718,20 @@ func (c *Config) NewDataprocClient(userAgent string) *dataproc.Service {
 	clientDataproc.BasePath = dataprocClientBasePath
 
 	return clientDataproc
+}
+
+func (c *Config) NewDataprocBetaClient(userAgent string) *dataprocBeta.Service {
+	dataprocBetaClientBasePath := removeBasePathVersion(c.DataprocBetaBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud Dataproc Beta client for path %s", dataprocBetaClientBasePath)
+	clientDataprocBeta, err := dataprocBeta.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client dataproc beta: %s", err)
+		return nil
+	}
+	clientDataprocBeta.UserAgent = userAgent
+	clientDataprocBeta.BasePath = dataprocBetaClientBasePath
+
+	return clientDataprocBeta
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
