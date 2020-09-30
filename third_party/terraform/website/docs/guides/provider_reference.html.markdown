@@ -77,13 +77,12 @@ credential/authentication file. Make sure that the scope of the VM/Cluster is se
 
 ### Running Terraform outside of Google Cloud
 
-If you are using running terraform outside of Google Cloud, generate a service account key and set the `GOOGLE_APPPLICATION_CREDENTIALS` environment variable to 
+If you are running terraform outside of Google Cloud, generate a service account key and set the `GOOGLE_APPPLICATION_CREDENTIALS` environment variable to
 the path of the service account key. Terraform will use that key for authentication.
 
 ### Impersonating Service Accounts
 
-Terraform can impersonate a Google Service Account as described [here](https://cloud.google.com/iam/docs/creating-short-lived-service-account-credentials). A valid 
-credential must be provided as mentioned in the earlier section and that identity must have the `roles/iam.serviceAccountTokenCreator` role on the service account you are impersonating.
+Terraform can impersonate a Google Service Account as described [here](https://cloud.google.com/iam/docs/creating-short-lived-service-account-credentials). A valid credential must be provided as mentioned in the earlier section and that identity must have the `roles/iam.serviceAccountTokenCreator` role on the service account you are impersonating.
 
 ## Configuration Reference
 
@@ -107,6 +106,10 @@ specified on a zonal resource, it will take precedence.
 * `impersonate_service_account` - (Optional) The service account to impersonate for all Google API Calls.
 You must have `roles/iam.serviceAccountTokenCreator` role on that account for the impersonation to succeed.
 
+* `credentials` - (Optional) Either the path to or the contents of a
+[service account key file] in JSON format. You can
+[manage key files using the Cloud Console].  If not provided, the
+application default credentials will be used. 
 ---
 
 * `scopes` - (Optional) The list of OAuth 2.0 [scopes] requested when generating
