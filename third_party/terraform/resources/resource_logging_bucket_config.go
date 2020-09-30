@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 	"log"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -52,7 +53,8 @@ type loggingBucketConfigIDFunc func(d *schema.ResourceData, config *Config) (str
 // config resource. In practice the only difference between these resources is the url location.
 func ResourceLoggingBucketConfig(parentType string, parentSpecificSchema map[string]*schema.Schema, iDFunc loggingBucketConfigIDFunc) *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLoggingBucketConfigAcquire(iDFunc),
+		// Create: resourceLoggingBucketConfigAcquire(iDFunc),
+		Create: resourceLoggingBucketConfigCreate,
 		Read:   resourceLoggingBucketConfigRead,
 		Update: resourceLoggingBucketConfigUpdate,
 		Delete: resourceLoggingBucketConfigDelete,
@@ -117,6 +119,75 @@ func resourceLoggingBucketConfigAcquire(iDFunc loggingBucketConfigIDFunc) func(*
 
 		return resourceLoggingBucketConfigUpdate(d, meta)
 	}
+}
+
+func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
+	obj := make(map[string]interface{})
+	nameProp, err := expandLoggingBucketName(d.Get("name"), d, config)
+	if err != nil {
+		return err
+	} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
+		obj["name"] = nameProp
+	}
+	descriptionProp, err := expandLoggingBucketDescription(d.Get("description"), d, config)
+	if err != nil {
+		return err
+	} else if v, ok := d.GetOkExists("description"); !isEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
+		obj["description"] = descriptionProp
+	}
+	retentionDaysProp, err := expandLoggingBucketRetentionDays(d.Get("retention_days"), d, config)
+	if err != nil {
+		return err
+	} else if v, ok := d.GetOkExists("retention_days"); !isEmptyValue(reflect.ValueOf(retentionDaysProp)) && (ok || !reflect.DeepEqual(v, retentionDaysProp)) {
+		obj["retentionDays"] = retentionDaysProp
+	}
+	lockedProp, err := expandLoggingBucketLocked(d.Get("locked"), d, config)
+	if err != nil {
+		return err
+	} else if v, ok := d.GetOkExists("locked"); !isEmptyValue(reflect.ValueOf(lockedProp)) && (ok || !reflect.DeepEqual(v, lockedProp)) {
+		obj["locked"] = lockedProp
+	}
+
+	url, err := replaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}")
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] Creating new Bucket: %#v", obj)
+	billingProject := ""
+
+	project, err := getProject(d, config)
+	if err != nil {
+		return err
+	}
+	billingProject = project
+
+	// err == nil indicates that the billing_project value was found
+	if bp, err := getBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	if err != nil {
+		return fmt.Errorf("Error creating Bucket: %s", err)
+	}
+
+	// Store the ID now
+	id, err := replaceVars(d, config, "{{name}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+	log.Printf("[DEBUG] Finished creating Bucket %q: %#v", d.Id(), res)
+
+	return resourceLoggingBucketConfigRead(d, meta)
 }
 
 func resourceLoggingBucketConfigRead(d *schema.ResourceData, meta interface{}) error {
@@ -201,4 +272,20 @@ func resourceLoggingBucketConfigDelete(d *schema.ResourceData, meta interface{})
 	d.SetId("")
 
 	return nil
+}
+
+func expandLoggingBucketName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandLoggingBucketDescription(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandLoggingBucketRetentionDays(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandLoggingBucketLocked(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
 }
