@@ -551,7 +551,7 @@ func (c *Config) NewSourceRepoClient(userAgent string) *sourcerepo.Service {
 func (c *Config) NewBigQueryClient(userAgent string) *bigquery.Service {
 	bigQueryClientBasePath := c.BigQueryBasePath
 	log.Printf("[INFO] Instantiating Google Cloud BigQuery client for path %s", bigQueryClientBasePath)
-	wrappedBigQueryClient := ClientWithAdditionalRetries(c.client, c.client.Transport.(*retryTransport), iamMemberMissing)
+	wrappedBigQueryClient := ClientWithAdditionalRetries(c.client, iamMemberMissing)
 	clientBigQuery, err := bigquery.NewService(c.context, option.WithHTTPClient(wrappedBigQueryClient))
 	if err != nil {
 		log.Printf("[WARN] Error creating client big query: %s", err)
