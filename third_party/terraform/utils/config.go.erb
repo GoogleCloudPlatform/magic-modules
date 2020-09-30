@@ -123,8 +123,6 @@ type Config struct {
 
 	CloudIoTBasePath string
 
-	clientAppEngine   *appengine.APIService
-
 	ServiceNetworkingBasePath string
 	clientServiceNetworking   *servicenetworking.APIService
 
@@ -216,15 +214,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	clientBigtable.BasePath = bigtableAdminBasePath
 	c.clientBigtableProjectsInstances = bigtableadmin.NewProjectsInstancesService(clientBigtable)
 	c.clientBigtableProjectsInstancesTables = bigtableadmin.NewProjectsInstancesTablesService(clientBigtable)
-
-	appEngineClientBasePath := removeBasePathVersion(c.AppEngineBasePath)
-	log.Printf("[INFO] Instantiating App Engine client for path %s", appEngineClientBasePath)
-	c.clientAppEngine, err = appengine.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientAppEngine.UserAgent = c.userAgent
-	c.clientAppEngine.BasePath = appEngineClientBasePath
 
 	composerClientBasePath := removeBasePathVersion(c.ComposerBasePath)
 	log.Printf("[INFO] Instantiating Cloud Composer client for path %s", composerClientBasePath)
@@ -739,6 +728,20 @@ func (c *Config) NewCloudIoTClient(userAgent string) *cloudiot.Service {
 	clientCloudIoT.BasePath = cloudIoTClientBasePath
 
 	return clientCloudIoT
+}
+
+func (c *Config) NewAppEngineClient(userAgent string) *appengine.APIService {
+	appEngineClientBasePath := removeBasePathVersion(c.AppEngineBasePath)
+	log.Printf("[INFO] Instantiating App Engine client for path %s", appEngineClientBasePath)
+	clientAppEngine, err := appengine.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client appengine: %s", err)
+		return nil
+	}
+	clientAppEngine.UserAgent = userAgent
+	clientAppEngine.BasePath = appEngineClientBasePath
+
+	return clientAppEngine
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
