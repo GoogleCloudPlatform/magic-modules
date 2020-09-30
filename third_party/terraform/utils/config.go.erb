@@ -107,8 +107,6 @@ type Config struct {
 
 	ContainerBetaBasePath string
 
-	clientDataproc   *dataproc.Service
-
 	DataprocBetaBasePath string
 	clientDataprocBeta   *dataprocBeta.Service
 
@@ -223,15 +221,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	c.clientBigtableProjectsInstances = bigtableadmin.NewProjectsInstancesService(clientBigtable)
 	c.clientBigtableProjectsInstancesTables = bigtableadmin.NewProjectsInstancesTablesService(clientBigtable)
 
-	dataprocClientBasePath := removeBasePathVersion(c.DataprocBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud Dataproc client for path %s", dataprocClientBasePath)
-	c.clientDataproc, err = dataproc.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientDataproc.UserAgent = c.userAgent
-	c.clientDataproc.BasePath = dataprocClientBasePath
-
 	dataprocBetaClientBasePath := removeBasePathVersion(c.DataprocBetaBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud Dataproc Beta client for path %s", dataprocBetaClientBasePath)
 	c.clientDataprocBeta, err = dataprocBeta.NewService(ctx, option.WithHTTPClient(client))
@@ -239,7 +228,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 		return err
 	}
 	c.clientDataprocBeta.UserAgent = c.userAgent
-	c.clientDataprocBeta.BasePath = dataprocClientBasePath
+	c.clientDataprocBeta.BasePath = dataprocBetaClientBasePath
 
 	filestoreClientBasePath := removeBasePathVersion(c.FilestoreBasePath)
 	log.Printf("[INFO] Instantiating Filestore client for path %s", filestoreClientBasePath)
@@ -725,6 +714,20 @@ func (c *Config) NewSpannerClient(userAgent string) *spanner.Service {
 	clientSpanner.BasePath = spannerClientBasePath
 
 	return clientSpanner
+}
+
+func (c *Config) NewDataprocClient(userAgent string) *dataproc.Service {
+	dataprocClientBasePath := removeBasePathVersion(c.DataprocBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud Dataproc client for path %s", dataprocClientBasePath)
+	clientDataproc, err := dataproc.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client dataproc: %s", err)
+		return nil
+	}
+	clientDataproc.UserAgent = userAgent
+	clientDataproc.BasePath = dataprocClientBasePath
+
+	return clientDataproc
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
