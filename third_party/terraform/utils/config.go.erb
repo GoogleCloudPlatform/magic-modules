@@ -113,8 +113,6 @@ type Config struct {
 
 	DnsBetaBasePath string
 
-	clientFilestore   *file.Service
-
 	IamCredentialsBasePath string
 
 	ResourceManagerV2Beta1BasePath string
@@ -219,15 +217,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	clientBigtable.BasePath = bigtableAdminBasePath
 	c.clientBigtableProjectsInstances = bigtableadmin.NewProjectsInstancesService(clientBigtable)
 	c.clientBigtableProjectsInstancesTables = bigtableadmin.NewProjectsInstancesTablesService(clientBigtable)
-
-	filestoreClientBasePath := removeBasePathVersion(c.FilestoreBasePath)
-	log.Printf("[INFO] Instantiating Filestore client for path %s", filestoreClientBasePath)
-	c.clientFilestore, err = file.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientFilestore.UserAgent = c.userAgent
-	c.clientFilestore.BasePath = filestoreClientBasePath
 
 	cloudIoTClientBasePath := removeBasePathVersion(c.CloudIoTBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud IoT Core client for path %s", cloudIoTClientBasePath)
@@ -732,6 +721,20 @@ func (c *Config) NewDataprocBetaClient(userAgent string) *dataprocBeta.Service {
 	clientDataprocBeta.BasePath = dataprocBetaClientBasePath
 
 	return clientDataprocBeta
+}
+
+func (c *Config) NewFilestoreClient(userAgent string) *file.Service {
+	filestoreClientBasePath := removeBasePathVersion(c.FilestoreBasePath)
+	log.Printf("[INFO] Instantiating Filestore client for path %s", filestoreClientBasePath)
+	clientFilestore, err := file.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client filestore: %s", err)
+		return nil
+	}
+	clientFilestore.UserAgent = userAgent
+	clientFilestore.BasePath = filestoreClientBasePath
+
+	return clientFilestore
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
