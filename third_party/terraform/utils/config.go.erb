@@ -122,7 +122,6 @@ type Config struct {
 	clientHealthcare   *healthcare.Service
 
 	CloudIoTBasePath string
-	clientCloudIoT   *cloudiot.Service
 
 	clientAppEngine   *appengine.APIService
 
@@ -217,15 +216,6 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	clientBigtable.BasePath = bigtableAdminBasePath
 	c.clientBigtableProjectsInstances = bigtableadmin.NewProjectsInstancesService(clientBigtable)
 	c.clientBigtableProjectsInstancesTables = bigtableadmin.NewProjectsInstancesTablesService(clientBigtable)
-
-	cloudIoTClientBasePath := removeBasePathVersion(c.CloudIoTBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud IoT Core client for path %s", cloudIoTClientBasePath)
-	c.clientCloudIoT, err = cloudiot.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientCloudIoT.UserAgent = c.userAgent
-	c.clientCloudIoT.BasePath = cloudIoTClientBasePath
 
 	appEngineClientBasePath := removeBasePathVersion(c.AppEngineBasePath)
 	log.Printf("[INFO] Instantiating App Engine client for path %s", appEngineClientBasePath)
@@ -735,6 +725,20 @@ func (c *Config) NewFilestoreClient(userAgent string) *file.Service {
 	clientFilestore.BasePath = filestoreClientBasePath
 
 	return clientFilestore
+}
+
+func (c *Config) NewCloudIoTClient(userAgent string) *cloudiot.Service {
+	cloudIoTClientBasePath := removeBasePathVersion(c.CloudIoTBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud IoT Core client for path %s", cloudIoTClientBasePath)
+	clientCloudIoT, err := cloudiot.NewService(c.context, option.WithHTTPClient(c.client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client cloud iot: %s", err)
+		return nil
+	}
+	clientCloudIoT.UserAgent = userAgent
+	clientCloudIoT.BasePath = cloudIoTClientBasePath
+
+	return clientCloudIoT
 }
 
 // staticTokenSource is used to be able to identify static token sources without reflection.
