@@ -1969,7 +1969,7 @@ func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
 	err := forceNewIfNetworkIPNotUpdatableFunc(d);
 
 	if err != nil {
-		t.Errorf(err)
+		t.Errorf("%v", err)
 	}
 
 	if d.IsForceNew {
@@ -2080,7 +2080,7 @@ func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
 		}
 		err := forceNewIfNetworkIPNotUpdatableFunc(d);
 		if  err != nil {
-			t.Errorf(err)
+			t.Errorf("%v", err)
 		}
 		if tc.ExpectedForceNew != d.IsForceNew {
 			t.Errorf("%v: Scenario got unexpected result", tn)
