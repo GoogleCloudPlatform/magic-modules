@@ -36,7 +36,7 @@ func networkInterfaceHelperFactory(d *schema.ResourceData, config *Config, insta
 		if err != nil {
 			return fmt.Errorf("Cannot determine self_link for subnetwork %q: %s", subnetwork, err)
 		}
-		resp, err := config.NewComputeClient.Subnetworks.Get(sf.Project, sf.Region, sf.Name).Do()
+		resp, err := config.NewComputeClient(userAgent).Subnetworks.Get(sf.Project, sf.Region, sf.Name).Do()
 		if err != nil {
 			return errwrap.Wrapf("Error getting subnetwork value: {{err}}", err)
 		}
@@ -63,7 +63,7 @@ func networkInterfaceHelperFactory(d *schema.ResourceData, config *Config, insta
 	deleteAccessConfigs := func() error {
 		// Delete any accessConfig that currently exists in instNetworkInterface
 		for _, ac := range instNetworkInterface.AccessConfigs {
-			op, err := config.NewComputeClient.Instances.DeleteAccessConfig(
+			op, err := config.NewComputeClient(userAgent).Instances.DeleteAccessConfig(
 				project, zone, instance.Name, ac.Name, networkName).Do()
 			if err != nil {
 				return fmt.Errorf("Error deleting old access_config: %s", err)
