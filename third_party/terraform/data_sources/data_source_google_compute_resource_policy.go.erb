@@ -47,7 +47,6 @@ func dataSourceGoogleComputeResourcePolicyRead(d *schema.ResourceData, meta inte
 	if err != nil {
 		return err
 	}
-	config.clientCompute.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -58,7 +57,7 @@ func dataSourceGoogleComputeResourcePolicyRead(d *schema.ResourceData, meta inte
 		return err
 	}
 	name := d.Get("name").(string)
-	resourcePolicy, err := config.clientCompute.ResourcePolicies.Get(project, region, name).Do()
+	resourcePolicy, err := config.NewComputeClient(userAgent).ResourcePolicies.Get(project, region, name).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("ResourcePolicy Not Found : %s", name))
 	}
