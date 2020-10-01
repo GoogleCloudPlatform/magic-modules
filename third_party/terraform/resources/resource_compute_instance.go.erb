@@ -1397,12 +1397,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		// In this scenario we assume network was inferred and attempt to figure out
 		// the new corresponding network.
 
-		if d.HasChange(prefix + ".subnetwork") {
-			if !d.HasChange(prefix + ".network") {
-				err := niH.InferNetworkFromSubnetwork()
-				if err != nil {
-					return err
-				}
+		if d.HasChange(prefix + ".subnetwork") && !d.HasChange(prefix + ".network")  {
+			err := niH.InferNetworkFromSubnetwork()
+			if err != nil {
+				return err
 			}
 		}
 

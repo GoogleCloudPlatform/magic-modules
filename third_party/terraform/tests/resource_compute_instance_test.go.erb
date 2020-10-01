@@ -1966,98 +1966,92 @@ func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
 		},
 	}
 
-	err := forceNewIfNetworkIPNotUpdatableFunc(d);
-
+	err := forceNewIfNetworkIPNotUpdatableFunc(d)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	}
 
 	if d.IsForceNew {
-		t.Errorf("Expected not force new if network_interface array size static")
+		t.Errorf("Expected not force new if network_interface array size changes")
+	}
+
+	type NetworkInterface struct {
+		Network           string
+		Subnetwork        string
+		SubnetworkProject string
+		NetworkIP         string
+	}
+	NIBefore := NetworkInterface{
+		Network:           "a",
+		Subnetwork:        "a",
+		SubnetworkProject: "a",
+		NetworkIP:         "a",
 	}
 
 	cases := map[string]struct {
-		NetworkBefore           string
-		SubnetworkBefore        string
-		SubnetworkProjectBefore string
-		NetworkIPBefore         string
-		NetworkAfter            string
-		SubnetworkAfter         string
-		SubnetworkProjectAfter  string
-		NetworkIPAfter          string
-		ExpectedForceNew        bool
+		ExpectedForceNew bool
+		Before           NetworkInterface
+		After            NetworkInterface
 	}{
 		"NetworkIP only change": {
-			ExpectedForceNew:        true,
-			NetworkBefore:           "a",
-			SubnetworkBefore:        "a",
-			SubnetworkProjectBefore: "a",
-			NetworkIPBefore:         "a",
-
-			NetworkAfter:           "a",
-			SubnetworkAfter:        "a",
-			SubnetworkProjectAfter: "a",
-			NetworkIPAfter:         "b",
+			ExpectedForceNew: true,
+			Before:           NIBefore,
+			After: NetworkInterface{
+				Network:           "a",
+				Subnetwork:        "a",
+				SubnetworkProject: "a",
+				NetworkIP:         "b",
+			},
 		},
 		"NetworkIP and Network change": {
-			ExpectedForceNew:        false,
-			NetworkBefore:           "a",
-			SubnetworkBefore:        "a",
-			SubnetworkProjectBefore: "a",
-			NetworkIPBefore:         "a",
-
-			NetworkAfter:           "b",
-			SubnetworkAfter:        "a",
-			SubnetworkProjectAfter: "a",
-			NetworkIPAfter:         "b",
+			ExpectedForceNew: false,
+			Before:           NIBefore,
+			After: NetworkInterface{
+				Network:           "b",
+				Subnetwork:        "a",
+				SubnetworkProject: "a",
+				NetworkIP:         "b",
+			},
 		},
-		"NetworkIP and Subnetwork change": {
-			ExpectedForceNew:        false,
-			NetworkBefore:           "a",
-			SubnetworkBefore:        "a",
-			SubnetworkProjectBefore: "a",
-			NetworkIPBefore:         "a",
-
-			NetworkAfter:           "a",
-			SubnetworkAfter:        "b",
-			SubnetworkProjectAfter: "a",
-			NetworkIPAfter:         "b",
+		"NetworkIP and Subtwork change": {
+			ExpectedForceNew: false,
+			Before:           NIBefore,
+			After: NetworkInterface{
+				Network:           "a",
+				Subnetwork:        "b",
+				SubnetworkProject: "a",
+				NetworkIP:         "b",
+			},
 		},
-		"NetworkIP and SubnetworkProject change": {
-			ExpectedForceNew:        false,
-			NetworkBefore:           "a",
-			SubnetworkBefore:        "a",
-			SubnetworkProjectBefore: "a",
-			NetworkIPBefore:         "a",
-
-			NetworkAfter:           "a",
-			SubnetworkAfter:        "a",
-			SubnetworkProjectAfter: "b",
-			NetworkIPAfter:         "b",
+		"NetworkIP and SubtworkProject change": {
+			ExpectedForceNew: false,
+			Before:           NIBefore,
+			After: NetworkInterface{
+				Network:           "a",
+				Subnetwork:        "a",
+				SubnetworkProject: "b",
+				NetworkIP:         "b",
+			},
 		},
 		"All change ": {
-			ExpectedForceNew:        false,
-			NetworkBefore:           "a",
-			SubnetworkBefore:        "a",
-			SubnetworkProjectBefore: "a",
-			NetworkIPBefore:         "a",
-
-			NetworkAfter:           "b",
-			SubnetworkAfter:        "b",
-			SubnetworkProjectAfter: "b",
-			NetworkIPAfter:         "b",
+			ExpectedForceNew: false,
+			Before:           NIBefore,
+			After: NetworkInterface{
+				Network:           "b",
+				Subnetwork:        "b",
+				SubnetworkProject: "b",
+				NetworkIP:         "b",
+			},
 		},
 		"No change": {
-			ExpectedForceNew:        false,
-			NetworkBefore:           "a",
-			SubnetworkBefore:        "a",
-			SubnetworkProjectBefore: "a",
-			NetworkIPBefore:         "a",
-
-			NetworkAfter:           "a",
-			SubnetworkAfter:        "a",
-			SubnetworkProjectAfter: "a",
-			NetworkIPAfter:         "a",
+			ExpectedForceNew: false,
+			Before:           NIBefore,
+			After: NetworkInterface{
+				Network:           "a",
+				Subnetwork:        "a",
+				SubnetworkProject: "a",
+				NetworkIP:         "a",
+			},
 		},
 	}
 
@@ -2065,25 +2059,25 @@ func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
 		d := &ResourceDiffMock{
 			Before: map[string]interface{}{
 				"network_interface.#":                    1,
-				"network_interface.0.network":            tc.NetworkBefore,
-				"network_interface.0.subnetwork":         tc.SubnetworkBefore,
-				"network_interface.0.subnetwork_project": tc.SubnetworkProjectBefore,
-				"network_interface.0.network_ip":         tc.NetworkIPBefore,
+				"network_interface.0.network":            tc.Before.Network,
+				"network_interface.0.subnetwork":         tc.Before.Subnetwork,
+				"network_interface.0.subnetwork_project": tc.Before.SubnetworkProject,
+				"network_interface.0.network_ip":         tc.Before.NetworkIP,
 			},
 			After: map[string]interface{}{
 				"network_interface.#":                    1,
-				"network_interface.0.network":            tc.NetworkAfter,
-				"network_interface.0.subnetwork":         tc.SubnetworkAfter,
-				"network_interface.0.subnetwork_project": tc.SubnetworkProjectAfter,
-				"network_interface.0.network_ip":         tc.NetworkIPAfter,
+				"network_interface.0.network":            tc.After.Network,
+				"network_interface.0.subnetwork":         tc.After.Subnetwork,
+				"network_interface.0.subnetwork_project": tc.After.SubnetworkProject,
+				"network_interface.0.network_ip":         tc.After.NetworkIP,
 			},
 		}
-		err := forceNewIfNetworkIPNotUpdatableFunc(d);
-		if  err != nil {
-			t.Errorf(err.Error())
+		err := forceNewIfNetworkIPNotUpdatableFunc(d)
+		if err != nil {
+			t.Error(err)
 		}
 		if tc.ExpectedForceNew != d.IsForceNew {
-			t.Errorf("%v: Scenario got unexpected result", tn)
+			t.Errorf("%v: expected d.IsForceNew to be %v, but was %v", tn, tc.ExpectedForceNew, d.IsForceNew)
 		}
 	}
 }
