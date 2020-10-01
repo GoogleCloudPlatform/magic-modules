@@ -49,7 +49,7 @@ func networkInterfaceHelperFactory(d *schema.ResourceData, config *Config, insta
 
 	refreshInstance := func() error {
 		// re-read fingerprint
-		inst, err := config.clientComputeBeta.Instances.Get(project, zone, instance.Name).Do()
+		inst, err := config.NewComputeBetaClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
 		if err != nil {
 			return nil
 		}
@@ -78,7 +78,7 @@ func networkInterfaceHelperFactory(d *schema.ResourceData, config *Config, insta
 	createAccessConfigs := func() error {
 		// Create new ones
 		for _, ac := range networkInterface.AccessConfigs {
-			op, err := config.clientComputeBeta.Instances.AddAccessConfig(
+			op, err := config.NewComputeBetaClient(userAgent).Instances.AddAccessConfig(
 				project, zone, instance.Name, networkName, ac).Do()
 			if err != nil {
 				return fmt.Errorf("Error adding new access_config: %s", err)
@@ -97,7 +97,7 @@ func networkInterfaceHelperFactory(d *schema.ResourceData, config *Config, insta
 				Fingerprint:     instNetworkInterface.Fingerprint,
 				ForceSendFields: []string{"AliasIpRanges"},
 			}
-			op, err := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, ni).Do()
+			op, err := config.NewComputeBetaClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, ni).Do()
 			if err != nil {
 				return errwrap.Wrapf("Error removing alias_ip_range: {{err}}", err)
 			}
@@ -114,7 +114,7 @@ func networkInterfaceHelperFactory(d *schema.ResourceData, config *Config, insta
 		networkInterfacePatchObj := &computeBeta.NetworkInterface{}
 		networkInterfacePatchObj.AliasIpRanges = networkInterface.AliasIpRanges
 		networkInterfacePatchObj.Fingerprint = instNetworkInterface.Fingerprint
-		op, err := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do()
+		op, err := config.NewComputeBetaClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do()
 		if err != nil {
 			return errwrap.Wrapf("Error updating network interface: {{err}}", err)
 		}
@@ -152,7 +152,7 @@ func networkInterfaceHelperFactory(d *schema.ResourceData, config *Config, insta
 		// expect caller to re-validate instance before calling patch
 		updateCall := func(instance *computeBeta.Instance) error {
 			networkInterfacePatchObj.Fingerprint = instance.NetworkInterfaces[index].Fingerprint
-			op, err := config.clientComputeBeta.Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do()
+			op, err := config.NewComputeBetaClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do()
 			if err != nil {
 				return errwrap.Wrapf("Error updating network interface: {{err}}", err)
 			}
