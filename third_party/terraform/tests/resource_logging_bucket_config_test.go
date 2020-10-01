@@ -77,6 +77,41 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 	})
 }
 
+func TestAccLoggingBucketConfigProject_customBucketId(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+		"project_name":  "tf-test-" + randString(t, 10),
+		"bucket_id":     "tf-test-bucket-" + randString(t, 10),
+		"org_id":        getTestOrgFromEnv(t),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingBucketConfigProject_customBucketId(context, 30),
+			},
+			{
+				ResourceName:            "google_logging_project_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+			{
+				Config: testAccLoggingBucketConfigProject_customBucketId(context, 40),
+			},
+			{
+				ResourceName:            "google_logging_project_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+		},
+	})
+}
 func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
 	t.Parallel()
 
@@ -177,6 +212,24 @@ resource "google_logging_project_bucket_config" "basic" {
 	retention_days = %d
 	description = "retention test %d days"
 	bucket_id = "_Default"
+}
+`, context), retention, retention)
+}
+
+func testAccLoggingBucketConfigProject_customBucketId(context map[string]interface{}, retention int) string {
+	return fmt.Sprintf(Nprintf(`
+resource "google_project" "default" {
+ 	project_id = "%{project_name}"
+ 	name       = "%{project_name}"
+ 	org_id     = "%{org_id}"
+ }
+
+resource "google_logging_project_bucket_config" "basic" {
+	project    = google_project.default.name
+	location  = "global"
+	retention_days = %d
+	description = "retention test %d days"
+	bucket_id = "%{bucket_id}"
 }
 `, context), retention, retention)
 }

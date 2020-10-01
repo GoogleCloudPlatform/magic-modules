@@ -49,18 +49,11 @@ var loggingBucketConfigSchema = map[string]*schema.Schema{
 
 type loggingBucketConfigIDFunc func(d *schema.ResourceData, config *Config) (string, error)
 
-var loggingBucketIDFunc loggingBucketConfigIDFunc
-
 // ResourceLoggingBucketConfig creates a resource definition by merging a unique field (eg: folder) to a generic logging bucket
 // config resource. In practice the only difference between these resources is the url location.
 func ResourceLoggingBucketConfig(parentType string, parentSpecificSchema map[string]*schema.Schema, iDFunc loggingBucketConfigIDFunc) *schema.Resource {
-	loggingBucketIDFunc = iDFunc
-
-	fmt.Println("Called with parent type --- ", parentType)
-
 	return &schema.Resource{
-		// Create: resourceLoggingBucketConfigAcquire(iDFunc),
-		Create: resourceLoggingBucketConfigCreate,
+		Create: resourceLoggingBucketConfigAcquire(iDFunc),
 		Read:   resourceLoggingBucketConfigRead,
 		Update: resourceLoggingBucketConfigUpdate,
 		Delete: resourceLoggingBucketConfigDelete,
@@ -114,8 +107,11 @@ func resourceLoggingBucketConfigImportState(parent string) schema.StateFunc {
 
 func resourceLoggingBucketConfigAcquire(iDFunc loggingBucketConfigIDFunc) func(*schema.ResourceData, interface{}) error {
 	return func(d *schema.ResourceData, meta interface{}) error {
-		fmt.Println("Reached inside config acquire here *****************************************")
 		config := meta.(*Config)
+		userAgent, err := generateUserAgentString(d, config.userAgent)
+		if err != nil {
+			return err
+		}
 
 		id, err := iDFunc(d, config)
 		if err != nil {
@@ -124,7 +120,20 @@ func resourceLoggingBucketConfigAcquire(iDFunc loggingBucketConfigIDFunc) func(*
 
 		d.SetId(id)
 
-		return resourceLoggingBucketConfigUpdate(d, meta)
+		log.Printf("[DEBUG] Fetching logging bucket config: %#v", d.Id())
+		url, err := replaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", d.Id()))
+		if err != nil {
+			return err
+		}
+
+		res, err := sendRequest(config, "GET", "", url, userAgent, nil)
+		if res != nil {
+			log.Printf("[DEGUG] Acquired logging bucket config at %s", d.Id())
+			// Logging bucket already exists, update is called
+			return resourceLoggingBucketConfigUpdate(d, meta)
+		} else {
+			return resourceLoggingBucketConfigCreate(d, meta)
+		}
 	}
 }
 
@@ -133,27 +142,6 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{})
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
-	}
-
-	id, err := loggingBucketIDFunc(d, config)
-	if err != nil {
-		return err
-	}
-	d.SetId(id)
-
-	log.Printf("[DEBUG] Fetching logging bucket config: %#v", d.Id())
-
-	url, err := replaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", d.Id()))
-	if err != nil {
-		return err
-	}
-
-	res, err := sendRequest(config, "GET", "", url, userAgent, nil)
-	if res != nil {
-		log.Printf("[DEGUG] Acquired logging bucket config at %s", d.Id())
-		// Logging bucket already exists, no creation required so update is called from here
-		return resourceLoggingBucketConfigUpdate(d, meta)
-
 	}
 
 	obj := make(map[string]interface{})
@@ -182,7 +170,7 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{})
 		obj["locked"] = lockedProp
 	}
 
-	url, err = replaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets?bucketId={{bucket_id}}")
+	url, err := replaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets?bucketId={{bucket_id}}")
 	if err != nil {
 		return err
 	}
@@ -201,13 +189,13 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{})
 		billingProject = bp
 	}
 
-	res, err = sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Bucket: %s", err)
 	}
 
 	// Store the ID now
-	id, err = replaceVars(d, config, "projects/{{project}}/locations/{{location}}/buckets/{{bucket_id}}")
+	id, err := replaceVars(d, config, "projects/{{project}}/locations/{{location}}/buckets/{{bucket_id}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
