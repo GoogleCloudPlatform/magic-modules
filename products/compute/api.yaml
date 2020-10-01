@@ -8579,7 +8579,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'PerInstanceConfig'
     base_url:  'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}'
-    min_version: beta
     description: |
       A config defined for a single managed instance that belongs to an instance group manager. It preserves the instance name
       across instance group manager operations and can define stateful disks or metadata that are unique to the instance.
@@ -8699,7 +8698,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'RegionPerInstanceConfig'
     base_url:  'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}'
-    min_version: beta
     description: |
       A config defined for a single managed instance that belongs to an instance group manager. It preserves the instance name
       across instance group manager operations and can define stateful disks or metadata that are unique to the instance.

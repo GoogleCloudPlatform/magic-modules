@@ -1,7 +1,5 @@
-<% autogen_exception -%>
 package google
 
-<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"testing"
@@ -10,23 +8,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccComputePerInstanceConfig_statefulBasic(t *testing.T) {
+func TestAccComputeRegionPerInstanceConfig_statefulBasic(t *testing.T) {
 	// Multiple fine-grained resources
 	skipIfVcr(t)
 	t.Parallel()
 
 	suffix := randString(t, 10)
-	igmName := fmt.Sprintf("tf-test-igm-%s", suffix)
+	rigmName := fmt.Sprintf("tf-test-rigm-%s", suffix)
 	context := map[string]interface{}{
-		"igm_name": igmName,
+		"rigm_name": rigmName,
 		"random_suffix": suffix,
 		"config_name" : fmt.Sprintf("instance-%s", randString(t, 10)),
 		"config_name2" : fmt.Sprintf("instance-%s", randString(t, 10)),
 		"config_name3" : fmt.Sprintf("instance-%s", randString(t, 10)),
 		"config_name4" : fmt.Sprintf("instance-%s", randString(t, 10)),
 	}
-	igmId := fmt.Sprintf("projects/%s/zones/%s/instanceGroupManagers/%s",
-		getTestProjectFromEnv(), "us-central1-c", igmName)
+	rigmId := fmt.Sprintf("projects/%s/regions/%s/instanceGroupManagers/%s",
+		getTestProjectFromEnv(), "us-central1", rigmName)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -34,68 +32,68 @@ func TestAccComputePerInstanceConfig_statefulBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create one endpoint
-				Config: testAccComputePerInstanceConfig_statefulBasic(context),
+				Config: testAccComputeRegionPerInstanceConfig_statefulBasic(context),
 			},
 			{
-				ResourceName:      "google_compute_per_instance_config.default",
+				ResourceName:      "google_compute_region_per_instance_config.default",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
 			},
 			{
 				// Force-recreate old config
-				Config: testAccComputePerInstanceConfig_statefulModified(context),
+				Config: testAccComputeRegionPerInstanceConfig_statefulModified(context),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputePerInstanceConfigDestroyed(t, igmId, context["config_name"].(string)),
+					testAccCheckComputeRegionPerInstanceConfigDestroyed(t, rigmId, context["config_name"].(string)),
 				),
 			},
 			{
-				ResourceName:      "google_compute_per_instance_config.default",
+				ResourceName:      "google_compute_region_per_instance_config.default",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
 			},
 			{
 				// Add two new endpoints
-				Config: testAccComputePerInstanceConfig_statefulAdditional(context),
+				Config: testAccComputeRegionPerInstanceConfig_statefulAdditional(context),
 			},
 			{
-				ResourceName:      "google_compute_per_instance_config.default",
+				ResourceName:      "google_compute_region_per_instance_config.default",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
 			},
 			{
-				ResourceName:            "google_compute_per_instance_config.with_disks",
+				ResourceName:            "google_compute_region_per_instance_config.with_disks",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"most_disruptive_allowed_action", "minimal_action", "remove_instance_state_on_destroy"},
 			},
 			{
-				ResourceName:      "google_compute_per_instance_config.add2",
+				ResourceName:      "google_compute_region_per_instance_config.add2",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
 			},
 			{
 				// delete all configs
-				Config: testAccComputePerInstanceConfig_igm(context),
+				Config: testAccComputeRegionPerInstanceConfig_rigm(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Config with remove_instance_state_on_destroy = false won't be destroyed (config4)
-					testAccCheckComputePerInstanceConfigDestroyed(t, igmId, context["config_name2"].(string)),
-					testAccCheckComputePerInstanceConfigDestroyed(t, igmId, context["config_name3"].(string)),
+					testAccCheckComputeRegionPerInstanceConfigDestroyed(t, rigmId, context["config_name2"].(string)),
+					testAccCheckComputeRegionPerInstanceConfigDestroyed(t, rigmId, context["config_name3"].(string)),
 				),
 			},
 		},
 	})
 }
 
-func TestAccComputePerInstanceConfig_update(t *testing.T) {
+func TestAccComputeRegionPerInstanceConfig_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
-		"igm_name": fmt.Sprintf("tf-test-igm-%s", randString(t, 10)),
+		"rigm_name": fmt.Sprintf("tf-test-rigm-%s", randString(t, 10)),
 		"config_name" : fmt.Sprintf("instance-%s", randString(t, 10)),
 	}
 
@@ -105,20 +103,20 @@ func TestAccComputePerInstanceConfig_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create one config
-				Config: testAccComputePerInstanceConfig_statefulBasic(context),
+				Config: testAccComputeRegionPerInstanceConfig_statefulBasic(context),
 			},
 			{
-				ResourceName:      "google_compute_per_instance_config.default",
+				ResourceName:      "google_compute_region_per_instance_config.default",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
 			},
 			{
 				// Update an existing config
-				Config: testAccComputePerInstanceConfig_update(context),
+				Config: testAccComputeRegionPerInstanceConfig_update(context),
 			},
 			{
-				ResourceName:      "google_compute_per_instance_config.default",
+				ResourceName:      "google_compute_region_per_instance_config.default",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
@@ -127,11 +125,11 @@ func TestAccComputePerInstanceConfig_update(t *testing.T) {
 	})
 }
 
-func testAccComputePerInstanceConfig_statefulBasic(context map[string]interface{}) string {
+func testAccComputeRegionPerInstanceConfig_statefulBasic(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_compute_per_instance_config" "default" {
-	zone = google_compute_instance_group_manager.igm.zone
-	instance_group_manager = google_compute_instance_group_manager.igm.name
+resource "google_compute_region_per_instance_config" "default" {
+	region = google_compute_region_instance_group_manager.rigm.region
+	region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
 	name = "%{config_name}"
 	remove_instance_state_on_destroy = true
 	preserved_state {
@@ -140,31 +138,31 @@ resource "google_compute_per_instance_config" "default" {
 		}
 	}
 }
-`, context) + testAccComputePerInstanceConfig_igm(context)
+`, context) + testAccComputeRegionPerInstanceConfig_rigm(context)
 }
 
-func testAccComputePerInstanceConfig_update(context map[string]interface{}) string {
+func testAccComputeRegionPerInstanceConfig_update(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_compute_per_instance_config" "default" {
-	zone = google_compute_instance_group_manager.igm.zone
-	instance_group_manager = google_compute_instance_group_manager.igm.name
+resource "google_compute_region_per_instance_config" "default" {
+	region = google_compute_region_instance_group_manager.rigm.region
+	region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
 	name = "%{config_name}"
 	remove_instance_state_on_destroy = true
 	preserved_state {
 		metadata = {
-			asdf = "asdf"
-			update = "12345"
+			asdf = "foo"
+			updated = "12345"
 		}
 	}
 }
-`, context) + testAccComputePerInstanceConfig_igm(context)
+`, context) + testAccComputeRegionPerInstanceConfig_rigm(context)
 }
 
-func testAccComputePerInstanceConfig_statefulModified(context map[string]interface{}) string {
+func testAccComputeRegionPerInstanceConfig_statefulModified(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_compute_per_instance_config" "default" {
-	zone = google_compute_instance_group_manager.igm.zone
-	instance_group_manager = google_compute_instance_group_manager.igm.name
+resource "google_compute_region_per_instance_config" "default" {
+	region = google_compute_region_instance_group_manager.rigm.region
+	region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
 	name = "%{config_name2}"
 	remove_instance_state_on_destroy = true
 	preserved_state {
@@ -173,14 +171,14 @@ resource "google_compute_per_instance_config" "default" {
 		}
 	}
 }
-`, context) + testAccComputePerInstanceConfig_igm(context)
+`, context) + testAccComputeRegionPerInstanceConfig_rigm(context)
 }
 
-func testAccComputePerInstanceConfig_statefulAdditional(context map[string]interface{}) string {
+func testAccComputeRegionPerInstanceConfig_statefulAdditional(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_compute_per_instance_config" "default" {
-	zone = google_compute_instance_group_manager.igm.zone
-	instance_group_manager = google_compute_instance_group_manager.igm.name
+resource "google_compute_region_per_instance_config" "default" {
+	region = google_compute_region_instance_group_manager.rigm.region
+	region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
 	name = "%{config_name2}"
 	remove_instance_state_on_destroy = true
 	preserved_state {
@@ -190,9 +188,9 @@ resource "google_compute_per_instance_config" "default" {
 	}
 }
 
-resource "google_compute_per_instance_config" "with_disks" {
-	zone = google_compute_instance_group_manager.igm.zone
-	instance_group_manager = google_compute_instance_group_manager.igm.name
+resource "google_compute_region_per_instance_config" "with_disks" {
+	region = google_compute_region_instance_group_manager.rigm.region
+	region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
 	name = "%{config_name3}"
 	most_disruptive_allowed_action = "REFRESH"
 	minimal_action = "REFRESH"
@@ -219,9 +217,9 @@ resource "google_compute_per_instance_config" "with_disks" {
 	}
 }
 
-resource "google_compute_per_instance_config" "add2" {
-	zone = google_compute_instance_group_manager.igm.zone
-	instance_group_manager = google_compute_instance_group_manager.igm.name
+resource "google_compute_region_per_instance_config" "add2" {
+	region = google_compute_region_instance_group_manager.rigm.region
+	region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
 	name = "%{config_name4}"
 	preserved_state {
 		metadata = {
@@ -233,7 +231,7 @@ resource "google_compute_per_instance_config" "add2" {
 resource "google_compute_disk" "disk" {
   name  = "test-disk-%{random_suffix}"
   type  = "pd-ssd"
-  zone  = google_compute_instance_group_manager.igm.zone
+  zone  = "us-central1-c"
   image = "debian-8-jessie-v20170523"
   physical_block_size_bytes = 4096
 }
@@ -241,7 +239,7 @@ resource "google_compute_disk" "disk" {
 resource "google_compute_disk" "disk1" {
   name  = "test-disk2-%{random_suffix}"
   type  = "pd-ssd"
-  zone  = google_compute_instance_group_manager.igm.zone
+  zone  = "us-central1-c"
   image = "debian-cloud/debian-9"
   physical_block_size_bytes = 4096
 }
@@ -249,22 +247,22 @@ resource "google_compute_disk" "disk1" {
 resource "google_compute_disk" "disk2" {
   name  = "test-disk3-%{random_suffix}"
   type  = "pd-ssd"
-  zone  = google_compute_instance_group_manager.igm.zone
+  zone  = "us-central1-c"
   image = "https://www.googleapis.com/compute/v1/projects/gce-uefi-images/global/images/centos-7-v20190729"
   physical_block_size_bytes = 4096
 }
-`, context) + testAccComputePerInstanceConfig_igm(context)
+`, context) + testAccComputeRegionPerInstanceConfig_rigm(context)
 }
 
-func testAccComputePerInstanceConfig_igm(context map[string]interface{}) string {
+func testAccComputeRegionPerInstanceConfig_rigm(context map[string]interface{}) string {
 	return Nprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-9"
   project = "debian-cloud"
 }
 
-resource "google_compute_instance_template" "igm-basic" {
-  name           = "igm-temp-%{random_suffix}"
+resource "google_compute_instance_template" "rigm-basic" {
+  name           = "rigm-temp-%{random_suffix}"
   machine_type   = "n1-standard-1"
   can_ip_forward = false
   tags           = ["foo", "bar"]
@@ -285,25 +283,34 @@ resource "google_compute_instance_template" "igm-basic" {
   }
 }
 
-resource "google_compute_instance_group_manager" "igm" {
+resource "google_compute_region_instance_group_manager" "rigm" {
   description = "Terraform test instance group manager"
-  name        = "%{igm_name}"
+  name        = "%{rigm_name}"
 
   version {
     name              = "prod"
-    instance_template = google_compute_instance_template.igm-basic.self_link
+    instance_template = google_compute_instance_template.rigm-basic.self_link
   }
 
-  base_instance_name = "igm-no-tp"
-  zone               = "us-central1-c"
+  base_instance_name = "rigm-no-tp"
+  region             = "us-central1"
+
+  update_policy {
+    instance_redistribution_type = "NONE"
+    type                         = "OPPORTUNISTIC"
+    minimal_action               = "REPLACE"
+    max_surge_fixed              = 0
+    max_unavailable_fixed        = 6
+    min_ready_sec                = 20
+  }
 }
 `, context)
 }
 
 // Checks that the per instance config with the given name was destroyed
-func testAccCheckComputePerInstanceConfigDestroyed(t *testing.T, igmId, configName string) resource.TestCheckFunc {
+func testAccCheckComputeRegionPerInstanceConfigDestroyed(t *testing.T, rigmId, configName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		foundNames, err := testAccComputePerInstanceConfigListNames(t, igmId)
+		foundNames, err := testAccComputePerInstanceConfigListNames(t, rigmId)
 		if err != nil {
 			return fmt.Errorf("unable to confirm config with name %s was destroyed: %v", configName, err)
 		}
@@ -314,26 +321,3 @@ func testAccCheckComputePerInstanceConfigDestroyed(t *testing.T, igmId, configNa
 		return nil
 	}
 }
-
-func testAccComputePerInstanceConfigListNames(t *testing.T, igmId string) (map[string]struct{}, error) {
-	config := googleProviderConfig(t)
-
-	url := fmt.Sprintf("%s%s/listPerInstanceConfigs", config.ComputeBasePath, igmId)
-	res, err := sendRequest(config, "POST", "", url, config.userAgent, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	v, ok := res["items"]
-	if !ok || v == nil {
-		return nil, nil
-	}
-	items := v.([]interface{})
-	instanceConfigs := make(map[string]struct{})
-	for _, item := range items {
-		perInstanceConfig := item.(map[string]interface{})
-		instanceConfigs[fmt.Sprintf("%v", perInstanceConfig["name"])] = struct{}{}
-	}
-	return instanceConfigs, nil
-}
-<% end -%>
