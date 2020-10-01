@@ -119,6 +119,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Job: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/jobs/{{job_id}}"]
     skip_delete: true
+    id_format: projects/{{project}}/jobs/{{job_id}}
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckForExistence
       actions: ['create']
