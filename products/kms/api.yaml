@@ -65,7 +65,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'CryptoKey'
     base_url: '{{key_ring}}/cryptoKeys'
-    create_url: '{{key_ring}}/cryptoKeys?cryptoKeyId={{name}}&skipInitialVersionCreation={{skipInitialVersionCreation}}'
+    create_url: '{{key_ring}}/cryptoKeys?cryptoKeyId={{name}}&skipInitialVersionCreation={{skip_initial_version_creation}}'
     self_link: '{{key_ring}}/cryptoKeys/{{name}}'
     update_verb: :PATCH
     update_mask: true
