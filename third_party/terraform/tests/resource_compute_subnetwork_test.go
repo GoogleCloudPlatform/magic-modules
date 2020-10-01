@@ -402,7 +402,6 @@ resource "google_compute_subnetwork" "network-ref-by-url" {
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.custom-test.self_link
-//  private_ipv6_google_access = "ENABLE_OUTBOUND_VM_ACCESS_TO_GOOGLE"
 }
 
 resource "google_compute_subnetwork" "network-ref-by-name" {
