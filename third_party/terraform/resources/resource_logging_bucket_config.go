@@ -53,7 +53,7 @@ type loggingBucketConfigIDFunc func(d *schema.ResourceData, config *Config) (str
 // config resource. In practice the only difference between these resources is the url location.
 func ResourceLoggingBucketConfig(parentType string, parentSpecificSchema map[string]*schema.Schema, iDFunc loggingBucketConfigIDFunc) *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLoggingBucketConfigAcquire(iDFunc),
+		Create: resourceLoggingBucketConfigAcquireOrCreate(iDFunc),
 		Read:   resourceLoggingBucketConfigRead,
 		Update: resourceLoggingBucketConfigUpdate,
 		Delete: resourceLoggingBucketConfigDelete,
@@ -105,7 +105,7 @@ func resourceLoggingBucketConfigImportState(parent string) schema.StateFunc {
 	}
 }
 
-func resourceLoggingBucketConfigAcquire(iDFunc loggingBucketConfigIDFunc) func(*schema.ResourceData, interface{}) error {
+func resourceLoggingBucketConfigAcquireOrCreate(iDFunc loggingBucketConfigIDFunc) func(*schema.ResourceData, interface{}) error {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*Config)
 		userAgent, err := generateUserAgentString(d, config.userAgent)
@@ -145,25 +145,25 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	obj := make(map[string]interface{})
-	nameProp, err := expandLoggingBucketName(d.Get("name"), d, config)
+	nameProp := d.Get("name")
 	if err != nil {
 		return err
 	} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
 		obj["name"] = nameProp
 	}
-	descriptionProp, err := expandLoggingBucketDescription(d.Get("description"), d, config)
+	descriptionProp := d.Get("description")
 	if err != nil {
 		return err
 	} else if v, ok := d.GetOkExists("description"); !isEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
 		obj["description"] = descriptionProp
 	}
-	retentionDaysProp, err := expandLoggingBucketRetentionDays(d.Get("retention_days"), d, config)
+	retentionDaysProp := d.Get("retention_days")
 	if err != nil {
 		return err
 	} else if v, ok := d.GetOkExists("retention_days"); !isEmptyValue(reflect.ValueOf(retentionDaysProp)) && (ok || !reflect.DeepEqual(v, retentionDaysProp)) {
 		obj["retentionDays"] = retentionDaysProp
 	}
-	lockedProp, err := expandLoggingBucketLocked(d.Get("locked"), d, config)
+	lockedProp := d.Get("locked")
 	if err != nil {
 		return err
 	} else if v, ok := d.GetOkExists("locked"); !isEmptyValue(reflect.ValueOf(lockedProp)) && (ok || !reflect.DeepEqual(v, lockedProp)) {
@@ -193,13 +193,6 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return fmt.Errorf("Error creating Bucket: %s", err)
 	}
-
-	// Store the ID now
-	id, err := replaceVars(d, config, "projects/{{project}}/locations/{{location}}/buckets/{{bucket_id}}")
-	if err != nil {
-		return fmt.Errorf("Error constructing id: %s", err)
-	}
-	d.SetId(id)
 
 	log.Printf("[DEBUG] Finished creating Bucket %q: %#v", d.Id(), res)
 
@@ -272,10 +265,8 @@ func resourceLoggingBucketConfigUpdate(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return err
 	}
-
 	_, err = sendRequestWithTimeout(config, "PATCH", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
-
 		return fmt.Errorf("Error updating Logging Bucket Config %q: %s", d.Id(), err)
 	}
 
@@ -289,20 +280,4 @@ func resourceLoggingBucketConfigDelete(d *schema.ResourceData, meta interface{})
 	d.SetId("")
 
 	return nil
-}
-
-func expandLoggingBucketName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandLoggingBucketDescription(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandLoggingBucketRetentionDays(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandLoggingBucketLocked(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
-	return v, nil
 }
