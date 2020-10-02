@@ -41,7 +41,7 @@ a restricted host and strong password.
 
 -> **Note**: On newer versions of the provider, you must explicitly set `deletion_protection=false`
 (and run `terraform apply` to write the field to state) in order to destroy an instance.
-It is recommended to not set this field (or set it to true) until you're ready to destroy the instance and it's databases.
+It is recommended to not set this field (or set it to true) until you're ready to destroy the instance and its databases.
 
 ## Example Usage
 
