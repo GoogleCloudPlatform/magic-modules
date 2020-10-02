@@ -668,10 +668,11 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	network := d.Get("settings.0.ip_configuration.0.private_network").(string)
 	if network != "" {
 		// Borrow some of the functions from resource_service_networking_connection.go
-		serviceNetworkingNetworkName, err := retrieveServiceNetworkingNetworkName(d, config, network)
+		serviceNetworkingNetworkName, err := retrieveServiceNetworkingNetworkName(d, config, network, userAgent)
 		if err != nil {
 			return err
 		}
+		config.clientServiceNetworking.UserAgent = userAgent
 		response, err := config.clientServiceNetworking.Services.Connections.List("services/servicenetworking.googleapis.com").
 			Network(serviceNetworkingNetworkName).Do()
 		if err != nil {
