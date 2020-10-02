@@ -1383,7 +1383,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	for i := 0; i < len(networkInterfaces); i++ {
 		prefix := fmt.Sprintf("network_interface.%d", i)
 		updateDuringStop := d.HasChange(prefix+".subnetwork") || d.HasChange(prefix+".network") || d.HasChange(prefix+".subnetwork_project")
-		niH, err := networkInterfaceHelperFactory(d, config, instance, networkInterfaces, i, project, zone, userAgent)
+		niH, err := createNetworkInterfaceHelper(d, config, instance, networkInterfaces, i, project, zone, userAgent)
 		if err != nil {
 			return err
 		}
