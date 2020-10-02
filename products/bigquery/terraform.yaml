@@ -117,7 +117,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/bigquery_dataset_access.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/bigquery_dataset_access.go.erb
   Job: !ruby/object:Overrides::Terraform::ResourceOverride
-    import_format: ["projects/{{project}}/jobs/{{job_id}}"]
+    import_format: ["projects/{{project}}/jobs/{{job_id}}/location/{{location}}", "projects/{{project}}/jobs/{{job_id}}", "{{project}}/{{job_id}}", "{{job_id}}"]
     skip_delete: true
     id_format: projects/{{project}}/jobs/{{job_id}}
     async: !ruby/object:Provider::Terraform::PollAsync
