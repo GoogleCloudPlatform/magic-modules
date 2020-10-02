@@ -16,7 +16,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Job: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: 'projects/{{project}}/locations/{{region}}/jobs/{{name}}'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      constants: templates/terraform/constants/scheduler_auth.erb
+      constants: templates/terraform/constants/scheduler.erb
       resource_definition: templates/terraform/resource_definition/scheduler_auth.erb
     examples:
       - !ruby/object:Provider::Terraform::Examples
