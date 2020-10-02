@@ -65,7 +65,7 @@ func (niH *networkInterfaceHelper) InferNetworkFromSubnetwork() error {
 
 func (niH *networkInterfaceHelper) RefreshInstance() error {
 	// re-read fingerprint
-	inst, err := niH.config.NewComputeBetaClient(niH.userAgent).Instances.Get(niH.project, niH.zone, niH.networkInterface.Name).Do()
+	inst, err := niH.config.NewComputeBetaClient(niH.userAgent).Instances.Get(niH.project, niH.zone, niH.instanceName).Do()
 	if err != nil {
 		return nil
 	}
@@ -79,7 +79,7 @@ func (niH *networkInterfaceHelper) DeleteAccessConfigs() error {
 	// Delete any accessConfig that currently exists in instNetworkInterface
 	for _, ac := range niH.instNetworkInterface.AccessConfigs {
 		op, err := niH.config.NewComputeClient(niH.userAgent).Instances.DeleteAccessConfig(
-			niH.project, niH.zone, niH.instanceName, ac.Name, niH.networkInterface.Name).Do()
+			niH.project, niH.zone, niH.instanceName, ac.Name, niH.instNetworkInterface.Name).Do()
 		if err != nil {
 			return fmt.Errorf("Error deleting old access_config: %s", err)
 		}
@@ -95,7 +95,7 @@ func (niH *networkInterfaceHelper) CreateAccessConfigs() error {
 	// Create new ones
 	for _, ac := range niH.networkInterface.AccessConfigs {
 		op, err := niH.config.NewComputeBetaClient(niH.userAgent).Instances.AddAccessConfig(
-			niH.project, niH.zone, niH.instanceName, niH.networkInterface.Name, ac).Do()
+			niH.project, niH.zone, niH.instanceName, niH.instNetworkInterface.Name, ac).Do()
 		if err != nil {
 			return fmt.Errorf("Error adding new access_config: %s", err)
 		}
@@ -113,7 +113,7 @@ func (niH *networkInterfaceHelper) DeleteAliasIPRanges() error {
 			Fingerprint:     niH.instNetworkInterface.Fingerprint,
 			ForceSendFields: []string{"AliasIpRanges"},
 		}
-		op, err := niH.config.NewComputeBetaClient(niH.userAgent).Instances.UpdateNetworkInterface(niH.project, niH.zone, niH.instanceName, niH.networkInterface.Name, ni).Do()
+		op, err := niH.config.NewComputeBetaClient(niH.userAgent).Instances.UpdateNetworkInterface(niH.project, niH.zone, niH.instanceName, niH.instNetworkInterface.Name, ni).Do()
 		if err != nil {
 			return errwrap.Wrapf("Error removing alias_ip_range: {{err}}", err)
 		}
@@ -130,7 +130,7 @@ func (niH *networkInterfaceHelper) CreateAliasIPRanges() error {
 	networkInterfacePatchObj := &computeBeta.NetworkInterface{}
 	networkInterfacePatchObj.AliasIpRanges = niH.networkInterface.AliasIpRanges
 	networkInterfacePatchObj.Fingerprint = niH.instNetworkInterface.Fingerprint
-	op, err := niH.config.NewComputeBetaClient(niH.userAgent).Instances.UpdateNetworkInterface(niH.project, niH.zone, niH.instanceName, niH.networkInterface.Name, networkInterfacePatchObj).Do()
+	op, err := niH.config.NewComputeBetaClient(niH.userAgent).Instances.UpdateNetworkInterface(niH.project, niH.zone, niH.instanceName, niH.instNetworkInterface.Name, networkInterfacePatchObj).Do()
 	if err != nil {
 		return errwrap.Wrapf("Error updating network interface: {{err}}", err)
 	}
@@ -168,7 +168,7 @@ func (niH *networkInterfaceHelper) CreateUpdateWhileStoppedCall() (func(inst *co
 	// expect caller to re-validate instance before calling patch
 	updateCall := func(instance *computeBeta.Instance) error {
 		networkInterfacePatchObj.Fingerprint = instance.NetworkInterfaces[niH.index].Fingerprint
-		op, err := niH.config.NewComputeBetaClient(niH.userAgent).Instances.UpdateNetworkInterface(niH.project, niH.zone, niH.instanceName, niH.networkInterface.Name, networkInterfacePatchObj).Do()
+		op, err := niH.config.NewComputeBetaClient(niH.userAgent).Instances.UpdateNetworkInterface(niH.project, niH.zone, niH.instanceName, niH.instNetworkInterface.Name, networkInterfacePatchObj).Do()
 		if err != nil {
 			return errwrap.Wrapf("Error updating network interface: {{err}}", err)
 		}
