@@ -8598,7 +8598,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/instance-groups/stateful-migs#per-instance_configs'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagers'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -8718,7 +8718,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/instance-groups/stateful-migs#per-instance_configs'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagers'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
