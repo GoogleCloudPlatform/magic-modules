@@ -27,22 +27,29 @@ func TestAccDataSourceGoogleGlobalForwardingRule(t *testing.T) {
 
 func testAccDataSourceGoogleGlobalForwardingRuleConfig(poolName, ruleName string) string {
 	return fmt.Sprintf(`
-resource "google_compute_target_pool" "foobar-tp" {
-  description = "Resource created for Terraform acceptance testing"
-  instances   = ["us-central1-a/foo", "us-central1-b/bar"]
-  name        = "%s"
-}
-
 resource "google_compute_global_forwarding_rule" "foobar-fr" {
-  description = "Resource created for Terraform acceptance testing"
-  ip_protocol = "UDP"
-  name        = "%s"
-  port_range  = "80-81"
-  target      = google_compute_target_pool.foobar-tp.self_link
+  name       = "%s"
+  target     = google_compute_target_http_proxy.default.id
+  port_range = "80"
 }
 
+resource "google_compute_target_http_proxy" "default" {
+  name        = "%s"
+  description = "a description"
+  url_map     = google_compute_url_map.default.id
+}
+
+resource "google_compute_url_map" "default" {
+  name            = "%s"
+  default_url_redirect {
+	https_redirect         = true
+	redirect_response_code = "MOVED_PERMANENTLY_DEFAULT"
+	strip_query            = false
+  }
+}
+  
 data "google_compute_global_forwarding_rule" "my_forwarding_rule" {
   name = google_compute_global_forwarding_rule.foobar-fr.name
 }
-`, poolName, ruleName)
+`, ruleName, poolName, poolName)
 }
