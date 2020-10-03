@@ -210,3 +210,11 @@ objects:
                   projects/{project_id}/notificationChannels/{channel_id}.
                   A maximum of 5 channels are allowed.
                 item_type: Api::Type::String
+              - !ruby/object:Api::Type::Boolean
+                name: disableDefaultIamRecipients
+                default_value: false
+                description: |
+                  When set to true, disables default notifications sent
+                  when a threshold is exceeded. Default recipients are
+                  those with Billing Account Administrators and Billing
+                  Account Users IAM roles for the target account.
