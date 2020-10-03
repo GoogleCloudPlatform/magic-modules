@@ -214,7 +214,7 @@ objects:
                 name: disableDefaultIamRecipients
                 default_value: false
                 description: |
-                  When set to true, disables default notifications sent
+                  Boolean. When set to true, disables default notifications sent
                   when a threshold is exceeded. Default recipients are
                   those with Billing Account Administrators and Billing
                   Account Users IAM roles for the target account.
