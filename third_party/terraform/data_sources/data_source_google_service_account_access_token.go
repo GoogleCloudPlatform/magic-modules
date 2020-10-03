@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"strings"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	iamcredentials "google.golang.org/api/iamcredentials/v1"
@@ -57,9 +56,14 @@ func dataSourceGoogleServiceAccountAccessToken() *schema.Resource {
 
 func dataSourceGoogleServiceAccountAccessTokenRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	log.Printf("[INFO] Acquire Service Account AccessToken for %s", d.Get("target_service_account").(string))
 
-	service := config.clientIamCredentials
+	service := config.NewIamCredentialsClient(userAgent)
 
 	name := fmt.Sprintf("projects/-/serviceAccounts/%s", d.Get("target_service_account").(string))
 	tokenRequest := &iamcredentials.GenerateAccessTokenRequest{
@@ -72,7 +76,7 @@ func dataSourceGoogleServiceAccountAccessTokenRead(d *schema.ResourceData, meta 
 		return err
 	}
 
-	d.SetId(time.Now().UTC().String())
+	d.SetId(name)
 	if err := d.Set("access_token", at.AccessToken); err != nil {
 		return fmt.Errorf("Error setting access_token: %s", err)
 	}

@@ -24,6 +24,11 @@ func dataSourceGoogleBigqueryDefaultServiceAccount() *schema.Resource {
 
 func dataSourceGoogleBigqueryDefaultServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	config.clientBigQuery.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {

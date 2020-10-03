@@ -89,6 +89,10 @@ func dataSourceGoogleComputeForwardingRule() *schema.Resource {
 
 func dataSourceGoogleComputeForwardingRuleRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	region, err := getRegion(d, config)
 	if err != nil {
@@ -102,7 +106,7 @@ func dataSourceGoogleComputeForwardingRuleRead(d *schema.ResourceData, meta inte
 
 	name := d.Get("name").(string)
 
-	frule, err := config.clientCompute.ForwardingRules.Get(
+	frule, err := config.NewComputeClient(userAgent).ForwardingRules.Get(
 		project, region, name).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Forwarding Rule Not Found : %s", name))

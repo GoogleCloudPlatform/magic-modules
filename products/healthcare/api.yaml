@@ -424,9 +424,20 @@ objects:
               - parser_config.0.allow_null_header
               - parser_config.0.segment_terminator
               - parser_config.0.schema
+              - parser_config.0.version
             description: |
               JSON encoded string for schemas used to parse messages in this
               store if schematized parsing is desired.
+          - !ruby/object:Api::Type::Enum
+            name: version
+            description: |
+              The version of the unschematized parser to be used when a custom `schema` is not set.
+            min_version: beta
+            input: true
+            default_value: :V1
+            values:
+              - :V1
+              - :V2
       - !ruby/object:Api::Type::KeyValuePairs
         name: labels
         required: false

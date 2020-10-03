@@ -87,18 +87,23 @@ func dataSourceGoogleComputeRegionInstanceGroup() *schema.Resource {
 
 func dataSourceComputeRegionInstanceGroupRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	project, region, name, err := GetRegionalResourcePropertiesFromSelfLinkOrSchema(d, config)
 	if err != nil {
 		return err
 	}
 
-	instanceGroup, err := config.clientCompute.RegionInstanceGroups.Get(
+	instanceGroup, err := config.NewComputeClient(userAgent).RegionInstanceGroups.Get(
 		project, region, name).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Region Instance Group %q", name))
 	}
 
-	members, err := config.clientCompute.RegionInstanceGroups.ListInstances(
+	members, err := config.NewComputeClient(userAgent).RegionInstanceGroups.ListInstances(
 		project, region, name, &compute.RegionInstanceGroupsListInstancesRequest{
 			InstanceState: "ALL",
 		}).Do()
