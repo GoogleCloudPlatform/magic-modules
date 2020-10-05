@@ -145,30 +145,10 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	obj := make(map[string]interface{})
-	nameProp := d.Get("name")
-	if err != nil {
-		return err
-	} else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
-		obj["name"] = nameProp
-	}
-	descriptionProp := d.Get("description")
-	if err != nil {
-		return err
-	} else if v, ok := d.GetOkExists("description"); !isEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
-		obj["description"] = descriptionProp
-	}
-	retentionDaysProp := d.Get("retention_days")
-	if err != nil {
-		return err
-	} else if v, ok := d.GetOkExists("retention_days"); !isEmptyValue(reflect.ValueOf(retentionDaysProp)) && (ok || !reflect.DeepEqual(v, retentionDaysProp)) {
-		obj["retentionDays"] = retentionDaysProp
-	}
-	lockedProp := d.Get("locked")
-	if err != nil {
-		return err
-	} else if v, ok := d.GetOkExists("locked"); !isEmptyValue(reflect.ValueOf(lockedProp)) && (ok || !reflect.DeepEqual(v, lockedProp)) {
-		obj["locked"] = lockedProp
-	}
+	obj["name"] = d.Get("name")
+	obj["description"] = d.Get("description")
+	obj["retentionDays"] = d.Get("retention_days")
+	obj["locked"] = d.Get("locked")
 
 	url, err := replaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets?bucketId={{bucket_id}}")
 	if err != nil {
