@@ -758,7 +758,7 @@ func (c *Config) NewBigTableProjectsInstancesTablesClient(userAgent string) *big
 	}
 	clientBigtable.UserAgent = userAgent
 	clientBigtable.BasePath = bigtableAdminBasePath
-	clientBigtableProjectsInstancesTables = bigtableadmin.NewProjectsInstancesTablesService(clientBigtable)
+	clientBigtableProjectsInstancesTables := bigtableadmin.NewProjectsInstancesTablesService(clientBigtable)
 
 	return clientBigtableProjectsInstancesTables
 }

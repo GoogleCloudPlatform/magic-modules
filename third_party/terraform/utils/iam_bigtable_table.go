@@ -118,7 +118,7 @@ func (u *BigtableTableIamUpdater) SetResourceIamPolicy(policy *cloudresourcemana
 
 	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	_, err = u.Config.NewBigTableProjectsInstancesTablesClient(userAgent).SetIamPolicy(u.GetResourceId(), req).Do()
