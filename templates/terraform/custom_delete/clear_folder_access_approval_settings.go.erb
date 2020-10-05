@@ -1,5 +1,3 @@
-config := meta.(*Config)
-
 obj := make(map[string]interface{})
 obj["notificationEmails"] = []string{}
 obj["enrolledServices"] = []string{}
@@ -22,7 +20,7 @@ if err != nil {
 	return err
 }
 
-res, err := sendRequestWithTimeout(config, "PATCH", "", url, obj, d.Timeout(schema.TimeoutUpdate))
+res, err := sendRequestWithTimeout(config, "PATCH", "", url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 
 if err != nil {
 	return fmt.Errorf("Error emptying FolderSettings %q: %s", d.Id(), err)

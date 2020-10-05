@@ -27,7 +27,7 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'Group'
-    base_url: groups
+    base_url: groups?initialGroupConfig=EMPTY
     update_url: '{{name}}'
     self_link: '{{name}}'
     update_verb: :PATCH

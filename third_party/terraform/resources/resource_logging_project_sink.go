@@ -38,6 +38,10 @@ func resourceLoggingProjectSink() *schema.Resource {
 
 func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -47,7 +51,7 @@ func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) 
 	id, sink := expandResourceLoggingSink(d, "projects", project)
 	uniqueWriterIdentity := d.Get("unique_writer_identity").(bool)
 
-	_, err = config.clientLogging.Projects.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(uniqueWriterIdentity).Do()
+	_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(uniqueWriterIdentity).Do()
 	if err != nil {
 		return err
 	}
@@ -59,13 +63,17 @@ func resourceLoggingProjectSinkCreate(d *schema.ResourceData, meta interface{}) 
 
 func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	sink, err := config.clientLogging.Projects.Sinks.Get(d.Id()).Do()
+	sink, err := config.NewLoggingClient(userAgent).Projects.Sinks.Get(d.Id()).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Project Logging Sink %s", d.Get("name").(string)))
 	}
@@ -92,11 +100,15 @@ func resourceLoggingProjectSinkRead(d *schema.ResourceData, meta interface{}) er
 
 func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	sink, updateMask := expandResourceLoggingSinkForUpdate(d)
 	uniqueWriterIdentity := d.Get("unique_writer_identity").(bool)
 
-	_, err := config.clientLogging.Projects.Sinks.Patch(d.Id(), sink).
+	_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Patch(d.Id(), sink).
 		UpdateMask(updateMask).UniqueWriterIdentity(uniqueWriterIdentity).Do()
 	if err != nil {
 		return err
@@ -107,8 +119,12 @@ func resourceLoggingProjectSinkUpdate(d *schema.ResourceData, meta interface{}) 
 
 func resourceLoggingProjectSinkDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
-	_, err := config.clientLogging.Projects.Sinks.Delete(d.Id()).Do()
+	_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Delete(d.Id()).Do()
 	if err != nil {
 		return err
 	}

@@ -152,6 +152,13 @@ func Provider() *schema.Provider {
 			BigtableAdminCustomEndpointEntryKey:          BigtableAdminCustomEndpointEntry,
 		},
 
+		ProviderMetaSchema: map[string]*schema.Schema{
+			"module_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+		},
+
 		DataSourcesMap: map[string]*schema.Resource{
 			"google_active_folder":                             dataSourceGoogleActiveFolder(),
 			"google_app_engine_default_service_account":        dataSourceGoogleAppEngineDefaultServiceAccount(),
@@ -164,6 +171,7 @@ func Provider() *schema.Provider {
 			"google_cloud_identity_groups":                     dataSourceGoogleCloudIdentityGroups(),
 			"google_cloud_identity_group_memberships":          dataSourceGoogleCloudIdentityGroupMemberships(),
 			<% end -%>
+			"google_cloud_run_service":                         dataSourceGoogleCloudRunService(),
 			"google_composer_image_versions":                   dataSourceGoogleComposerImageVersions(),
 			"google_compute_address":                           dataSourceGoogleComputeAddress(),
 			"google_compute_backend_service":                   dataSourceGoogleComputeBackendService(),
@@ -305,6 +313,9 @@ end     # products.each do
 				"google_bigtable_instance_iam_member":          ResourceIamMember(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
 				"google_bigtable_instance_iam_policy":          ResourceIamPolicy(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
 				"google_bigtable_table":                        resourceBigtableTable(),
+			"google_bigtable_table_iam_binding":                ResourceIamBinding(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),
+			"google_bigtable_table_iam_member":                 ResourceIamMember(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),
+			"google_bigtable_table_iam_policy":                 ResourceIamPolicy(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),			
 				"google_bigquery_dataset_iam_binding":          ResourceIamBinding(IamBigqueryDatasetSchema, NewBigqueryDatasetIamUpdater, BigqueryDatasetIdParseFunc),
 				"google_bigquery_dataset_iam_member":           ResourceIamMember(IamBigqueryDatasetSchema, NewBigqueryDatasetIamUpdater, BigqueryDatasetIdParseFunc),
 				"google_bigquery_dataset_iam_policy":           ResourceIamPolicy(IamBigqueryDatasetSchema, NewBigqueryDatasetIamUpdater, BigqueryDatasetIdParseFunc),

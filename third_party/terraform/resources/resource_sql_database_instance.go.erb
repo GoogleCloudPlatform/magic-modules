@@ -92,7 +92,8 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			customdiff.ForceNewIfChange("settings.0.disk_size", isDiskShrinkage),
-			privateNetworkCustomizeDiff),
+			privateNetworkCustomizeDiff,
+			pitrPostgresOnlyCustomizeDiff),
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -617,8 +618,25 @@ func privateNetworkCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta
 	return nil
 }
 
+// Point in time recovery for MySQL database instances needs binary_log_enabled set to true and
+// not point_in_time_recovery_enabled, which is confusing to users. This checks for 
+// point_in_time_recovery_enabled being set to a non-PostgreSQL database instance and suggests 
+// binary_log_enabled.
+func pitrPostgresOnlyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
+	pitr := diff.Get("settings.0.backup_configuration.0.point_in_time_recovery_enabled").(bool)
+	dbVersion := diff.Get("database_version").(string)
+	if pitr && !strings.Contains(dbVersion, "POSTGRES") {
+		return fmt.Errorf("point_in_time_recovery_enabled is only available for Postgres. You may want to consider using binary_log_enabled instead.")
+	}
+	return nil
+}
+
 func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -672,7 +690,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	var op *sqladmin.Operation
 	err = retryTimeDuration(func() (operr error) {
-		op, operr = config.clientSqlAdmin.Instances.Insert(project, instance).Do()
+		op, operr = config.NewSqlAdminClient(userAgent).Instances.Insert(project, instance).Do()
 		return operr
 	}, d.Timeout(schema.TimeoutCreate), isSqlOperationInProgressError)
 	if err != nil {
@@ -685,7 +703,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	}
 	d.SetId(id)
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Create Instance", d.Timeout(schema.TimeoutCreate))
+	err = sqlAdminOperationWaitTime(config, op, project, "Create Instance", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		d.SetId("")
 		return err
@@ -701,7 +719,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	if sqlDatabaseIsMaster(d) {
 		var users *sqladmin.UsersListResponse
 		err = retryTimeDuration(func() error {
-			users, err = config.clientSqlAdmin.Users.List(project, instance.Name).Do()
+			users, err = config.NewSqlAdminClient(userAgent).Users.List(project, instance.Name).Do()
 			return err
 		}, d.Timeout(schema.TimeoutRead), isSqlOperationInProgressError)
 		if err != nil {
@@ -710,9 +728,9 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		for _, u := range users.Items {
 			if u.Name == "root" && u.Host == "%" {
 				err = retry(func() error {
-					op, err = config.clientSqlAdmin.Users.Delete(project, instance.Name).Host(u.Host).Name(u.Name).Do()
+					op, err = config.NewSqlAdminClient(userAgent).Users.Delete(project, instance.Name).Host(u.Host).Name(u.Name).Do()
 					if err == nil {
-						err = sqlAdminOperationWaitTime(config, op, project, "Delete default root User", d.Timeout(schema.TimeoutCreate))
+						err = sqlAdminOperationWaitTime(config, op, project, "Delete default root User", userAgent, d.Timeout(schema.TimeoutCreate))
 					}
 					return err
 				})
@@ -883,6 +901,10 @@ func expandBackupConfiguration(configured []interface{}) *sqladmin.BackupConfigu
 
 func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -891,7 +913,7 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 
 	var instance *sqladmin.DatabaseInstance
 	err = retryTimeDuration(func() (rerr error) {
-		instance, rerr = config.clientSqlAdmin.Instances.Get(project, d.Get("name").(string)).Do()
+		instance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, d.Get("name").(string)).Do()
 		return rerr
 	}, d.Timeout(schema.TimeoutRead), isSqlOperationInProgressError)
 	if err != nil {
@@ -978,6 +1000,10 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -998,14 +1024,14 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 
 	var op *sqladmin.Operation
 	err = retryTimeDuration(func() (rerr error) {
-		op, rerr = config.clientSqlAdmin.Instances.Update(project, d.Get("name").(string), instance).Do()
+		op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, d.Get("name").(string), instance).Do()
 		return rerr
 	}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)
 	if err != nil {
 		return fmt.Errorf("Error, failed to update instance settings for %s: %s", instance.Name, err)
 	}
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Update Instance", d.Timeout(schema.TimeoutUpdate))
+	err = sqlAdminOperationWaitTime(config, op, project, "Update Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
@@ -1015,6 +1041,10 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 
 func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -1030,11 +1060,11 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 
 	var op *sqladmin.Operation
 	err = retryTimeDuration(func() (rerr error) {
-		op, rerr = config.clientSqlAdmin.Instances.Delete(project, d.Get("name").(string)).Do()
+		op, rerr = config.NewSqlAdminClient(userAgent).Instances.Delete(project, d.Get("name").(string)).Do()
 		if rerr != nil {
 		  return rerr
 		}
-		err = sqlAdminOperationWaitTime(config, op, project, "Delete Instance", d.Timeout(schema.TimeoutDelete))
+		err = sqlAdminOperationWaitTime(config, op, project, "Delete Instance", userAgent, d.Timeout(schema.TimeoutDelete))
 		if err != nil {
 			return err
 		}

@@ -127,6 +127,12 @@ func resourceBigtableInstance() *schema.Resource {
 
 func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	config.bigtableClientFactory.UserAgent = userAgent
+
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -180,6 +186,11 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 
 func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	config.bigtableClientFactory.UserAgent = userAgent
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -240,6 +251,11 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 
 func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	config.bigtableClientFactory.UserAgent = userAgent
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -289,6 +305,12 @@ func resourceBigtableInstanceDestroy(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("cannot destroy instance without setting deletion_protection=false and running `terraform apply`")
 	}
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	config.bigtableClientFactory.UserAgent = userAgent
+
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
