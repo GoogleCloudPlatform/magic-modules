@@ -1,7 +1,5 @@
-<% autogen_exception -%>
 package google
 
-<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"testing"
@@ -18,12 +16,12 @@ func TestAccComputeRegionPerInstanceConfig_statefulBasic(t *testing.T) {
 	suffix := randString(t, 10)
 	rigmName := fmt.Sprintf("tf-test-rigm-%s", suffix)
 	context := map[string]interface{}{
-		"rigm_name": rigmName,
+		"rigm_name":     rigmName,
 		"random_suffix": suffix,
-		"config_name" : fmt.Sprintf("instance-%s", randString(t, 10)),
-		"config_name2" : fmt.Sprintf("instance-%s", randString(t, 10)),
-		"config_name3" : fmt.Sprintf("instance-%s", randString(t, 10)),
-		"config_name4" : fmt.Sprintf("instance-%s", randString(t, 10)),
+		"config_name":   fmt.Sprintf("instance-%s", randString(t, 10)),
+		"config_name2":  fmt.Sprintf("instance-%s", randString(t, 10)),
+		"config_name3":  fmt.Sprintf("instance-%s", randString(t, 10)),
+		"config_name4":  fmt.Sprintf("instance-%s", randString(t, 10)),
 	}
 	rigmId := fmt.Sprintf("projects/%s/regions/%s/instanceGroupManagers/%s",
 		getTestProjectFromEnv(), "us-central1", rigmName)
@@ -37,9 +35,9 @@ func TestAccComputeRegionPerInstanceConfig_statefulBasic(t *testing.T) {
 				Config: testAccComputeRegionPerInstanceConfig_statefulBasic(context),
 			},
 			{
-				ResourceName:      "google_compute_region_per_instance_config.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_region_per_instance_config.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
 			},
 			{
@@ -50,9 +48,9 @@ func TestAccComputeRegionPerInstanceConfig_statefulBasic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_compute_region_per_instance_config.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_region_per_instance_config.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
 			},
 			{
@@ -60,9 +58,9 @@ func TestAccComputeRegionPerInstanceConfig_statefulBasic(t *testing.T) {
 				Config: testAccComputeRegionPerInstanceConfig_statefulAdditional(context),
 			},
 			{
-				ResourceName:      "google_compute_region_per_instance_config.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_region_per_instance_config.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
 			},
 			{
@@ -72,9 +70,9 @@ func TestAccComputeRegionPerInstanceConfig_statefulBasic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"most_disruptive_allowed_action", "minimal_action", "remove_instance_state_on_destroy"},
 			},
 			{
-				ResourceName:      "google_compute_region_per_instance_config.add2",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_region_per_instance_config.add2",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
 			},
 			{
@@ -95,8 +93,8 @@ func TestAccComputeRegionPerInstanceConfig_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
-		"rigm_name": fmt.Sprintf("tf-test-rigm-%s", randString(t, 10)),
-		"config_name" : fmt.Sprintf("instance-%s", randString(t, 10)),
+		"rigm_name":     fmt.Sprintf("tf-test-rigm-%s", randString(t, 10)),
+		"config_name":   fmt.Sprintf("instance-%s", randString(t, 10)),
 	}
 
 	vcrTest(t, resource.TestCase{
@@ -108,9 +106,9 @@ func TestAccComputeRegionPerInstanceConfig_update(t *testing.T) {
 				Config: testAccComputeRegionPerInstanceConfig_statefulBasic(context),
 			},
 			{
-				ResourceName:      "google_compute_region_per_instance_config.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_region_per_instance_config.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
 			},
 			{
@@ -118,9 +116,9 @@ func TestAccComputeRegionPerInstanceConfig_update(t *testing.T) {
 				Config: testAccComputeRegionPerInstanceConfig_update(context),
 			},
 			{
-				ResourceName:      "google_compute_region_per_instance_config.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_region_per_instance_config.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"remove_instance_state_on_destroy"},
 			},
 		},
@@ -323,4 +321,3 @@ func testAccCheckComputeRegionPerInstanceConfigDestroyed(t *testing.T, rigmId, c
 		return nil
 	}
 }
-<% end -%>
