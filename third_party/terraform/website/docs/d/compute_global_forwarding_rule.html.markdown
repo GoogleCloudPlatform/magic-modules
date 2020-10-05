@@ -4,7 +4,7 @@ layout: "google"
 page_title: "Google: google_compute_global_forwarding_rule"
 sidebar_current: "docs-google-datasource-compute-global_forwarding-rule"
 description: |-
-  Get a regional forwarding rule within GCE.
+  Get a global forwarding rule within GCE.
 ---
 
 # google\_compute\_global_\forwarding\_rule
@@ -23,8 +23,7 @@ data "google_compute_global_forwarding_rule" "my-forwarding-rule" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the forwarding rule.
-
+* `name` - (Required) The name of the global forwarding rule.
 
 - - -
 
