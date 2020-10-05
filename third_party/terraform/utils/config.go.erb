@@ -719,7 +719,7 @@ func (c *Config) NewCloudIdentityClient(userAgent string) *cloudidentity.Service
 }
 <% end -%>
 
-func (c *Config) BigQueryClientFactory(userAgent string) *BigtableClientFactory {
+func (c *Config) BigTableClientFactory(userAgent string) *BigtableClientFactory {
 	bigtableClientFactory := &BigtableClientFactory{
 		UserAgent:   userAgent,
 		TokenSource: c.tokenSource,
