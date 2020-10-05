@@ -125,7 +125,7 @@ func resourceLoggingBucketConfigAcquireOrCreate(iDFunc loggingBucketConfigIDFunc
 			return err
 		}
 
-		res, err := sendRequest(config, "GET", "", url, userAgent, nil)
+		res, _ := sendRequest(config, "GET", "", url, userAgent, nil)
 		if res != nil {
 			log.Printf("[DEGUG] Acquired logging bucket config at %s", d.Id())
 			// Logging bucket already exists, update is called
