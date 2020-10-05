@@ -96,7 +96,7 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 	}
 	testAccPreCheck(t)
 
-	serviceaccount := multiEnvSearch([]string{"GOOGLE_IMPERSONATED_SERVICE_ACCOUNT"})
+	serviceaccount := multiEnvSearch([]string{"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT"})
 	proj := getTestProjectFromEnv()
 
 	config := &Config{

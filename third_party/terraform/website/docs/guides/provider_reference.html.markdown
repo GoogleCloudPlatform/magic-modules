@@ -191,6 +191,8 @@ running [`gcloud auth application-default login`][gcloud adc].
 * `impersonate_service_account` - (Optional) The service account to impersonate for all Google API Calls.
 You must have `roles/iam.serviceAccountTokenCreator` role on that account for the impersonation to succeed. 
 If you are using a delegation chain, you can specify that using the `impersonate_service_account_delegates` field.
+Alternatively, this can be specified using the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` environment
+variable.
 
 * `impersonate_service_account_delegates` - (Optional) The delegation chain for an impersonating a service account as described [here](https://cloud.google.com/iam/docs/creating-short-lived-service-account-credentials#sa-credentials-delegated).
 
