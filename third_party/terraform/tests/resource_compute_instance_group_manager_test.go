@@ -1,8 +1,9 @@
-<% autogen_exception -%>
 package google
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -331,7 +332,6 @@ func TestAccInstanceGroupManager_autoHealingPolicies(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccInstanceGroupManager_stateful(t *testing.T) {
 	t.Parallel()
 
@@ -365,7 +365,6 @@ func TestAccInstanceGroupManager_stateful(t *testing.T) {
 	})
 }
 
-<% end -%>
 func testAccCheckInstanceGroupManagerDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := googleProviderConfig(t)
@@ -1218,7 +1217,6 @@ resource "google_compute_instance_group_manager" "igm-basic" {
 `, primaryTemplate, canaryTemplate, igm)
 }
 
-<% unless version == 'ga' -%>
 func testAccInstanceGroupManager_stateful(template, target, igm, hck string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1367,4 +1365,3 @@ resource "google_compute_http_health_check" "zero" {
 }
 `, template, target, igm, hck)
 }
-<% end -%>
