@@ -1115,7 +1115,8 @@ objects:
            for health checking this BackendService. Currently at most one health
            check can be specified.
 
-           A health check must be specified unless the backend service uses an internet NEG as a backend.
+           A health check must be specified unless the backend service uses an internet
+           or serverless NEG as a backend.
 
            For internal load balancing, a URL to a HealthCheck resource must be specified instead.
       - !ruby/object:Api::Type::Integer
@@ -1960,13 +1961,15 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'healthChecks'
         item_type: Api::Type::String
-        required: true
         min_size: 1
         max_size: 1
         description: |
            The set of URLs to HealthCheck resources for health checking
            this RegionBackendService. Currently at most one health
-           check can be specified, and a health check is required.
+           check can be specified. 
+
+           A health check must be specified unless the backend service uses an internet
+           or serverless NEG as a backend.
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -8579,7 +8582,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'PerInstanceConfig'
     base_url:  'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}'
-    min_version: beta
     description: |
       A config defined for a single managed instance that belongs to an instance group manager. It preserves the instance name
       across instance group manager operations and can define stateful disks or metadata that are unique to the instance.
@@ -8599,7 +8601,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/instance-groups/stateful-migs#per-instance_configs'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagers'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -8699,7 +8701,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'RegionPerInstanceConfig'
     base_url:  'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}'
-    min_version: beta
     description: |
       A config defined for a single managed instance that belongs to an instance group manager. It preserves the instance name
       across instance group manager operations and can define stateful disks or metadata that are unique to the instance.
@@ -8720,7 +8721,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/instance-groups/stateful-migs#per-instance_configs'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagers'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'

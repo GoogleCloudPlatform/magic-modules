@@ -17,7 +17,7 @@ import (
          .first -%>
 <% resource_name = product_ns + object.name -%>
 <%
-individual_url = object.self_link_url
+individual_url = object.iam_policy.self_link || object.self_link_url
 -%>
 <%
   tf_product = (@config.legacy_name || product_ns).underscore

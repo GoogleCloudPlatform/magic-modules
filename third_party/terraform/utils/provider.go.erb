@@ -170,6 +170,7 @@ func Provider() *schema.Provider {
 			"google_cloud_identity_groups":                     dataSourceGoogleCloudIdentityGroups(),
 			"google_cloud_identity_group_memberships":          dataSourceGoogleCloudIdentityGroupMemberships(),
 			<% end -%>
+			"google_cloud_run_service":                         dataSourceGoogleCloudRunService(),
 			"google_composer_image_versions":                   dataSourceGoogleComposerImageVersions(),
 			"google_compute_address":                           dataSourceGoogleComputeAddress(),
 			"google_compute_backend_service":                   dataSourceGoogleComputeBackendService(),
@@ -177,6 +178,7 @@ func Provider() *schema.Provider {
 			"google_compute_default_service_account":           dataSourceGoogleComputeDefaultServiceAccount(),
 			"google_compute_forwarding_rule":                   dataSourceGoogleComputeForwardingRule(),
 			"google_compute_global_address":                    dataSourceGoogleComputeGlobalAddress(),
+			"google_compute_global_forwarding_rule":			dataSourceGoogleComputeGlobalForwardingRule(),
 			"google_compute_image":                             dataSourceGoogleComputeImage(),
 			"google_compute_instance":                          dataSourceGoogleComputeInstance(),
 			"google_compute_instance_serial_port":              dataSourceGoogleComputeInstanceSerialPort(),
