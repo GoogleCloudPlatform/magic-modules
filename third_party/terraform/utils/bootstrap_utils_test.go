@@ -322,10 +322,9 @@ func BootstrapConfig(t *testing.T) *Config {
 	}
 
 	config := &Config{
-		Credentials: getTestCredsFromEnv(),
-		Project:     getTestProjectFromEnv(),
-		Region:      getTestRegionFromEnv(),
-		Zone:        getTestZoneFromEnv(),
+		Project: getTestProjectFromEnv(),
+		Region:  getTestRegionFromEnv(),
+		Zone:    getTestZoneFromEnv(),
 	}
 
 	ConfigureBasePaths(config)

@@ -91,21 +91,10 @@ func TestAccDataSourceGoogleServiceAccountIdToken_impersonation(t *testing.T) {
 func testAccCheckGoogleServiceAccountIdToken_impersonation_datasource(targetAudience string, targetServiceAccount string) string {
 
 	return fmt.Sprintf(`
-data "google_service_account_access_token" "default" {
-	target_service_account = "%s"
-	scopes                 = ["userinfo-email", "https://www.googleapis.com/auth/cloud-platform"]
-	lifetime               = "30s"
-}
-
-provider google {
-	alias  = "impersonated"
-	access_token = data.google_service_account_access_token.default.access_token
-}
-
 data "google_service_account_id_token" "default" {
-	provider = google.impersonated
 	target_service_account = "%s"
 	target_audience = "%s"
+	include_email = true
 }
-`, targetServiceAccount, targetServiceAccount, targetAudience)
+`, targetServiceAccount, targetAudience)
 }

@@ -3,64 +3,12 @@ package google
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
-
-	"golang.org/x/oauth2/google"
 )
 
 const testFakeCredentialsPath = "./test-fixtures/fake_account.json"
-const testOauthScope = "https://www.googleapis.com/auth/compute"
-
-func TestConfigLoadAndValidate_accountFilePath(t *testing.T) {
-	config := &Config{
-		Credentials: testFakeCredentialsPath,
-		Project:     "my-gce-project",
-		Region:      "us-central1",
-	}
-
-	ConfigureBasePaths(config)
-
-	err := config.LoadAndValidate(context.Background())
-	if err != nil {
-		t.Fatalf("error: %v", err)
-	}
-}
-
-func TestConfigLoadAndValidate_accountFileJSON(t *testing.T) {
-	contents, err := ioutil.ReadFile(testFakeCredentialsPath)
-	if err != nil {
-		t.Fatalf("error: %v", err)
-	}
-	config := &Config{
-		Credentials: string(contents),
-		Project:     "my-gce-project",
-		Region:      "us-central1",
-	}
-
-	ConfigureBasePaths(config)
-
-	err = config.LoadAndValidate(context.Background())
-	if err != nil {
-		t.Fatalf("error: %v", err)
-	}
-}
-
-func TestConfigLoadAndValidate_accountFileJSONInvalid(t *testing.T) {
-	config := &Config{
-		Credentials: "{this is not json}",
-		Project:     "my-gce-project",
-		Region:      "us-central1",
-	}
-
-	ConfigureBasePaths(config)
-
-	if config.LoadAndValidate(context.Background()) == nil {
-		t.Fatalf("expected error, but got nil")
-	}
-}
 
 func TestAccConfigLoadValidate_credentials(t *testing.T) {
 	if os.Getenv(TestEnvVar) == "" {
@@ -68,13 +16,11 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 	}
 	testAccPreCheck(t)
 
-	creds := getTestCredsFromEnv()
 	proj := getTestProjectFromEnv()
 
 	config := &Config{
-		Credentials: creds,
-		Project:     proj,
-		Region:      "us-central1",
+		Project: proj,
+		Region:  "us-central1",
 	}
 
 	ConfigureBasePaths(config)
@@ -90,34 +36,24 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 	}
 }
 
-func TestAccConfigLoadValidate_accessToken(t *testing.T) {
+func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 	if os.Getenv(TestEnvVar) == "" {
 		t.Skip(fmt.Sprintf("Network access not allowed; use %s=1 to enable", TestEnvVar))
 	}
 	testAccPreCheck(t)
 
-	creds := getTestCredsFromEnv()
+	serviceaccount := multiEnvSearch([]string{"GOOGLE_IMPERSONATED_SERVICE_ACCOUNT"})
 	proj := getTestProjectFromEnv()
 
-	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), testOauthScope)
-	if err != nil {
-		t.Fatalf("invalid test credentials: %s", err)
-	}
-
-	token, err := c.TokenSource.Token()
-	if err != nil {
-		t.Fatalf("Unable to generate test access token: %s", err)
-	}
-
 	config := &Config{
-		AccessToken: token.AccessToken,
-		Project:     proj,
-		Region:      "us-central1",
+		ImpersonateServiceAccount: serviceaccount,
+		Project:                   proj,
+		Region:                    "us-central1",
 	}
 
 	ConfigureBasePaths(config)
 
-	err = config.LoadAndValidate(context.Background())
+	err := config.LoadAndValidate(context.Background())
 	if err != nil {
 		t.Fatalf("error: %v", err)
 	}
@@ -130,10 +66,9 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 
 func TestConfigLoadAndValidate_customScopes(t *testing.T) {
 	config := &Config{
-		Credentials: testFakeCredentialsPath,
-		Project:     "my-gce-project",
-		Region:      "us-central1",
-		Scopes:      []string{"https://www.googleapis.com/auth/compute"},
+		Project: "my-gce-project",
+		Region:  "us-central1",
+		Scopes:  []string{"https://www.googleapis.com/auth/compute"},
 	}
 
 	ConfigureBasePaths(config)
@@ -158,7 +93,6 @@ func TestConfigLoadAndValidate_defaultBatchingConfig(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	config := &Config{
-		Credentials:    testFakeCredentialsPath,
 		Project:        "my-gce-project",
 		Region:         "us-central1",
 		BatchingConfig: batchCfg,
@@ -195,7 +129,6 @@ func TestConfigLoadAndValidate_customBatchingConfig(t *testing.T) {
 	}
 
 	config := &Config{
-		Credentials:    testFakeCredentialsPath,
 		Project:        "my-gce-project",
 		Region:         "us-central1",
 		BatchingConfig: batchCfg,

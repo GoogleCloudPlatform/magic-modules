@@ -22,24 +22,18 @@ var mutexKV = NewMutexKV()
 func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"credentials": &schema.Schema{
+			"impersonate_service_account": {
 				Type:     schema.TypeString,
 				Optional: true,
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_CREDENTIALS",
-					"GOOGLE_CLOUD_KEYFILE_JSON",
-					"GCLOUD_KEYFILE_JSON",
+					"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
 				}, nil),
-				ValidateFunc: validateCredentials,
 			},
 
-			"access_token": {
-				Type:     schema.TypeString,
+			"impersonate_service_account_delegates": {
+				Type:     schema.TypeList,
 				Optional: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"GOOGLE_OAUTH_ACCESS_TOKEN",
-				}, nil),
-				ConflictsWith: []string{"credentials"},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
 			"project": &schema.Schema{
@@ -465,10 +459,8 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		}
 	}
 	// Add credential source
-	if v, ok := d.GetOk("access_token"); ok {
-		config.AccessToken = v.(string)
-	} else if v, ok := d.GetOk("credentials"); ok {
-		config.Credentials = v.(string)
+	if v, ok := d.GetOk("impersonate_service_account"); ok {
+		config.ImpersonateServiceAccount = v.(string)
 	}
 
 	scopes := d.Get("scopes").([]interface{})
@@ -477,6 +469,14 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	}
 	for i, scope := range scopes {
 		config.Scopes[i] = scope.(string)
+	}
+
+	delegates := d.Get("impersonate_service_account_delegates").([]interface{})
+	if len(delegates) > 0 {
+		config.ImpersonateServiceAccountDelegates = make([]string, len(delegates))
+	}
+	for i, delegate := range delegates {
+		config.ImpersonateServiceAccountDelegates[i] = delegate.(string)
 	}
 
 	batchCfg, err := expandProviderBatchingConfig(d.Get("batching"))

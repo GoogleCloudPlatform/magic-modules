@@ -935,10 +935,9 @@ func getInitializedConfig(t *testing.T) *Config {
 	testAccPreCheck(t)
 
 	config := &Config{
-		Project:     getTestProjectFromEnv(),
-		Credentials: getTestCredsFromEnv(),
-		Region:      getTestRegionFromEnv(),
-		Zone:        getTestZoneFromEnv(),
+		Project: getTestProjectFromEnv(),
+		Region:  getTestRegionFromEnv(),
+		Zone:    getTestZoneFromEnv(),
 	}
 
 	ConfigureBasePaths(config)
