@@ -19,43 +19,45 @@ module Provider
   class TerraformOiCS < Provider::Terraform
     # We don't want *any* static generation, so we override generate to only
     # generate objects.
-    def generate(output_folder, types, _product_path, _dump_yaml)
-      generate_objects(output_folder, types)
+    def generate(output_folder, types, _product_path, _dump_yaml, code_only, docs_only)
+      generate_objects(output_folder, types, code_only, docs_only)
     end
 
     # Create a directory of examples per resource
-    def generate_resource(pwd, data)
-      examples = data.object.examples
-                     .reject(&:skip_test)
-                     .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
-                     .reject { |e| @version < @api.version_obj_or_closest(e.min_version) }
+    def generate_resource(pwd, data, code_only, docs_only)
+      unless code_only
+        examples = data.object.examples
+                       .reject(&:skip_test)
+                       .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
+                       .reject { |e| @version < @api.version_obj_or_closest(e.min_version) }
 
-      examples.each do |example|
-        target_folder = data.output_folder
-        target_folder = File.join(target_folder, example.name)
-        FileUtils.mkpath target_folder
+        examples.each do |example|
+          target_folder = data.output_folder
+          target_folder = File.join(target_folder, example.name)
+          FileUtils.mkpath target_folder
 
-        data.example = example
+          data.example = example
 
-        data.generate(pwd,
-                      'templates/terraform/examples/base_configs/example_file.tf.erb',
-                      File.join(target_folder, 'main.tf'),
-                      self)
+          data.generate(pwd,
+                        'templates/terraform/examples/base_configs/example_file.tf.erb',
+                        File.join(target_folder, 'main.tf'),
+                        self)
 
-        data.generate(pwd,
-                      'templates/terraform/examples/base_configs/tutorial.md.erb',
-                      File.join(target_folder, 'tutorial.md'),
-                      self)
+          data.generate(pwd,
+                        'templates/terraform/examples/base_configs/tutorial.md.erb',
+                        File.join(target_folder, 'tutorial.md'),
+                        self)
 
-        data.generate(pwd,
-                      'templates/terraform/examples/base_configs/example_backing_file.tf.erb',
-                      File.join(target_folder, 'backing_file.tf'),
-                      self)
+          data.generate(pwd,
+                        'templates/terraform/examples/base_configs/example_backing_file.tf.erb',
+                        File.join(target_folder, 'backing_file.tf'),
+                        self)
 
-        data.generate(pwd,
-                      'templates/terraform/examples/static/motd',
-                      File.join(target_folder, 'motd'),
-                      self)
+          data.generate(pwd,
+                        'templates/terraform/examples/static/motd',
+                        File.join(target_folder, 'motd'),
+                        self)
+        end
       end
     end
 
@@ -66,8 +68,8 @@ module Provider
 
     def compile_common_files(output_folder, products, common_compile_file) end
 
-    def copy_common_files(output_folder) end
+    def copy_common_files(output_folder, docs_only) end
 
-    def generate_iam_policy(pwd, data) end
+    def generate_iam_policy(pwd, data, code_only, docs_only) end
   end
 end

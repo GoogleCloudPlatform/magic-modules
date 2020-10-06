@@ -76,8 +76,8 @@ module Provider
     end
 
     # Main entry point for generation.
-    def generate(output_folder, types, product_path, dump_yaml)
-      generate_objects(output_folder, types)
+    def generate(output_folder, types, product_path, dump_yaml, code_only, docs_only)
+      generate_objects(output_folder, types, code_only, docs_only)
       copy_files(output_folder) \
         unless @config.files.nil? || @config.files.copy.nil?
       # Compilation has to be the last step, as some files (e.g.
@@ -91,12 +91,14 @@ module Provider
 
       FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
       pwd = Dir.pwd
-      Dir.chdir output_folder
-      generate_datasources(pwd, output_folder, types) \
-        unless @config.datasources.nil?
+      unless docs_only
+        Dir.chdir output_folder
+        generate_datasources(pwd, output_folder, types) \
+          unless @config.datasources.nil?
 
-      generate_operation(pwd, output_folder, types)
-      Dir.chdir pwd
+        generate_operation(pwd, output_folder, types)
+        Dir.chdir pwd
+      end
 
       # Write a file with the final version of the api, after overrides
       # have been applied.
@@ -117,7 +119,7 @@ module Provider
       copy_file_list(output_folder, @config.files.copy)
     end
 
-    def copy_common_files(output_folder, provider_name = nil)
+    def copy_common_files(output_folder, docs_only, provider_name = nil)
       # version_name is actually used because all of the variables in scope in this method
       # are made available within the templates by the compile call.
       # TODO: remove version_name, use @target_version_name or pass it in expicitly
@@ -197,7 +199,7 @@ module Provider
       Dir.chdir pwd
     end
 
-    def generate_objects(output_folder, types)
+    def generate_objects(output_folder, types, code_only, docs_only)
       (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
@@ -215,23 +217,28 @@ module Provider
           object.freeze
           object.all_user_properties.each(&:freeze)
 
-          generate_object object, output_folder, @target_version_name
+          generate_object object, output_folder, @target_version_name, code_only, docs_only
         end
       end
     end
 
-    def generate_object(object, output_folder, version_name)
+    def generate_object(object, output_folder, version_name, code_only, docs_only)
       pwd = Dir.pwd
       data = build_object_data(pwd, object, output_folder, version_name)
       unless object.exclude_resource
         FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
         Dir.chdir output_folder
         Google::LOGGER.debug "Generating #{object.name} resource"
-        generate_resource(pwd, data.clone)
-        Google::LOGGER.debug "Generating #{object.name} tests"
-        generate_resource_tests(pwd, data.clone)
-        generate_resource_sweepers(pwd, data.clone)
-        generate_resource_files(pwd, data.clone)
+        if docs_only || code_only
+          Google::LOGGER.debug "Generating #{docs_only ? "docs only" : "code only"}"
+        end
+        generate_resource(pwd, data.clone, code_only, docs_only)
+        unless docs_only
+          Google::LOGGER.debug "Generating #{object.name} tests"
+          generate_resource_tests(pwd, data.clone)
+          generate_resource_sweepers(pwd, data.clone)
+          generate_resource_files(pwd, data.clone)
+        end
         Dir.chdir pwd
       end
 
@@ -241,7 +248,7 @@ module Provider
       FileUtils.mkpath output_folder unless Dir.exist?(output_folder)
       Dir.chdir output_folder
       Google::LOGGER.debug "Generating #{object.name} IAM policy"
-      generate_iam_policy(pwd, data.clone)
+      generate_iam_policy(pwd, data.clone, code_only, docs_only)
       Dir.chdir pwd
     end
 
@@ -342,7 +349,7 @@ module Provider
       url_part
     end
 
-    def generate_iam_policy(pwd, data) end
+    def generate_iam_policy(pwd, data, code_only, docs_only) end
 
     # TODO(nelsonjr): Review all object interfaces and move to private methods
     # that should not be exposed outside the object hierarchy.

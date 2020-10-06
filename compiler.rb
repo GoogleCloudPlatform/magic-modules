@@ -40,6 +40,8 @@ require 'pp' if ENV['COMPILER_DEBUG']
 products_to_generate = nil
 all_products = false
 yaml_dump = false
+code_only = false
+docs_only = false
 output_path = nil
 provider_name = nil
 force_provider = nil
@@ -85,6 +87,12 @@ OptionParser.new do |opt|
   end
   opt.on('-d', '--debug', 'Show all debug logs') do |_debug|
     Google::LOGGER.level = Logger::DEBUG
+  end
+  opt.on('-c', '--code', 'Generate code only') do
+    code_only = true
+  end
+  opt.on('-g', '--docs', 'Generate documentation only') do
+    docs_only = true
   end
 end.parse!
 # rubocop:enable Metrics/BlockLength
@@ -216,28 +224,30 @@ all_product_files.each do |product_name|
 
   Google::LOGGER.info \
     "#{product_name}: Generating types: #{types_to_generate.empty? ? 'ALL' : types_to_generate}"
-  provider.generate output_path, types_to_generate, product_name, yaml_dump
+  provider.generate output_path, types_to_generate, product_name, yaml_dump, code_only, docs_only
 end
 
 # In order to only copy/compile files once per provider this must be called outside
 # of the products loop. This will get called with the provider from the final iteration
 # of the loop
-provider&.copy_common_files(output_path)
+provider&.copy_common_files(output_path, docs_only)
 Google::LOGGER.info "Compiling common files for #{provider_name}"
 common_compile_file = "provider/#{provider_name}/common~compile.yaml"
-provider&.compile_common_files(
-  output_path,
-  products_for_version.sort_by { |p| p[:definitions].name.downcase },
-  common_compile_file
-)
-if override_dir
-  Google::LOGGER.info "Compiling override common files for #{provider_name}"
-  common_compile_file = "#{override_dir}/common~compile.yaml"
+unless docs_only
   provider&.compile_common_files(
     output_path,
     products_for_version.sort_by { |p| p[:definitions].name.downcase },
-    common_compile_file,
-    override_dir
+    common_compile_file
   )
+  if override_dir
+    Google::LOGGER.info "Compiling override common files for #{provider_name}"
+    common_compile_file = "#{override_dir}/common~compile.yaml"
+    provider&.compile_common_files(
+      output_path,
+      products_for_version.sort_by { |p| p[:definitions].name.downcase },
+      common_compile_file,
+      override_dir
+    )
+  end
 end
 # rubocop:enable Metrics/BlockLength
