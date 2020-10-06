@@ -82,7 +82,6 @@ type Config struct {
 	PollInterval time.Duration
 
 	client           *http.Client
-	wrappedBigQueryClient *http.Client
 	context          context.Context
 	userAgent        string
 
@@ -719,7 +718,7 @@ func (c *Config) NewCloudIdentityClient(userAgent string) *cloudidentity.Service
 }
 <% end -%>
 
-func (c *Config) BigQueryClientFactory(userAgent string) *BigtableClientFactory {
+func (c *Config) BigTableClientFactory(userAgent string) *BigtableClientFactory {
 	bigtableClientFactory := &BigtableClientFactory{
 		UserAgent:   userAgent,
 		TokenSource: c.tokenSource,
