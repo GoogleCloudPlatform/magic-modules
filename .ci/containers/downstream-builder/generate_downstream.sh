@@ -99,7 +99,7 @@ elif [ "$REPO" == "tf-oics" ]; then
 else
     if [ "$VERSION" == "ga"]; then
         bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION -c
-        bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v beta -d
+        bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v beta -g
     else
         bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION
     end
