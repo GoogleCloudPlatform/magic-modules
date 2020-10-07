@@ -104,7 +104,7 @@ func resourceLoggingBucketConfigImportState(parent string) schema.StateFunc {
 	}
 }
 
-func resourceLoggingBucketConfigAcquireOrCreate(iDFunc loggingBucketConfigIDFunc) func(*schema.ResourceData, interface{}) error {
+func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggingBucketConfigIDFunc) func(*schema.ResourceData, interface{}) error {
 	return func(d *schema.ResourceData, meta interface{}) error {
 		config := meta.(*Config)
 		userAgent, err := generateUserAgentString(d, config.userAgent)
@@ -119,20 +119,23 @@ func resourceLoggingBucketConfigAcquireOrCreate(iDFunc loggingBucketConfigIDFunc
 
 		d.SetId(id)
 
-		log.Printf("[DEBUG] Fetching logging bucket config: %#v", d.Id())
-		url, err := replaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", d.Id()))
-		if err != nil {
-			return err
+		if parentType == "project" {
+			//logging bucket can be created only at the project level, in future api may allow for folder, org and other parent rsesources
+
+			log.Printf("[DEBUG] Fetching logging bucket config: %#v", d.Id())
+			url, err := replaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", d.Id()))
+			if err != nil {
+				return err
+			}
+
+			res, _ := sendRequest(config, "GET", "", url, userAgent, nil)
+			if res == nil {
+				log.Printf("[DEGUG] Loggin Bucket not exist %s", d.Id())
+				return resourceLoggingBucketConfigCreate(d, meta)
+			}
 		}
 
-		res, _ := sendRequest(config, "GET", "", url, userAgent, nil)
-		if res != nil {
-			log.Printf("[DEGUG] Acquired logging bucket config at %s", d.Id())
-			// Logging bucket already exists, update is called
-			return resourceLoggingBucketConfigUpdate(d, meta)
-		} else {
-			return resourceLoggingBucketConfigCreate(d, meta)
-		}
+		return resourceLoggingBucketConfigUpdate(d, meta)
 	}
 }
 

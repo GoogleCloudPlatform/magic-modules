@@ -249,42 +249,6 @@ resource "google_logging_organization_bucket_config" "basic" {
 func getLoggingBucketConfigs(context map[string]interface{}) map[string]string {
 
 	return map[string]string{
-		"organization": Nprintf(`data "google_organization" "default" {
-					organization = "%{org_id}"
-				}
-				
-				resource "google_logging_organization_bucket_config" "basic" {
-					organization    = data.google_organization.default.organization
-					location  = "global"
-					retention_days = 10
-					description = "retention test 10 days"
-					bucket_id = "%{bucket_id}"
-				}`, context),
-
-		"billing_account": Nprintf(`data "google_billing_account" "default" {
-					billing_account = "%{billing_account_name}"
-				}
-			
-				resource "google_logging_billing_account_bucket_config" "basic" {
-					billing_account    = data.google_billing_account.default.billing_account
-					location  = "global"
-					retention_days = 10
-					description = "retention test 10 days"
-					bucket_id = "%{bucket_id}"
-				}`, context),
-
-		"folder": Nprintf(`resource "google_folder" "default" {
-					display_name = "%{folder_name}"
-					parent       = "organizations/%{org_id}"
-				}
-				
-				resource "google_logging_folder_bucket_config" "basic" {
-					folder    = google_folder.default.name
-					location  = "global"
-					retention_days = 10
-					description = "retention test 10 days"
-					bucket_id = "%{bucket_id}"
-				}`, context),
 
 		"project": Nprintf(`resource "google_project" "default" {
 				project_id = "%{project_name}"
