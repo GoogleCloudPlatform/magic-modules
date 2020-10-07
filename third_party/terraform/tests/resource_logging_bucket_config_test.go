@@ -176,7 +176,7 @@ resource "google_logging_project_bucket_config" "basic" {
 	location  = "global"
 	retention_days = %d
 	description = "retention test %d days"
-	 bucket_id = "_Default"
+	bucket_id = "_Default"
 }
 `, context), retention, retention)
 }
@@ -192,7 +192,7 @@ func TestAccLoggingBucketConfig_CreateBuckets_withCustomId(t *testing.T) {
 		"bucket_id":            "tf-test-bucket-" + randString(t, 10),
 	}
 
-	configlst := getLoggingBucketConfigs(context)
+	configList := getLoggingBucketConfigs(context)
 
 	for res, config := range configlst {
 		vcrTest(t, resource.TestCase{
@@ -249,7 +249,6 @@ resource "google_logging_organization_bucket_config" "basic" {
 func getLoggingBucketConfigs(context map[string]interface{}) map[string]string {
 
 	return map[string]string{
-
 		"project": Nprintf(`resource "google_project" "default" {
 				project_id = "%{project_name}"
 				name       = "%{project_name}"
