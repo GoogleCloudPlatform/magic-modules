@@ -1383,9 +1383,29 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	for i := 0; i < len(networkInterfaces); i++ {
 		prefix := fmt.Sprintf("network_interface.%d", i)
 		updateDuringStop := d.HasChange(prefix+".subnetwork") || d.HasChange(prefix+".network") || d.HasChange(prefix+".subnetwork_project")
-		niH, err := createNetworkInterfaceHelper(d, config, instance, networkInterfaces, i, project, zone, userAgent)
-		if err != nil {
-			return err
+		networkName := d.Get(prefix + ".name").(string)
+		instNetworkInterface := instance.NetworkInterfaces[i]
+		networkInterface := networkInterfaces[i]
+
+		if networkName != instNetworkInterface.Name {
+			return fmt.Errorf("Instance networkInterface had unexpected name: %s", instNetworkInterface.Name)
+		}
+
+		waitForOperation := func(res interface{}, activity string) error {
+			return computeOperationWaitTime(config, res, project, activity, userAgent, d.Timeout(schema.TimeoutUpdate))
+		}
+
+		var niH networkInterfaceHelperInterface = &networkInterfaceHelper{
+			WaitForOperation:       waitForOperation,
+			GetSubnetworks:         config.NewComputeClient(userAgent).Subnetworks.Get,
+			DeleteAccessConfig:     config.NewComputeClient(userAgent).Instances.DeleteAccessConfig,
+			AddAccessConfig:        config.NewComputeBetaClient(userAgent).Instances.AddAccessConfig,
+			UpdateNetworkInterface: config.NewComputeBetaClient(userAgent).Instances.UpdateNetworkInterface,
+			HasChange:              d.HasChange,
+			instanceName:           instance.Name,
+			prefix:                 prefix,
+			project:                project,
+			zone:                   zone,
 		}
 
 		// On creation the network is inferred if only subnetwork is given.
@@ -1394,50 +1414,52 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		// from state. So here we check if subnetwork changed and network did not.
 		// In this scenario we assume network was inferred and attempt to figure out
 		// the new corresponding network.
-
-		if d.HasChange(prefix + ".subnetwork") && !d.HasChange(prefix + ".network")  {
-			err := niH.InferNetworkFromSubnetwork()
+		if d.HasChange(prefix+".subnetwork") && !d.HasChange(prefix+".network") {
+			network, err := niH.InferNetworkFromSubnetwork(d, config, instNetworkInterface, networkInterface)
 			if err != nil {
 				return err
 			}
+			networkInterface.Network = network
 		}
 
 		if !updateDuringStop {
 			if d.HasChange(prefix + ".access_config") {
 				// Access configs cannot be updated, they must first be removed
-				err := niH.DeleteAccessConfigs()
+				err := niH.DeleteAccessConfigs(instNetworkInterface)
 				if err != nil {
 					return err
 				}
-				err = niH.CreateAccessConfigs()
+				err = niH.CreateAccessConfigs(instNetworkInterface, networkInterface)
 				if err != nil {
 					return err
 				}
 				// refresh the instance to get an up to date fingerprint for subsequent changes
-				err = niH.RefreshInstance()
+				instance, err = config.NewComputeBetaClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
 				if err != nil {
 					return err
 				}
+				instNetworkInterface = instance.NetworkInterfaces[i]
 			}
 			if d.HasChange(prefix + ".alias_ip_range") {
 				// Alias IP ranges cannot be updated; they must be removed and then added
 				// unless you are changing subnetwork/network
-				err := niH.DeleteAliasIPRanges()
+				err := niH.DeleteAliasIPRanges(instNetworkInterface)
 				if err != nil {
 					return err
 				}
 				// refresh the instance to get an up to date fingerprint for subsequent changes
-				err = niH.RefreshInstance()
+				instance, err = config.NewComputeBetaClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
 				if err != nil {
 					return err
 				}
-				err = niH.CreateAliasIPRanges()
+				instNetworkInterface = instance.NetworkInterfaces[i]
+				err = niH.CreateAliasIPRanges(instNetworkInterface, networkInterface)
 				if err != nil {
 					return err
 				}
 			}
 		} else {
-			patch, err := niH.CreateUpdateWhileStoppedCall()
+			patch, err := niH.CreateUpdateWhileStoppedCall(instNetworkInterface, networkInterface, i)
 			if err != nil {
 				return err
 			}
