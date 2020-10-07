@@ -1,0 +1,8 @@
+// The API doesn't return openapiDocuments field so we'll assume that 
+// if it's empty we won't recreate it.
+func apiConfigEmptyCheck(k, old, new string, d *schema.ResourceData) bool {
+	if k != "" && new == "" {
+        return true
+    }
+	return false
+}
