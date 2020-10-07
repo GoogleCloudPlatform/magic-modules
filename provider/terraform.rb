@@ -178,8 +178,8 @@ module Provider
     # This function uses the resource.erb template to create one file
     # per resource. The resource.erb template forms the basis of a single
     # GCP Resource on Terraform.
-    def generate_resource(pwd, data, code_only, docs_only)
-      unless docs_only
+    def generate_resource(pwd, data, generate_code, generate_docs)
+      if generate_code
         name = data.object.filename_override || data.object.name.underscore
         product_name = data.product.name.underscore
 
@@ -189,7 +189,7 @@ module Provider
                       "#{folder_name(data.version)}/resource_#{product_name}_#{name}.go",
                       self)
       end
-      unless code_only
+      if generate_docs
         generate_documentation(pwd, data)
       end
     end
@@ -265,8 +265,8 @@ module Provider
 
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
-    def generate_iam_policy(pwd, data, code_only, docs_only)
-      unless docs_only
+    def generate_iam_policy(pwd, data, generate_code, generate_docs)
+      if generate_code
         name = data.object.filename_override || data.object.name.underscore
         product_name = data.product.name.underscore
 
@@ -287,7 +287,7 @@ module Provider
         end
       end
 
-      unless code_only
+      if generate_docs
         generate_iam_documentation(pwd, data)
       end
     end

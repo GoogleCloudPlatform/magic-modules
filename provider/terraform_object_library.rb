@@ -16,21 +16,21 @@ require 'provider/terraform_oics'
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
   class TerraformObjectLibrary < Provider::Terraform
-    def generate(output_folder, types, _product_path, _dump_yaml, code_only, docs_only)
+    def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
       @base_url = @version.base_url
-      generate_objects(output_folder, types, code_only, docs_only)
+      generate_objects(output_folder, types, generate_code, generate_docs)
     end
 
-    def generate_object(object, output_folder, version_name, code_only, docs_only)
+    def generate_object(object, output_folder, version_name, generate_code, generate_docs)
       if object.exclude_validator
         Google::LOGGER.info "Skipping fine-grained resource #{object.name}"
         return
       end
 
-      super(object, output_folder, version_name, code_only, docs_only)
+      super(object, output_folder, version_name, generate_code, generate_docs)
     end
 
-    def generate_resource(pwd, data, code_only, docs_only)
+    def generate_resource(pwd, data, generate_code, generate_docs)
       target_folder = data.output_folder
       product_ns = data.object.__product.name
 
@@ -62,9 +62,9 @@ module Provider
                         file_template)
     end
 
-    def copy_common_files(output_folder, docs_only)
+    def copy_common_files(output_folder, generate_code, generate_docs)
       Google::LOGGER.info 'Copying common files.'
-      unless docs_only
+      if generate_code
         copy_file_list(output_folder, [
                          ['google/constants.go',
                           'third_party/validator/constants.go'],
@@ -142,7 +142,7 @@ module Provider
 
     def generate_resource_tests(pwd, data) end
 
-    def generate_iam_policy(pwd, data, code_only, docs_only) end
+    def generate_iam_policy(pwd, data, generate_code, generate_docs) end
 
     def generate_resource_sweepers(pwd, data) end
   end

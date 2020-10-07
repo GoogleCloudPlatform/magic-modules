@@ -61,11 +61,11 @@ module Provider
 
     # This function uses the resource templates to create singular and plural
     # resources that can be used by InSpec
-    def generate_resource(pwd, data, code_only, docs_only)
+    def generate_resource(pwd, data, generate_code, generate_docs)
       target_folder = File.join(data.output_folder, 'libraries')
       name = data.object.name.underscore
 
-      unless docs_only
+      if generate_code
         data.generate(
           pwd,
           'templates/inspec/singular_resource.erb',
@@ -73,7 +73,7 @@ module Provider
           self
         )
       end
-      unless code_only
+      if generate_docs
         generate_documentation(pwd, data.clone, name, false)
 
         unless data.object.singular_only
@@ -92,11 +92,11 @@ module Provider
 
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
-    def generate_iam_policy(pwd, data, code_only, docs_only)
+    def generate_iam_policy(pwd, data, generate_code, generate_docs)
       target_folder = File.join(data.output_folder, 'libraries')
       iam_policy_resource_name = "#{resource_name(data.object, data.product)}_iam_policy"
 
-      unless docs_only
+      if generate_code
         data.generate(
           pwd,
           'templates/inspec/iam_policy/iam_policy.erb',
@@ -105,7 +105,7 @@ module Provider
         )
       end
 
-      unless code_only
+      if generate_docs
         markdown_target_folder = File.join(data.output_folder, 'docs/resources')
         data.generate(
           pwd,

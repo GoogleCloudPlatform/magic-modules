@@ -34,7 +34,7 @@ module Provider
         'ansible.module_utils.gcp_utils'
       end
 
-      def generate_resource(pwd, data, _code_only, _docs_only)
+      def generate_resource(pwd, data, _generate_code, _generate_docs)
         target_folder = data.output_folder
         name = module_name(data.object)
         path = File.join(target_folder,
@@ -104,7 +104,7 @@ module Provider
 
       def compile_common_files(_arg1, _arg2, _arg3) end
 
-      def copy_common_files(output_folder, docs_only, provider_name = nil)
+      def copy_common_files(output_folder, generate_code, generate_docs, provider_name = nil)
         # version_name is actually used because all of the variables in scope in this method
         # are made available within the templates by the compile call.
         # TODO: remove version_name, use @target_version_name or pass it in expicitly
