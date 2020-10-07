@@ -1,8 +1,36 @@
-// The API doesn't return openapiDocuments field so we'll assume that 
-// if it's empty we won't recreate it.
-func apiConfigEmptyCheck(k, old, new string, d *schema.ResourceData) bool {
-	if k != "" && new == "" {
-        return true
-    }
-	return false
+func apiConfigCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+    field := "gateway_config.0.backend_config.0.google_service_account"
+	old, new := diff.GetChange(field)
+	config := meta.(*Config)
+    log.Printf("[DEBUG] Running CustomizeDiff. old value: %s, new value: %s", old.(string), new.(string))
+
+	project, err := getProjectFromDiff(diff, config)
+	if err != nil {
+		return err
+	}
+
+    // We will check for diffs in 3 scenarios.
+    // 1. Matches the project's default compute engine service account
+    // 2. RegexCompile against serviceaccount self link
+    // 3. UUID of svc matches up.
+
+	serviceAccount := regexp.MustCompile("projects/-/serviceAccounts/(.+)")
+
+	if serviceAccount.MatchString(new.(string)) {
+		parts := serviceAccount.FindStringSubmatch(new.(string))
+        if old == "" {
+            // Service account was initially null and the resource used the default service account.
+            projectCompResource, err := config.NewComputeClient(config.userAgent).Projects.Get(project).Do()
+            if err != nil {
+                return err
+            }
+            email := parts[0]
+            if projectCompResource.DefaultServiceAccount == email {
+                diff.SetNew(field, old)
+                return nil
+            }
+        }
+	}
+
+	return nil
 }

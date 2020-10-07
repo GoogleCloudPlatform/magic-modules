@@ -31,8 +31,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "api"
     properties:
-      name: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       displayName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       managedService: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -55,18 +53,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "api-cfg"
     properties:
-      name: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       displayName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       gatewayConfig.backendConfig.googleServiceAccount: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      # openapiDocuments.document.contents: !ruby/object:Overrides::Terraform::PropertyOverride
-      #   diff_suppress_func: 'apiConfigEmptyCheck'
-      # openapiDocuments.document.path: !ruby/object:Overrides::Terraform::PropertyOverride
-      #   diff_suppress_func: 'apiConfigEmptyCheck'
+      openapiDocuments.document.contents: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      openapiDocuments.document.path: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants:  'templates/terraform/constants/apigateway_apiconfig.erb'
+      resource_definition: 'templates/terraform/resource_definition/api_config.erb'
   Gateway: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
