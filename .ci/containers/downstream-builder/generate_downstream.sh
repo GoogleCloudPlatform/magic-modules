@@ -98,8 +98,8 @@ elif [ "$REPO" == "tf-oics" ]; then
     bundle exec compiler -a -e terraform -f oics -o $LOCAL_PATH -v $VERSION
 else
     if [ "$VERSION" == "ga"]; then
-        bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION -c
-        bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v beta -g
+        bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION --no-docs
+        bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v beta --no-code
     else
         bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION
     end
