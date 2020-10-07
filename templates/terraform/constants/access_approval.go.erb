@@ -23,16 +23,14 @@ var accessApprovalCloudProductMapping = map[string]string{
     "pubsub.googleapis.com": "Cloud Pub/Sub",
     "storage.googleapis.com": "Cloud Storage",
 }
-func accessApprovalCloudProductDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	if n, ok := accessApprovalCloudProductMapping[old]; ok {
-        if n == new {
-            return true
-        }
-    }
-    if o, ok := accessApprovalCloudProductMapping[new]; ok {
-        if o == old {
-            return true
-        }
-    }
-    return false
+func accessApprovalEnrolledServicesHash(v interface{}) int {
+	var buf bytes.Buffer
+	m := v.(map[string]interface{})
+	cp := m["cloud_product"].(string)
+	if n, ok := accessApprovalCloudProductMapping[cp]; ok {
+		cp = n
+	}
+	buf.WriteString(fmt.Sprintf("%s-", strings.ToLower(cp))) // ToLower just in case
+	buf.WriteString(fmt.Sprintf("%s-", strings.ToLower(m["enrollment_level"].(string))))
+	return hashcode(buf.String())
 }
