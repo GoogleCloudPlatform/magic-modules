@@ -28,7 +28,7 @@ The arguments of this data source act as filters for querying the available Orga
 The given filters must match exactly one Organizations whose data will be exported as attributes.
 The following arguments are supported:
 
-* `organization` (Optional) - The Organizatin's numeric id, including an optional `organizations/` prefix.
+* `organization` (Optional) - The Organization's numeric ID, including an optional `organizations/` prefix.
 
 * `domain` (Optional) - The domain name of the Organization.
 
