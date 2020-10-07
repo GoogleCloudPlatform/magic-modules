@@ -31,6 +31,9 @@ func JSONBytesEqual(a, b []byte) (bool, error) {
 	if err := json.Unmarshal(a, &j); err != nil {
 		return false, err
 	}
+	if j == nil {
+		return false, fmt.Errorf("The old schema value was nil")
+	}
 	jList := j.([]interface{})
 	if err := checkNameExists(jList); err != nil {
 		return false, err
@@ -40,6 +43,9 @@ func JSONBytesEqual(a, b []byte) (bool, error) {
 	})
 	if err := json.Unmarshal(b, &j2); err != nil {
 		return false, err
+	}
+	if j2 == nil {
+		return false, fmt.Errorf("The new schema value was nil")
 	}
 	j2List := j2.([]interface{})
 	if err := checkNameExists(j2List); err != nil {
@@ -53,6 +59,11 @@ func JSONBytesEqual(a, b []byte) (bool, error) {
 
 // Compare the JSON strings are equal
 func bigQueryTableSchemaDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	// The API can return an empty schema which gets encoded to "null"
+	// during read.
+	if old == "null" {
+		old = "[]"
+	}
 	oldBytes := []byte(old)
 	newBytes := []byte(new)
 
@@ -385,6 +396,44 @@ func resourceBigQueryTable() *schema.Resource {
 				},
 			},
 
+			// Materialized View: [Optional] If specified, configures this table as a materialized view.
+			"materialized_view": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `If specified, configures this table as a materialized view.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// EnableRefresh: [Optional] Enable automatic refresh of
+						// the materialized view when the base table is updated. The default
+						// value is "true".
+						"enable_refresh": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     true,
+							Description: `Specifies if BigQuery should automatically refresh materialized view when the base table is updated. The default is true.`,
+						},
+
+						// RefreshIntervalMs: [Optional] The maximum frequency
+						// at which this materialized view will be refreshed. The default value
+						// is 1800000 (30 minutes).
+						"refresh_interval_ms": {
+							Type:        schema.TypeInt,
+							Default:     1800000,
+							Optional:    true,
+							Description: `Specifies maximum frequency at which this materialized view will be refreshed. The default is 1800000`,
+						},
+
+						// Query: [Required] A query whose result is persisted
+						"query": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `A query whose result is persisted.`,
+						},
+					},
+				},
+			},
+
 			// TimePartitioning: [Experimental] If specified, configures time-based
 			// partitioning for this table.
 			"time_partitioning": {
@@ -609,6 +658,10 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 		table.View = expandView(v)
 	}
 
+	if v, ok := d.GetOk("materialized_view"); ok {
+		table.MaterializedView = expandMaterializedView(v)
+	}
+
 	if v, ok := d.GetOk("description"); ok {
 		table.Description = v.(string)
 	}
@@ -680,6 +733,11 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 
 func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	config.clientBigQuery.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -708,6 +766,11 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 
 func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	config.clientBigQuery.UserAgent = userAgent
 
 	log.Printf("[INFO] Reading BigQuery table: %s", d.Id())
 
@@ -843,11 +906,24 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	if res.MaterializedView != nil {
+		materialized_view := flattenMaterializedView(res.MaterializedView)
+
+		if err := d.Set("materialized_view", materialized_view); err != nil {
+			return fmt.Errorf("Error setting materialized view: %s", err)
+		}
+	}
+
 	return nil
 }
 
 func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	config.clientBigQuery.UserAgent = userAgent
 
 	table, err := resourceTable(d, meta)
 	if err != nil {
@@ -873,6 +949,11 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 
 func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	config.clientBigQuery.UserAgent = userAgent
 
 	log.Printf("[INFO] Deleting BigQuery table: %s", d.Id())
 
@@ -1237,6 +1318,31 @@ func expandView(configured interface{}) *bigquery.ViewDefinition {
 func flattenView(vd *bigquery.ViewDefinition) []map[string]interface{} {
 	result := map[string]interface{}{"query": vd.Query}
 	result["use_legacy_sql"] = vd.UseLegacySql
+
+	return []map[string]interface{}{result}
+}
+
+func expandMaterializedView(configured interface{}) *bigquery.MaterializedViewDefinition {
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	mvd := &bigquery.MaterializedViewDefinition{Query: raw["query"].(string)}
+
+	if v, ok := raw["enable_refresh"]; ok {
+		mvd.EnableRefresh = v.(bool)
+		mvd.ForceSendFields = append(mvd.ForceSendFields, "EnableRefresh")
+	}
+
+	if v, ok := raw["refresh_interval_ms"]; ok {
+		mvd.RefreshIntervalMs = int64(v.(int))
+		mvd.ForceSendFields = append(mvd.ForceSendFields, "RefreshIntervalMs")
+	}
+
+	return mvd
+}
+
+func flattenMaterializedView(mvd *bigquery.MaterializedViewDefinition) []map[string]interface{} {
+	result := map[string]interface{}{"query": mvd.Query}
+	result["enable_refresh"] = mvd.EnableRefresh
+	result["refresh_interval_ms"] = mvd.RefreshIntervalMs
 
 	return []map[string]interface{}{result}
 }

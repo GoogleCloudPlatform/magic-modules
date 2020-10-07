@@ -30,13 +30,17 @@ func dataSourceGoogleStorageProjectServiceAccount() *schema.Resource {
 
 func dataSourceGoogleStorageProjectServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	serviceAccountGetRequest := config.clientStorage.Projects.ServiceAccount.Get(project)
+	serviceAccountGetRequest := config.NewStorageClient(userAgent).Projects.ServiceAccount.Get(project)
 
 	if v, ok := d.GetOk("user_project"); ok {
 		serviceAccountGetRequest = serviceAccountGetRequest.UserProject(v.(string))

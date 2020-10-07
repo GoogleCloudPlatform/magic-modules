@@ -70,7 +70,7 @@ func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, location
 	keyName := fmt.Sprintf("%s/cryptoKeys/%s", keyParent, keyShortName)
 
 	// Get or Create the hard coded shared keyring for testing
-	kmsClient := config.clientKms
+	kmsClient := config.NewKmsClient(config.userAgent)
 	keyRing, err := kmsClient.Projects.Locations.KeyRings.Get(keyRingName).Do()
 	if err != nil {
 		if isGoogleApiErrorWithCode(err, 404) {
@@ -137,7 +137,7 @@ func getOrCreateServiceAccount(config *Config, project string) (*iam.ServiceAcco
 	name := fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", project, serviceAccountEmail, project)
 	log.Printf("[DEBUG] Verifying %s as bootstrapped service account.\n", name)
 
-	sa, err := config.clientIAM.Projects.ServiceAccounts.Get(name).Do()
+	sa, err := config.NewIamClient(config.userAgent).Projects.ServiceAccounts.Get(name).Do()
 	if err != nil && !isGoogleApiErrorWithCode(err, 404) {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func getOrCreateServiceAccount(config *Config, project string) (*iam.ServiceAcco
 			AccountId:      serviceAccountEmail,
 			ServiceAccount: sa,
 		}
-		sa, err = config.clientIAM.Projects.ServiceAccounts.Create("projects/"+project, r).Do()
+		sa, err = config.NewIamClient(config.userAgent).Projects.ServiceAccounts.Create("projects/"+project, r).Do()
 		if err != nil {
 			return nil, err
 		}
@@ -180,7 +180,7 @@ func impersonationServiceAccountPermissions(config *Config, sa *iam.ServiceAccou
 	// Overwrite the roles each time on this service account. This is because this account is
 	// only created for the test suite and will stop snowflaking of permissions to get tests
 	// to run. Overwriting permissions on 1 service account shouldn't affect others.
-	_, err := config.clientIAM.Projects.ServiceAccounts.SetIamPolicy(sa.Name, &iam.SetIamPolicyRequest{
+	_, err := config.NewIamClient(config.userAgent).Projects.ServiceAccounts.SetIamPolicy(sa.Name, &iam.SetIamPolicyRequest{
 		Policy: &policy,
 	}).Do()
 	if err != nil {
@@ -229,7 +229,7 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 	}
 
 	log.Printf("[DEBUG] Getting shared test network %q", networkName)
-	_, err := config.clientCompute.Networks.Get(project, networkName).Do()
+	_, err := config.NewComputeClient(config.userAgent).Networks.Get(project, networkName).Do()
 	if err != nil && isGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] Network %q not found, bootstrapping", networkName)
 		url := fmt.Sprintf("%sprojects/%s/global/networks", config.ComputeBasePath, project)
@@ -238,19 +238,19 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 			"autoCreateSubnetworks": false,
 		}
 
-		res, err := sendRequestWithTimeout(config, "POST", project, url, netObj, 4*time.Minute)
+		res, err := sendRequestWithTimeout(config, "POST", project, url, config.userAgent, netObj, 4*time.Minute)
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared test network %q: %s", networkName, err)
 		}
 
 		log.Printf("[DEBUG] Waiting for network creation to finish")
-		err = computeOperationWaitTime(config, res, project, "Error bootstrapping shared test network", 4*time.Minute)
+		err = computeOperationWaitTime(config, res, project, "Error bootstrapping shared test network", config.userAgent, 4*time.Minute)
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared test network %q: %s", networkName, err)
 		}
 	}
 
-	network, err := config.clientCompute.Networks.Get(project, networkName).Do()
+	network, err := config.NewComputeClient(config.userAgent).Networks.Get(project, networkName).Do()
 	if err != nil {
 		t.Errorf("Error getting shared test network %q: %s", networkName, err)
 	}
@@ -274,7 +274,7 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 	// doesn't seem to allow for prefix matching. Don't change this to include the parent type unless
 	// that API behavior changes.
 	prefixFilter := fmt.Sprintf("id:%s* parent.id:%s", SharedServicePerimeterProjectPrefix, org)
-	res, err := config.clientResourceManager.Projects.List().Filter(prefixFilter).Do()
+	res, err := config.NewResourceManagerClient(config.userAgent).Projects.List().Filter(prefixFilter).Do()
 	if err != nil {
 		t.Fatalf("Error getting shared test projects: %s", err)
 	}
@@ -290,7 +290,7 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 				Id:   org,
 			},
 		}
-		op, err := config.clientResourceManager.Projects.Create(project).Do()
+		op, err := config.NewResourceManagerClient(config.userAgent).Projects.Create(project).Do()
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared test project: %s", err)
 		}
@@ -300,12 +300,12 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 			t.Fatalf("Error bootstrapping shared test project: %s", err)
 		}
 
-		err = resourceManagerOperationWaitTime(config, opAsMap, "creating project", 4)
+		err = resourceManagerOperationWaitTime(config, opAsMap, "creating project", config.userAgent, 4)
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared test project: %s", err)
 		}
 
-		p, err := config.clientResourceManager.Projects.Get(pid).Do()
+		p, err := config.NewResourceManagerClient(config.userAgent).Projects.Get(pid).Do()
 		if err != nil {
 			t.Fatalf("Error getting shared test project: %s", err)
 		}

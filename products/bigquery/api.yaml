@@ -388,7 +388,7 @@ objects:
     name: 'Job'
     kind: 'bigquery#job'
     base_url: projects/{{project}}/jobs
-    self_link: projects/{{project}}/jobs/{{job_id}}
+    self_link: projects/{{project}}/jobs/{{job_id}}?location={{location}}
     input: true
     description: |
       Jobs are actions that BigQuery runs on your behalf to load data, export data, query data, or copy data.

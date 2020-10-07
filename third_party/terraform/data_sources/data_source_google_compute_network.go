@@ -47,13 +47,17 @@ func dataSourceGoogleComputeNetwork() *schema.Resource {
 
 func dataSourceGoogleComputeNetworkRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
 	name := d.Get("name").(string)
-	network, err := config.clientCompute.Networks.Get(project, name).Do()
+	network, err := config.NewComputeClient(userAgent).Networks.Get(project, name).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Network Not Found : %s", name))
 	}

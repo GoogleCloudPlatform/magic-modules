@@ -222,6 +222,10 @@ func resourceDataflowJobTypeCustomizeDiff(_ context.Context, d *schema.ResourceD
 
 func resourceDataflowJobCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -247,7 +251,7 @@ func resourceDataflowJobCreate(d *schema.ResourceData, meta interface{}) error {
 		Environment: &env,
 	}
 
-	job, err := resourceDataflowJobCreateJob(config, project, region, &request)
+	job, err := resourceDataflowJobCreateJob(config, project, region, userAgent, &request)
 	if err != nil {
 		return err
 	}
@@ -258,6 +262,10 @@ func resourceDataflowJobCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDataflowJobRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -271,7 +279,7 @@ func resourceDataflowJobRead(d *schema.ResourceData, meta interface{}) error {
 
 	id := d.Id()
 
-	job, err := resourceDataflowJobGetJob(config, project, region, id)
+	job, err := resourceDataflowJobGetJob(config, project, region, userAgent, id)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Dataflow job %s", id))
 	}
@@ -337,6 +345,10 @@ func resourceDataflowJobUpdateByReplacement(d *schema.ResourceData, meta interfa
 	}
 
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -366,14 +378,14 @@ func resourceDataflowJobUpdateByReplacement(d *schema.ResourceData, meta interfa
 
 	var response *dataflow.LaunchTemplateResponse
 	err = retryTimeDuration(func() (updateErr error) {
-		response, updateErr = resourceDataflowJobLaunchTemplate(config, project, region, d.Get("template_gcs_path").(string), &request)
+		response, updateErr = resourceDataflowJobLaunchTemplate(config, project, region, userAgent, d.Get("template_gcs_path").(string), &request)
 		return updateErr
 	}, time.Minute*time.Duration(5), isDataflowJobUpdateRetryableError)
 	if err != nil {
 		return err
 	}
 
-	if err := waitForDataflowJobToBeUpdated(d, config, response.Job.Id, d.Timeout(schema.TimeoutUpdate)); err != nil {
+	if err := waitForDataflowJobToBeUpdated(d, config, response.Job.Id, userAgent, d.Timeout(schema.TimeoutUpdate)); err != nil {
 		return fmt.Errorf("Error updating job with job ID %q: %v", d.Id(), err)
 	}
 
@@ -384,6 +396,10 @@ func resourceDataflowJobUpdateByReplacement(d *schema.ResourceData, meta interfa
 
 func resourceDataflowJobDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -410,7 +426,7 @@ func resourceDataflowJobDelete(d *schema.ResourceData, meta interface{}) error {
 			RequestedState: requestedState,
 		}
 
-		_, updateErr := resourceDataflowJobUpdateJob(config, project, region, id, job)
+		_, updateErr := resourceDataflowJobUpdateJob(config, project, region, userAgent, id, job)
 		if updateErr != nil {
 			gerr, isGoogleErr := updateErr.(*googleapi.Error)
 			if !isGoogleErr {
@@ -470,32 +486,32 @@ func resourceDataflowJobMapRequestedState(policy string) (string, error) {
 	}
 }
 
-func resourceDataflowJobCreateJob(config *Config, project string, region string, request *dataflow.CreateJobFromTemplateRequest) (*dataflow.Job, error) {
+func resourceDataflowJobCreateJob(config *Config, project, region, userAgent string, request *dataflow.CreateJobFromTemplateRequest) (*dataflow.Job, error) {
 	if region == "" {
-		return config.clientDataflow.Projects.Templates.Create(project, request).Do()
+		return config.NewDataflowClient(userAgent).Projects.Templates.Create(project, request).Do()
 	}
-	return config.clientDataflow.Projects.Locations.Templates.Create(project, region, request).Do()
+	return config.NewDataflowClient(userAgent).Projects.Locations.Templates.Create(project, region, request).Do()
 }
 
-func resourceDataflowJobGetJob(config *Config, project string, region string, id string) (*dataflow.Job, error) {
+func resourceDataflowJobGetJob(config *Config, project, region, userAgent string, id string) (*dataflow.Job, error) {
 	if region == "" {
-		return config.clientDataflow.Projects.Jobs.Get(project, id).View("JOB_VIEW_ALL").Do()
+		return config.NewDataflowClient(userAgent).Projects.Jobs.Get(project, id).View("JOB_VIEW_ALL").Do()
 	}
-	return config.clientDataflow.Projects.Locations.Jobs.Get(project, region, id).View("JOB_VIEW_ALL").Do()
+	return config.NewDataflowClient(userAgent).Projects.Locations.Jobs.Get(project, region, id).View("JOB_VIEW_ALL").Do()
 }
 
-func resourceDataflowJobUpdateJob(config *Config, project string, region string, id string, job *dataflow.Job) (*dataflow.Job, error) {
+func resourceDataflowJobUpdateJob(config *Config, project, region, userAgent string, id string, job *dataflow.Job) (*dataflow.Job, error) {
 	if region == "" {
-		return config.clientDataflow.Projects.Jobs.Update(project, id, job).Do()
+		return config.NewDataflowClient(userAgent).Projects.Jobs.Update(project, id, job).Do()
 	}
-	return config.clientDataflow.Projects.Locations.Jobs.Update(project, region, id, job).Do()
+	return config.NewDataflowClient(userAgent).Projects.Locations.Jobs.Update(project, region, id, job).Do()
 }
 
-func resourceDataflowJobLaunchTemplate(config *Config, project string, region string, gcsPath string, request *dataflow.LaunchTemplateParameters) (*dataflow.LaunchTemplateResponse, error) {
+func resourceDataflowJobLaunchTemplate(config *Config, project, region, userAgent string, gcsPath string, request *dataflow.LaunchTemplateParameters) (*dataflow.LaunchTemplateResponse, error) {
 	if region == "" {
-		return config.clientDataflow.Projects.Templates.Launch(project, request).GcsPath(gcsPath).Do()
+		return config.NewDataflowClient(userAgent).Projects.Templates.Launch(project, request).GcsPath(gcsPath).Do()
 	}
-	return config.clientDataflow.Projects.Locations.Templates.Launch(project, region, request).GcsPath(gcsPath).Do()
+	return config.NewDataflowClient(userAgent).Projects.Locations.Templates.Launch(project, region, request).GcsPath(gcsPath).Do()
 }
 
 func resourceDataflowJobSetupEnv(d *schema.ResourceData, config *Config) (dataflow.RuntimeEnvironment, error) {
@@ -571,7 +587,7 @@ func resourceDataflowJobIsVirtualUpdate(d *schema.ResourceData) bool {
 	return false
 }
 
-func waitForDataflowJobToBeUpdated(d *schema.ResourceData, config *Config, replacementJobID string, timeout time.Duration) error {
+func waitForDataflowJobToBeUpdated(d *schema.ResourceData, config *Config, replacementJobID, userAgent string, timeout time.Duration) error {
 	return resource.Retry(timeout, func() *resource.RetryError {
 		project, err := getProject(d, config)
 		if err != nil {
@@ -583,7 +599,7 @@ func waitForDataflowJobToBeUpdated(d *schema.ResourceData, config *Config, repla
 			return resource.NonRetryableError(err)
 		}
 
-		replacementJob, err := resourceDataflowJobGetJob(config, project, region, replacementJobID)
+		replacementJob, err := resourceDataflowJobGetJob(config, project, region, userAgent, replacementJobID)
 		if err != nil {
 			if isRetryableError(err) {
 				return resource.RetryableError(err)
