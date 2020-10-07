@@ -52,7 +52,8 @@ type loggingBucketConfigIDFunc func(d *schema.ResourceData, config *Config) (str
 // config resource. In practice the only difference between these resources is the url location.
 func ResourceLoggingBucketConfig(parentType string, parentSpecificSchema map[string]*schema.Schema, iDFunc loggingBucketConfigIDFunc) *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLoggingBucketConfigAcquireOrCreate(iDFunc),
+func ResourceLoggingBucketConfig(parentType string, parentSpecificSchema map[string]*schema.Schema, iDFunc loggingBucketConfigIDFunc) *schema.Resource {
+		Create: resourceLoggingBucketConfigAcquireOrCreate(parentType, iDFunc),
 		Read:   resourceLoggingBucketConfigRead,
 		Update: resourceLoggingBucketConfigUpdate,
 		Delete: resourceLoggingBucketConfigDelete,
