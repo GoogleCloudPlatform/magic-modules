@@ -9,7 +9,7 @@ description: |-
 
 # google\_app_engine\_default\_service\_account
 
-Use this data source to retrieve the default app engine service account for the specified project.
+Use this data source to retrieve the default App Engine service account for the specified project.
 
 ## Example Usage
 
@@ -33,7 +33,7 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `email` - Email address of the default service account used by VMs running in this project
+* `email` - Email address of the default service account used by App Engine in this project.
 
 * `unique_id` - The unique id of the service account.
 
