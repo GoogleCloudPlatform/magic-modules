@@ -97,12 +97,12 @@ elif [ "$REPO" == "tf-oics" ]; then
     # use terraform generator with oics override
     bundle exec compiler -a -e terraform -f oics -o $LOCAL_PATH -v $VERSION
 else
-    if [ "$VERSION" == "ga"]; then
+    if [ "$VERSION" == "ga" ]; then
         bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION --no-docs
         bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v beta --no-code
     else
         bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION
-    end
+    fi
 fi
 
 pushd $LOCAL_PATH
