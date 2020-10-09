@@ -9,7 +9,7 @@ description: |-
 
 # google\_redis\_instance
 
-Get info about a Google Cloud Redis instance from its name.
+Get info about a Google Cloud Redis instance.
 
 ## Example Usage
 
