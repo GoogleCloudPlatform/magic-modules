@@ -132,7 +132,7 @@ func dataSourceGoogleComputeImageRead(d *schema.ResourceData, meta interface{}) 
 		image, err = config.NewComputeClient(userAgent).Images.GetFromFamily(project, v.(string)).Do()
 		log.Printf("[DEBUG] Fetched latest non-deprecated image from family %s", v.(string))
 	} else if v, ok := d.GetOk("filter"); ok {
-		images, err := config.clientCompute.Images.List(project).Filter(v.(string)).Do()
+		images, err := config.NewComputeClient(userAgent).Images.List(project).Filter(v.(string)).Do()
 		if err != nil {
 			return fmt.Errorf("error retrieving list of images: %s", err)
 		}
@@ -142,7 +142,7 @@ func dataSourceGoogleComputeImageRead(d *schema.ResourceData, meta interface{}) 
 				image = im
 			}
 		} else {
-			return fmt.Errorf("Your filter has returned more than one image or no image. Please refine your filter to return exactly one image.")
+			return fmt.Errorf("your filter has returned more than one image or no image. Please refine your filter to return exactly one image")
 		}
 	} else {
 		return fmt.Errorf("one of name, family or filters must be set")
