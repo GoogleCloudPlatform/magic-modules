@@ -1221,8 +1221,8 @@ func testAccDataprocCluster_updatable(rnd string, w, p int) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "updatable" {
   name   = "tf-test-dproc-%s"
-	region = "us-central1"
-	graceful_decommission_timeout = "0.2s"
+  region = "us-central1"
+  graceful_decommission_timeout = "0.2s"
 
   cluster_config {
     master_config {
