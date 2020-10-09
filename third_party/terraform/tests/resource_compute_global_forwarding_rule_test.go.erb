@@ -471,7 +471,7 @@ resource "google_compute_instance_group_manager" "igm" {
 
 resource "google_compute_instance_template" "instance_template" {
   name         = "%s"
-  machine_type = "e2-standard-1"
+  machine_type = "e2-medium"
 
   network_interface {
     network = "default"
@@ -590,7 +590,7 @@ resource "google_compute_instance_group_manager" "igm" {
 
 resource "google_compute_instance_template" "instance_template" {
   name         = "%s"
-  machine_type = "e2-standard-1"
+  machine_type = "e2-medium"
 
   network_interface {
     network = "default"
