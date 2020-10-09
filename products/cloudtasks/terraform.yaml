@@ -48,7 +48,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       status: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-    examples: 
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "queue_basic"
         primary_resource_id: "default"
