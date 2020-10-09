@@ -233,7 +233,7 @@ module Provider
         ex
       end
 
-      def generate_resource(pwd, data, generate_code, generate_docs)
+      def generate_resource(pwd, data, _generate_code, _generate_docs)
         target_folder = data.output_folder
         name = module_name(data.object)
         path = File.join(target_folder,
