@@ -8,13 +8,12 @@ import (
 	computeBeta "google.golang.org/api/compute/v0.beta"
 )
 
+// TODO: This code deletes then recreates accessConfigs.  This is bad because it may
+// leave the machine inaccessible from either ip if the creation part fails (network
+// timeout etc).  However right now there is a GCE limit of 1 accessConfig so it is
+// the only way to do it.  In future this should be revised to only change what is
+// necessary, and also add before removing.
 func computeInstanceDeleteAccessConfigs(d *schema.ResourceData, config *Config, instNetworkInterface *computeBeta.NetworkInterface, project, zone, userAgent, instanceName string) error {
-	// TODO: This code deletes then recreates accessConfigs.  This is bad because it may
-	// leave the machine inaccessible from either ip if the creation part fails (network
-	// timeout etc).  However right now there is a GCE limit of 1 accessConfig so it is
-	// the only way to do it.  In future this should be revised to only change what is
-	// necessary, and also add before removing.
-
 	// Delete any accessConfig that currently exists in instNetworkInterface
 	for _, ac := range instNetworkInterface.AccessConfigs {
 		op, err := config.NewComputeClient(userAgent).Instances.DeleteAccessConfig(
@@ -55,8 +54,11 @@ func computeInstanceCreateUpdateWhileStoppedCall(d *schema.ResourceData, config 
 		instNetworkInterface := instance.NetworkInterfaces[index]
 		networkInterfacePatchObj.Fingerprint = instNetworkInterface.Fingerprint
 
-		// Access config can run into some issues since we can't derive users original intent due to
-		// terraform limitation. Lets only update it if we need to.
+		// Access config can run into some issues since we can't tell the difference between
+		// the users declared intent (config within their hcl file) and what we have inferred from the
+		// server (terraform state). Access configs contain an ip subproperty that can be incompatible
+		// with the subnetwork/network we are transitioning to. Due to this we only change access
+		// configs if we notice the configuration (user intent) changes.
 		if accessConfigsHaveChanged {
 			err := computeInstanceDeleteAccessConfigs(d, config, instNetworkInterface, project, zone, userAgent, instanceName)
 			if err != nil {

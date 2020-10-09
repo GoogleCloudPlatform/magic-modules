@@ -1466,9 +1466,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				instNetworkInterface = instance.NetworkInterfaces[i]
 			}
 
-			networkInterfacePatchObj := &computeBeta.NetworkInterface{}
-			networkInterfacePatchObj.AliasIpRanges = networkInterface.AliasIpRanges
-			networkInterfacePatchObj.Fingerprint = instNetworkInterface.Fingerprint
+			networkInterfacePatchObj := &computeBeta.NetworkInterface{
+				AliasIpRanges: networkInterface.AliasIpRanges
+				Fingerprint: instNetworkInterface.Fingerprint
+			}
 			updateCall := config.NewComputeBetaClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
 			op, err := updateCall()
 			if err != nil {
@@ -1494,8 +1495,11 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				networkInterfacePatchObj.NetworkIP = networkInterface.NetworkIP
 			}
 
-			// Access config can run into some issues since we can't derive users original intent due to
-			// terraform limitation. Lets only update it if we need to.
+			// Access config can run into some issues since we can't tell the difference between
+			// the users declared intent (config within their hcl file) and what we have inferred from the
+			// server (terraform state). Access configs contain an ip subproperty that can be incompatible
+			// with the subnetwork/network we are transitioning to. Due to this we only change access
+			// configs if we notice the configuration (user intent) changes.
 			accessConfigsHaveChanged := d.HasChange(prefix + ".access_config")
 
 			updateCall := computeInstanceCreateUpdateWhileStoppedCall(d, config, networkInterfacePatchObj, networkInterface.AccessConfigs, accessConfigsHaveChanged, i, project, zone, userAgent, instance.Name)

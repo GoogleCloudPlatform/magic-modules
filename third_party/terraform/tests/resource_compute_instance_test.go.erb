@@ -1954,7 +1954,7 @@ func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
 				NetworkIP:         "b",
 			},
 		},
-		"NetworkIP and Subtwork change": {
+		"NetworkIP and Subnetwork change": {
 			ExpectedForceNew: false,
 			Before:           NIBefore,
 			After: NetworkInterface{
@@ -1964,7 +1964,7 @@ func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
 				NetworkIP:         "b",
 			},
 		},
-		"NetworkIP and SubtworkProject change": {
+		"NetworkIP and SubnetworkProject change": {
 			ExpectedForceNew: false,
 			Before:           NIBefore,
 			After: NetworkInterface{
@@ -1974,7 +1974,7 @@ func TestComputeInstance_networkIPCustomizedDiff(t *testing.T) {
 				NetworkIP:         "b",
 			},
 		},
-		"All change ": {
+		"All change": {
 			ExpectedForceNew: false,
 			Before:           NIBefore,
 			After: NetworkInterface{
