@@ -210,6 +210,7 @@ objects:
     name: 'Cluster'
     base_url: "projects/{{project}}/regions/{{region}}/clusters"
     self_link: "projects/{{project}}/regions/{{region}}/clusters/{{clusterName}}"
+    update_url: "projects/{{project}}/regions/{{region}}/clusters/{{clusterName}}?gracefulDecommissionTimeout={{graceful_decommission_timeout}}"
     description: |
       Describes an autoscaling policy for Dataproc cluster autoscaler.
     parameters:
@@ -219,6 +220,21 @@ objects:
         input: true
         description: |
           The region in which the cluster and associated nodes will be created in.
+      - !ruby/object:Api::Type::String
+        name: 'gracefulDecommissionTimeout'
+        url_param_only: true
+        input: true
+        description: |
+          This parameter is used when updating the number of worker nodes directly through a terraform apply.
+          For more [context](https://cloud.google.com/dataproc/docs/reference/rest/v1/projects.regions.clusters/patch#query-parameters)
+
+          Timeout for graceful YARN decomissioning. Graceful decommissioning allows
+          removing nodes from the cluster without interrupting jobs in progress.
+          Timeout specifies how long to wait for jobs in progress to finish before forcefully removing nodes (and potentially interrupting jobs).
+          Default timeout is 0 (for forceful decommission), and the maximum allowed timeout is 1 day. (see JSON representation of
+          [Duration](https://developers.google.com/protocol-buffers/docs/proto3#json)).
+
+          Only supported on Dataproc image versions 1.2 and higher.
     properties:
       - !ruby/object:Api::Type::String
         name: 'clusterName'
@@ -476,7 +492,7 @@ objects:
                   The version of software inside the cluster. It must be one of the supported Cloud Dataproc
                   Versions, such as "1.2" (including a subminor version, such as "1.2.29"), or the "preview"
                   version.
-              - !ruby/object:Api::Type::KeyValuePairs              
+              - !ruby/object:Api::Type::KeyValuePairs
                 name: 'properties'
                 description: |
                   The properties to set on daemon config files.
