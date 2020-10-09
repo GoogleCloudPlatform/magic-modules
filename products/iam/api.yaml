@@ -203,7 +203,7 @@ objects:
     name: 'WorkloadIdentityPool'
     min_version: beta
     base_url: projects/{{project}}/locations/global/workloadIdentityPools
-    create_url: projects/{{project}}/locations/global/workloadIdentityPools?workloadIdentityPoolId={{id}}
+    create_url: projects/{{project}}/locations/global/workloadIdentityPools?workloadIdentityPoolId={{workload_identity_pool_id}}
     description: |
       Represents a collection of external workload identities. You can define IAM policies to
       grant these identities access to Google Cloud resources.
@@ -226,6 +226,15 @@ objects:
         path: 'error'
         message: 'message'
     properties:
+      - !ruby/object:Api::Type::String
+         name: 'workloadIdentityPoolId'
+         description: |
+           The ID to use for the pool, which becomes the final component of the resource name. This
+           value should be 4-32 characters, and may contain the characters [a-z0-9-]. The prefix
+           `gcp-` is reserved for use by Google, and may not be specified.
+         required: true
+         input: true
+         url_param_only: true
       - !ruby/object:Api::Type::Enum
         name: 'state'
         description: |
@@ -251,7 +260,9 @@ objects:
         description: A description of the pool. Cannot exceed 256 characters.
       - !ruby/object:Api::Type::String
         name: 'name'
-        description: The resource name of the pool.
+        description: |
+          The resource name of the pool as
+          `projects/<projectnumber>/locations/global/workloadIdentityPools/<id>`.
         output: true
       - !ruby/object:Api::Type::Boolean
         name: 'disabled'
