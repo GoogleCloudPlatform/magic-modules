@@ -724,10 +724,19 @@ func (c *Config) GetCredentials(clientScopes []string) (googleoauth.Credentials,
 		if err != nil {
 			return googleoauth.Credentials{}, fmt.Errorf("Error loading access token: %s", err)
 		}
+		token := &oauth2.Token{AccessToken: contents}
+
+		if c.ImpersonateServiceAccount != "" {
+			opts := []option.ClientOption{option.WithTokenSource(token), option.ImpersonateCredentials(c.ImpersonateServiceAccount, c.ImpersonateServiceAccountDelegates...), option.WithScopes(clientScopes...)}
+			creds, err := transport.Creds(context.TODO(), opts...)
+			if err != nil {
+				return googleoauth.Credentials{}, err
+			}
+			return *creds, nil
+		}
 
 		log.Printf("[INFO] Authenticating using configured Google JSON 'access_token'...")
 		log.Printf("[INFO]   -- Scopes: %s", clientScopes)
-		token := &oauth2.Token{AccessToken: contents}
 
 		return googleoauth.Credentials{
 			TokenSource: staticTokenSource{oauth2.StaticTokenSource(token)},
@@ -746,7 +755,6 @@ func (c *Config) GetCredentials(clientScopes []string) (googleoauth.Credentials,
 				return googleoauth.Credentials{}, err
 			}
 			return *creds, nil
-
 		}
 		creds, err := googleoauth.CredentialsFromJSON(c.context, []byte(contents), clientScopes...)
 		if err != nil {
