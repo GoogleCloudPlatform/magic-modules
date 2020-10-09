@@ -1430,6 +1430,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 			// Create new ones
 			err = computeInstanceAddAccessConfigs(d, config, instNetworkInterface, networkInterface.AccessConfigs, project, zone, userAgent, instance.Name)
+			if err != nil {
+				return err
+			}
+
 			// re-read fingerprint
 			instance, err = config.NewComputeBetaClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
 			if err != nil {
