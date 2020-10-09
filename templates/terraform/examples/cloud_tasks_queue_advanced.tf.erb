@@ -19,9 +19,9 @@ resource "google_cloud_tasks_queue" "<%= ctx[:primary_resource_id] %>" {
     max_backoff = "3s"
     min_backoff = "2s"
     max_doublings = 1
-	}
+  }
 
-	stackdriver_logging_config {
-		sampling_ratio = 0.9
-	}
+  stackdriver_logging_config {
+    sampling_ratio = 0.9
+  }
 }
