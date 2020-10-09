@@ -8,11 +8,6 @@ import (
 	computeBeta "google.golang.org/api/compute/v0.beta"
 )
 
-// TODO: This code deletes then recreates accessConfigs.  This is bad because it may
-// leave the machine inaccessible from either ip if the creation part fails (network
-// timeout etc).  However right now there is a GCE limit of 1 accessConfig so it is
-// the only way to do it.  In future this should be revised to only change what is
-// necessary, and also add before removing.
 func computeInstanceDeleteAccessConfigs(d *schema.ResourceData, config *Config, instNetworkInterface *computeBeta.NetworkInterface, project, zone, userAgent, instanceName string) error {
 	// Delete any accessConfig that currently exists in instNetworkInterface
 	for _, ac := range instNetworkInterface.AccessConfigs {
