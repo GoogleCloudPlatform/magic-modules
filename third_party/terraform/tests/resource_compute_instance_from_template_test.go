@@ -29,7 +29,7 @@ func TestAccComputeInstanceFromTemplate_basic(t *testing.T) {
 					testAccCheckComputeInstanceExists(t, resourceName, &instance),
 
 					// Check that fields were set based on the template
-					resource.TestCheckResourceAttr(resourceName, "machine_type", "n1-standard-1"),
+					resource.TestCheckResourceAttr(resourceName, "machine_type", "e2-standard-1"),
 					resource.TestCheckResourceAttr(resourceName, "attached_disk.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "scheduling.0.automatic_restart", "false"),
 				),
@@ -252,7 +252,7 @@ resource "google_compute_disk" "foobar" {
 
 resource "google_compute_instance_template" "foobar" {
   name         = "%s"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-standard-1"
 
   disk {
     source      = google_compute_disk.foobar.name
@@ -334,7 +334,7 @@ resource "google_compute_disk" "override_disk" {
 
 resource "google_compute_instance_template" "template" {
   name         = "%s"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-standard-1"
 
   disk {
     source_image = data.google_compute_image.my_image.self_link
@@ -399,7 +399,7 @@ resource "google_compute_disk" "override_disk" {
 
 resource "google_compute_instance_template" "template" {
   name         = "%s"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-standard-1"
 
   disk {
     source_image = data.google_compute_image.my_image.self_link
@@ -464,7 +464,7 @@ resource "google_compute_disk" "override_disk" {
 
 resource "google_compute_instance_template" "template" {
   name         = "%s"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-standard-1"
 
   disk {
     source_image = data.google_compute_image.my_image.self_link
@@ -518,7 +518,7 @@ resource "google_compute_disk" "foobar" {
 
 resource "google_compute_instance_template" "foobar" {
   name         = "%s"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-standard-1"
 
   disk {
     source      = google_compute_disk.foobar.name
@@ -561,7 +561,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "foobar" {
   name         = "%s"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-standard-1"
 
   disk {
     source_image = data.google_compute_image.my_image.self_link
@@ -638,7 +638,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "foobar" {
   name         = "%s"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-standard-1"
 
   disk {
     source_image = data.google_compute_image.my_image.self_link
