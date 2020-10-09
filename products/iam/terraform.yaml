@@ -12,6 +12,15 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Role: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
+  ServiceAccount: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
+  ServiceAccountKey: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
+  OrganizationCustomRole: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
