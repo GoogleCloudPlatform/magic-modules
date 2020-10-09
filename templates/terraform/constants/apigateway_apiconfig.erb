@@ -1,35 +1,37 @@
 func apiConfigCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
-    field := "gateway_config.0.backend_config.0.google_service_account"
+	field := "gateway_config.0.backend_config.0.google_service_account"
 	old, new := diff.GetChange(field)
 	config := meta.(*Config)
-    log.Printf("[DEBUG] Running CustomizeDiff. old value: %s, new value: %s", old.(string), new.(string))
+	log.Printf("[DEBUG] Running CustomizeDiff. old value: %s, new value: %s", old.(string), new.(string))
 
 	project, err := getProjectFromDiff(diff, config)
 	if err != nil {
 		return err
 	}
 
-    // We will check for diffs in 3 scenarios.
-    // 1. Matches the project's default compute engine service account
-    // 2. RegexCompile against serviceaccount self link
-    // 3. UUID of svc matches up.
+	// We will check for diffs in 2 scenarios.
+	// 1. Matches the project's default compute engine service account
+	// 2. Matches the a service account email
 
 	serviceAccount := regexp.MustCompile("projects/-/serviceAccounts/(.+)")
-
-	if serviceAccount.MatchString(new.(string)) {
-		parts := serviceAccount.FindStringSubmatch(new.(string))
-        if old == "" {
-            // Service account was initially null and the resource used the default service account.
-            projectCompResource, err := config.NewComputeClient(config.userAgent).Projects.Get(project).Do()
-            if err != nil {
-                return err
-            }
-            email := parts[0]
-            if projectCompResource.DefaultServiceAccount == email {
-                diff.SetNew(field, old)
-                return nil
-            }
-        }
+	if serviceAccount.MatchString(old.(string)) {
+		parts := serviceAccount.FindStringSubmatch(old.(string))
+		if strings.Contains(parts[1], "compute@developer.gserviceaccount.com") {
+			projectCompResource, err := config.NewComputeClient(config.userAgent).Projects.Get(project).Do()
+			if err != nil {
+				return err
+			}
+			if projectCompResource.DefaultServiceAccount == parts[1] {
+				if err := diff.SetNew(field, old); err != nil {
+					return err
+				}
+				return nil
+			}
+		} else if parts[1] == new.(string) {
+			if err := diff.SetNew(field, old); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
