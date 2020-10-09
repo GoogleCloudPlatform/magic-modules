@@ -1473,7 +1473,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			}
 
 			networkInterfacePatchObj := &computeBeta.NetworkInterface{
-				AliasIpRanges: networkInterface.AliasIpRanges
+				AliasIpRanges: networkInterface.AliasIpRanges,
 				Fingerprint: instNetworkInterface.Fingerprint
 			}
 			updateCall := config.NewComputeBetaClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
