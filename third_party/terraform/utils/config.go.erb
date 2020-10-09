@@ -727,7 +727,7 @@ func (c *Config) GetCredentials(clientScopes []string) (googleoauth.Credentials,
 		token := &oauth2.Token{AccessToken: contents}
 
 		if c.ImpersonateServiceAccount != "" {
-			opts := []option.ClientOption{option.WithTokenSource(token), option.ImpersonateCredentials(c.ImpersonateServiceAccount, c.ImpersonateServiceAccountDelegates...), option.WithScopes(clientScopes...)}
+			opts := []option.ClientOption{option.WithTokenSource(oauth2.StaticTokenSource(token)), option.ImpersonateCredentials(c.ImpersonateServiceAccount, c.ImpersonateServiceAccountDelegates...), option.WithScopes(clientScopes...)}
 			creds, err := transport.Creds(context.TODO(), opts...)
 			if err != nil {
 				return googleoauth.Credentials{}, err
