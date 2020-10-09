@@ -161,6 +161,7 @@ func Provider() *schema.Provider {
 
 		DataSourcesMap: map[string]*schema.Resource{
 			"google_active_folder":                             dataSourceGoogleActiveFolder(),
+			"google_app_engine_default_service_account":        dataSourceGoogleAppEngineDefaultServiceAccount(),
 			"google_billing_account":                           dataSourceGoogleBillingAccount(),
 			"google_bigquery_default_service_account":          dataSourceGoogleBigqueryDefaultServiceAccount(),
 			"google_client_config":                             dataSourceGoogleClientConfig(),
@@ -178,7 +179,7 @@ func Provider() *schema.Provider {
 			"google_compute_default_service_account":           dataSourceGoogleComputeDefaultServiceAccount(),
 			"google_compute_forwarding_rule":                   dataSourceGoogleComputeForwardingRule(),
 			"google_compute_global_address":                    dataSourceGoogleComputeGlobalAddress(),
-			"google_compute_global_forwarding_rule":			dataSourceGoogleComputeGlobalForwardingRule(),
+			"google_compute_global_forwarding_rule":			      dataSourceGoogleComputeGlobalForwardingRule(),
 			"google_compute_image":                             dataSourceGoogleComputeImage(),
 			"google_compute_instance":                          dataSourceGoogleComputeInstance(),
 			"google_compute_instance_serial_port":              dataSourceGoogleComputeInstanceSerialPort(),
@@ -228,10 +229,11 @@ func Provider() *schema.Provider {
 			"google_project":                                   dataSourceGoogleProject(),
 			"google_projects":                                  dataSourceGoogleProjects(),
 			"google_project_organization_policy":               dataSourceGoogleProjectOrganizationPolicy(),
-			"google_secret_manager_secret_version":              dataSourceSecretManagerSecretVersion(),
+			"google_pubsub_topic":                              dataSourceGooglePubsubTopic(),
+			"google_secret_manager_secret_version":             dataSourceSecretManagerSecretVersion(),
 			"google_service_account":                           dataSourceGoogleServiceAccount(),
 			"google_service_account_access_token":              dataSourceGoogleServiceAccountAccessToken(),
-			"google_service_account_id_token":                 dataSourceGoogleServiceAccountIdToken(),
+			"google_service_account_id_token":                  dataSourceGoogleServiceAccountIdToken(),
 			"google_service_account_key":                       dataSourceGoogleServiceAccountKey(),
 			"google_sql_ca_certs":                              dataSourceGoogleSQLCaCerts(),
 			"google_sql_database_instance":                     dataSourceSqlDatabaseInstance(),
@@ -315,7 +317,7 @@ end     # products.each do
 				"google_bigtable_table":                        resourceBigtableTable(),
 			"google_bigtable_table_iam_binding":                ResourceIamBinding(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),
 			"google_bigtable_table_iam_member":                 ResourceIamMember(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),
-			"google_bigtable_table_iam_policy":                 ResourceIamPolicy(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),			
+			"google_bigtable_table_iam_policy":                 ResourceIamPolicy(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),
 				"google_bigquery_dataset_iam_binding":          ResourceIamBinding(IamBigqueryDatasetSchema, NewBigqueryDatasetIamUpdater, BigqueryDatasetIdParseFunc),
 				"google_bigquery_dataset_iam_member":           ResourceIamMember(IamBigqueryDatasetSchema, NewBigqueryDatasetIamUpdater, BigqueryDatasetIdParseFunc),
 				"google_bigquery_dataset_iam_policy":           ResourceIamPolicy(IamBigqueryDatasetSchema, NewBigqueryDatasetIamUpdater, BigqueryDatasetIdParseFunc),
@@ -345,7 +347,7 @@ end     # products.each do
 				"google_container_registry":                    resourceContainerRegistry(),
 				"google_dataflow_job":                          resourceDataflowJob(),
 				<% unless version == 'ga' -%>
-				"google_dataflow_flex_template_job":            resourceDataflowFlexTemplateJob(), 
+				"google_dataflow_flex_template_job":            resourceDataflowFlexTemplateJob(),
 				<% end -%>
 				"google_dataproc_cluster":                      resourceDataprocCluster(),
 				"google_dataproc_cluster_iam_binding":          ResourceIamBinding(IamDataprocClusterSchema, NewDataprocClusterUpdater, DataprocClusterIdParseFunc),
