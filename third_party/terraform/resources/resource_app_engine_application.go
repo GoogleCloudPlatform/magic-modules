@@ -70,6 +70,10 @@ func resourceAppEngineApplication() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"CLOUD_FIRESTORE",
 					"CLOUD_DATASTORE_COMPATIBILITY",
+					// NOTE: this is provided for compatibility with instances from
+					// before CLOUD_DATASTORE_COMPATIBILITY - it cannot be set
+					// for new instances.
+					"CLOUD_DATASTORE",
 				}, false),
 				Computed: true,
 			},
@@ -195,6 +199,11 @@ func appEngineApplicationLocationIDCustomizeDiff(_ context.Context, d *schema.Re
 
 func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	config.clientAppEngine.UserAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -221,7 +230,7 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 	d.SetId(project)
 
 	// Wait for the operation to complete
-	waitErr := appEngineOperationWaitTime(config, op, project, "App Engine app to create", d.Timeout(schema.TimeoutCreate))
+	waitErr := appEngineOperationWaitTime(config, op, project, "App Engine app to create", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		d.SetId("")
 		return waitErr
@@ -233,6 +242,11 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 
 func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	config.clientAppEngine.UserAgent = userAgent
 	pid := d.Id()
 
 	app, err := config.clientAppEngine.Apps.Get(pid).Do()
@@ -301,6 +315,11 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	config.clientAppEngine.UserAgent = userAgent
 	pid := d.Id()
 	app, err := expandAppEngineApplication(d, pid)
 	if err != nil {
@@ -321,7 +340,7 @@ func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}
 	}
 
 	// Wait for the operation to complete
-	waitErr := appEngineOperationWaitTime(config, op, pid, "App Engine app to update", d.Timeout(schema.TimeoutUpdate))
+	waitErr := appEngineOperationWaitTime(config, op, pid, "App Engine app to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if waitErr != nil {
 		return waitErr
 	}

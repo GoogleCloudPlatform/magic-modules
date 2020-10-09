@@ -186,6 +186,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/data_catalog_tag.go.erb
+      encoder: templates/terraform/encoders/data_catalog_tag.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

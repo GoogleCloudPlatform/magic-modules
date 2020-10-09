@@ -1,8 +1,6 @@
 package google
 
 import (
-	"time"
-
 	"fmt"
 	"strings"
 
@@ -64,8 +62,12 @@ func dataSourceGoogleServiceAccountIdToken() *schema.Resource {
 }
 
 func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta interface{}) error {
-
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	targetAudience := d.Get("target_audience").(string)
 	creds, err := config.GetCredentials([]string{userInfoScope})
 	if err != nil {
@@ -78,7 +80,7 @@ func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta inte
 	if _, ok := ts.(staticTokenSource); ok {
 		// Use
 		// https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/generateIdToken
-		service := config.clientIamCredentials
+		service := config.NewIamCredentialsClient(userAgent)
 		name := fmt.Sprintf("projects/-/serviceAccounts/%s", d.Get("target_service_account").(string))
 		tokenRequest := &iamcredentials.GenerateIdTokenRequest{
 			Audience:     targetAudience,
@@ -90,7 +92,7 @@ func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta inte
 			return fmt.Errorf("error calling iamcredentials.GenerateIdToken: %v", err)
 		}
 
-		d.SetId(time.Now().UTC().String())
+		d.SetId(d.Get("target_service_account").(string))
 		if err := d.Set("id_token", at.Token); err != nil {
 			return fmt.Errorf("Error setting id_token: %s", err)
 		}
@@ -122,7 +124,7 @@ func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta inte
 		return fmt.Errorf("unable to retrieve Token: %v", err)
 	}
 
-	d.SetId(time.Now().UTC().String())
+	d.SetId(targetAudience)
 	if err := d.Set("id_token", idToken.AccessToken); err != nil {
 		return fmt.Errorf("Error setting id_token: %s", err)
 	}

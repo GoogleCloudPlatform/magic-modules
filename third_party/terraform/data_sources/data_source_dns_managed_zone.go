@@ -50,6 +50,10 @@ func dataSourceDnsManagedZone() *schema.Resource {
 
 func dataSourceDnsManagedZoneRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -59,7 +63,7 @@ func dataSourceDnsManagedZoneRead(d *schema.ResourceData, meta interface{}) erro
 	name := d.Get("name").(string)
 	d.SetId(fmt.Sprintf("projects/%s/managedZones/%s", project, name))
 
-	zone, err := config.clientDns.ManagedZones.Get(
+	zone, err := config.NewDnsClient(userAgent).ManagedZones.Get(
 		project, name).Do()
 	if err != nil {
 		return err
