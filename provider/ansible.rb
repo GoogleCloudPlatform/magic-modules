@@ -233,7 +233,7 @@ module Provider
         ex
       end
 
-      def generate_resource(pwd, data)
+      def generate_resource(pwd, data, generate_code, generate_docs)
         target_folder = data.output_folder
         name = module_name(data.object)
         path = File.join(target_folder,
@@ -304,7 +304,7 @@ module Provider
                       self)
       end
 
-      def generate_objects(output_folder, types)
+      def generate_objects(output_folder, types, _generate_code, _generate_docs)
         # We have two sets of overrides - one for regular modules, one for
         # datasources.
         # When building regular modules, we will potentially need some
@@ -366,8 +366,8 @@ module Provider
       compile_file_list(data.output_folder, files, file_template, pwd)
     end
 
-    def copy_common_files(output_folder, provider_name = 'ansible')
-      super(output_folder, provider_name)
+    def copy_common_files(output_folder, generate_code, generate_docs, provider_name = 'ansible')
+      super(output_folder, generate_code, generate_docs, provider_name)
     end
 
     def module_utils_import_path
