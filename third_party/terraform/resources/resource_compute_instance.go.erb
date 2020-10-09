@@ -1379,33 +1379,20 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Instance had unexpected number of network interfaces: %d", len(instance.NetworkInterfaces))
 	}
 
-	var updatesToNIWhileStopped []func(*computeBeta.Instance) error
+
+	var updatesToNIWhileStopped []func(inst *computeBeta.Instance) error
 	for i := 0; i < len(networkInterfaces); i++ {
 		prefix := fmt.Sprintf("network_interface.%d", i)
-		updateDuringStop := d.HasChange(prefix+".subnetwork") || d.HasChange(prefix+".network") || d.HasChange(prefix+".subnetwork_project")
-		networkName := d.Get(prefix + ".name").(string)
-		instNetworkInterface := instance.NetworkInterfaces[i]
 		networkInterface := networkInterfaces[i]
+		instNetworkInterface := instance.NetworkInterfaces[i]
 
+		networkName := d.Get(prefix + ".name").(string)
+		subnetwork := networkInterface.Subnetwork
+		updateDuringStop := d.HasChange(prefix+".subnetwork") || d.HasChange(prefix+".network") || d.HasChange(prefix+".subnetwork_project")
+
+		// Sanity check
 		if networkName != instNetworkInterface.Name {
 			return fmt.Errorf("Instance networkInterface had unexpected name: %s", instNetworkInterface.Name)
-		}
-
-		waitForOperation := func(res interface{}, activity string) error {
-			return computeOperationWaitTime(config, res, project, activity, userAgent, d.Timeout(schema.TimeoutUpdate))
-		}
-
-		var niH networkInterfaceHelperInterface = &networkInterfaceHelper{
-			WaitForOperation:       waitForOperation,
-			GetSubnetworks:         config.NewComputeClient(userAgent).Subnetworks.Get,
-			DeleteAccessConfig:     config.NewComputeClient(userAgent).Instances.DeleteAccessConfig,
-			AddAccessConfig:        config.NewComputeBetaClient(userAgent).Instances.AddAccessConfig,
-			UpdateNetworkInterface: config.NewComputeBetaClient(userAgent).Instances.UpdateNetworkInterface,
-			HasChange:              d.HasChange,
-			instanceName:           instance.Name,
-			prefix:                 prefix,
-			project:                project,
-			zone:                   zone,
 		}
 
 		// On creation the network is inferred if only subnetwork is given.
@@ -1414,56 +1401,101 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		// from state. So here we check if subnetwork changed and network did not.
 		// In this scenario we assume network was inferred and attempt to figure out
 		// the new corresponding network.
-		if d.HasChange(prefix+".subnetwork") && !d.HasChange(prefix+".network") {
-			network, err := niH.InferNetworkFromSubnetwork(d, config, instNetworkInterface, networkInterface)
-			if err != nil {
-				return err
+
+		if d.HasChange(prefix + ".subnetwork") {
+			if !d.HasChange(prefix + ".network") {
+				subnetProjectField := prefix + ".subnetwork_project"
+				sf, err := ParseSubnetworkFieldValueWithProjectField(subnetwork, subnetProjectField, d, config)
+				if err != nil {
+					return fmt.Errorf("Cannot determine self_link for subnetwork %q: %s", subnetwork, err)
+				}
+				resp, err := config.NewComputeClient(userAgent).Subnetworks.Get(sf.Project, sf.Region, sf.Name).Do()
+				if err != nil {
+					return errwrap.Wrapf("Error getting subnetwork value: {{err}}", err)
+				}
+				nf, err := ParseNetworkFieldValue(resp.Network, d, config)
+				if err != nil {
+					return fmt.Errorf("Cannot determine self_link for network %q: %s", resp.Network, err)
+				}
+				networkInterface.Network = nf.RelativeLink()
 			}
-			networkInterface.Network = network
 		}
 
-		if !updateDuringStop {
-			if d.HasChange(prefix + ".access_config") {
-				// Access configs cannot be updated, they must first be removed
-				err := niH.DeleteAccessConfigs(instNetworkInterface)
-				if err != nil {
-					return err
-				}
-				err = niH.CreateAccessConfigs(instNetworkInterface, networkInterface)
-				if err != nil {
-					return err
-				}
-				// refresh the instance to get an up to date fingerprint for subsequent changes
-				instance, err = config.NewComputeBetaClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
-				if err != nil {
-					return err
-				}
-				instNetworkInterface = instance.NetworkInterfaces[i]
-			}
-			if d.HasChange(prefix + ".alias_ip_range") {
-				// Alias IP ranges cannot be updated; they must be removed and then added
-				// unless you are changing subnetwork/network
-				err := niH.DeleteAliasIPRanges(instNetworkInterface)
-				if err != nil {
-					return err
-				}
-				// refresh the instance to get an up to date fingerprint for subsequent changes
-				instance, err = config.NewComputeBetaClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
-				if err != nil {
-					return err
-				}
-				instNetworkInterface = instance.NetworkInterfaces[i]
-				err = niH.CreateAliasIPRanges(instNetworkInterface, networkInterface)
-				if err != nil {
-					return err
-				}
-			}
-		} else {
-			patch, err := niH.CreateUpdateWhileStoppedCall(instNetworkInterface, networkInterface, i)
+		if !updateDuringStop && d.HasChange(prefix+".access_config") {
+			// Delete current access configs
+			err := computeInstanceDeleteAccessConfigs(d, config, instNetworkInterface, project, zone, userAgent, instance.Name)
 			if err != nil {
 				return err
 			}
-			updatesToNIWhileStopped = append(updatesToNIWhileStopped, patch)
+
+			// Create new ones
+			err = computeInstanceAddAccessConfigs(d, config, instNetworkInterface, networkInterface.AccessConfigs, project, zone, userAgent, instance.Name)
+			// re-read fingerprint
+			instance, err = config.NewComputeBetaClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
+			if err != nil {
+				return err
+			}
+			instNetworkInterface = instance.NetworkInterfaces[i]
+		}
+
+		if !updateDuringStop && d.HasChange(prefix+".alias_ip_range") {
+			// Alias IP ranges cannot be updated; they must be removed and then added
+			// unless you are changing subnetwork/network
+			if len(instNetworkInterface.AliasIpRanges) > 0 {
+				ni := &computeBeta.NetworkInterface{
+					Fingerprint:     instNetworkInterface.Fingerprint,
+					ForceSendFields: []string{"AliasIpRanges"},
+				}
+				op, err := config.NewComputeBetaClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, ni).Do()
+				if err != nil {
+					return errwrap.Wrapf("Error removing alias_ip_range: {{err}}", err)
+				}
+				opErr := computeOperationWaitTime(config, op, project, "updating alias ip ranges", userAgent, d.Timeout(schema.TimeoutUpdate))
+				if opErr != nil {
+					return opErr
+				}
+				// re-read fingerprint
+				instance, err = config.NewComputeBetaClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
+				if err != nil {
+					return err
+				}
+				instNetworkInterface = instance.NetworkInterfaces[i]
+			}
+
+			networkInterfacePatchObj := &computeBeta.NetworkInterface{}
+			networkInterfacePatchObj.AliasIpRanges = networkInterface.AliasIpRanges
+			networkInterfacePatchObj.Fingerprint = instNetworkInterface.Fingerprint
+			updateCall := config.NewComputeBetaClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
+			op, err := updateCall()
+			if err != nil {
+				return errwrap.Wrapf("Error updating network interface: {{err}}", err)
+			}
+			opErr := computeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+			if opErr != nil {
+				return opErr
+			}
+		}
+
+		if updateDuringStop {
+			// Lets be explicit about what we are changing in the patch call
+			networkInterfacePatchObj := &computeBeta.NetworkInterface{
+				Network:       networkInterface.Network,
+				Subnetwork:    networkInterface.Subnetwork,
+				AliasIpRanges: networkInterface.AliasIpRanges,
+			}
+
+			// network_ip can be inferred if not declared. Let's only patch if it's being changed by user
+			// otherwise this could fail if the network ip is not compatible with the new Subnetwork/Network.
+			if d.HasChange(prefix + ".network_ip") {
+				networkInterfacePatchObj.NetworkIP = networkInterface.NetworkIP
+			}
+
+			// Access config can run into some issues since we can't derive users original intent due to
+			// terraform limitation. Lets only update it if we need to.
+			accessConfigsHaveChanged := d.HasChange(prefix + ".access_config")
+
+			updateCall := computeInstanceCreateUpdateWhileStoppedCall(d, config, networkInterfacePatchObj, networkInterface.AccessConfigs, accessConfigsHaveChanged, i, project, zone, userAgent, instance.Name)
+			updatesToNIWhileStopped = append(updatesToNIWhileStopped, updateCall)
 		}
 	}
 
