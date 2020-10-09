@@ -47,3 +47,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     self_link: organizations/{{org_id}}/roles/{{name}}
     collection_url_key: roles
     privileged: true
+  WorkloadIdentityPool: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
