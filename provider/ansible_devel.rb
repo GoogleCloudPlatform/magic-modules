@@ -104,7 +104,7 @@ module Provider
 
       def compile_common_files(_arg1, _arg2, _arg3) end
 
-      def copy_common_files(output_folder, generate_code, generate_docs, provider_name = nil)
+      def copy_common_files(output_folder, _generate_code, _generate_docs, provider_name = nil)
         # version_name is actually used because all of the variables in scope in this method
         # are made available within the templates by the compile call.
         # TODO: remove version_name, use @target_version_name or pass it in expicitly

@@ -189,9 +189,10 @@ module Provider
                       "#{folder_name(data.version)}/resource_#{product_name}_#{name}.go",
                       self)
       end
-      if generate_docs
-        generate_documentation(pwd, data)
-      end
+
+      return unless generate_docs
+
+      generate_documentation(pwd, data)
     end
 
     def generate_documentation(pwd, data)
@@ -287,9 +288,9 @@ module Provider
         end
       end
 
-      if generate_docs
-        generate_iam_documentation(pwd, data)
-      end
+      return unless generate_docs
+
+      generate_iam_documentation(pwd, data)
     end
 
     def generate_iam_documentation(pwd, data)

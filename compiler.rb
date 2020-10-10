@@ -224,7 +224,14 @@ all_product_files.each do |product_name|
 
   Google::LOGGER.info \
     "#{product_name}: Generating types: #{types_to_generate.empty? ? 'ALL' : types_to_generate}"
-  provider.generate output_path, types_to_generate, product_name, yaml_dump, generate_code, generate_docs
+  provider.generate(
+    output_path,
+    types_to_generate,
+    product_name,
+    yaml_dump,
+    generate_code,
+    generate_docs
+  )
 end
 
 # In order to only copy/compile files once per provider this must be called outside

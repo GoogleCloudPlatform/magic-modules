@@ -18,7 +18,12 @@ module Provider
   class TerraformObjectLibrary < Provider::Terraform
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
       @base_url = @version.base_url
-      generate_objects(output_folder, types, generate_code, generate_docs)
+      generate_objects(
+        output_folder,
+        types,
+        generate_code,
+        generate_docs
+      )
     end
 
     def generate_object(object, output_folder, version_name, generate_code, generate_docs)
@@ -30,7 +35,7 @@ module Provider
       super(object, output_folder, version_name, generate_code, generate_docs)
     end
 
-    def generate_resource(pwd, data, generate_code, generate_docs)
+    def generate_resource(pwd, data, _generate_code, _generate_docs)
       target_folder = data.output_folder
       product_ns = data.object.__product.name
 
@@ -62,82 +67,82 @@ module Provider
                         file_template)
     end
 
-    def copy_common_files(output_folder, generate_code, generate_docs)
+    def copy_common_files(output_folder, generate_code, _generate_docs)
       Google::LOGGER.info 'Copying common files.'
-      if generate_code
-        copy_file_list(output_folder, [
-                         ['google/constants.go',
-                          'third_party/validator/constants.go'],
-                         ['google/cai.go',
-                          'third_party/validator/cai.go'],
-                         ['google/cai_test.go',
-                          'third_party/validator/cai_test.go'],
-                         ['google/json_map.go',
-                          'third_party/validator/json_map.go'],
-                         ['google/project.go',
-                          'third_party/validator/project.go'],
-                         ['google/compute_instance.go',
-                          'third_party/validator/compute_instance.go'],
-                         ['google/sql_database_instance.go',
-                          'third_party/validator/sql_database_instance.go'],
-                         ['google/storage_bucket.go',
-                          'third_party/validator/storage_bucket.go'],
-                         ['google/storage_bucket_iam.go',
-                          'third_party/validator/storage_bucket_iam.go'],
-                         ['google/iam_helpers.go',
-                          'third_party/validator/iam_helpers.go'],
-                         ['google/iam_helpers_test.go',
-                          'third_party/validator/iam_helpers_test.go'],
-                         ['google/organization_iam.go',
-                          'third_party/validator/organization_iam.go'],
-                         ['google/project_iam.go',
-                          'third_party/validator/project_iam.go'],
-                         ['google/folder_iam.go',
-                          'third_party/validator/folder_iam.go'],
-                         ['google/container.go',
-                          'third_party/validator/container.go'],
-                         ['google/image.go',
-                          'third_party/terraform/utils/image.go'],
-                         ['google/disk_type.go',
-                          'third_party/terraform/utils/disk_type.go'],
-                         ['google/validation.go',
-                          'third_party/terraform/utils/validation.go'],
-                         ['google/regional_utils.go',
-                          'third_party/terraform/utils/regional_utils.go'],
-                         ['google/field_helpers.go',
-                          'third_party/terraform/utils/field_helpers.go'],
-                         ['google/self_link_helpers.go',
-                          'third_party/terraform/utils/self_link_helpers.go'],
-                         ['google/transport.go',
-                          'third_party/terraform/utils/transport.go'],
-                         ['google/bigtable_client_factory.go',
-                          'third_party/terraform/utils/bigtable_client_factory.go'],
-                         ['google/common_operation.go',
-                          'third_party/terraform/utils/common_operation.go'],
-                         ['google/compute_shared_operation.go',
-                          'third_party/terraform/utils/compute_shared_operation.go'],
-                         ['google/compute_instance_helpers.go',
-                          'third_party/terraform/utils/compute_instance_helpers.go.erb'],
-                         ['google/convert.go',
-                          'third_party/terraform/utils/convert.go'],
-                         ['google/metadata.go',
-                          'third_party/terraform/utils/metadata.go'],
-                         ['google/service_scope.go',
-                          'third_party/terraform/utils/service_scope.go'],
-                         ['google/kms_utils.go',
-                          'third_party/terraform/utils/kms_utils.go'],
-                         ['google/batcher.go',
-                          'third_party/terraform/utils/batcher.go'],
-                         ['google/retry_utils.go',
-                          'third_party/terraform/utils/retry_utils.go'],
-                         ['google/source_repo_utils.go',
-                          'third_party/terraform/utils/source_repo_utils.go'],
-                         ['google/retry_transport.go',
-                          'third_party/terraform/utils/retry_transport.go'],
-                         ['google/error_retry_predicates.go',
-                          'third_party/terraform/utils/error_retry_predicates.go']
-                       ])
-      end
+      return unless generate_code
+
+      copy_file_list(output_folder, [
+                       ['google/constants.go',
+                        'third_party/validator/constants.go'],
+                       ['google/cai.go',
+                        'third_party/validator/cai.go'],
+                       ['google/cai_test.go',
+                        'third_party/validator/cai_test.go'],
+                       ['google/json_map.go',
+                        'third_party/validator/json_map.go'],
+                       ['google/project.go',
+                        'third_party/validator/project.go'],
+                       ['google/compute_instance.go',
+                        'third_party/validator/compute_instance.go'],
+                       ['google/sql_database_instance.go',
+                        'third_party/validator/sql_database_instance.go'],
+                       ['google/storage_bucket.go',
+                        'third_party/validator/storage_bucket.go'],
+                       ['google/storage_bucket_iam.go',
+                        'third_party/validator/storage_bucket_iam.go'],
+                       ['google/iam_helpers.go',
+                        'third_party/validator/iam_helpers.go'],
+                       ['google/iam_helpers_test.go',
+                        'third_party/validator/iam_helpers_test.go'],
+                       ['google/organization_iam.go',
+                        'third_party/validator/organization_iam.go'],
+                       ['google/project_iam.go',
+                        'third_party/validator/project_iam.go'],
+                       ['google/folder_iam.go',
+                        'third_party/validator/folder_iam.go'],
+                       ['google/container.go',
+                        'third_party/validator/container.go'],
+                       ['google/image.go',
+                        'third_party/terraform/utils/image.go'],
+                       ['google/disk_type.go',
+                        'third_party/terraform/utils/disk_type.go'],
+                       ['google/validation.go',
+                        'third_party/terraform/utils/validation.go'],
+                       ['google/regional_utils.go',
+                        'third_party/terraform/utils/regional_utils.go'],
+                       ['google/field_helpers.go',
+                        'third_party/terraform/utils/field_helpers.go'],
+                       ['google/self_link_helpers.go',
+                        'third_party/terraform/utils/self_link_helpers.go'],
+                       ['google/transport.go',
+                        'third_party/terraform/utils/transport.go'],
+                       ['google/bigtable_client_factory.go',
+                        'third_party/terraform/utils/bigtable_client_factory.go'],
+                       ['google/common_operation.go',
+                        'third_party/terraform/utils/common_operation.go'],
+                       ['google/compute_shared_operation.go',
+                        'third_party/terraform/utils/compute_shared_operation.go'],
+                       ['google/compute_instance_helpers.go',
+                        'third_party/terraform/utils/compute_instance_helpers.go.erb'],
+                       ['google/convert.go',
+                        'third_party/terraform/utils/convert.go'],
+                       ['google/metadata.go',
+                        'third_party/terraform/utils/metadata.go'],
+                       ['google/service_scope.go',
+                        'third_party/terraform/utils/service_scope.go'],
+                       ['google/kms_utils.go',
+                        'third_party/terraform/utils/kms_utils.go'],
+                       ['google/batcher.go',
+                        'third_party/terraform/utils/batcher.go'],
+                       ['google/retry_utils.go',
+                        'third_party/terraform/utils/retry_utils.go'],
+                       ['google/source_repo_utils.go',
+                        'third_party/terraform/utils/source_repo_utils.go'],
+                       ['google/retry_transport.go',
+                        'third_party/terraform/utils/retry_transport.go'],
+                       ['google/error_retry_predicates.go',
+                        'third_party/terraform/utils/error_retry_predicates.go']
+                     ])
     end
 
     def generate_resource_tests(pwd, data) end
