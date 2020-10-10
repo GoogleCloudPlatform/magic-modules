@@ -3588,7 +3588,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "n1-standard-1"   // can't be e2 because of local-ssd
   zone         = "us-central1-a"
 
   boot_disk {
@@ -4244,7 +4244,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "n1-standard-1"   // can't be e2 because of min_cpu_platform
   zone         = "us-central1-a"
 
   boot_disk {
@@ -4390,7 +4390,7 @@ resource "google_compute_node_template" "nodetmpl" {
     tfacc = "test"
   }
 
-  node_type = "e2-node-96-624"
+  node_type = "n1-node-96-624"
 
 <% unless version == 'ga' -%>
   cpu_overcommit_type = "ENABLED"
