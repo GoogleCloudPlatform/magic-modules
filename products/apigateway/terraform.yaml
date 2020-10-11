@@ -22,7 +22,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/apigateway.viewer'
       method_name_separator: ':'
-      parent_resource_attribute: 'api'
+      parent_resource_attribute: 'api_id'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta
@@ -43,8 +43,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/apigateway.viewer'
+      parent_resource_type: 'google_api_gateway_api'
+      parent_resource_attribute: api_config_id
+      example_config_body: 'templates/terraform/iam/example_config_body/api_gateway_api_config.tf.erb'
       method_name_separator: ':'
-      parent_resource_attribute: 'api_config'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta
@@ -55,15 +57,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       displayName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      gatewayConfig.backendConfig.googleServiceAccount: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
-      openapiDocuments.document.contents: !ruby/object:Overrides::Terraform::PropertyOverride
+      gatewayConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
-      openapiDocuments.document.path: !ruby/object:Overrides::Terraform::PropertyOverride
+      openapiDocuments: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      constants:  'templates/terraform/constants/apigateway_apiconfig.erb'
-      resource_definition: 'templates/terraform/resource_definition/api_config.erb'
   Gateway: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
@@ -73,7 +70,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       allowed_iam_role: 'roles/apigateway.viewer'
       method_name_separator: ':'
-      parent_resource_attribute: 'gateway'
+      parent_resource_attribute: 'gateway_id'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta
@@ -82,8 +79,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "api-gw"
     properties:
-      name: !ruby/object:Overrides::Terraform::PropertyOverride
-        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       displayName: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride

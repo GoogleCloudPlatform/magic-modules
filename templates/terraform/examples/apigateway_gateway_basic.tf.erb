@@ -1,21 +1,13 @@
 resource "google_api_gateway_api" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   api_id = "<%= ctx[:vars]["name"] %>"
-  display_name = "MM Dev API"
-  labels = {
-    environment = "dev"
-  }
 }
-
 
 resource "google_api_gateway_api_config" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
-  api_id = google_api_gateway_api.<%= ctx[:primary_resource_id] %>.api_id
+  api = google_api_gateway_api.<%= ctx[:primary_resource_id] %>.api_id
   api_config_id = "<%= ctx[:vars]["name"] %>"
-  display_name = "MM Dev API Config"
-  labels = {
-    environment = "dev"
-  }
+
   openapi_documents {
     document {
       path = "spec.yaml"
@@ -24,10 +16,10 @@ resource "google_api_gateway_api_config" "<%= ctx[:primary_resource_id] %>" {
   }
 }
 
-
 resource "google_api_gateway_gateway" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
-  api_config = google_api_gateway_api_config.<%= ctx[:primary_resource_id] %>.name
+  region = "us-central1"
+  api_config = google_api_gateway_api_config.<%= ctx[:primary_resource_id] %>.id
   gateway_id = "<%= ctx[:vars]["name"] %>"
   display_name = "MM Dev API Gateway"
   labels = {
