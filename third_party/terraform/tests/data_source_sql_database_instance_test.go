@@ -39,6 +39,8 @@ resource "google_sql_database_instance" "master" {
     # type. See argument reference below.
     tier = "db-f1-micro"
   }
+
+  deletion_protection = false
 }
 
 data "google_sql_database_instance" "qa" {
