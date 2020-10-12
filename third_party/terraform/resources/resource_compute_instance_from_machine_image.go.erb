@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	strcase "github.com/stoewer/go-strcase"
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	compute "google.golang.org/api/compute/v1"
@@ -55,6 +55,11 @@ func computeInstanceFromMachineImageSchema() map[string]*schema.Schema {
 		// machine image, so remove defaults.
 		field.Default = nil
 
+		// Make non-required fields computed since they'll be set by the template.
+		// Leave deprecated and removed fields alone because we don't set them.
+		if !field.Required && !(field.Deprecated != "") {
+			field.Computed = true
+		}
 	})
 
 	s["source_machine_image"] = &schema.Schema{
@@ -70,6 +75,10 @@ func computeInstanceFromMachineImageSchema() map[string]*schema.Schema {
 
 func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -82,8 +91,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 		return err
 	}
 	log.Printf("[DEBUG] Loading zone: %s", z)
-
-	zone, err := config.clientCompute.Zones.Get(project, z).Do()
+	zone, err := config.NewComputeClient(userAgent).Zones.Get(project, z).Do()
 	if err != nil {
 		return fmt.Errorf("Error loading zone '%s': %s", z, err)
 	}
@@ -98,7 +106,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 		return err
 	}
 
-	mi, err := config.clientComputeBeta.MachineImages.Get(project, tpl.Name).Do()
+	mi, err := config.NewComputeBetaClient(userAgent).MachineImages.Get(project, tpl.Name).Do()
 	if err != nil {
 		return err
 	}
@@ -135,7 +143,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	}
 
 	log.Printf("[INFO] Requesting instance creation")
-	op, err := config.clientComputeBeta.Instances.Insert(project, zone.Name, instance).SourceMachineImage(tpl.RelativeLink()).Do()
+	op, err := config.NewComputeBetaClient(userAgent).Instances.Insert(project, zone.Name, instance).SourceMachineImage(tpl.RelativeLink()).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating instance: %s", err)
 	}
@@ -145,7 +153,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 
 	// Wait for the operation to complete
 	waitErr := computeOperationWaitTime(config, op, project,
-		"instance to create", d.Timeout(schema.TimeoutCreate))
+		"instance to create",userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		// The resource didn't actually create
 		d.SetId("")

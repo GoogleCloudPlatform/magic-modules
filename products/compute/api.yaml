@@ -7168,8 +7168,7 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'storageLocations'
         description: |
-          The RFC 4648 base64 encoded SHA-256 hash of the
-          customer-supplied encryption key that protects this resource.
+          The regional or multi-regional Cloud Storage bucket location where the machine image is stored.
         item_type: Api::Type::String
         output: true
       - !ruby/object:Api::Type::Boolean
