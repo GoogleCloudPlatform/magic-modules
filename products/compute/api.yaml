@@ -4146,6 +4146,7 @@ objects:
         description: |
           An optional description of this resource. Provide this property when
           you create the resource.
+        send_empty_value: true
       - !ruby/object:Api::Type::Integer
         name: 'healthyThreshold'
         description: |
@@ -11070,6 +11071,7 @@ objects:
         description: |
           An optional description of this resource. Provide this property when
           you create the resource.
+        send_empty_value: true
       - !ruby/object:Api::Type::Integer
         name: 'healthyThreshold'
         description: |
