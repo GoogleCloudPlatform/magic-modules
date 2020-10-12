@@ -119,6 +119,11 @@ func resourceGoogleProjectServiceImport(d *schema.ResourceData, m interface{}) (
 
 func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	config.userAgent = userAgent
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -157,6 +162,10 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 
 func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -165,7 +174,7 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	project = GetResourceNameFromSelfLink(project)
 
 	// Verify project for services still exists
-	projectGetCall := config.clientResourceManager.Projects.Get(project)
+	projectGetCall := config.NewResourceManagerClient(userAgent).Projects.Get(project)
 	if config.UserProjectOverride {
 		projectGetCall.Header().Add("X-Goog-User-Project", project)
 	}
@@ -245,8 +254,13 @@ func resourceGoogleProjectServiceUpdate(d *schema.ResourceData, meta interface{}
 // Disables a project service.
 func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *Config, disableDependentServices bool) error {
 	err := retryTimeDuration(func() error {
+		userAgent, err := generateUserAgentString(d, config.userAgent)
+		if err != nil {
+			return err
+		}
+
 		name := fmt.Sprintf("projects/%s/services/%s", project, service)
-		servicesDisableCall := config.clientServiceUsage.Services.Disable(name, &serviceusage.DisableServiceRequest{
+		servicesDisableCall := config.NewServiceUsageClient(userAgent).Services.Disable(name, &serviceusage.DisableServiceRequest{
 			DisableDependentServices: disableDependentServices,
 		})
 		if config.UserProjectOverride {
@@ -257,7 +271,7 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 			return err
 		}
 		// Wait for the operation to complete
-		waitErr := serviceUsageOperationWait(config, sop, project, "api to disable", d.Timeout(schema.TimeoutDelete))
+		waitErr := serviceUsageOperationWait(config, sop, project, "api to disable", userAgent, d.Timeout(schema.TimeoutDelete))
 		if waitErr != nil {
 			return waitErr
 		}

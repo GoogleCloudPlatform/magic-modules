@@ -37,6 +37,11 @@ func dataSourceGoogleComputeInstanceSerialPort() *schema.Resource {
 
 func computeInstanceSerialPortRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
@@ -53,7 +58,7 @@ func computeInstanceSerialPortRead(d *schema.ResourceData, meta interface{}) err
 	}
 
 	port := int64(d.Get("port").(int))
-	output, err := config.clientCompute.Instances.GetSerialPortOutput(project, zone, d.Get("instance").(string)).Port(port).Do()
+	output, err := config.NewComputeClient(userAgent).Instances.GetSerialPortOutput(project, zone, d.Get("instance").(string)).Port(port).Do()
 	if err != nil {
 		return err
 	}

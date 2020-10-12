@@ -90,6 +90,10 @@ func recurseOnSchema(s map[string]*schema.Schema, f func(*schema.Schema)) {
 
 func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -102,7 +106,7 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 	log.Printf("[DEBUG] Loading zone: %s", z)
-	zone, err := config.clientCompute.Zones.Get(project, z).Do()
+	zone, err := config.NewComputeClient(userAgent).Zones.Get(project, z).Do()
 	if err != nil {
 		return fmt.Errorf("Error loading zone '%s': %s", z, err)
 	}
@@ -117,7 +121,7 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	it, err := config.clientComputeBeta.InstanceTemplates.Get(project, tpl.Name).Do()
+	it, err := config.NewComputeBetaClient(userAgent).InstanceTemplates.Get(project, tpl.Name).Do()
 	if err != nil {
 		return err
 	}
@@ -154,7 +158,7 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 	}
 
 	log.Printf("[INFO] Requesting instance creation")
-	op, err := config.clientComputeBeta.Instances.Insert(project, zone.Name, instance).SourceInstanceTemplate(tpl.RelativeLink()).Do()
+	op, err := config.NewComputeBetaClient(userAgent).Instances.Insert(project, zone.Name, instance).SourceInstanceTemplate(tpl.RelativeLink()).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating instance: %s", err)
 	}
@@ -164,7 +168,7 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 
 	// Wait for the operation to complete
 	waitErr := computeOperationWaitTime(config, op, project,
-		"instance to create", d.Timeout(schema.TimeoutCreate))
+		"instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		// The resource didn't actually create
 		d.SetId("")

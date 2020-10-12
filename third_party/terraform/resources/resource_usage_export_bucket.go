@@ -49,13 +49,17 @@ func resourceProjectUsageBucket() *schema.Resource {
 
 func resourceProjectUsageBucketRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	p, err := config.clientCompute.Projects.Get(project).Do()
+	p, err := config.NewComputeClient(userAgent).Projects.Get(project).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Project data for project %s", project))
 	}
@@ -80,13 +84,17 @@ func resourceProjectUsageBucketRead(d *schema.ResourceData, meta interface{}) er
 
 func resourceProjectUsageBucketCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	op, err := config.clientCompute.Projects.SetUsageExportBucket(project, &compute.UsageExportLocation{
+	op, err := config.NewComputeClient(userAgent).Projects.SetUsageExportBucket(project, &compute.UsageExportLocation{
 		ReportNamePrefix: d.Get("prefix").(string),
 		BucketName:       d.Get("bucket_name").(string),
 	}).Do()
@@ -94,7 +102,7 @@ func resourceProjectUsageBucketCreate(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 	d.SetId(project)
-	err = computeOperationWaitTime(config, op, project, "Setting usage export bucket.", d.Timeout(schema.TimeoutCreate))
+	err = computeOperationWaitTime(config, op, project, "Setting usage export bucket.", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		d.SetId("")
 		return err
@@ -109,19 +117,23 @@ func resourceProjectUsageBucketCreate(d *schema.ResourceData, meta interface{}) 
 
 func resourceProjectUsageBucketDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	op, err := config.clientCompute.Projects.SetUsageExportBucket(project, nil).Do()
+	op, err := config.NewComputeClient(userAgent).Projects.SetUsageExportBucket(project, nil).Do()
 	if err != nil {
 		return err
 	}
 
 	err = computeOperationWaitTime(config, op, project,
-		"Setting usage export bucket to nil, automatically disabling usage export.", d.Timeout(schema.TimeoutDelete))
+		"Setting usage export bucket to nil, automatically disabling usage export.", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return err
 	}

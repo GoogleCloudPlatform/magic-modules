@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"sort"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/compute/v1"
@@ -35,6 +34,10 @@ func dataSourceGoogleComputeNodeTypes() *schema.Resource {
 
 func dataSourceGoogleComputeNodeTypesRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -46,7 +49,7 @@ func dataSourceGoogleComputeNodeTypesRead(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Please specify zone to get appropriate node types for zone. Unable to get zone: %s", err)
 	}
 
-	resp, err := config.clientCompute.NodeTypes.List(project, zone).Do()
+	resp, err := config.NewComputeClient(userAgent).NodeTypes.List(project, zone).Do()
 	if err != nil {
 		return err
 	}
@@ -62,7 +65,7 @@ func dataSourceGoogleComputeNodeTypesRead(d *schema.ResourceData, meta interface
 	if err := d.Set("zone", zone); err != nil {
 		return fmt.Errorf("Error setting zone: %s", err)
 	}
-	d.SetId(time.Now().UTC().String())
+	d.SetId(fmt.Sprintf("projects/%s/zones/%s", project, zone))
 
 	return nil
 }

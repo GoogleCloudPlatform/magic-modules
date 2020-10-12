@@ -20,13 +20,13 @@ if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(v)) && (ok ||
     if err != nil {
         return err
     }
-    res, err = sendRequest(config, "POST", project, url, obj<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+    res, err = sendRequest(config, "POST", project, url, userAgent, obj<%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
       return fmt.Errorf("Error adding labels to <%= resource_name -%> %q: %s", d.Id(), err)
     }
 
     err = computeOperationWaitTime(
-        config, res, project, "Updating <%= resource_name -%> Labels",
+        config, res, project, "Updating <%= resource_name -%> Labels", userAgent,
         d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {

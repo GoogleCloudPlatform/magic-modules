@@ -33,8 +33,13 @@ func dataSourceGoogleIamRole() *schema.Resource {
 
 func dataSourceGoogleIamRoleRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	roleName := d.Get("name").(string)
-	role, err := config.clientIAM.Roles.Get(roleName).Do()
+	role, err := config.NewIamClient(userAgent).Roles.Get(roleName).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Error reading IAM Role %s: %s", roleName, err))
 	}
