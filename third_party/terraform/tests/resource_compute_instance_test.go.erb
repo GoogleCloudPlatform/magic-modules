@@ -4039,6 +4039,8 @@ resource "google_compute_instance" "foobar" {
   scheduling {
     # Instances with guest accelerators do not support live migration.
     on_host_maintenance = "TERMINATE"
+    preemptible         = true
+    automatic_restart   = false
   }
 
   guest_accelerator {
@@ -4058,7 +4060,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "n1-standard-1"   // can't be e2 because of min_cpu_platform
   zone         = "us-east1-d"
 
   boot_disk {
@@ -4281,7 +4283,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-standard-2"
+  machine_type = "n1-standard-2"   // can't be e2 because of min_cpu_platform
   zone         = "us-central1-a"
 
   boot_disk {
@@ -4317,7 +4319,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-standard-2"
+  machine_type = "n1-standard-2"   // can't be e2 because of min_cpu_platform
   zone         = "us-central1-a"
 
   boot_disk {
@@ -4344,7 +4346,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-standard-8"
+  machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
   zone         = "us-central1-a"
 
   boot_disk {
@@ -4416,7 +4418,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-standard-8"
+  machine_type = "n1-standard-8"   // can't be e2 because of sole tenancy
   zone         = "us-central1-a"
 
   boot_disk {
