@@ -4023,7 +4023,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance" "foobar" {
   name         = "%s"
-  machine_type = "e2-medium"
+  machine_type = "n1-standard-1"   // can't be e2 because of guest_accelerator
   zone         = "us-east1-d"
 
   boot_disk {
@@ -4039,8 +4039,6 @@ resource "google_compute_instance" "foobar" {
   scheduling {
     # Instances with guest accelerators do not support live migration.
     on_host_maintenance = "TERMINATE"
-    preemptible         = true
-    automatic_restart   = false
   }
 
   guest_accelerator {
