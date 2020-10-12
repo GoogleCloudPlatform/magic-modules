@@ -48,12 +48,13 @@ objects:
           The user email.
         input: true
         url_param_only: true
-        required: true      
+        required: true
       - !ruby/object:Api::Type::String
-        name: fingerprint
+        name: project
         description: |
-          The SHA-256 fingerprint of the SSH public key.
-        output: true
+          The project ID of the Google Cloud Platform project.
+        input: true
+        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'key'
@@ -66,3 +67,8 @@ objects:
         description: |
           An expiration time in microseconds since epoch.
         required: false
+      - !ruby/object:Api::Type::String
+        name: fingerprint
+        description: |
+          The SHA-256 fingerprint of the SSH public key.
+        output: true
