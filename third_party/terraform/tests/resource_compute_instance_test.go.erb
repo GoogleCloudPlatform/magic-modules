@@ -4462,7 +4462,7 @@ resource "google_compute_node_template" "nodetmpl" {
     tfacc = "test"
   }
 
-  node_type = "e2-node-96-624"
+  node_type = "n1-node-96-624"
 
 <% unless version == 'ga' -%>
   cpu_overcommit_type = "ENABLED"
