@@ -580,6 +580,13 @@ objects:
     delete_verb: :PATCH
     input: true
     update_mask: true
+    identity:
+      - ipSubnetworks
+      - requiredAccessLevels
+      - members
+      - negate
+      - devicePolicy
+      - regions
     nested_query: !ruby/object:Api::Resource::NestedQuery
       modify_by_patch: true
       keys:

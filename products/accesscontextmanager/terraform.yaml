@@ -110,6 +110,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         in the provider configuration. Otherwise the ACM API will return a 403 error. 
         Your account must have the `serviceusage.services.use` permission on the 
         `billing_project` you defined.
+    async: !ruby/object:Provider::Terraform::PollAsync
+      check_response_func_existence: PollCheckForExistence
+      actions: ['create']
+      operation: !ruby/object:Api::Async::Operation
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 4
     autogen_async: true
     exclude_validator: true
     exclude_import: true # no unique way to specify

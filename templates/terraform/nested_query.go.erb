@@ -26,33 +26,14 @@ func flattenNested<%= resource_name -%>(d *schema.ResourceData, meta interface{}
     return nil, fmt.Errorf("expected list or map for value <%= object.nested_query.keys.join(".") -%>. Actual value: %v", v)
   }
 
-  // create desired object
-  config := meta.(*Config)
-  desiredObj := make(map[string]interface{})
-<%  object.settable_properties.each do |prop| -%>
-    <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
-    <%= prop.api_name -%>Prop, err := expand<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
-    if err != nil {
-        return nil, err
-<%    if prop.send_empty_value -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
-<%    elsif prop.flatten_object -%>
-    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
-<%    else -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
-<%    end -%>
-        desiredObj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-    }
-<%  end -%>
-
-  _, item, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, v.([]interface{}), desiredObj)
+  _, item, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, v.([]interface{}))
   if err != nil {
     return nil, err
   } 
   return item, nil
 }
 
-func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, meta interface{}, items []interface{}, obj map[string]interface{}) (index int, item map[string]interface{}, err error) {
+func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, meta interface{}, items []interface{}) (index int, item map[string]interface{}, err error) {
   <% object.identity.each do |id_prop| -%>
   <%   if settable_properties.include?(id_prop) -%>
   expected<%= titlelize_property(id_prop) -%>, err := expandNested<%= resource_name -%><%= titlelize_property(id_prop) -%>(d.Get("<%= id_prop.name.underscore -%>"), d, meta.(*Config))
@@ -95,10 +76,8 @@ func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, me
       continue
     }
     <% end -%>
-    if reflect.DeepEqual(item, obj) {
-      log.Printf("[DEBUG] Found item for resource %q: %#v)", d.Id(), item)
-      return idx, item, nil
-    }
+    log.Printf("[DEBUG] Found item for resource %q: %#v)", d.Id(), item)
+    return idx, item, nil
   }
   return -1, nil, nil
 }
@@ -115,7 +94,7 @@ func resource<%= resource_name -%>PatchCreateEncoder(d *schema.ResourceData, met
     return nil, err
   }
 
-  _, found, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, currItems, obj)
+  _, found, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, currItems)
   if err != nil {
     return nil, err
   }
@@ -172,7 +151,7 @@ func resource<%= resource_name -%>PatchUpdateEncoder(d *schema.ResourceData, met
     return nil, err
   }
 
-  idx, item, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, items, obj)
+  idx, item, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, items)
   if err != nil {
     return nil, err
   }
@@ -212,7 +191,7 @@ func resource<%= resource_name -%>PatchDeleteEncoder(d *schema.ResourceData, met
     return nil, err
   }
 
-  idx, item, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, currItems, obj)
+  idx, item, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, currItems)
   if err != nil {
     return nil, err
   }
