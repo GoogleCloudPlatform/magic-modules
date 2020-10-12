@@ -166,9 +166,9 @@ resource "google_logging_folder_bucket_config" "basic" {
 func testAccLoggingBucketConfigProject_basic(context map[string]interface{}, retention int) string {
 	return fmt.Sprintf(Nprintf(`
  resource "google_project" "default" {
- 	project_id = "%{project_name}"
- 	name       = "%{project_name}"
- 	org_id     = "%{org_id}"
+	project_id = "%{project_name}"
+	name       = "%{project_name}"
+	org_id     = "%{org_id}"
  }
 
 resource "google_logging_project_bucket_config" "basic" {
