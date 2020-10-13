@@ -136,7 +136,6 @@ resource "google_access_context_manager_access_level" "test-access" {
 
 resource "google_service_account" "created-later" {
   account_id = "%s"
-  depends_on = [google_access_context_manager_access_level.test-access]
 }
 
 resource "google_access_context_manager_access_level_condition" "access-level-condition" {

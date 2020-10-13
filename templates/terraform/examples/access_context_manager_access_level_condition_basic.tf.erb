@@ -30,7 +30,7 @@ resource "google_service_account" "created-later" {
 resource "google_access_context_manager_access_level_condition" "access-level-conditions" {
   access_level = google_access_context_manager_access_level.access-level-service-account.name
   ip_subnetworks = ["192.0.4.0/24"]
-  members = ["user:test@google.com", "user:test2@google.com"]
+  members = ["user:test@google.com", "user:test2@google.com", "serviceAccount:${google_service_account.created-later.email}"]
   negate = false
   device_policy {
     require_screen_lock = false
