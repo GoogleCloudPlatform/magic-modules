@@ -7951,9 +7951,13 @@ objects:
           The total number of nodes in the node group.
         required: true
         send_empty_value: true
+      - !ruby/object:Api::Type::String
+        name: 'maintenancePolicy'
+        description: |
+          Specifies how to handle instances when a node in the group undergoes maintenance. Set to one of: DEFAULT, RESTART_IN_PLACE, or MIGRATE_WITHIN_NODE_GROUP. The default value is DEFAULT.
+        default_value: DEFAULT
       - !ruby/object:Api::Type::NestedObject
         name: 'autoscalingPolicy'
-        min_version: beta
         description: |
           If you use sole-tenant nodes for your workloads, you can use the node
           group autoscaler to automatically manage the sizes of your node groups.
