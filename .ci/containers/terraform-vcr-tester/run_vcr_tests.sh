@@ -17,18 +17,12 @@ ID=$(cat build.json | jq .id -r)
 curl --header "Authorization: Bearer $TEAMCITY_TOKEN" --header "Accept: application/json" https://ci-oss.hashicorp.engineering/app/rest/builds/id:$ID --output poll.json
 STATUS=$(cat poll.json | jq .status -r)
 STATE=$(cat poll.json | jq .state -r)
-counter=0
 while [[ "$STATE" != "finished" ]]; do
-	if [ "$counter" -gt "100" ]; then
-		echo "Failed to wait for job to finish, exiting"
-		exit 1
-	fi
-	sleep 30
+	sleep 60
 	curl --header "Authorization: Bearer $TEAMCITY_TOKEN" --header "Accept: application/json" https://ci-oss.hashicorp.engineering/app/rest/builds/id:$ID --output poll.json
 	STATUS=$(cat poll.json | jq .status -r)
 	STATE=$(cat poll.json | jq .state -r)
 	echo "Trying again, State: $STATE Status: $STATUS"
-	counter=$((counter + 1))
 done
 
 if [ "$STATUS" == "SUCCESS" ]; then
