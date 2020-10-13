@@ -25,7 +25,6 @@ resource "google_access_context_manager_access_level" "access-level-service-acco
 
 resource "google_service_account" "created-later" {
   account_id = "tf-test-%{random_suffix}"
-  depends_on = [google_access_context_manager_access_level.access-level-service-account]
 }
 
 resource "google_access_context_manager_access_level_condition" "access-level-conditions" {

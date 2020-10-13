@@ -573,6 +573,11 @@ objects:
                     description: String indicating the location of the expression for error reporting, e.g. a file name and a position in the file      
   - !ruby/object:Api::Resource
     name: 'AccessLevelCondition'
+    # This is an unusual API, so we need to use a few fields to map the methods
+    # to the right URL.
+    # create_url is the Create URL
+    # base_url is the Get and Delete and Patch URL. It is empty on purpose.
+    # List won't work yet. It should share a URL with Create.
     create_url: "{{access_level}}"
     base_url: ""
     self_link: "{{access_level}}"
