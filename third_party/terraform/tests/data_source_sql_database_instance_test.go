@@ -20,7 +20,13 @@ func TestAccDataSourceSqlDatabaseInstance_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceSqlDatabaseInstance_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_sql_database_instance.qa", "google_sql_database_instance.master"),
+					checkDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_sql_database_instance.qa",
+						"google_sql_database_instance.master",
+						map[string]struct{}{
+							"deletion_protection": {},
+						},
+					),
 				),
 			},
 		},
