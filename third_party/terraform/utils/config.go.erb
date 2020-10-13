@@ -104,6 +104,7 @@ type Config struct {
 	DnsBetaBasePath string
 	IamCredentialsBasePath string
 	ResourceManagerV2Beta1BasePath string
+	IAMBasePath string
 	CloudIoTBasePath string
 	ServiceNetworkingBasePath string
 	StorageTransferBasePath string
@@ -866,6 +867,7 @@ func ConfigureBasePaths(c *Config) {
 	c.DnsBetaBasePath = DnsBetaDefaultBasePath
 	c.IamCredentialsBasePath = IamCredentialsDefaultBasePath
 	c.ResourceManagerV2Beta1BasePath = ResourceManagerV2Beta1DefaultBasePath
+	c.IAMBasePath = IAMDefaultBasePath
 	c.ServiceNetworkingBasePath = ServiceNetworkingDefaultBasePath
 	c.BigQueryBasePath = BigQueryDefaultBasePath
 	c.StorageTransferBasePath = StorageTransferDefaultBasePath

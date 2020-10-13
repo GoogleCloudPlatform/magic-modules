@@ -126,9 +126,9 @@ resource project for preconditions, quota, and billing, instead of the project
 the credentials belong to. Not all resources support this- see the
 documentation for each resource to learn whether it does.
 
-* `billing_project` - (Optional) This fields specifies a project that's used for
-preconditions, quota, and billing for requests. All resources that support user project
-overrides will use this project instead of the resource's project (if available). This
+* `billing_project` - (Optional) This fields specifies a project that's used for 
+preconditions, quota, and billing for requests. All resources that support user project 
+overrides will use this project instead of the resource's project (if available). This 
 field is ignored if `user_project_override` is set to false or unset.
 
 * `{{service}}_custom_endpoint` - (Optional) The endpoint for a service's APIs,
@@ -211,7 +211,7 @@ following ordered by precedence.
 ---
 
 * `billing_project` - (Optional) This fields allows Terraform to set X-Goog-User-Project
-for APIs that require a billing project to be specified like Access Context Manager APIs if
+for APIs that require a billing project to be specified like Access Context Manager APIs if 
 User ADCs are being used. This can also be
 specified using the `GOOGLE_BILLING_PROJECT` environment variable.
 
@@ -304,7 +304,7 @@ be used for configuration are below:
 * `dns_beta_custom_endpoint` (`GOOGLE_DNS_BETA_CUSTOM_ENDPOINT`) - `https://www.googleapis.com/dns/v1beta2/`
 * `filestore_custom_endpoint` (`GOOGLE_FILESTORE_CUSTOM_ENDPOINT`) - `https://file.googleapis.com/v1/`
 * `firestore_custom_endpoint` (`GOOGLE_FIRESTORE_CUSTOM_ENDPOINT`) - `https://firestore.googleapis.com/v1/`
-* `iam_custom_endpoint` (`GOOGLE_IAM_CUSTOM_ENDPOINT`) - `https://iam.googleapis.com/v1/` | `https://iam.googleapis.com/v1beta/`
+* `iam_custom_endpoint` (`GOOGLE_IAM_CUSTOM_ENDPOINT`) - `https://iam.googleapis.com/v1/`
 * `iam_credentials_custom_endpoint` (`GOOGLE_IAM_CREDENTIALS_CUSTOM_ENDPOINT`) - `https://iamcredentials.googleapis.com/v1/`
 * `kms_custom_endpoint` (`GOOGLE_KMS_CUSTOM_ENDPOINT`) - `https://cloudkms.googleapis.com/v1/`
 * `logging_custom_endpoint` (`GOOGLE_LOGGING_CUSTOM_ENDPOINT`) - `https://logging.googleapis.com/v2/`
@@ -351,12 +351,12 @@ as their versioned counterpart but that won't necessarily always be the case.
 
 * `batching` - (Optional) Controls batching for specific GCP request types
   where users have encountered quota or speed issues using `count` with
-  resources that affect the same GCP resource (e.g. `google_project_service`).
+  resources that affect the same GCP resource (e.g. `google_project_service`). 
   It is not used for every resource/request type and can only group parallel
   similar calls for nodes at a similar traversal time in the graph during
   `terraform apply` (e.g. resources created using `count` that affect a single
-  `project`). Thus, it is also bounded by the `terraform`
-  [`-parallelism`](https://www.terraform.io/docs/commands/apply.html#parallelism-n)
+  `project`). Thus, it is also bounded by the `terraform` 
+  [`-parallelism`](https://www.terraform.io/docs/commands/apply.html#parallelism-n) 
   flag, as reducing the number of parallel calls will reduce the number of
   simultaneous requests being added to a batcher.
 

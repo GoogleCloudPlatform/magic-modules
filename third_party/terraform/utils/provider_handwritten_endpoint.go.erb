@@ -104,6 +104,17 @@ var DnsBetaCustomEndpointEntry = &schema.Schema{
 	}, DnsBetaDefaultBasePath),
 }
 
+var IAMDefaultBasePath = "https://iam.googleapis.com/v1/"
+var IAMCustomEndpointEntryKey = "iam_custom_endpoint"
+var IAMCustomEndpointEntry = &schema.Schema{
+	Type:         schema.TypeString,
+	Optional:     true,
+	ValidateFunc: validateCustomEndpoint,
+	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+		"GOOGLE_IAM_CUSTOM_ENDPOINT",
+	}, IAMDefaultBasePath),
+}
+
 var IamCredentialsDefaultBasePath = "https://iamcredentials.googleapis.com/v1/"
 var IamCredentialsCustomEndpointEntryKey = "iam_credentials_custom_endpoint"
 var IamCredentialsCustomEndpointEntry = &schema.Schema{

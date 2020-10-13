@@ -20,9 +20,6 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://iam.googleapis.com/v1/
-  - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://iam.googleapis.com/v1beta/
 scopes:
   - https://www.googleapis.com/auth/iam
 apis_required:
@@ -199,74 +196,3 @@ objects:
         name: 'deleted'
         description: The current deleted state of the role
         output: true
-  - !ruby/object:Api::Resource
-    name: 'WorkloadIdentityPool'
-    min_version: beta
-    base_url: projects/{{project}}/locations/global/workloadIdentityPools
-    create_url: projects/{{project}}/locations/global/workloadIdentityPools?workloadIdentityPoolId={{workload_identity_pool_id}}
-    description: |
-      Represents a collection of external workload identities. You can define IAM policies to
-      grant these identities access to Google Cloud resources.
-    update_mask: true
-    async: !ruby/object:Api::OpAsync
-      operation: !ruby/object:Api::OpAsync::Operation
-        path: 'name'
-        base_url: '{{op_id}}'
-        wait_ms: 1000
-      result: !ruby/object:Api::OpAsync::Result
-        path: 'response'
-        resource_inside_response: true
-      status: !ruby/object:Api::OpAsync::Status
-        path: 'done'
-        complete: True
-        allowed:
-          - True
-          - False
-      error: !ruby/object:Api::OpAsync::Error
-        path: 'error'
-        message: 'message'
-    properties:
-      - !ruby/object:Api::Type::String
-         name: 'workloadIdentityPoolId'
-         description: |
-           The ID to use for the pool, which becomes the final component of the resource name. This
-           value should be 4-32 characters, and may contain the characters [a-z0-9-]. The prefix
-           `gcp-` is reserved for use by Google, and may not be specified.
-         required: true
-         input: true
-         url_param_only: true
-      - !ruby/object:Api::Type::Enum
-        name: 'state'
-        description: |
-          The state of the pool.
-          STATE_UNSPECIFIED: State unspecified.
-          ACTIVE: The pool is active, and may be used in Google Cloud policies.
-          DELETED: The pool is soft-deleted. Soft-deleted pools are permanently deleted after
-          approximately 30 days. You can restore a soft-deleted pool using
-          UndeleteWorkloadIdentityPool. You cannot reuse the ID of a soft-deleted pool until it is
-          permanently deleted. While a pool is deleted, you cannot use it to exchange tokens, or
-          use existing tokens to access resources. If the pool is undeleted, existing tokens grant
-          access again.
-        output: true
-        values:
-          - :STATE_UNSPECIFIED
-          - :ACTIVE
-          - :DELETED
-      - !ruby/object:Api::Type::String
-        name: 'displayName'
-        description: A display name for the pool. Cannot exceed 32 characters.
-      - !ruby/object:Api::Type::String
-        name: 'description'
-        description: A description of the pool. Cannot exceed 256 characters.
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        description: |
-          The resource name of the pool as
-          `projects/<projectnumber>/locations/global/workloadIdentityPools/<id>`.
-        output: true
-      - !ruby/object:Api::Type::Boolean
-        name: 'disabled'
-        description: |
-          Whether the pool is disabled. You cannot use a disabled pool to exchange tokens, or use
-          existing tokens to access resources. If the pool is re-enabled, existing tokens grant
-          access again.

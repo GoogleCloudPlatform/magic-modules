@@ -1,12 +1,14 @@
+<% autogen_exception -%>
 package google
 
+<% unless version == 'ga' %>
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccIAMWorkloadIdentityPool_example(t *testing.T) {
+func TestAccIAMBetaWorkloadIdentityPool_example(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -20,19 +22,13 @@ func TestAccIAMWorkloadIdentityPool_example(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIAMWorkloadIdentityPool_example(context),
-			},
-			{
-				ResourceName:            "google_iam_workload_identity_pool.my_pool",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"project"},
+				Config: testAccIAMBetaWorkloadIdentityPool_example(context),
 			},
 		},
 	})
 }
 
-func testAccIAMWorkloadIdentityPool_example(context map[string]interface{}) string {
+func testAccIAMBetaWorkloadIdentityPool_example(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_project" "my_project" {
   project_id = "tf-test%{random_suffix}"
@@ -53,3 +49,4 @@ resource "google_iam_workload_identity_pool" "my_pool" {
 }
 `, context)
 }
+<% end -%>
