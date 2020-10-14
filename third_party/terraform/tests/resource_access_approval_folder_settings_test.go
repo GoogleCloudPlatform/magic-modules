@@ -10,8 +10,6 @@ import (
 )
 
 func testAccAccessApprovalFolderSettings(t *testing.T) {
-	t.Parallel()
-
 	context := map[string]interface{}{
 		"org_id":        getTestOrgFromEnv(t),
 		"random_suffix": randString(t, 10),

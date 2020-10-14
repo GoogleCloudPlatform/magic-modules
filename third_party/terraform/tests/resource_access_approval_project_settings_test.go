@@ -10,8 +10,6 @@ import (
 )
 
 func testAccAccessApprovalProjectSettings(t *testing.T) {
-	t.Parallel()
-
 	context := map[string]interface{}{
 		"project":       getTestProjectFromEnv(),
 		"org_id":        getTestOrgFromEnv(t),
