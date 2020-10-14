@@ -7587,8 +7587,8 @@ objects:
     read_verb: :POST
     self_link: projects/{{project}}/global/networkEndpointGroups/{{global_network_endpoint_group}}/listNetworkEndpoints
     identity:
-      - fqdn
       - ipAddress
+      - fqdn
       - port
     nested_query: !ruby/object:Api::Resource::NestedQuery
       keys:
