@@ -115,7 +115,7 @@ objects:
               - schedule_options.0.disable_auto_scheduling
               - schedule_options.0.start_time
               - schedule_options.0.end_time
-          - !ruby/object:Api::Type::String
+          - !ruby/object:Api::Type::Time
             name: 'startTime'
             description: |
               Specifies time to start scheduling transfer runs. The first run will be
@@ -127,7 +127,7 @@ objects:
               - schedule_options.0.disable_auto_scheduling
               - schedule_options.0.start_time
               - schedule_options.0.end_time
-          - !ruby/object:Api::Type::String
+          - !ruby/object:Api::Type::Time
             name: 'endTime'
             description: |
               Defines time to stop scheduling transfer runs. A transfer run cannot be
