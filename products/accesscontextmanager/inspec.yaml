@@ -24,6 +24,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   AccessLevels: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  AccessLevelCondition: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   ServicePerimeter: !ruby/object:Overrides::Inspec::ResourceOverride
     base_url: "accessPolicies/{{policy_name}}/servicePerimeters"
     self_link: "accessPolicies/{{policy_name}}/servicePerimeters/{{name}}"
