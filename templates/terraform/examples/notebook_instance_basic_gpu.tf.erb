@@ -2,7 +2,7 @@ resource "google_notebooks_instance" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name = "<%= ctx[:vars]["instance_name"] %>"
   location = "us-west1-a"
-  machine_type = "e2-medium"
+  machine_type = "n1-standard-1" // can't be e2 because of accelerator
 
   install_gpu_driver = true
   accelerator_config {
