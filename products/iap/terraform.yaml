@@ -153,6 +153,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Brand: !ruby/object:Overrides::Terraform::ResourceOverride
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckForExistence
+      target_occurrences: 5
       actions: ['create']
       operation: !ruby/object:Api::Async::Operation
         timeouts: !ruby/object:Api::Timeouts
