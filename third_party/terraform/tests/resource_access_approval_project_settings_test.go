@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAccessApprovalProjectSettings_update(t *testing.T) {
+func testAccAccessApprovalProjectSettings(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
