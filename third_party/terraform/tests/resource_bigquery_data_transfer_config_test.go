@@ -34,8 +34,9 @@ func TestAccBigqueryDataTransferConfig(t *testing.T) {
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 	random_suffix := randString(t, 10)
-	start_time := time.Now().Add(1 * time.Hour).Format(time.RFC3339)
-	end_time := time.Now().AddDate(0, 1, 0).Format(time.RFC3339)
+	now := time.Now().UTC()
+	start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
+	end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -57,10 +58,11 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 
 func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
 	random_suffix := randString(t, 10)
-	first_start_time := time.Now().Add(1 * time.Hour).Format(time.RFC3339)
-	first_end_time := time.Now().AddDate(0, 1, 0).Format(time.RFC3339)
-	second_start_time := time.Now().Add(2 * time.Hour).Format(time.RFC3339)
-	second_end_time := time.Now().AddDate(0, 2, 0).Format(time.RFC3339)
+	now := time.Now().UTC()
+	first_start_time := now.Add(1 * time.Hour).Format(time.RFC3339)
+	first_end_time := now.AddDate(0, 1, 0).Format(time.RFC3339)
+	second_start_time := now.Add(2 * time.Hour).Format(time.RFC3339)
+	second_end_time := now.AddDate(0, 2, 0).Format(time.RFC3339)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
