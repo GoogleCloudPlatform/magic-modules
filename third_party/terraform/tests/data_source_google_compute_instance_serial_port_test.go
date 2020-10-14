@@ -29,9 +29,9 @@ func TestAccDataSourceComputeInstanceSerialPort_basic(t *testing.T) {
 func testAccComputeInstanceSerialPort(instanceName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_instance" "default" {
-	name				 = "%s"
-	machine_type = "n1-standard-1"
-	zone				 = "us-central1-a"
+	name         = "%s"
+	machine_type = "e2-medium"
+	zone         = "us-central1-a"
 
 	boot_disk {
 		initialize_params {
