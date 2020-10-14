@@ -39,3 +39,6 @@ Metrics/LineLength:
 
 Style/CommandLiteral:
   EnforcedStyle: percent_x
+
+Metrics/ParameterLists:
+  Enabled: false

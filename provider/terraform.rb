@@ -178,15 +178,20 @@ module Provider
     # This function uses the resource.erb template to create one file
     # per resource. The resource.erb template forms the basis of a single
     # GCP Resource on Terraform.
-    def generate_resource(pwd, data)
-      name = data.object.filename_override || data.object.name.underscore
-      product_name = data.product.name.underscore
+    def generate_resource(pwd, data, generate_code, generate_docs)
+      if generate_code
+        name = data.object.filename_override || data.object.name.underscore
+        product_name = data.product.name.underscore
 
-      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
-      data.generate(pwd,
-                    '/templates/terraform/resource.erb',
-                    "#{folder_name(data.version)}/resource_#{product_name}_#{name}.go",
-                    self)
+        FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+        data.generate(pwd,
+                      '/templates/terraform/resource.erb',
+                      "#{folder_name(data.version)}/resource_#{product_name}_#{name}.go",
+                      self)
+      end
+
+      return unless generate_docs
+
       generate_documentation(pwd, data)
     end
 
@@ -261,25 +266,29 @@ module Provider
 
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
-    def generate_iam_policy(pwd, data)
-      name = data.object.filename_override || data.object.name.underscore
-      product_name = data.product.name.underscore
+    def generate_iam_policy(pwd, data, generate_code, generate_docs)
+      if generate_code
+        name = data.object.filename_override || data.object.name.underscore
+        product_name = data.product.name.underscore
 
-      FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
-      data.generate(pwd,
-                    'templates/terraform/iam_policy.go.erb',
-                    "#{folder_name(data.version)}/iam_#{product_name}_#{name}.go",
-                    self)
+        FileUtils.mkpath folder_name(data.version) unless Dir.exist?(folder_name(data.version))
+        data.generate(pwd,
+                      'templates/terraform/iam_policy.go.erb',
+                      "#{folder_name(data.version)}/iam_#{product_name}_#{name}.go",
+                      self)
 
-      # Only generate test if testable examples exist.
-      unless data.object.examples.reject(&:skip_test).empty?
-        data.generate(
-          pwd,
-          'templates/terraform/examples/base_configs/iam_test_file.go.erb',
-          "#{folder_name(data.version)}/iam_#{product_name}_#{name}_generated_test.go",
-          self
-        )
+        # Only generate test if testable examples exist.
+        unless data.object.examples.reject(&:skip_test).empty?
+          data.generate(
+            pwd,
+            'templates/terraform/examples/base_configs/iam_test_file.go.erb',
+            "#{folder_name(data.version)}/iam_#{product_name}_#{name}_generated_test.go",
+            self
+          )
+        end
       end
+
+      return unless generate_docs
 
       generate_iam_documentation(pwd, data)
     end
