@@ -112,30 +112,6 @@ objects:
                     A-Z), numbers (0-9), or underscores (_). The maximum length
                     is 1,024 characters.
                   required: true
-            - !ruby/object:Api::Type::NestedObject
-              name: 'routine'
-              description: |
-                A routine from a different dataset to grant access to. Queries
-                executed against that routine will have read access to
-                views/tables/routines in this dataset. The role field is not
-                required when this field is set. If that routine is updated by any user,
-                access to the routine needs to be granted again via an update operation.
-              properties:
-                - !ruby/object:Api::Type::String
-                  name: 'datasetId'
-                  description: The ID of the dataset containing this table.
-                  required: true
-                - !ruby/object:Api::Type::String
-                  name: 'projectId'
-                  description: The ID of the project containing this table.
-                  required: true
-                - !ruby/object:Api::Type::String
-                  name: 'routineId'
-                  description: |
-                    The ID of the routine. The ID must contain only letters (a-z,
-                    A-Z), numbers (0-9), or underscores (_). The maximum length
-                    is 1,024 characters.
-                  required: true
       - !ruby/object:Api::Type::Integer
         name: 'creationTime'
         output: true
