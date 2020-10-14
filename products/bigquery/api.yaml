@@ -58,27 +58,26 @@ objects:
               name: 'role'
               description: |
                 Describes the rights granted to the user specified by the other
-                member of the access object. Primitive, Predefined and custom
-                roles are supported. Predefined roles that have equivalent
-                primitive roles are swapped by the API to their Primitive
-                counterparts. See
+                member of the access object. Basic, predefined, and custom roles
+                are supported. Predefined roles that have equivalent basic roles
+                are swapped by the API to their basic counterparts. See
                 [official docs](https://cloud.google.com/bigquery/docs/access-control).
             - !ruby/object:Api::Type::String
               name: 'specialGroup'
               description: |
                 A special group to grant access to. Possible values include:
-                
-                
+
+
                 * `projectOwners`: Owners of the enclosing project.
-                
-                
+
+
                 * `projectReaders`: Readers of the enclosing project.
-                
-                
+
+
                 * `projectWriters`: Writers of the enclosing project.
-                
-                
-                * `allAuthenticatedUsers`: All authenticated BigQuery users. 
+
+
+                * `allAuthenticatedUsers`: All authenticated BigQuery users.
             - !ruby/object:Api::Type::String
               name: 'userByEmail'
               description: |
@@ -139,8 +138,8 @@ objects:
         description: |
           The default lifetime of all tables in the dataset, in milliseconds.
           The minimum value is 3600000 milliseconds (one hour).
-          
-          
+
+
           Once this property is set, all newly-created tables in the dataset
           will have an `expirationTime` property set to the creation time plus
           the value in this property, and changing the value will only affect
@@ -156,7 +155,7 @@ objects:
           The default partition expiration for all partitioned tables in
           the dataset, in milliseconds.
 
-          
+
           Once this property is set, all newly-created partitioned tables in
           the dataset will have an `expirationMs` property in the `timePartitioning`
           settings set to this value, and changing the value will only
@@ -202,20 +201,12 @@ objects:
         description: |
           The geographic location where the dataset should reside.
           See [official docs](https://cloud.google.com/bigquery/docs/dataset-locations).
-          
-          
+
+
           There are two types of locations, regional or multi-regional. A regional
           location is a specific geographic place, such as Tokyo, and a multi-regional
           location is a large geographic area, such as the United States, that
           contains at least two geographic places.
-          
-          
-          Possible regional values include: `asia-east1`, `asia-northeast1`,
-          `asia-southeast1`, `australia-southeast1`, `europe-north1`,
-          `europe-west2` and `us-east4`.
-          
-          
-          Possible multi-regional values: `EU` and `US`.
 
 
           The default value is multi-regional location `US`.
@@ -278,10 +269,10 @@ objects:
         name: 'role'
         description: |
           Describes the rights granted to the user specified by the other
-          member of the access object. Primitive, Predefined and custom
-          roles are supported. Predefined roles that have equivalent
-          primitive roles are swapped by the API to their Primitive
-          counterparts, and will show a diff post-create. See
+          member of the access object. Basic, predefined, and custom roles are
+          supported. Predefined roles that have equivalent basic roles are
+          swapped by the API to their basic counterparts, and will show a diff
+          post-create. See
           [official docs](https://cloud.google.com/bigquery/docs/access-control).
       - !ruby/object:Api::Type::String
         name: 'userByEmail'
@@ -321,17 +312,17 @@ objects:
         name: 'specialGroup'
         description: |
           A special group to grant access to. Possible values include:
-          
-          
+
+
           * `projectOwners`: Owners of the enclosing project.
-          
-          
+
+
           * `projectReaders`: Readers of the enclosing project.
-          
-          
+
+
           * `projectWriters`: Writers of the enclosing project.
-          
-          
+
+
           * `allAuthenticatedUsers`: All authenticated BigQuery users.
         exactly_one_of:
           - user_by_email

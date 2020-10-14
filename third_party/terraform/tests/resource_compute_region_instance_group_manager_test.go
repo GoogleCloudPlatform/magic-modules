@@ -1,9 +1,9 @@
-<% autogen_exception -%>
-
 package google
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"strings"
 	"testing"
 
@@ -343,7 +343,6 @@ func TestAccRegionInstanceGroupManager_distributionPolicy(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccRegionInstanceGroupManager_stateful(t *testing.T) {
 	t.Parallel()
 
@@ -375,7 +374,6 @@ func TestAccRegionInstanceGroupManager_stateful(t *testing.T) {
 	})
 }
 
-<% end -%>
 func testAccCheckRegionInstanceGroupManagerDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := googleProviderConfig(t)
@@ -1233,7 +1231,6 @@ resource "google_compute_region_instance_group_manager" "igm-rolling-update-poli
 `, igm)
 }
 
-<% unless version == 'ga' -%>
 func testAccRegionInstanceGroupManager_stateful(template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1350,4 +1347,3 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 }
 `, template, igm)
 }
-<% end -%>

@@ -207,7 +207,6 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 		return false
 	})
 	config.client.Transport = rec
-	config.wrappedBigQueryClient.Transport = rec
 	configs[testName] = config
 	return config, nil
 }
@@ -882,6 +881,10 @@ func getTestProjectFromEnv() string {
 
 // testAccPreCheck ensures at least one of the credentials env variables is set.
 func getTestCredsFromEnv() string {
+	// Return empty string if GOOGLE_USE_DEFAULT_CREDENTIALS is set to true.
+	if multiEnvSearch(credsEnvVars) == "true" {
+		return ""
+	}
 	return multiEnvSearch(credsEnvVars)
 }
 
