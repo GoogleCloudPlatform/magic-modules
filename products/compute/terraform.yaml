@@ -2549,6 +2549,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_value: :NONE
   TargetVpnGateway: !ruby/object:Overrides::Terraform::ResourceOverride
     name: 'VpnGateway'
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        Classic VPN is deprecating certain functionality on October 31, 2021. For more information,
+        see the [Classic VPN partial deprecation page](https://cloud.google.com/network-connectivity/docs/vpn/deprecations/classic-vpn-deprecation).
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "target_vpn_gateway_basic"
