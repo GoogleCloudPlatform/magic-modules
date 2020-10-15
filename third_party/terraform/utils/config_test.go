@@ -130,7 +130,7 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 	proj := getTestProjectFromEnv()
 	serviceaccount := multiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 
-	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), testOauthScope)
+	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), DefaultClientScopes..)
 	if err != nil {
 		t.Fatalf("invalid test credentials: %s", err)
 	}
