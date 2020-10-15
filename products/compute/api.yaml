@@ -14670,7 +14670,7 @@ objects:
       guides:
         'Choosing a VPN': https://cloud.google.com/vpn/docs/how-to/choosing-a-vpn
         'Cloud VPN Overview': 'https://cloud.google.com/vpn/docs/concepts/overview'
-      api: https://cloud.google.com/compute/docs/reference/rest/beta/vpnGateways
+      api: https://cloud.google.com/compute/docs/reference/rest/v1/vpnGateways
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -14753,7 +14753,7 @@ objects:
     description: |
       Represents a VPN gateway managed outside of GCP.
     references: !ruby/object:Api::Resource::ReferenceLinks
-      api: https://cloud.google.com/compute/docs/reference/rest/beta/externalVpnGateways
+      api: https://cloud.google.com/compute/docs/reference/rest/v1/externalVpnGateways
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
