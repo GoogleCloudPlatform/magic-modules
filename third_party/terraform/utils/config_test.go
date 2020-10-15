@@ -96,7 +96,7 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 	}
 	testAccPreCheck(t)
 
-	serviceaccount := multiEnvSearch([]string{"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT"})
+	serviceaccount := multiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 	creds := getTestCredsFromEnv()
 	proj := getTestProjectFromEnv()
 
@@ -128,7 +128,7 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 
 	creds := getTestCredsFromEnv()
 	proj := getTestProjectFromEnv()
-	serviceaccount := multiEnvSearch([]string{"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT"})
+	serviceaccount := multiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 
 	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), testOauthScope)
 	if err != nil {
