@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"cloud.google.com/go/bigtable"
 )
@@ -97,6 +97,7 @@ func resourceBigtableInstance() *schema.Resource {
 				Default:      "PRODUCTION",
 				ValidateFunc: validation.StringInSlice([]string{"DEVELOPMENT", "PRODUCTION"}, false),
 				Description:  `The instance type to create. One of "DEVELOPMENT" or "PRODUCTION". Defaults to "PRODUCTION".`,
+				Deprecated:   `It is recommended to leave this field unspecified since the distinction between "DEVELOPMENT" and "PRODUCTION" instances is going away, and all instances will become "PRODUCTION" instances. This means that new and existing "DEVELOPMENT" instances will be converted to "PRODUCTION" instances. It is recommended for users to use "PRODUCTION" instances in any case, since a 1-node "PRODUCTION" instance is functionally identical to a "DEVELOPMENT" instance, but without the accompanying restrictions.`,
 			},
 
 			"deletion_protection": {
@@ -126,6 +127,11 @@ func resourceBigtableInstance() *schema.Resource {
 
 func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -156,7 +162,7 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 
 	conf.Clusters = expandBigtableClusters(d.Get("cluster").([]interface{}), conf.InstanceID)
 
-	c, err := config.bigtableClientFactory.NewInstanceAdminClient(project)
+	c, err := config.BigTableClientFactory(userAgent).NewInstanceAdminClient(project)
 	if err != nil {
 		return fmt.Errorf("Error starting instance admin client. %s", err)
 	}
@@ -179,6 +185,10 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 
 func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -186,7 +196,7 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	c, err := config.bigtableClientFactory.NewInstanceAdminClient(project)
+	c, err := config.BigTableClientFactory(userAgent).NewInstanceAdminClient(project)
 	if err != nil {
 		return fmt.Errorf("Error starting instance admin client. %s", err)
 	}
@@ -202,7 +212,9 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 		return nil
 	}
 
-	d.Set("project", project)
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 
 	clusters, err := c.Clusters(ctx, instance.Name)
 	if err != nil {
@@ -220,9 +232,15 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error setting clusters in state: %s", err.Error())
 	}
 
-	d.Set("name", instance.Name)
-	d.Set("display_name", instance.DisplayName)
-	d.Set("labels", instance.Labels)
+	if err := d.Set("name", instance.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("display_name", instance.DisplayName); err != nil {
+		return fmt.Errorf("Error setting display_name: %s", err)
+	}
+	if err := d.Set("labels", instance.Labels); err != nil {
+		return fmt.Errorf("Error setting labels: %s", err)
+	}
 	// Don't set instance_type: we don't want to detect drift on it because it can
 	// change under-the-hood.
 
@@ -231,6 +249,10 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 
 func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -238,7 +260,7 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	c, err := config.bigtableClientFactory.NewInstanceAdminClient(project)
+	c, err := config.BigTableClientFactory(userAgent).NewInstanceAdminClient(project)
 	if err != nil {
 		return fmt.Errorf("Error starting instance admin client. %s", err)
 	}
@@ -280,6 +302,11 @@ func resourceBigtableInstanceDestroy(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("cannot destroy instance without setting deletion_protection=false and running `terraform apply`")
 	}
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -287,7 +314,7 @@ func resourceBigtableInstanceDestroy(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	c, err := config.bigtableClientFactory.NewInstanceAdminClient(project)
+	c, err := config.BigTableClientFactory(userAgent).NewInstanceAdminClient(project)
 	if err != nil {
 		return fmt.Errorf("Error starting instance admin client. %s", err)
 	}
@@ -352,7 +379,7 @@ func expandBigtableClusters(clusters []interface{}, instanceID string) []bigtabl
 // This doesn't use the standard unordered list utility (https://github.com/GoogleCloudPlatform/magic-modules/blob/master/templates/terraform/unordered_list_customize_diff.erb)
 // because some fields can't be modified using the API and we recreate the instance
 // when they're changed.
-func resourceBigtableInstanceClusterReorderTypeList(diff *schema.ResourceDiff, meta interface{}) error {
+func resourceBigtableInstanceClusterReorderTypeList(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	oldCount, newCount := diff.GetChange("cluster.#")
 
 	// simulate Required:true, MinItems:1, MaxItems:4 for "cluster"

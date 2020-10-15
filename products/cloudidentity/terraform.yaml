@@ -14,6 +14,13 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Group: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        If you are using User ADCs (Application Default Credentials) with this resource,
+        you must specify a `billing_project` and set `user_project_override` to true 
+        in the provider configuration. Otherwise the Cloud Identity API will return a 403 error. 
+        Your account must have the `serviceusage.services.use` permission on the 
+        `billing_project` you defined.
     import_format: ["{{name}}"]
     # Cloud Identity Group requires a customized sweeper
     skip_sweeper: true
@@ -41,6 +48,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/set_computed_name.erb
       custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.erb
   GroupMembership: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        If you are using User ADCs (Application Default Credentials) with this resource,
+        you must specify a `billing_project` and set `user_project_override` to true 
+        in the provider configuration. Otherwise the Cloud Identity API will return a 403 error. 
+        Your account must have the `serviceusage.services.use` permission on the 
+        `billing_project` you defined.
     import_format: ["{{name}}"]
     # These will be sweeped with the parent groups
     skip_sweeper: true

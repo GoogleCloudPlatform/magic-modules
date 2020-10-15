@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/iam/v1"
 )
 
@@ -69,6 +69,11 @@ func resourceGoogleServiceAccount() *schema.Resource {
 
 func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
@@ -87,7 +92,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 		ServiceAccount: sa,
 	}
 
-	sa, err = config.clientIAM.Projects.ServiceAccounts.Create("projects/"+project, r).Do()
+	sa, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Create("projects/"+project, r).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating service account: %s", err)
 	}
@@ -95,7 +100,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 	d.SetId(sa.Name)
 
 	err = retryTimeDuration(func() (operr error) {
-		_, saerr := config.clientIAM.Projects.ServiceAccounts.Get(d.Id()).Do()
+		_, saerr := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
 		return saerr
 	}, d.Timeout(schema.TimeoutCreate), isNotFoundRetryableError("service account creation"))
 
@@ -108,27 +113,49 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 
 func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	// Confirm the service account exists
-	sa, err := config.clientIAM.Projects.ServiceAccounts.Get(d.Id()).Do()
+	sa, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Service Account %q", d.Id()))
 	}
 
-	d.Set("email", sa.Email)
-	d.Set("unique_id", sa.UniqueId)
-	d.Set("project", sa.ProjectId)
-	d.Set("account_id", strings.Split(sa.Email, "@")[0])
-	d.Set("name", sa.Name)
-	d.Set("display_name", sa.DisplayName)
-	d.Set("description", sa.Description)
+	if err := d.Set("email", sa.Email); err != nil {
+		return fmt.Errorf("Error setting email: %s", err)
+	}
+	if err := d.Set("unique_id", sa.UniqueId); err != nil {
+		return fmt.Errorf("Error setting unique_id: %s", err)
+	}
+	if err := d.Set("project", sa.ProjectId); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("account_id", strings.Split(sa.Email, "@")[0]); err != nil {
+		return fmt.Errorf("Error setting account_id: %s", err)
+	}
+	if err := d.Set("name", sa.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("display_name", sa.DisplayName); err != nil {
+		return fmt.Errorf("Error setting display_name: %s", err)
+	}
+	if err := d.Set("description", sa.Description); err != nil {
+		return fmt.Errorf("Error setting description: %s", err)
+	}
 	return nil
 }
 
 func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	name := d.Id()
-	_, err := config.clientIAM.Projects.ServiceAccounts.Delete(name).Do()
+	_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Delete(name).Do()
 	if err != nil {
 		return err
 	}
@@ -138,7 +165,11 @@ func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}
 
 func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	sa, err := config.clientIAM.Projects.ServiceAccounts.Get(d.Id()).Do()
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+	sa, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
 	if err != nil {
 		return fmt.Errorf("Error retrieving service account %q: %s", d.Id(), err)
 	}
@@ -149,7 +180,7 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 	if d.HasChange("display_name") {
 		updateMask = append(updateMask, "display_name")
 	}
-	_, err = config.clientIAM.Projects.ServiceAccounts.Patch(d.Id(),
+	_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Patch(d.Id(),
 		&iam.PatchServiceAccountRequest{
 			UpdateMask: strings.Join(updateMask, ","),
 			ServiceAccount: &iam.ServiceAccount{

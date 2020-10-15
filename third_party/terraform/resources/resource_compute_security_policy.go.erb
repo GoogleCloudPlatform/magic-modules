@@ -2,14 +2,15 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"time"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/compute/v0.beta"
 )
 
@@ -168,7 +169,7 @@ func resourceComputeSecurityPolicy() *schema.Resource {
 	}
 }
 
-func rulesCustomizeDiff(diff *schema.ResourceDiff, _ interface{}) error {
+func rulesCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 	_, n := diff.GetChange("rule")
 	nSet := n.(*schema.Set)
 
@@ -186,6 +187,10 @@ func rulesCustomizeDiff(diff *schema.ResourceDiff, _ interface{}) error {
 
 func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -203,7 +208,7 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 
 	log.Printf("[DEBUG] SecurityPolicy insert request: %#v", securityPolicy)
 
-	op, err := config.clientComputeBeta.SecurityPolicies.Insert(project, securityPolicy).Do()
+	op, err := config.NewComputeBetaClient(userAgent).SecurityPolicies.Insert(project, securityPolicy).Do()
 
 	if err != nil {
 		return errwrap.Wrapf("Error creating SecurityPolicy: {{err}}", err)
@@ -215,7 +220,7 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 	}
 	d.SetId(id)
 
-	err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Creating SecurityPolicy %q", sp), d.Timeout(schema.TimeoutCreate))
+	err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Creating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}
@@ -225,6 +230,10 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 
 func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -232,25 +241,39 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 	}
 
 	sp := d.Get("name").(string)
-	securityPolicy, err := config.clientComputeBeta.SecurityPolicies.Get(project, sp).Do()
+	securityPolicy, err := config.NewComputeBetaClient(userAgent).SecurityPolicies.Get(project, sp).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("SecurityPolicy %q", d.Id()))
 	}
 
-	d.Set("name", securityPolicy.Name)
-	d.Set("description", securityPolicy.Description)
+	if err := d.Set("name", securityPolicy.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("description", securityPolicy.Description); err != nil {
+		return fmt.Errorf("Error setting description: %s", err)
+	}
 	if err := d.Set("rule", flattenSecurityPolicyRules(securityPolicy.Rules)); err != nil {
 		return err
 	}
-	d.Set("fingerprint", securityPolicy.Fingerprint)
-	d.Set("project", project)
-	d.Set("self_link", ConvertSelfLinkToV1(securityPolicy.SelfLink))
+	if err := d.Set("fingerprint", securityPolicy.Fingerprint); err != nil {
+		return fmt.Errorf("Error setting fingerprint: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("self_link", ConvertSelfLinkToV1(securityPolicy.SelfLink)); err != nil {
+		return fmt.Errorf("Error setting self_link: %s", err)
+	}
 
 	return nil
 }
 
 func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -265,13 +288,13 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 			Fingerprint:     d.Get("fingerprint").(string),
 			ForceSendFields: []string{"Description"},
 		}
-		op, err := config.clientComputeBeta.SecurityPolicies.Patch(project, sp, securityPolicy).Do()
+		op, err := config.NewComputeBetaClient(userAgent).SecurityPolicies.Patch(project, sp, securityPolicy).Do()
 
 		if err != nil {
 			return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 		}
 
-		err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), d.Timeout(schema.TimeoutUpdate))
+		err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -293,25 +316,25 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 			nPriorities[priority] = true
 			if !oPriorities[priority] {
 				// If the rule is in new and its priority does not exist in old, then add it.
-				op, err := config.clientComputeBeta.SecurityPolicies.AddRule(project, sp, expandSecurityPolicyRule(rule)).Do()
+				op, err := config.NewComputeBetaClient(userAgent).SecurityPolicies.AddRule(project, sp, expandSecurityPolicyRule(rule)).Do()
 
 				if err != nil {
 					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 				}
 
-				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), d.Timeout(schema.TimeoutUpdate))
+				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
 				if err != nil {
 					return err
 				}
 			} else if !oSet.Contains(rule) {
 				// If the rule is in new, and its priority is in old, but its hash is different than the one in old, update it.
-				op, err := config.clientComputeBeta.SecurityPolicies.PatchRule(project, sp, expandSecurityPolicyRule(rule)).Priority(priority).Do()
+				op, err := config.NewComputeBetaClient(userAgent).SecurityPolicies.PatchRule(project, sp, expandSecurityPolicyRule(rule)).Priority(priority).Do()
 
 				if err != nil {
 					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 				}
 
-				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), d.Timeout(schema.TimeoutUpdate))
+				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
 				if err != nil {
 					return err
 				}
@@ -322,13 +345,13 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 			priority := int64(rule.(map[string]interface{})["priority"].(int))
 			if !nPriorities[priority] {
 				// If the rule's priority is in old but not new, remove it.
-				op, err := config.clientComputeBeta.SecurityPolicies.RemoveRule(project, sp).Priority(priority).Do()
+				op, err := config.NewComputeBetaClient(userAgent).SecurityPolicies.RemoveRule(project, sp).Priority(priority).Do()
 
 				if err != nil {
 					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{err}}", sp), err)
 				}
 
-				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), d.Timeout(schema.TimeoutUpdate))
+				err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
 				if err != nil {
 					return err
 				}
@@ -341,6 +364,10 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 
 func resourceComputeSecurityPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -348,12 +375,12 @@ func resourceComputeSecurityPolicyDelete(d *schema.ResourceData, meta interface{
 	}
 
 	// Delete the SecurityPolicy
-	op, err := config.clientComputeBeta.SecurityPolicies.Delete(project, d.Get("name").(string)).Do()
+	op, err := config.NewComputeBetaClient(userAgent).SecurityPolicies.Delete(project, d.Get("name").(string)).Do()
 	if err != nil {
 		return errwrap.Wrapf("Error deleting SecurityPolicy: {{err}}", err)
 	}
 
-	err = computeOperationWaitTime(config, op, project, "Deleting SecurityPolicy", d.Timeout(schema.TimeoutDelete))
+	err = computeOperationWaitTime(config, op, project, "Deleting SecurityPolicy", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return err
 	}

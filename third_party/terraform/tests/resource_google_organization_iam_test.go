@@ -7,8 +7,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -89,7 +89,7 @@ func testAccCheckGoogleOrganizationIamBindingExists(t *testing.T, bindingResourc
 		}
 
 		config := googleProviderConfig(t)
-		p, err := config.clientResourceManager.Organizations.GetIamPolicy("organizations/"+bindingRs.Primary.Attributes["org_id"], &cloudresourcemanager.GetIamPolicyRequest{}).Do()
+		p, err := config.NewResourceManagerClient(config.userAgent).Organizations.GetIamPolicy("organizations/"+bindingRs.Primary.Attributes["org_id"], &cloudresourcemanager.GetIamPolicyRequest{}).Do()
 		if err != nil {
 			return err
 		}
@@ -119,7 +119,7 @@ func testAccCheckGoogleOrganizationIamMemberExists(t *testing.T, n, role, member
 		}
 
 		config := googleProviderConfig(t)
-		p, err := config.clientResourceManager.Organizations.GetIamPolicy("organizations/"+rs.Primary.Attributes["org_id"], &cloudresourcemanager.GetIamPolicyRequest{}).Do()
+		p, err := config.NewResourceManagerClient(config.userAgent).Organizations.GetIamPolicy("organizations/"+rs.Primary.Attributes["org_id"], &cloudresourcemanager.GetIamPolicyRequest{}).Do()
 		if err != nil {
 			return err
 		}

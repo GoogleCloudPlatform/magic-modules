@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccContainerNodePool_basic(t *testing.T) {
@@ -166,7 +166,7 @@ func TestAccContainerNodePool_withNodeConfig(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
+
 func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 	t.Parallel()
 
@@ -212,6 +212,7 @@ func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 	})
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
@@ -300,6 +301,8 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 
 func TestAccContainerNodePool_withInvalidKubeletCpuManagerPolicy(t *testing.T) {
 	t.Parallel()
+	// Unit test, no interactions
+	skipIfVcr(t)
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", randString(t, 10))
 	np := fmt.Sprintf("tf-test-np-%s", randString(t, 10))
@@ -311,7 +314,7 @@ func TestAccContainerNodePool_withInvalidKubeletCpuManagerPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccContainerNodePool_withKubeletConfig(cluster, np, "dontexist", "100us", true),
-				ExpectError: regexp.MustCompile(`.*to be one of \[static default\].*`),
+				ExpectError: regexp.MustCompile(`.*to be one of \[static none\].*`),
 			},
 		},
 	})
@@ -852,7 +855,7 @@ func testAccCheckContainerNodePoolDestroyProducer(t *testing.T) func(s *terrafor
 
 			var err error
 			if location != "" {
-				_, err = config.clientContainer.Projects.Zones.Clusters.NodePools.Get(
+				_, err = config.NewContainerClient(config.userAgent).Projects.Zones.Clusters.NodePools.Get(
 					config.Project, attributes["location"], attributes["cluster"], attributes["name"]).Do()
 			} else {
 				name := fmt.Sprintf(
@@ -862,7 +865,7 @@ func testAccCheckContainerNodePoolDestroyProducer(t *testing.T) func(s *terrafor
 					attributes["cluster"],
 					attributes["name"],
 				)
-				_, err = config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Get(name).Do()
+				_, err = config.NewContainerBetaClient(config.userAgent).Projects.Locations.Clusters.NodePools.Get(name).Do()
 			}
 
 			if err == nil {
@@ -876,6 +879,9 @@ func testAccCheckContainerNodePoolDestroyProducer(t *testing.T) func(s *terrafor
 
 func testAccContainerNodePool_basic(cluster, np string) string {
 	return fmt.Sprintf(`
+provider "google" {
+  user_project_override = true
+}	
 resource "google_container_cluster" "cluster" {
   name               = "%s"
   location           = "us-central1-a"
@@ -1276,7 +1282,7 @@ resource "google_container_node_pool" "np_with_node_config" {
 `, cluster, nodePool)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+
 func testAccContainerNodePool_withWorkloadMetadataConfig(cluster, np string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -1349,7 +1355,7 @@ resource "google_container_node_pool" "with_workload_metadata_config" {
 `, projectID, cluster, np)
 }
 
-
+<% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_withSandboxConfig(cluster, np string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -1369,6 +1375,7 @@ resource "google_container_node_pool" "with_sandbox_config" {
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
   node_config {
+    machine_type = "n1-standard-1"
     image_type = "COS_CONTAINERD"
 
     sandbox_config {
@@ -1413,6 +1420,7 @@ resource "google_container_node_pool" "with_sandbox_config" {
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
   node_config {
+    machine_type = "n1-standard-1"
     image_type = "COS_CONTAINERD"
 
     sandbox_config {

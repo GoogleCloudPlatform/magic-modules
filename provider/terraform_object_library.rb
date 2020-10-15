@@ -16,21 +16,26 @@ require 'provider/terraform_oics'
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
   class TerraformObjectLibrary < Provider::Terraform
-    def generate(output_folder, types, _product_path, _dump_yaml)
+    def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
       @base_url = @version.base_url
-      generate_objects(output_folder, types)
+      generate_objects(
+        output_folder,
+        types,
+        generate_code,
+        generate_docs
+      )
     end
 
-    def generate_object(object, output_folder, version_name)
+    def generate_object(object, output_folder, version_name, generate_code, generate_docs)
       if object.exclude_validator
         Google::LOGGER.info "Skipping fine-grained resource #{object.name}"
         return
       end
 
-      super(object, output_folder, version_name)
+      super(object, output_folder, version_name, generate_code, generate_docs)
     end
 
-    def generate_resource(pwd, data)
+    def generate_resource(pwd, data, _generate_code, _generate_docs)
       target_folder = data.output_folder
       product_ns = data.object.__product.name
 
@@ -62,8 +67,10 @@ module Provider
                         file_template)
     end
 
-    def copy_common_files(output_folder)
+    def copy_common_files(output_folder, generate_code, _generate_docs)
       Google::LOGGER.info 'Copying common files.'
+      return unless generate_code
+
       copy_file_list(output_folder, [
                        ['google/constants.go',
                         'third_party/validator/constants.go'],
@@ -140,7 +147,7 @@ module Provider
 
     def generate_resource_tests(pwd, data) end
 
-    def generate_iam_policy(pwd, data) end
+    def generate_iam_policy(pwd, data, generate_code, generate_docs) end
 
     def generate_resource_sweepers(pwd, data) end
   end

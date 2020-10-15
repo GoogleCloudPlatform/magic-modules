@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
 )
 
@@ -49,6 +49,10 @@ func resourceRuntimeconfigConfig() *schema.Resource {
 
 func resourceRuntimeconfigConfigCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -65,7 +69,7 @@ func resourceRuntimeconfigConfigCreate(d *schema.ResourceData, meta interface{})
 		runtimeConfig.Description = val.(string)
 	}
 
-	_, err = config.clientRuntimeconfig.Projects.Configs.Create("projects/"+project, &runtimeConfig).Do()
+	_, err = config.NewRuntimeconfigClient(userAgent).Projects.Configs.Create("projects/"+project, &runtimeConfig).Do()
 
 	if err != nil {
 		return err
@@ -77,9 +81,13 @@ func resourceRuntimeconfigConfigCreate(d *schema.ResourceData, meta interface{})
 
 func resourceRuntimeconfigConfigRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	fullName := d.Id()
-	runConfig, err := config.clientRuntimeconfig.Projects.Configs.Get(fullName).Do()
+	runConfig, err := config.NewRuntimeconfigClient(userAgent).Projects.Configs.Get(fullName).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("RuntimeConfig %q", d.Id()))
 	}
@@ -94,18 +102,30 @@ func resourceRuntimeconfigConfigRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 	if project != curProject {
-		d.Set("project", project)
+		if err := d.Set("project", project); err != nil {
+			return fmt.Errorf("Error setting project: %s", err)
+		}
 	}
 
-	d.Set("name", name)
-	d.Set("description", runConfig.Description)
-	d.Set("project", project)
+	if err := d.Set("name", name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("description", runConfig.Description); err != nil {
+		return fmt.Errorf("Error setting description: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 
 	return nil
 }
 
 func resourceRuntimeconfigConfigUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	// Update works more like an 'overwrite' method - we build a new runtimeconfig.RuntimeConfig struct and it becomes
 	// the new config. This means our Update logic looks an awful lot like Create (and hence, doesn't use
@@ -118,7 +138,7 @@ func resourceRuntimeconfigConfigUpdate(d *schema.ResourceData, meta interface{})
 		runtimeConfig.Description = v.(string)
 	}
 
-	_, err := config.clientRuntimeconfig.Projects.Configs.Update(fullName, &runtimeConfig).Do()
+	_, err = config.NewRuntimeconfigClient(userAgent).Projects.Configs.Update(fullName, &runtimeConfig).Do()
 	if err != nil {
 		return err
 	}
@@ -127,10 +147,14 @@ func resourceRuntimeconfigConfigUpdate(d *schema.ResourceData, meta interface{})
 
 func resourceRuntimeconfigConfigDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	fullName := d.Id()
 
-	_, err := config.clientRuntimeconfig.Projects.Configs.Delete(fullName).Do()
+	_, err = config.NewRuntimeconfigClient(userAgent).Projects.Configs.Delete(fullName).Do()
 	if err != nil {
 		return err
 	}

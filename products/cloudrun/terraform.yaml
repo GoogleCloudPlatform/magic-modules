@@ -34,6 +34,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: 'templates/terraform/encoders/cloud_run_domain_mapping.go.erb'
       decoder: 'templates/terraform/decoders/cloud_run.go.erb'
+      constants: templates/terraform/constants/cloud_run_domain_mapping.go.erb
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         required: true
@@ -45,6 +46,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       metadata.labels: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: 'domainMappingLabelDiffSuppress'
       metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       metadata.namespace: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -80,6 +82,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           cloud_run_service_name: "cloudrun-srv"
           cloud_run_sql_name: "cloudrun-sql"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
         test_env_vars:
           project: :PROJECT_NAME
         ignore_read_extra:

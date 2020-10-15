@@ -1,11 +1,12 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -39,7 +40,7 @@ func TestIsShrinkageIpCidr(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if isShrinkageIpCidr(tc.Old, tc.New, nil) != tc.Shrinkage {
+		if isShrinkageIpCidr(context.Background(), tc.Old, tc.New, nil) != tc.Shrinkage {
 			t.Errorf("%s failed: Shrinkage should be %t", tn, tc.Shrinkage)
 		}
 	}
@@ -344,7 +345,7 @@ func testAccCheckComputeSubnetworkExists(t *testing.T, n string, subnetwork *com
 		region := rs.Primary.Attributes["region"]
 		subnet_name := rs.Primary.Attributes["name"]
 
-		found, err := config.clientCompute.Subnetworks.Get(
+		found, err := config.NewComputeClient(config.userAgent).Subnetworks.Get(
 			config.Project, region, subnet_name).Do()
 		if err != nil {
 			return err

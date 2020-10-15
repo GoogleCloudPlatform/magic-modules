@@ -6,8 +6,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 const DEFAULT_HEALTHCARE_TEST_LOCATION = "us-central1"
@@ -133,7 +133,7 @@ func TestAccHealthcareDatasetIamPolicy(t *testing.T) {
 func testAccCheckGoogleHealthcareDatasetIam(t *testing.T, datasetId, role string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := googleProviderConfig(t)
-		p, err := config.clientHealthcare.Projects.Locations.Datasets.GetIamPolicy(datasetId).Do()
+		p, err := config.NewHealthcareClient(config.userAgent).Projects.Locations.Datasets.GetIamPolicy(datasetId).Do()
 		if err != nil {
 			return err
 		}

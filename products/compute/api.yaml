@@ -1115,7 +1115,8 @@ objects:
            for health checking this BackendService. Currently at most one health
            check can be specified.
 
-           A health check must be specified unless the backend service uses an internet NEG as a backend.
+           A health check must be specified unless the backend service uses an internet
+           or serverless NEG as a backend.
 
            For internal load balancing, a URL to a HealthCheck resource must be specified instead.
       - !ruby/object:Api::Type::Integer
@@ -1472,6 +1473,7 @@ objects:
           - :HTTP2
           - :TCP
           - :SSL
+          - :GRPC
       # TODO: make a ResourceRef to Security Policy
       - !ruby/object:Api::Type::String
         name: 'securityPolicy'
@@ -1959,13 +1961,15 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'healthChecks'
         item_type: Api::Type::String
-        required: true
         min_size: 1
         max_size: 1
         description: |
            The set of URLs to HealthCheck resources for health checking
            this RegionBackendService. Currently at most one health
-           check can be specified, and a health check is required.
+           check can be specified. 
+
+           A health check must be specified unless the backend service uses an internet
+           or serverless NEG as a backend.
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -2302,6 +2306,7 @@ objects:
           - :SSL
           - :TCP
           - :UDP
+          - :GRPC
       - !ruby/object:Api::Type::Enum
         name: 'sessionAffinity'
         description: |
@@ -2636,10 +2641,6 @@ objects:
         required: true
   - !ruby/object:Api::Resource
     name: 'Disk'
-    # TODO(nelsonjr): Implement disk special actions as defined in the API:
-    # - resize
-    # - createSnapshot
-    # - setLabels
     kind: 'compute#disk'
     input: true
     base_url: projects/{{project}}/zones/{{zone}}/disks
@@ -2717,6 +2718,11 @@ objects:
             name: 'kmsKeyName'
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key.
+              If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::String
         name: 'sourceImageId'
@@ -2762,6 +2768,11 @@ objects:
               Your project's Compute Engine System service account
               (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
               `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key.
+              If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'sourceSnapshot'
@@ -2799,6 +2810,11 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
               encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key. 
+              If absent, the Compute Engine Service Agent service account is used.
         input: true
       - !ruby/object:Api::Type::String
         name: 'sourceSnapshotId'
@@ -2908,14 +2924,14 @@ objects:
 
           To create a disk with one of the public operating system images,
           specify the image by its family name. For example, specify
-          family/debian-8 to use the latest Debian 8 image:
+          family/debian-9 to use the latest Debian 9 image:
 
-          projects/debian-cloud/global/images/family/debian-8
+          projects/debian-cloud/global/images/family/debian-9
 
           Alternatively, use a specific version of a public operating system
           image:
 
-          projects/debian-cloud/global/images/debian-8-jessie-vYYYYMMDD
+          projects/debian-cloud/global/images/debian-9-stretch-vYYYYMMDD
 
           To create a disk with a private image that you created, specify the
           image name in the following format:
@@ -3008,7 +3024,7 @@ objects:
                 The IP protocol to which this rule applies. The protocol type is
                 required when creating a firewall rule. This value can either be
                 one of the following well known protocol strings (tcp, udp,
-                icmp, esp, ah, sctp, ipip), or the IP protocol number.
+                icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
               api_name: 'IPProtocol'
               required: true
             - !ruby/object:Api::Type::Array
@@ -3044,7 +3060,7 @@ objects:
                 The IP protocol to which this rule applies. The protocol type is
                 required when creating a firewall rule. This value can either be
                 one of the following well known protocol strings (tcp, udp,
-                icmp, esp, ah, sctp, ipip), or the IP protocol number.
+                icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
               api_name: 'IPProtocol'
               required: true
             - !ruby/object:Api::Type::Array
@@ -4135,6 +4151,7 @@ objects:
         description: |
           An optional description of this resource. Provide this property when
           you create the resource.
+        send_empty_value: true
       - !ruby/object:Api::Type::Integer
         name: 'healthyThreshold'
         description: |
@@ -5523,6 +5540,7 @@ objects:
               values:
                 - :MULTI_IP_SUBNET
                 - :SECURE_BOOT
+                - :SEV_CAPABLE
                 - :UEFI_COMPATIBLE
                 - :VIRTIO_SCSI_MULTIQUEUE
                 - :WINDOWS
@@ -7331,6 +7349,45 @@ objects:
           values:
             - :REGIONAL
             - :GLOBAL
+      - !ruby/object:Api::Type::Array
+        name: 'peerings'
+        # This is only used in InSpec, handled via fine-grained in Terraform
+        exclude: true
+        output: true
+        description: |
+          Peerings for a network
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: subnetworks
+          description: The subnetworks that should be mirrored.
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              description: |
+                Name of the peering.
+            - !ruby/object:Api::Type::String
+              name: 'state'
+              description: |
+                State of the peering.
+            - !ruby/object:Api::Type::String
+              name: 'stateDetails'
+              description: |
+                Details about the current state of the peering.
+            - !ruby/object:Api::Type::String
+              name: 'network'
+              description: |
+                URL of the peer network
+            - !ruby/object:Api::Type::Boolean
+              name: 'exportCustomRoutes'
+              description: |
+                Whether to export the custom routes to the peer network.
+            - !ruby/object:Api::Type::Boolean
+              name: 'importCustomRoutes'
+              description: |
+                Whether to import the custom routes to the peer network.
+            - !ruby/object:Api::Type::Integer
+              name: 'peerMtu'
+              description: |
+                Maximum Transmission Unit in bytes.
   - !ruby/object:Api::Resource
     name: 'NetworkEndpoint'
     kind: 'compute#networkEndpoint'
@@ -7442,6 +7499,10 @@ objects:
       backend with internal load balancers. Because NEG backends allow you to
       specify IP addresses and ports, you can distribute traffic in a granular
       fashion among applications or containers running within VM instances.
+
+      Recreating a network endpoint group that's in use by another resource will give a
+      `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
+      to avoid this type of error.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -7535,8 +7596,8 @@ objects:
     read_verb: :POST
     self_link: projects/{{project}}/global/networkEndpointGroups/{{global_network_endpoint_group}}/listNetworkEndpoints
     identity:
-      - fqdn
       - ipAddress
+      - fqdn
       - port
     nested_query: !ruby/object:Api::Resource::NestedQuery
       keys:
@@ -7608,6 +7669,10 @@ objects:
     description: |
       A global network endpoint group contains endpoints that reside outside of Google Cloud.
       Currently a global network endpoint group can only support a single endpoint.
+
+      Recreating a global network endpoint group that's in use by another resource will give a
+      `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
+      to avoid this type of error.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -7674,6 +7739,10 @@ objects:
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups'
     description: |
       A regional NEG that can support Serverless Products.
+
+      Recreating a region network endpoint group that's in use by another resource will give a
+      `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
+      to avoid this type of error.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -7899,9 +7968,13 @@ objects:
           The total number of nodes in the node group.
         required: true
         send_empty_value: true
+      - !ruby/object:Api::Type::String
+        name: 'maintenancePolicy'
+        description: |
+          Specifies how to handle instances when a node in the group undergoes maintenance. Set to one of: DEFAULT, RESTART_IN_PLACE, or MIGRATE_WITHIN_NODE_GROUP. The default value is DEFAULT.
+        default_value: DEFAULT
       - !ruby/object:Api::Type::NestedObject
         name: 'autoscalingPolicy'
-        min_version: beta
         description: |
           If you use sole-tenant nodes for your workloads, you can use the node
           group autoscaler to automatically manage the sizes of your node groups.
@@ -8531,7 +8604,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'PerInstanceConfig'
     base_url:  'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}'
-    min_version: beta
     description: |
       A config defined for a single managed instance that belongs to an instance group manager. It preserves the instance name
       across instance group manager operations and can define stateful disks or metadata that are unique to the instance.
@@ -8551,7 +8623,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/instance-groups/stateful-migs#per-instance_configs'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagers'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -8641,7 +8713,7 @@ objects:
                   description: |
                     A value that prescribes what should happen to the stateful disk when the VM instance is deleted.
                     The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`.
-                    `NEVER` detatch the disk when the VM is deleted, but not delete the disk.
+                    `NEVER` - detach the disk when the VM is deleted, but do not delete the disk.
                     `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
                     deleted from the instance group.
                   values:
@@ -8651,7 +8723,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'RegionPerInstanceConfig'
     base_url:  'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}'
-    min_version: beta
     description: |
       A config defined for a single managed instance that belongs to an instance group manager. It preserves the instance name
       across instance group manager operations and can define stateful disks or metadata that are unique to the instance.
@@ -8672,7 +8743,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/instance-groups/stateful-migs#per-instance_configs'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagers'
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -8762,7 +8833,7 @@ objects:
                   description: |
                     A value that prescribes what should happen to the stateful disk when the VM instance is deleted.
                     The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`.
-                    `NEVER` detatch the disk when the VM is deleted, but not delete the disk.
+                    `NEVER` - detach the disk when the VM is deleted, but do not delete the disk.
                     `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
                     deleted from the instance group.
                   values:
@@ -11021,6 +11092,7 @@ objects:
         description: |
           An optional description of this resource. Provide this property when
           you create the resource.
+        send_empty_value: true
       - !ruby/object:Api::Type::Integer
         name: 'healthyThreshold'
         description: |
@@ -12836,6 +12908,11 @@ objects:
             name: 'kmsKeyName'
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key.
+              If absent, the Compute Engine Service Agent service account is used.
       - !ruby/object:Api::Type::NestedObject
         # ignore_read in providers - this is only used in Create
         name: 'sourceDiskEncryptionKey'
@@ -12862,6 +12939,11 @@ objects:
             name: 'kmsKeyName'
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key.
+              If absent, the Compute Engine Service Agent service account is used.
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -12901,6 +12983,11 @@ objects:
           creation/deletion.
         output: true
       # 'storageBytesStatus' not useful for object convergence.
+      - !ruby/object:Api::Type::Array
+        name: 'storageLocations'
+        description: |
+          Cloud Storage bucket storage location of the snapshot (regional or multi-regional).
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'licenses'
         output: true
@@ -14151,6 +14238,11 @@ objects:
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'network'
+        description: 'The URL of the network this target instance uses to forward traffic. If not specified, the traffic will be forwarded to the network that the default network interface belongs to.'
+        input: true
+        min_version: beta
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
@@ -17393,3 +17485,96 @@ objects:
         description: 'The available CPU platforms in this zone'
         item_type: Api::Type::String
         output: true
+  - !ruby/object:Api::Resource
+    name: 'TargetGrpcProxy'
+    kind: 'compute#targetGrpcProxy'
+    base_url: projects/{{project}}/global/targetGrpcProxies
+    collection_url_key: 'items'
+    update_verb: :PATCH
+    has_self_link: true
+    description: |
+      Represents a Target gRPC Proxy resource. A target gRPC proxy is a component
+      of load balancers intended for load balancing gRPC traffic. Global forwarding
+      rules reference a target gRPC proxy. The Target gRPC Proxy references
+      a URL map which specifies how traffic routes to gRPC backend services.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+          guides:
+            'Using Target gRPC Proxies': 'https://cloud.google.com/traffic-director/docs/proxyless-overview'
+          api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetGrpcProxies'
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource. Provided by the client when the resource
+          is created. The name must be 1-63 characters long, and comply
+          with RFC1035. Specifically, the name must be 1-63 characters long
+          and match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which
+          means the first character must be a lowercase letter, and all
+          following characters must be a dash, lowercase letter, or digit,
+          except the last character, which cannot be a dash.
+        input: true
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'selfLinkWithId'
+        description: 'Server-defined URL with id for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'urlMap'
+        description: |
+          URL to the UrlMap resource that defines the mapping from URL to
+          the BackendService. The protocol field in the BackendService
+          must be set to GRPC.
+        input: true
+        update_verb: :PATCH
+        update_url: projects/{{project}}/global/targetGrpcProxies
+        update_id: 'urlMap'
+        fingerprint_name: 'fingerprint'
+      - !ruby/object:Api::Type::Boolean
+        name: 'validateForProxyless'
+        input: true
+        description: |
+          If true, indicates that the BackendServices referenced by
+          the urlMap may be accessed by gRPC applications without using
+          a sidecar proxy. This will enable configuration checks on urlMap
+          and its referenced BackendServices to not allow unsupported features.
+          A gRPC application must use "xds:///" scheme in the target URI
+          of the service it is connecting to. If false, indicates that the
+          BackendServices referenced by the urlMap will be accessed by gRPC
+          applications via a sidecar proxy. In this case, a gRPC application
+          must not use "xds:///" scheme in the target URI of the service
+          it is connecting to
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'fingerprint'
+        description: |
+          Fingerprint of this resource. A hash of the contents stored in
+          this object. This field is used in optimistic locking. This field
+          will be ignored when inserting a TargetGrpcProxy. An up-to-date
+          fingerprint must be provided in order to patch/update the
+          TargetGrpcProxy; otherwise, the request will fail with error
+          412 conditionNotMet. To see the latest fingerprint, make a get()
+          request to retrieve the TargetGrpcProxy. A base64-encoded string.

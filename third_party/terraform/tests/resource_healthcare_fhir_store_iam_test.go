@@ -6,8 +6,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccHealthcareFhirStoreIamBinding(t *testing.T) {
@@ -143,7 +143,7 @@ func testAccCheckGoogleHealthcareFhirStoreIamBindingExists(t *testing.T, binding
 			return err
 		}
 
-		p, err := config.clientHealthcare.Projects.Locations.Datasets.FhirStores.GetIamPolicy(fhirStoreId.fhirStoreId()).Do()
+		p, err := config.NewHealthcareClient(config.userAgent).Projects.Locations.Datasets.FhirStores.GetIamPolicy(fhirStoreId.fhirStoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -179,7 +179,7 @@ func testAccCheckGoogleHealthcareFhirStoreIamMemberExists(t *testing.T, n, role,
 			return err
 		}
 
-		p, err := config.clientHealthcare.Projects.Locations.Datasets.FhirStores.GetIamPolicy(fhirStoreId.fhirStoreId()).Do()
+		p, err := config.NewHealthcareClient(config.userAgent).Projects.Locations.Datasets.FhirStores.GetIamPolicy(fhirStoreId.fhirStoreId()).Do()
 		if err != nil {
 			return err
 		}
@@ -214,7 +214,7 @@ func testAccCheckGoogleHealthcareFhirStoreIamPolicyExists(t *testing.T, n, role,
 			return err
 		}
 
-		p, err := config.clientHealthcare.Projects.Locations.Datasets.FhirStores.GetIamPolicy(fhirStoreId.fhirStoreId()).Do()
+		p, err := config.NewHealthcareClient(config.userAgent).Projects.Locations.Datasets.FhirStores.GetIamPolicy(fhirStoreId.fhirStoreId()).Do()
 		if err != nil {
 			return err
 		}

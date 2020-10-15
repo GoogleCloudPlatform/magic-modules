@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -127,6 +127,8 @@ func TestAccComputeNetwork_default_routing_mode(t *testing.T) {
 func TestAccComputeNetwork_networkDeleteDefaultRoute(t *testing.T) {
 	t.Parallel()
 
+	var network compute.Network
+
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -134,6 +136,12 @@ func TestAccComputeNetwork_networkDeleteDefaultRoute(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeNetwork_deleteDefaultRoute(randString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkExists(
+						t, "google_compute_network.bar", &network),
+					testAccCheckComputeNetworkDefaultRoutesDeleted(
+						t, "google_compute_network.bar", &network),
+				),
 			},
 		},
 	})
@@ -152,7 +160,7 @@ func testAccCheckComputeNetworkExists(t *testing.T, n string, network *compute.N
 
 		config := googleProviderConfig(t)
 
-		found, err := config.clientCompute.Networks.Get(
+		found, err := config.NewComputeClient(config.userAgent).Networks.Get(
 			config.Project, rs.Primary.Attributes["name"]).Do()
 		if err != nil {
 			return err
@@ -168,11 +176,37 @@ func testAccCheckComputeNetworkExists(t *testing.T, n string, network *compute.N
 	}
 }
 
+func testAccCheckComputeNetworkDefaultRoutesDeleted(t *testing.T, n string, network *compute.Network) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.Attributes["name"] == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := googleProviderConfig(t)
+
+		routes, err := config.NewComputeClient(config.userAgent).Routes.List(config.Project).Filter(fmt.Sprintf("(network=\"%s\") AND (destRange=\"0.0.0.0/0\")", network.SelfLink)).Do()
+		if err != nil {
+			return err
+		}
+
+		if len(routes.Items) > 0 {
+			return fmt.Errorf("Default routes were not deleted")
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckComputeNetworkIsAutoSubnet(t *testing.T, n string, network *compute.Network) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := googleProviderConfig(t)
 
-		found, err := config.clientCompute.Networks.Get(
+		found, err := config.NewComputeClient(config.userAgent).Networks.Get(
 			config.Project, network.Name).Do()
 		if err != nil {
 			return err
@@ -194,7 +228,7 @@ func testAccCheckComputeNetworkIsCustomSubnet(t *testing.T, n string, network *c
 	return func(s *terraform.State) error {
 		config := googleProviderConfig(t)
 
-		found, err := config.clientCompute.Networks.Get(
+		found, err := config.NewComputeClient(config.userAgent).Networks.Get(
 			config.Project, network.Name).Do()
 		if err != nil {
 			return err
@@ -225,7 +259,7 @@ func testAccCheckComputeNetworkHasRoutingMode(t *testing.T, n string, network *c
 			return fmt.Errorf("Routing mode not found on resource")
 		}
 
-		found, err := config.clientCompute.Networks.Get(
+		found, err := config.NewComputeClient(config.userAgent).Networks.Get(
 			config.Project, network.Name).Do()
 		if err != nil {
 			return err

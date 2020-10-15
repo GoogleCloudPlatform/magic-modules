@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccSqlUser_mysql(t *testing.T) {
@@ -89,7 +89,7 @@ func testAccCheckGoogleSqlUserExists(t *testing.T, n string) resource.TestCheckF
 		name := rs.Primary.Attributes["name"]
 		instance := rs.Primary.Attributes["instance"]
 		host := rs.Primary.Attributes["host"]
-		users, err := config.clientSqlAdmin.Users.List(config.Project,
+		users, err := config.NewSqlAdminClient(config.userAgent).Users.List(config.Project,
 			instance).Do()
 
 		if err != nil {
@@ -117,7 +117,7 @@ func testAccSqlUserDestroyProducer(t *testing.T) func(s *terraform.State) error 
 			name := rs.Primary.Attributes["name"]
 			instance := rs.Primary.Attributes["instance"]
 			host := rs.Primary.Attributes["host"]
-			users, err := config.clientSqlAdmin.Users.List(config.Project,
+			users, err := config.NewSqlAdminClient(config.userAgent).Users.List(config.Project,
 				instance).Do()
 
 			for _, user := range users.Items {
@@ -138,6 +138,7 @@ func testGoogleSqlUser_mysql(instance, password string) string {
 resource "google_sql_database_instance" "instance" {
   name   = "%s"
   region = "us-central1"
+  deletion_protection = false
   settings {
     tier = "db-f1-micro"
   }
@@ -165,6 +166,7 @@ resource "google_sql_database_instance" "instance" {
   name             = "%s"
   region           = "us-central1"
   database_version = "POSTGRES_9_6"
+  deletion_protection = false
 
   settings {
     tier = "db-f1-micro"

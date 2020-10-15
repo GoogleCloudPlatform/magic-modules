@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/iam/v1"
 )
 
@@ -31,12 +31,6 @@ func resourceGoogleServiceAccountKey() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"KEY_ALG_UNSPECIFIED", "KEY_ALG_RSA_1024", "KEY_ALG_RSA_2048"}, false),
 				Description:  `The algorithm used to generate the key, used only on create. KEY_ALG_RSA_2048 is the default algorithm. Valid values are: "KEY_ALG_RSA_1024", "KEY_ALG_RSA_2048".`,
-			},
-			"pgp_key": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Removed:  "The pgp_key field has been removed. See https://www.terraform.io/docs/extend/best-practices/sensitive-state.html for more information.",
-				Computed: true,
 			},
 			"private_key_type": {
 				Type:         schema.TypeString,
@@ -88,22 +82,16 @@ func resourceGoogleServiceAccountKey() *schema.Resource {
 				Computed:    true,
 				Description: `The key can be used before this timestamp. A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".`,
 			},
-			"private_key_encrypted": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "The private_key_encrypted field has been removed. See https://www.terraform.io/docs/extend/best-practices/sensitive-state.html for more information.",
-			},
-			"private_key_fingerprint": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Removed:  "The private_key_fingerprint field has been removed. See https://www.terraform.io/docs/extend/best-practices/sensitive-state.html for more information.",
-			},
 		},
 	}
 }
 
 func resourceGoogleServiceAccountKeyCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	serviceAccountName, err := serviceAccountFQN(d.Get("service_account_id").(string), d, config)
 	if err != nil {
@@ -116,7 +104,7 @@ func resourceGoogleServiceAccountKeyCreate(d *schema.ResourceData, meta interfac
 		ru := &iam.UploadServiceAccountKeyRequest{
 			PublicKeyData: d.Get("public_key_data").(string),
 		}
-		sak, err = config.clientIAM.Projects.ServiceAccounts.Keys.Upload(serviceAccountName, ru).Do()
+		sak, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys.Upload(serviceAccountName, ru).Do()
 		if err != nil {
 			return fmt.Errorf("Error creating service account key: %s", err)
 		}
@@ -125,7 +113,7 @@ func resourceGoogleServiceAccountKeyCreate(d *schema.ResourceData, meta interfac
 			KeyAlgorithm:   d.Get("key_algorithm").(string),
 			PrivateKeyType: d.Get("private_key_type").(string),
 		}
-		sak, err = config.clientIAM.Projects.ServiceAccounts.Keys.Create(serviceAccountName, rc).Do()
+		sak, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys.Create(serviceAccountName, rc).Do()
 		if err != nil {
 			return fmt.Errorf("Error creating service account key: %s", err)
 		}
@@ -133,11 +121,17 @@ func resourceGoogleServiceAccountKeyCreate(d *schema.ResourceData, meta interfac
 
 	d.SetId(sak.Name)
 	// Data only available on create.
-	d.Set("valid_after", sak.ValidAfterTime)
-	d.Set("valid_before", sak.ValidBeforeTime)
-	d.Set("private_key", sak.PrivateKeyData)
+	if err := d.Set("valid_after", sak.ValidAfterTime); err != nil {
+		return fmt.Errorf("Error setting valid_after: %s", err)
+	}
+	if err := d.Set("valid_before", sak.ValidBeforeTime); err != nil {
+		return fmt.Errorf("Error setting valid_before: %s", err)
+	}
+	if err := d.Set("private_key", sak.PrivateKeyData); err != nil {
+		return fmt.Errorf("Error setting private_key: %s", err)
+	}
 
-	err = serviceAccountKeyWaitTime(config.clientIAM.Projects.ServiceAccounts.Keys, d.Id(), d.Get("public_key_type").(string), "Creating Service account key", 4*time.Minute)
+	err = serviceAccountKeyWaitTime(config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys, d.Id(), d.Get("public_key_type").(string), "Creating Service account key", 4*time.Minute)
 	if err != nil {
 		return err
 	}
@@ -146,11 +140,15 @@ func resourceGoogleServiceAccountKeyCreate(d *schema.ResourceData, meta interfac
 
 func resourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	publicKeyType := d.Get("public_key_type").(string)
 
 	// Confirm the service account key exists
-	sak, err := config.clientIAM.Projects.ServiceAccounts.Keys.Get(d.Id()).PublicKeyType(publicKeyType).Do()
+	sak, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys.Get(d.Id()).PublicKeyType(publicKeyType).Do()
 	if err != nil {
 		if err = handleNotFoundError(err, d, fmt.Sprintf("Service Account Key %q", d.Id())); err == nil {
 			return nil
@@ -166,16 +164,26 @@ func resourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{
 		}
 	}
 
-	d.Set("name", sak.Name)
-	d.Set("key_algorithm", sak.KeyAlgorithm)
-	d.Set("public_key", sak.PublicKeyData)
+	if err := d.Set("name", sak.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("key_algorithm", sak.KeyAlgorithm); err != nil {
+		return fmt.Errorf("Error setting key_algorithm: %s", err)
+	}
+	if err := d.Set("public_key", sak.PublicKeyData); err != nil {
+		return fmt.Errorf("Error setting public_key: %s", err)
+	}
 	return nil
 }
 
 func resourceGoogleServiceAccountKeyDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
-	_, err := config.clientIAM.Projects.ServiceAccounts.Keys.Delete(d.Id()).Do()
+	_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys.Delete(d.Id()).Do()
 
 	if err != nil {
 		if err = handleNotFoundError(err, d, fmt.Sprintf("Service Account Key %q", d.Id())); err == nil {

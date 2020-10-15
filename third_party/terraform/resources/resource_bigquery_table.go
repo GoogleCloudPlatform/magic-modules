@@ -8,11 +8,21 @@ import (
 	"reflect"
 	"sort"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/structure"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/bigquery/v2"
 )
+
+func checkNameExists(jsonList []interface{}) error {
+	for _, m := range jsonList {
+		if _, ok := m.(map[string]interface{})["name"]; !ok {
+			return fmt.Errorf("No name in schema %+v", m)
+		}
+	}
+
+	return nil
+}
 
 // JSONBytesEqual compares the JSON in two byte slices.
 // Reference: https://stackoverflow.com/questions/32408890/how-to-compare-two-json-requests
@@ -21,14 +31,26 @@ func JSONBytesEqual(a, b []byte) (bool, error) {
 	if err := json.Unmarshal(a, &j); err != nil {
 		return false, err
 	}
+	if j == nil {
+		return false, fmt.Errorf("The old schema value was nil")
+	}
 	jList := j.([]interface{})
+	if err := checkNameExists(jList); err != nil {
+		return false, err
+	}
 	sort.Slice(jList, func(i, k int) bool {
 		return jList[i].(map[string]interface{})["name"].(string) < jList[k].(map[string]interface{})["name"].(string)
 	})
 	if err := json.Unmarshal(b, &j2); err != nil {
 		return false, err
 	}
+	if j2 == nil {
+		return false, fmt.Errorf("The new schema value was nil")
+	}
 	j2List := j2.([]interface{})
+	if err := checkNameExists(j2List); err != nil {
+		return false, err
+	}
 	sort.Slice(j2List, func(i, k int) bool {
 		return j2List[i].(map[string]interface{})["name"].(string) < j2List[k].(map[string]interface{})["name"].(string)
 	})
@@ -37,11 +59,17 @@ func JSONBytesEqual(a, b []byte) (bool, error) {
 
 // Compare the JSON strings are equal
 func bigQueryTableSchemaDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	// The API can return an empty schema which gets encoded to "null"
+	// during read.
+	if old == "null" {
+		old = "[]"
+	}
 	oldBytes := []byte(old)
 	newBytes := []byte(new)
 
 	eq, err := JSONBytesEqual(oldBytes, newBytes)
 	if err != nil {
+		log.Printf("[DEBUG] %v", err)
 		log.Printf("[DEBUG] Error comparing JSON bytes: %v, %v", old, new)
 	}
 
@@ -153,7 +181,7 @@ func resourceBigQueryTable() *schema.Resource {
 							Optional:     true,
 							Computed:     true,
 							ForceNew:     true,
-							ValidateFunc: validation.ValidateJsonString,
+							ValidateFunc: validation.StringIsJSON,
 							StateFunc: func(v interface{}) string {
 								json, _ := structure.NormalizeJsonString(v)
 								return json
@@ -330,7 +358,7 @@ func resourceBigQueryTable() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validation.ValidateJsonString,
+				ValidateFunc: validation.StringIsJSON,
 				StateFunc: func(v interface{}) string {
 					json, _ := structure.NormalizeJsonString(v)
 					return json
@@ -368,6 +396,44 @@ func resourceBigQueryTable() *schema.Resource {
 				},
 			},
 
+			// Materialized View: [Optional] If specified, configures this table as a materialized view.
+			"materialized_view": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `If specified, configures this table as a materialized view.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// EnableRefresh: [Optional] Enable automatic refresh of
+						// the materialized view when the base table is updated. The default
+						// value is "true".
+						"enable_refresh": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     true,
+							Description: `Specifies if BigQuery should automatically refresh materialized view when the base table is updated. The default is true.`,
+						},
+
+						// RefreshIntervalMs: [Optional] The maximum frequency
+						// at which this materialized view will be refreshed. The default value
+						// is 1800000 (30 minutes).
+						"refresh_interval_ms": {
+							Type:        schema.TypeInt,
+							Default:     1800000,
+							Optional:    true,
+							Description: `Specifies maximum frequency at which this materialized view will be refreshed. The default is 1800000`,
+						},
+
+						// Query: [Required] A query whose result is persisted
+						"query": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `A query whose result is persisted.`,
+						},
+					},
+				},
+			},
+
 			// TimePartitioning: [Experimental] If specified, configures time-based
 			// partitioning for this table.
 			"time_partitioning": {
@@ -385,13 +451,13 @@ func resourceBigQueryTable() *schema.Resource {
 							Description: `Number of milliseconds for which to keep the storage for a partition.`,
 						},
 
-						// Type: [Required] The supported types are DAY and HOUR, which will generate
-						// one partition per day or hour based on data loading time.
+						// Type: [Required] The supported types are DAY, HOUR, MONTH, and YEAR, which will generate
+						// one partition per day, hour, month, and year, respectively.
 						"type": {
 							Type:         schema.TypeString,
 							Required:     true,
-							Description:  `The supported types are DAY and HOUR, which will generate one partition per day or hour based on data loading time.`,
-							ValidateFunc: validation.StringInSlice([]string{"DAY", "HOUR"}, false),
+							Description:  `The supported types are DAY, HOUR, MONTH, and YEAR, which will generate one partition per day, hour, month, and year, respectively.`,
+							ValidateFunc: validation.StringInSlice([]string{"DAY", "HOUR", "MONTH", "YEAR"}, false),
 						},
 
 						// Field: [Optional] The field used to determine how to create a time-based
@@ -474,7 +540,6 @@ func resourceBigQueryTable() *schema.Resource {
 			"clustering": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				ForceNew:    true,
 				MaxItems:    4,
 				Description: `Specifies column names to use for data clustering. Up to four top-level columns are allowed, and should be specified in descending priority order.`,
 				Elem:        &schema.Schema{Type: schema.TypeString},
@@ -593,6 +658,10 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 		table.View = expandView(v)
 	}
 
+	if v, ok := d.GetOk("materialized_view"); ok {
+		table.MaterializedView = expandMaterializedView(v)
+	}
+
 	if v, ok := d.GetOk("description"); ok {
 		table.Description = v.(string)
 	}
@@ -664,6 +733,10 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 
 func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -679,7 +752,7 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 
 	log.Printf("[INFO] Creating BigQuery table: %s", table.TableReference.TableId)
 
-	res, err := config.clientBigQuery.Tables.Insert(project, datasetID, table).Do()
+	res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
 	if err != nil {
 		return err
 	}
@@ -692,6 +765,10 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 
 func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	log.Printf("[INFO] Reading BigQuery table: %s", d.Id())
 
@@ -703,27 +780,59 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	datasetID := d.Get("dataset_id").(string)
 	tableID := d.Get("table_id").(string)
 
-	res, err := config.clientBigQuery.Tables.Get(project, datasetID, tableID).Do()
+	res, err := config.NewBigQueryClient(userAgent).Tables.Get(project, datasetID, tableID).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("BigQuery table %q", tableID))
 	}
 
-	d.Set("project", project)
-	d.Set("description", res.Description)
-	d.Set("expiration_time", res.ExpirationTime)
-	d.Set("friendly_name", res.FriendlyName)
-	d.Set("labels", res.Labels)
-	d.Set("creation_time", res.CreationTime)
-	d.Set("etag", res.Etag)
-	d.Set("last_modified_time", res.LastModifiedTime)
-	d.Set("location", res.Location)
-	d.Set("num_bytes", res.NumBytes)
-	d.Set("table_id", res.TableReference.TableId)
-	d.Set("dataset_id", res.TableReference.DatasetId)
-	d.Set("num_long_term_bytes", res.NumLongTermBytes)
-	d.Set("num_rows", res.NumRows)
-	d.Set("self_link", res.SelfLink)
-	d.Set("type", res.Type)
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("description", res.Description); err != nil {
+		return fmt.Errorf("Error setting description: %s", err)
+	}
+	if err := d.Set("expiration_time", res.ExpirationTime); err != nil {
+		return fmt.Errorf("Error setting expiration_time: %s", err)
+	}
+	if err := d.Set("friendly_name", res.FriendlyName); err != nil {
+		return fmt.Errorf("Error setting friendly_name: %s", err)
+	}
+	if err := d.Set("labels", res.Labels); err != nil {
+		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := d.Set("creation_time", res.CreationTime); err != nil {
+		return fmt.Errorf("Error setting creation_time: %s", err)
+	}
+	if err := d.Set("etag", res.Etag); err != nil {
+		return fmt.Errorf("Error setting etag: %s", err)
+	}
+	if err := d.Set("last_modified_time", res.LastModifiedTime); err != nil {
+		return fmt.Errorf("Error setting last_modified_time: %s", err)
+	}
+	if err := d.Set("location", res.Location); err != nil {
+		return fmt.Errorf("Error setting location: %s", err)
+	}
+	if err := d.Set("num_bytes", res.NumBytes); err != nil {
+		return fmt.Errorf("Error setting num_bytes: %s", err)
+	}
+	if err := d.Set("table_id", res.TableReference.TableId); err != nil {
+		return fmt.Errorf("Error setting table_id: %s", err)
+	}
+	if err := d.Set("dataset_id", res.TableReference.DatasetId); err != nil {
+		return fmt.Errorf("Error setting dataset_id: %s", err)
+	}
+	if err := d.Set("num_long_term_bytes", res.NumLongTermBytes); err != nil {
+		return fmt.Errorf("Error setting num_long_term_bytes: %s", err)
+	}
+	if err := d.Set("num_rows", res.NumRows); err != nil {
+		return fmt.Errorf("Error setting num_rows: %s", err)
+	}
+	if err := d.Set("self_link", res.SelfLink); err != nil {
+		return fmt.Errorf("Error setting self_link: %s", err)
+	}
+	if err := d.Set("type", res.Type); err != nil {
+		return fmt.Errorf("Error setting type: %s", err)
+	}
 
 	if res.ExternalDataConfiguration != nil {
 		externalDataConfiguration, err := flattenExternalDataConfiguration(res.ExternalDataConfiguration)
@@ -749,7 +858,9 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 			}
 		}
 
-		d.Set("external_data_configuration", externalDataConfiguration)
+		if err := d.Set("external_data_configuration", externalDataConfiguration); err != nil {
+			return fmt.Errorf("Error setting external_data_configuration: %s", err)
+		}
 	}
 
 	if res.TimePartitioning != nil {
@@ -765,7 +876,9 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if res.Clustering != nil {
-		d.Set("clustering", res.Clustering.Fields)
+		if err := d.Set("clustering", res.Clustering.Fields); err != nil {
+			return fmt.Errorf("Error setting clustering: %s", err)
+		}
 	}
 	if res.EncryptionConfiguration != nil {
 		if err := d.Set("encryption_configuration", flattenEncryptionConfiguration(res.EncryptionConfiguration)); err != nil {
@@ -779,12 +892,24 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 
-		d.Set("schema", schema)
+		if err := d.Set("schema", schema); err != nil {
+			return fmt.Errorf("Error setting schema: %s", err)
+		}
 	}
 
 	if res.View != nil {
 		view := flattenView(res.View)
-		d.Set("view", view)
+		if err := d.Set("view", view); err != nil {
+			return fmt.Errorf("Error setting view: %s", err)
+		}
+	}
+
+	if res.MaterializedView != nil {
+		materialized_view := flattenMaterializedView(res.MaterializedView)
+
+		if err := d.Set("materialized_view", materialized_view); err != nil {
+			return fmt.Errorf("Error setting materialized view: %s", err)
+		}
 	}
 
 	return nil
@@ -792,6 +917,10 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	table, err := resourceTable(d, meta)
 	if err != nil {
@@ -808,7 +937,7 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 	datasetID := d.Get("dataset_id").(string)
 	tableID := d.Get("table_id").(string)
 
-	if _, err = config.clientBigQuery.Tables.Update(project, datasetID, tableID, table).Do(); err != nil {
+	if _, err = config.NewBigQueryClient(userAgent).Tables.Update(project, datasetID, tableID, table).Do(); err != nil {
 		return err
 	}
 
@@ -817,6 +946,10 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 
 func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	log.Printf("[INFO] Deleting BigQuery table: %s", d.Id())
 
@@ -828,7 +961,7 @@ func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error
 	datasetID := d.Get("dataset_id").(string)
 	tableID := d.Get("table_id").(string)
 
-	if err := config.clientBigQuery.Tables.Delete(project, datasetID, tableID).Do(); err != nil {
+	if err := config.NewBigQueryClient(userAgent).Tables.Delete(project, datasetID, tableID).Do(); err != nil {
 		return err
 	}
 
@@ -1181,6 +1314,31 @@ func expandView(configured interface{}) *bigquery.ViewDefinition {
 func flattenView(vd *bigquery.ViewDefinition) []map[string]interface{} {
 	result := map[string]interface{}{"query": vd.Query}
 	result["use_legacy_sql"] = vd.UseLegacySql
+
+	return []map[string]interface{}{result}
+}
+
+func expandMaterializedView(configured interface{}) *bigquery.MaterializedViewDefinition {
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	mvd := &bigquery.MaterializedViewDefinition{Query: raw["query"].(string)}
+
+	if v, ok := raw["enable_refresh"]; ok {
+		mvd.EnableRefresh = v.(bool)
+		mvd.ForceSendFields = append(mvd.ForceSendFields, "EnableRefresh")
+	}
+
+	if v, ok := raw["refresh_interval_ms"]; ok {
+		mvd.RefreshIntervalMs = int64(v.(int))
+		mvd.ForceSendFields = append(mvd.ForceSendFields, "RefreshIntervalMs")
+	}
+
+	return mvd
+}
+
+func flattenMaterializedView(mvd *bigquery.MaterializedViewDefinition) []map[string]interface{} {
+	result := map[string]interface{}{"query": mvd.Query}
+	result["enable_refresh"] = mvd.EnableRefresh
+	result["refresh_interval_ms"] = mvd.RefreshIntervalMs
 
 	return []map[string]interface{}{result}
 }

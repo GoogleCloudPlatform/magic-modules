@@ -7,8 +7,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 const DEFAULT_KMS_TEST_LOCATION = "us-central1"
@@ -248,7 +248,7 @@ func TestAccKmsKeyRingIamPolicy_withCondition(t *testing.T) {
 func testAccCheckGoogleKmsKeyRingIam(t *testing.T, keyRingId, role string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := googleProviderConfig(t)
-		p, err := config.clientKms.Projects.Locations.KeyRings.GetIamPolicy(keyRingId).Do()
+		p, err := config.NewKmsClient(config.userAgent).Projects.Locations.KeyRings.GetIamPolicy(keyRingId).Do()
 		if err != nil {
 			return err
 		}

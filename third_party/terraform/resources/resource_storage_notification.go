@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/storage/v1"
 )
 
@@ -89,6 +89,10 @@ func resourceStorageNotification() *schema.Resource {
 
 func resourceStorageNotificationCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	bucket := d.Get("bucket").(string)
 
@@ -110,7 +114,7 @@ func resourceStorageNotificationCreate(d *schema.ResourceData, meta interface{})
 		Topic:            computedTopicName,
 	}
 
-	res, err := config.clientStorage.Notifications.Insert(bucket, storageNotification).Do()
+	res, err := config.NewStorageClient(userAgent).Notifications.Insert(bucket, storageNotification).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating notification config for bucket %s: %v", bucket, err)
 	}
@@ -122,32 +126,56 @@ func resourceStorageNotificationCreate(d *schema.ResourceData, meta interface{})
 
 func resourceStorageNotificationRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	bucket, notificationID := resourceStorageNotificationParseID(d.Id())
 
-	res, err := config.clientStorage.Notifications.Get(bucket, notificationID).Do()
+	res, err := config.NewStorageClient(userAgent).Notifications.Get(bucket, notificationID).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Notification configuration %s for bucket %s", notificationID, bucket))
 	}
 
-	d.Set("bucket", bucket)
-	d.Set("payload_format", res.PayloadFormat)
-	d.Set("topic", res.Topic)
-	d.Set("object_name_prefix", res.ObjectNamePrefix)
-	d.Set("event_types", res.EventTypes)
-	d.Set("notification_id", notificationID)
-	d.Set("self_link", res.SelfLink)
-	d.Set("custom_attributes", res.CustomAttributes)
+	if err := d.Set("bucket", bucket); err != nil {
+		return fmt.Errorf("Error setting bucket: %s", err)
+	}
+	if err := d.Set("payload_format", res.PayloadFormat); err != nil {
+		return fmt.Errorf("Error setting payload_format: %s", err)
+	}
+	if err := d.Set("topic", res.Topic); err != nil {
+		return fmt.Errorf("Error setting topic: %s", err)
+	}
+	if err := d.Set("object_name_prefix", res.ObjectNamePrefix); err != nil {
+		return fmt.Errorf("Error setting object_name_prefix: %s", err)
+	}
+	if err := d.Set("event_types", res.EventTypes); err != nil {
+		return fmt.Errorf("Error setting event_types: %s", err)
+	}
+	if err := d.Set("notification_id", notificationID); err != nil {
+		return fmt.Errorf("Error setting notification_id: %s", err)
+	}
+	if err := d.Set("self_link", res.SelfLink); err != nil {
+		return fmt.Errorf("Error setting self_link: %s", err)
+	}
+	if err := d.Set("custom_attributes", res.CustomAttributes); err != nil {
+		return fmt.Errorf("Error setting custom_attributes: %s", err)
+	}
 
 	return nil
 }
 
 func resourceStorageNotificationDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	bucket, notificationID := resourceStorageNotificationParseID(d.Id())
 
-	err := config.clientStorage.Notifications.Delete(bucket, notificationID).Do()
+	err = config.NewStorageClient(userAgent).Notifications.Delete(bucket, notificationID).Do()
 	if err != nil {
 		return fmt.Errorf("Error deleting notification configuration %s for bucket %s: %v", notificationID, bucket, err)
 	}

@@ -5,8 +5,8 @@ import (
 	"path"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccHealthcareDicomStoreIdParsing(t *testing.T) {
@@ -169,7 +169,7 @@ func testAccCheckGoogleHealthcareDicomStoreUpdate(t *testing.T, pubsubTopic stri
 				return err
 			}
 
-			response, err := config.clientHealthcare.Projects.Locations.Datasets.DicomStores.Get(gcpResourceUri).Do()
+			response, err := config.NewHealthcareClient(config.userAgent).Projects.Locations.Datasets.DicomStores.Get(gcpResourceUri).Do()
 			if err != nil {
 				return fmt.Errorf("Unexpected failure while verifying 'updated' dataset: %s", err)
 			}

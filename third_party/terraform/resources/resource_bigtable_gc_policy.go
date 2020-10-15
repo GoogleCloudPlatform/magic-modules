@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/bigtable"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 const (
@@ -98,6 +98,11 @@ func resourceBigtableGCPolicy() *schema.Resource {
 
 func resourceBigtableGCPolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -106,11 +111,13 @@ func resourceBigtableGCPolicyCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.bigtableClientFactory.NewAdminClient(project, instanceName)
+	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
-	d.Set("instance_name", instanceName)
+	if err := d.Set("instance_name", instanceName); err != nil {
+		return fmt.Errorf("Error setting instance_name: %s", err)
+	}
 
 	defer c.Close()
 
@@ -142,6 +149,10 @@ func resourceBigtableGCPolicyCreate(d *schema.ResourceData, meta interface{}) er
 
 func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -150,7 +161,7 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.bigtableClientFactory.NewAdminClient(project, instanceName)
+	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -172,13 +183,19 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 		}
 	}
 
-	d.Set("project", project)
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 
 	return nil
 }
 
 func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -187,7 +204,7 @@ func resourceBigtableGCPolicyDestroy(d *schema.ResourceData, meta interface{}) e
 	}
 
 	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.bigtableClientFactory.NewAdminClient(project, instanceName)
+	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}

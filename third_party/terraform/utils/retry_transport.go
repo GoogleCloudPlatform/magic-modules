@@ -34,13 +34,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"google.golang.org/api/googleapi"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"google.golang.org/api/googleapi"
 )
 
 const defaultRetryTransportTimeoutSec = 30
@@ -55,11 +56,9 @@ func NewTransportWithDefaultRetries(t http.RoundTripper) *retryTransport {
 
 // Helper method to create a shallow copy of an HTTP client with a shallow-copied retryTransport
 // s.t. the base HTTP transport is the same (i.e. client connection pools are shared, retryPredicates are different)
-func ClientWithAdditionalRetries(baseClient *http.Client, baseRetryTransport *retryTransport, predicates ...RetryErrorPredicateFunc) *http.Client {
+func ClientWithAdditionalRetries(baseClient *http.Client, predicates ...RetryErrorPredicateFunc) *http.Client {
 	copied := *baseClient
-	if baseRetryTransport == nil {
-		baseRetryTransport = NewTransportWithDefaultRetries(baseClient.Transport)
-	}
+	baseRetryTransport := NewTransportWithDefaultRetries(baseClient.Transport)
 	copied.Transport = baseRetryTransport.WithAddedPredicates(predicates...)
 	return &copied
 }

@@ -46,6 +46,7 @@ objects:
     name: 'Repository'
     base_url: projects/{{project}}/locations/{{location}}/repositories
     create_url: projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}
+    self_link: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
     min_version: beta
     description: A repository for storing artifacts
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -56,8 +57,11 @@ objects:
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ':'
+      # TODO (camthornton): Change to repository_id in 4.0
       parent_resource_attribute: 'repository'
       import_format: ["projects/{{project}}/locations/{{location}}/repositories/{{repository}}", "{{repository}}"]
+      base_url: projects/{{project}}/locations/{{location}}/repositories/{{name}}
+      self_link: projects/{{project}}/locations/{{location}}/repositories/{{name}}
     properties:
     - !ruby/object:Api::Type::String
       name: name

@@ -1,8 +1,6 @@
 package google
 
 import (
-	"time"
-
 	"fmt"
 	"strings"
 
@@ -10,7 +8,7 @@ import (
 	"google.golang.org/api/idtoken"
 	"google.golang.org/api/option"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"golang.org/x/net/context"
 )
 
@@ -64,21 +62,23 @@ func dataSourceGoogleServiceAccountIdToken() *schema.Resource {
 }
 
 func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta interface{}) error {
-
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	targetAudience := d.Get("target_audience").(string)
 	creds, err := config.GetCredentials([]string{userInfoScope})
 	if err != nil {
 		return fmt.Errorf("error calling getCredentials(): %v", err)
 	}
 
-	ts := creds.TokenSource
-
-	// If the source token is just an access_token, all we can do is use the iamcredentials api to get an id_token
-	if _, ok := ts.(staticTokenSource); ok {
+	// If the source credential is not a service account key, use the API to generate the idToken
+	if creds.JSON == nil {
 		// Use
 		// https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/generateIdToken
-		service := config.clientIamCredentials
+		service := config.NewIamCredentialsClient(userAgent)
 		name := fmt.Sprintf("projects/-/serviceAccounts/%s", d.Get("target_service_account").(string))
 		tokenRequest := &iamcredentials.GenerateIdTokenRequest{
 			Audience:     targetAudience,
@@ -90,21 +90,14 @@ func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta inte
 			return fmt.Errorf("error calling iamcredentials.GenerateIdToken: %v", err)
 		}
 
-		d.SetId(time.Now().UTC().String())
-		d.Set("id_token", at.Token)
+		d.SetId(d.Get("target_service_account").(string))
+		if err := d.Set("id_token", at.Token); err != nil {
+			return fmt.Errorf("Error setting id_token: %s", err)
+		}
 
 		return nil
 	}
 
-	tok, err := ts.Token()
-	if err != nil {
-		return fmt.Errorf("unable to get Token() from tokenSource: %v", err)
-	}
-
-	// only user-credential TokenSources have refreshTokens
-	if tok.RefreshToken != "" {
-		return fmt.Errorf("unsupported Credential Type supplied.  Use serviceAccount credentials")
-	}
 	ctx := context.Background()
 	co := []option.ClientOption{}
 	if creds.JSON != nil {
@@ -120,8 +113,10 @@ func dataSourceGoogleServiceAccountIdTokenRead(d *schema.ResourceData, meta inte
 		return fmt.Errorf("unable to retrieve Token: %v", err)
 	}
 
-	d.SetId(time.Now().UTC().String())
-	d.Set("id_token", idToken.AccessToken)
+	d.SetId(targetAudience)
+	if err := d.Set("id_token", idToken.AccessToken); err != nil {
+		return fmt.Errorf("Error setting id_token: %s", err)
+	}
 
 	return nil
 }

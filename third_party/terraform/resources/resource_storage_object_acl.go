@@ -1,11 +1,12 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/storage/v1"
 )
 
@@ -56,7 +57,7 @@ func resourceStorageObjectAcl() *schema.Resource {
 // Suppressing it means their configs won't be *strictly* correct as they will be missing the object
 // owner having OWNER. It's impossible to remove that permission though, so this custom diff
 // makes configs with or without that line indistinguishable.
-func resourceStorageObjectAclDiff(diff *schema.ResourceDiff, meta interface{}) error {
+func resourceStorageObjectAclDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	config := meta.(*Config)
 	bucket, ok := diff.GetOk("bucket")
 	if !ok {
@@ -71,7 +72,7 @@ func resourceStorageObjectAclDiff(diff *schema.ResourceDiff, meta interface{}) e
 		return nil
 	}
 
-	sObject, err := config.clientStorage.Objects.Get(bucket.(string), object.(string)).Projection("full").Do()
+	sObject, err := config.NewStorageClient(config.userAgent).Objects.Get(bucket.(string), object.(string)).Projection("full").Do()
 	if err != nil {
 		// Failing here is OK! Generally, it means we are at Create although it could mean the resource is gone.
 		// Create won't show the object owner being given
@@ -110,6 +111,10 @@ func getObjectAclId(object string) string {
 
 func resourceStorageObjectAclCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	bucket := d.Get("bucket").(string)
 	object := d.Get("object").(string)
@@ -123,25 +128,25 @@ func resourceStorageObjectAclCreate(d *schema.ResourceData, meta interface{}) er
 
 	// If we're using a predefined acl we just use the canned api.
 	if predefinedAcl, ok := d.GetOk("predefined_acl"); ok {
-		res, err := config.clientStorage.Objects.Get(bucket, object).Do()
+		res, err := config.NewStorageClient(userAgent).Objects.Get(bucket, object).Do()
 		if err != nil {
 			return fmt.Errorf("Error reading object %s in %s: %v", object, bucket, err)
 		}
 
-		_, err = config.clientStorage.Objects.Update(bucket, object, res).PredefinedAcl(predefinedAcl.(string)).Do()
+		_, err = config.NewStorageClient(userAgent).Objects.Update(bucket, object, res).PredefinedAcl(predefinedAcl.(string)).Do()
 		if err != nil {
 			return fmt.Errorf("Error updating object %s in %s: %v", object, bucket, err)
 		}
 
 		return resourceStorageObjectAclRead(d, meta)
 	} else if reMap := d.Get("role_entity").(*schema.Set); reMap.Len() > 0 {
-		sObject, err := config.clientStorage.Objects.Get(bucket, object).Projection("full").Do()
+		sObject, err := config.NewStorageClient(userAgent).Objects.Get(bucket, object).Projection("full").Do()
 		if err != nil {
 			return fmt.Errorf("Error reading object %s in %s: %v", object, bucket, err)
 		}
 
 		objectOwner := sObject.Owner.Entity
-		roleEntitiesUpstream, err := getRoleEntitiesAsStringsFromApi(config, bucket, object)
+		roleEntitiesUpstream, err := getRoleEntitiesAsStringsFromApi(config, bucket, object, userAgent)
 		if err != nil {
 			return fmt.Errorf("Error reading object %s in %s: %v", object, bucket, err)
 		}
@@ -151,7 +156,7 @@ func resourceStorageObjectAclCreate(d *schema.ResourceData, meta interface{}) er
 			return fmt.Errorf("Error reading object %s in %s. Invalid schema: %v", object, bucket, err)
 		}
 
-		err = performStorageObjectRoleEntityOperations(create, update, remove, config, bucket, object)
+		err = performStorageObjectRoleEntityOperations(create, update, remove, config, bucket, object, userAgent)
 		if err != nil {
 			return fmt.Errorf("Error creating object %s in %s: %v", object, bucket, err)
 		}
@@ -164,11 +169,15 @@ func resourceStorageObjectAclCreate(d *schema.ResourceData, meta interface{}) er
 
 func resourceStorageObjectAclRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	bucket := d.Get("bucket").(string)
 	object := d.Get("object").(string)
 
-	roleEntities, err := getRoleEntitiesAsStringsFromApi(config, bucket, object)
+	roleEntities, err := getRoleEntitiesAsStringsFromApi(config, bucket, object, userAgent)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Storage Object ACL for Bucket %q", d.Get("bucket").(string)))
 	}
@@ -184,6 +193,10 @@ func resourceStorageObjectAclRead(d *schema.ResourceData, meta interface{}) erro
 
 func resourceStorageObjectAclUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	bucket := d.Get("bucket").(string)
 	object := d.Get("object").(string)
@@ -196,19 +209,19 @@ func resourceStorageObjectAclUpdate(d *schema.ResourceData, meta interface{}) er
 	defer mutexKV.Unlock(lockName)
 
 	if _, ok := d.GetOk("predefined_acl"); d.HasChange("predefined_acl") && ok {
-		res, err := config.clientStorage.Objects.Get(bucket, object).Do()
+		res, err := config.NewStorageClient(userAgent).Objects.Get(bucket, object).Do()
 		if err != nil {
 			return fmt.Errorf("Error reading object %s in %s: %v", object, bucket, err)
 		}
 
-		_, err = config.clientStorage.Objects.Update(bucket, object, res).PredefinedAcl(d.Get("predefined_acl").(string)).Do()
+		_, err = config.NewStorageClient(userAgent).Objects.Update(bucket, object, res).PredefinedAcl(d.Get("predefined_acl").(string)).Do()
 		if err != nil {
 			return fmt.Errorf("Error updating object %s in %s: %v", object, bucket, err)
 		}
 
 		return resourceStorageObjectAclRead(d, meta)
 	} else {
-		sObject, err := config.clientStorage.Objects.Get(bucket, object).Projection("full").Do()
+		sObject, err := config.NewStorageClient(userAgent).Objects.Get(bucket, object).Projection("full").Do()
 		if err != nil {
 			return fmt.Errorf("Error reading object %s in %s: %v", object, bucket, err)
 		}
@@ -224,7 +237,7 @@ func resourceStorageObjectAclUpdate(d *schema.ResourceData, meta interface{}) er
 			return fmt.Errorf("Error reading object %s in %s. Invalid schema: %v", object, bucket, err)
 		}
 
-		err = performStorageObjectRoleEntityOperations(create, update, remove, config, bucket, object)
+		err = performStorageObjectRoleEntityOperations(create, update, remove, config, bucket, object, userAgent)
 		if err != nil {
 			return fmt.Errorf("Error updating object %s in %s: %v", object, bucket, err)
 		}
@@ -235,6 +248,10 @@ func resourceStorageObjectAclUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceStorageObjectAclDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	bucket := d.Get("bucket").(string)
 	object := d.Get("object").(string)
@@ -246,12 +263,12 @@ func resourceStorageObjectAclDelete(d *schema.ResourceData, meta interface{}) er
 	mutexKV.Lock(lockName)
 	defer mutexKV.Unlock(lockName)
 
-	res, err := config.clientStorage.Objects.Get(bucket, object).Do()
+	res, err := config.NewStorageClient(userAgent).Objects.Get(bucket, object).Do()
 	if err != nil {
 		return fmt.Errorf("Error reading object %s in %s: %v", object, bucket, err)
 	}
 
-	_, err = config.clientStorage.Objects.Update(bucket, object, res).PredefinedAcl("private").Do()
+	_, err = config.NewStorageClient(userAgent).Objects.Update(bucket, object, res).PredefinedAcl("private").Do()
 	if err != nil {
 		return fmt.Errorf("Error updating object %s in %s: %v", object, bucket, err)
 	}
@@ -259,9 +276,9 @@ func resourceStorageObjectAclDelete(d *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-func getRoleEntitiesAsStringsFromApi(config *Config, bucket string, object string) ([]string, error) {
+func getRoleEntitiesAsStringsFromApi(config *Config, bucket, object, userAgent string) ([]string, error) {
 	var roleEntities []string
-	res, err := config.clientStorage.ObjectAccessControls.List(bucket, object).Do()
+	res, err := config.NewStorageClient(userAgent).ObjectAccessControls.List(bucket, object).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -331,13 +348,13 @@ func getRoleEntityChange(old []string, new []string, owner string) (create, upda
 }
 
 // Takes in lists of changes to make to a Storage Object's ACL and makes those changes
-func performStorageObjectRoleEntityOperations(create []*RoleEntity, update []*RoleEntity, remove []*RoleEntity, config *Config, bucket string, object string) error {
+func performStorageObjectRoleEntityOperations(create []*RoleEntity, update []*RoleEntity, remove []*RoleEntity, config *Config, bucket, object, userAgent string) error {
 	for _, v := range create {
 		objectAccessControl := &storage.ObjectAccessControl{
 			Role:   v.Role,
 			Entity: v.Entity,
 		}
-		_, err := config.clientStorage.ObjectAccessControls.Insert(bucket, object, objectAccessControl).Do()
+		_, err := config.NewStorageClient(userAgent).ObjectAccessControls.Insert(bucket, object, objectAccessControl).Do()
 		if err != nil {
 			return fmt.Errorf("Error inserting ACL item %s for object %s in %s: %v", v.Entity, object, bucket, err)
 		}
@@ -348,14 +365,14 @@ func performStorageObjectRoleEntityOperations(create []*RoleEntity, update []*Ro
 			Role:   v.Role,
 			Entity: v.Entity,
 		}
-		_, err := config.clientStorage.ObjectAccessControls.Update(bucket, object, v.Entity, objectAccessControl).Do()
+		_, err := config.NewStorageClient(userAgent).ObjectAccessControls.Update(bucket, object, v.Entity, objectAccessControl).Do()
 		if err != nil {
 			return fmt.Errorf("Error updating ACL item %s for object %s in %s: %v", v.Entity, object, bucket, err)
 		}
 	}
 
 	for _, v := range remove {
-		err := config.clientStorage.ObjectAccessControls.Delete(bucket, object, v.Entity).Do()
+		err := config.NewStorageClient(userAgent).ObjectAccessControls.Delete(bucket, object, v.Entity).Do()
 		if err != nil {
 			return fmt.Errorf("Error deleting ACL item %s for object %s in %s: %v", v.Entity, object, bucket, err)
 		}

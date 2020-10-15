@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/bigquery/v2"
 )
 
@@ -168,7 +168,7 @@ func testAccAddTable(t *testing.T, datasetID string, tableID string) resource.Te
 				ProjectId: config.Project,
 			},
 		}
-		_, err := config.clientBigQuery.Tables.Insert(config.Project, datasetID, table).Do()
+		_, err := config.NewBigQueryClient(config.userAgent).Tables.Insert(config.Project, datasetID, table).Do()
 		if err != nil {
 			return fmt.Errorf("Could not create table")
 		}

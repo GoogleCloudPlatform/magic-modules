@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/dataproc/v1"
 )
 
@@ -96,7 +96,6 @@ func resourceDataprocJob() *schema.Resource {
 			"status": {
 				Type:        schema.TypeList,
 				Computed:    true,
-				MaxItems:    1,
 				Description: `The status of the job.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -182,6 +181,10 @@ func resourceDataprocJobUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -240,7 +243,7 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Submit the job
-	job, err := config.clientDataproc.Projects.Regions.Jobs.Submit(
+	job, err := config.NewDataprocClient(userAgent).Projects.Regions.Jobs.Submit(
 		project, region, submitReq).Do()
 	if err != nil {
 		return err
@@ -248,7 +251,7 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 	d.SetId(fmt.Sprintf("projects/%s/regions/%s/jobs/%s", project, region, job.Reference.JobId))
 
 	waitErr := dataprocJobOperationWait(config, region, project, job.Reference.JobId,
-		"Creating Dataproc job", d.Timeout(schema.TimeoutCreate))
+		"Creating Dataproc job", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		return waitErr
 	}
@@ -259,6 +262,10 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	region := d.Get("region").(string)
 
 	project, err := getProject(d, config)
@@ -268,45 +275,77 @@ func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 
 	parts := strings.Split(d.Id(), "/")
 	jobId := parts[len(parts)-1]
-	job, err := config.clientDataproc.Projects.Regions.Jobs.Get(
+	job, err := config.NewDataprocClient(userAgent).Projects.Regions.Jobs.Get(
 		project, region, jobId).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Dataproc Job %q", jobId))
 	}
 
-	d.Set("force_delete", d.Get("force_delete"))
-	d.Set("labels", job.Labels)
-	d.Set("driver_output_resource_uri", job.DriverOutputResourceUri)
-	d.Set("driver_controls_files_uri", job.DriverControlFilesUri)
+	if err := d.Set("force_delete", d.Get("force_delete")); err != nil {
+		return fmt.Errorf("Error setting force_delete: %s", err)
+	}
+	if err := d.Set("labels", job.Labels); err != nil {
+		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := d.Set("driver_output_resource_uri", job.DriverOutputResourceUri); err != nil {
+		return fmt.Errorf("Error setting driver_output_resource_uri: %s", err)
+	}
+	if err := d.Set("driver_controls_files_uri", job.DriverControlFilesUri); err != nil {
+		return fmt.Errorf("Error setting driver_controls_files_uri: %s", err)
+	}
 
-	d.Set("placement", flattenJobPlacement(job.Placement))
-	d.Set("status", flattenJobStatus(job.Status))
-	d.Set("reference", flattenJobReference(job.Reference))
-	d.Set("project", project)
+	if err := d.Set("placement", flattenJobPlacement(job.Placement)); err != nil {
+		return fmt.Errorf("Error setting placement: %s", err)
+	}
+	if err := d.Set("status", flattenJobStatus(job.Status)); err != nil {
+		return fmt.Errorf("Error setting status: %s", err)
+	}
+	if err := d.Set("reference", flattenJobReference(job.Reference)); err != nil {
+		return fmt.Errorf("Error setting reference: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 
 	if job.PysparkJob != nil {
-		d.Set("pyspark_config", flattenPySparkJob(job.PysparkJob))
+		if err := d.Set("pyspark_config", flattenPySparkJob(job.PysparkJob)); err != nil {
+			return fmt.Errorf("Error setting pyspark_config: %s", err)
+		}
 	}
 	if job.SparkJob != nil {
-		d.Set("spark_config", flattenSparkJob(job.SparkJob))
+		if err := d.Set("spark_config", flattenSparkJob(job.SparkJob)); err != nil {
+			return fmt.Errorf("Error setting spark_config: %s", err)
+		}
 	}
 	if job.HadoopJob != nil {
-		d.Set("hadoop_config", flattenHadoopJob(job.HadoopJob))
+		if err := d.Set("hadoop_config", flattenHadoopJob(job.HadoopJob)); err != nil {
+			return fmt.Errorf("Error setting hadoop_config: %s", err)
+		}
 	}
 	if job.HiveJob != nil {
-		d.Set("hive_config", flattenHiveJob(job.HiveJob))
+		if err := d.Set("hive_config", flattenHiveJob(job.HiveJob)); err != nil {
+			return fmt.Errorf("Error setting hive_config: %s", err)
+		}
 	}
 	if job.PigJob != nil {
-		d.Set("pig_config", flattenPigJob(job.PigJob))
+		if err := d.Set("pig_config", flattenPigJob(job.PigJob)); err != nil {
+			return fmt.Errorf("Error setting pig_config: %s", err)
+		}
 	}
 	if job.SparkSqlJob != nil {
-		d.Set("sparksql_config", flattenSparkSqlJob(job.SparkSqlJob))
+		if err := d.Set("sparksql_config", flattenSparkSqlJob(job.SparkSqlJob)); err != nil {
+			return fmt.Errorf("Error setting sparksql_config: %s", err)
+		}
 	}
 	return nil
 }
 
 func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -324,10 +363,10 @@ func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
 		// ignore error if we get one - job may be finished already and not need to
 		// be cancelled. We do however wait for the state to be one that is
 		// at least not active
-		_, _ = config.clientDataproc.Projects.Regions.Jobs.Cancel(project, region, jobId, &dataproc.CancelJobRequest{}).Do()
+		_, _ = config.NewDataprocClient(userAgent).Projects.Regions.Jobs.Cancel(project, region, jobId, &dataproc.CancelJobRequest{}).Do()
 
 		waitErr := dataprocJobOperationWait(config, region, project, jobId,
-			"Cancelling Dataproc job", d.Timeout(schema.TimeoutDelete))
+			"Cancelling Dataproc job", userAgent, d.Timeout(schema.TimeoutDelete))
 		if waitErr != nil {
 			return waitErr
 		}
@@ -335,14 +374,14 @@ func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] Deleting Dataproc job %s", d.Id())
-	_, err = config.clientDataproc.Projects.Regions.Jobs.Delete(
+	_, err = config.NewDataprocClient(userAgent).Projects.Regions.Jobs.Delete(
 		project, region, jobId).Do()
 	if err != nil {
 		return err
 	}
 
 	waitErr := dataprocDeleteOperationWait(config, region, project, jobId,
-		"Deleting Dataproc job", d.Timeout(schema.TimeoutDelete))
+		"Deleting Dataproc job", userAgent, d.Timeout(schema.TimeoutDelete))
 	if waitErr != nil {
 		return waitErr
 	}

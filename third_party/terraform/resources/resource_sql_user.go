@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
@@ -71,6 +71,10 @@ func resourceSqlUser() *schema.Resource {
 
 func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -93,7 +97,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	defer mutexKV.Unlock(instanceMutexKey(project, instance))
 	var op *sqladmin.Operation
 	insertFunc := func() error {
-		op, err = config.clientSqlAdmin.Users.Insert(project, instance,
+		op, err = config.NewSqlAdminClient(userAgent).Users.Insert(project, instance,
 			user).Do()
 		return err
 	}
@@ -108,7 +112,7 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	// for which user.Host is an empty string.  That's okay.
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Insert User", d.Timeout(schema.TimeoutCreate))
+	err = sqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutCreate))
 
 	if err != nil {
 		return fmt.Errorf("Error, failure waiting for insertion of %s "+
@@ -120,6 +124,10 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -133,7 +141,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	var users *sqladmin.UsersListResponse
 	err = nil
 	err = retryTime(func() error {
-		users, err = config.clientSqlAdmin.Users.List(project, instance).Do()
+		users, err = config.NewSqlAdminClient(userAgent).Users.List(project, instance).Do()
 		return err
 	}, 5)
 	if err != nil {
@@ -159,16 +167,28 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 
-	d.Set("host", user.Host)
-	d.Set("instance", user.Instance)
-	d.Set("name", user.Name)
-	d.Set("project", project)
+	if err := d.Set("host", user.Host); err != nil {
+		return fmt.Errorf("Error setting host: %s", err)
+	}
+	if err := d.Set("instance", user.Instance); err != nil {
+		return fmt.Errorf("Error setting instance: %s", err)
+	}
+	if err := d.Set("name", user.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
 	return nil
 }
 
 func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	if d.HasChange("password") {
 		project, err := getProject(d, config)
@@ -191,7 +211,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 		defer mutexKV.Unlock(instanceMutexKey(project, instance))
 		var op *sqladmin.Operation
 		updateFunc := func() error {
-			op, err = config.clientSqlAdmin.Users.Update(project, instance, user).Host(host).Name(name).Do()
+			op, err = config.NewSqlAdminClient(userAgent).Users.Update(project, instance, user).Host(host).Name(name).Do()
 			return err
 		}
 		err = retryTimeDuration(updateFunc, d.Timeout(schema.TimeoutUpdate))
@@ -201,7 +221,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 				"user %s into user %s: %s", name, instance, err)
 		}
 
-		err = sqlAdminOperationWaitTime(config, op, project, "Insert User", d.Timeout(schema.TimeoutUpdate))
+		err = sqlAdminOperationWaitTime(config, op, project, "Insert User", userAgent, d.Timeout(schema.TimeoutUpdate))
 
 		if err != nil {
 			return fmt.Errorf("Error, failure waiting for update of %s "+
@@ -216,6 +236,10 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -231,12 +255,12 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 
 	var op *sqladmin.Operation
 	err = retryTimeDuration(func() error {
-		op, err = config.clientSqlAdmin.Users.Delete(project, instance).Host(host).Name(name).Do()
+		op, err = config.NewSqlAdminClient(userAgent).Users.Delete(project, instance).Host(host).Name(name).Do()
 		if err != nil {
 			return err
 		}
 
-		if err := sqlAdminOperationWaitTime(config, op, project, "Delete User", d.Timeout(schema.TimeoutDelete)); err != nil {
+		if err := sqlAdminOperationWaitTime(config, op, project, "Delete User", userAgent, d.Timeout(schema.TimeoutDelete)); err != nil {
 			return err
 		}
 		return nil
@@ -255,14 +279,28 @@ func resourceSqlUserImporter(d *schema.ResourceData, meta interface{}) ([]*schem
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) == 3 {
-		d.Set("project", parts[0])
-		d.Set("instance", parts[1])
-		d.Set("name", parts[2])
+		if err := d.Set("project", parts[0]); err != nil {
+			return nil, fmt.Errorf("Error setting project: %s", err)
+		}
+		if err := d.Set("instance", parts[1]); err != nil {
+			return nil, fmt.Errorf("Error setting instance: %s", err)
+		}
+		if err := d.Set("name", parts[2]); err != nil {
+			return nil, fmt.Errorf("Error setting name: %s", err)
+		}
 	} else if len(parts) == 4 {
-		d.Set("project", parts[0])
-		d.Set("instance", parts[1])
-		d.Set("host", parts[2])
-		d.Set("name", parts[3])
+		if err := d.Set("project", parts[0]); err != nil {
+			return nil, fmt.Errorf("Error setting project: %s", err)
+		}
+		if err := d.Set("instance", parts[1]); err != nil {
+			return nil, fmt.Errorf("Error setting instance: %s", err)
+		}
+		if err := d.Set("host", parts[2]); err != nil {
+			return nil, fmt.Errorf("Error setting host: %s", err)
+		}
+		if err := d.Set("name", parts[3]); err != nil {
+			return nil, fmt.Errorf("Error setting name: %s", err)
+		}
 	} else {
 		return nil, fmt.Errorf("Invalid specifier. Expecting {project}/{instance}/{name} for postgres instance and {project}/{instance}/{host}/{name} for MySQL instance")
 	}

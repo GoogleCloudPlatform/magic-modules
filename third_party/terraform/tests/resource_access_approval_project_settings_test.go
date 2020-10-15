@@ -5,13 +5,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAccessApprovalProjectSettings_update(t *testing.T) {
-	t.Parallel()
-
+// Since access approval settings are heirarchical, and only one can exist per folder/project/org,
+// and all refer to the same organization, they need to be ran serially.
+// See AccessApprovalOrganizationSettings for the test runner.
+func testAccAccessApprovalProjectSettings(t *testing.T) {
 	context := map[string]interface{}{
 		"project":       getTestProjectFromEnv(),
 		"org_id":        getTestOrgFromEnv(t),

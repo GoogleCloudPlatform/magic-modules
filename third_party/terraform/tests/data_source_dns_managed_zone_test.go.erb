@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
@@ -26,6 +26,7 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 						"private_visibility_config.#": {},
 						"peering_config.#":            {},
 						"forwarding_config.#":         {},
+						"force_destroy":               {},
 <% unless version == "ga" -%>
 						"reverse_lookup":         {},
 <% end -%>

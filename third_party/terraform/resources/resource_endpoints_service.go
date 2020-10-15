@@ -1,6 +1,7 @@
 package google
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -11,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/servicemanagement/v1"
 )
 
@@ -149,7 +150,7 @@ func resourceEndpointsService() *schema.Resource {
 	}
 }
 
-func predictServiceId(d *schema.ResourceDiff, meta interface{}) error {
+func predictServiceId(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	if !d.HasChange("openapi_config") && !d.HasChange("grpc_config") && !d.HasChange("protoc_output_base64") {
 		return nil
 	}
@@ -170,9 +171,13 @@ func predictServiceId(d *schema.ResourceDiff, meta interface{}) error {
 		if err != nil {
 			return err
 		}
-		d.SetNew("config_id", fmt.Sprintf("%sr%d", baseDate, n+1))
+		if err := d.SetNew("config_id", fmt.Sprintf("%sr%d", baseDate, n+1)); err != nil {
+			return err
+		}
 	} else {
-		d.SetNew("config_id", baseDate+"r0")
+		if err := d.SetNew("config_id", baseDate+"r0"); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -211,6 +216,11 @@ func getEndpointServiceGRPCConfigSource(serviceConfig, protoConfig string) *serv
 
 func resourceEndpointsServiceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
@@ -228,10 +238,10 @@ func resourceEndpointsServiceCreate(d *schema.ResourceData, meta interface{}) er
 	log.Printf("[DEBUG] Create Endpoint Service %q", serviceName)
 
 	log.Printf("[DEBUG] Checking for existing ManagedService %q", serviceName)
-	_, err = config.clientServiceMan.Services.Get(serviceName).Do()
+	_, err = config.NewServiceManClient(userAgent).Services.Get(serviceName).Do()
 	if err != nil {
 		log.Printf("[DEBUG] Creating new ServiceManagement ManagedService %q", serviceName)
-		op, err := config.clientServiceMan.Services.Create(
+		op, err := config.NewServiceManClient(userAgent).Services.Create(
 			&servicemanagement.ManagedService{
 				ProducerProjectId: project,
 				ServiceName:       serviceName,
@@ -240,7 +250,7 @@ func resourceEndpointsServiceCreate(d *schema.ResourceData, meta interface{}) er
 			return err
 		}
 
-		_, err = serviceManagementOperationWaitTime(config, op, "Creating new ManagedService.", d.Timeout(schema.TimeoutCreate))
+		_, err = serviceManagementOperationWaitTime(config, op, "Creating new ManagedService.", userAgent, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
 			return err
 		}
@@ -281,6 +291,11 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 	// we currently only support full rollouts - anyone trying to do incremental
 	// rollouts or A/B testing is going to need a more precise tool than this resource.
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	serviceName := d.Get("service_name").(string)
 
 	log.Printf("[DEBUG] Updating ManagedService %q", serviceName)
@@ -297,7 +312,7 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 	// with any new features that arise - this is why you provide a YAML config
 	// instead of providing the config in HCL.
 	log.Printf("[DEBUG] Submitting config for ManagedService %q", serviceName)
-	op, err := config.clientServiceMan.Services.Configs.Submit(
+	op, err := config.NewServiceManClient(userAgent).Services.Configs.Submit(
 		serviceName,
 		&servicemanagement.SubmitConfigSourceRequest{
 			ConfigSource: cfgSource,
@@ -305,7 +320,7 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return err
 	}
-	s, err := serviceManagementOperationWaitTime(config, op, "Submitting service config.", d.Timeout(schema.TimeoutUpdate))
+	s, err := serviceManagementOperationWaitTime(config, op, "Submitting service config.", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
@@ -323,11 +338,11 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	log.Printf("[DEBUG] Creating new rollout for ManagedService %q", serviceName)
-	op, err = config.clientServiceMan.Services.Rollouts.Create(serviceName, &rollout).Do()
+	op, err = config.NewServiceManClient(userAgent).Services.Rollouts.Create(serviceName, &rollout).Do()
 	if err != nil {
 		return err
 	}
-	_, err = serviceManagementOperationWaitTime(config, op, "Performing service rollout.", d.Timeout(schema.TimeoutUpdate))
+	_, err = serviceManagementOperationWaitTime(config, op, "Performing service rollout.", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
@@ -337,32 +352,48 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceEndpointsServiceDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-
-	log.Printf("[DEBUG] Deleting ManagedService %q", d.Id())
-
-	op, err := config.clientServiceMan.Services.Delete(d.Get("service_name").(string)).Do()
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	_, err = serviceManagementOperationWaitTime(config, op, "Deleting service.", d.Timeout(schema.TimeoutDelete))
+
+	log.Printf("[DEBUG] Deleting ManagedService %q", d.Id())
+
+	op, err := config.NewServiceManClient(userAgent).Services.Delete(d.Get("service_name").(string)).Do()
+	if err != nil {
+		return err
+	}
+	_, err = serviceManagementOperationWaitTime(config, op, "Deleting service.", userAgent, d.Timeout(schema.TimeoutDelete))
 	d.SetId("")
 	return err
 }
 
 func resourceEndpointsServiceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-
-	log.Printf("[DEBUG] Reading ManagedService %q", d.Id())
-
-	service, err := config.clientServiceMan.Services.GetConfig(d.Get("service_name").(string)).Do()
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
 
-	d.Set("config_id", service.Id)
-	d.Set("dns_address", service.Name)
-	d.Set("apis", flattenServiceManagementAPIs(service.Apis))
-	d.Set("endpoints", flattenServiceManagementEndpoints(service.Endpoints))
+	log.Printf("[DEBUG] Reading ManagedService %q", d.Id())
+
+	service, err := config.NewServiceManClient(userAgent).Services.GetConfig(d.Get("service_name").(string)).Do()
+	if err != nil {
+		return err
+	}
+
+	if err := d.Set("config_id", service.Id); err != nil {
+		return fmt.Errorf("Error setting config_id: %s", err)
+	}
+	if err := d.Set("dns_address", service.Name); err != nil {
+		return fmt.Errorf("Error setting dns_address: %s", err)
+	}
+	if err := d.Set("apis", flattenServiceManagementAPIs(service.Apis)); err != nil {
+		return fmt.Errorf("Error setting apis: %s", err)
+	}
+	if err := d.Set("endpoints", flattenServiceManagementEndpoints(service.Endpoints)); err != nil {
+		return fmt.Errorf("Error setting endpoints: %s", err)
+	}
 
 	return nil
 }

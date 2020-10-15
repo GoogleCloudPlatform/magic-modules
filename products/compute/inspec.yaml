@@ -106,6 +106,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         override_name: "network_id"
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: "network_name"
+      peerings: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude: false
   NetworkEndpoint: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   GlobalNetworkEndpoint: !ruby/object:Overrides::Inspec::ResourceOverride
@@ -217,4 +219,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RegionPerInstanceConfig: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   RegionNetworkEndpointGroup: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  TargetGrpcProxy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true

@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -48,6 +48,10 @@ func resourceComputeProjectDefaultNetworkTier() *schema.Resource {
 
 func resourceComputeProjectDefaultNetworkTierCreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	projectID, err := getProject(d, config)
 	if err != nil {
@@ -57,13 +61,13 @@ func resourceComputeProjectDefaultNetworkTierCreateOrUpdate(d *schema.ResourceDa
 	request := &compute.ProjectsSetDefaultNetworkTierRequest{
 		NetworkTier: d.Get("network_tier").(string),
 	}
-	op, err := config.clientCompute.Projects.SetDefaultNetworkTier(projectID, request).Do()
+	op, err := config.NewComputeClient(userAgent).Projects.SetDefaultNetworkTier(projectID, request).Do()
 	if err != nil {
 		return fmt.Errorf("SetDefaultNetworkTier failed: %s", err)
 	}
 
 	log.Printf("[DEBUG] SetDefaultNetworkTier: %d (%s)", op.Id, op.SelfLink)
-	err = computeOperationWaitTime(config, op, projectID, "SetDefaultNetworkTier", d.Timeout(schema.TimeoutCreate))
+	err = computeOperationWaitTime(config, op, projectID, "SetDefaultNetworkTier", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("SetDefaultNetworkTier failed: %s", err)
 	}
@@ -75,10 +79,14 @@ func resourceComputeProjectDefaultNetworkTierCreateOrUpdate(d *schema.ResourceDa
 
 func resourceComputeProjectDefaultNetworkTierRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	projectId := d.Id()
 
-	project, err := config.clientCompute.Projects.Get(projectId).Do()
+	project, err := config.NewComputeClient(userAgent).Projects.Get(projectId).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Project data for project %q", projectId))
 	}
@@ -88,7 +96,9 @@ func resourceComputeProjectDefaultNetworkTierRead(d *schema.ResourceData, meta i
 		return fmt.Errorf("Error setting default network tier: %s", err)
 	}
 
-	d.Set("project", projectId)
+	if err := d.Set("project", projectId); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 
 	return nil
 }

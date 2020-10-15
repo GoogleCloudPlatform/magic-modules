@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccComputeSslCertificate_no_name(t *testing.T) {
@@ -50,7 +50,7 @@ func testAccCheckComputeSslCertificateExists(t *testing.T, n string) resource.Te
 		// We don't specify a name, but it is saved during create
 		name := rs.Primary.Attributes["name"]
 
-		found, err := config.clientCompute.SslCertificates.Get(
+		found, err := config.NewComputeClient(config.userAgent).SslCertificates.Get(
 			config.Project, name).Do()
 		if err != nil {
 			return err

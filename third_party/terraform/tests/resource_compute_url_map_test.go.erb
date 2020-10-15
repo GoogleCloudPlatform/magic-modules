@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccComputeUrlMap_update_path_matcher(t *testing.T) {
@@ -162,7 +162,7 @@ func testAccCheckComputeUrlMapExists(t *testing.T, n string) resource.TestCheckF
 		config := googleProviderConfig(t)
 		name := rs.Primary.Attributes["name"]
 
-		found, err := config.clientCompute.UrlMaps.Get(
+		found, err := config.NewComputeClient(config.userAgent).UrlMaps.Get(
 			config.Project, name).Do()
 		if err != nil {
 			return err

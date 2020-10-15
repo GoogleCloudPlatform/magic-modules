@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -212,7 +212,7 @@ func testAccCheckGoogleProjectOrganizationPolicyDestroyProducer(t *testing.T) fu
 
 			projectId := canonicalProjectId(rs.Primary.Attributes["project"])
 			constraint := canonicalOrgPolicyConstraint(rs.Primary.Attributes["constraint"])
-			policy, err := config.clientResourceManager.Projects.GetOrgPolicy(projectId, &cloudresourcemanager.GetOrgPolicyRequest{
+			policy, err := config.NewResourceManagerClient(config.userAgent).Projects.GetOrgPolicy(projectId, &cloudresourcemanager.GetOrgPolicyRequest{
 				Constraint: constraint,
 			}).Do()
 
@@ -330,7 +330,7 @@ func getGoogleProjectOrganizationPolicyTestResource(t *testing.T, s *terraform.S
 	config := googleProviderConfig(t)
 	projectId := canonicalProjectId(rs.Primary.Attributes["project"])
 
-	return config.clientResourceManager.Projects.GetOrgPolicy(projectId, &cloudresourcemanager.GetOrgPolicyRequest{
+	return config.NewResourceManagerClient(config.userAgent).Projects.GetOrgPolicy(projectId, &cloudresourcemanager.GetOrgPolicyRequest{
 		Constraint: rs.Primary.Attributes["constraint"],
 	}).Do()
 }

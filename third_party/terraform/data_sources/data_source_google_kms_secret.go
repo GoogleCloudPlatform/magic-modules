@@ -5,9 +5,8 @@ import (
 
 	"encoding/base64"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
-	"time"
 )
 
 func dataSourceGoogleKmsSecret() *schema.Resource {
@@ -37,6 +36,10 @@ func dataSourceGoogleKmsSecret() *schema.Resource {
 
 func dataSourceGoogleKmsSecretRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	cryptoKeyId, err := parseKmsCryptoKeyId(d.Get("crypto_key").(string), config)
 
@@ -54,7 +57,7 @@ func dataSourceGoogleKmsSecretRead(d *schema.ResourceData, meta interface{}) err
 		kmsDecryptRequest.AdditionalAuthenticatedData = aad.(string)
 	}
 
-	decryptResponse, err := config.clientKms.Projects.Locations.KeyRings.CryptoKeys.Decrypt(cryptoKeyId.cryptoKeyId(), kmsDecryptRequest).Do()
+	decryptResponse, err := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.Decrypt(cryptoKeyId.cryptoKeyId(), kmsDecryptRequest).Do()
 
 	if err != nil {
 		return fmt.Errorf("Error decrypting ciphertext: %s", err)
@@ -68,8 +71,10 @@ func dataSourceGoogleKmsSecretRead(d *schema.ResourceData, meta interface{}) err
 
 	log.Printf("[INFO] Successfully decrypted ciphertext: %s", ciphertext)
 
-	d.Set("plaintext", string(plaintext[:]))
-	d.SetId(time.Now().UTC().String())
+	if err := d.Set("plaintext", string(plaintext[:])); err != nil {
+		return fmt.Errorf("Error setting plaintext: %s", err)
+	}
+	d.SetId(fmt.Sprintf("%s:%s", d.Get("crypto_key").(string), ciphertext))
 
 	return nil
 }

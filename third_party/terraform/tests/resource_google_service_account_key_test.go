@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 // Test that a service account key can be created and destroyed
@@ -94,7 +94,7 @@ func testAccCheckGoogleServiceAccountKeyExists(t *testing.T, r string) resource.
 		}
 		config := googleProviderConfig(t)
 
-		_, err := config.clientIAM.Projects.ServiceAccounts.Keys.Get(rs.Primary.ID).Do()
+		_, err := config.NewIamClient(config.userAgent).Projects.ServiceAccounts.Keys.Get(rs.Primary.ID).Do()
 		if err != nil {
 			return err
 		}

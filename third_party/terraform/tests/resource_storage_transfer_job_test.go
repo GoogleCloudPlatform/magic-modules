@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccStorageTransferJob_basic(t *testing.T) {
@@ -103,7 +103,7 @@ func testAccStorageTransferJobDestroyProducer(t *testing.T) func(s *terraform.St
 				return err
 			}
 
-			res, err := config.clientStorageTransfer.TransferJobs.Get(name).ProjectId(project).Do()
+			res, err := config.NewStorageTransferClient(config.userAgent).TransferJobs.Get(name).ProjectId(project).Do()
 			if res.Status != "DELETED" {
 				return fmt.Errorf("Transfer Job not set to DELETED")
 			}

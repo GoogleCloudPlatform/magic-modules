@@ -6,18 +6,20 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/mutexkv"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	googleoauth "golang.org/x/oauth2/google"
 )
 
-// Global MutexKV
-var mutexKV = mutexkv.NewMutexKV()
+const TestEnvVar = "TF_ACC"
 
-// Provider returns a terraform.ResourceProvider.
-func Provider() terraform.ResourceProvider {
+// Global MutexKV
+var mutexKV = NewMutexKV()
+
+// Provider returns a *schema.Provider.
+func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"credentials": &schema.Schema{
@@ -39,6 +41,19 @@ func Provider() terraform.ResourceProvider {
 				}, nil),
 				ConflictsWith: []string{"credentials"},
 			},
+			"impersonate_service_account": {
+				Type:     schema.TypeString,
+				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
+				}, nil),
+			},
+
+			"impersonate_service_account_delegates": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 
 			"project": &schema.Schema{
 				Type:     schema.TypeString,
@@ -48,6 +63,14 @@ func Provider() terraform.ResourceProvider {
 					"GOOGLE_CLOUD_PROJECT",
 					"GCLOUD_PROJECT",
 					"CLOUDSDK_CORE_PROJECT",
+				}, nil),
+			},
+
+			"billing_project": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"GOOGLE_BILLING_PROJECT",
 				}, nil),
 			},
 
@@ -101,6 +124,9 @@ func Provider() terraform.ResourceProvider {
 			"user_project_override": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"USER_PROJECT_OVERRIDE",
+				}, nil),
 			},
 
 			"request_timeout": {
@@ -139,8 +165,16 @@ func Provider() terraform.ResourceProvider {
 			BigtableAdminCustomEndpointEntryKey:          BigtableAdminCustomEndpointEntry,
 		},
 
+		ProviderMetaSchema: map[string]*schema.Schema{
+			"module_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+		},
+
 		DataSourcesMap: map[string]*schema.Resource{
 			"google_active_folder":                             dataSourceGoogleActiveFolder(),
+			"google_app_engine_default_service_account":        dataSourceGoogleAppEngineDefaultServiceAccount(),
 			"google_billing_account":                           dataSourceGoogleBillingAccount(),
 			"google_bigquery_default_service_account":          dataSourceGoogleBigqueryDefaultServiceAccount(),
 			"google_client_config":                             dataSourceGoogleClientConfig(),
@@ -150,6 +184,7 @@ func Provider() terraform.ResourceProvider {
 			"google_cloud_identity_groups":                     dataSourceGoogleCloudIdentityGroups(),
 			"google_cloud_identity_group_memberships":          dataSourceGoogleCloudIdentityGroupMemberships(),
 			<% end -%>
+			"google_cloud_run_service":                         dataSourceGoogleCloudRunService(),
 			"google_composer_image_versions":                   dataSourceGoogleComposerImageVersions(),
 			"google_compute_address":                           dataSourceGoogleComputeAddress(),
 			"google_compute_backend_service":                   dataSourceGoogleComputeBackendService(),
@@ -157,6 +192,7 @@ func Provider() terraform.ResourceProvider {
 			"google_compute_default_service_account":           dataSourceGoogleComputeDefaultServiceAccount(),
 			"google_compute_forwarding_rule":                   dataSourceGoogleComputeForwardingRule(),
 			"google_compute_global_address":                    dataSourceGoogleComputeGlobalAddress(),
+			"google_compute_global_forwarding_rule":			      dataSourceGoogleComputeGlobalForwardingRule(),
 			"google_compute_image":                             dataSourceGoogleComputeImage(),
 			"google_compute_instance":                          dataSourceGoogleComputeInstance(),
 			"google_compute_instance_serial_port":              dataSourceGoogleComputeInstanceSerialPort(),
@@ -167,6 +203,7 @@ func Provider() terraform.ResourceProvider {
 			"google_compute_node_types":                        dataSourceGoogleComputeNodeTypes(),
 			"google_compute_regions":                           dataSourceGoogleComputeRegions(),
 			"google_compute_region_instance_group":             dataSourceGoogleComputeRegionInstanceGroup(),
+			"google_compute_region_ssl_certificate":            dataSourceGoogleRegionComputeSslCertificate(),
 			<% unless version == 'ga' -%>
 			"google_compute_resource_policy":                   dataSourceGoogleComputeResourcePolicy(),
 			<% end -%>
@@ -205,11 +242,13 @@ func Provider() terraform.ResourceProvider {
 			"google_project":                                   dataSourceGoogleProject(),
 			"google_projects":                                  dataSourceGoogleProjects(),
 			"google_project_organization_policy":               dataSourceGoogleProjectOrganizationPolicy(),
-			"google_secret_manager_secret_version":              dataSourceSecretManagerSecretVersion(),
+			"google_pubsub_topic":                              dataSourceGooglePubsubTopic(),
+			"google_secret_manager_secret_version":             dataSourceSecretManagerSecretVersion(),
 			"google_service_account":                           dataSourceGoogleServiceAccount(),
 			"google_service_account_access_token":              dataSourceGoogleServiceAccountAccessToken(),
-			"google_service_account_id_token":                 dataSourceGoogleServiceAccountIdToken(),
+			"google_service_account_id_token":                  dataSourceGoogleServiceAccountIdToken(),
 			"google_service_account_key":                       dataSourceGoogleServiceAccountKey(),
+			"google_spanner_instance":                          dataSourceSpannerInstance(),
 			"google_sql_ca_certs":                              dataSourceGoogleSQLCaCerts(),
 			"google_sql_database_instance":                     dataSourceSqlDatabaseInstance(),
 			"google_storage_bucket_object":                     dataSourceGoogleStorageBucketObject(),
@@ -223,14 +262,8 @@ func Provider() terraform.ResourceProvider {
 		ResourcesMap: ResourceMap(),
 	}
 
-	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
-		terraformVersion := provider.TerraformVersion
-		if terraformVersion == "" {
-			// Terraform 0.12 introduced this field to the protocol
-			// We can therefore assume that if it's missing it's 0.10 or 0.11
-			terraformVersion = "0.11+compatible"
-		}
-		return providerConfigure(d, provider, terraformVersion)
+	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+		return providerConfigure(ctx, d, provider)
 	}
 
 	return provider
@@ -296,6 +329,9 @@ end     # products.each do
 				"google_bigtable_instance_iam_member":          ResourceIamMember(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
 				"google_bigtable_instance_iam_policy":          ResourceIamPolicy(IamBigtableInstanceSchema, NewBigtableInstanceUpdater, BigtableInstanceIdParseFunc),
 				"google_bigtable_table":                        resourceBigtableTable(),
+			"google_bigtable_table_iam_binding":                ResourceIamBinding(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),
+			"google_bigtable_table_iam_member":                 ResourceIamMember(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),
+			"google_bigtable_table_iam_policy":                 ResourceIamPolicy(IamBigtableTableSchema, NewBigtableTableUpdater, BigtableTableIdParseFunc),
 				"google_bigquery_dataset_iam_binding":          ResourceIamBinding(IamBigqueryDatasetSchema, NewBigqueryDatasetIamUpdater, BigqueryDatasetIdParseFunc),
 				"google_bigquery_dataset_iam_member":           ResourceIamMember(IamBigqueryDatasetSchema, NewBigqueryDatasetIamUpdater, BigqueryDatasetIdParseFunc),
 				"google_bigquery_dataset_iam_policy":           ResourceIamPolicy(IamBigqueryDatasetSchema, NewBigqueryDatasetIamUpdater, BigqueryDatasetIdParseFunc),
@@ -325,7 +361,7 @@ end     # products.each do
 				"google_container_registry":                    resourceContainerRegistry(),
 				"google_dataflow_job":                          resourceDataflowJob(),
 				<% unless version == 'ga' -%>
-				"google_dataflow_flex_template_job":            resourceDataflowFlexTemplateJob(), 
+				"google_dataflow_flex_template_job":            resourceDataflowFlexTemplateJob(),
 				<% end -%>
 				"google_dataproc_cluster":                      resourceDataprocCluster(),
 				"google_dataproc_cluster_iam_binding":          ResourceIamBinding(IamDataprocClusterSchema, NewDataprocClusterUpdater, DataprocClusterIdParseFunc),
@@ -374,6 +410,9 @@ end     # products.each do
 				"google_kms_crypto_key_iam_member":             ResourceIamMember(IamKmsCryptoKeySchema, NewKmsCryptoKeyIamUpdater, CryptoIdParseFunc),
 				"google_kms_crypto_key_iam_policy":             ResourceIamPolicy(IamKmsCryptoKeySchema, NewKmsCryptoKeyIamUpdater, CryptoIdParseFunc),
 				"google_monitoring_dashboard":                  resourceMonitoringDashboard(),
+				<% unless version == 'ga' -%>
+				"google_project_service_identity":              resourceProjectServiceIdentity(),
+				<% end -%>
 				"google_service_networking_connection":         resourceServiceNetworkingConnection(),
 				"google_spanner_instance_iam_binding":          ResourceIamBinding(IamSpannerInstanceSchema, NewSpannerInstanceIamUpdater, SpannerInstanceIdParseFunc),
 				"google_spanner_instance_iam_member":           ResourceIamMember(IamSpannerInstanceSchema, NewSpannerInstanceIamUpdater, SpannerInstanceIdParseFunc),
@@ -420,20 +459,25 @@ end     # products.each do
 		)
 }
 
-func providerConfigure(d *schema.ResourceData, p *schema.Provider, terraformVersion string) (interface{}, error) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
 	config := Config{
 		Project:             d.Get("project").(string),
 		Region:              d.Get("region").(string),
 		Zone:                d.Get("zone").(string),
 		UserProjectOverride: d.Get("user_project_override").(bool),
-		terraformVersion:    terraformVersion,
+		BillingProject:      d.Get("billing_project").(string),
+        <% if version.nil? || version == 'ga' -%>
+        userAgent: p.UserAgent("terraform-provider-google", version.ProviderVersion),
+        <% else -%>
+        userAgent: p.UserAgent("terraform-provider-google-<%= version -%>", version.ProviderVersion),
+        <% end -%>
 	}
 
 	if v, ok := d.GetOk("request_timeout"); ok {
 		var err error
 		config.RequestTimeout, err = time.ParseDuration(v.(string))
 		if err != nil {
-			return nil, err
+			return nil, diag.FromErr(err)
 		}
 	}
 	// Add credential source
@@ -441,6 +485,9 @@ func providerConfigure(d *schema.ResourceData, p *schema.Provider, terraformVers
 		config.AccessToken = v.(string)
 	} else if v, ok := d.GetOk("credentials"); ok {
 		config.Credentials = v.(string)
+    }
+	if v, ok := d.GetOk("impersonate_service_account"); ok {
+		config.ImpersonateServiceAccount = v.(string)
 	}
 
 	scopes := d.Get("scopes").([]interface{})
@@ -451,9 +498,17 @@ func providerConfigure(d *schema.ResourceData, p *schema.Provider, terraformVers
 		config.Scopes[i] = scope.(string)
 	}
 
+	delegates := d.Get("impersonate_service_account_delegates").([]interface{})
+	if len(delegates) > 0 {
+		config.ImpersonateServiceAccountDelegates = make([]string, len(delegates))
+	}
+	for i, delegate := range delegates {
+		config.ImpersonateServiceAccountDelegates[i] = delegate.(string)
+	}
+
 	batchCfg, err := expandProviderBatchingConfig(d.Get("batching"))
 	if err != nil {
-		return nil, err
+		return nil, diag.FromErr(err)
 	}
 	config.BatchingConfig = batchCfg
 
@@ -481,8 +536,12 @@ func providerConfigure(d *schema.ResourceData, p *schema.Provider, terraformVers
 	config.StorageTransferBasePath = d.Get(StorageTransferCustomEndpointEntryKey).(string)
 	config.BigtableAdminBasePath = d.Get(BigtableAdminCustomEndpointEntryKey).(string)
 
-	if err := config.LoadAndValidate(p.StopContext()); err != nil {
-		return nil, err
+	stopCtx, ok := schema.StopContext(ctx)
+	if !ok {
+		stopCtx = ctx
+	}
+	if err := config.LoadAndValidate(stopCtx); err != nil {
+		return nil, diag.FromErr(err)
 	}
 
 	return &config, nil

@@ -6,7 +6,7 @@ import (
 	healthcare "google.golang.org/api/healthcare/v1"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -20,6 +20,7 @@ var IamHealthcareFhirStoreSchema = map[string]*schema.Schema{
 
 type HealthcareFhirStoreIamUpdater struct {
 	resourceId string
+	d          *schema.ResourceData
 	Config     *Config
 }
 
@@ -33,6 +34,7 @@ func NewHealthcareFhirStoreIamUpdater(d *schema.ResourceData, config *Config) (R
 
 	return &HealthcareFhirStoreIamUpdater{
 		resourceId: fhirStoreId.fhirStoreId(),
+		d:          d,
 		Config:     config,
 	}, nil
 }
@@ -42,13 +44,20 @@ func FhirStoreIdParseFunc(d *schema.ResourceData, config *Config) error {
 	if err != nil {
 		return err
 	}
-	d.Set("fhir_store_id", fhirStoreId.fhirStoreId())
+	if err := d.Set("fhir_store_id", fhirStoreId.fhirStoreId()); err != nil {
+		return fmt.Errorf("Error setting fhir_store_id: %s", err)
+	}
 	d.SetId(fhirStoreId.fhirStoreId())
 	return nil
 }
 
 func (u *HealthcareFhirStoreIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	p, err := u.Config.clientHealthcare.Projects.Locations.Datasets.FhirStores.GetIamPolicy(u.resourceId).Do()
+	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := u.Config.NewHealthcareClient(userAgent).Projects.Locations.Datasets.FhirStores.GetIamPolicy(u.resourceId).Do()
 
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
@@ -70,7 +79,12 @@ func (u *HealthcareFhirStoreIamUpdater) SetResourceIamPolicy(policy *cloudresour
 		return errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
 
-	_, err = u.Config.clientHealthcare.Projects.Locations.Datasets.FhirStores.SetIamPolicy(u.resourceId, &healthcare.SetIamPolicyRequest{
+	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	if err != nil {
+		return err
+	}
+
+	_, err = u.Config.NewHealthcareClient(userAgent).Projects.Locations.Datasets.FhirStores.SetIamPolicy(u.resourceId, &healthcare.SetIamPolicyRequest{
 		Policy: healthcarePolicy,
 	}).Do()
 

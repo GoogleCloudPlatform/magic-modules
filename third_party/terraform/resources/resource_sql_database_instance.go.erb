@@ -2,16 +2,17 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"regexp"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"google.golang.org/api/googleapi"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -58,14 +59,6 @@ var (
 		"settings.0.maintenance_window.0.update_track",
 	}
 
-	serverCertsKeys = []string{
-		"server_ca_cert.0.cert",
-		"server_ca_cert.0.common_name",
-		"server_ca_cert.0.create_time",
-		"server_ca_cert.0.expiration_time",
-		"server_ca_cert.0.sha1_fingerprint",
-	}
-
 	replicaConfigurationKeys = []string{
 		"replica_configuration.0.ca_certificate",
 		"replica_configuration.0.client_certificate",
@@ -99,7 +92,8 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			customdiff.ForceNewIfChange("settings.0.disk_size", isDiskShrinkage),
-			privateNetworkCustomizeDiff),
+			privateNetworkCustomizeDiff,
+			pitrPostgresOnlyCustomizeDiff),
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -109,7 +103,12 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 				ForceNew:    true,
 				Description: `The region the instance will sit in. Note, Cloud SQL is not available in all regions - choose from one of the options listed here. A valid region must be provided to use this resource. If a region is not provided in the resource definition, the provider region will be used instead, but this will be an apply-time error for instances if the provider region is not supported with Cloud SQL. If you choose not to provide the region argument for this resource, make sure you understand this.`,
 			},
-
+			"deletion_protection": {
+				Type:        schema.TypeBool,
+				Default:     true,
+				Optional:    true,
+				Description: `Used to block Terraform from deleting a SQL Instance.`,
+			},
 			"settings": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -544,37 +543,31 @@ settings.backup_configuration.binary_log_enabled are both set to true.`,
 			"server_ca_cert": {
 				Type:     schema.TypeList,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"cert": {
 							Type:         schema.TypeString,
 							Computed:     true,
-							AtLeastOneOf: serverCertsKeys,
 							Description:  `The CA Certificate used to connect to the SQL Instance via SSL.`,
 						},
 						"common_name": {
 							Type:         schema.TypeString,
 							Computed:     true,
-							AtLeastOneOf: serverCertsKeys,
 							Description:   `The CN valid for the CA Cert.`,
 						},
 						"create_time": {
 							Type:         schema.TypeString,
 							Computed:     true,
-							AtLeastOneOf: serverCertsKeys,
 							Description:  `Creation time of the CA Cert.`,
 						},
 						"expiration_time": {
 							Type:         schema.TypeString,
 							Computed:     true,
-							AtLeastOneOf: serverCertsKeys,
 							Description:  `Expiration time of the CA Cert.`,
 						},
 						"sha1_fingerprint": {
 							Type:         schema.TypeString,
 							Computed:     true,
-							AtLeastOneOf: serverCertsKeys,
 							Description:  `SHA Fingerprint of the CA Cert.`,
 						},
 					},
@@ -618,18 +611,37 @@ func isFirstGen(d *schema.ResourceData) bool {
 
 // Makes private_network ForceNew if it is changing from set to nil. The API returns an error
 // if this change is attempted in-place.
-func privateNetworkCustomizeDiff(d *schema.ResourceDiff, meta interface{}) error {
+func privateNetworkCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	old, new := d.GetChange("settings.0.ip_configuration.0.private_network")
 
 	if old != "" && new == "" {
-		d.ForceNew("settings.0.ip_configuration.0.private_network")
+		if err := d.ForceNew("settings.0.ip_configuration.0.private_network"); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
+// Point in time recovery for MySQL database instances needs binary_log_enabled set to true and
+// not point_in_time_recovery_enabled, which is confusing to users. This checks for 
+// point_in_time_recovery_enabled being set to a non-PostgreSQL database instance and suggests 
+// binary_log_enabled.
+func pitrPostgresOnlyCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
+	pitr := diff.Get("settings.0.backup_configuration.0.point_in_time_recovery_enabled").(bool)
+	dbVersion := diff.Get("database_version").(string)
+	if pitr && !strings.Contains(dbVersion, "POSTGRES") {
+		return fmt.Errorf("point_in_time_recovery_enabled is only available for Postgres. You may want to consider using binary_log_enabled instead.")
+	}
+	return nil
+}
+
 func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -648,7 +660,29 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		name = resource.UniqueId()
 	}
 
-	d.Set("name", name)
+	if err := d.Set("name", name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+
+	// Before we create the instance, check if at least 1 service connection exists for private SQL Instances.
+	network := d.Get("settings.0.ip_configuration.0.private_network").(string)
+	if network != "" {
+		// Borrow some of the functions from resource_service_networking_connection.go
+		serviceNetworkingNetworkName, err := retrieveServiceNetworkingNetworkName(d, config, network, userAgent)
+		if err != nil {
+			return err
+		}
+		response, err := config.NewServiceNetworkingClient(userAgent).Services.Connections.List("services/servicenetworking.googleapis.com").
+			Network(serviceNetworkingNetworkName).Do()
+		if err != nil {
+			// It is possible that the identity creating the SQL Instance might not have permissions to call servicenetworking.services.connections.list
+			log.Printf("[WARNING] Failed to list Service Networking of the project. Skipping Service Networking check.")
+		} else {
+			if len(response.Connections) < 1 {
+				return fmt.Errorf("Error, failed to create instance because the network doesn't have at least 1 private services connection. Please see https://cloud.google.com/sql/docs/mysql/private-ip#network_requirements for how to create this connection.")
+			}
+		}
+	}
 
 	instance := &sqladmin.DatabaseInstance{
 		Name:                 name,
@@ -681,7 +715,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	var op *sqladmin.Operation
 	err = retryTimeDuration(func() (operr error) {
-		op, operr = config.clientSqlAdmin.Instances.Insert(project, instance).Do()
+		op, operr = config.NewSqlAdminClient(userAgent).Instances.Insert(project, instance).Do()
 		return operr
 	}, d.Timeout(schema.TimeoutCreate), isSqlOperationInProgressError)
 	if err != nil {
@@ -694,7 +728,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	}
 	d.SetId(id)
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Create Instance", d.Timeout(schema.TimeoutCreate))
+	err = sqlAdminOperationWaitTime(config, op, project, "Create Instance", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		d.SetId("")
 		return err
@@ -710,7 +744,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	if sqlDatabaseIsMaster(d) {
 		var users *sqladmin.UsersListResponse
 		err = retryTimeDuration(func() error {
-			users, err = config.clientSqlAdmin.Users.List(project, instance.Name).Do()
+			users, err = config.NewSqlAdminClient(userAgent).Users.List(project, instance.Name).Do()
 			return err
 		}, d.Timeout(schema.TimeoutRead), isSqlOperationInProgressError)
 		if err != nil {
@@ -719,9 +753,9 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		for _, u := range users.Items {
 			if u.Name == "root" && u.Host == "%" {
 				err = retry(func() error {
-					op, err = config.clientSqlAdmin.Users.Delete(project, instance.Name).Host(u.Host).Name(u.Name).Do()
+					op, err = config.NewSqlAdminClient(userAgent).Users.Delete(project, instance.Name).Host(u.Host).Name(u.Name).Do()
 					if err == nil {
-						err = sqlAdminOperationWaitTime(config, op, project, "Delete default root User", d.Timeout(schema.TimeoutCreate))
+						err = sqlAdminOperationWaitTime(config, op, project, "Delete default root User", userAgent, d.Timeout(schema.TimeoutCreate))
 					}
 					return err
 				})
@@ -892,6 +926,10 @@ func expandBackupConfiguration(configured []interface{}) *sqladmin.BackupConfigu
 
 func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -900,25 +938,37 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 
 	var instance *sqladmin.DatabaseInstance
 	err = retryTimeDuration(func() (rerr error) {
-		instance, rerr = config.clientSqlAdmin.Instances.Get(project, d.Get("name").(string)).Do()
+		instance, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, d.Get("name").(string)).Do()
 		return rerr
 	}, d.Timeout(schema.TimeoutRead), isSqlOperationInProgressError)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("SQL Database Instance %q", d.Get("name").(string)))
 	}
 
-	d.Set("name", instance.Name)
-	d.Set("region", instance.Region)
-	d.Set("database_version", instance.DatabaseVersion)
-	d.Set("connection_name", instance.ConnectionName)
-	d.Set("service_account_email_address", instance.ServiceAccountEmailAddress)
+	if err := d.Set("name", instance.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("region", instance.Region); err != nil {
+		return fmt.Errorf("Error setting region: %s", err)
+	}
+	if err := d.Set("database_version", instance.DatabaseVersion); err != nil {
+		return fmt.Errorf("Error setting database_version: %s", err)
+	}
+	if err := d.Set("connection_name", instance.ConnectionName); err != nil {
+		return fmt.Errorf("Error setting connection_name: %s", err)
+	}
+	if err := d.Set("service_account_email_address", instance.ServiceAccountEmailAddress); err != nil {
+		return fmt.Errorf("Error setting service_account_email_address: %s", err)
+	}
 
 	if err := d.Set("settings", flattenSettings(instance.Settings)); err != nil {
 		log.Printf("[WARN] Failed to set SQL Database Instance Settings")
 	}
     <% unless version == 'ga' -%>
     if instance.DiskEncryptionConfiguration != nil {
-        d.Set("encryption_key_name", instance.DiskEncryptionConfiguration.KmsKeyName)
+        if err := d.Set("encryption_key_name", instance.DiskEncryptionConfiguration.KmsKeyName); err != nil {
+        	return fmt.Errorf("Error setting encryption_key_name: %s", err)
+        }
     }
     <% end -%>
 
@@ -931,7 +981,9 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if len(ipAddresses) > 0 {
-		d.Set("first_ip_address", ipAddresses[0]["ip_address"])
+		if err := d.Set("first_ip_address", ipAddresses[0]["ip_address"]); err != nil {
+			return fmt.Errorf("Error setting first_ip_address: %s", err)
+		}
 	}
 
 	publicIpAddress := ""
@@ -946,16 +998,26 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
-	d.Set("public_ip_address", publicIpAddress)
-	d.Set("private_ip_address", privateIpAddress)
+	if err := d.Set("public_ip_address", publicIpAddress); err != nil {
+		return fmt.Errorf("Error setting public_ip_address: %s", err)
+	}
+	if err := d.Set("private_ip_address", privateIpAddress); err != nil {
+		return fmt.Errorf("Error setting private_ip_address: %s", err)
+	}
 
 	if err := d.Set("server_ca_cert", flattenServerCaCerts([]*sqladmin.SslCert{instance.ServerCaCert})); err != nil {
 		log.Printf("[WARN] Failed to set SQL Database CA Certificate")
 	}
 
-	d.Set("master_instance_name", strings.TrimPrefix(instance.MasterInstanceName, project+":"))
-	d.Set("project", project)
-	d.Set("self_link", instance.SelfLink)
+	if err := d.Set("master_instance_name", strings.TrimPrefix(instance.MasterInstanceName, project+":")); err != nil {
+		return fmt.Errorf("Error setting master_instance_name: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("self_link", instance.SelfLink); err != nil {
+		return fmt.Errorf("Error setting self_link: %s", err)
+	}
 	d.SetId(instance.Name)
 
 	return nil
@@ -963,6 +1025,10 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -983,14 +1049,14 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 
 	var op *sqladmin.Operation
 	err = retryTimeDuration(func() (rerr error) {
-		op, rerr = config.clientSqlAdmin.Instances.Update(project, d.Get("name").(string), instance).Do()
+		op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, d.Get("name").(string), instance).Do()
 		return rerr
 	}, d.Timeout(schema.TimeoutUpdate), isSqlOperationInProgressError)
 	if err != nil {
 		return fmt.Errorf("Error, failed to update instance settings for %s: %s", instance.Name, err)
 	}
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Update Instance", d.Timeout(schema.TimeoutUpdate))
+	err = sqlAdminOperationWaitTime(config, op, project, "Update Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
@@ -1000,10 +1066,20 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 
 func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
+	}
+
+	// Check if deletion protection is enabled.
+ 
+	if d.Get("deletion_protection").(bool) {
+		return fmt.Errorf("Error, failed to delete instance because deletion_protection is set to true. Set it to false to proceed with instance deletion")
 	}
 
 	// Lock on the master_instance_name just in case deleting a replica causes
@@ -1015,11 +1091,11 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 
 	var op *sqladmin.Operation
 	err = retryTimeDuration(func() (rerr error) {
-		op, rerr = config.clientSqlAdmin.Instances.Delete(project, d.Get("name").(string)).Do()
+		op, rerr = config.NewSqlAdminClient(userAgent).Instances.Delete(project, d.Get("name").(string)).Do()
 		if rerr != nil {
 		  return rerr
 		}
-		err = sqlAdminOperationWaitTime(config, op, project, "Delete Instance", d.Timeout(schema.TimeoutDelete))
+		err = sqlAdminOperationWaitTime(config, op, project, "Delete Instance", userAgent, d.Timeout(schema.TimeoutDelete))
 		if err != nil {
 			return err
 		}
@@ -1038,6 +1114,10 @@ func resourceSqlDatabaseInstanceImport(d *schema.ResourceData, meta interface{})
 		"(?P<project>[^/]+)/(?P<name>[^/]+)",
 		"(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
+	}
+
+	if err := d.Set("deletion_protection", true); err != nil {
+		return nil, fmt.Errorf("Error setting deletion_protection: %s", err)
 	}
 
 	// Replace import id for the resource id

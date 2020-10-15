@@ -1,13 +1,14 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	appengine "google.golang.org/api/appengine/v1"
 )
 
@@ -69,6 +70,10 @@ func resourceAppEngineApplication() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"CLOUD_FIRESTORE",
 					"CLOUD_DATASTORE_COMPATIBILITY",
+					// NOTE: this is provided for compatibility with instances from
+					// before CLOUD_DATASTORE_COMPATIBILITY - it cannot be set
+					// for new instances.
+					"CLOUD_DATASTORE",
 				}, false),
 				Computed: true,
 			},
@@ -184,7 +189,7 @@ func appEngineApplicationFeatureSettingsResource() *schema.Resource {
 	}
 }
 
-func appEngineApplicationLocationIDCustomizeDiff(d *schema.ResourceDiff, meta interface{}) error {
+func appEngineApplicationLocationIDCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	old, new := d.GetChange("location_id")
 	if old != "" && old != new {
 		return fmt.Errorf("Cannot change location_id once the resource is created.")
@@ -194,6 +199,10 @@ func appEngineApplicationLocationIDCustomizeDiff(d *schema.ResourceDiff, meta in
 
 func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -212,7 +221,7 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 	defer mutexKV.Unlock(lockName)
 
 	log.Printf("[DEBUG] Creating App Engine App")
-	op, err := config.clientAppEngine.Apps.Create(app).Do()
+	op, err := config.NewAppEngineClient(userAgent).Apps.Create(app).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating App Engine application: %s", err.Error())
 	}
@@ -220,7 +229,7 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 	d.SetId(project)
 
 	// Wait for the operation to complete
-	waitErr := appEngineOperationWaitTime(config, op, project, "App Engine app to create", d.Timeout(schema.TimeoutCreate))
+	waitErr := appEngineOperationWaitTime(config, op, project, "App Engine app to create", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		d.SetId("")
 		return waitErr
@@ -232,23 +241,49 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 
 func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	pid := d.Id()
 
-	app, err := config.clientAppEngine.Apps.Get(pid).Do()
+	app, err := config.NewAppEngineClient(userAgent).Apps.Get(pid).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("App Engine Application %q", pid))
 	}
-	d.Set("auth_domain", app.AuthDomain)
-	d.Set("code_bucket", app.CodeBucket)
-	d.Set("default_bucket", app.DefaultBucket)
-	d.Set("default_hostname", app.DefaultHostname)
-	d.Set("location_id", app.LocationId)
-	d.Set("name", app.Name)
-	d.Set("app_id", app.Id)
-	d.Set("serving_status", app.ServingStatus)
-	d.Set("gcr_domain", app.GcrDomain)
-	d.Set("database_type", app.DatabaseType)
-	d.Set("project", pid)
+	if err := d.Set("auth_domain", app.AuthDomain); err != nil {
+		return fmt.Errorf("Error setting auth_domain: %s", err)
+	}
+	if err := d.Set("code_bucket", app.CodeBucket); err != nil {
+		return fmt.Errorf("Error setting code_bucket: %s", err)
+	}
+	if err := d.Set("default_bucket", app.DefaultBucket); err != nil {
+		return fmt.Errorf("Error setting default_bucket: %s", err)
+	}
+	if err := d.Set("default_hostname", app.DefaultHostname); err != nil {
+		return fmt.Errorf("Error setting default_hostname: %s", err)
+	}
+	if err := d.Set("location_id", app.LocationId); err != nil {
+		return fmt.Errorf("Error setting location_id: %s", err)
+	}
+	if err := d.Set("name", app.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("app_id", app.Id); err != nil {
+		return fmt.Errorf("Error setting app_id: %s", err)
+	}
+	if err := d.Set("serving_status", app.ServingStatus); err != nil {
+		return fmt.Errorf("Error setting serving_status: %s", err)
+	}
+	if err := d.Set("gcr_domain", app.GcrDomain); err != nil {
+		return fmt.Errorf("Error setting gcr_domain: %s", err)
+	}
+	if err := d.Set("database_type", app.DatabaseType); err != nil {
+		return fmt.Errorf("Error setting database_type: %s", err)
+	}
+	if err := d.Set("project", pid); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 	dispatchRules, err := flattenAppEngineApplicationDispatchRules(app.DispatchRules)
 	if err != nil {
 		return err
@@ -278,6 +313,10 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	pid := d.Id()
 	app, err := expandAppEngineApplication(d, pid)
 	if err != nil {
@@ -292,13 +331,13 @@ func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}
 	defer mutexKV.Unlock(lockName)
 
 	log.Printf("[DEBUG] Updating App Engine App")
-	op, err := config.clientAppEngine.Apps.Patch(pid, app).UpdateMask("authDomain,databaseType,servingStatus,featureSettings.splitHealthChecks,iap").Do()
+	op, err := config.NewAppEngineClient(userAgent).Apps.Patch(pid, app).UpdateMask("authDomain,databaseType,servingStatus,featureSettings.splitHealthChecks,iap").Do()
 	if err != nil {
 		return fmt.Errorf("Error updating App Engine application: %s", err.Error())
 	}
 
 	// Wait for the operation to complete
-	waitErr := appEngineOperationWaitTime(config, op, pid, "App Engine app to update", d.Timeout(schema.TimeoutUpdate))
+	waitErr := appEngineOperationWaitTime(config, op, pid, "App Engine app to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if waitErr != nil {
 		return waitErr
 	}

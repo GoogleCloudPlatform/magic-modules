@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
@@ -93,6 +93,10 @@ func resourceSqlSslCert() *schema.Resource {
 
 func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -108,13 +112,13 @@ func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 
 	mutexKV.Lock(instanceMutexKey(project, instance))
 	defer mutexKV.Unlock(instanceMutexKey(project, instance))
-	resp, err := config.clientSqlAdmin.SslCerts.Insert(project, instance, sslCertsInsertRequest).Do()
+	resp, err := config.NewSqlAdminClient(userAgent).SslCerts.Insert(project, instance, sslCertsInsertRequest).Do()
 	if err != nil {
 		return fmt.Errorf("Error, failed to insert "+
 			"ssl cert %s into instance %s: %s", commonName, instance, err)
 	}
 
-	err = sqlAdminOperationWaitTime(config, resp.Operation, project, "Create Ssl Cert", d.Timeout(schema.TimeoutCreate))
+	err = sqlAdminOperationWaitTime(config, resp.Operation, project, "Create Ssl Cert", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error, failure waiting for creation of %q "+
 			"in %q: %s", commonName, instance, err)
@@ -122,17 +126,27 @@ func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 
 	fingerprint := resp.ClientCert.CertInfo.Sha1Fingerprint
 	d.SetId(fmt.Sprintf("projects/%s/instances/%s/sslCerts/%s", project, instance, fingerprint))
-	d.Set("sha1_fingerprint", fingerprint)
+	if err := d.Set("sha1_fingerprint", fingerprint); err != nil {
+		return fmt.Errorf("Error setting sha1_fingerprint: %s", err)
+	}
 
 	// The private key is only returned on the initial insert so set it here.
-	d.Set("private_key", resp.ClientCert.CertPrivateKey)
-	d.Set("server_ca_cert", resp.ServerCaCert.Cert)
+	if err := d.Set("private_key", resp.ClientCert.CertPrivateKey); err != nil {
+		return fmt.Errorf("Error setting private_key: %s", err)
+	}
+	if err := d.Set("server_ca_cert", resp.ServerCaCert.Cert); err != nil {
+		return fmt.Errorf("Error setting server_ca_cert: %s", err)
+	}
 
 	return resourceSqlSslCertRead(d, meta)
 }
 
 func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -143,7 +157,7 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 	commonName := d.Get("common_name").(string)
 	fingerprint := d.Get("sha1_fingerprint").(string)
 
-	sslCerts, err := config.clientSqlAdmin.SslCerts.Get(project, instance, fingerprint).Do()
+	sslCerts, err := config.NewSqlAdminClient(userAgent).SslCerts.Get(project, instance, fingerprint).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("SQL Ssl Cert %q in instance %q", commonName, instance))
 	}
@@ -155,14 +169,30 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 
-	d.Set("instance", sslCerts.Instance)
-	d.Set("project", project)
-	d.Set("sha1_fingerprint", sslCerts.Sha1Fingerprint)
-	d.Set("common_name", sslCerts.CommonName)
-	d.Set("cert", sslCerts.Cert)
-	d.Set("cert_serial_number", sslCerts.CertSerialNumber)
-	d.Set("create_time", sslCerts.CreateTime)
-	d.Set("expiration_time", sslCerts.ExpirationTime)
+	if err := d.Set("instance", sslCerts.Instance); err != nil {
+		return fmt.Errorf("Error setting instance: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("sha1_fingerprint", sslCerts.Sha1Fingerprint); err != nil {
+		return fmt.Errorf("Error setting sha1_fingerprint: %s", err)
+	}
+	if err := d.Set("common_name", sslCerts.CommonName); err != nil {
+		return fmt.Errorf("Error setting common_name: %s", err)
+	}
+	if err := d.Set("cert", sslCerts.Cert); err != nil {
+		return fmt.Errorf("Error setting cert: %s", err)
+	}
+	if err := d.Set("cert_serial_number", sslCerts.CertSerialNumber); err != nil {
+		return fmt.Errorf("Error setting cert_serial_number: %s", err)
+	}
+	if err := d.Set("create_time", sslCerts.CreateTime); err != nil {
+		return fmt.Errorf("Error setting create_time: %s", err)
+	}
+	if err := d.Set("expiration_time", sslCerts.ExpirationTime); err != nil {
+		return fmt.Errorf("Error setting expiration_time: %s", err)
+	}
 
 	d.SetId(fmt.Sprintf("projects/%s/instances/%s/sslCerts/%s", project, instance, fingerprint))
 	return nil
@@ -170,6 +200,10 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -182,7 +216,7 @@ func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
 
 	mutexKV.Lock(instanceMutexKey(project, instance))
 	defer mutexKV.Unlock(instanceMutexKey(project, instance))
-	op, err := config.clientSqlAdmin.SslCerts.Delete(project, instance, fingerprint).Do()
+	op, err := config.NewSqlAdminClient(userAgent).SslCerts.Delete(project, instance, fingerprint).Do()
 
 	if err != nil {
 		return fmt.Errorf("Error, failed to delete "+
@@ -190,7 +224,7 @@ func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
 			instance, err)
 	}
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Delete Ssl Cert", d.Timeout(schema.TimeoutDelete))
+	err = sqlAdminOperationWaitTime(config, op, project, "Delete Ssl Cert", userAgent, d.Timeout(schema.TimeoutDelete))
 
 	if err != nil {
 		return fmt.Errorf("Error, failure waiting for deletion of ssl cert %q "+

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -188,11 +188,15 @@ func resourceGoogleOrganizationPolicyCreate(d *schema.ResourceData, meta interfa
 
 func resourceGoogleOrganizationPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	org := "organizations/" + d.Get("org_id").(string)
 
 	var policy *cloudresourcemanager.OrgPolicy
-	err := retryTimeDuration(func() (readErr error) {
-		policy, readErr = config.clientResourceManager.Organizations.GetOrgPolicy(org, &cloudresourcemanager.GetOrgPolicyRequest{
+	err = retryTimeDuration(func() (readErr error) {
+		policy, readErr = config.NewResourceManagerClient(userAgent).Organizations.GetOrgPolicy(org, &cloudresourcemanager.GetOrgPolicyRequest{
 			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		}).Do()
 		return readErr
@@ -201,13 +205,27 @@ func resourceGoogleOrganizationPolicyRead(d *schema.ResourceData, meta interface
 		return handleNotFoundError(err, d, fmt.Sprintf("Organization policy for %s", org))
 	}
 
-	d.Set("constraint", policy.Constraint)
-	d.Set("boolean_policy", flattenBooleanOrganizationPolicy(policy.BooleanPolicy))
-	d.Set("list_policy", flattenListOrganizationPolicy(policy.ListPolicy))
-	d.Set("version", policy.Version)
-	d.Set("etag", policy.Etag)
-	d.Set("update_time", policy.UpdateTime)
-	d.Set("restore_policy", flattenRestoreOrganizationPolicy(policy.RestoreDefault))
+	if err := d.Set("constraint", policy.Constraint); err != nil {
+		return fmt.Errorf("Error setting constraint: %s", err)
+	}
+	if err := d.Set("boolean_policy", flattenBooleanOrganizationPolicy(policy.BooleanPolicy)); err != nil {
+		return fmt.Errorf("Error setting boolean_policy: %s", err)
+	}
+	if err := d.Set("list_policy", flattenListOrganizationPolicy(policy.ListPolicy)); err != nil {
+		return fmt.Errorf("Error setting list_policy: %s", err)
+	}
+	if err := d.Set("version", policy.Version); err != nil {
+		return fmt.Errorf("Error setting version: %s", err)
+	}
+	if err := d.Set("etag", policy.Etag); err != nil {
+		return fmt.Errorf("Error setting etag: %s", err)
+	}
+	if err := d.Set("update_time", policy.UpdateTime); err != nil {
+		return fmt.Errorf("Error setting update_time: %s", err)
+	}
+	if err := d.Set("restore_policy", flattenRestoreOrganizationPolicy(policy.RestoreDefault)); err != nil {
+		return fmt.Errorf("Error setting restore_policy: %s", err)
+	}
 
 	return nil
 }
@@ -226,10 +244,14 @@ func resourceGoogleOrganizationPolicyUpdate(d *schema.ResourceData, meta interfa
 
 func resourceGoogleOrganizationPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	org := "organizations/" + d.Get("org_id").(string)
 
-	err := retryTimeDuration(func() error {
-		_, dErr := config.clientResourceManager.Organizations.ClearOrgPolicy(org, &cloudresourcemanager.ClearOrgPolicyRequest{
+	err = retryTimeDuration(func() error {
+		_, dErr := config.NewResourceManagerClient(userAgent).Organizations.ClearOrgPolicy(org, &cloudresourcemanager.ClearOrgPolicyRequest{
 			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		}).Do()
 		return dErr
@@ -247,8 +269,12 @@ func resourceGoogleOrganizationPolicyImportState(d *schema.ResourceData, meta in
 		return nil, fmt.Errorf("Invalid id format. Expecting {org_id}/{constraint}, got '%s' instead.", d.Id())
 	}
 
-	d.Set("org_id", parts[0])
-	d.Set("constraint", parts[1])
+	if err := d.Set("org_id", parts[0]); err != nil {
+		return nil, fmt.Errorf("Error setting org_id: %s", err)
+	}
+	if err := d.Set("constraint", parts[1]); err != nil {
+		return nil, fmt.Errorf("Error setting constraint: %s", err)
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -268,6 +294,11 @@ func isOrganizationPolicyUnset(d *schema.ResourceData) bool {
 
 func setOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	org := "organizations/" + d.Get("org_id").(string)
 
 	listPolicy, err := expandListOrganizationPolicy(d.Get("list_policy").([]interface{}))
@@ -281,7 +312,7 @@ func setOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	err = retryTimeDuration(func() (setErr error) {
-		_, setErr = config.clientResourceManager.Organizations.SetOrgPolicy(org, &cloudresourcemanager.SetOrgPolicyRequest{
+		_, setErr = config.NewResourceManagerClient(userAgent).Organizations.SetOrgPolicy(org, &cloudresourcemanager.SetOrgPolicyRequest{
 			Policy: &cloudresourcemanager.OrgPolicy{
 				Constraint:     canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 				BooleanPolicy:  expandBooleanOrganizationPolicy(d.Get("boolean_policy").([]interface{})),

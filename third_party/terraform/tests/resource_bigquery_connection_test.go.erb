@@ -5,7 +5,7 @@ package google
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic(t *testing.T) {
@@ -18,9 +18,12 @@ func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic(t *testing.T) {
 	}
 
 	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckBigqueryConnectionConnectionDestroyProducer(t),
+		PreCheck:          func() { testAccPreCheck(t) },
+		Providers:         testAccProvidersOiCS,
+		CheckDestroy:      testAccCheckBigqueryConnectionConnectionDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryConnectionConnection_bigqueryConnectionBasic(context),
@@ -42,6 +45,8 @@ resource "google_sql_database_instance" "instance" {
     settings {
 		tier = "db-f1-micro"
 	}
+
+    deletion_protection = false
 }
 
 resource "google_sql_database" "db" {
@@ -91,6 +96,8 @@ resource "google_sql_database_instance" "instance" {
     settings {
 		tier = "db-f1-micro"
 	}
+
+    deletion_protection = false
 }
 
 resource "google_sql_database" "db" {

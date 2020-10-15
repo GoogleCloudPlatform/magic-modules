@@ -1,10 +1,11 @@
 package google
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 type ResourceDataMock struct {
@@ -62,13 +63,19 @@ func (d *ResourceDataMock) Id() string {
 }
 
 type ResourceDiffMock struct {
-	Before  map[string]interface{}
-	After   map[string]interface{}
-	Cleared map[string]struct{}
+	Before     map[string]interface{}
+	After      map[string]interface{}
+	Cleared    map[string]struct{}
+	IsForceNew bool
 }
 
 func (d *ResourceDiffMock) GetChange(key string) (interface{}, interface{}) {
 	return d.Before[key], d.After[key]
+}
+
+func (d *ResourceDiffMock) HasChange(key string) bool {
+	old, new := d.GetChange(key)
+	return old != new
 }
 
 func (d *ResourceDiffMock) Get(key string) interface{} {
@@ -80,6 +87,11 @@ func (d *ResourceDiffMock) Clear(key string) error {
 		d.Cleared = map[string]struct{}{}
 	}
 	d.Cleared[key] = struct{}{}
+	return nil
+}
+
+func (d *ResourceDiffMock) ForceNew(key string) error {
+	d.IsForceNew = true
 	return nil
 }
 
@@ -111,6 +123,9 @@ func checkDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourc
 			if _, ok := ignoreFields[k]; ok {
 				continue
 			}
+			if k == "%" {
+				continue
+			}
 			if dsAttr[k] != rsAttr[k] {
 				// ignore data sources where an empty list is being compared against a null list.
 				if k[len(k)-1:] == "#" && (dsAttr[k] == "" || dsAttr[k] == "0") && (rsAttr[k] == "" || rsAttr[k] == "0") {
@@ -121,7 +136,7 @@ func checkDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourc
 		}
 
 		if errMsg != "" {
-			return fmt.Errorf(errMsg)
+			return errors.New(errMsg)
 		}
 
 		return nil

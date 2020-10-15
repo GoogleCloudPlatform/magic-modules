@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"crypto/md5"
 	"encoding/base64"
@@ -187,6 +187,10 @@ func objectGetId(object *storage.Object) string {
 
 func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
@@ -204,7 +208,7 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error, either \"content\" or \"source\" must be specified")
 	}
 
-	objectsService := storage.NewObjectsService(config.clientStorage)
+	objectsService := storage.NewObjectsService(config.NewStorageClient(userAgent))
 	object := &storage.Object{Bucket: bucket}
 
 	if v, ok := d.GetOk("cache_control"); ok {
@@ -239,7 +243,7 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 	insertCall.Name(name)
 	insertCall.Media(media)
 
-	_, err := insertCall.Do()
+	_, err = insertCall.Do()
 
 	if err != nil {
 		return fmt.Errorf("Error uploading object %s: %s", name, err)
@@ -250,11 +254,15 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 
 func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	objectsService := storage.NewObjectsService(config.clientStorage)
+	objectsService := storage.NewObjectsService(config.NewStorageClient(userAgent))
 	getCall := objectsService.Get(bucket, name)
 
 	res, err := getCall.Do()
@@ -263,19 +271,45 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 		return handleNotFoundError(err, d, fmt.Sprintf("Storage Bucket Object %q", d.Get("name").(string)))
 	}
 
-	d.Set("md5hash", res.Md5Hash)
-	d.Set("detect_md5hash", res.Md5Hash)
-	d.Set("crc32c", res.Crc32c)
-	d.Set("cache_control", res.CacheControl)
-	d.Set("content_disposition", res.ContentDisposition)
-	d.Set("content_encoding", res.ContentEncoding)
-	d.Set("content_language", res.ContentLanguage)
-	d.Set("content_type", res.ContentType)
-	d.Set("storage_class", res.StorageClass)
-	d.Set("self_link", res.SelfLink)
-	d.Set("output_name", res.Name)
-	d.Set("metadata", res.Metadata)
-	d.Set("media_link", res.MediaLink)
+	if err := d.Set("md5hash", res.Md5Hash); err != nil {
+		return fmt.Errorf("Error setting md5hash: %s", err)
+	}
+	if err := d.Set("detect_md5hash", res.Md5Hash); err != nil {
+		return fmt.Errorf("Error setting detect_md5hash: %s", err)
+	}
+	if err := d.Set("crc32c", res.Crc32c); err != nil {
+		return fmt.Errorf("Error setting crc32c: %s", err)
+	}
+	if err := d.Set("cache_control", res.CacheControl); err != nil {
+		return fmt.Errorf("Error setting cache_control: %s", err)
+	}
+	if err := d.Set("content_disposition", res.ContentDisposition); err != nil {
+		return fmt.Errorf("Error setting content_disposition: %s", err)
+	}
+	if err := d.Set("content_encoding", res.ContentEncoding); err != nil {
+		return fmt.Errorf("Error setting content_encoding: %s", err)
+	}
+	if err := d.Set("content_language", res.ContentLanguage); err != nil {
+		return fmt.Errorf("Error setting content_language: %s", err)
+	}
+	if err := d.Set("content_type", res.ContentType); err != nil {
+		return fmt.Errorf("Error setting content_type: %s", err)
+	}
+	if err := d.Set("storage_class", res.StorageClass); err != nil {
+		return fmt.Errorf("Error setting storage_class: %s", err)
+	}
+	if err := d.Set("self_link", res.SelfLink); err != nil {
+		return fmt.Errorf("Error setting self_link: %s", err)
+	}
+	if err := d.Set("output_name", res.Name); err != nil {
+		return fmt.Errorf("Error setting output_name: %s", err)
+	}
+	if err := d.Set("metadata", res.Metadata); err != nil {
+		return fmt.Errorf("Error setting metadata: %s", err)
+	}
+	if err := d.Set("media_link", res.MediaLink); err != nil {
+		return fmt.Errorf("Error setting media_link: %s", err)
+	}
 
 	d.SetId(objectGetId(res))
 
@@ -284,14 +318,18 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	objectsService := storage.NewObjectsService(config.clientStorage)
+	objectsService := storage.NewObjectsService(config.NewStorageClient(userAgent))
 
 	DeleteCall := objectsService.Delete(bucket, name)
-	err := DeleteCall.Do()
+	err = DeleteCall.Do()
 
 	if err != nil {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {

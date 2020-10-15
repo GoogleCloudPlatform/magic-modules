@@ -133,6 +133,9 @@ The following arguments are supported:
 * `view` - (Optional) If specified, configures this table as a view.
     Structure is documented below.
 
+* `materialized_view` - (Optional) If specified, configures this table as a materialized view.
+    Structure is documented below.
+
 The `external_data_configuration` block supports:
 
 * `autodetect` - (Required) - Let BigQuery try to autodetect the schema
@@ -249,8 +252,8 @@ The `time_partitioning` block supports:
     partition. If time-based partitioning is enabled without this value, the
     table is partitioned based on the load time.
 
-* `type` - (Required) The only type supported is DAY, which will generate
-    one partition per day based on data loading time.
+* `type` - (Required) The supported types are DAY, HOUR, MONTH, and YEAR,
+    which will generate one partition per day, hour, month, and year, respectively.
 
 * `require_partition_filter` - (Optional) If set to true, queries over this table
     require a partition filter that can be used for partition elimination to be
@@ -278,6 +281,16 @@ The `view` block supports:
 
 * `use_legacy_sql` - (Optional) Specifies whether to use BigQuery's legacy SQL for this view.
     The default value is true. If set to false, the view will use BigQuery's standard SQL.
+
+The `materialized_view` block supports:
+
+* `query` - (Required) A query whose result is persisted.
+
+* `enable_refresh` - (Optional) Specifies whether to use BigQuery's automatic refresh for this materialized view when the base table is updated.
+    The default value is true.
+
+* `refresh_interval_ms` - (Optional) The maximum frequency at which this materialized view will be refreshed.
+    The default value is 1800000
 
 The `encryption_configuration` block supports the following arguments:
 

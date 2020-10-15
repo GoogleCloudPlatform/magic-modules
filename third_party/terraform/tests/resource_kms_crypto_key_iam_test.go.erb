@@ -7,8 +7,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccKmsCryptoKeyIamBinding(t *testing.T) {
@@ -259,7 +259,7 @@ func testAccCheckGoogleKmsCryptoKeyIamBindingExists(t *testing.T, bindingResourc
 			return err
 		}
 
-		p, err := config.clientKms.Projects.Locations.KeyRings.CryptoKeys.GetIamPolicy(cryptoKeyId.cryptoKeyId()).Do()
+		p, err := config.NewKmsClient(config.userAgent).Projects.Locations.KeyRings.CryptoKeys.GetIamPolicy(cryptoKeyId.cryptoKeyId()).Do()
 		if err != nil {
 			return err
 		}
@@ -295,7 +295,7 @@ func testAccCheckGoogleKmsCryptoKeyIamMemberExists(t *testing.T, n, role, member
 			return err
 		}
 
-		p, err := config.clientKms.Projects.Locations.KeyRings.GetIamPolicy(cryptoKeyId.cryptoKeyId()).Do()
+		p, err := config.NewKmsClient(config.userAgent).Projects.Locations.KeyRings.GetIamPolicy(cryptoKeyId.cryptoKeyId()).Do()
 		if err != nil {
 			return err
 		}
@@ -330,7 +330,7 @@ func testAccCheckGoogleCryptoKmsKeyIam(t *testing.T, n, role string, members []s
 			return err
 		}
 
-		p, err := config.clientKms.Projects.Locations.KeyRings.GetIamPolicy(cryptoKeyId.cryptoKeyId()).Do()
+		p, err := config.NewKmsClient(config.userAgent).Projects.Locations.KeyRings.GetIamPolicy(cryptoKeyId.cryptoKeyId()).Do()
 		if err != nil {
 			return err
 		}

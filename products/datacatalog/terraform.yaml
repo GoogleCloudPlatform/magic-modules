@@ -68,7 +68,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
         validation: !ruby/object:Provider::Terraform::Validation
-          function: 'validation.ValidateJsonString'
+          function: 'validation.StringIsJSON'
       userSpecifiedSystem: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^[A-z_][A-z0-9_]{0,63}$'
@@ -155,6 +155,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           force_delete: "true"
         oics_vars_overrides:
           force_delete: "true"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_catalog_entry_tag_false"
+        primary_resource_id: "basic_tag"
+        vars:
+          entry_group_id: "my_entry_group"
+          entry_id: "my_entry"
+          tag_template_id: "my_template"
+          force_delete: "false"
+        test_vars_overrides:
+          force_delete: "true"
+        oics_vars_overrides:
+          force_delete: "true"
+        skip_docs: true  # omitting doc as it is almost identical to the case of data_catalog_entry_tag_basic
     properties:
       # Changing the name here so when mm generates methods like `flattenDataCatalogTagTemplateDisplayName`
       # this doesn't conflict with tag template's display name methods
@@ -173,6 +186,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/data_catalog_tag.go.erb
+      encoder: templates/terraform/encoders/data_catalog_tag.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

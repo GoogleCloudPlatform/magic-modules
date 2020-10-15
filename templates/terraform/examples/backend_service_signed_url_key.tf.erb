@@ -1,6 +1,10 @@
+resource "random_id" "url_signature" {
+  byte_length = 16
+}
+
 resource "google_compute_backend_service_signed_url_key" "backend_key" {
   name            = "<%= ctx[:vars]['key_name'] %>"
-  key_value       = "pPsVemX8GM46QVeezid6Rw=="
+  key_value       = random_id.url_signature.b64_url
   backend_service = google_compute_backend_service.example_backend.name
 }
 
@@ -34,7 +38,7 @@ resource "google_compute_instance_group_manager" "webservers" {
 
 resource "google_compute_instance_template" "webserver" {
   name         = "standard-webserver"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-medium"
 
   network_interface {
     network = "default"

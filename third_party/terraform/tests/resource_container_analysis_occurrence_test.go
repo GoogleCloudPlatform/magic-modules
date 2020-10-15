@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"crypto/sha512"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"google.golang.org/api/cloudkms/v1"
 )
 
@@ -33,7 +33,7 @@ func getSignedTestOccurrenceAttestationPayload(
 	pbytes := []byte(rawPayload)
 	ssum := sha512.Sum512(pbytes)
 	hashed := base64.StdEncoding.EncodeToString(ssum[:])
-	signed, err := config.clientKms.Projects.Locations.KeyRings.CryptoKeys.
+	signed, err := config.NewKmsClient(config.userAgent).Projects.Locations.KeyRings.CryptoKeys.
 		CryptoKeyVersions.AsymmetricSign(
 		fmt.Sprintf("%s/cryptoKeyVersions/1", signingKey.CryptoKey.Name),
 		&cloudkms.AsymmetricSignRequest{

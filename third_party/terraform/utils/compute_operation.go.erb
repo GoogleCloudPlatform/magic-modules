@@ -3,7 +3,10 @@ package google
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"google.golang.org/api/compute/v1"
@@ -18,6 +21,7 @@ type ComputeOperationWaiter struct {
 	Service *computeBeta.Service
 	Op      *computeBeta.Operation
 <% end -%>
+	Context context.Context
 	Project string
 <% unless version == 'ga' -%>
 	Parent  string
@@ -67,6 +71,15 @@ func (w *ComputeOperationWaiter) QueryOp() (interface{}, error) {
 	if w == nil || w.Op == nil {
 		return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
 	}
+	if w.Context != nil {
+		select {
+		case <-w.Context.Done():
+			log.Println("[WARN] request has been cancelled early")
+			return w.Op, errors.New("unable to finish polling, context has been cancelled")
+		default:
+			// default must be here to keep the previous case from blocking
+		}
+	}
 	if w.Op.Zone != "" {
 		zone := GetResourceNameFromSelfLink(w.Op.Zone)
 		return w.Service.ZoneOperations.Get(w.Project, zone, w.Op.Name).Do()
@@ -97,7 +110,7 @@ func (w *ComputeOperationWaiter) TargetStates() []string {
 	return []string{"DONE"}
 }
 
-func computeOperationWaitTime(config *Config, res interface{}, project, activity string, timeout time.Duration) error {
+func computeOperationWaitTime(config *Config, res interface{}, project, activity, userAgent string, timeout time.Duration) error {
 <% if version == 'ga' -%>
 	op := &compute.Operation{}
 <% else -%>
@@ -110,10 +123,11 @@ func computeOperationWaitTime(config *Config, res interface{}, project, activity
 
 	w := &ComputeOperationWaiter{
 <% if version == 'ga' -%>
-		Service: config.clientCompute,
+		Service: config.NewComputeClient(userAgent),
 <% else -%>
-		Service: config.clientComputeBeta,
+		Service: config.NewComputeBetaClient(userAgent),
 <% end -%>
+		Context: config.context,
 		Op:      op,
 		Project: project,
 	}
@@ -125,7 +139,7 @@ func computeOperationWaitTime(config *Config, res interface{}, project, activity
 }
 
 <% unless version == 'ga' -%>
-func computeOrgOperationWaitTimeWithResponse(config *Config, res interface{}, response *map[string]interface{}, parent, activity string, timeout time.Duration) error {
+func computeOrgOperationWaitTimeWithResponse(config *Config, res interface{}, response *map[string]interface{}, parent, activity, userAgent string, timeout time.Duration) error {
 	op := &computeBeta.Operation{}
 	err := Convert(res, op)
 	if err != nil {
@@ -133,7 +147,7 @@ func computeOrgOperationWaitTimeWithResponse(config *Config, res interface{}, re
 	}
 
 	w := &ComputeOperationWaiter{
-		Service: config.clientComputeBeta,
+		Service: config.NewComputeBetaClient(userAgent),
 		Op:      op,
 		Parent:  parent,
 	}

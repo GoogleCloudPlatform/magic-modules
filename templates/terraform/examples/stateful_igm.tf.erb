@@ -5,7 +5,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "igm-basic" {
   name           = "<%= ctx[:vars]['template_name'] %>"
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
 
@@ -42,7 +42,7 @@ resource "google_compute_disk" "default" {
   name  = "test-disk-%{random_suffix}"
   type  = "pd-ssd"
   zone  = google_compute_instance_group_manager.igm.zone
-  image = "debian-8-jessie-v20170523"
+  image = "debian-9-stretch-v20200805"
   physical_block_size_bytes = 4096
 }
 

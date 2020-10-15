@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"google.golang.org/api/googleapi"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dataflow "google.golang.org/api/dataflow/v1b3"
 )
 
@@ -41,6 +41,14 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"region": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: `The region in which the created job should run.`,
+			},
+
 			"on_delete": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"cancel", "drain"}, false),
@@ -53,6 +61,8 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Optional:         true,
 				DiffSuppressFunc: resourceDataflowJobLabelDiffSuppress,
 				ForceNew:         true,
+				// TODO add support for labels when the API supports it
+				Deprecated:       "Deprecated until the API supports this field",
 			},
 
 			"parameters": {
@@ -84,6 +94,10 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 // resourceDataflowFlexTemplateJobCreate creates a Flex Template Job from TF code.
 func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -103,14 +117,16 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 		},
 	}
 
-	response, err := config.clientDataflow.Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
+	response, err := config.NewDataflowClient(userAgent).Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
 	if err != nil {
 		return err
 	}
 
 	job := response.Job
 	d.SetId(job.Id)
-	d.Set("job_id", job.Id)
+	if err := d.Set("job_id", job.Id); err != nil {
+		return fmt.Errorf("Error setting job_id: %s", err)
+	}
 
 	return resourceDataflowFlexTemplateJobRead(d, meta)
 }
@@ -118,6 +134,10 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 // resourceDataflowFlexTemplateJobRead reads a Flex Template Job resource.
 func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -131,15 +151,23 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 
 	jobId := d.Id()
 
-	job, err := resourceDataflowJobGetJob(config, project, region, jobId)
+	job, err := resourceDataflowJobGetJob(config, project, region, userAgent, jobId)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Dataflow job %s", jobId))
 	}
 
-	d.Set("state", job.CurrentState)
-	d.Set("name", job.Name)
-	d.Set("project", project)
-	d.Set("labels", job.Labels)
+	if err := d.Set("state", job.CurrentState); err != nil {
+		return fmt.Errorf("Error setting state: %s", err)
+	}
+	if err := d.Set("name", job.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("labels", job.Labels); err != nil {
+		return fmt.Errorf("Error setting labels: %s", err)
+	}
 
 	if _, ok := dataflowTerminalStatesMap[job.CurrentState]; ok {
 		log.Printf("[DEBUG] Removing resource '%s' because it is in state %s.\n", job.Name, job.CurrentState)
@@ -158,6 +186,10 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 
 func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -184,7 +216,7 @@ func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interfac
 			RequestedState: requestedState,
 		}
 
-		_, updateErr := resourceDataflowJobUpdateJob(config, project, region, id, job)
+		_, updateErr := resourceDataflowJobUpdateJob(config, project, region, userAgent, id, job)
 		if updateErr != nil {
 			gerr, isGoogleErr := updateErr.(*googleapi.Error)
 			if !isGoogleErr {

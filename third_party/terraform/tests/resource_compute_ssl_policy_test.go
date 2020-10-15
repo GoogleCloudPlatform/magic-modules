@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	compute "google.golang.org/api/compute/v1"
 )
 
@@ -170,7 +170,7 @@ func testAccCheckComputeSslPolicyExists(t *testing.T, n string, sslPolicy *compu
 
 		name := rs.Primary.Attributes["name"]
 
-		found, err := config.clientCompute.SslPolicies.Get(
+		found, err := config.NewComputeClient(config.userAgent).SslPolicies.Get(
 			project, name).Do()
 		if err != nil {
 			return fmt.Errorf("Error Reading SSL Policy %s: %s", name, err)

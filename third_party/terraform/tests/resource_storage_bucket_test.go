@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/storage/v1"
@@ -762,6 +762,35 @@ func TestAccStorageBucket_bucketPolicyOnly(t *testing.T) {
 	})
 }
 
+func TestAccStorageBucket_uniformBucketAccessOnly(t *testing.T) {
+	t.Parallel()
+
+	bucketName := fmt.Sprintf("tf-test-acl-bucket-%d", randInt(t))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_uniformBucketAccessOnly(bucketName, true),
+			},
+			{
+				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccStorageBucket_uniformBucketAccessOnly(bucketName, false),
+			},
+			{
+				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccStorageBucket_labels(t *testing.T) {
 	t.Parallel()
 
@@ -835,7 +864,7 @@ func TestAccStorageBucket_website(t *testing.T) {
 	t.Parallel()
 
 	bucketSuffix := fmt.Sprintf("tf-website-test-%d", randInt(t))
-	errRe := regexp.MustCompile("one of `((website.0.main_page_suffix,website.0.not_found_page)|(website.0.not_found_page,website.0.main_page_suffix))` must be specified")
+	errRe := regexp.MustCompile("one of\n`website.0.main_page_suffix,website.0.not_found_page` must be specified")
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -916,7 +945,7 @@ func testAccCheckStorageBucketExists(t *testing.T, n string, bucketName string, 
 
 		config := googleProviderConfig(t)
 
-		found, err := config.clientStorage.Buckets.Get(rs.Primary.ID).Do()
+		found, err := config.NewStorageClient(config.userAgent).Buckets.Get(rs.Primary.ID).Do()
 		if err != nil {
 			return err
 		}
@@ -961,7 +990,7 @@ func testAccCheckStorageBucketPutItem(t *testing.T, bucketName string) resource.
 		object := &storage.Object{Name: "bucketDestroyTestFile"}
 
 		// This needs to use Media(io.Reader) call, otherwise it does not go to /upload API and fails
-		if res, err := config.clientStorage.Objects.Insert(bucketName, object).Media(dataReader).Do(); err == nil {
+		if res, err := config.NewStorageClient(config.userAgent).Objects.Insert(bucketName, object).Media(dataReader).Do(); err == nil {
 			log.Printf("[INFO] Created object %v at location %v\n\n", res.Name, res.SelfLink)
 		} else {
 			return fmt.Errorf("Objects.Insert failed: %v", err)
@@ -980,21 +1009,21 @@ func testAccCheckStorageBucketRetentionPolicy(t *testing.T, bucketName string) r
 		object := &storage.Object{Name: "bucketDestroyTestFile"}
 
 		// This needs to use Media(io.Reader) call, otherwise it does not go to /upload API and fails
-		if res, err := config.clientStorage.Objects.Insert(bucketName, object).Media(dataReader).Do(); err == nil {
+		if res, err := config.NewStorageClient(config.userAgent).Objects.Insert(bucketName, object).Media(dataReader).Do(); err == nil {
 			log.Printf("[INFO] Created object %v at location %v\n\n", res.Name, res.SelfLink)
 		} else {
 			return fmt.Errorf("Objects.Insert failed: %v", err)
 		}
 
 		// Test deleting immediately, this should fail because of the 10 second retention
-		if err := config.clientStorage.Objects.Delete(bucketName, objectName).Do(); err == nil {
+		if err := config.NewStorageClient(config.userAgent).Objects.Delete(bucketName, objectName).Do(); err == nil {
 			return fmt.Errorf("Objects.Delete succeeded: %v", object.Name)
 		}
 
 		// Wait 10 seconds and delete again
 		time.Sleep(10000 * time.Millisecond)
 
-		if err := config.clientStorage.Objects.Delete(bucketName, object.Name).Do(); err == nil {
+		if err := config.NewStorageClient(config.userAgent).Objects.Delete(bucketName, object.Name).Do(); err == nil {
 			log.Printf("[INFO] Deleted object %v at location %v\n\n", object.Name, object.SelfLink)
 		} else {
 			return fmt.Errorf("Objects.Delete failed: %v", err)
@@ -1008,7 +1037,7 @@ func testAccCheckStorageBucketMissing(t *testing.T, bucketName string) resource.
 	return func(s *terraform.State) error {
 		config := googleProviderConfig(t)
 
-		_, err := config.clientStorage.Buckets.Get(bucketName).Do()
+		_, err := config.NewStorageClient(config.userAgent).Buckets.Get(bucketName).Do()
 		if err == nil {
 			return fmt.Errorf("Found %s", bucketName)
 		}
@@ -1049,7 +1078,7 @@ func testAccStorageBucketDestroyProducer(t *testing.T) func(s *terraform.State) 
 				continue
 			}
 
-			_, err := config.clientStorage.Buckets.Get(rs.Primary.ID).Do()
+			_, err := config.NewStorageClient(config.userAgent).Buckets.Get(rs.Primary.ID).Do()
 			if err == nil {
 				return fmt.Errorf("Bucket still exists")
 			}
@@ -1371,6 +1400,15 @@ func testAccStorageBucket_bucketPolicyOnly(bucketName string, enabled bool) stri
 resource "google_storage_bucket" "bucket" {
   name               = "%s"
   bucket_policy_only = %t
+}
+`, bucketName, enabled)
+}
+
+func testAccStorageBucket_uniformBucketAccessOnly(bucketName string, enabled bool) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name               = "%s"
+  uniform_bucket_level_access = %t
 }
 `, bucketName, enabled)
 }

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 // Add two key value pairs
@@ -110,7 +110,7 @@ func testAccCheckComputeProjectMetadataDestroyProducer(t *testing.T) func(s *ter
 				continue
 			}
 
-			project, err := config.clientCompute.Projects.Get(rs.Primary.ID).Do()
+			project, err := config.NewComputeClient(config.userAgent).Projects.Get(rs.Primary.ID).Do()
 			if err == nil && len(project.CommonInstanceMetadata.Items) > 0 {
 				return fmt.Errorf("Error, metadata items still exist in %s", rs.Primary.ID)
 			}
