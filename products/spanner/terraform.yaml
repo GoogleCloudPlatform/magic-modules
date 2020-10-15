@@ -39,6 +39,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_vcr: true
         vars:
           database_name: "my-database"
+        ignore_read_extra:
+          - "deletion_protection"
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'deletion_protection'
