@@ -367,6 +367,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   TargetGrpcProxy: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  VpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>
