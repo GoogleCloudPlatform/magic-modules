@@ -87,6 +87,7 @@ resource "google_spanner_database" "basic" {
 	"CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
 	"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
   ]
+  deletion_protection = false
 }
 `, instanceName, instanceName, databaseName)
 }
@@ -108,6 +109,7 @@ resource "google_spanner_database" "basic" {
 	"CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
 	"CREATE TABLE t3 (t3 INT64 NOT NULL,) PRIMARY KEY(t3)",
   ]
+  deletion_protection = false
 }
 `, instanceName, instanceName, databaseName)
 }
