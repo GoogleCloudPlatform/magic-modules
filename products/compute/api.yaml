@@ -13684,16 +13684,11 @@ objects:
           access Google APIs and services by using Private Google Access.
         update_verb: :POST
         update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess'
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'privateIpv6GoogleAccess'
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
-        description: The private IPv6 google access type for the VMs in this subnet.
-        default_value: :DISABLE_GOOGLE_ACCESS
-        values:
-          - :DISABLE_GOOGLE_ACCESS
-          - :ENABLE_BIDIRECTIONAL_ACCESS_TO_GOOGLE
-          - :ENABLE_OUTBOUND_VM_ACCESS_TO_GOOGLE
+        description: The private IPv6 google access type for the VMs in this subnet. 
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
         resource: 'Region'
