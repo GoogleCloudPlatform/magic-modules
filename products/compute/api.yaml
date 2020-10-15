@@ -7494,6 +7494,10 @@ objects:
       backend with internal load balancers. Because NEG backends allow you to
       specify IP addresses and ports, you can distribute traffic in a granular
       fashion among applications or containers running within VM instances.
+
+      Recreating a network endpoint group that's in use by another resource will give a
+      `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
+      to avoid this type of error.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -7660,6 +7664,10 @@ objects:
     description: |
       A global network endpoint group contains endpoints that reside outside of Google Cloud.
       Currently a global network endpoint group can only support a single endpoint.
+
+      Recreating a global network endpoint group that's in use by another resource will give a
+      `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
+      to avoid this type of error.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -7726,6 +7734,10 @@ objects:
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups'
     description: |
       A regional NEG that can support Serverless Products.
+
+      Recreating a region network endpoint group that's in use by another resource will give a
+      `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
+      to avoid this type of error.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
