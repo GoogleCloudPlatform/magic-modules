@@ -17313,7 +17313,6 @@ objects:
         imports: 'selfLink'
         input: true
         conflicts:
-          - peer_external_gateway
           - peer_gcp_gateway
         description: |
           URL of the peer side external VPN gateway to which this VPN tunnel is connected.
@@ -17326,7 +17325,6 @@ objects:
         name: 'peerGcpGateway'
         conflicts:
           - peer_external_gateway
-          - peer_gcp_gateway
         description: |
           URL of the peer side HA GCP VPN gateway to which this VPN tunnel is connected.
           If provided, the VPN tunnel will automatically use the same vpn_gateway_interface
