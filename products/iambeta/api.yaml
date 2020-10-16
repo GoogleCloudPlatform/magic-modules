@@ -24,16 +24,39 @@ apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Identity and Access Management (IAM) API
     url: https://console.cloud.google.com/apis/library/iam.googleapis.com/
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: True
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
 objects:
   - !ruby/object:Api::Resource
     name: 'WorkloadIdentityPool'
     min_version: beta
     base_url: projects/{{project}}/locations/global/workloadIdentityPools
+    self_link: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}
     create_url: projects/{{project}}/locations/global/workloadIdentityPools?workloadIdentityPoolId={{workload_identity_pool_id}}
+    update_verb: :PATCH
+    update_mask: true
     description: |
       Represents a collection of external workload identities. You can define IAM policies to
       grant these identities access to Google Cloud resources.
-    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Managing workload identity pools':
+          'https://cloud.google.com/iam/docs/manage-workload-identity-pools-providers#pools'
+      api: 'https://cloud.google.com/iam/docs/reference/rest/v1beta/projects.locations.workloadIdentityPools'
     properties:
       - !ruby/object:Api::Type::String
          name: 'workloadIdentityPoolId'

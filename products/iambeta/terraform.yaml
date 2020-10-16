@@ -13,6 +13,32 @@
 
 --- !ruby/object:Provider::Terraform::Config
 legacy_name: iam
+overrides: !ruby/object:Overrides::ResourceOverrides
+  WorkloadIdentityPool: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    import_format: ["projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iam_workload_identity_pool_basic"
+        primary_resource_id: "example"
+        vars:
+          workload_identity_pool_id: "example-pool"
+        min_version: beta
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iam_workload_identity_pool_full"
+        primary_resource_id: "example"
+        vars:
+          workload_identity_pool_id: "example-pool"
+        min_version: beta
+    docs: !ruby/object:Provider::Terraform::Docs
+      attributes: |
+        * `self_link`: The self link of the created WorkloadIdentityPool in the format `projects/{project}/locations/global/workloadIdentityPools/{workload_identity_pool_id}`
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/iam_workload_identity_pool.go.erb
+    properties:
+      workloadIdentityPoolId: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateWorkloadIdentityPoolId'
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
