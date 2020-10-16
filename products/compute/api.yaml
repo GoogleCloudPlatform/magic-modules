@@ -17326,8 +17326,7 @@ objects:
         resource: 'ExternalVpnGateway'
         imports: 'selfLink'
         input: true
-        exactly_one_of:
-          - peer_external_gateway
+        conflicts:
           - peer_gcp_gateway
         description: |
           URL of the peer side external VPN gateway to which this VPN tunnel is connected.
@@ -17338,9 +17337,8 @@ objects:
         send_empty_value: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'peerGcpGateway'
-        exactly_one_of:
+        conflicts:
           - peer_external_gateway
-          - peer_gcp_gateway
         description: |
           URL of the peer side HA GCP VPN gateway to which this VPN tunnel is connected.
           If provided, the VPN tunnel will automatically use the same vpn_gateway_interface
