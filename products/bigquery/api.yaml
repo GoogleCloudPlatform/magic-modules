@@ -1457,7 +1457,6 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'projectId'
             description: The ID of the project containing this routine
-            #  required: true
           - !ruby/object:Api::Type::String
             name: 'routineId'
             description: The ID of the the routine. The ID must contain only
@@ -1522,16 +1521,17 @@ objects:
               # We'll have people provide the json blob for the schema instead.
               name: 'dataType'
               description: |
-                Required unless argumentKind = ANY_TYPE. ~>**NOTE**: Because this field expects
-                a JSON string, any changes to the string will create a diff, even if the JSON
-                itself hasn't changed. If the API returns a different value for the same schema,
-                e.g. it switched the order of values or replaced STRUCT field type with RECORD
-                field type, we currently cannot suppress the recurring diff this causes. As a
-                workaround, we recommend using the schema as returned by the API.
+                A JSON schema for the data type. Required unless argumentKind = ANY_TYPE.
+                ~>**NOTE**: Because this field expects a JSON string, any changes to the string
+                will create a diff, even if the JSON itself hasn't changed. If the API returns
+                a different value for the same schema, e.g. it switched the order of values
+                or replaced STRUCT field type with RECORD field type, we currently cannot
+                suppress the recurring diff this causes. As a workaround, we recommend using
+                the schema as returned by the API.
       - !ruby/object:Api::Type::String
         name: 'returnType'
         description: |
-          Optional A JSON schema for the return type . if language = "SQL"; required otherwise.
+          A JSON schema for the return type. Optional if language = "SQL"; required otherwise.
           If absent, the return type is inferred from definitionBody at query time in each query
           that references this routine. If present, then the evaluated result will be cast to
           the specified returned type at query time. ~>**NOTE**: Because this field expects a JSON
@@ -1548,6 +1548,7 @@ objects:
         item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'definitionBody'
+        required: true
         description: |
           The body of the routine. For functions, this is the expression in the AS clause.
           If language=SQL, it is the substring inside (but excluding) the parentheses.
