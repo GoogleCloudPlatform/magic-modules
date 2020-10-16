@@ -41,9 +41,9 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Api'
     min_version: beta
-    create_url:  projects/{{project}}/locations/global/apis?apiId={{api_id}}
+    create_url: projects/{{project}}/locations/global/apis?apiId={{api_id}}
     self_link: projects/{{project}}/locations/global/apis/{{api_id}}
-    base_url:  projects/{{project}}/locations/global/apis
+    base_url: projects/{{project}}/locations/global/apis
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -90,7 +90,8 @@ objects:
     min_version: beta
     create_url: projects/{{project}}/locations/global/apis/{{api}}/configs?apiConfigId={{api_config_id}}
     self_link: projects/{{project}}/locations/global/apis/{{api}}/configs/{{api_config_id}}
-    base_url:  projects/{{project}}/locations/global/apis/{{api}}/configs
+    base_url: projects/{{project}}/locations/global/apis/{{api}}/configs
+    read_query_params: '?view=FULL'
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -171,18 +172,12 @@ objects:
                   input: true
                   description: |
                     Base64 encoded content of the file.
-    # iam_policy: !ruby/object:Api::Resource::IamPolicy
-    #   allowed_iam_role: 'roles/apigateway.viewer'
-    #   parent_resource_type: 'google_api_gateway_api'
-    #   parent_resource_attribute: 'api'
-    #   example_config_body: 'templates/terraform/iam/example_config_body/api_gateway_api_config.tf.erb'
-    #   method_name_separator: ':'
   - !ruby/object:Api::Resource
     name: 'Gateway'
     min_version: beta
-    create_url:  projects/{{project}}/locations/{{region}}/gateways?gatewayId={{gateway_id}}
+    create_url: projects/{{project}}/locations/{{region}}/gateways?gatewayId={{gateway_id}}
     self_link: projects/{{project}}/locations/{{region}}/gateways/{{gateway_id}}
-    base_url:  projects/{{project}}/locations/{{region}}/gateways
+    base_url: projects/{{project}}/locations/{{region}}/gateways
     update_verb: :PATCH
     update_mask: true
     description: |

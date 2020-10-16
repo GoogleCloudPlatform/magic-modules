@@ -15,3 +15,14 @@ resource "google_api_gateway_api_config" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 }
+
+resource "google_api_gateway_gateway" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+  region     = "us-central1"
+  api_config = google_api_gateway_api_config.<%= ctx[:primary_resource_id] %>.id
+  gateway_id = "<%= ctx[:vars]["name"] %>"
+  display_name = "MM Dev API Gateway"
+  labels = {
+    environment = "dev"
+  }
+}
