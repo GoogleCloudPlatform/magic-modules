@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -202,4 +203,59 @@ func TestSpannerDatabase_resourceSpannerDBDdlCustomDiffFuncForceNew(t *testing.T
 			t.Errorf("ForceNew not setup correctly for the condition-'%s', expected:%v;actual:%v", tn, tc.forcenew, d.IsForceNew)
 		}
 	}
+}
+
+func TestAccSpannerDatabase_deletionProtection(t *testing.T) {
+	skipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+	}
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
+		CheckDestroy: testAccCheckSpannerDatabaseDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerDatabase_deletionProtection(context),
+			},
+			{
+				ResourceName:            "google_spanner_database.database",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ddl", "instance", "deletion_protection"},
+			},
+			{
+				Config:      testAccSpannerDatabase_deletionProtection(context),
+				Destroy:     true,
+				ExpectError: regexp.MustCompile("deletion_protection"),
+			},
+			{
+				Config: testAccSpannerDatabase_spannerDatabaseBasicExample(context),
+			},
+		},
+	})
+}
+
+func testAccSpannerDatabase_deletionProtection(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_spanner_instance" "main" {
+  config       = "regional-europe-west1"
+  display_name = "main-instance"
+}
+
+resource "google_spanner_database" "database" {
+  instance = google_spanner_instance.main.name
+  name     = "tf-test-my-database%{random_suffix}"
+  ddl = [
+    "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+    "CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
+  ]
+}
+`, context)
 }
