@@ -51,9 +51,9 @@ The following arguments are supported:
   is already established will not reallocate already provisioned service producer subnetworks.
 
 ## Import 
-Service networking connection can be imported in following ways
+ServiceNetworkingConnection can be imported using any of these accepted formats
 
-* terraform import google_service_networking_connection.peering_connection {{peering-network}}:{{servicenetworking.googleapis.com}}
+* terraform import google_service_networking_connection.peering_connection {{peering-network}}:{{service}}
 
-* terraform import google_service_networking_connection.peering_connection /projects/{{project}}/global/networks/{{peering-network}}:{{servicenetworking.googleapis.com}}
+* terraform import google_service_networking_connection.peering_connection /projects/{{project}}/global/networks/{{peering-network}}:{{service}}
 
