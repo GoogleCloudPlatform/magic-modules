@@ -1803,7 +1803,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'consistentHash'
         description: |
-          Consistent hash-based load balancing can be used to provide soft session
+          Consistent Hash-based load balancing can be used to provide soft session
           affinity based on HTTP headers, cookies or other properties. This load balancing
           policy is applicable only for HTTP connections. The affinity to a particular
           destination host will be lost when one or more hosts are added/removed from the
