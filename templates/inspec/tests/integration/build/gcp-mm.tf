@@ -941,6 +941,7 @@ resource "google_spanner_database" "database" {
   instance     = google_spanner_instance.spanner_instance.name
   name         = var.spannerdatabase["name"]
   ddl          = [var.spannerdatabase["ddl"]]
+  deletion_protection = false
 }
 
 resource "google_cloud_scheduler_job" "job" {
