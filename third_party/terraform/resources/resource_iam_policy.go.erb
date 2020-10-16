@@ -59,7 +59,6 @@ func ResourceIamPolicyCreate(newUpdaterFunc newResourceIamUpdaterFunc) schema.Cr
 		if err != nil {
 			return err
 		}
-		config.userAgent = userAgent
 
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
@@ -82,7 +81,6 @@ func ResourceIamPolicyRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.Read
 		if err != nil {
 			return err
 		}
-		config.userAgent = userAgent
 
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
@@ -112,7 +110,6 @@ func ResourceIamPolicyUpdate(newUpdaterFunc newResourceIamUpdaterFunc) schema.Up
 		if err != nil {
 			return err
 		}
-		config.userAgent = userAgent
 
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
@@ -136,7 +133,6 @@ func ResourceIamPolicyDelete(newUpdaterFunc newResourceIamUpdaterFunc) schema.De
 		if err != nil {
 			return err
 		}
-		config.userAgent = userAgent
 
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {

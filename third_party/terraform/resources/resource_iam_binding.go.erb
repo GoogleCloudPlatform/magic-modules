@@ -121,7 +121,7 @@ func resourceIamBindingRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.Rea
 		if err != nil {
 			return err
 		}
-		config.userAgent = userAgent
+
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
 			return err
@@ -259,7 +259,7 @@ func resourceIamBindingDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBa
 		if err != nil {
 			return err
 		}
-		config.userAgent = userAgent
+
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
 			return err

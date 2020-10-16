@@ -140,7 +140,6 @@ func resourceIamAuditConfigCreateUpdate(newUpdaterFunc newResourceIamUpdaterFunc
 		if err != nil {
 			return err
 		}
-		config.userAgent = userAgent
 
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
@@ -174,7 +173,7 @@ func resourceIamAuditConfigDelete(newUpdaterFunc newResourceIamUpdaterFunc, enab
 		if err != nil {
 			return err
 		}
-		config.userAgent = userAgent
+
 		updater, err := newUpdaterFunc(d, config)
 		if err != nil {
 			return err
