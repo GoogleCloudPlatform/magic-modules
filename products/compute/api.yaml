@@ -126,7 +126,7 @@ objects:
         description: |
           The purpose of this resource, which can be one of the following values:
 
-          - GCE_ENDPOINT for addresses that are used by VM instances, alias IP ranges, internal load balancers, and similar resources.
+          * GCE_ENDPOINT for addresses that are used by VM instances, alias IP ranges, internal load balancers, and similar resources.
 
           This should only be set when using an Internal address.
         values:
@@ -136,8 +136,10 @@ objects:
         exact_version: beta
         description: |
           The purpose of this resource, which can be one of the following values:
-          - GCE_ENDPOINT for addresses that are used by VM instances, alias IP ranges, internal load balancers, and similar resources.
-          - SHARED_LOADBALANCER_VIP for an address that can be used by multiple internal load balancers
+
+          * GCE_ENDPOINT for addresses that are used by VM instances, alias IP ranges, internal load balancers, and similar resources.
+          * SHARED_LOADBALANCER_VIP for an address that can be used by multiple internal load balancers.
+
           This should only be set when using an Internal address.
         values:
           - :GCE_ENDPOINT
@@ -1172,29 +1174,29 @@ objects:
           The load balancing algorithm used within the scope of the locality.
           The possible values are -
 
-          ROUND_ROBIN - This is a simple policy in which each healthy backend
-                        is selected in round robin order.
+          * ROUND_ROBIN - This is a simple policy in which each healthy backend
+                          is selected in round robin order.
 
-          LEAST_REQUEST - An O(1) algorithm which selects two random healthy
-                          hosts and picks the host which has fewer active requests.
+          * LEAST_REQUEST - An O(1) algorithm which selects two random healthy
+                            hosts and picks the host which has fewer active requests.
 
-          RING_HASH - The ring/modulo hash load balancer implements consistent
-                      hashing to backends. The algorithm has the property that the
-                      addition/removal of a host from a set of N hosts only affects
-                      1/N of the requests.
+          * RING_HASH - The ring/modulo hash load balancer implements consistent
+                        hashing to backends. The algorithm has the property that the
+                        addition/removal of a host from a set of N hosts only affects
+                        1/N of the requests.
 
-          RANDOM - The load balancer selects a random healthy host.
+          * RANDOM - The load balancer selects a random healthy host.
 
-          ORIGINAL_DESTINATION - Backend host is selected based on the client
-                                 connection metadata, i.e., connections are opened
-                                 to the same address as the destination address of
-                                 the incoming connection before the connection
-                                 was redirected to the load balancer.
+          * ORIGINAL_DESTINATION - Backend host is selected based on the client
+                                   connection metadata, i.e., connections are opened
+                                   to the same address as the destination address of
+                                   the incoming connection before the connection
+                                   was redirected to the load balancer.
 
-          MAGLEV - used as a drop in replacement for the ring hash load balancer.
-                   Maglev is not as stable as ring hash but has faster table lookup
-                   build times and host selection times. For more information about
-                   Maglev, refer to https://ai.google/research/pubs/pub44824
+          * MAGLEV - used as a drop in replacement for the ring hash load balancer.
+                     Maglev is not as stable as ring hash but has faster table lookup
+                     build times and host selection times. For more information about
+                     Maglev, refer to https://ai.google/research/pubs/pub44824
 
           This field is applicable only when the load_balancing_scheme is set to
           INTERNAL_SELF_MANAGED.
@@ -1998,29 +2000,29 @@ objects:
           The load balancing algorithm used within the scope of the locality.
           The possible values are -
 
-          ROUND_ROBIN - This is a simple policy in which each healthy backend
-                        is selected in round robin order.
+          * ROUND_ROBIN - This is a simple policy in which each healthy backend
+                          is selected in round robin order.
 
-          LEAST_REQUEST - An O(1) algorithm which selects two random healthy
-                          hosts and picks the host which has fewer active requests.
+          * LEAST_REQUEST - An O(1) algorithm which selects two random healthy
+                            hosts and picks the host which has fewer active requests.
 
-          RING_HASH - The ring/modulo hash load balancer implements consistent
-                      hashing to backends. The algorithm has the property that the
-                      addition/removal of a host from a set of N hosts only affects
-                      1/N of the requests.
+          * RING_HASH - The ring/modulo hash load balancer implements consistent
+                        hashing to backends. The algorithm has the property that the
+                        addition/removal of a host from a set of N hosts only affects
+                        1/N of the requests.
 
-          RANDOM - The load balancer selects a random healthy host.
+          * RANDOM - The load balancer selects a random healthy host.
 
-          ORIGINAL_DESTINATION - Backend host is selected based on the client
-                                 connection metadata, i.e., connections are opened
-                                 to the same address as the destination address of
-                                 the incoming connection before the connection
-                                 was redirected to the load balancer.
+          * ORIGINAL_DESTINATION - Backend host is selected based on the client
+                                   connection metadata, i.e., connections are opened
+                                   to the same address as the destination address of
+                                   the incoming connection before the connection
+                                   was redirected to the load balancer.
 
-          MAGLEV - used as a drop in replacement for the ring hash load balancer.
-                   Maglev is not as stable as ring hash but has faster table lookup
-                   build times and host selection times. For more information about
-                   Maglev, refer to https://ai.google/research/pubs/pub44824
+          * MAGLEV - used as a drop in replacement for the ring hash load balancer.
+                     Maglev is not as stable as ring hash but has faster table lookup
+                     build times and host selection times. For more information about
+                     Maglev, refer to https://ai.google/research/pubs/pub44824
 
           This field is applicable only when the `load_balancing_scheme` is set to
           INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, or HTTP2.
@@ -5680,10 +5682,10 @@ objects:
           URL of the source image used to create this image. In order to create an image, you must provide the full or partial
           URL of one of the following:
 
-          The selfLink URL
-          This property
-          The rawDisk.source URL
-          The sourceDisk URL
+          * The selfLink URL
+          * This property
+          * The rawDisk.source URL
+          * The sourceDisk URL
         resource: 'Image'
         imports: 'selfLink'
       - !ruby/object:Api::Type::ResourceRef
@@ -5693,11 +5695,11 @@ objects:
 
           In order to create an image, you must provide the full or partial URL of one of the following:
 
-          The selfLink URL
-          This property
-          The sourceImage URL
-          The rawDisk.source URL
-          The sourceDisk URL
+          * The selfLink URL
+          * This property
+          * The sourceImage URL
+          * The rawDisk.source URL
+          * The sourceDisk URL
         resource: 'Snapshot'
         imports: 'selfLink'
       - !ruby/object:Api::Type::Enum
@@ -9917,10 +9919,15 @@ objects:
                                 description: |
                                   The header value must be an integer and its value must be in the range specified
                                   in rangeMatch. If the header does not contain an integer, number or is empty,
-                                  the match fails. For example for a range [-5, 0]   - -3 will match.  - 0 will
-                                  not match.  - 0.25 will not match.  - -3someString will not match.   Only one of
-                                  exactMatch, prefixMatch, suffixMatch, regexMatch, presentMatch or rangeMatch
-                                  must be set.
+                                  the match fails. For example for a range [-5, 0]
+
+                                  * -3 will match
+                                  * 0 will not match
+                                  * 0.25 will not match
+                                  * -3someString will not match.
+
+                                  Only one of exactMatch, prefixMatch, suffixMatch, regexMatch, presentMatch or
+                                  rangeMatch must be set.
                                 properties:
                                   - !ruby/object:Api::Type::Integer
                                     name: 'rangeEnd'
@@ -9999,9 +10006,10 @@ objects:
                                 description: |
                                   Specifies how individual filterLabel matches within the list of filterLabels
                                   contribute towards the overall metadataFilter match. Supported values are:
-                                    - MATCH_ANY: At least one of the filterLabels must have a matching label in the
+
+                                  * MATCH_ANY: At least one of the filterLabels must have a matching label in the
                                   provided metadata.
-                                    - MATCH_ALL: All filterLabels must have matching labels in
+                                  * MATCH_ALL: All filterLabels must have matching labels in
                                   the provided metadata.
                                 values:
                                   - :MATCH_ALL
@@ -10219,25 +10227,26 @@ objects:
                             item_type: Api::Type::String
                             description: |
                               Specfies one or more conditions when this retry rule applies. Valid values are:
-                              - 5xx: Loadbalancer will attempt a retry if the backend service responds with
+
+                              * 5xx: Loadbalancer will attempt a retry if the backend service responds with
                                 any 5xx response code, or if the backend service does not respond at all,
                                 example: disconnects, reset, read timeout, connection failure, and refused
                                 streams.
-                              - gateway-error: Similar to 5xx, but only applies to response codes
+                              * gateway-error: Similar to 5xx, but only applies to response codes
                                 502, 503 or 504.
-                              - connect-failure: Loadbalancer will retry on failures
+                              * connect-failure: Loadbalancer will retry on failures
                                 connecting to backend services, for example due to connection timeouts.
-                              - retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
+                              * retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
                                 Currently the only retriable error supported is 409.
-                              - refused-stream: Loadbalancer will retry if the backend service resets the stream with a
+                              * refused-stream: Loadbalancer will retry if the backend service resets the stream with a
                                 REFUSED_STREAM error code. This reset type indicates that it is safe to retry.
-                              - cancelled: Loadbalancer will retry if the gRPC status code in the response
+                              * cancelled: Loadbalancer will retry if the gRPC status code in the response
                                 header is set to cancelled
-                              - deadline-exceeded: Loadbalancer will retry if the
+                              * deadline-exceeded: Loadbalancer will retry if the
                                 gRPC status code in the response header is set to deadline-exceeded
-                              - resource-exhausted: Loadbalancer will retry if the gRPC status code in the response
+                              * resource-exhausted: Loadbalancer will retry if the gRPC status code in the response
                                 header is set to resource-exhausted
-                              - unavailable: Loadbalancer will retry if the gRPC status code in
+                              * unavailable: Loadbalancer will retry if the gRPC status code in
                                 the response header is set to unavailable
                       - !ruby/object:Api::Type::NestedObject
                         name: 'timeout'
@@ -10644,6 +10653,7 @@ objects:
                             item_type: Api::Type::String
                             description: |
                               Specifies one or more conditions when this retry rule applies. Valid values are:
+
                               - 5xx: Loadbalancer will attempt a retry if the backend service responds with
                               any 5xx response code, or if the backend service does not respond at all,
                               example: disconnects, reset, read timeout, connection failure, and refused
@@ -11796,8 +11806,10 @@ objects:
               description: |
                 The gRPC service name for the health check. 
                 The value of grpcServiceName has the following meanings by convention:
-                  - Empty serviceName means the overall status of all services at the backend.
-                  - Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
+
+                * Empty serviceName means the overall status of all services at the backend.
+                * Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
+
                 The grpcServiceName can only be ASCII.
       - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
@@ -14395,11 +14407,11 @@ objects:
         description: |
           Session affinity option. Must be one of these values:
 
-          - NONE: Connections from the same client IP may go to any instance in
+          * NONE: Connections from the same client IP may go to any instance in
             the pool.
-          - CLIENT_IP: Connections from the same client IP will go to the same
+          * CLIENT_IP: Connections from the same client IP will go to the same
             instance in the pool while that instance remains healthy.
-          - CLIENT_IP_PROTO: Connections from the same client IP with the same
+          * CLIENT_IP_PROTO: Connections from the same client IP with the same
             IP protocol will go to the same instance in the pool while that
             instance remains healthy.
         input: true
@@ -15341,25 +15353,26 @@ objects:
                             item_type: Api::Type::String
                             description: |
                               Specifies one or more conditions when this retry rule applies. Valid values are:
-                              - 5xx: Loadbalancer will attempt a retry if the backend service responds with
+
+                              * 5xx: Loadbalancer will attempt a retry if the backend service responds with
                               any 5xx response code, or if the backend service does not respond at all,
                               example: disconnects, reset, read timeout, connection failure, and refused
                               streams.
-                              - gateway-error: Similar to 5xx, but only applies to response codes
+                              * gateway-error: Similar to 5xx, but only applies to response codes
                               502, 503 or 504.
-                              - connect-failure: Loadbalancer will retry on failures
+                              * connect-failure: Loadbalancer will retry on failures
                               connecting to backend services, for example due to connection timeouts.
-                              - retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
+                              * retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
                               Currently the only retriable error supported is 409.
-                              - refused-stream: Loadbalancer will retry if the backend service resets the stream with a
+                              * refused-stream: Loadbalancer will retry if the backend service resets the stream with a
                               REFUSED_STREAM error code. This reset type indicates that it is safe to retry.
-                              - cancelled: Loadbalancer will retry if the gRPC status code in the response
+                              * cancelled: Loadbalancer will retry if the gRPC status code in the response
                               header is set to cancelled
-                              - deadline-exceeded: Loadbalancer will retry if the
+                              * deadline-exceeded: Loadbalancer will retry if the
                               gRPC status code in the response header is set to deadline-exceeded
-                              - resource-exhausted: Loadbalancer will retry if the gRPC status code in the response
+                              * resource-exhausted: Loadbalancer will retry if the gRPC status code in the response
                               header is set to resource-exhausted
-                              - unavailable: Loadbalancer will retry if
+                              * unavailable: Loadbalancer will retry if
                               the gRPC status code in the response header is set to unavailable
                       - !ruby/object:Api::Type::NestedObject
                         name: 'timeout'
@@ -16035,25 +16048,26 @@ objects:
                             item_type: Api::Type::String
                             description: |
                               Specfies one or more conditions when this retry rule applies. Valid values are:
-                              - 5xx: Loadbalancer will attempt a retry if the backend service responds with
+
+                              * 5xx: Loadbalancer will attempt a retry if the backend service responds with
                                 any 5xx response code, or if the backend service does not respond at all,
                                 example: disconnects, reset, read timeout, connection failure, and refused
                                 streams.
-                              - gateway-error: Similar to 5xx, but only applies to response codes
+                              * gateway-error: Similar to 5xx, but only applies to response codes
                                 502, 503 or 504.
-                              - connect-failure: Loadbalancer will retry on failures
+                              * connect-failure: Loadbalancer will retry on failures
                                 connecting to backend services, for example due to connection timeouts.
-                              - retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
+                              * retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
                                 Currently the only retriable error supported is 409.
-                              - refused-stream: Loadbalancer will retry if the backend service resets the stream with a
+                              * refused-stream: Loadbalancer will retry if the backend service resets the stream with a
                                 REFUSED_STREAM error code. This reset type indicates that it is safe to retry.
-                              - cancelled: Loadbalancer will retry if the gRPC status code in the response
+                              * cancelled: Loadbalancer will retry if the gRPC status code in the response
                                 header is set to cancelled
-                              - deadline-exceeded: Loadbalancer will retry if the
+                              * deadline-exceeded: Loadbalancer will retry if the
                                 gRPC status code in the response header is set to deadline-exceeded
-                              - resource-exhausted: Loadbalancer will retry if the gRPC status code in the response
+                              * resource-exhausted: Loadbalancer will retry if the gRPC status code in the response
                                 header is set to resource-exhausted
-                              - unavailable: Loadbalancer will retry if the gRPC status code in
+                              * unavailable: Loadbalancer will retry if the gRPC status code in
                                 the response header is set to unavailable
                       - !ruby/object:Api::Type::NestedObject
                         name: 'timeout'
@@ -16480,20 +16494,20 @@ objects:
                       description: |
                         Specfies one or more conditions when this retry rule applies. Valid values are:
 
-                        5xx: Loadbalancer will attempt a retry if the backend service responds with any 5xx response code,
-                        or if the backend service does not respond at all, example: disconnects, reset, read timeout,
-                        connection failure, and refused streams.
-                        gateway-error: Similar to 5xx, but only applies to response codes 502, 503 or 504.
-                        connect-failure: Loadbalancer will retry on failures connecting to backend services,
-                        for example due to connection timeouts.
-                        retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
-                        Currently the only retriable error supported is 409.
-                        refused-stream:Loadbalancer will retry if the backend service resets the stream with a REFUSED_STREAM error code.
-                        This reset type indicates that it is safe to retry.
-                        cancelled: Loadbalancer will retry if the gRPC status code in the response header is set to cancelled
-                        deadline-exceeded: Loadbalancer will retry if the gRPC status code in the response header is set to deadline-exceeded
-                        resource-exhausted: Loadbalancer will retry if the gRPC status code in the response header is set to resource-exhausted
-                        unavailable: Loadbalancer will retry if the gRPC status code in the response header is set to unavailable
+                        * 5xx: Loadbalancer will attempt a retry if the backend service responds with any 5xx response code,
+                          or if the backend service does not respond at all, example: disconnects, reset, read timeout,
+                        * connection failure, and refused streams.
+                        * gateway-error: Similar to 5xx, but only applies to response codes 502, 503 or 504.
+                        * connect-failure: Loadbalancer will retry on failures connecting to backend services,
+                          for example due to connection timeouts.
+                        * retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
+                          Currently the only retriable error supported is 409.
+                        * refused-stream:Loadbalancer will retry if the backend service resets the stream with a REFUSED_STREAM error code.
+                          This reset type indicates that it is safe to retry.
+                        * cancelled: Loadbalancer will retry if the gRPC status code in the response header is set to cancelled
+                        * deadline-exceeded: Loadbalancer will retry if the gRPC status code in the response header is set to deadline-exceeded
+                        * resource-exhausted: Loadbalancer will retry if the gRPC status code in the response header is set to resource-exhausted
+                        * unavailable: Loadbalancer will retry if the gRPC status code in the response header is set to unavailable
                       item_type: Api::Type::String
                     - !ruby/object:Api::Type::Integer
                       name: 'numRetries'
@@ -16932,20 +16946,20 @@ objects:
                 description: |
                   Specfies one or more conditions when this retry rule applies. Valid values are:
 
-                  5xx: Loadbalancer will attempt a retry if the backend service responds with any 5xx response code,
-                  or if the backend service does not respond at all, example: disconnects, reset, read timeout,
-                  connection failure, and refused streams.
-                  gateway-error: Similar to 5xx, but only applies to response codes 502, 503 or 504.
-                  connect-failure: Loadbalancer will retry on failures connecting to backend services,
-                  for example due to connection timeouts.
-                  retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
-                  Currently the only retriable error supported is 409.
-                  refused-stream:Loadbalancer will retry if the backend service resets the stream with a REFUSED_STREAM error code.
-                  This reset type indicates that it is safe to retry.
-                  cancelled: Loadbalancer will retry if the gRPC status code in the response header is set to cancelled
-                  deadline-exceeded: Loadbalancer will retry if the gRPC status code in the response header is set to deadline-exceeded
-                  resource-exhausted: Loadbalancer will retry if the gRPC status code in the response header is set to resource-exhausted
-                  unavailable: Loadbalancer will retry if the gRPC status code in the response header is set to unavailable
+                  * 5xx: Loadbalancer will attempt a retry if the backend service responds with any 5xx response code,
+                    or if the backend service does not respond at all, example: disconnects, reset, read timeout,
+                  * connection failure, and refused streams.
+                  * gateway-error: Similar to 5xx, but only applies to response codes 502, 503 or 504.
+                  * connect-failure: Loadbalancer will retry on failures connecting to backend services,
+                    for example due to connection timeouts.
+                  * retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
+                    Currently the only retriable error supported is 409.
+                  * refused-stream:Loadbalancer will retry if the backend service resets the stream with a REFUSED_STREAM error code.
+                    This reset type indicates that it is safe to retry.
+                  * cancelled: Loadbalancer will retry if the gRPC status code in the response header is set to cancelled
+                  * deadline-exceeded: Loadbalancer will retry if the gRPC status code in the response header is set to deadline-exceeded
+                  * resource-exhausted: Loadbalancer will retry if the gRPC status code in the response header is set to resource-exhausted
+                  * unavailable: Loadbalancer will retry if the gRPC status code in the response header is set to unavailable
                 at_least_one_of:
                   - default_route_action.0.retry_policy.0.retry_conditions
                   - default_route_action.0.retry_policy.0.num_retries
