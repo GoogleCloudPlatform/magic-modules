@@ -1,0 +1,19 @@
+data "google_monitoring_app_engine_service" "default" {
+  module_id = "default"
+}
+
+resource "google_monitoring_slo" "<%= ctx[:primary_resource_id] -%>" {
+  service = data.google_monitoring_app_engine_service.default.service_id
+
+  slo_id = "<%= ctx[:vars]['slo_id'] -%>"
+  display_name = "Terraform Test SLO for App Engine"
+
+  goal = 0.9
+  calendar_period = "DAY"
+
+  basic_sli {
+    latency {
+      threshold = "1s"
+    }
+  }
+}

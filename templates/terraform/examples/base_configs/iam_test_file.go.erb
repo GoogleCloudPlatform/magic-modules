@@ -1,4 +1,4 @@
-<%= lines(autogen_notice :go) -%>
+<%= lines(autogen_notice(:go, pwd)) -%>
 
 package google
 
@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 <%# Since most resources define a "basic" config as their first example, we can reuse that config to create a resource to test IAM resources with. -%>
@@ -16,7 +17,7 @@ import (
          .first -%>
 <% resource_name = product_ns + object.name -%>
 <%
-individual_url = object.self_link_url
+individual_url = object.iam_policy.self_link || object.self_link_url
 -%>
 <%
   tf_product = (@config.legacy_name || product_ns).underscore
@@ -52,9 +53,9 @@ import_url = import_format.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.bas
 func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 	t.Parallel()
 
-<%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers:    testAccProvidersOiCS,
@@ -92,9 +93,9 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 	t.Parallel()
 
-<%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers: testAccProvidersOiCS,
@@ -121,12 +122,16 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 	t.Parallel()
 
-<%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
 <% unless object.iam_policy.admin_iam_role.nil? -%>
-	context["service_account"] = getTestServiceAccountFromEnv(t)
+	// This may skip test, so do it first
+	sa := getTestServiceAccountFromEnv(t)
+<% end -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
+<% unless object.iam_policy.admin_iam_role.nil? -%>
+	context["service_account"] = sa
 <% end -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers: testAccProvidersOiCS,
@@ -164,9 +169,9 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T) {
 	t.Parallel()
 
-<%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers: testAccProvidersOiCS,
@@ -190,11 +195,13 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 }
 
 func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *testing.T) {
+	// Multiple fine-grained resources
+	skipIfVcr(t)
 	t.Parallel()
 
-<%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers: testAccProvidersOiCS,
@@ -228,9 +235,9 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *
 func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) {
 	t.Parallel()
 
-<%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers: testAccProvidersOiCS,
@@ -254,11 +261,13 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 }
 
 func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *testing.T) {
+	// Multiple fine-grained resources
+	skipIfVcr(t)
 	t.Parallel()
 
-<%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers: testAccProvidersOiCS,
@@ -292,12 +301,16 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *t
 func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) {
 	t.Parallel()
 
-<%= lines(compile('templates/terraform/iam/iam_context.go.erb')) -%>
 <% unless object.iam_policy.admin_iam_role.nil? -%>
-	context["service_account"] = getTestServiceAccountFromEnv(t)
+	// This may skip test, so do it first
+	sa := getTestServiceAccountFromEnv(t)
+<% end -%>
+<%= lines(compile(pwd + '/templates/terraform/iam/iam_context.go.erb')) -%>
+<% unless object.iam_policy.admin_iam_role.nil? -%>
+	context["service_account"] = sa
 <% end -%>
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 <% unless object.min_version.name == "ga" -%>
 		Providers: testAccProvidersOiCS,
@@ -323,13 +336,13 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 
 func testAcc<%= resource_name -%>IamMember_basicGenerated(context map[string]interface{}) string {
 	return Nprintf(`
-<%= example.config_test_body -%>
+<%= example.config_test_body(pwd) -%>
 
 resource "<%= resource_ns_iam -%>_member" "foo" {
 <% unless object.min_version.name == "ga" -%>
   provider = google-beta
 <% end -%>
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
 }
@@ -338,7 +351,7 @@ resource "<%= resource_ns_iam -%>_member" "foo" {
 
 func testAcc<%= resource_name -%>IamPolicy_basicGenerated(context map[string]interface{}) string {
 	return Nprintf(`
-<%= example.config_test_body -%>
+<%= example.config_test_body(pwd) -%>
 
 data "google_iam_policy" "foo" {
 <% unless object.min_version.name == "ga" -%>
@@ -360,7 +373,7 @@ resource "<%= resource_ns_iam -%>_policy" "foo" {
 <% unless object.min_version.name == "ga" -%>
   provider = google-beta
 <% end -%>
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   policy_data = data.google_iam_policy.foo.policy_data
 }
 `, context)
@@ -368,7 +381,7 @@ resource "<%= resource_ns_iam -%>_policy" "foo" {
 
 func testAcc<%= resource_name -%>IamPolicy_emptyBinding(context map[string]interface{}) string {
 	return Nprintf(`
-<%= example.config_test_body -%>
+<%= example.config_test_body(pwd) -%>
 
 data "google_iam_policy" "foo" {
 <% unless object.min_version.name == "ga" -%>
@@ -380,7 +393,7 @@ resource "<%= resource_ns_iam -%>_policy" "foo" {
 <% unless object.min_version.name == "ga" -%>
   provider = google-beta
 <% end -%>
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   policy_data = data.google_iam_policy.foo.policy_data
 }
 `, context)
@@ -388,13 +401,13 @@ resource "<%= resource_ns_iam -%>_policy" "foo" {
 
 func testAcc<%= resource_name -%>IamBinding_basicGenerated(context map[string]interface{}) string {
 	return Nprintf(`
-<%= example.config_test_body -%>
+<%= example.config_test_body(pwd) -%>
 
 resource "<%= resource_ns_iam -%>_binding" "foo" {
 <% unless object.min_version.name == "ga" -%> 
   provider = google-beta
 <% end -%>
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "%{role}"
   members = ["user:admin@hashicorptest.com"]
 }
@@ -403,13 +416,13 @@ resource "<%= resource_ns_iam -%>_binding" "foo" {
 
 func testAcc<%= resource_name -%>IamBinding_updateGenerated(context map[string]interface{}) string {
 	return Nprintf(`
-<%= example.config_test_body -%>
+<%= example.config_test_body(pwd) -%>
 
 resource "<%= resource_ns_iam -%>_binding" "foo" {
 <% unless object.min_version.name == "ga" -%>
   provider = google-beta
 <% end -%>
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "%{role}"
   members = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
 }
@@ -419,13 +432,13 @@ resource "<%= resource_ns_iam -%>_binding" "foo" {
 <% unless version == 'ga' || object.iam_policy.iam_conditions_request_type.nil? -%>
 func testAcc<%= resource_name -%>IamBinding_withConditionGenerated(context map[string]interface{}) string {
 	return Nprintf(`
-<%= example.config_test_body -%>
+<%= example.config_test_body(pwd) -%>
 
 resource "<%= resource_ns_iam -%>_binding" "foo" {
 <% unless object.min_version.name == "ga" -%>
   provider = google-beta
 <% end -%>
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "%{role}"
   members = ["user:admin@hashicorptest.com"]
   condition {
@@ -439,13 +452,13 @@ resource "<%= resource_ns_iam -%>_binding" "foo" {
 
 func testAcc<%= resource_name -%>IamBinding_withAndWithoutConditionGenerated(context map[string]interface{}) string {
 	return Nprintf(`
-<%= example.config_test_body -%>
+<%= example.config_test_body(pwd) -%>
 
 resource "<%= resource_ns_iam -%>_binding" "foo" {
 <% unless object.min_version.name == "ga" -%>
   provider = google-beta
 <% end -%>
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "%{role}"
   members = ["user:admin@hashicorptest.com"]
 }
@@ -454,7 +467,7 @@ resource "<%= resource_ns_iam -%>_binding" "foo2" {
 <% unless object.min_version.name == "ga" -%>
   provider = google-beta
 <% end -%>
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "%{role}"
   members = ["user:admin@hashicorptest.com"]
   condition {
@@ -468,13 +481,13 @@ resource "<%= resource_ns_iam -%>_binding" "foo2" {
 
 func testAcc<%= resource_name -%>IamMember_withConditionGenerated(context map[string]interface{}) string {
 	return Nprintf(`
-<%= example.config_test_body -%>
+<%= example.config_test_body(pwd) -%>
 
 resource "<%= resource_ns_iam -%>_member" "foo" {
 <% unless object.min_version.name == "ga" -%>
   provider = google-beta
 <% end -%>
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
   condition {
@@ -488,13 +501,13 @@ resource "<%= resource_ns_iam -%>_member" "foo" {
 
 func testAcc<%= resource_name -%>IamMember_withAndWithoutConditionGenerated(context map[string]interface{}) string {
 	return Nprintf(`
-<%= example.config_test_body -%>
+<%= example.config_test_body(pwd) -%>
 
 resource "<%= resource_ns_iam -%>_member" "foo" {
 <% unless object.min_version.name == "ga" -%>
   provider = google-beta
 <% end -%>
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
 }
@@ -503,7 +516,7 @@ resource "<%= resource_ns_iam -%>_member" "foo2" {
 <% unless object.min_version.name == "ga" -%>
   provider = google-beta
 <% end -%>
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
   condition {
@@ -517,7 +530,7 @@ resource "<%= resource_ns_iam -%>_member" "foo2" {
 
 func testAcc<%= resource_name -%>IamPolicy_withConditionGenerated(context map[string]interface{}) string {
 	return Nprintf(`
-<%= example.config_test_body -%>
+<%= example.config_test_body(pwd) -%>
 
 data "google_iam_policy" "foo" {
 <% unless object.min_version.name == "ga" -%>
@@ -544,7 +557,7 @@ resource "<%= resource_ns_iam -%>_policy" "foo" {
 <% unless object.min_version.name == "ga" -%>
   provider = google-beta
 <% end -%>
-<%= lines(compile(object.iam_policy.example_config_body)) -%>
+<%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>
   policy_data = data.google_iam_policy.foo.policy_data
 }
 `, context)

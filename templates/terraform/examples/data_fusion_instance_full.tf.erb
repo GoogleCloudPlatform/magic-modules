@@ -1,5 +1,5 @@
 resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
-  provider = "google-beta"
+  provider = google-beta
   name = "<%= ctx[:vars]["instance_name"] %>"
   description = "My Data Fusion instance"
   region = "us-central1"
@@ -14,4 +14,5 @@ resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
     network = "default"
     ip_allocation = "10.89.48.0/22"
   }
+  version = "6.1.1"
 }

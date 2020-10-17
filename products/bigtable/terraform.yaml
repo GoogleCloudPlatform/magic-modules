@@ -13,6 +13,9 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Instance: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude_resource: true
+    exclude: true
   AppProfile: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}"
     import_format: ["projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}"]
@@ -25,6 +28,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           instance_name: "bt-instance"
           app_profile_name: "bt-profile"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
         ignore_read_extra:
           - "ignore_warnings"
       - !ruby/object:Provider::Terraform::Examples
@@ -33,12 +41,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           instance_name: "bt-instance"
           app_profile_name: "bt-profile"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
         ignore_read_extra:
           - "ignore_warnings"
     properties:
+      instance: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: compareResourceNames
       multiClusterRoutingUseAny: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bigtable_app_profile_routing.erb'
         custom_flatten: 'templates/terraform/custom_flatten/bigtable_app_profile_routing.erb'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/bigtable_app_profile.go.erb
+
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

@@ -6,13 +6,13 @@ function clone_repo() {
     SCRATCH_OWNER=modular-magician
     if [ "$REPO" == "terraform" ]; then
         if [ "$VERSION" == "ga" ]; then
-            UPSTREAM_OWNER=terraform-providers
+            UPSTREAM_OWNER=hashicorp
             GH_REPO=terraform-provider-google
-            LOCAL_PATH=$GOPATH/src/github.com/terraform-providers/terraform-provider-google
+            LOCAL_PATH=$GOPATH/src/github.com/hashicorp/terraform-provider-google
         elif [ "$VERSION" == "beta" ]; then
-            UPSTREAM_OWNER=terraform-providers
+            UPSTREAM_OWNER=hashicorp
             GH_REPO=terraform-provider-google-beta
-            LOCAL_PATH=$GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta
+            LOCAL_PATH=$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
         else
             echo "Unrecognized version $VERSION"
             exit 1
@@ -27,7 +27,7 @@ function clone_repo() {
         LOCAL_PATH=$GOPATH/src/github.com/terraform-google-modules/docs-examples
     elif [ "$REPO" == "ansible" ]; then
         UPSTREAM_OWNER=ansible-collections
-        GH_REPO=ansible_collections_google
+        GH_REPO=google.cloud
         LOCAL_PATH=$PWD/../ansible
     elif [ "$REPO" == "inspec" ]; then
         UPSTREAM_OWNER=modular-magician
@@ -65,8 +65,8 @@ pushd ../mm-$REPO-$VERSION-$COMMAND
 
 clone_repo
 
-git config --global user.name "Modular Magician"
-git config --global user.email "magic-modules@google.com"
+git config --local user.name "Modular Magician"
+git config --local user.email "magic-modules@google.com"
 
 if [ "$COMMAND" == "head" ]; then
     BRANCH=auto-pr-$REFERENCE
@@ -85,7 +85,8 @@ fi
 
 if [ "$REPO" == "terraform" ]; then
     pushd $LOCAL_PATH
-    find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \;
+    find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -name ".go-version" -not -name ".hashibot.hcl" -not -name "tools.go"  -exec git rm {} \;
+    go mod download
     popd
 fi
 
@@ -96,10 +97,22 @@ elif [ "$REPO" == "tf-oics" ]; then
     # use terraform generator with oics override
     bundle exec compiler -a -e terraform -f oics -o $LOCAL_PATH -v $VERSION
 else
-    bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION
+    if [ "$REPO" == "terraform" ] && [ "$VERSION" == "ga" ]; then
+        bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION --no-docs
+        bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v beta --no-code
+    else
+        bundle exec compiler -a -e $REPO -o $LOCAL_PATH -v $VERSION
+    fi
 fi
 
 pushd $LOCAL_PATH
+
+if [ "$REPO" == "terraform" ]; then
+    make generate
+fi
+
+git config --local user.name "Modular Magician"
+git config --local user.email "magic-modules@google.com"
 git add .
 git checkout -b $BRANCH
 
@@ -111,13 +124,13 @@ if [ "$REPO" == "terraform" ]; then
   CHANGELOG=true
 fi
 
+PR_NUMBER=$(curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
+    "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=closed&base=master&sort=updated&direction=desc" | \
+    jq -r ".[] | if .merge_commit_sha == \"$REFERENCE\" then .number else empty end")
 if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ] && [ "$CHANGELOG" == "true" ]; then
     # Add the changelog entry!
-    PR_NUMBER=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
-        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=closed&base=master&sort=updated&direction=desc" | \
-        jq -r ".[] | if .merge_commit_sha == \"$REFERENCE\" then .number else empty end")
     mkdir -p .changelog/
-    curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+    curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/$PR_NUMBER" | \
         jq -r .body | \
         sed -e '/```release-note/,/```/!d' \
@@ -129,13 +142,13 @@ fi
 git push $SCRATCH_PATH $BRANCH -f
 
 if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
-    PR_BODY=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+    PR_BODY=$(curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/$PR_NUMBER" | \
         jq -r .body)
-    PR_TITLE=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+    PR_TITLE=$(curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/$PR_NUMBER" | \
         jq -r .title)
-    MM_PR_URL=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+    MM_PR_URL=$(curl -L -s -H "Authorization: token ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/$PR_NUMBER" | \
         jq -r .html_url)
 
@@ -147,7 +160,7 @@ if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
 
     # Wait a few seconds, then merge the PR.
     sleep 5
-    curl -H "Authorization: token ${GITHUB_TOKEN}" \
+    curl -L -H "Authorization: token ${GITHUB_TOKEN}" \
         -X PUT \
         -d '{"merge_method": "squash"}' \
         "https://api.github.com/repos/$UPSTREAM_OWNER/$GH_REPO/pulls/$NEW_PR_NUMBER/merge"

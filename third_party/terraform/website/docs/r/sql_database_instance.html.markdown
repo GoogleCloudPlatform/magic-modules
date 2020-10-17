@@ -39,6 +39,10 @@ default 'root'@'%' user with no password. This user will be deleted by Terraform
 instance creation. You should use `google_sql_user` to define a custom user with
 a restricted host and strong password.
 
+-> **Note**: On newer versions of the provider, you must explicitly set `deletion_protection=false`
+(and run `terraform apply` to write the field to state) in order to destroy an instance.
+It is recommended to not set this field (or set it to true) until you're ready to destroy the instance and its databases.
+
 ## Example Usage
 
 ### SQL Second Generation Instance
@@ -122,7 +126,7 @@ resource "google_sql_database_instance" "postgres" {
 ```
 
 ### Private IP Instance
-~> **NOTE**: For private IP instance setup, note that the `google_sql_database_instance` does not actually interpolate values from `google_service_networking_connection`. You must explicitly add a `depends_on`reference as shown below.
+~> **NOTE:** For private IP instance setup, note that the `google_sql_database_instance` does not actually interpolate values from `google_service_networking_connection`. You must explicitly add a `depends_on`reference as shown below.
 
 ```hcl
 resource "google_compute_network" "private_network" {
@@ -138,13 +142,13 @@ resource "google_compute_global_address" "private_ip_address" {
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
-  network       = google_compute_network.private_network.self_link
+  network       = google_compute_network.private_network.id
 }
 
 resource "google_service_networking_connection" "private_vpc_connection" {
   provider = google-beta
 
-  network                 = google_compute_network.private_network.self_link
+  network                 = google_compute_network.private_network.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
 }
@@ -165,7 +169,7 @@ resource "google_sql_database_instance" "instance" {
     tier = "db-f1-micro"
     ip_configuration {
       ipv4_enabled    = false
-      private_network = google_compute_network.private_network.self_link
+      private_network = google_compute_network.private_network.id
     }
   }
 }
@@ -194,7 +198,7 @@ The following arguments are supported:
 
 * `database_version` - (Optional, Default: `MYSQL_5_6`) The MySQL, PostgreSQL or
 SQL Server (beta) version to use. Supported values include `MYSQL_5_6`,
-`MYSQL_5_7`, `POSTGRES_9_6`,`POSTGRES_11`, `SQLSERVER_2017_STANDARD`,
+`MYSQL_5_7`, `POSTGRES_9_6`,`POSTGRES_10`, `POSTGRES_11`, `POSTGRES_12`, `SQLSERVER_2017_STANDARD`,
 `SQLSERVER_2017_ENTERPRISE`, `SQLSERVER_2017_EXPRESS`, `SQLSERVER_2017_WEB`.
 [Database Version Policies](https://cloud.google.com/sql/docs/sqlserver/db-versions)
 includes an up-to-date reference of supported versions.
@@ -214,7 +218,7 @@ includes an up-to-date reference of supported versions.
 * `replica_configuration` - (Optional) The configuration for replication. The
     configuration is detailed below.
     
-* `root_password` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Initial root password. Required for MS SQL Server, ignored by MySQL and PostgreSQL.
+* `root_password` - (Optional) Initial root password. Required for MS SQL Server, ignored by MySQL and PostgreSQL.
 
 * `encryption_key_name` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
     The full path to the encryption key used for the CMEK disk encryption.  Setting
@@ -225,6 +229,9 @@ includes an up-to-date reference of supported versions.
     manually, please see [this step](https://cloud.google.com/sql/docs/mysql/configure-cmek#service-account).
     That service account needs the `Cloud KMS > Cloud KMS CryptoKey Encrypter/Decrypter` role on your
     key - please see [this step](https://cloud.google.com/sql/docs/mysql/configure-cmek#grantkey).
+
+* `deletion_protection` - (Optional, Default: `true` ) Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
+in Terraform state, a `terraform destroy` or `terraform apply` command that deletes the instance will fail.
 
 The required `settings` block supports:
 
@@ -240,8 +247,10 @@ The required `settings` block supports:
     for information on how to upgrade to Second Generation instances.
     A list of Google App Engine (GAE) project names that are allowed to access this instance.
 
-* `availability_type` - (Optional) This specifies whether a PostgreSQL instance
-    should be set up for high availability (`REGIONAL`) or single zone (`ZONAL`).
+* `availability_type` - (Optional) The availability type of the Cloud SQL
+instance, high availability (`REGIONAL`) or single zone (`ZONAL`).' For MySQL
+instances, ensure that `settings.backup_configuration.enabled` and
+`settings.backup_configuration.binary_log_enabled` are both set to `true`.
 
 * `crash_safe_replication` - (Optional, Deprecated) This property is only applicable to First Generation instances.
     First Generation instances are now deprecated, see [here](https://cloud.google.com/sql/docs/mysql/upgrade-2nd-gen)
@@ -280,6 +289,7 @@ The optional `settings.backup_configuration` subblock supports:
 
 * `start_time` - (Optional) `HH:MM` format time indicating when backup
     configuration starts.
+* `point_in_time_recovery_enabled` - (Optional) True if Point-in-time recovery is enabled. Will restart database if enabled after instance creation. Valid only for PostgreSQL instances.
 
 The optional `settings.ip_configuration` subblock supports:
 
@@ -388,7 +398,7 @@ instance.
   * A `PRIVATE` address is an address for an instance which has been configured to use private networking see: [Private IP](https://cloud.google.com/sql/docs/mysql/private-ip).
 
 * `first_ip_address` - The first IPv4 address of any type assigned. This is to
-support accessing the [first address in the list in a terraform output](https://github.com/terraform-providers/terraform-provider-google/issues/912)
+support accessing the [first address in the list in a terraform output](https://github.com/hashicorp/terraform-provider-google/issues/912)
 when the resource is configured with a `count`.
 
 * `public_ip_address` - The first public (`PRIMARY`) IPv4 address assigned. This is

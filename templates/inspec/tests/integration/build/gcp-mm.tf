@@ -636,7 +636,7 @@ variable "project_sink" {
 }
 
 resource "google_logging_project_sink" "project-logging-sink" {
-  count = var.gcp_enable_privileged_resources
+  count = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
   project = var.gcp_project_id
 
   name = var.project_sink.name
@@ -652,6 +652,14 @@ resource "google_storage_bucket" "bucket" {
   project       = var.gcp_project_id
   location      = var.gcp_location
   force_destroy = true
+
+  labels = {
+    "key" = "value"
+  }
+
+  retention_policy {
+    retention_period = 1000
+  }
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -902,6 +910,11 @@ resource "google_service_account" "spanner_service_account" {
   display_name = "${var.gcp_service_account_display_name}-sp"
 }
 
+resource "google_service_account_key" "userkey" {
+  service_account_id = google_service_account.spanner_service_account.name
+  public_key_type    = "TYPE_X509_PEM_FILE"
+}
+
 resource "google_spanner_instance" "spanner_instance" {
   project      = var.gcp_project_id
   config       = var.spannerinstance["config"]
@@ -928,6 +941,7 @@ resource "google_spanner_database" "database" {
   instance     = google_spanner_instance.spanner_instance.name
   name         = var.spannerdatabase["name"]
   ddl          = [var.spannerdatabase["ddl"]]
+  deletion_protection = false
 }
 
 resource "google_cloud_scheduler_job" "job" {
@@ -1199,4 +1213,89 @@ resource "google_compute_image" "example" {
   raw_disk {
     source = var.compute_image["source"]
   }
+}
+
+variable "gcp_organization_iam_custom_role_id" {}
+
+resource "google_organization_iam_custom_role" "generic_org_iam_custom_role" {
+  count       = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  org_id      = var.gcp_organization_id
+  role_id     = var.gcp_organization_iam_custom_role_id
+  title       = "GCP Inspec Generic Organization IAM Custom Role"
+  description = "Custom role allowing to list IAM roles only"
+  permissions = ["iam.roles.list"]
+}
+
+variable "security_policy" {
+  type = any
+}
+
+resource "google_compute_security_policy" "policy" {
+  project = var.gcp_project_id
+  name = var.security_policy["name"]
+
+  rule {
+    action   = var.security_policy["action"]
+    priority = var.security_policy["priority"]
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = [var.security_policy["ip_range"]]
+      }
+    }
+    description = var.security_policy["description"]
+  }
+
+  rule {
+    action   = "allow"
+    priority = "2147483647"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "default rule"
+  }
+}
+
+variable "memcache_instance" {
+  type = any
+}
+
+resource "google_compute_network" "memcache_network" {
+  provider = google-beta
+  project = var.gcp_project_id
+  name = "inspec-gcp-memcache"
+}
+
+resource "google_compute_global_address" "service_range" {
+  provider = google-beta
+  project = var.gcp_project_id
+  name          = "inspec-gcp-memcache"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.memcache_network.id
+}
+
+resource "google_service_networking_connection" "private_service_connection" {
+  provider = google-beta
+  network                 = google_compute_network.memcache_network.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.service_range.name]
+}
+
+resource "google_memcache_instance" "instance" {
+  provider = google-beta
+  name = var.memcache_instance["name"]
+  project = var.gcp_project_id
+  region = var.gcp_location
+  authorized_network = google_service_networking_connection.private_service_connection.network
+
+  node_config {
+    cpu_count      = 1
+    memory_size_mb = 1024
+  }
+  node_count = 1
 }

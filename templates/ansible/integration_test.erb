@@ -1,5 +1,5 @@
 ---
-<%= lines(autogen_notice :yaml) -%>
+<%= lines(autogen_notice(:yaml, pwd)) -%>
 # Pre-test setup
 <% unless example.dependencies.nil? -%>
 <% example.dependencies.each do |depend| -%>
@@ -25,7 +25,7 @@
       - result.changed == true
 <% end # if object.readonly -%>
 <% unless example.verifier.nil? -%>
-<%= lines(example.verifier.build_task('present', object)) -%>
+<%= lines(example.verifier.build_task('present', object, pwd)) -%>
 <% end -%>
 <% unless object.readonly -%>
 # ----------------------------------------------------------------------------
@@ -43,7 +43,7 @@
     that:
       - result.changed == true
 <% unless example.verifier.nil? -%>
-<%= lines(example.verifier.build_task('absent', object)) -%>
+<%= lines(example.verifier.build_task('absent', object, pwd)) -%>
 <% end -%>
 # ----------------------------------------------------------------------------
 <%= lines(example.task.build_test('absent', object, true)) -%>

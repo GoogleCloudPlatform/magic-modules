@@ -1,7 +1,7 @@
 
 <% if property.flatten_object -%>
 <% property.nested_properties.each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop)) -%>
+<%= lines(build_nested_property_documentation(prop, pwd)) -%>
 <% end -%>
 <%
   elsif property.nested_properties?
@@ -11,10 +11,10 @@ The `<%= property.name.underscore -%>` block <%= if property.output then "contai
 * `<%= property.key_name.underscore -%>` - (Required) The identifier for this object. Format specified above.
 <% end -%>
 <% property.nested_properties.each do |prop| -%>
-<%= lines(build_property_documentation(prop)) -%>
+<%= lines(build_property_documentation(prop, pwd)) -%>
 <% end -%>
 
 <% property.nested_properties.each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop)) -%>
+<%= lines(build_nested_property_documentation(prop, pwd)) -%>
 <% end -%>
 <% end -%>

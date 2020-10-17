@@ -1,0 +1,3 @@
+func <%= resource_name -%>DiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	return compareResourceNames("", old, new, nil)
+}

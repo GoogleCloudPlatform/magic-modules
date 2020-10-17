@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"google.golang.org/api/cloudkms/v1"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/iam/v1"
@@ -52,10 +51,12 @@ func BootstrapKMSKeyWithPurpose(t *testing.T, purpose string) bootstrappedKMS {
 * a KMS key.
 **/
 func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID string) bootstrappedKMS {
-	if v := os.Getenv("TF_ACC"); v == "" {
-		log.Println("Acceptance tests and bootstrapping skipped unless env 'TF_ACC' set")
+	return BootstrapKMSKeyWithPurposeInLocationAndName(t, purpose, locationID, SharedCryptoKey[purpose])
+}
 
-		// If not running acceptance tests, return an empty object
+func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, locationID, keyShortName string) bootstrappedKMS {
+	config := BootstrapConfig(t)
+	if config == nil {
 		return bootstrappedKMS{
 			&cloudkms.KeyRing{},
 			&cloudkms.CryptoKey{},
@@ -66,23 +67,10 @@ func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID stri
 	keyRingParent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
 	keyRingName := fmt.Sprintf("%s/keyRings/%s", keyRingParent, SharedKeyRing)
 	keyParent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s", projectID, locationID, SharedKeyRing)
-	keyName := fmt.Sprintf("%s/cryptoKeys/%s", keyParent, SharedCryptoKey[purpose])
-
-	config := &Config{
-		Credentials: getTestCredsFromEnv(),
-		Project:     getTestProjectFromEnv(),
-		Region:      getTestRegionFromEnv(),
-		Zone:        getTestZoneFromEnv(),
-	}
-
-	ConfigureBasePaths(config)
-
-	if err := config.LoadAndValidate(context.Background()); err != nil {
-		t.Errorf("Unable to bootstrap KMS key: %s", err)
-	}
+	keyName := fmt.Sprintf("%s/cryptoKeys/%s", keyParent, keyShortName)
 
 	// Get or Create the hard coded shared keyring for testing
-	kmsClient := config.clientKms
+	kmsClient := config.NewKmsClient(config.userAgent)
 	keyRing, err := kmsClient.Projects.Locations.KeyRings.Get(keyRingName).Do()
 	if err != nil {
 		if isGoogleApiErrorWithCode(err, 404) {
@@ -119,7 +107,7 @@ func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID stri
 			}
 
 			cryptoKey, err = kmsClient.Projects.Locations.KeyRings.CryptoKeys.Create(keyParent, &newKey).
-				CryptoKeyId(SharedCryptoKey[purpose]).Do()
+				CryptoKeyId(keyShortName).Do()
 			if err != nil {
 				t.Errorf("Unable to bootstrap KMS key. Cannot create new CryptoKey: %s", err)
 			}
@@ -149,7 +137,7 @@ func getOrCreateServiceAccount(config *Config, project string) (*iam.ServiceAcco
 	name := fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", project, serviceAccountEmail, project)
 	log.Printf("[DEBUG] Verifying %s as bootstrapped service account.\n", name)
 
-	sa, err := config.clientIAM.Projects.ServiceAccounts.Get(name).Do()
+	sa, err := config.NewIamClient(config.userAgent).Projects.ServiceAccounts.Get(name).Do()
 	if err != nil && !isGoogleApiErrorWithCode(err, 404) {
 		return nil, err
 	}
@@ -164,7 +152,7 @@ func getOrCreateServiceAccount(config *Config, project string) (*iam.ServiceAcco
 			AccountId:      serviceAccountEmail,
 			ServiceAccount: sa,
 		}
-		sa, err = config.clientIAM.Projects.ServiceAccounts.Create("projects/"+project, r).Do()
+		sa, err = config.NewIamClient(config.userAgent).Projects.ServiceAccounts.Create("projects/"+project, r).Do()
 		if err != nil {
 			return nil, err
 		}
@@ -192,7 +180,7 @@ func impersonationServiceAccountPermissions(config *Config, sa *iam.ServiceAccou
 	// Overwrite the roles each time on this service account. This is because this account is
 	// only created for the test suite and will stop snowflaking of permissions to get tests
 	// to run. Overwriting permissions on 1 service account shouldn't affect others.
-	_, err := config.clientIAM.Projects.ServiceAccounts.SetIamPolicy(sa.Name, &iam.SetIamPolicyRequest{
+	_, err := config.NewIamClient(config.userAgent).Projects.ServiceAccounts.SetIamPolicy(sa.Name, &iam.SetIamPolicyRequest{
 		Policy: &policy,
 	}).Do()
 	if err != nil {
@@ -203,22 +191,9 @@ func impersonationServiceAccountPermissions(config *Config, sa *iam.ServiceAccou
 }
 
 func BootstrapServiceAccount(t *testing.T, project, testRunner string) string {
-	if v := os.Getenv("TF_ACC"); v == "" {
-		log.Println("Acceptance tests and bootstrapping skipped unless env 'TF_ACC' set")
+	config := BootstrapConfig(t)
+	if config == nil {
 		return ""
-	}
-
-	config := &Config{
-		Credentials: getTestCredsFromEnv(),
-		Project:     getTestProjectFromEnv(),
-		Region:      getTestRegionFromEnv(),
-		Zone:        getTestZoneFromEnv(),
-	}
-
-	ConfigureBasePaths(config)
-
-	if err := config.LoadAndValidate(context.Background()); err != nil {
-		t.Fatalf("Bootstrapping failed. Unable to load test config: %s", err)
 	}
 
 	sa, err := getOrCreateServiceAccount(config, project)
@@ -245,27 +220,16 @@ const SharedTestNetworkPrefix = "tf-bootstrap-net-"
 // testId specifies the test/suite for which a shared network is used/initialized.
 // Returns the name of an network, creating it if hasn't been created in the test projcet.
 func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
-	if v := os.Getenv("TF_ACC"); v == "" {
-		log.Println("Acceptance tests and bootstrapping skipped unless env 'TF_ACC' set")
-		// If not running acceptance tests, return an empty string
+	project := getTestProjectFromEnv()
+	networkName := SharedTestNetworkPrefix + testId
+
+	config := BootstrapConfig(t)
+	if config == nil {
 		return ""
 	}
 
-	project := getTestProjectFromEnv()
-	networkName := SharedTestNetworkPrefix + testId
-	config := &Config{
-		Credentials: getTestCredsFromEnv(),
-		Project:     project,
-		Region:      getTestRegionFromEnv(),
-		Zone:        getTestZoneFromEnv(),
-	}
-	ConfigureBasePaths(config)
-	if err := config.LoadAndValidate(context.Background()); err != nil {
-		t.Errorf("Unable to bootstrap network: %s", err)
-	}
-
 	log.Printf("[DEBUG] Getting shared test network %q", networkName)
-	_, err := config.clientCompute.Networks.Get(project, networkName).Do()
+	_, err := config.NewComputeClient(config.userAgent).Networks.Get(project, networkName).Do()
 	if err != nil && isGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] Network %q not found, bootstrapping", networkName)
 		url := fmt.Sprintf("%sprojects/%s/global/networks", config.ComputeBasePath, project)
@@ -274,19 +238,19 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 			"autoCreateSubnetworks": false,
 		}
 
-		res, err := sendRequestWithTimeout(config, "POST", project, url, netObj, 4*time.Minute)
+		res, err := sendRequestWithTimeout(config, "POST", project, url, config.userAgent, netObj, 4*time.Minute)
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared test network %q: %s", networkName, err)
 		}
 
 		log.Printf("[DEBUG] Waiting for network creation to finish")
-		err = computeOperationWaitTime(config, res, project, "Error bootstrapping shared test network", 4)
+		err = computeOperationWaitTime(config, res, project, "Error bootstrapping shared test network", config.userAgent, 4*time.Minute)
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared test network %q: %s", networkName, err)
 		}
 	}
 
-	network, err := config.clientCompute.Networks.Get(project, networkName).Do()
+	network, err := config.NewComputeClient(config.userAgent).Networks.Get(project, networkName).Do()
 	if err != nil {
 		t.Errorf("Error getting shared test network %q: %s", networkName, err)
 	}
@@ -299,12 +263,64 @@ func BootstrapSharedTestNetwork(t *testing.T, testId string) string {
 var SharedServicePerimeterProjectPrefix = "tf-bootstrap-sp-"
 
 func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*cloudresourcemanager.Project {
-	if v := os.Getenv("TF_ACC"); v == "" {
-		log.Println("Acceptance tests and bootstrapping skipped unless env 'TF_ACC' set")
+	config := BootstrapConfig(t)
+	if config == nil {
 		return nil
 	}
 
 	org := getTestOrgFromEnv(t)
+
+	// The filter endpoint works differently if you provide both the parent id and parent type, and
+	// doesn't seem to allow for prefix matching. Don't change this to include the parent type unless
+	// that API behavior changes.
+	prefixFilter := fmt.Sprintf("id:%s* parent.id:%s", SharedServicePerimeterProjectPrefix, org)
+	res, err := config.NewResourceManagerClient(config.userAgent).Projects.List().Filter(prefixFilter).Do()
+	if err != nil {
+		t.Fatalf("Error getting shared test projects: %s", err)
+	}
+
+	projects := res.Projects
+	for len(projects) < desiredProjects {
+		pid := SharedServicePerimeterProjectPrefix + randString(t, 10)
+		project := &cloudresourcemanager.Project{
+			ProjectId: pid,
+			Name:      "TF Service Perimeter Test",
+			Parent: &cloudresourcemanager.ResourceId{
+				Type: "organization",
+				Id:   org,
+			},
+		}
+		op, err := config.NewResourceManagerClient(config.userAgent).Projects.Create(project).Do()
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared test project: %s", err)
+		}
+
+		opAsMap, err := ConvertToMap(op)
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared test project: %s", err)
+		}
+
+		err = resourceManagerOperationWaitTime(config, opAsMap, "creating project", config.userAgent, 4)
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared test project: %s", err)
+		}
+
+		p, err := config.NewResourceManagerClient(config.userAgent).Projects.Get(pid).Do()
+		if err != nil {
+			t.Fatalf("Error getting shared test project: %s", err)
+		}
+		projects = append(projects, p)
+	}
+
+	return projects
+}
+
+func BootstrapConfig(t *testing.T) *Config {
+	if v := os.Getenv("TF_ACC"); v == "" {
+		t.Skip("Acceptance tests and bootstrapping skipped unless env 'TF_ACC' set")
+		return nil
+	}
+
 	config := &Config{
 		Credentials: getTestCredsFromEnv(),
 		Project:     getTestProjectFromEnv(),
@@ -317,48 +333,5 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 	if err := config.LoadAndValidate(context.Background()); err != nil {
 		t.Fatalf("Bootstrapping failed. Unable to load test config: %s", err)
 	}
-
-	// The filter endpoint works differently if you provide both the parent id and parent type, and
-	// doesn't seem to allow for prefix matching. Don't change this to include the parent type unless
-	// that API behavior changes.
-	prefixFilter := fmt.Sprintf("id:%s* parent.id:%s", SharedServicePerimeterProjectPrefix, org)
-	res, err := config.clientResourceManager.Projects.List().Filter(prefixFilter).Do()
-	if err != nil {
-		t.Errorf("Error getting shared test projects: %s", err)
-	}
-
-	projects := res.Projects
-	for len(projects) < desiredProjects {
-		pid := SharedServicePerimeterProjectPrefix + acctest.RandString(10)
-		project := &cloudresourcemanager.Project{
-			ProjectId: pid,
-			Name:      "TF Service Perimeter Test",
-			Parent: &cloudresourcemanager.ResourceId{
-				Type: "organization",
-				Id:   org,
-			},
-		}
-		op, err := config.clientResourceManager.Projects.Create(project).Do()
-		if err != nil {
-			t.Fatalf("Error bootstrapping shared test project: %s", err)
-		}
-
-		opAsMap, err := ConvertToMap(op)
-		if err != nil {
-			t.Fatalf("Error bootstrapping shared test project: %s", err)
-		}
-
-		err = resourceManagerOperationWaitTime(config, opAsMap, "creating project", 4)
-		if err != nil {
-			t.Fatalf("Error bootstrapping shared test project: %s", err)
-		}
-
-		p, err := config.clientResourceManager.Projects.Get(pid).Do()
-		if err != nil {
-			t.Fatalf("Error getting shared test project: %s", err)
-		}
-		projects = append(projects, p)
-	}
-
-	return projects
+	return config
 }

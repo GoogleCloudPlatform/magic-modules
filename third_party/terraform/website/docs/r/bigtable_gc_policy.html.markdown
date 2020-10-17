@@ -1,5 +1,5 @@
 ---
-subcategory: "Bigtable"
+subcategory: "Cloud Bigtable"
 layout: "google"
 page_title: "Google: google_bigtable_gc_policy"
 sidebar_current: "docs-google-bigtable-gc-policy"
@@ -100,3 +100,7 @@ The following arguments are supported:
 ## Attributes Reference
 
 Only the arguments listed above are exposed as attributes.
+
+## Import
+
+This resource does not support import.

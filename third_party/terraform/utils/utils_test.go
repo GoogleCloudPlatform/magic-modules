@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/googleapi"
 )
 
@@ -156,7 +156,9 @@ func TestGetZone(t *testing.T) {
 	if zone, err := getZone(d, &config); err != nil || zone != "foo" {
 		t.Fatalf("Zone '%s' != 'foo', %s", zone, err)
 	}
-	d.Set("zone", "")
+	if err := d.Set("zone", ""); err != nil {
+		t.Fatalf("Error setting zone: %s", err)
+	}
 	if zone, err := getZone(d, &config); err != nil || zone != "bar" {
 		t.Fatalf("Zone '%s' != 'bar', %s", zone, err)
 	}
@@ -179,7 +181,9 @@ func TestGetRegion(t *testing.T) {
 	}
 
 	config.Zone = "bar"
-	d.Set("zone", "")
+	if err := d.Set("zone", ""); err != nil {
+		t.Fatalf("Error setting zone: %s", err)
+	}
 	if region, err := getRegion(d, &config); err != nil || region != barRegionName {
 		t.Fatalf("Zone '%s' != '%s', %s", region, barRegionName, err)
 	}
@@ -506,8 +510,17 @@ func TestRetryTimeDuration_wrapped(t *testing.T) {
 		}
 		return errwrap.Wrapf("nested error: {{err}}", err)
 	}
-	if err := retryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil || err.(*googleapi.Error).Code != 500 {
-		t.Errorf("unexpected error retrying: %v", err)
+	if err := retryTimeDuration(f, time.Duration(1000)*time.Millisecond); err == nil {
+		t.Errorf("unexpected nil error, expected an error")
+	} else {
+		innerErr := errwrap.GetType(err, &googleapi.Error{})
+		if innerErr == nil {
+			t.Errorf("unexpected error %v does not have a google api error", err)
+		}
+		gerr := innerErr.(*googleapi.Error)
+		if gerr.Code != 500 {
+			t.Errorf("unexpected googleapi error expected code 500, error: %v", gerr)
+		}
 	}
 	if i < 2 {
 		t.Errorf("expected error function to be called at least twice, but was called %d times", i)

@@ -1,5 +1,5 @@
 ---
-subcategory: "Bigtable"
+subcategory: "Cloud Bigtable"
 layout: "google"
 page_title: "Google: google_bigtable_instance"
 sidebar_current: "docs-google-bigtable-instance"
@@ -13,6 +13,15 @@ Creates a Google Bigtable instance. For more information see
 [the official documentation](https://cloud.google.com/bigtable/) and
 [API](https://cloud.google.com/bigtable/docs/go/reference).
 
+-> **Note**: It is strongly recommended to set `lifecycle { prevent_destroy = true }`
+on instances in order to prevent accidental data loss. See
+[Terraform docs](https://www.terraform.io/docs/configuration/resources.html#prevent_destroy)
+for more information on lifecycle parameters.
+
+-> **Note**: On newer versions of the provider, you must explicitly set `deletion_protection=false`
+(and run `terraform apply` to write the field to state) in order to destroy an instance.
+It is recommended to not set this field (or set it to true) until you're ready to destroy.
+
 
 ## Example Usage - Production Instance
 
@@ -23,8 +32,16 @@ resource "google_bigtable_instance" "production-instance" {
   cluster {
     cluster_id   = "tf-instance-cluster"
     zone         = "us-central1-b"
-    num_nodes    = 3
+    num_nodes    = 1
     storage_type = "HDD"
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+
+  labels = {
+    my-label = "prod-label"
   }
 }
 ```
@@ -41,6 +58,10 @@ resource "google_bigtable_instance" "development-instance" {
     zone         = "us-central1-b"
     storage_type = "HDD"
   }
+
+  labels = {
+    my-label = "dev-label"
+  }
 }
 ```
 
@@ -50,16 +71,26 @@ The following arguments are supported:
 
 * `name` - (Required) The name (also called Instance Id in the Cloud Console) of the Cloud Bigtable instance.
 
-* `cluster` - (Required) A block of cluster configuration options. This can be specified 1 or 2 times. See structure below.
+* `cluster` - (Required) A block of cluster configuration options. This can be specified at least once, and up to 4 times.
+See structure below.
 
 -----
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
-* `instance_type` - (Optional) The instance type to create. One of `"DEVELOPMENT"` or `"PRODUCTION"`. Defaults to `"PRODUCTION"`.
+* `instance_type` - (Optional, Deprecated) The instance type to create. One of `"DEVELOPMENT"` or `"PRODUCTION"`. Defaults to `"PRODUCTION"`.
+    It is recommended to leave this field unspecified since the distinction between `"DEVELOPMENT"` and `"PRODUCTION"` instances is going away,
+    and all instances will become `"PRODUCTION"` instances. This means that new and existing `"DEVELOPMENT"` instances will be converted to
+    `"PRODUCTION"` instances. It is recommended for users to use `"PRODUCTION"` instances in any case, since a 1-node `"PRODUCTION"` instance
+    is functionally identical to a `"DEVELOPMENT"` instance, but without the accompanying restrictions.
 
 * `display_name` - (Optional) The human-readable display name of the Bigtable instance. Defaults to the instance `name`.
+
+* `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
+in Terraform state, a `terraform destroy` or `terraform apply` that would delete the instance will fail.
+
+* `labels` - (Optional) A set of key/value label pairs to assign to the resource. Label keys must follow the requirements at https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements.
 
 
 -----
@@ -73,7 +104,7 @@ cluster must have a different zone in the same region. Zones that support
 Bigtable instances are noted on the [Cloud Bigtable locations page](https://cloud.google.com/bigtable/docs/locations).
 
 * `num_nodes` - (Optional) The number of nodes in your Cloud Bigtable cluster.
-Required, with a minimum of `3` for a `PRODUCTION` instance. Must be left unset
+Required, with a minimum of `1` for a `PRODUCTION` instance. Must be left unset
 for a `DEVELOPMENT` instance.
 
 * `storage_type` - (Optional) The storage type to use. One of `"SSD"` or
@@ -86,7 +117,9 @@ for a `DEVELOPMENT` instance.
 
 ## Attributes Reference
 
-Only the arguments listed above are exposed as attributes.
+In addition to the arguments listed above, the following computed attributes are exported:
+
+* `id` - an identifier for the resource with format `projects/{{project}}/instances/{{name}}`
 
 ## Import
 

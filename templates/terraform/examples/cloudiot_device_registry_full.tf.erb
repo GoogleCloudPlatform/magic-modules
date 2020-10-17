@@ -1,0 +1,46 @@
+resource "google_pubsub_topic" "default-devicestatus" {
+  name = "<%= ctx[:vars]['cloudiot_device_status_topic_name'] %>"
+}
+
+resource "google_pubsub_topic" "default-telemetry" {
+  name = "<%= ctx[:vars]['cloudiot_device_telemetry_topic_name'] %>"
+}
+
+resource "google_pubsub_topic" "additional-telemetry" {
+  name = "<%= ctx[:vars]['cloudiot_additional_device_telemetry_topic_name'] %>"
+}
+
+resource "google_cloudiot_registry" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloudiot_registry_name'] %>"
+
+  event_notification_configs {
+    pubsub_topic_name = google_pubsub_topic.additional-telemetry.id
+    subfolder_matches = "<%= ctx[:vars]['cloudiot_subfolder_matches_additional_device_telemetry_topic'] %>"
+  }
+
+  event_notification_configs {
+    pubsub_topic_name = google_pubsub_topic.default-telemetry.id
+    subfolder_matches = ""
+  }
+
+  state_notification_config = {
+    pubsub_topic_name = google_pubsub_topic.default-devicestatus.id
+  }
+
+  mqtt_config = {
+    mqtt_enabled_state = "MQTT_ENABLED"
+  }
+
+  http_config = {
+    http_enabled_state = "HTTP_ENABLED"
+  }
+
+  log_level = "INFO"
+
+  credentials {
+    public_key_certificate = {
+      format      = "X509_CERTIFICATE_PEM"
+      certificate = file("test-fixtures/rsa_cert.pem")
+    }
+  }
+}

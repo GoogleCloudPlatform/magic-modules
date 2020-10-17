@@ -1,11 +1,11 @@
 # frozen_string_literal: false
 
-<%= lines(autogen_notice :ruby) -%>
+<%= lines(autogen_notice(:ruby,pwd)) -%>
 require 'gcp_backend'
 require 'google/iam/property/iam_policy_audit_configs'
 require 'google/iam/property/iam_policy_bindings'
 
-# A provider to manage <%= @api.product_full_name -%> IAM Policy resources.
+# A provider to manage <%= @api.display_name -%> IAM Policy resources.
 class <%= object.name -%>IamPolicy < GcpResourceBase
   name '<%= resource_name(object, product) -%>_iam_policy'
   desc '<%= object.name -%> Iam Policy'
@@ -18,7 +18,7 @@ class <%= object.name -%>IamPolicy < GcpResourceBase
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
     @params = params
-    @fetched = @connection.fetch(product_url, resource_base_url, params, '<%= object.iam_policy.fetch_iam_policy_verb.capitalize -%>')
+    @fetched = @connection.fetch(product_url, resource_base_url, params, '<%= object.iam_policy.fetch_iam_policy_verb.capitalize -%>'<% if object.iam_policy.iam_conditions_request_type == :REQUEST_BODY -%>, { 'options' => { 'requestedPolicyVersion' => 3 } }.to_json<% end -%>)
     parse unless @fetched.nil?
   end
 

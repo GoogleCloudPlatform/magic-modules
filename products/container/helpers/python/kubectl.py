@@ -32,8 +32,7 @@ class Kubectl(object):
               'name': context,
               'cluster': {
                 'certificate-authority-data':
-                  str(self.fetch['masterAuth']['clusterCaCertificate']),
-                'server': endpoint,
+                  str(self.fetch['masterAuth']['clusterCaCertificate'])
               }
             }
           ],

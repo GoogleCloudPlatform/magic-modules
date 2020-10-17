@@ -4,9 +4,9 @@
 <%=
   object.provider_helpers.map do |f|
     if f == object.provider_helpers.last
-      lines(compile(f))
+      lines(compile(pwd + '/' + f))
     else
-      lines(compile(f), 2)
+      lines(compile(pwd + '/' + f), 2)
     end
   end.join
 -%>

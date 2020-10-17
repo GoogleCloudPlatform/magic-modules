@@ -25,6 +25,10 @@ end
   end
 end
 ```
+<% if object.iam_policy.iam_conditions_request_type == :REQUEST_BODY -%>
+
+This resource supports [IAM conditions](https://cloud.google.com/iam/docs/conditions-overview).
+<% end -%>
 
 ## Properties
 Properties that can be accessed from the `<%= iam_resource_name -%>` resource:
@@ -37,6 +41,16 @@ Properties that can be accessed from the `<%= iam_resource_name -%>` resource:
 
     * `members`: Specifies the identities requesting access for a Cloud Platform resource.
 
+<% if object.iam_policy.iam_conditions_request_type == :REQUEST_BODY -%>
+    * `condition`: Contains information about when this binding is to be applied.
+
+      * `expression`: Textual representation of an expression in Common Expression Language syntax.
+
+      * `title`: An optional title for the expression, i.e. a short string describing its purpose.
+
+      * `description`: An optional description of the expression. This is a longer text which describes the expression.
+
+<% end -%>
   * `audit_configs`: Specifies cloud audit logging configuration for this policy.
 
     * `service`: Specifies a service that will be enabled for audit logging. For example, `storage.googleapis.com`, `cloudsql.googleapis.com`. `allServices`  is a special value that covers all services.

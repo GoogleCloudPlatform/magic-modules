@@ -15,7 +15,6 @@
 <%
   dir = @target_version_name == 'ga' ? 'google' : "google-#{@target_version_name}"
 -%>
-'website/google.erb': 'third_party/terraform/website-compiled/google.erb'
 <%  Dir["third_party/terraform/tests/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>

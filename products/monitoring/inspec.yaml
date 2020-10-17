@@ -16,9 +16,9 @@ legacy_name: project
 overrides: !ruby/object:Overrides::ResourceOverrides
   AlertPolicy: !ruby/object:Overrides::Inspec::ResourceOverride
     additional_functions: third_party/inspec/custom_functions/alert_policy.erb
-    singular_extra_examples: third_party/inspec/documentation/alert_policy_examples.md
-    plural_extra_examples: third_party/inspec/documentation/alert_policies.md
-    self_link: projects/{{project}}/alertPolicies/{{name}}
+    singular_extra_examples: third_party/inspec/documentation/google_project_alert_policy.md
+    plural_extra_examples: third_party/inspec/documentation/google_project_alert_policies.md
+    self_link: v3/projects/{{project}}/alertPolicies/{{name}}
     properties:
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         override_name: policy_names
@@ -30,5 +30,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   NotificationChannel: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  Service: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  Slo: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   UptimeCheckConfig: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  MetricDescriptor: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true

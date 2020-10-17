@@ -5,25 +5,24 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccComputeGlobalForwardingRule_updateTarget(t *testing.T) {
 	t.Parallel()
 
-	fr := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	proxy := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	proxyUpdated := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	backend := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	hc := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	urlmap := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+	fr := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
+	proxy := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
+	proxyUpdated := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
+	backend := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
+	hc := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
+	urlmap := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroy,
+		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeGlobalForwardingRule_httpProxy(fr, "proxy", proxy, proxyUpdated, backend, hc, urlmap),
@@ -56,16 +55,16 @@ func TestAccComputeGlobalForwardingRule_updateTarget(t *testing.T) {
 func TestAccComputeGlobalForwardingRule_ipv6(t *testing.T) {
 	t.Parallel()
 
-	fr := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	proxy := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	backend := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	hc := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	urlmap := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+	fr := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
+	proxy := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
+	backend := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
+	hc := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
+	urlmap := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroy,
+		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeGlobalForwardingRule_ipv6(fr, proxy, backend, hc, urlmap),
@@ -87,16 +86,16 @@ func TestAccComputeGlobalForwardingRule_ipv6(t *testing.T) {
 func TestAccComputeGlobalForwardingRule_labels(t *testing.T) {
 	t.Parallel()
 
-	fr := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	proxy := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	backend := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	hc := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	urlmap := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+	fr := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
+	proxy := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
+	backend := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
+	hc := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
+	urlmap := fmt.Sprintf("forwardrule-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroy,
+		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeGlobalForwardingRule_labels(fr, proxy, backend, hc, urlmap),
@@ -123,18 +122,18 @@ func TestAccComputeGlobalForwardingRule_labels(t *testing.T) {
 func TestAccComputeGlobalForwardingRule_internalLoadBalancing(t *testing.T) {
 	t.Parallel()
 
-	fr := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	proxy := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	backend := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	hc := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	urlmap := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	igm := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
-	it := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+	fr := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	proxy := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	backend := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	hc := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	urlmap := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	igm := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	it := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroy,
+		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeGlobalForwardingRule_internalLoadBalancing(fr, proxy, backend, hc, urlmap, igm, it),
@@ -388,7 +387,7 @@ func testAccComputeGlobalForwardingRule_internalLoadBalancing(fr, proxy, backend
 resource "google_compute_global_forwarding_rule" "forwarding_rule" {
   name                  = "%s"
   target                = google_compute_target_http_proxy.default.self_link
-  port_range            = "80"
+  port_range            = "8080"
   load_balancing_scheme = "INTERNAL_SELF_MANAGED"
   ip_address            = "0.0.0.0"
   metadata_filters {
@@ -472,7 +471,7 @@ resource "google_compute_instance_group_manager" "igm" {
 
 resource "google_compute_instance_template" "instance_template" {
   name         = "%s"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-medium"
 
   network_interface {
     network = "default"
@@ -492,7 +491,7 @@ func testAccComputeGlobalForwardingRule_internalLoadBalancingUpdate(fr, proxy, b
 resource "google_compute_global_forwarding_rule" "forwarding_rule" {
   name                  = "%s"
   target                = google_compute_target_http_proxy.default.self_link
-  port_range            = "80"
+  port_range            = "8080"
   load_balancing_scheme = "INTERNAL_SELF_MANAGED"
   ip_address            = "0.0.0.0"
   metadata_filters {
@@ -591,7 +590,7 @@ resource "google_compute_instance_group_manager" "igm" {
 
 resource "google_compute_instance_template" "instance_template" {
   name         = "%s"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-medium"
 
   network_interface {
     network = "default"

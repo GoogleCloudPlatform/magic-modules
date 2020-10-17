@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func projectIamBindingImportStep(resourceName, pid, role string) resource.TestStep {
@@ -23,9 +22,9 @@ func TestAccProjectIamBinding_basic(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := acctest.RandomWithPrefix("tf-test")
+	pid := fmt.Sprintf("tf-test-%d", randInt(t))
 	role := "roles/compute.instanceAdmin"
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -33,7 +32,7 @@ func TestAccProjectIamBinding_basic(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM binding
@@ -50,11 +49,11 @@ func TestAccProjectIamBinding_multiple(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := acctest.RandomWithPrefix("tf-test")
+	pid := fmt.Sprintf("tf-test-%d", randInt(t))
 	role := "roles/compute.instanceAdmin"
 	role2 := "roles/viewer"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -62,7 +61,7 @@ func TestAccProjectIamBinding_multiple(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM binding
@@ -81,14 +80,16 @@ func TestAccProjectIamBinding_multiple(t *testing.T) {
 
 // Test that multiple IAM bindings can be applied to a project all at once
 func TestAccProjectIamBinding_multipleAtOnce(t *testing.T) {
+	// Multiple fine-grained resources
+	skipIfVcr(t)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := acctest.RandomWithPrefix("tf-test")
+	pid := fmt.Sprintf("tf-test-%d", randInt(t))
 	role := "roles/compute.instanceAdmin"
 	role2 := "roles/viewer"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -96,7 +97,7 @@ func TestAccProjectIamBinding_multipleAtOnce(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM binding
@@ -114,10 +115,10 @@ func TestAccProjectIamBinding_update(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := acctest.RandomWithPrefix("tf-test")
+	pid := fmt.Sprintf("tf-test-%d", randInt(t))
 	role := "roles/compute.instanceAdmin"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -125,7 +126,7 @@ func TestAccProjectIamBinding_update(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM binding
@@ -151,14 +152,16 @@ func TestAccProjectIamBinding_update(t *testing.T) {
 
 // Test that an IAM binding can be removed from a project
 func TestAccProjectIamBinding_remove(t *testing.T) {
+	// Multiple fine-grained resources
+	skipIfVcr(t)
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := acctest.RandomWithPrefix("tf-test")
+	pid := fmt.Sprintf("tf-test-%d", randInt(t))
 	role := "roles/compute.instanceAdmin"
 	role2 := "roles/viewer"
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -166,7 +169,7 @@ func TestAccProjectIamBinding_remove(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply multiple IAM bindings
@@ -180,7 +183,7 @@ func TestAccProjectIamBinding_remove(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 		},
@@ -192,9 +195,9 @@ func TestAccProjectIamBinding_noMembers(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := acctest.RandomWithPrefix("tf-test")
+	pid := fmt.Sprintf("tf-test-%d", randInt(t))
 	role := "roles/compute.instanceAdmin"
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -202,7 +205,7 @@ func TestAccProjectIamBinding_noMembers(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM binding
@@ -214,15 +217,14 @@ func TestAccProjectIamBinding_noMembers(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccProjectIamBinding_withCondition(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := acctest.RandomWithPrefix("tf-test")
+	pid := fmt.Sprintf("tf-test-%d", randInt(t))
 	role := "roles/compute.instanceAdmin"
 	conditionTitle := "expires_after_2019_12_31"
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -230,7 +232,7 @@ func TestAccProjectIamBinding_withCondition(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM binding
@@ -246,7 +248,6 @@ func TestAccProjectIamBinding_withCondition(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func testAccProjectAssociateBindingBasic(pid, name, org, role string) string {
 	return fmt.Sprintf(`
@@ -334,7 +335,6 @@ resource "google_project_iam_binding" "acceptance" {
 `, pid, name, org, role)
 }
 
-<% unless version == 'ga' -%>
 func testAccProjectAssociateBinding_withCondition(pid, name, org, role, conditionTitle string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
@@ -355,4 +355,3 @@ resource "google_project_iam_binding" "acceptance" {
 }
 `, pid, name, org, role, conditionTitle)
 }
-<% end -%>

@@ -9,9 +9,15 @@ description: |-
 
 # google\_container\_cluster
 
+-> Visit the [Provision a GKE Cluster (Google Cloud)](https://learn.hashicorp.com/tutorials/terraform/gke?in=terraform/kubernetes&utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS) Learn tutorial to learn how to provision and interact
+with a GKE cluster.
+
+-> See the [Using GKE with Terraform](/docs/providers/google/guides/using_gke_with_terraform.html)
+guide for more information about using GKE with Terraform.
+
 Manages a Google Kubernetes Engine (GKE) cluster. For more information see
 [the official documentation](https://cloud.google.com/container-engine/docs/clusters)
-and [the API reference](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.locations.clusters).
+and [the API reference](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters).
 
 ~> **Note:** All arguments and attributes, including basic auth username and
 passwords as well as certificate outputs will be stored in the raw state as
@@ -48,15 +54,14 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
 
   node_config {
     preemptible  = true
-    machine_type = "n1-standard-1"
+    machine_type = "e2-medium"
 
     metadata = {
       disable-legacy-endpoints = "true"
     }
 
     oauth_scopes = [
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
+      "https://www.googleapis.com/auth/cloud-platform"
     ]
   }
 }
@@ -81,8 +86,7 @@ resource "google_container_cluster" "primary" {
 
   node_config {
     oauth_scopes = [
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
+      "https://www.googleapis.com/auth/cloud-platform"
     ]
 
     metadata = {
@@ -137,14 +141,14 @@ in this cluster in CIDR notation (e.g. `10.96.0.0/14`). Leave blank to have one
 automatically chosen or specify a `/14` block in `10.0.0.0/8`. This field will
 only work for routes-based clusters, where `ip_allocation_policy` is not defined.
 
-* `cluster_autoscaling` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `cluster_autoscaling` - (Optional)
 Per-cluster configuration of Node Auto-Provisioning with Cluster Autoscaler to
 automatically adjust the size of the cluster and create/delete node pools based
 on the current needs of the cluster's workload. See the
 [guide to using Node Auto-Provisioning](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)
 for more details. Structure is documented below.
 
-* `database_encryption` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+* `database_encryption` - (Optional)
     Structure is documented below.
 
 * `description` - (Optional) Description of the cluster.
@@ -169,7 +173,7 @@ for more information.
     will have statically granted permissions beyond those provided by the RBAC configuration or IAM.
     Defaults to `false`
 
-* `enable_shielded_nodes` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Enable Shielded Nodes features on all nodes in this cluster.  Defaults to `false`.
+* `enable_shielded_nodes` - (Optional) Enable Shielded Nodes features on all nodes in this cluster.  Defaults to `false`.
 
 * `initial_node_count` - (Optional) The number of nodes to create in this
 cluster's default node pool. In regional or multi-zonal clusters, this is the
@@ -182,6 +186,10 @@ set this to a value of at least `1`, alongside setting
 VPC-native clusters. Adding this block enables [IP aliasing](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-aliases),
 making the cluster VPC-native instead of routes-based. Structure is documented
 below.
+
+* `networking_mode` - (Optional, [Beta]) Determines whether alias IPs or routes will be used for pod IPs in the cluster.
+Options are `VPC_NATIVE` or `ROUTES`. `VPC_NATIVE` enables [IP aliasing](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-aliases),
+and requires the `ip_allocation_policy` block to be defined. By default when this field is unspecified, GKE will create a `ROUTES`-based cluster.
 
 * `logging_service` - (Optional) The logging service that the cluster should
     write logs to. Available options include `logging.googleapis.com`(Legacy Stackdriver),
@@ -265,12 +273,23 @@ region are guaranteed to support the same version.
 * `private_cluster_config` - (Optional) Configuration for [private clusters](https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters),
 clusters with private nodes. Structure is documented below.
 
+* `cluster_telemetry` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for
+   [ClusterTelemetry](https://cloud.google.com/monitoring/kubernetes-engine/installing#controlling_the_collection_of_application_logs) feature,
+   Structure is documented below.
+
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
-* `release_channel` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration options for the
-    [Release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels)
-    feature, which provide more control over automatic upgrades of your GKE clusters. Structure is documented below.
+* `release_channel` - (Optional)
+Configuration options for the [Release channel](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels)
+feature, which provide more control over automatic upgrades of your GKE clusters.
+When updating this field, GKE imposes specific version requirements. See
+[Migrating between release channels](https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels#migrating_between_release_channels)
+for more details; the `google_container_engine_versions` datasource can provide
+the default version for a channel. Note that removing the `release_channel`
+field from your config will cause Terraform to stop managing your cluster's
+release channel, but will not unenroll it. Instead, use the `"UNSPECIFIED"`
+channel. Structure is documented below.
 
 * `remove_default_node_pool` - (Optional) If `true`, deletes the default node
     pool upon cluster creation. If you're using `google_container_node_pool`
@@ -279,7 +298,7 @@ clusters with private nodes. Structure is documented below.
 
 * `resource_labels` - (Optional) The GCE resource labels (a map of key/value pairs) to be applied to the cluster.
 
-* `resource_usage_export_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
+* `resource_usage_export_config` - (Optional) Configuration for the
     [ResourceUsageExportConfig](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-usage-metering) feature.
     Structure is documented below.
 
@@ -290,13 +309,24 @@ subnetwork in which the cluster's instances are launched.
     Vertical Pod Autoscaling automatically adjusts the resources of pods controlled by it.
     Structure is documented below.
 
-* `workload_identity_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `workload_identity_config` - (Optional)
     Workload Identity allows Kubernetes service accounts to act as a user-managed
     [Google IAM Service Account](https://cloud.google.com/iam/docs/service-accounts#user-managed_service_accounts).
     Structure is documented below.
 
 * `enable_intranode_visibility` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
     Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.
+
+* `default_snat_status` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  [GKE SNAT](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-masquerade-agent#how_ipmasq_works) DefaultSnatStatus contains the desired state of whether default sNAT should be disabled on the cluster, [API doc](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#networkconfig).
+
+The `default_snat_status` block supports
+
+*  `disabled` - (Required) Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic
+
+The `cluster_telemetry` block supports
+* `type` - Telemetry integration for the cluster. Supported values (`ENABLE, DISABLE, SYSTEM_ONLY`);
+   `SYSTEM_ONLY` (Only system components are monitored and logged) is only available in GKE versions 1.15 and later.
 
 The `addons_config` block supports:
 
@@ -318,12 +348,26 @@ The `addons_config` block supports:
     It can only be disabled if the nodes already do not have network policies enabled.
     Defaults to disabled; set `disabled = false` to enable.
 
+* `cloudrun_config` - (Optional). Structure is documented below.
+
 * `istio_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     Structure is documented below.
 
-* `cloudrun_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
-    The status of the CloudRun addon. It requires `istio_config` enabled. It is disabled by default.
-    Set `disabled = false` to enable. This addon can only be enabled at cluster creation time.
+* `dns_cache_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+    The status of the NodeLocal DNSCache addon. It is disabled by default.
+    Set `enabled = true` to enable.
+
+    **Enabling/Disabling NodeLocal DNSCache in an existing cluster is a disruptive operation.
+    All cluster nodes running GKE 1.15 and higher are recreated.**
+
+* `gce_persistent_disk_csi_driver_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+    Whether this cluster should enable the Google Compute Engine Persistent Disk Container Storage Interface (CSI) Driver. Defaults to disabled; set `enabled = true` to enable.
+
+* `kalm_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/ provider_versions.html)).
+    Configuration for the KALM addon, which manages the lifecycle of k8s. It is disabled by default; Set `enabled = true` to enable.
+
+*  `config_connector_config` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+    The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
 
 This example `addons_config` disables two addons:
 
@@ -345,6 +389,13 @@ The `database_encryption` block supports:
 
 * `key_name` - (Required) the key to use to encrypt/decrypt secrets.  See the [DatabaseEncryption definition](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#Cluster.DatabaseEncryption) for more information.
 
+The `cloudrun_config` block supports:
+
+* `disabled` - (Optional) The status of the CloudRun addon. It is disabled by default. Set `disabled=false` to enable.
+
+* `load_balancer_type` - (Optional) The load balancer type of CloudRun ingress service. It is external load balancer by default.
+    Set `load_balancer_type=LOAD_BALANCER_TYPE_INTERNAL` to configure it as internal load balancer.
+
 The `istio_config` block supports:
 
 * `disabled` - (Optional) The status of the Istio addon, which makes it easy to set up Istio for services in a
@@ -365,6 +416,11 @@ in addition to node auto-provisioning. Structure is documented below.
 * `auto_provisioning_defaults` - (Optional) Contains defaults for a node pool created by NAP.
 Structure is documented below.
 
+* `autoscaling_profile` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) Configuration
+options for the [Autoscaling profile](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#autoscaling_profiles)
+feature, which lets you choose whether the cluster autoscaler should optimize for resource utilization or resource availability
+when deciding to remove nodes from a cluster. Can be `BALANCED` or `OPTIMIZE_UTILIZATION`. Defaults to `BALANCED`.
+
 The `resource_limits` block supports:
 
 * `resource_type` - (Required) The type of the resource. For example, `cpu` and
@@ -377,13 +433,16 @@ for a list of types.
 
 The `auto_provisioning_defaults` block supports:
 
-* `oauth_scopes` - (Optional) Scopes that are used by NAP when creating node pools.
-If `oauth_scopes` are specified, `service_account` must be empty.
+* `min_cpu_platform` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+Minimum CPU platform to be used for NAP created node pools. The instance may be scheduled on the
+specified or newer CPU platform. Applicable values are the friendly names of CPU platforms, such
+as "Intel Haswell" or "Intel Sandy Bridge".
+
+* `oauth_scopes` - (Optional) Scopes that are used by NAP when creating node pools. Use the "https://www.googleapis.com/auth/cloud-platform" scope to grant access to all APIs. It is recommended that you set `service_account` to a non-default service account and grant IAM roles to that service account for only the resources that it needs. 
 
 -> `monitoring.write` is always enabled regardless of user input.  `monitoring` and `logging.write` may also be enabled depending on the values for `monitoring_service` and `logging_service`.
 
 * `service_account` - (Optional) The Google Cloud Platform Service Account to be used by the node VMs.
-If `service_account` is specified, `oauth_scopes` must be empty.
 
 The `authenticator_groups_config` block supports:
 
@@ -403,12 +462,13 @@ maintenance_policy {
 }
 ```
 
-* `recurring_window` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Time window for
+* `recurring_window` - (Optional) Time window for
 recurring maintenance operations.
 
-Specify `start_time` and `end_time` in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) date format.  The start time's date is
+Specify `start_time` and `end_time` in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) "Zulu" date format.  The start time's date is
 the initial date that the window starts, and the end time is used for calculating duration.  Specify `recurrence` in
 [RFC5545](https://tools.ietf.org/html/rfc5545#section-3.8.5.3) RRULE format, to specify when this recurs.
+Note that GKE may accept other formats, but will return values in UTC, causing a permanent diff.
 
 Examples:
 ```
@@ -424,8 +484,8 @@ maintenance_policy {
 ```
 maintenance_policy {
   recurring_window {
-    start_time = "2019-01-01T09:00:00-04:00"
-    end_time = "2019-01-01T17:00:00-04:00"
+    start_time = "2019-01-01T09:00:00Z"
+    end_time = "2019-01-01T17:00:00Z"
     recurrence = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"
   }
 }
@@ -501,7 +561,7 @@ The `node_config` block supports:
     in GB. The smallest allowed disk size is 10GB. Defaults to 100GB.
 
 * `disk_type` - (Optional) Type of the disk attached to each node
-    (e.g. 'pd-standard' or 'pd-ssd'). If unspecified, the default disk type is 'pd-standard'
+    (e.g. 'pd-standard', 'pd-balanced' or 'pd-ssd'). If unspecified, the default disk type is 'pd-standard'
 
 * `guest_accelerator` - (Optional) List of the type and count of accelerator cards attached to the instance.
     Structure documented below.
@@ -511,13 +571,14 @@ The `node_config` block supports:
 * `image_type` - (Optional) The image type to use for this node. Note that changing the image type
     will delete and recreate all nodes in the node pool.
 
-* `labels` - (Optional) The Kubernetes labels (key/value pairs) to be applied to each node.
+* `labels` - (Optional) The Kubernetes labels (key/value pairs) to be applied to each node. The kubernetes.io/ and k8s.io/ prefixes are
+    reserved by Kubernetes Core components and cannot be specified.
 
 * `local_ssd_count` - (Optional) The amount of local SSD disks that will be
     attached to each cluster node. Defaults to 0.
 
 * `machine_type` - (Optional) The name of a Google Compute Engine machine type.
-    Defaults to `n1-standard-1`. To create a custom machine type, value should be set as specified
+    Defaults to `e2-medium`. To create a custom machine type, value should be set as specified
     [here](https://cloud.google.com/compute/docs/reference/latest/instances#machineType).
 
 * `metadata` - (Optional) The metadata key/value pairs assigned to instances in
@@ -533,18 +594,10 @@ The `node_config` block supports:
     for more information.
 
 * `oauth_scopes` - (Optional) The set of Google API scopes to be made available
-    on all of the node VMs under the "default" service account. These can be
-    either FQDNs, or scope aliases. The following scopes are necessary to ensure
-    the correct functioning of the cluster:
+    on all of the node VMs under the "default" service account. 
+    Use the "https://www.googleapis.com/auth/cloud-platform" scope to grant access to all APIs. It is recommended that you set `service_account` to a non-default service account and grant IAM roles to that service account for only the resources that it needs.
 
-  * `storage-ro` (`https://www.googleapis.com/auth/devstorage.read_only`),
-    if the cluster must read private images from GCR.
-    Note this will grant read access to ALL GCS content unless you also
-    specify a custom role. See https://cloud.google.com/kubernetes-engine/docs/how-to/access-scopes
-  * `logging-write` (`https://www.googleapis.com/auth/logging.write`),
-    if `logging_service` is not `none`.
-  * `monitoring` (`https://www.googleapis.com/auth/monitoring`),
-    if `monitoring_service` is not `none`.
+    See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/access-scopes) for information on migrating off of legacy access scopes.
 
 * `preemptible` - (Optional) A boolean that represents whether or not the underlying node VMs
     are preemptible. See the [official documentation](https://cloud.google.com/container-engine/docs/preemptible-vm)
@@ -577,8 +630,34 @@ Kubernetes (eg. through `kubectl`), and it's recommended that you do not use
 this field to manage taints. If you do, `lifecycle.ignore_changes` is
 recommended. Structure is documented below.
 
-* `workload_metadata_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Metadata configuration to expose to workloads on the node pool.
+* `workload_metadata_config` - (Optional) Metadata configuration to expose to workloads on the node pool.
     Structure is documented below.
+
+* `kubelet_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+Kubelet configuration, currently supported attributes can be found [here](https://cloud.google.com/sdk/gcloud/reference/beta/container/node-pools/create#--system-config-from-file).
+Structure is documented below.
+
+```
+kubelet_config {
+  cpu_manager_policy   = "static"
+  cpu_cfs_quota        = true
+  cpu_cfs_quota_period = "100us"
+}
+```
+
+* `linux_node_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+Linux node configuration, currently supported attributes can be found [here](https://cloud.google.com/sdk/gcloud/reference/beta/container/node-pools/create#--system-config-from-file).
+Note that validations happen all server side. All attributes are optional.
+Structure is documented below.
+
+```hcl
+linux_node_config {
+  sysctls = {
+    "net.core.netdev_max_backlog" = "10000"
+    "net.core.rmem_max"           = "10000"
+  }
+}
+```
 
 The `guest_accelerator` block supports:
 
@@ -621,6 +700,10 @@ subnet. See [Private Cluster Limitations](https://cloud.google.com/kubernetes-en
 for more details. This field only applies to private clusters, when
 `enable_private_nodes` is `true`.
 
+* `master_global_access_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - Controls cluster master global
+access settings. If unset, Terraform will no longer manage this field and will
+not modify the previously-set value. Structure is documented below.
+
 In addition, the `private_cluster_config` allows access to the following read-only fields:
 
 * `peering_name` - The name of the peering between this cluster and the Google owned VPC.
@@ -632,6 +715,11 @@ In addition, the `private_cluster_config` allows access to the following read-on
 !> The Google provider is unable to validate certain configurations of
 `private_cluster_config` when `enable_private_nodes` is `false`. It's
 recommended that you omit the block entirely if the field is not set to `true`.
+
+The `private_cluster_config.master_global_access_config` block supports:
+
+* `enabled` (Optional) - Whether the cluster master is accessible globally or
+not.
 
 The `sandbox_config` block supports:
 
@@ -654,6 +742,12 @@ The `resource_usage_export_config` block supports:
 * `enable_network_egress_metering` (Optional) - Whether to enable network egress metering for this cluster. If enabled, a daemonset will be created
     in the cluster to meter network egress traffic.
 
+* `enable_resource_consumption_metering` (Optional) - Whether to enable resource
+consumption metering on this cluster. When enabled, a table will be created in
+the resource export BigQuery dataset to store resource consumption data. The
+resulting table can be joined with the resource usage table or with BigQuery
+billing export. Defaults to `true`.
+
 * `bigquery_destination` (Required) - Parameters for using BigQuery as the destination of resource usage export.
 
 * `bigquery_destination.dataset_id` (Required) - The ID of a BigQuery Dataset. For Example:
@@ -661,6 +755,7 @@ The `resource_usage_export_config` block supports:
 ```hcl
 resource_usage_export_config {
   enable_network_egress_metering = false
+  enable_resource_consumption_metering = true
 
   bigquery_destination {
     dataset_id = "cluster_resource_usage"
@@ -695,6 +790,31 @@ The `workload_metadata_config` block supports:
     * EXPOSE: Expose all VM metadata to pods.
     * GKE_METADATA_SERVER: Enables [workload identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) on the node.
 
+The `kubelet_config` block supports:
+
+* `cpu_manager_policy` - (Required) The CPU management policy on the node. See
+[K8S CPU Management Policies](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/).
+One of `"none"` or `"static"`. Defaults to `none` when `kubelet_config` is unset.
+
+* `cpu_cfs_quota` - (Optional) If true, enables CPU CFS quota enforcement for
+containers that specify CPU limits.
+
+* `cpu_cfs_quota_period` - (Optional) The CPU CFS quota period value. Specified
+as a sequence of decimal numbers, each with optional fraction and a unit suffix,
+such as `"300ms"`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m",
+"h". The value must be a positive duration.
+
+-> Note: At the time of writing (2020/08/18) the GKE API rejects the `none`
+value and accepts an invalid `default` value instead. While this remains true,
+not specifying the `kubelet_config` block should be the equivalent of specifying
+`none`.
+
+The `linux_node_config` block supports:
+
+* `sysctls` - (Required)  The Linux kernel parameters to be applied to the nodes
+and all pods running on the nodes. Specified as a map from the key, such as
+`net.core.wmem_max`, to a string value.
+
 The `vertical_pod_autoscaling` block supports:
 
 * `enabled` (Required) - Enables vertical pod autoscaling
@@ -704,10 +824,16 @@ The `vertical_pod_autoscaling` block supports:
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
+* `id` - an identifier for the resource with format `projects/{{project}}/locations/{{zone}}/clusters/{{name}}`
+
+* `self_link` - The server-defined URL for the resource.
+
 * `endpoint` - The IP address of this cluster's Kubernetes master.
 
 * `instance_group_urls` - List of instance group URLs which have been assigned
     to the cluster.
+
+* `label_fingerprint` - The fingerprint of the set of labels for this cluster.
 
 * `maintenance_policy.0.daily_maintenance_window.0.duration` - Duration of the time window, automatically chosen to be
     smallest possible in the given scenario.
@@ -741,6 +867,7 @@ This resource provides the following
 [Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
 
 - `create` - Default is 40 minutes.
+- `read`   - Default is 40 minutes.
 - `update` - Default is 60 minutes.
 - `delete` - Default is 40 minutes.
 

@@ -13,3 +13,7 @@
 --- !ruby/object:Provider::Inspec::Config
 legacy_name: project
 overrides: !ruby/object:Overrides::ResourceOverrides
+  ConsumerQuotaOverride: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  AdminQuotaOverride: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true

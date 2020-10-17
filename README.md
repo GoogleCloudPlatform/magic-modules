@@ -88,8 +88,8 @@ you'll need to check out the repo(s) you're generating in your GOPATH. For
 example:
 
 ```
-git clone https://github.com/terraform-providers/terraform-provider-google.git $GOPATH/src/github.com/terraform-providers/terraform-provider-google
-git clone https://github.com/terraform-providers/terraform-provider-google-beta.git $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta
+git clone https://github.com/hashicorp/terraform-provider-google.git $GOPATH/src/github.com/hashicorp/terraform-provider-google
+git clone https://github.com/hashicorp/terraform-provider-google-beta.git $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
 ```
 
 Magic Modules won't work with old versions of the Terraform provider repos. If
@@ -124,14 +124,14 @@ common commands
 
 {{tool}}  | {{output_folder}}
 ----------|----------
-terraform | $GOPATH/src/github.com/terraform-providers/terraform-provider-google
+terraform | $GOPATH/src/github.com/hashicorp/terraform-provider-google
 ansible   | build/ansible
 inspec    | build/inspec
 
 For example, to generate Terraform:
 
 ```
-bundle exec compiler -a -v "ga" -e terraform -o "$GOPATH/src/github.com/terraform-providers/terraform-provider-google"
+bundle exec compiler -a -v "ga" -e terraform -o "$GOPATH/src/github.com/hashicorp/terraform-provider-google"
 ```
 
 It's worth noting that Magic Modules will only generate new files when ran
@@ -145,7 +145,7 @@ Terraform is the only tool to handle Beta features right now; you can generate
 and using the repository for the `google-beta` provider.
 
 ```
-bundle exec compiler -a -v "beta" -e terraform -o "$GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta"
+bundle exec compiler -a -v "beta" -e terraform -o "$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
 ```
 
 ### Making changes to resources
@@ -182,8 +182,8 @@ often minor differences- the naming of a field, or whether it's required or not.
 You can find them under the folder for a product, with the name `{{tool}}.yaml`.
 For example, Ansible's overrides for Cloud SQL are present at `products/sql/ansible.yaml`
 
-You can find a full reference for each tool under `provider/{{tool}}/resource_override.rb`
-and `provider/{{tool}}/property_override.rb`, as well as some other tool-specific
+You can find a full reference for each tool under `overrides/{{tool}}/resource_override.rb`
+and `overrides/{{tool}}/property_override.rb`, as well as some other tool-specific
 functionality.
 
 #### Making changes to handwritten files
@@ -217,8 +217,8 @@ Tool             | Testing Guide
 -----------------|--------------
 ansible          | [instructions](https://docs.ansible.com/ansible/devel/dev_guide/testing.html)
 inspec           | [testing inspec-gcp](https://github.com/inspec/inspec-gcp/#test-inspec-gcp-resources)
-terraform        | [`google` provider testing guide](https://github.com/terraform-providers/terraform-provider-google/blob/master/.github/CONTRIBUTING.md#tests)
-terraform (beta) | [`google-beta` provider testing guide](https://github.com/terraform-providers/terraform-provider-google-beta/blob/master/.github/CONTRIBUTING.md#tests)
+terraform        | [`google` provider testing guide](https://github.com/hashicorp/terraform-provider-google/blob/master/.github/CONTRIBUTING.md#tests)
+terraform (beta) | [`google-beta` provider testing guide](https://github.com/hashicorp/terraform-provider-google-beta/blob/master/.github/CONTRIBUTING.md#tests)
 
 Don't worry about testing every tool, only the primary tool you're making
 changes against. The Magic Modules maintainers will ensure your changes work

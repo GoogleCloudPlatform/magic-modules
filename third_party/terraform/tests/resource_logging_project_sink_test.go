@@ -4,21 +4,20 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccLoggingProjectSink_basic(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + acctest.RandString(10)
-	bucketName := "tf-test-sink-bucket-" + acctest.RandString(10)
+	sinkName := "tf-test-sink-" + randString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLoggingProjectSinkDestroy,
+		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingProjectSink_basic(sinkName, getTestProjectFromEnv(), bucketName),
@@ -35,14 +34,14 @@ func TestAccLoggingProjectSink_basic(t *testing.T) {
 func TestAccLoggingProjectSink_updatePreservesUniqueWriter(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + acctest.RandString(10)
-	bucketName := "tf-test-sink-bucket-" + acctest.RandString(10)
-	updatedBucketName := "tf-test-sink-bucket-" + acctest.RandString(10)
+	sinkName := "tf-test-sink-" + randString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
+	updatedBucketName := "tf-test-sink-bucket-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLoggingProjectSinkDestroy,
+		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingProjectSink_uniqueWriter(sinkName, bucketName),
@@ -67,13 +66,13 @@ func TestAccLoggingProjectSink_updatePreservesUniqueWriter(t *testing.T) {
 func TestAccLoggingProjectSink_updateBigquerySink(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + acctest.RandString(10)
-	bqDatasetID := "tf_test_sink_" + acctest.RandString(10)
+	sinkName := "tf-test-sink-" + randString(t, 10)
+	bqDatasetID := "tf_test_sink_" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLoggingProjectSinkDestroy,
+		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingProjectSink_bigquery_before(sinkName, bqDatasetID),
@@ -98,13 +97,13 @@ func TestAccLoggingProjectSink_updateBigquerySink(t *testing.T) {
 func TestAccLoggingProjectSink_heredoc(t *testing.T) {
 	t.Parallel()
 
-	sinkName := "tf-test-sink-" + acctest.RandString(10)
-	bucketName := "tf-test-sink-bucket-" + acctest.RandString(10)
+	sinkName := "tf-test-sink-" + randString(t, 10)
+	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 
-	resource.Test(t, resource.TestCase{
+	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLoggingProjectSinkDestroy,
+		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingProjectSink_heredoc(sinkName, getTestProjectFromEnv(), bucketName),
@@ -118,23 +117,47 @@ func TestAccLoggingProjectSink_heredoc(t *testing.T) {
 	})
 }
 
-func testAccCheckLoggingProjectSinkDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
+func TestAccLoggingProjectSink_loggingbucket(t *testing.T) {
+	t.Parallel()
 
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_logging_project_sink" {
-			continue
+	sinkName := "tf-test-sink-" + randString(t, 10)
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingProjectSink_loggingbucket(sinkName, getTestProjectFromEnv()),
+			},
+			{
+				ResourceName:      "google_logging_project_sink.loggingbucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccCheckLoggingProjectSinkDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		config := googleProviderConfig(t)
+
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_logging_project_sink" {
+				continue
+			}
+
+			attributes := rs.Primary.Attributes
+
+			_, err := config.NewLoggingClient(config.userAgent).Projects.Sinks.Get(attributes["id"]).Do()
+			if err == nil {
+				return fmt.Errorf("project sink still exists")
+			}
 		}
 
-		attributes := rs.Primary.Attributes
-
-		_, err := config.clientLogging.Projects.Sinks.Get(attributes["id"]).Do()
-		if err == nil {
-			return fmt.Errorf("project sink still exists")
-		}
+		return nil
 	}
-
-	return nil
 }
 
 func testAccLoggingProjectSink_basic(name, project, bucketName string) string {
@@ -246,4 +269,28 @@ resource "google_bigquery_dataset" "logging_sink" {
   description = "Log sink (generated during acc test of terraform-provider-google(-beta))."
 }
 `, sinkName, getTestProjectFromEnv(), getTestProjectFromEnv(), bqDatasetID)
+}
+
+func testAccLoggingProjectSink_loggingbucket(name, project string) string {
+	return fmt.Sprintf(`
+resource "google_logging_project_sink" "loggingbucket" {
+  name        = "%s"
+  project     = "%s"
+  destination = "logging.googleapis.com/projects/%s/locations/global/buckets/_Default"
+  exclusions {
+		name = "ex1"
+		description = "test"
+		filter = "resource.type = k8s_container"
+	}
+
+	exclusions {
+		name = "ex2"
+		description = "test-2"
+		filter = "resource.type = k8s_container"
+	}
+
+  unique_writer_identity = true
+}
+
+`, name, project, project)
 }

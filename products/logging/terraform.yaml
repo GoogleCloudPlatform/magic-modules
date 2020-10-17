@@ -14,7 +14,7 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Metric: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
-    import_format: ["{{name}}"]
+    import_format: ["{{name}}", "{{project}} {{name}}"]
     mutex: customMetric/{{project}}
     examples:
       - !ruby/object:Provider::Terraform::Examples

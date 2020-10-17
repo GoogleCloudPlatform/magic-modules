@@ -11,6 +11,10 @@ if v, ok := res["diskEncryptionKey"]; ok {
     transformed["kmsKeyName"] = strings.Split(kmsKeyName.(string), "/cryptoKeyVersions")[0]
   }
 
+  if kmsKeyServiceAccount, ok := original["kmsKeyServiceAccount"]; ok {
+    transformed["kmsKeyServiceAccount"] = kmsKeyServiceAccount
+  }
+
   res["diskEncryptionKey"] = transformed
 }
 
@@ -27,6 +31,10 @@ if v, ok := res["sourceImageEncryptionKey"]; ok {
     transformed["kmsKeyName"] = strings.Split(kmsKeyName.(string), "/cryptoKeyVersions")[0]
   }
 
+  if kmsKeyServiceAccount, ok := original["kmsKeyServiceAccount"]; ok {
+    transformed["kmsKeyServiceAccount"] = kmsKeyServiceAccount
+  }
+
   res["sourceImageEncryptionKey"] = transformed
 }
 
@@ -41,6 +49,10 @@ if v, ok := res["sourceSnapshotEncryptionKey"]; ok {
     // The response for crypto keys often includes the version of the key which needs to be removed
     // format: projects/<project>/locations/<region>/keyRings/<keyring>/cryptoKeys/<key>/cryptoKeyVersions/1
     transformed["kmsKeyName"] = strings.Split(kmsKeyName.(string), "/cryptoKeyVersions")[0]
+  }
+
+  if kmsKeyServiceAccount, ok := original["kmsKeyServiceAccount"]; ok {
+    transformed["kmsKeyServiceAccount"] = kmsKeyServiceAccount
   }
 
   res["sourceSnapshotEncryptionKey"] = transformed

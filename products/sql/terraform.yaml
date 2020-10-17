@@ -16,6 +16,7 @@ client_name: 'SqlAdmin'
 overrides: !ruby/object:Overrides::ResourceOverrides
   Database: !ruby/object:Overrides::Terraform::ResourceOverride
     mutex: "google-sql-database-instance-{{project}}-{{instance}}"
+    read_error_transform: "transformSQLDatabaseReadError"
     import_format: ["projects/{{project}}/instances/{{instance}}/databases/{{name}}",
                     "{{project}}/{{instance}}/{{name}}",
                     "instances/{{instance}}/databases/{{name}}",
@@ -30,6 +31,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           database_name: "my-database"
           database_instance_name: "my-database-instance"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 15
       update_minutes: 10
@@ -39,6 +45,31 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       charset: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  SourceRepresentationInstance: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "sql_source_representation_instance_basic"
+        primary_resource_id: "instance"
+        vars:
+          name: "my-instance"
+    properties:
+      onPremisesConfiguration: !ruby/object:Overrides::Terraform::PropertyOverride
+        flatten_object: true
+      onPremisesConfiguration.host: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateIpAddress'
+      onPremisesConfiguration.port: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0, 65535)'
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        description: |
+          The Region in which the created instance should reside.
+          If it is not provided, the provider region is used.
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: 'templates/terraform/encoders/sql_source_representation_instance.go.erb'
+      decoder: 'templates/terraform/decoders/sql_source_representation_instance.go.erb'
   Flag: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride

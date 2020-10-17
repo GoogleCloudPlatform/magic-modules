@@ -17,7 +17,7 @@ display_name: Cloud Storage
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://www.googleapis.com/storage/v1/
+    base_url: https://storage.googleapis.com/storage/v1/
 scopes:
   - https://www.googleapis.com/auth/devstorage.full_control
 apis_required:
@@ -52,6 +52,7 @@ objects:
       set_iam_policy_method: 'iam'
       set_iam_policy_verb: :PUT
       wrapped_policy_obj: false
+      custom_diff_suppress: 'templates/terraform/iam/storage_bucket_diff_suppress.go.erb'
     properties:
       - !ruby/object:Api::Type::Array
         name: 'acl'
@@ -299,8 +300,8 @@ objects:
                       description: |
                         Objects having any of the storage classes specified by
                         this condition will be matched. Values include
-                        MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, STANDARD,
-                        and DURABLE_REDUCED_AVAILABILITY.
+                        MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, ARCHIVE,
+                        STANDARD, and DURABLE_REDUCED_AVAILABILITY.
                       item_type: Api::Type::String
                     - !ruby/object:Api::Type::Integer
                       name: 'numNewerVersions'
@@ -358,16 +359,17 @@ objects:
           The bucket's default storage class, used whenever no storageClass is
           specified for a newly-created object. This defines how objects in the
           bucket are stored and determines the SLA and the cost of storage.
-          Values include MULTI_REGIONAL, REGIONAL, STANDARD, NEARLINE, COLDLINE,
-          and DURABLE_REDUCED_AVAILABILITY. If this value is not specified when
-          the bucket is created, it will default to STANDARD. For more
-          information, see storage classes.
+          Values include MULTI_REGIONAL, REGIONAL, STANDARD, NEARLINE,
+          COLDLINE, ARCHIVE, and DURABLE_REDUCED_AVAILABILITY. If this value is
+          not specified when the bucket is created, it will default to 
+          STANDARD. For more information, see storage classes.
         values:
           - :MULTI_REGIONAL
           - :REGIONAL
           - :STANDARD
           - :NEARLINE
           - :COLDLINE
+          - :ARCHIVE
           - :DURABLE_REDUCED_AVAILABILITY
       - !ruby/object:Api::Type::Time
         name: 'timeCreated'
@@ -406,6 +408,39 @@ objects:
               object is missing, if applicable, the service will return the
               named object from this bucket as the content for a 404 Not Found
               result.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Labels applied to this bucket.  A list of key->value pairs.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'encryption'
+        description: |
+          Encryption configuration for the bucket
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'defaultKmsKeyName'
+            description: |
+              A Cloud KMS key that will be used to encrypt objects inserted into this bucket,
+              if no encryption method is specified.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'retentionPolicy'
+        description: |
+          Retention policy for the bucket
+        properties:
+          - !ruby/object:Api::Type::Time
+            name: 'effectiveTime'
+            description: |
+              The time from which the retention policy was effective
+          - !ruby/object:Api::Type::Boolean
+            name: 'isLocked'
+            description: |
+              If the retention policy is locked. If true, the retention policy cannot be removed and the period cannot
+              be reduced.
+          - !ruby/object:Api::Type::Integer
+            name: 'retentionPeriod'
+            description: |
+              The period of time, in seconds, that objects in the bucket must be retained and cannot be deleted,
+              overwritten, or made noncurrent.
     parameters:
       - !ruby/object:Api::Type::String
         name: 'project'
@@ -780,4 +815,63 @@ objects:
         name: timeUpdated
         api_name: updated
         description: The modification time of the object metadata.
-
+  - !ruby/object:Api::Resource
+    name: 'HmacKey'
+    kind: 'storage#hmacKey'
+    base_url: projects/{{project}}/hmacKeys
+    create_url: projects/{{project}}/hmacKeys?serviceAccountEmail={{serviceAccountEmail}}
+    self_link: projects/{{project}}/hmacKeys/{{accessId}}
+    # technically updatable, but implemented as custom update for new fingerprint support
+    input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/storage/docs/authentication/managing-hmackeys'
+      api: 'https://cloud.google.com/storage/docs/json_api/v1/projects/hmacKeys'
+    description: |
+      The hmacKeys resource represents an HMAC key within Cloud Storage. The resource
+      consists of a secret and HMAC key metadata. HMAC keys can be used as credentials
+      for service accounts.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccountEmail'
+        description: |
+          The email address of the key's associated service account.
+        required: true
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        description: |
+          The state of the key. Can be set to one of ACTIVE, INACTIVE.
+        default_value: :ACTIVE
+        values:
+          - :ACTIVE
+          - :INACTIVE
+          # - :DELETED (not directly settable)
+        update_verb: :PUT
+        update_url: projects/{{project}}/hmacKeys/{{accessId}}
+        update_id: 'state'
+        fingerprint_name: 'etag'
+      - !ruby/object:Api::Type::String
+        name: 'secret'
+        output: true
+        description: |
+          HMAC secret key material.
+      - !ruby/object:Api::Type::String
+        name: 'accessId'
+        output: true
+        description: |
+          The access ID of the HMAC Key.
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        output: true
+        description: |
+          The ID of the HMAC key, including the Project ID and the Access ID.
+      - !ruby/object:Api::Type::Time
+        name: 'timeCreated'
+        output: true
+        description: |
+          'The creation time of the HMAC key in RFC 3339 format. '
+      - !ruby/object:Api::Type::Time
+        name: 'updated'
+        output: true
+        description: |
+          'The last modification time of the HMAC key metadata in RFC 3339 format.'

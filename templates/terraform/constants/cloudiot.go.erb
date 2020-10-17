@@ -1,0 +1,241 @@
+func expandCloudIotDeviceRegistryHTTPConfig(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+    original := v.(map[string]interface{})
+    transformed := make(map[string]interface{})
+
+    transformedHTTPEnabledState, err := expandCloudIotDeviceRegistryHTTPEnabledState(original["http_enabled_state"], d, config)
+    if err != nil {
+        return nil, err
+    } else if val := reflect.ValueOf(transformedHTTPEnabledState); val.IsValid() && !isEmptyValue(val) {
+        transformed["httpEnabledState"] = transformedHTTPEnabledState
+    }
+
+    return transformed, nil
+}
+
+func expandCloudIotDeviceRegistryHTTPEnabledState(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+    return v, nil
+}
+
+func expandCloudIotDeviceRegistryMqttConfig(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+    original := v.(map[string]interface{})
+    transformed := make(map[string]interface{})
+
+    transformedMqttEnabledState, err := expandCloudIotDeviceRegistryMqttEnabledState(original["mqtt_enabled_state"], d, config)
+    if err != nil {
+        return nil, err
+    } else if val := reflect.ValueOf(transformedMqttEnabledState); val.IsValid() && !isEmptyValue(val) {
+        transformed["mqttEnabledState"] = transformedMqttEnabledState
+    }
+
+    return transformed, nil
+}
+
+func expandCloudIotDeviceRegistryMqttEnabledState(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+    return v, nil
+}
+
+func expandCloudIotDeviceRegistryStateNotificationConfig(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+    original := v.(map[string]interface{})
+    transformed := make(map[string]interface{})
+
+    transformedPubsubTopicName, err := expandCloudIotDeviceRegistryStateNotificationConfigPubsubTopicName(original["pubsub_topic_name"], d, config)
+    if err != nil {
+        return nil, err
+    } else if val := reflect.ValueOf(transformedPubsubTopicName); val.IsValid() && !isEmptyValue(val) {
+        transformed["pubsubTopicName"] = transformedPubsubTopicName
+    }
+
+    return transformed, nil
+}
+
+func expandCloudIotDeviceRegistryStateNotificationConfigPubsubTopicName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+    return v, nil
+}
+
+func expandCloudIotDeviceRegistryCredentials(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	l := v.([]interface{})
+	req := make([]interface{}, 0, len(l))
+
+	for _, raw := range l {
+		if raw == nil {
+			continue
+		}
+		original := raw.(map[string]interface{})
+		transformed := make(map[string]interface{})
+
+		transformedPublicKeyCertificate, err := expandCloudIotDeviceRegistryCredentialsPublicKeyCertificate(original["public_key_certificate"], d, config)
+		if err != nil {
+			return nil, err
+		} else if val := reflect.ValueOf(transformedPublicKeyCertificate); val.IsValid() && !isEmptyValue(val) {
+			transformed["publicKeyCertificate"] = transformedPublicKeyCertificate
+		}
+
+		req = append(req, transformed)
+	}
+
+	return req, nil
+}
+
+func expandCloudIotDeviceRegistryCredentialsPublicKeyCertificate(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+    original := v.(map[string]interface{})
+    transformed := make(map[string]interface{})
+
+    transformedFormat, err := expandCloudIotDeviceRegistryPublicKeyCertificateFormat(original["format"], d, config)
+    if err != nil {
+        return nil, err
+    } else if val := reflect.ValueOf(transformedFormat); val.IsValid() && !isEmptyValue(val) {
+        transformed["format"] = transformedFormat
+    }
+
+    transformedCertificate, err := expandCloudIotDeviceRegistryPublicKeyCertificateCertificate(original["certificate"], d, config)
+    if err != nil {
+        return nil, err
+    } else if val := reflect.ValueOf(transformedCertificate); val.IsValid() && !isEmptyValue(val) {
+        transformed["certificate"] = transformedCertificate
+    }
+
+    return transformed, nil
+}
+
+func expandCloudIotDeviceRegistryPublicKeyCertificateFormat(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+    return v, nil
+}
+
+func expandCloudIotDeviceRegistryPublicKeyCertificateCertificate(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+    return v, nil
+}
+
+func flattenCloudIotDeviceRegistryCredentials(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+	log.Printf("[DEBUG] Flattening device resitry credentials: %q", d.Id())
+	if v == nil {
+		log.Printf("[DEBUG] The credentials array is nil: %q", d.Id())
+		return v
+	}
+	l := v.([]interface{})
+	transformed := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+        original := raw.(map[string]interface{})
+        log.Printf("[DEBUG] Original credential: %+v", original)
+		if len(original) < 1 {
+			log.Printf("[DEBUG] Excluding empty credential that the API returned. %q", d.Id())
+			continue
+		}
+		log.Printf("[DEBUG] Credentials array before appending a new credential: %+v", transformed)
+		transformed = append(transformed, map[string]interface{}{
+			"public_key_certificate": flattenCloudIotDeviceRegistryCredentialsPublicKeyCertificate(original["publicKeyCertificate"], d, config),
+		})
+		log.Printf("[DEBUG] Credentials array after appending a new credential: %+v", transformed)
+	}
+	return transformed
+}
+
+func flattenCloudIotDeviceRegistryCredentialsPublicKeyCertificate(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+	log.Printf("[DEBUG] Flattening device resitry credentials public key certificate: %q", d.Id())
+	if v == nil {
+		log.Printf("[DEBUG] The public key certificate is nil: %q", d.Id())
+		return v
+	}
+
+	original := v.(map[string]interface{})
+	log.Printf("[DEBUG] Original public key certificate: %+v", original)
+	transformed := make(map[string]interface{})
+
+	transformedPublicKeyCertificateFormat := flattenCloudIotDeviceRegistryPublicKeyCertificateFormat(original["format"], d, config)
+	transformed["format"] = transformedPublicKeyCertificateFormat
+
+	transformedPublicKeyCertificateCertificate := flattenCloudIotDeviceRegistryPublicKeyCertificateCertificate(original["certificate"], d, config)
+	transformed["certificate"] = transformedPublicKeyCertificateCertificate
+
+	log.Printf("[DEBUG] Transformed public key certificate: %+v", transformed)
+
+	return transformed
+}
+
+func flattenCloudIotDeviceRegistryPublicKeyCertificateFormat(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+    return v
+}
+
+func flattenCloudIotDeviceRegistryPublicKeyCertificateCertificate(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+    return v
+}
+
+func flattenCloudIotDeviceRegistryHTTPConfig(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+    if v == nil {
+        return v
+    }
+
+    original := v.(map[string]interface{})
+    transformed := make(map[string]interface{})
+
+    transformedHTTPEnabledState := flattenCloudIotDeviceRegistryHTTPConfigHTTPEnabledState(original["httpEnabledState"], d, config)
+    transformed["http_enabled_state"] = transformedHTTPEnabledState
+
+    return transformed
+}
+
+func flattenCloudIotDeviceRegistryHTTPConfigHTTPEnabledState(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+    return v
+}
+
+func flattenCloudIotDeviceRegistryMqttConfig(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+    if v == nil {
+        return v
+    }
+
+    original := v.(map[string]interface{})
+    transformed := make(map[string]interface{})
+
+    transformedMqttEnabledState := flattenCloudIotDeviceRegistryMqttConfigMqttEnabledState(original["mqttEnabledState"], d, config)
+    transformed["mqtt_enabled_state"] = transformedMqttEnabledState
+
+    return transformed
+}
+
+func flattenCloudIotDeviceRegistryMqttConfigMqttEnabledState(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+    return v
+}
+
+func flattenCloudIotDeviceRegistryStateNotificationConfig(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+    log.Printf("[DEBUG] Flattening state notification config: %+v", v)
+    if v == nil {
+        return v
+    }
+
+    original := v.(map[string]interface{})
+    transformed := make(map[string]interface{})
+
+    transformedPubsubTopicName := flattenCloudIotDeviceRegistryStateNotificationConfigPubsubTopicName(original["pubsubTopicName"], d, config)
+    if val := reflect.ValueOf(transformedPubsubTopicName); val.IsValid() && !isEmptyValue(val) {
+        log.Printf("[DEBUG] pubsub topic name is not null: %v", d.Get("pubsub_topic_name"))
+        transformed["pubsub_topic_name"] = transformedPubsubTopicName
+    }
+
+
+    return transformed
+}
+
+func flattenCloudIotDeviceRegistryStateNotificationConfigPubsubTopicName(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+    return v
+}
+
+func validateCloudIotDeviceRegistryID(v interface{}, k string) (warnings []string, errors []error) {
+    value := v.(string)
+    if strings.HasPrefix(value, "goog") {
+        errors = append(errors, fmt.Errorf(
+            "%q (%q) can not start with \"goog\"", k, value))
+    }
+    if !regexp.MustCompile(CloudIoTIdRegex).MatchString(value) {
+        errors = append(errors, fmt.Errorf(
+            "%q (%q) doesn't match regexp %q", k, value, CloudIoTIdRegex))
+    }
+    return
+}
+
+func validateCloudIotDeviceRegistrySubfolderMatch(v interface{}, k string) (warnings []string, errors []error) {
+    value := v.(string)
+    if strings.HasPrefix(value, "/") {
+        errors = append(errors, fmt.Errorf(
+            "%q (%q) can not start with '/'", k, value))
+    }
+    return
+}

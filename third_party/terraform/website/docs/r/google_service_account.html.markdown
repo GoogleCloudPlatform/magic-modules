@@ -50,6 +50,8 @@ The following arguments are supported:
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
+* `id` - an identifier for the resource with format `projects/{{project}}/serviceAccounts/{{email}}`
+
 * `email` - The e-mail address of the service account. This value
     should be referenced from any `google_iam_policy` data sources
     that would grant the service account privileges.
@@ -57,6 +59,13 @@ exported:
 * `name` - The fully-qualified name of the service account.
 
 * `unique_id` - The unique id of the service account.
+
+## Timeouts
+
+This resource provides the following
+[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+
+- `create` - Default is 5 minutes.
 
 ## Import
 

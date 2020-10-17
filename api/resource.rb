@@ -205,6 +205,16 @@ module Api
       all_user_properties.select(&:required)
     end
 
+    def all_nested_properties(props)
+      nested = props
+      props.each do |prop|
+        if !prop.flatten_object && prop.nested_properties?
+          nested += all_nested_properties(prop.nested_properties)
+        end
+      end
+      nested
+    end
+
     # Returns all resourcerefs at any depth
     def all_resourcerefs
       resourcerefs_for_properties(all_user_properties, self)
@@ -314,6 +324,8 @@ module Api
       if @self_link.nil?
         [@base_url, '{{name}}'].join('/')
       else
+        # If the terms in this are not snake-cased, this will require
+        # an override in Terraform.
         @self_link
       end
     end

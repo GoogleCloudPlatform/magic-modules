@@ -37,6 +37,8 @@ module Provider
               (choices_description(prop) \
                if prop.is_a?(Api::Type::Enum) && prop.contain_extra_docs)
             ].flatten.compact,
+            'elements' => (python_type(prop.item_type) \
+              if prop.is_a?(Api::Type::Array) && python_type(prop.item_type)),
             'required' => required,
             'default' => (
               if prop.default_value&.is_a?(::Hash)
@@ -46,7 +48,6 @@ module Provider
               end),
             'type' => python_type(prop),
             'aliases' => prop.aliases,
-            'version_added' => version_added(prop),
             'suboptions' => (
                 if prop.nested_properties?
                   prop.nested_properties.reject(&:output).map { |p| documentation_for_property(p) }
@@ -154,7 +155,8 @@ module Provider
           },
           'scopes' => {
             'description' => ['Array of scopes to be used'],
-            'type' => 'list'
+            'type' => 'list',
+            'elements' => 'str'
           },
           'env_type' => {
             'description' => [

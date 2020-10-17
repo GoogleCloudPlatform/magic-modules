@@ -1,0 +1,11 @@
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute(pwd, 'gcp_location', doc_generation)}" -%>
+<% memcache_instance = grab_attributes(pwd)['memcache_instance'] -%>
+describe google_memcache_instance(project: <%= gcp_project_id -%>, region: <%= gcp_location %>, name: <%= doc_generation ? "'#{memcache_instance['name']}'" : "memcache_instance['name']" -%>) do
+  it { should exist }
+  its('node_count') { should cmp 1 }
+end
+
+describe google_memcache_instance(project: <%= gcp_project_id -%>, region: <%= gcp_location %>, name: "nonexistent") do
+  it { should_not exist }
+end

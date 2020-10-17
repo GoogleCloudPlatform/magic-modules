@@ -1,0 +1,10 @@
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+	if v == nil {
+		return v
+	}
+	relative, err := getRelativePath(v.(string))
+	if err != nil {
+		return v
+	}
+	return relative
+}

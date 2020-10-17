@@ -13,10 +13,11 @@ resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
       annotations = {
         "autoscaling.knative.dev/maxScale"      = "1000"
         "run.googleapis.com/cloudsql-instances" = "<%= ctx[:test_env_vars]['project'] %>:us-central1:${google_sql_database_instance.instance.name}"
-        "run.googleapis.com/client-name"        = "cloud-console"
+        "run.googleapis.com/client-name"        = "terraform"
       }
     }
   }
+  autogenerate_revision_name = true
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -25,4 +26,6 @@ resource "google_sql_database_instance" "instance" {
   settings {
     tier = "db-f1-micro"
   }
+
+  deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
 }

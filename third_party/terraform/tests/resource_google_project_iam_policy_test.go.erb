@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -17,8 +16,8 @@ func TestAccProjectIamPolicy_basic(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := acctest.RandomWithPrefix("tf-test")
-	resource.Test(t, resource.TestCase{
+	pid := fmt.Sprintf("tf-test-%d", randInt(t))
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -26,7 +25,7 @@ func TestAccProjectIamPolicy_basic(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM policy from a data source. The application
@@ -47,8 +46,8 @@ func TestAccProjectIamPolicy_emptyMembers(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := acctest.RandomWithPrefix("tf-test")
-	resource.Test(t, resource.TestCase{
+	pid := fmt.Sprintf("tf-test-%d", randInt(t))
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -64,8 +63,8 @@ func TestAccProjectIamPolicy_expanded(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := acctest.RandomWithPrefix("tf-test")
-	resource.Test(t, resource.TestCase{
+	pid := fmt.Sprintf("tf-test-%d", randInt(t))
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -84,8 +83,8 @@ func TestAccProjectIamPolicy_basicAuditConfig(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := acctest.RandomWithPrefix("tf-test")
-	resource.Test(t, resource.TestCase{
+	pid := fmt.Sprintf("tf-test-%d", randInt(t))
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -93,7 +92,7 @@ func TestAccProjectIamPolicy_basicAuditConfig(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM policy from a data source. The application
@@ -114,8 +113,8 @@ func TestAccProjectIamPolicy_expandedAuditConfig(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := acctest.RandomWithPrefix("tf-test")
-	resource.Test(t, resource.TestCase{
+	pid := fmt.Sprintf("tf-test-%d", randInt(t))
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -129,13 +128,12 @@ func TestAccProjectIamPolicy_expandedAuditConfig(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccProjectIamPolicy_withCondition(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := acctest.RandomWithPrefix("tf-test")
-	resource.Test(t, resource.TestCase{
+	pid := fmt.Sprintf("tf-test-%d", randInt(t))
+	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -143,7 +141,7 @@ func TestAccProjectIamPolicy_withCondition(t *testing.T) {
 			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectExistingPolicy(pid),
+					testAccProjectExistingPolicy(t, pid),
 				),
 			},
 			// Apply an IAM policy from a data source. The application
@@ -158,7 +156,6 @@ func TestAccProjectIamPolicy_withCondition(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func getStatePrimaryResource(s *terraform.State, res, expectedID string) (*terraform.InstanceState, error) {
 	// Get the project resource
@@ -166,7 +163,7 @@ func getStatePrimaryResource(s *terraform.State, res, expectedID string) (*terra
 	if !ok {
 		return nil, fmt.Errorf("Not found: %s", res)
 	}
-	if resource.Primary.Attributes["id"] != expectedID && expectedID != "" {
+	if expectedID != "" && !compareProjectName("", resource.Primary.Attributes["id"], expectedID, nil) {
 		return nil, fmt.Errorf("Expected project %q to match ID %q in state", resource.Primary.ID, expectedID)
 	}
 	return resource.Primary, nil
@@ -217,9 +214,9 @@ func testAccCheckGoogleProjectIamPolicyExists(projectRes, policyRes, pid string)
 }
 
 // Confirm that a project has an IAM policy with at least 1 binding
-func testAccProjectExistingPolicy(pid string) resource.TestCheckFunc {
+func testAccProjectExistingPolicy(t *testing.T, pid string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		c := testAccProvider.Meta().(*Config)
+		c := googleProviderConfig(t)
 		var err error
 		originalPolicy, err = getProjectIamPolicy(pid, c)
 		if err != nil {
@@ -432,7 +429,6 @@ data "google_iam_policy" "expanded" {
 `, pid, name, org)
 }
 
-<% unless version == 'ga' -%>
 func testAccProjectAssociatePolicy_withCondition(pid, name, org string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
@@ -468,4 +464,3 @@ data "google_iam_policy" "admin" {
 }
 `, pid, name, org)
 }
-<% end -%>

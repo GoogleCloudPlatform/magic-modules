@@ -20,6 +20,9 @@
 *.pyc
 *.python-version
 
+# Python virtual environment
+.env/*
+
 # IDEA files
 .idea/*
 *.iml
@@ -37,3 +40,9 @@ final_api.yaml
 # Ansible PR Script
 tools/ansible-pr/templates/*
 !tools/ansible-pr/templates/.keep
+
+# Used by OiCS tutorial
+build/*
+
+# vscode workspace settings
+.vscode

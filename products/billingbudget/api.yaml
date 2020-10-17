@@ -113,11 +113,13 @@ objects:
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: specifiedAmount
+                exactly_one_of:
+                  - budget.0.amount.0.specified_amount
+                  - budget.0.amount.0.last_period_amount
                 description: |
                   A specified amount to use as the budget. currencyCode is
                   optional. If specified, it must match the currency of the
                   billing account. The currencyCode is provided on output.
-                required: true
                 properties:
                   - !ruby/object:Api::Type::String
                     name: currencyCode
@@ -138,6 +140,16 @@ objects:
                       negative. If units is negative, nanos must be negative or
                       zero. For example $-1.75 is represented as units=-1 and
                       nanos=-750,000,000.
+              - !ruby/object:Api::Type::Boolean
+                name: 'lastPeriodAmount'
+                exactly_one_of:
+                  - budget.0.amount.0.specified_amount
+                  - budget.0.amount.0.last_period_amount
+                description: |
+                  Configures a budget amount that is automatically set to 100% of
+                  last period's spend.
+                  Boolean. Set value to true to use. Do not set to false, instead
+                  use the `specified_amount` block.
           - !ruby/object:Api::Type::Array
             name: thresholdRules
             required: true
@@ -172,7 +184,9 @@ objects:
             properties:
               - !ruby/object:Api::Type::String
                 name: pubsubTopic
-                required: true
+                at_least_one_of:
+                  - budget.0.all_updates_rule.0.pubsub_topic
+                  - budget.0.all_updates_rule.0.monitoring_notification_channels
                 description: |
                   The name of the Cloud Pub/Sub topic where budget related
                   messages will be published, in the form
@@ -185,3 +199,22 @@ objects:
                   The schema version of the notification. Only "1.0" is
                   accepted. It represents the JSON schema as defined in
                   https://cloud.google.com/billing/docs/how-to/budgets#notification_format.
+              - !ruby/object:Api::Type::Array
+                name: monitoringNotificationChannels
+                at_least_one_of:
+                  - budget.0.all_updates_rule.0.pubsub_topic
+                  - budget.0.all_updates_rule.0.monitoring_notification_channels
+                description: |
+                  The full resource name of a monitoring notification
+                  channel in the form
+                  projects/{project_id}/notificationChannels/{channel_id}.
+                  A maximum of 5 channels are allowed.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Boolean
+                name: disableDefaultIamRecipients
+                default_value: false
+                description: |
+                  Boolean. When set to true, disables default notifications sent
+                  when a threshold is exceeded. Default recipients are
+                  those with Billing Account Administrators and Billing
+                  Account Users IAM roles for the target account.

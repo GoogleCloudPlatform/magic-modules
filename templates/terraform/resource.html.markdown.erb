@@ -40,6 +40,7 @@
   tf_subcategory = (object.__product.display_name)
   terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   properties = object.all_user_properties
+  sensitive_props = object.all_nested_properties(object.root_properties).select(&:sensitive)
   # In order of preference, use TF override,
   # general defined timeouts, or default Timeouts
   timeouts = object.timeouts
@@ -47,7 +48,7 @@
   timeouts ||= Api::Timeouts.new
 -%>
 ---
-<%= lines(autogen_notice :yaml) -%>
+<%= lines(autogen_notice(:yaml, pwd)) -%>
 subcategory: "<%= tf_subcategory -%>"
 layout: "google"
 page_title: "Google: <%= terraform_name -%>"
@@ -82,11 +83,19 @@ To get more information about <%= object.name -%>, see:
 
 ~> **Warning:** <%= object.docs.warning -%>
 <%- end -%>
+<%- if !sensitive_props.empty? -%>
+<%-
+  sense_props = sensitive_props.map! {|prop| "`"+prop.lineage+"`"}.to_sentence
+-%>
+
+~> **Warning:** All arguments including <%= sense_props -%> will be stored in the raw
+state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+<%- end -%>
 
 <%#- We over-generate examples/oics buttons here; they'll all be _valid_ just not necessarily intended for this provider version.
      Unless/Until we split our docs, this is a non-issue. -%>
 <% unless object.examples.empty? -%>
-  <%- object.examples.each do |example| -%>
+  <%- object.examples.reject(&:skip_docs).each do |example| -%>
     <%- unless example.skip_test -%>
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
   <a href="<%= example.oics_link %>" target="_blank">
@@ -97,7 +106,7 @@ To get more information about <%= object.name -%>, see:
 ## Example Usage - <%= example.name.camelize(:upper).titleize %>
 
 
-<%= example.config_documentation -%>
+<%= example.config_documentation(pwd) -%>
   <%- end %>
 <%- end -%>
 ## Argument Reference
@@ -105,11 +114,11 @@ To get more information about <%= object.name -%>, see:
 The following arguments are supported:
 
 <% object.root_properties.select(&:required).each do |prop| -%>
-<%= lines(build_property_documentation(prop)) -%>
+<%= lines(build_property_documentation(prop, pwd)) -%>
 <% end -%>
 
 <% properties.select(&:required).each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop)) -%>
+<%= lines(build_nested_property_documentation(prop, pwd)) -%>
 <% end -%>
 <%- unless object.docs.required_properties.nil? -%>
 <%= "\n" + object.docs.required_properties -%>
@@ -118,9 +127,9 @@ The following arguments are supported:
 - - -
 
 <% object.root_properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%=    lines(build_property_documentation(prop)) -%>
+<%=    lines(build_property_documentation(prop, pwd)) -%>
 <% end -%>
-<% if object.base_url.include?("{{project}}")-%>
+<% if object.base_url.include?("{{project}}") || (object.create_url && object.create_url.include?('{{project}}'))-%>
 <%# The following new line allow for project to be bullet-formatted properly. -%>
 
 * `project` - (Optional) The ID of the project in which the resource belongs.
@@ -136,7 +145,7 @@ The following arguments are supported:
 <%= "\n" + object.docs.optional_properties -%>
 <% end -%>
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop)) -%>
+<%= lines(build_nested_property_documentation(prop, pwd)) -%>
 <% end -%>
 
 ## Attributes Reference
@@ -145,14 +154,14 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `id` - an identifier for the resource with format `<%= id_format(object) %>`
 <% object.root_properties.select(&:output).each do |prop| -%>
-<%= lines(build_property_documentation(prop)) -%>
+<%= lines(build_property_documentation(prop, pwd)) -%>
 <% end -%>
 <% if object.has_self_link -%>
 * `self_link` - The URI of the created resource.
 <% end -%>
 
 <% properties.select(&:output).each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop)) -%>
+<%= lines(build_nested_property_documentation(prop, pwd)) -%>
 <% end -%>
 <%- unless object.docs.attributes.nil? -%>
 <%= "\n" + object.docs.attributes -%>
@@ -169,19 +178,20 @@ This resource provides the following
 <% end -%>
 - `delete` - Default is <%= timeouts.delete_minutes -%> minutes.
 
-<% unless object.exclude_import -%>
 ## Import
+<% if object.exclude_import -%>
+
+This resource does not support import.
+
+<% else %>
 
 <%= object.name -%> can be imported using any of these accepted formats:
 
 ```
 <% import_id_formats_from_resource(object).map{ |id| id.gsub('%', '') }.each do |id_format| -%>
-$ terraform import <% if object.min_version.name == 'beta' %>-provider=google-beta <% end -%><%= terraform_name -%>.default <%= id_format %>
+$ terraform import <%= terraform_name -%>.default <%= id_format %>
 <% end -%>
 ```
-
--> If you're importing a resource with beta features, make sure to include `-provider=google-beta`
-as an argument so that Terraform uses the correct provider to import your resource.
 
 <% end -%>
 <% if object.base_url.include?("{{project}}") || object.supports_indirect_user_project_override -%>

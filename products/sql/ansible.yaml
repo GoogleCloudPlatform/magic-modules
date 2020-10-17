@@ -60,9 +60,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   # Objects not implemented yet.
   Tier: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  SslCert: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   Flag: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  SourceRepresentationInstance: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
   resource:

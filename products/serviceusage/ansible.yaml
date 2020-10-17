@@ -22,6 +22,10 @@ datasources: !ruby/object:Overrides::ResourceOverrides
         does_not_exist: |
           "'{{ (results['resources'] | selectattr('name', 'search', 'spanner.googleapis.com') | list | first).state }}' == 'DISABLED'"
 overrides: !ruby/object:Overrides::ResourceOverrides
+  ConsumerQuotaOverride: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  AdminQuotaOverride: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   Service: !ruby/object:Overrides::Ansible::ResourceOverride
     custom_code: !ruby/object:Provider::Ansible::CustomCode
       pre_action: |

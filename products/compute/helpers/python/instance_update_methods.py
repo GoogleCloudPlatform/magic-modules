@@ -1,7 +1,7 @@
 def deletion_protection_update(module, request, response):
     auth = GcpSession(module, 'compute')
     auth.post(
-        ''.join(["https://www.googleapis.com/compute/v1/", "projects/{project}/zones/{zone}/instances/{name}/setDeletionProtection?deletionProtection={deletionProtection}"]).format(**module.params),
+        ''.join(["https://www.googleapis.com/compute/v1/", "projects/{project}/zones/{zone}/instances/{name}/setDeletionProtection?deletionProtection={deletion_protection}"]).format(**module.params),
         {},
     )
 

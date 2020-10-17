@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: Redis
-display_name: Cloud Memorystore
+display_name: Memorystore (Redis)
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
@@ -71,6 +71,14 @@ objects:
           If provided, it must be a different zone from the one provided in
           [locationId].
         input: true
+      - !ruby/object:Api::Type::Boolean
+        name: authEnabled
+        description: |
+          Optional. Indicates whether OSS Redis AUTH is enabled for the
+          instance. If set to "true" AUTH is enabled on the instance.
+          Default value is "false" meaning AUTH is disabled.
+        default_value: false
+        min_version: beta
       - !ruby/object:Api::Type::String
         name: authorizedNetwork
         description: |
@@ -78,6 +86,15 @@ objects:
           instance is connected. If left unspecified, the default network
           will be used.
         input: true
+      - !ruby/object:Api::Type::Enum
+        name: connectMode
+        description: |
+          The connection mode of the Redis instance.
+        input: true
+        values:
+          - :DIRECT_PEERING
+          - :PRIVATE_SERVICE_ACCESS
+        default_value: :DIRECT_PEERING
       - !ruby/object:Api::Type::Time
         name: createTime
         description: |
@@ -93,7 +110,6 @@ objects:
           instances, this can be either [locationId] or [alternativeLocationId]
           and can change after a failover event.
         output: true
-        input: true
       - !ruby/object:Api::Type::String
         name: displayName
         description: |
@@ -137,11 +153,20 @@ objects:
         description: The port number of the exposed Redis endpoint.
         output: true
       - !ruby/object:Api::Type::String
+        name: persistenceIamIdentity
+        description: |
+          Output only. Cloud IAM identity used by import / export operations
+          to transfer data to/from Cloud Storage. Format is "serviceAccount:".
+          The value may change over time for a given instance so should be
+          checked before each import/export operation.
+        output: true
+      - !ruby/object:Api::Type::String
         name: redisVersion
         description: |
           The version of Redis software. If not provided, latest supported
           version will be used. Currently, the supported values are:
 
+          - REDIS_5_0 for Redis 5.0 compatibility
           - REDIS_4_0 for Redis 4.0 compatibility
           - REDIS_3_2 for Redis 3.2 compatibility
         input: true

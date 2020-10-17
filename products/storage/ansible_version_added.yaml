@@ -1,24 +1,12 @@
 ---
 :facts:
-  :Object:
-    :version_added: '2.8'
   :Bucket:
     :version_added: '2.6'
   :BucketAccessControl:
     :version_added: '2.6'
+  :DefaultObjectACL:
+    :version_added: '2.10'
 :regular:
-  :Object:
-    :version_added: '2.8'
-    :action:
-      :version_added: '2.8'
-    :overwrite:
-      :version_added: '2.8'
-    :src:
-      :version_added: '2.8'
-    :dest:
-      :version_added: '2.8'
-    :bucket:
-      :version_added: '2.8'
   :Bucket:
     :version_added: '2.6'
     :acl:
@@ -47,6 +35,8 @@
         :version_added: '2.6'
       :responseHeader:
         :version_added: '2.6'
+    :defaultEventBasedHold:
+      :version_added: '2.10'
     :defaultObjectAcl:
       :version_added: '2.7'
       :bucket:
@@ -117,13 +107,15 @@
       :version_added: '2.6'
     :entity:
       :version_added: '2.6'
-    :entityId:
-      :version_added: '2.6'
-    :projectTeam:
-      :version_added: '2.6'
-      :projectNumber:
-        :version_added: '2.6'
-      :team:
-        :version_added: '2.6'
     :role:
       :version_added: '2.6'
+  :DefaultObjectACL:
+    :version_added: '2.10'
+    :bucket:
+      :version_added: '2.10'
+    :entity:
+      :version_added: '2.10'
+    :object:
+      :version_added: '2.10'
+    :role:
+      :version_added: '2.10'

@@ -55,6 +55,8 @@ def wait_for_completion(status, op_result, module):
     op_id = navigate_hash(op_result, <%= op_path -%>)
 <% if object.async.operation&.full_url -%>
     op_uri = navigate_hash(op_result, <%= python_literal(object.async.operation.full_url.split('/')) -%>)
+<% elsif object&.custom_code&.custom_async_function -%>
+    op_uri = <%= object&.custom_code&.custom_async_function -%>(module, {'op_id': op_id})
 <% else -%>
     op_uri = async_op_url(module, {'op_id': op_id})
 <% end -%>

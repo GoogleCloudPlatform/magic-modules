@@ -1,7 +1,7 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% gcp_ext_vm_name = "#{external_attribute('gcp_ext_vm_name', doc_generation)}" -%>
-<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
-<% target_pool = grab_attributes['target_pool'] -%>
+<% gcp_project_id = "#{external_attribute(pwd, 'gcp_project_id', doc_generation)}" -%>
+<% gcp_ext_vm_name = "#{external_attribute(pwd, 'gcp_ext_vm_name', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute(pwd, 'gcp_location', doc_generation)}" -%>
+<% target_pool = grab_attributes(pwd)['target_pool'] -%>
 describe google_compute_target_pools(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>) do
   its('names') { should include <%= doc_generation ? "'#{target_pool['name']}'" : "target_pool['name']" -%> }
   its('session_affinities') { should include <%= doc_generation ? "'#{target_pool['session_affinity']}'" : "target_pool['session_affinity']" -%> }

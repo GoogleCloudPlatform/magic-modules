@@ -19,12 +19,19 @@ module Provider
   class TerraformOiCS < Provider::Terraform
     # We don't want *any* static generation, so we override generate to only
     # generate objects.
-    def generate(output_folder, types, _product_path, _dump_yaml)
-      generate_objects(output_folder, types)
+    def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
+      generate_objects(
+        output_folder,
+        types,
+        generate_code,
+        generate_docs
+      )
     end
 
     # Create a directory of examples per resource
-    def generate_resource(data)
+    def generate_resource(pwd, data, _generate_code, generate_docs)
+      return unless generate_docs
+
       examples = data.object.examples
                      .reject(&:skip_test)
                      .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
@@ -37,41 +44,37 @@ module Provider
 
         data.example = example
 
-        data.generate(
-          'templates/terraform/examples/base_configs/example_file.tf.erb',
-          File.join(target_folder, 'main.tf'),
-          self
-        )
+        data.generate(pwd,
+                      'templates/terraform/examples/base_configs/example_file.tf.erb',
+                      File.join(target_folder, 'main.tf'),
+                      self)
 
-        data.generate(
-          'templates/terraform/examples/base_configs/tutorial.md.erb',
-          File.join(target_folder, 'tutorial.md'),
-          self
-        )
+        data.generate(pwd,
+                      'templates/terraform/examples/base_configs/tutorial.md.erb',
+                      File.join(target_folder, 'tutorial.md'),
+                      self)
 
-        data.generate(
-          'templates/terraform/examples/base_configs/example_backing_file.tf.erb',
-          File.join(target_folder, 'backing_file.tf'),
-          self
-        )
+        data.generate(pwd,
+                      'templates/terraform/examples/base_configs/example_backing_file.tf.erb',
+                      File.join(target_folder, 'backing_file.tf'),
+                      self)
 
-        data.generate(
-          'templates/terraform/examples/static/motd',
-          File.join(target_folder, 'motd'),
-          self
-        )
+        data.generate(pwd,
+                      'templates/terraform/examples/static/motd',
+                      File.join(target_folder, 'motd'),
+                      self)
       end
     end
 
     # We don't want to generate anything but the resource.
-    def generate_resource_tests(data) end
+    def generate_resource_tests(pwd, data) end
 
-    def generate_resource_sweepers(data) end
+    def generate_resource_sweepers(pwd, data) end
 
     def compile_common_files(output_folder, products, common_compile_file) end
 
-    def copy_common_files(output_folder) end
+    def copy_common_files(output_folder, generate_code, generate_docs) end
 
-    def generate_iam_policy(data) end
+    def generate_iam_policy(pwd, data, generate_code, generate_docs) end
   end
 end

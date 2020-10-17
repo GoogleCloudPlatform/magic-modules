@@ -58,6 +58,11 @@ objects:
         name: 'description'
         description: |
           Human-readable description of the trigger.
+      - !ruby/object:Api::Type::Array
+        name: 'tags'
+        item_type: Api::Type::String
+        description: |
+          Tags for annotation of a BuildTrigger
       - !ruby/object:Api::Type::Boolean
         name: 'disabled'
         description: |
@@ -95,7 +100,7 @@ objects:
         name: 'includedFiles'
         item_type: Api::Type::String
         description: |
-          ignoredFiles and includedFiles are file glob matches using http://godoc/pkg/path/filepath#Match
+          ignoredFiles and includedFiles are file glob matches using https://golang.org/pkg/path/filepath/#Match
           extended with support for `**`.
 
           If any of the files altered in the commit pass the ignoredFiles filter
@@ -133,6 +138,11 @@ objects:
               This must be a relative path. If a step's dir is specified and
               is an absolute path, this value is ignored for that step's
               execution.
+
+          - !ruby/object:Api::Type::Boolean
+            name: 'invertRegex'
+            description: |
+              Only trigger a build if the revision regex does NOT match the revision regex.
           - !ruby/object:Api::Type::String
             name: 'branchName'
             description: |
@@ -198,6 +208,11 @@ objects:
                 values:
                   - :COMMENTS_DISABLED
                   - :COMMENTS_ENABLED
+                  - :COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY
+              - !ruby/object:Api::Type::Boolean
+                name: 'invertRegex'
+                description: |
+                    If true, branches that do NOT match the git_ref will trigger a build.
           - !ruby/object:Api::Type::NestedObject
             name: 'push'
             description: |
@@ -206,6 +221,10 @@ objects:
               - github.0.pull_request
               - github.0.push
             properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'invertRegex'
+                description: |
+                    When true, only trigger a build if the revision regex does NOT match the git_ref regex.
               - !ruby/object:Api::Type::String
                 name: 'branch'
                 description: |
@@ -228,6 +247,77 @@ objects:
         description: |
           Contents of the build template. Either a filename or build template must be provided.
         properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'source'
+            description: |
+              The location of the source files to build.
+            properties:
+              - !ruby/object:Api::Type::NestedObject
+                name: 'storageSource'
+                description: |
+                  Location of the source in an archive file in Google Cloud Storage.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'bucket'
+                    required: true
+                    description: |
+                      Google Cloud Storage bucket containing the source.
+                  - !ruby/object:Api::Type::String
+                    name: 'object'
+                    required: true
+                    description: |
+                      Google Cloud Storage object containing the source.
+                      This object must be a gzipped archive file (.tar.gz) containing source to build.
+                  - !ruby/object:Api::Type::String
+                    name: 'generation'
+                    description: |
+                      Google Cloud Storage generation for the object. 
+                      If the generation is omitted, the latest generation will be used
+              - !ruby/object:Api::Type::NestedObject
+                name: 'repoSource'
+                description: |
+                  Location of the source in a Google Cloud Source Repository.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'projectId'
+                    description: |
+                      ID of the project that owns the Cloud Source Repository. 
+                      If omitted, the project ID requesting the build is assumed.
+                  - !ruby/object:Api::Type::String
+                    name: 'repoName'
+                    required: true
+                    description: |
+                      Name of the Cloud Source Repository.
+                  - !ruby/object:Api::Type::String
+                    name: 'dir'
+                    description: |
+                      Directory, relative to the source root, in which to run the build.
+                      This must be a relative path. If a step's dir is specified and is an absolute path, 
+                      this value is ignored for that step's execution.
+                  - !ruby/object:Api::Type::Boolean
+                    name: 'invertRegex'
+                    description: |
+                      Only trigger a build if the revision regex does NOT match the revision regex.
+                  - !ruby/object:Api::Type::KeyValuePairs
+                    name: 'substitutions'
+                    description: |
+                      Substitutions to use in a triggered build. Should only be used with triggers.run
+                  - !ruby/object:Api::Type::String
+                    name: 'branchName'
+                    description: |
+                      Regex matching branches to build. Exactly one a of branch name, tag, or commit SHA must be provided.
+                      The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
+                      described at https://github.com/google/re2/wiki/Syntax
+                  - !ruby/object:Api::Type::String
+                    name: 'tagName'
+                    description: |
+                      Regex matching tags to build. Exactly one a of branch name, tag, or commit SHA must be provided.
+                      The syntax of the regular expressions accepted is the syntax accepted by RE2 and 
+                      described at https://github.com/google/re2/wiki/Syntax
+                  - !ruby/object:Api::Type::String
+                    name: 'commitSha'
+                    description: |
+                      Explicit commit SHA to build. Exactly one a of branch name, tag, or commit SHA must be provided.
           - !ruby/object:Api::Type::Array
             name: 'tags'
             item_type: Api::Type::String
@@ -241,15 +331,49 @@ objects:
               The images are pushed using the builder service account's credentials.
               The digests of the pushed images will be stored in the Build resource's results field.
               If any of the images fail to be pushed, the build status is marked FAILURE.
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'substitutions'
+            description: |
+              Substitutions data for Build resource.
+          - !ruby/object:Api::Type::String
+            name: 'queueTtl'
+            description: |
+              TTL in queue for this build. If provided and the build is enqueued longer than this value, 
+              the build will expire and the build status will be EXPIRED.
+              The TTL starts ticking from createTime.
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+          - !ruby/object:Api::Type::String
+            name: 'logsBucket'
+            description: |
+              Google Cloud Storage bucket where logs should be written. 
+              Logs file names will be of the format ${logsBucket}/log-${build_id}.txt.
           - !ruby/object:Api::Type::String
             name: 'timeout'
             description: |
-              Amount of time that this build should be allowed to run, to second granularity. 
+              Amount of time that this build should be allowed to run, to second granularity.
               If this amount of time elapses, work on the build will cease and the build status will be TIMEOUT.
               This timeout must be equal to or greater than the sum of the timeouts for build steps within the build.
               The expected format is the number of seconds followed by s.
               Default time is ten minutes (600s).
             default_value: '600s'
+          - !ruby/object:Api::Type::Array
+            name: 'secrets'
+            description: |
+              Secrets to decrypt using Cloud Key Management Service.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'kmsKeyName'
+                  required: true
+                  description: |
+                    Cloud KMS key name to use to decrypt these envs.
+                - !ruby/object:Api::Type::KeyValuePairs
+                  name: 'secretEnv'
+                  description: |
+                    Map of environment variable name to its encrypted value.
+                    Secret environment variables must be unique across all of a build's secrets, 
+                    and must be used by at least one build step. Values can be at most 64 KB in size. 
+                    There can be at most 100 secret values across all of a build's secrets.
           - !ruby/object:Api::Type::Array
             name: 'steps'
             required: true
@@ -380,3 +504,187 @@ objects:
                     have completed successfully. If `wait_for` is empty, this build step
                     will start when all previous build steps in the `Build.Steps` list
                     have completed successfully.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'artifacts'
+            description: |
+              Artifacts produced by the build that should be uploaded upon successful completion of all build steps.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'images'
+                item_type: Api::Type::String
+                description: |
+                  A list of images to be pushed upon the successful completion of all build steps.
+
+                  The images will be pushed using the builder service account's credentials.
+
+                  The digests of the pushed images will be stored in the Build resource's results field.
+
+                  If any of the images fail to be pushed, the build is marked FAILURE.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'objects'
+                description: |
+                  A list of objects to be uploaded to Cloud Storage upon successful completion of all build steps.
+
+                  Files in the workspace matching specified paths globs will be uploaded to the
+                  Cloud Storage location using the builder service account's credentials.
+
+                  The location and generation of the uploaded objects will be stored in the Build resource's results field.
+
+                  If any objects fail to be pushed, the build is marked FAILURE.
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'location'
+                    description: |
+                      Cloud Storage bucket and optional object path, in the form "gs://bucket/path/to/somewhere/".
+
+                      Files in the workspace matching any path pattern will be uploaded to Cloud Storage with
+                      this location as a prefix.
+                  - !ruby/object:Api::Type::Array
+                    name: 'paths'
+                    item_type: Api::Type::String
+                    description: |
+                      Path globs used to match files in the build's workspace.
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'timing'
+                    description: |
+                      Output only. Stores timing information for pushing all artifact objects.
+                    output: true
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'startTime'
+                        description: |
+                          Start of time span.
+
+                          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to
+                          nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+                      - !ruby/object:Api::Type::String
+                        name: 'endTime'
+                        description: |
+                          End of time span.
+
+                          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to
+                          nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+          - !ruby/object:Api::Type::NestedObject
+            name: 'options'
+            description: |
+              Special options for this build.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: 'sourceProvenanceHash'
+                description: |
+                  Requested hash for SourceProvenance.
+                item_type: !ruby/object:Api::Type::Enum
+                  name: 'hashType'
+                  description: |
+                    Specifies the hash algorithm, if any.
+                  values:
+                    - :NONE
+                    - :SHA256
+                    - :MD5
+              - !ruby/object:Api::Type::Enum
+                name: 'requestedVerifyOption'
+                description: |
+                  Requested verifiability options.
+                values:
+                  - :NOT_VERIFIED
+                  - :VERIFIED
+              - !ruby/object:Api::Type::Enum
+                name: 'machineType'
+                description: |
+                  Compute Engine machine type on which to run the build.
+                values:
+                  - :UNSPECIFIED
+                  - :N1_HIGHCPU_8
+                  - :N1_HIGHCPU_32
+              - !ruby/object:Api::Type::Integer
+                name: 'diskSizeGb'
+                description: |
+                  Requested disk size for the VM that runs the build. Note that this is NOT "disk free";
+                  some of the space will be used by the operating system and build utilities.
+                  Also note that this is the minimum disk size that will be allocated for the build --
+                  the build may run with a larger disk than requested. At present, the maximum disk size
+                  is 1000GB; builds that request more than the maximum are rejected with an error.
+              - !ruby/object:Api::Type::Enum
+                name: 'substitutionOption'
+                description: |
+                  Option to specify behavior when there is an error in the substitution checks.
+
+                  NOTE this is always set to ALLOW_LOOSE for triggered builds and cannot be overridden
+                  in the build configuration file.
+                values:
+                  - :MUST_MATCH
+                  - :ALLOW_LOOSE
+              - !ruby/object:Api::Type::Boolean
+                name: 'dynamicSubstitutions'
+                send_empty_value: true
+                description: |
+                  Option to specify whether or not to apply bash style string operations to the substitutions.
+
+                  NOTE this is always enabled for triggered builds and cannot be overridden in the build configuration file.
+              - !ruby/object:Api::Type::Enum
+                name: 'logStreamingOption'
+                description: |
+                  Option to define build log streaming behavior to Google Cloud Storage.
+                values:
+                  - :STREAM_DEFAULT
+                  - :STREAM_ON
+                  - :STREAM_OFF
+              - !ruby/object:Api::Type::String
+                name: 'workerPool'
+                description: |
+                  Option to specify a WorkerPool for the build. Format projects/{project}/workerPools/{workerPool}
+
+                  This field is experimental.
+              - !ruby/object:Api::Type::Enum
+                name: 'logging'
+                description: |
+                  Option to specify the logging mode, which determines if and where build logs are stored.
+                values:
+                  - :LOGGING_UNSPECIFIED
+                  - :LEGACY
+                  - :GCS_ONLY
+                  - :STACKDRIVER_ONLY
+                  - :NONE
+              - !ruby/object:Api::Type::Array
+                name: 'env'
+                item_type: Api::Type::String
+                description: |
+                  A list of global environment variable definitions that will exist for all build steps
+                  in this build. If a variable is defined in both globally and in a build step,
+                  the variable will use the build step value.
+
+                  The elements are of the form "KEY=VALUE" for the environment variable "KEY" being given the value "VALUE".
+              - !ruby/object:Api::Type::Array
+                name: 'secretEnv'
+                item_type: Api::Type::String
+                description: |
+                  A list of global environment variables, which are encrypted using a Cloud Key Management
+                  Service crypto key. These values must be specified in the build's Secret. These variables
+                  will be available to all build steps in this build.
+              - !ruby/object:Api::Type::Array
+                name: 'volumes'
+                description: |
+                  Global list of volumes to mount for ALL build steps
+
+                  Each volume is created as an empty volume prior to starting the build process.
+                  Upon completion of the build, volumes and their contents are discarded. Global
+                  volume names and paths cannot conflict with the volumes defined a build step.
+
+                  Using a global volume in a build with only one step is not valid as it is indicative
+                  of a build request with an incorrect configuration.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'name'
+                      description: |
+                        Name of the volume to mount.
+
+                        Volume names must be unique per build step and must be valid names for Docker volumes.
+                        Each named volume must be used by at least two build steps.
+                    - !ruby/object:Api::Type::String
+                      name: 'path'
+                      description: |
+                        Path at which to mount the volume.
+
+                        Paths must be absolute and cannot conflict with other volume paths on the same
+                        build step or with certain reserved volume paths.

@@ -90,6 +90,13 @@ module Api
       # variables that are outside of the base_url qualifiers.
       attr_reader :import_format
 
+      # Allows us to override the self_link of the resource. This is required for Artifact Registry
+      # to prevent breaking changes
+      attr_reader :self_link
+
+      # [Optional] Version number in the request payload.
+      # if set, it overrides the default iamPolicyVersion
+      attr_reader :iam_policy_version
       def validate
         super
 
@@ -107,11 +114,13 @@ module Api
         check :test_project_name, type: String
         check :iam_conditions_request_type, type: Symbol, allowed: %i[REQUEST_BODY QUERY_PARAM]
         check :base_url, type: String
+        check :self_link, type: String
         check :import_format, type: Array, item_type: String
         check(
           :example_config_body,
           type: String, default: 'templates/terraform/iam/iam_attributes.tf.erb'
         )
+        check :iam_policy_version, type: String
       end
     end
   end

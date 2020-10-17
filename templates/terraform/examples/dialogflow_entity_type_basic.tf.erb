@@ -1,0 +1,19 @@
+resource "google_dialogflow_agent" "basic_agent" {
+  display_name = "example_agent"
+  default_language_code = "en"
+  time_zone = "America/New_York"
+}
+
+resource "google_dialogflow_entity_type" "<%= ctx[:primary_resource_id] %>" {
+  depends_on = [google_dialogflow_agent.basic_agent]
+  display_name = "<%= ctx[:vars]["entity_type_name"] %>"
+  kind = "KIND_MAP"
+  entities {
+    value = "value1"
+    synonyms = ["synonym1","synonym2"]
+  }
+  entities {
+    value = "value2"
+    synonyms = ["synonym3","synonym4"]
+  }
+}

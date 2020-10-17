@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'google/iam/property/iam_binding_condition'
 module GoogleInSpec
   module Iam
     module Property
@@ -21,11 +22,14 @@ module GoogleInSpec
 
         attr_reader :members
 
+        attr_reader :condition
+
         def initialize(args = nil, parent_identifier = nil)
           return if args.nil?
           @parent_identifier = parent_identifier
           @role = args['role']
           @members = args['members']
+          @condition = GoogleInSpec::Iam::Property::IamBindingCondition.new(args['condition'], to_s)
         end
 
         def to_s

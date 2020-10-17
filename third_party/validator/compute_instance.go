@@ -234,6 +234,11 @@ func expandInstanceGuestAccelerators(d TerraformResourceData, config *Config) ([
 }
 
 func expandBootDisk(d TerraformResourceData, config *Config, project string) (*computeBeta.AttachedDisk, error) {
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return nil, err
+	}
+
 	disk := &computeBeta.AttachedDisk{
 		AutoDelete: d.Get("boot_disk.0.auto_delete").(bool),
 		Boot:       true,
@@ -285,7 +290,7 @@ func expandBootDisk(d TerraformResourceData, config *Config, project string) (*c
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.image"); ok {
 			imageName := v.(string)
-			imageUrl, err := resolveImage(config, project, imageName)
+			imageUrl, err := resolveImage(config, project, imageName, userAgent)
 			if err != nil {
 				return nil, fmt.Errorf("Error resolving image name '%s': %s", imageName, err)
 			}

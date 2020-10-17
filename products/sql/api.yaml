@@ -17,7 +17,7 @@ display_name: Cloud SQL
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://www.googleapis.com/sql/v1beta4/
+    base_url: https://sqladmin.googleapis.com/sql/v1beta4/
 scopes:
   - https://www.googleapis.com/auth/sqlservice.admin
 apis_required:
@@ -395,6 +395,10 @@ objects:
               update method to make sure concurrent updates are handled properly. 
               During update, use the most recent settingsVersion value for this 
               instance and do not try to update this value.
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'userLabels'
+            description: |
+              User-provided labels, represented as a dictionary where each label is a single key value pair.
       - !ruby/object:Api::Type::String
         name: 'gceZone'
         output: true
@@ -415,6 +419,50 @@ objects:
           - :PENDING_CREATE
           - :MAINTENANCE
           - :FAILED
+      - !ruby/object:Api::Type::NestedObject
+        name: 'diskEncryptionConfiguration'
+        description: 'Disk encyption settings'
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyName'
+            description: |
+              The KMS key used to encrypt the Cloud SQL instance
+      - !ruby/object:Api::Type::NestedObject
+        name: 'diskEncryptionStatus'
+        description: 'Disk encyption status'
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyVersionName'
+            description: |
+              The KMS key version used to encrypt the Cloud SQL instance
+      - !ruby/object:Api::Type::NestedObject
+        name: 'serverCaCert'
+        description: 'SSL configuration'
+        output: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'cert'
+            description: 'PEM representation of the X.509 certificate.'
+          - !ruby/object:Api::Type::String
+            name: 'certSerialNumber'
+            description: 'Serial number, as extracted from the certificate.'
+          - !ruby/object:Api::Type::String
+            name: 'commonName'
+            description: 'User supplied name. Constrained to [a-zA-Z.-_ ]+.'
+          - !ruby/object:Api::Type::Time
+            name: 'createTime'
+            description: |
+              The time when the certificate was created in RFC 3339 format, for
+              example 2012-11-15T16:19:00.094Z.
+          - !ruby/object:Api::Type::Time
+            name: 'expirationTime'
+            description: |
+              The time when the certificate expires in RFC 3339 format, for example
+              2012-11-15T16:19:00.094Z.
+          - !ruby/object:Api::Type::String
+            name: 'sha1Fingerprint'
+            description: |
+              SHA-1 fingerprint of the certificate.
   - !ruby/object:Api::Resource
     name: 'Database'
     kind: 'sql#database'
@@ -629,6 +677,54 @@ objects:
         item_type: Api::Type::String
         description: 'The applicable regions for this tier.'
         output: true
+  - !ruby/object:Api::Resource
+    name: 'SourceRepresentationInstance'
+    kind: 'sql#instance'
+    description: |
+      A source representation instance is a Cloud SQL instance that represents
+      the source database server to the Cloud SQL replica. It is visible in the
+      Cloud Console and appears the same as a regular Cloud SQL instance, but it
+      contains no data, requires no configuration or maintenance, and does not
+      affect billing. You cannot update the source representation instance.
+    base_url: projects/{{project}}/instances
+    input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+            The name of the source representation instance. Use any valid Cloud SQL instance name.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'region'
+        description: |
+          The region where you want your Cloud SQL replicas to reside.
+        required: true
+      - !ruby/object:Api::Type::Enum
+        name: 'databaseVersion'
+        description: |
+          The MySQL version running on your source database server.
+        required: true
+        values:
+          - :MYSQL_5_6
+          - :MYSQL_5_7
+      - !ruby/object:Api::Type::NestedObject
+        name: 'onPremisesConfiguration'
+        description: |
+          Configuration specific to on-premises instances.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'host'
+            description: |
+              The externally accessible IPv4 address for the source database server.
+            required: true
+          - !ruby/object:Api::Type::Integer
+            name: 'port'
+            default_value: 3306
+            description: |
+              The externally accessible port for the source database server.
+              Defaults to 3306.
+
   # 'Operation' is not idempotent and will not be covered.
   # (it is used internally to assert the state of operations being performed)
   # | - !ruby/object:Api::Resource

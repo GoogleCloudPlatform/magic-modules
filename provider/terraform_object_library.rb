@@ -16,25 +16,31 @@ require 'provider/terraform_oics'
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
   class TerraformObjectLibrary < Provider::Terraform
-    def generate(output_folder, types, _product_path, _dump_yaml)
+    def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
       @base_url = @version.base_url
-      generate_objects(output_folder, types)
+      generate_objects(
+        output_folder,
+        types,
+        generate_code,
+        generate_docs
+      )
     end
 
-    def generate_object(object, output_folder, version_name)
+    def generate_object(object, output_folder, version_name, generate_code, generate_docs)
       if object.exclude_validator
         Google::LOGGER.info "Skipping fine-grained resource #{object.name}"
         return
       end
 
-      super(object, output_folder, version_name)
+      super(object, output_folder, version_name, generate_code, generate_docs)
     end
 
-    def generate_resource(data)
+    def generate_resource(pwd, data, _generate_code, _generate_docs)
       target_folder = data.output_folder
       product_ns = data.object.__product.name
 
-      data.generate('templates/terraform/objectlib/base.go.erb',
+      data.generate(pwd,
+                    'templates/terraform/objectlib/base.go.erb',
                     File.join(target_folder,
                               "google/#{product_ns.downcase}_#{data.object.name.underscore}.go"),
                     self)
@@ -49,6 +55,8 @@ module Provider
         products
       )
       compile_file_list(output_folder, [
+                          ['google/compute_operation.go',
+                           'third_party/terraform/utils/compute_operation.go.erb'],
                           ['google/config.go',
                            'third_party/terraform/utils/config.go.erb'],
                           ['google/utils.go',
@@ -59,8 +67,10 @@ module Provider
                         file_template)
     end
 
-    def copy_common_files(output_folder)
+    def copy_common_files(output_folder, generate_code, _generate_docs)
       Google::LOGGER.info 'Copying common files.'
+      return unless generate_code
+
       copy_file_list(output_folder, [
                        ['google/constants.go',
                         'third_party/validator/constants.go'],
@@ -110,12 +120,10 @@ module Provider
                         'third_party/terraform/utils/bigtable_client_factory.go'],
                        ['google/common_operation.go',
                         'third_party/terraform/utils/common_operation.go'],
-                       ['google/compute_operation.go',
-                        'third_party/terraform/utils/compute_operation.go'],
                        ['google/compute_shared_operation.go',
                         'third_party/terraform/utils/compute_shared_operation.go'],
                        ['google/compute_instance_helpers.go',
-                        'third_party/terraform/utils/compute_instance_helpers.go'],
+                        'third_party/terraform/utils/compute_instance_helpers.go.erb'],
                        ['google/convert.go',
                         'third_party/terraform/utils/convert.go'],
                        ['google/metadata.go',
@@ -128,15 +136,19 @@ module Provider
                         'third_party/terraform/utils/batcher.go'],
                        ['google/retry_utils.go',
                         'third_party/terraform/utils/retry_utils.go'],
+                       ['google/source_repo_utils.go',
+                        'third_party/terraform/utils/source_repo_utils.go'],
+                       ['google/retry_transport.go',
+                        'third_party/terraform/utils/retry_transport.go'],
                        ['google/error_retry_predicates.go',
                         'third_party/terraform/utils/error_retry_predicates.go']
                      ])
     end
 
-    def generate_resource_tests(data) end
+    def generate_resource_tests(pwd, data) end
 
-    def generate_iam_policy(data) end
+    def generate_iam_policy(pwd, data, generate_code, generate_docs) end
 
-    def generate_resource_sweepers(data) end
+    def generate_resource_sweepers(pwd, data) end
   end
 end

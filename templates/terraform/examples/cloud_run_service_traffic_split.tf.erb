@@ -1,0 +1,26 @@
+resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
+  location = "us-central1"
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+      }
+    }
+    metadata {
+      name = "<%= ctx[:vars]['cloud_run_service_name'] %>-green"
+    }
+  }
+
+  traffic {
+    percent       = 25
+    revision_name = "<%= ctx[:vars]['cloud_run_service_name'] %>-green"
+  }
+
+  traffic {
+    percent       = 75
+    # This revision needs to already exist
+    revision_name = "<%= ctx[:vars]['cloud_run_service_name'] %>-blue"
+  }
+}

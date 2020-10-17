@@ -16,6 +16,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"
     import_format: ["locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}"]
+    async: !ruby/object:Provider::Terraform::PollAsync
+      check_response_func_existence: PollCheckKnativeStatus
+      actions: ['create', 'update']
+      operation: !ruby/object:Api::Async::Operation
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 6
+          update_minutes: 6
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_domain_mapping_basic"
@@ -27,6 +34,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: 'templates/terraform/encoders/cloud_run_domain_mapping.go.erb'
       decoder: 'templates/terraform/decoders/cloud_run.go.erb'
+      constants: templates/terraform/constants/cloud_run_domain_mapping.go.erb
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         required: true
@@ -38,6 +46,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       metadata.labels: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: 'domainMappingLabelDiffSuppress'
       metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       metadata.namespace: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -50,11 +59,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "locations/{{location}}/namespaces/{{project}}/services/{{name}}"
     import_format: ["locations/{{location}}/namespaces/{{project}}/services/{{name}}"]
+    async: !ruby/object:Provider::Terraform::PollAsync
+      check_response_func_existence: PollCheckKnativeStatus
+      actions: ['create', 'update']
+      operation: !ruby/object:Api::Async::Operation
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 6
+          update_minutes: 15
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_basic"
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-tftest-cloudrun%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:
           cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
@@ -62,16 +78,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_sql"
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-tftest-cloudrun%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:
           cloud_run_service_name: "cloudrun-srv"
           cloud_run_sql_name: "cloudrun-sql"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
         test_env_vars:
           project: :PROJECT_NAME
+        ignore_read_extra:
+          - "autogenerate_revision_name"
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_noauth"
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-tftest-cloudrun%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:
           cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
@@ -79,14 +102,37 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_run_service_multiple_environment_variables"
         primary_resource_id: "default"
-        primary_resource_name: "fmt.Sprintf(\"tf-test-tftest-cloudrun%s\", context[\"random_suffix\"])"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
         vars:
           cloud_run_service_name: "cloudrun-srv"
         test_env_vars:
           project: :PROJECT_NAME
+        ignore_read_extra:
+          - "autogenerate_revision_name"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_run_service_traffic_split"
+        skip_test: true
+        primary_resource_id: "default"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
+        vars:
+          cloud_run_service_name: "cloudrun-srv"
+        test_env_vars:
+          project: :PROJECT_NAME
+    virtual_fields:
+      - !ruby/object:Api::Type::Boolean
+        name: 'autogenerate_revision_name'
+        default_value: false
+        description: |
+          If set to `true`, the revision name (template.metadata.name) will be omitted and 
+          autogenerated by Cloud Run. This cannot be set to `true` while `template.metadata.name` 
+          is also set. 
+          (For legacy support, if `template.metadata.name` is unset in state while
+          this field is set to false, the revision name will still autogenerate.)
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: 'templates/terraform/encoders/cloud_run_service.go.erb'
       decoder: 'templates/terraform/decoders/cloud_run.go.erb'
+      constants: templates/terraform/constants/cloud_run_service.go.erb
+      resource_definition: templates/terraform/resource_definition/cloud_run_service.go.erb
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         required: true
@@ -102,6 +148,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       spec.template.metadata: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       spec.template.metadata.name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/cloud_run_service_revision_name.erb'
         default_from_api: true
       spec.template.metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -112,7 +159,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       spec.template.spec.containerConcurrency: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      spec.template.spec.timeoutSeconds: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       spec.template.spec.containers: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      spec.template.spec.containers.ports: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       spec.template.spec.containers.resources: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true

@@ -94,7 +94,7 @@ module Provider
          object.name.underscore].join('_')
       end
 
-      def build_object_data(object, output_folder, version)
+      def build_object_data(pwd, object, output_folder, version)
         # Method is overridden to add Ansible example objects to the data object.
         data = AnsibleProductFileTemplate.file_for_resource(
           output_folder,
@@ -105,7 +105,7 @@ module Provider
         )
 
         prod_name = data.object.name.underscore
-        path = ["products/#{data.product.api_name}",
+        path = [pwd + "/products/#{data.product.api_name}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 
         data.example = get_example(path) if File.file?(path)
@@ -233,19 +233,20 @@ module Provider
         ex
       end
 
-      def generate_resource(data)
+      def generate_resource(pwd, data, _generate_code, _generate_docs)
         target_folder = data.output_folder
         name = module_name(data.object)
         path = File.join(target_folder,
                          "plugins/modules/#{name}.py")
         data.generate(
+          pwd,
           data.object.template || 'templates/ansible/resource.erb',
           path,
           self
         )
       end
 
-      def generate_resource_tests(data)
+      def generate_resource_tests(pwd, data)
         prod_name = data.object.name.underscore
         path = ["products/#{data.product.api_name}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
@@ -260,6 +261,7 @@ module Provider
         path = File.join(target_folder,
                          "tests/integration/targets/#{name}/tasks/main.yml")
         data.generate(
+          pwd,
           'templates/ansible/tests_main.erb',
           path,
           self
@@ -270,6 +272,7 @@ module Provider
           path = File.join(target_folder,
                            "tests/integration/targets/#{name}/tasks/#{t.name}.yml")
           data.generate(
+            pwd,
             t.path,
             path,
             self
@@ -280,26 +283,28 @@ module Provider
         path = File.join(target_folder,
                          "tests/integration/targets/#{name}/defaults/main.yml")
         data.generate(
+          pwd,
           'templates/ansible/integration_test_variables.erb',
           path,
           self
         )
       end
 
-      def generate_resource_sweepers(data)
+      def generate_resource_sweepers(pwd, data)
         # No generated sweepers for this provider
       end
 
-      def compile_datasource(data)
+      def compile_datasource(pwd, data)
         target_folder = data.output_folder
         name = module_name(data.object)
-        data.generate('templates/ansible/facts.erb',
+        data.generate(pwd,
+                      'templates/ansible/facts.erb',
                       File.join(target_folder,
                                 "plugins/modules/#{name}_info.py"),
                       self)
       end
 
-      def generate_objects(output_folder, types)
+      def generate_objects(output_folder, types, _generate_code, _generate_docs)
         # We have two sets of overrides - one for regular modules, one for
         # datasources.
         # When building regular modules, we will potentially need some
@@ -344,7 +349,7 @@ module Provider
     # Generates files on a per-resource basis.
     # All paths are allowed a '%s' where the module name
     # will be added.
-    def generate_resource_files(data)
+    def generate_resource_files(pwd, data)
       return unless @config&.files&.resource
 
       files = @config.files.resource
@@ -358,11 +363,11 @@ module Provider
         data.version,
         build_env
       )
-      compile_file_list(data.output_folder, files, file_template)
+      compile_file_list(data.output_folder, files, file_template, pwd)
     end
 
-    def copy_common_files(output_folder, provider_name = 'ansible')
-      super(output_folder, provider_name)
+    def copy_common_files(output_folder, generate_code, generate_docs, provider_name = 'ansible')
+      super(output_folder, generate_code, generate_docs, provider_name)
     end
 
     def module_utils_import_path

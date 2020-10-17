@@ -6,6 +6,8 @@
     :version_added: '2.8'
   :User:
     :version_added: '2.8'
+  :SslCert:
+    :version_added: '2.10'
 :regular:
   :Instance:
     :version_added: '2.7'
@@ -115,3 +117,19 @@
       :version_added: '2.7'
     :password:
       :version_added: '2.7'
+  :SslCert:
+    :version_added: '2.10'
+    :cert:
+      :version_added: '2.10'
+    :certSerialNumber:
+      :version_added: '2.10'
+    :commonName:
+      :version_added: '2.10'
+    :createTime:
+      :version_added: '2.10'
+    :expirationTime:
+      :version_added: '2.10'
+    :instance:
+      :version_added: '2.10'
+    :sha1Fingerprint:
+      :version_added: '2.10'
