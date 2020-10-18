@@ -1985,6 +1985,7 @@ objects:
           balancing cannot be used with the other(s).
         default_value: :INTERNAL
         values:
+          - :EXTERNAL
           - :INTERNAL
           - :INTERNAL_MANAGED
       - !ruby/object:Api::Type::Enum
