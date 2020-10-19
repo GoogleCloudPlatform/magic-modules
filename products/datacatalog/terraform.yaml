@@ -215,10 +215,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_name: "fmt.Sprintf(\"tf_test_my_child_tag%s\", context[\"random_suffix\"])"
         vars:
           taxonomy_display_name: "taxonomy_display_name"
-    properties:
-      region: !ruby/object:Overrides::Terraform::PropertyOverride
-        required: false
-        default_from_api: true
   # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

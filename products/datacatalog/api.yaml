@@ -515,7 +515,9 @@ objects:
         url_param_only: true
         input: true
         description: |
-          Taxonomy location region.
+          Taxonomy location region. Regions currently supported: eu, us, asia-northeast3
+
+          Regions supported after GA launch: eu, us, asia_east1, asia_east2, asia_south1, asia_southeast1, asia_southeast2, asia_northeast1, asia_northeast2, asia_northeast3, autralia_southeast1, europe_north1, europe_west1, europe_west2, europe_west3, europe_west4, europe_west6, northamerica_northeast1, southamerica_east1, us_east1, us_east4, us_west1, us_west2, us_west3, us_west4
     properties:
       - !ruby/object:Api::Type::String
         name: "name"
@@ -550,13 +552,13 @@ objects:
             - :FINE_GRAINED_ACCESS_CONTROL
   - !ruby/object:Api::Resource
     name: PolicyTag
-    base_url: projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}/PolicyTags
+    base_url: "{{taxonomy}}/policyTags"
     self_link: "{{name}}"
     min_version: beta
     update_verb: :PATCH
     update_mask: true
     description: |
-      Denotes one policy tag in a taxonomy
+      Denotes one policy tag in a taxonomy.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': https://cloud.google.com/data-catalog/docs
@@ -565,15 +567,9 @@ objects:
       method_name_separator: ':'
       fetch_iam_policy_verb: :POST
       parent_resource_attribute: 'policy_tag'
-      import_format: ["projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}/policyTags/{{policy_tag}}", "{{policy_tag}}"]
-      base_url: projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}/policyTags/{{policytag}}
+      import_format: ["{{taxonomy}}/policyTags/{{policy_tag}}", "{{policy_tag}}"]
+      base_url: "{{taxonomy}}/policyTags/{{policytag}}"
     parameters:
-      - !ruby/object:Api::Type::String
-        name: region
-        url_param_only: true
-        input: true
-        description: |
-          Taxonomy location region.
       - !ruby/object:Api::Type::String
         name: taxonomy
         url_param_only: true
