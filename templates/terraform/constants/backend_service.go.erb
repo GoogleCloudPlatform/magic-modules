@@ -24,10 +24,7 @@ func isNegBackend(backend map[string]interface{}) bool {
 		// should not happen as long as the regexp pattern compiled correctly
 		return false
 	}
-	if match {
-		return true
-	}
-	return false
+	return match
 }
 
 func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
