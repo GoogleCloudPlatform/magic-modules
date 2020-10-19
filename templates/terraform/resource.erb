@@ -562,7 +562,6 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     if err != nil {
     	return err
     }
-    config.userAgent = userAgent
 
     billingProject := ""
 
@@ -821,7 +820,6 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     if err != nil {
     	return err
     }
-    config.userAgent = userAgent
 
 <% if object.custom_code.custom_delete -%>
 <%= lines(compile(pwd + '/' + object.custom_code.custom_delete)) -%>
