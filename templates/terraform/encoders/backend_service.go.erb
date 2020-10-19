@@ -39,17 +39,9 @@ if !ok {
 backends := backendsRaw.([]interface{})
 for _, backendRaw := range backends {
 	backend := backendRaw.(map[string]interface{})
-	backendGroup, ok := backend["group"]
-	if !ok {
-		continue
-	}
 
-	match, err := regexp.MatchString("(?:global|regions/[^/]+)/networkEndpointGroups", backendGroup.(string))
-	if err != nil {
-		return nil, err
-	}
-	if match {
-		// Remove `max_utilization` from any backend that belongs to a serverless NEG. This field
+	if isNegBackend(backend) {
+		// Remove `max_utilization` from any backend that belongs to an NEG. This field
 		// has a default value and causes API validation errors
 		backend["maxUtilization"] = nil
 	}
