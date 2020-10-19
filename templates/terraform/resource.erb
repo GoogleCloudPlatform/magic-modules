@@ -500,7 +500,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%- unless object.virtual_fields.empty? -%>
   // Explicitly set virtual fields to default values if unset
 <%-   object.virtual_fields.each do |field| -%>
-    if _, ok := d.GetOk("<%= field.name -%>"); !ok {
+    if _, ok := d.GetOkExists("<%= field.name -%>"); !ok {
       if err := d.Set("<%= field.name -%>", <%= go_literal(field.default_value) -%>); err != nil {
       	return fmt.Errorf("Error setting <%= field.name -%>: %s", err)
       }

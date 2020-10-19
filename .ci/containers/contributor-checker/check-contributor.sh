@@ -38,7 +38,7 @@ fi
 
 # This is where you add people to the random-assignee rotation.  This list
 # might not equal the list above.
-ASSIGNEE=$(shuf -n 1 <(printf "danawillow\nrileykarson\nslevenick\nc2thorn\nndmckinley\nmegan07\nscottsuarez"))
+ASSIGNEE=$(shuf -n 1 <(printf "danawillow\nrileykarson\nslevenick\nc2thorn\nndmckinley\nscottsuarez"))
 
 comment=$(cat << EOF
 Hello!  I am a robot who works on Magic Modules PRs.
