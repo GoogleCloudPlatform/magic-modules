@@ -508,7 +508,7 @@ objects:
       fetch_iam_policy_verb: :POST
       parent_resource_attribute: 'taxonomy'
       import_format: ["projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}", "{{taxonomy}}"]
-      base_url: projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}
+      base_url: "projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}"
     parameters:
       - !ruby/object:Api::Type::String
         name: region
@@ -567,8 +567,8 @@ objects:
       method_name_separator: ':'
       fetch_iam_policy_verb: :POST
       parent_resource_attribute: 'policy_tag'
-      import_format: ["{{taxonomy}}/policyTags/{{policy_tag}}", "{{policy_tag}}"]
-      base_url: "{{taxonomy}}/policyTags/{{policytag}}"
+      import_format: ["{{%policy_tag}}"]
+      base_url: "{{%policy_tag}}"
     parameters:
       - !ruby/object:Api::Type::String
         name: taxonomy
@@ -609,3 +609,4 @@ objects:
         description: |
           Resource names of child policy tags of this policy tag.
         item_type: Api::Type::String
+        output: true

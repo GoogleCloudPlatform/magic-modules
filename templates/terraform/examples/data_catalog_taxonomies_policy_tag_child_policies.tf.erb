@@ -2,7 +2,7 @@ resource "google_data_catalog_policy_tag" "parent_policy" {
   provider = google-beta
   taxonomy = google_data_catalog_taxonomy.my_taxonomy.id
   display_name = "High"
-  description = "A policy tag catagory used for high security access"
+  description = "A policy tag category used for high security access"
 }
 
 resource "google_data_catalog_policy_tag" "<%= ctx[:primary_resource_id] %>" {
