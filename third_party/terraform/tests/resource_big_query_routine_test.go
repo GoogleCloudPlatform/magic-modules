@@ -13,9 +13,6 @@ func TestAccBigQueryRoutine_bigQueryRoutine_Update(t *testing.T) {
 	dataset := fmt.Sprintf("tfmanualdataset%s", randString(t, 10))
 	routine := fmt.Sprintf("tfmanualroutine%s", randString(t, 10))
 
-	body := "CREATE FUNCTION Add(x FLOAT64, y FLOAT64) RETURNS FLOAT64 AS (x + y);"
-	body_updated := "CREATE FUNCTION Minus(x FLOAT64, y FLOAT64) RETURNS FLOAT64 AS (x + y);"
-
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
@@ -25,7 +22,7 @@ func TestAccBigQueryRoutine_bigQueryRoutine_Update(t *testing.T) {
 		CheckDestroy: testAccCheckBigQueryRoutineDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryRoutine_bigQueryRoutine_Update(dataset, routine, body),
+				Config: testAccBigQueryRoutine_bigQueryRoutine(dataset, routine),
 			},
 			{
 				ResourceName:      "google_bigquery_routine.sproc",
@@ -33,7 +30,7 @@ func TestAccBigQueryRoutine_bigQueryRoutine_Update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccBigQueryRoutine_bigQueryRoutine_Update(dataset, routine, body_updated),
+				Config: testAccBigQueryRoutine_bigQueryRoutine_Update(dataset, routine),
 			},
 			{
 				ResourceName:      "google_bigquery_routine.sproc",
@@ -44,7 +41,7 @@ func TestAccBigQueryRoutine_bigQueryRoutine_Update(t *testing.T) {
 	})
 }
 
-func testAccBigQueryRoutine_bigQueryRoutine_Update(dataset, routine, body string) string {
+func testAccBigQueryRoutine_bigQueryRoutine(dataset, routine string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
 	dataset_id = "%s"
@@ -53,9 +50,35 @@ resource "google_bigquery_dataset" "test" {
 resource "google_bigquery_routine" "sproc" {
   dataset_id = google_bigquery_dataset.test.dataset_id
   routine_id     = "%s"
-  routine_type = "PROCEDURE"
+  routine_type = "SCALAR_FUNCTION"
   language = "SQL"
-  definition_body = "%s"
+  definition_body = "1"
 }
-`, dataset, routine, body)
+`, dataset, routine)
+}
+
+func testAccBigQueryRoutine_bigQueryRoutine_Update(dataset, routine string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+	dataset_id = "%s"
+}
+
+resource "google_bigquery_routine" "sproc" {
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  routine_id     = "%s"
+  routine_type = "SCALAR_FUNCTION"
+  language = "JAVASCRIPT"
+  definition_body = "CREATE FUNCTION multiplyInputs return x*y;"
+  arguments {
+    name = "x"
+    data_type = "{\"typeKind\" :  \"FLOAT64\"}"
+  }
+  arguments {
+    name = "y"
+    data_type = "{\"typeKind\" :  \"FLOAT64\"}"
+  }
+
+  return_type = "{\"typeKind\" :  \"FLOAT64\"}"
+}
+`, dataset, routine)
 }
