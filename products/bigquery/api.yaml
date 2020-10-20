@@ -47,6 +47,11 @@ objects:
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
+              name: 'id'
+              description: |
+                The fully-qualified unique name of the dataset in the format projectId:datasetId
+              output: true
+            - !ruby/object:Api::Type::String
               name: 'domain'
               description: |
                 A domain to grant access to. Any users signed in with the
