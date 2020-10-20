@@ -515,9 +515,7 @@ objects:
         url_param_only: true
         input: true
         description: |
-          Taxonomy location region. Regions currently supported: eu, us, asia-northeast3
-
-          Regions supported after GA launch: eu, us, asia_east1, asia_east2, asia_south1, asia_southeast1, asia_southeast2, asia_northeast1, asia_northeast2, asia_northeast3, autralia_southeast1, europe_north1, europe_west1, europe_west2, europe_west3, europe_west4, europe_west6, northamerica_northeast1, southamerica_east1, us_east1, us_east4, us_west1, us_west2, us_west3, us_west4
+          Taxonomy location region.
     properties:
       - !ruby/object:Api::Type::String
         name: "name"
