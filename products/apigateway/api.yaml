@@ -57,7 +57,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: apiId
         description: |
-          This must be unique within the project.
+          Identifier to assign to the API. Must be unique within scope of the parent resource(project)
         required: true
         input: true
         url_param_only: true
@@ -95,7 +95,7 @@ objects:
     update_verb: :PATCH
     update_mask: true
     description: |
-      A consumable API that can be used by multiple Gateways.
+      An API Configuration is an association of an API Controller Config and a Gateway Config
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -112,7 +112,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: apiConfigId
         description: |
-          Identifier to assign to the API Config. Must be unique within scope of the parent resource.
+          Identifier to assign to the API Config. Must be unique within scope of the parent resource(api).
         required: true
         input: true
         url_param_only: true
@@ -136,18 +136,21 @@ objects:
           Resource labels to represent user-provided metadata.
       - !ruby/object:Api::Type::NestedObject
         name: 'gatewayConfig'
+        input: true
         description: |
           Immutable. Gateway specific configuration.
           If not specified, backend authentication will be set to use OIDC authentication using the default compute service account
         properties:
         - !ruby/object:Api::Type::NestedObject
           name: 'backendConfig'
+          required: true
           description: |
             Backend settings that are applied to all backends of the Gateway.
           properties:
           - !ruby/object:Api::Type::String
             name: 'googleServiceAccount'
             input: true
+            required: true
             description: |
               Google Cloud IAM service account used to sign OIDC tokens for backends that have authentication configured
               (https://cloud.google.com/service-infrastructure/docs/service-management/reference/rest/v1/services.configs#backend). 
@@ -160,15 +163,18 @@ objects:
           properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'document'
+              required: true
               description: The OpenAPI Specification document file.
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'path'
+                  required: true
                   input: true
                   description: |
                     The file path (full or relative path). This is typically the path of the file when it is uploaded.
                 - !ruby/object:Api::Type::String
                   name: 'contents'
+                  required: true
                   input: true
                   description: |
                     Base64 encoded content of the file.
@@ -191,7 +197,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'region'
         description: |
-          The name of the Memcache region of the instance.
+          The region of the gateway for the API.
         input: true
         url_param_only: true
       - !ruby/object:Api::Type::String
