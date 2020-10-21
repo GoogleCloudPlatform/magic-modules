@@ -252,7 +252,7 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 			"build_environment_variables": {
 				Type:        schema.TypeMap,
 				Optional:    true,
-				Description: `A set of key/value environment variable pairs to assign to the function.`,
+				Description: ` A set of key/value environment variable pairs available during build time.`,
 			},
 
 			"trigger_http": {
@@ -510,9 +510,6 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("Error setting service_account_email: %s", err)
 	}
 	if err := d.Set("environment_variables", function.EnvironmentVariables); err != nil {
-		return fmt.Errorf("Error setting environment_variables: %s", err)
-	}
-	if err := d.Set("build_environment_variables", function.BuildEnvironmentVariables); err != nil {
 		return fmt.Errorf("Error setting environment_variables: %s", err)
 	}
 	if err := d.Set("vpc_connector", function.VpcConnector); err != nil {
