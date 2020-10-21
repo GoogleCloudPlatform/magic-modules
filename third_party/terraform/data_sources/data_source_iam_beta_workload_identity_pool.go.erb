@@ -1,0 +1,26 @@
+<% autogen_exception -%>
+package google
+
+<% unless version == 'ga' -%>
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+func dataSourceIAMBetaWorkloadIdentityPool() *schema.Resource {
+
+	dsSchema := (resourceIAMBetaWorkloadIdentityPool().Schema)
+	addRequiredFieldsToSchema(dsSchema, "workload_identity_pool_id")
+	addOptionalFieldsToSchema(dsSchema, "project")
+
+	return &schema.Resource{
+		Read:   dataSourceIAMBetaWorkloadIdentityPoolRead,
+		Schema: dsSchema,
+	}
+}
+
+func dataSourceIAMBetaWorkloadIdentityPoolRead(d *schema.ResourceData, meta interface{}) error {
+
+	return resourceIAMBetaWorkloadIdentityPoolRead(d, meta)
+
+}
+<% end -%>
