@@ -73,8 +73,6 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			{
 				Config: testAcc<%= test_slug -%>(context),
 			},
-		<%#- The Terraform test runner doesn't let us import resources with aliased providers (yet) -%>
-		<% unless versioned_provider -%>
 			{
 				ResourceName:      "<%= terraform_name -%>.<%= example.primary_resource_id -%>",
 				ImportState:       true,
@@ -83,7 +81,6 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 				ImportStateVerifyIgnore: <%= go_literal(ignore_read) %>,
 		<%- end -%>
 			},
-		<% end -%>
 		},
 	})
 }
