@@ -1075,6 +1075,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "vpc_network"
         vars:
           network_name: "vpc-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_custom_mtu"
+        primary_resource_id: "vpc_network"
+        vars:
+          network_name: "vpc-network"
     virtual_fields:
       - !ruby/object:Api::Type::Boolean
         name: 'delete_default_routes_on_create'
@@ -1108,6 +1113,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # while required inside routingConfig, routingMode is an optional convenience
         # field.
         required: false
+        default_from_api: true
+      mtu: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
@@ -1242,6 +1249,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"]
     # format from google_compute_network_peering
     mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
+    skip_delete: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "network_peering_routes_config_basic"
@@ -1266,7 +1274,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       exportCustomRoutes: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_delete: 'templates/terraform/custom_delete/skip_delete.go.erb'
       encoder: 'templates/terraform/encoders/network_peering_routes_config.go.erb'
   NodeGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs

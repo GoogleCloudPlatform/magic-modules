@@ -12,6 +12,21 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
+// Whether the backend is a global or regional NEG
+func isNegBackend(backend map[string]interface{}) bool {
+	backendGroup, ok := backend["group"]
+	if !ok {
+		return false
+	}
+
+	match, err := regexp.MatchString("(?:global|regions/[^/]+)/networkEndpointGroups", backendGroup.(string))
+	if err != nil {
+		// should not happen as long as the regexp pattern compiled correctly
+		return false
+	}
+	return match
+}
+
 func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
 	if v == nil {
 		return 0
@@ -102,6 +117,16 @@ func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
 		buf.WriteString(fmt.Sprintf("%v-", v))
 	}
 	if v, ok := m["max_rate_per_endpoint"]; ok {
+		if v == nil {
+			v = 0.0
+		}
+
+		// floats can't be added to the hash with %v as the other values are because
+		// %v and %f are not equivalent strings so this must remain as a float so that
+		// the hash function doesn't return something else.
+		buf.WriteString(fmt.Sprintf("%f-", v.(float64)))
+	}
+	if v, ok := m["max_utilization"]; ok && !isNegBackend(m) {
 		if v == nil {
 			v = 0.0
 		}
