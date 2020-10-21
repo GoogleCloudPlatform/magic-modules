@@ -626,7 +626,8 @@ func resourceContainerCluster() *schema.Resource {
 <% unless version == 'ga' -%>
 			"confidential_nodes": {
 				Type:        schema.TypeList,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				MaxItems:    1,
 				Description: `Configuration for the confidential nodes feature, which makes nodes run on confidential VMs. Warning: This configuration can't be changed (or added/removed) after cluster creation without deleting and recreating the entire cluster.`,
