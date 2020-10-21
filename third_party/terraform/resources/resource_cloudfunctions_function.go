@@ -249,6 +249,12 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 				Description: `A set of key/value environment variable pairs to assign to the function.`,
 			},
 
+			"build_environment_variables": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: `A set of key/value environment variable pairs to assign to the function.`,
+			},
+
 			"trigger_http": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -412,6 +418,10 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 		function.EnvironmentVariables = expandEnvironmentVariables(d)
 	}
 
+	if _, ok := d.GetOk("build_environment_variables"); ok {
+		function.BuildEnvironmentVariables = expandBuildEnvironmentVariables(d)
+	}
+
 	if v, ok := d.GetOk("vpc_connector"); ok {
 		function.VpcConnector = v.(string)
 	}
@@ -500,6 +510,9 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("Error setting service_account_email: %s", err)
 	}
 	if err := d.Set("environment_variables", function.EnvironmentVariables); err != nil {
+		return fmt.Errorf("Error setting environment_variables: %s", err)
+	}
+	if err := d.Set("build_environment_variables", function.BuildEnvironmentVariables); err != nil {
 		return fmt.Errorf("Error setting environment_variables: %s", err)
 	}
 	if err := d.Set("vpc_connector", function.VpcConnector); err != nil {
@@ -625,6 +638,11 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	if d.HasChange("environment_variables") {
 		function.EnvironmentVariables = expandEnvironmentVariables(d)
 		updateMaskArr = append(updateMaskArr, "environmentVariables")
+	}
+
+	if d.HasChange("build_environment_variables") {
+		function.EnvironmentVariables = expandEnvironmentVariables(d)
+		updateMaskArr = append(updateMaskArr, "buildEnvironmentVariables")
 	}
 
 	if d.HasChange("vpc_connector") {
