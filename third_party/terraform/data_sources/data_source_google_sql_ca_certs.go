@@ -61,6 +61,10 @@ func dataSourceGoogleSQLCaCerts() *schema.Resource {
 
 func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	fv, err := parseProjectFieldValue("instances", d.Get("instance").(string), "project", d, config, false)
 	if err != nil {
@@ -71,7 +75,7 @@ func dataSourceGoogleSQLCaCertsRead(d *schema.ResourceData, meta interface{}) er
 
 	log.Printf("[DEBUG] Fetching CA certs from instance %s", instance)
 
-	response, err := config.clientSqlAdmin.Instances.ListServerCas(project, instance).Do()
+	response, err := config.NewSqlAdminClient(userAgent).Instances.ListServerCas(project, instance).Do()
 	if err != nil {
 		return fmt.Errorf("error retrieving CA certs: %s", err)
 	}

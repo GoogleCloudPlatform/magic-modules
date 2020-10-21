@@ -1,5 +1,3 @@
-config := meta.(*Config)
-
 // Store the ID now
 id, err := replaceVars(d, config, "projects/{{project}}/locations/global/gameServerDeployments/{{deployment_id}}/rollout")
 if err != nil {

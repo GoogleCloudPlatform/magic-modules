@@ -78,11 +78,15 @@ func resourceGoogleFolderOrganizationPolicyCreate(d *schema.ResourceData, meta i
 
 func resourceGoogleFolderOrganizationPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	folder := canonicalFolderId(d.Get("folder").(string))
 
 	var policy *cloudresourcemanager.OrgPolicy
-	err := retryTimeDuration(func() (getErr error) {
-		policy, getErr = config.clientResourceManager.Folders.GetOrgPolicy(folder, &cloudresourcemanager.GetOrgPolicyRequest{
+	err = retryTimeDuration(func() (getErr error) {
+		policy, getErr = config.NewResourceManagerClient(userAgent).Folders.GetOrgPolicy(folder, &cloudresourcemanager.GetOrgPolicyRequest{
 			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		}).Do()
 		return getErr
@@ -130,10 +134,14 @@ func resourceGoogleFolderOrganizationPolicyUpdate(d *schema.ResourceData, meta i
 
 func resourceGoogleFolderOrganizationPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	folder := canonicalFolderId(d.Get("folder").(string))
 
 	return retryTimeDuration(func() (delErr error) {
-		_, delErr = config.clientResourceManager.Folders.ClearOrgPolicy(folder, &cloudresourcemanager.ClearOrgPolicyRequest{
+		_, delErr = config.NewResourceManagerClient(userAgent).Folders.ClearOrgPolicy(folder, &cloudresourcemanager.ClearOrgPolicyRequest{
 			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		}).Do()
 		return delErr
@@ -142,6 +150,11 @@ func resourceGoogleFolderOrganizationPolicyDelete(d *schema.ResourceData, meta i
 
 func setFolderOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	folder := canonicalFolderId(d.Get("folder").(string))
 
 	listPolicy, err := expandListOrganizationPolicy(d.Get("list_policy").([]interface{}))
@@ -155,7 +168,7 @@ func setFolderOrganizationPolicy(d *schema.ResourceData, meta interface{}) error
 	}
 
 	return retryTimeDuration(func() (setErr error) {
-		_, setErr = config.clientResourceManager.Folders.SetOrgPolicy(folder, &cloudresourcemanager.SetOrgPolicyRequest{
+		_, setErr = config.NewResourceManagerClient(userAgent).Folders.SetOrgPolicy(folder, &cloudresourcemanager.SetOrgPolicyRequest{
 			Policy: &cloudresourcemanager.OrgPolicy{
 				Constraint:     canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 				BooleanPolicy:  expandBooleanOrganizationPolicy(d.Get("boolean_policy").([]interface{})),

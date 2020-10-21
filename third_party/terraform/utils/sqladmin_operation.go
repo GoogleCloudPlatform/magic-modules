@@ -100,7 +100,7 @@ func (w *SqlAdminOperationWaiter) TargetStates() []string {
 	return []string{"DONE"}
 }
 
-func sqlAdminOperationWaitTime(config *Config, res interface{}, project, activity string, timeout time.Duration) error {
+func sqlAdminOperationWaitTime(config *Config, res interface{}, project, activity, userAgent string, timeout time.Duration) error {
 	op := &sqladmin.Operation{}
 	err := Convert(res, op)
 	if err != nil {
@@ -108,7 +108,7 @@ func sqlAdminOperationWaitTime(config *Config, res interface{}, project, activit
 	}
 
 	w := &SqlAdminOperationWaiter{
-		Service: config.clientSqlAdmin,
+		Service: config.NewSqlAdminClient(userAgent),
 		Op:      op,
 		Project: project,
 	}

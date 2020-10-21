@@ -21,13 +21,17 @@ func dataSourceGoogleComputeInstance() *schema.Resource {
 
 func dataSourceGoogleComputeInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, zone, name, err := GetZonalResourcePropertiesFromSelfLinkOrSchema(d, config)
 	if err != nil {
 		return err
 	}
 
-	instance, err := config.clientComputeBeta.Instances.Get(project, zone, name).Do()
+	instance, err := config.NewComputeBetaClient(userAgent).Instances.Get(project, zone, name).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Instance %s", name))
 	}

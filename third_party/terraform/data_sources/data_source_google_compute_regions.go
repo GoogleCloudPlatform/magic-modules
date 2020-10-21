@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"sort"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -36,6 +35,10 @@ func dataSourceGoogleComputeRegions() *schema.Resource {
 
 func dataSourceGoogleComputeRegionsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -46,7 +49,7 @@ func dataSourceGoogleComputeRegionsRead(d *schema.ResourceData, meta interface{}
 		filter = fmt.Sprintf(" (status eq %s)", s)
 	}
 
-	call := config.clientCompute.Regions.List(project).Filter(filter)
+	call := config.NewComputeClient(userAgent).Regions.List(project).Filter(filter)
 
 	resp, err := call.Do()
 	if err != nil {
@@ -62,7 +65,7 @@ func dataSourceGoogleComputeRegionsRead(d *schema.ResourceData, meta interface{}
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	d.SetId(time.Now().UTC().String())
+	d.SetId(fmt.Sprintf("projects/%s", project))
 
 	return nil
 }
