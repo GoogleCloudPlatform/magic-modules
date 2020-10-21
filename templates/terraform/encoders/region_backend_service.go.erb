@@ -12,11 +12,11 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-if d.Get("load_balancing_scheme").(string) != "INTERNAL" {
+if d.Get("load_balancing_scheme").(string) == "INTERNAL_MANAGED" {
 	return obj, nil
 }
 
-backendServiceOnlyNonInternalApiFieldNames := []string{
+backendServiceOnlyManagedApiFieldNames := []string{
 	"capacityScaler",
 	"maxConnections",
 	"maxConnectionsPerInstance",
@@ -36,10 +36,10 @@ for idx, v := range backends {
 		continue
 	}
 	backend := v.(map[string]interface{})
-	// Remove fields from backends that cannot be sent for INTERNAL
+	// Remove fields from backends that cannot be sent for non-managed
 	// backend services
-	for _, k := range backendServiceOnlyNonInternalApiFieldNames {
-		log.Printf("[DEBUG] Removing field %q for request for INTERNAL backend service %s", k, d.Get("name"))
+	for _, k := range backendServiceOnlyManagedApiFieldNames {
+		log.Printf("[DEBUG] Removing field %q for request for non-managed backend service %s", k, d.Get("name"))
 		delete(backend, k)
 	}
 	backends[idx] = backend
