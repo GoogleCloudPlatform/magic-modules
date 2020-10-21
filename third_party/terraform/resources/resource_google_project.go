@@ -107,7 +107,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	if err = resourceGoogleProjectCheckPreRequisites(config, d); err != nil {
+	if err = resourceGoogleProjectCheckPreRequisites(config, d, userAgent); err != nil {
 		return fmt.Errorf("failed pre-requisites: %v", err)
 	}
 
@@ -157,7 +157,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 
 	// Set the billing account
 	if _, ok := d.GetOk("billing_account"); ok {
-		err = updateProjectBillingAccount(d, config)
+		err = updateProjectBillingAccount(d, config, userAgent)
 		if err != nil {
 			return err
 		}
@@ -193,7 +193,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
-func resourceGoogleProjectCheckPreRequisites(config *Config, d *schema.ResourceData) error {
+func resourceGoogleProjectCheckPreRequisites(config *Config, d *schema.ResourceData, userAgent string) error {
 	ib, ok := d.GetOk("billing_account")
 	if !ok {
 		return nil
@@ -203,12 +203,23 @@ func resourceGoogleProjectCheckPreRequisites(config *Config, d *schema.ResourceD
 	req := &cloudbilling.TestIamPermissionsRequest{
 		Permissions: []string{perm},
 	}
-	resp, err := config.clientBilling.BillingAccounts.TestIamPermissions(ba, req).Do()
+	resp, err := config.NewBillingClient(userAgent).BillingAccounts.TestIamPermissions(ba, req).Do()
 	if err != nil {
 		return fmt.Errorf("failed to check permissions on billing account %q: %v", ba, err)
 	}
 	if !stringInSlice(resp.Permissions, perm) {
 		return fmt.Errorf("missing permission on %q: %v", ba, perm)
+	}
+	if !d.Get("auto_create_network").(bool) {
+		_, err := config.NewServiceUsageClient(userAgent).Services.Get("projects/00000000000/services/serviceusage.googleapis.com").Do()
+		switch {
+		// We are querying a dummy project since the call is already coming from the quota project.
+		// If the API is enabled we get a not found message or accessNotConfigured if API is not enabled.
+		case err.Error() == "googleapi: Error 403: Project '00000000000' not found or permission denied., forbidden":
+			return nil
+		case strings.Contains(err.Error(), "accessNotConfigured"):
+			return fmt.Errorf("API serviceusage not enabled.\nFound error: %v", err)
+		}
 	}
 	return nil
 }
@@ -271,7 +282,7 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 
 	var ba *cloudbilling.ProjectBillingInfo
 	err = retryTimeDuration(func() (reqErr error) {
-		ba, reqErr = config.clientBilling.Projects.GetBillingInfo(prefixedProject(pid)).Do()
+		ba, reqErr = config.NewBillingClient(userAgent).Projects.GetBillingInfo(prefixedProject(pid)).Do()
 		return reqErr
 	}, d.Timeout(schema.TimeoutRead))
 	// Read the billing account
@@ -381,7 +392,7 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 
 	// Billing account has changed
 	if ok := d.HasChange("billing_account"); ok {
-		err = updateProjectBillingAccount(d, config)
+		err = updateProjectBillingAccount(d, config, userAgent)
 		if err != nil {
 			return err
 		}
@@ -499,7 +510,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *Config, projectId
 	return deleteComputeNetwork(projectId, networkName, userAgent, config)
 }
 
-func updateProjectBillingAccount(d *schema.ResourceData, config *Config) error {
+func updateProjectBillingAccount(d *schema.ResourceData, config *Config, userAgent string) error {
 	parts := strings.Split(d.Id(), "/")
 	pid := parts[len(parts)-1]
 	name := d.Get("billing_account").(string)
@@ -509,7 +520,7 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *Config) error {
 		ba.BillingAccountName = "billingAccounts/" + name
 	}
 	updateBillingInfoFunc := func() error {
-		_, err := config.clientBilling.Projects.UpdateBillingInfo(prefixedProject(pid), ba).Do()
+		_, err := config.NewBillingClient(userAgent).Projects.UpdateBillingInfo(prefixedProject(pid), ba).Do()
 		return err
 	}
 	err := retryTimeDuration(updateBillingInfoFunc, d.Timeout(schema.TimeoutUpdate))
@@ -525,7 +536,7 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *Config) error {
 	for retries := 0; retries < 3; retries++ {
 		var ba *cloudbilling.ProjectBillingInfo
 		err = retryTimeDuration(func() (reqErr error) {
-			ba, reqErr = config.clientBilling.Projects.GetBillingInfo(prefixedProject(pid)).Do()
+			ba, reqErr = config.NewBillingClient(userAgent).Projects.GetBillingInfo(prefixedProject(pid)).Do()
 			return reqErr
 		}, d.Timeout(schema.TimeoutRead))
 		if err != nil {

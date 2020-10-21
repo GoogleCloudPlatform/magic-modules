@@ -170,6 +170,19 @@ objects:
             name: 'purgeTime'
             output: true
             description: The last time this queue was purged.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'stackdriverLoggingConfig'
+        description: |
+          Configuration options for writing logs to Stackdriver Logging.
+        properties:
+          - !ruby/object:Api::Type::Double
+            name: 'samplingRatio'
+            required: true
+            description: |
+              Specifies the fraction of operations to write to Stackdriver Logging.
+              This field may contain any value between 0.0 and 1.0, inclusive. 0.0 is the
+              default and means that no operations are logged.
+
 
 
 

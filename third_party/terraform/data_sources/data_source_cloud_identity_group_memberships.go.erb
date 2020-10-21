@@ -43,10 +43,9 @@ func dataSourceGoogleCloudIdentityGroupMembershipsRead(d *schema.ResourceData, m
 	if err != nil {
 		return err
 	}
-	config.clientCloudIdentity.UserAgent = userAgent
 
 	result := []map[string]interface{}{}
-	err = config.clientCloudIdentity.Groups.Memberships.List(d.Get("group").(string)).View("FULL").Pages(config.context, func(resp *cloudidentity.ListMembershipsResponse) error {
+	err = config.NewCloudIdentityClient(userAgent).Groups.Memberships.List(d.Get("group").(string)).View("FULL").Pages(config.context, func(resp *cloudidentity.ListMembershipsResponse) error {
 
 		for _, member := range resp.Memberships {
 			result = append(result, map[string]interface{}{
