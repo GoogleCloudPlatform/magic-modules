@@ -42,7 +42,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validateWorkloadIdentityPoolId'
   WorkloadIdentityPoolProvider: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
-    import_format: ["projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/{{workload_identity_pool_id}}"]
+    import_format: ["projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/{{workload_identity_pool_provider_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "iam_workload_identity_pool_provider_aws_basic"
