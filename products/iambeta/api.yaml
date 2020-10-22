@@ -71,14 +71,14 @@ objects:
         name: 'state'
         description: |
           The state of the pool.
-          STATE_UNSPECIFIED: State unspecified.
-          ACTIVE: The pool is active, and may be used in Google Cloud policies.
-          DELETED: The pool is soft-deleted. Soft-deleted pools are permanently deleted after
-          approximately 30 days. You can restore a soft-deleted pool using
-          UndeleteWorkloadIdentityPool. You cannot reuse the ID of a soft-deleted pool until it is
-          permanently deleted. While a pool is deleted, you cannot use it to exchange tokens, or
-          use existing tokens to access resources. If the pool is undeleted, existing tokens grant
-          access again.
+          * STATE_UNSPECIFIED: State unspecified.
+          * ACTIVE: The pool is active, and may be used in Google Cloud policies.
+          * DELETED: The pool is soft-deleted. Soft-deleted pools are permanently deleted after
+            approximately 30 days. You can restore a soft-deleted pool using
+            UndeleteWorkloadIdentityPool. You cannot reuse the ID of a soft-deleted pool until it is
+            permanently deleted. While a pool is deleted, you cannot use it to exchange tokens, or
+            use existing tokens to access resources. If the pool is undeleted, existing tokens grant
+            access again.
         output: true
         values:
           - :STATE_UNSPECIFIED
@@ -142,9 +142,9 @@ objects:
           * STATE_UNSPECIFIED: State unspecified.
           * ACTIVE: The provider is active, and may be used to validate authentication credentials.
           * DELETED: The provider is soft-deleted. Soft-deleted providers are permanently deleted
-          after approximately 30 days. You can restore a soft-deleted provider using
-          UndeleteWorkloadIdentityPoolProvider. You cannot reuse the ID of a soft-deleted provider
-          until it is permanently deleted.
+            after approximately 30 days. You can restore a soft-deleted provider using
+            UndeleteWorkloadIdentityPoolProvider. You cannot reuse the ID of a soft-deleted provider
+            until it is permanently deleted.
         output: true
         values:
           - :STATE_UNSPECIFIED
