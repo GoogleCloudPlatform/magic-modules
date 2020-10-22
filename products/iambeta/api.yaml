@@ -94,7 +94,7 @@ objects:
         name: 'name'
         description: |
           The resource name of the pool as
-          `projects/<projectnumber>/locations/global/workloadIdentityPools/<pool-id>`.
+          `projects/{project}/locations/global/workloadIdentityPools/{workload_identity_pool_id}`.
         output: true
       - !ruby/object:Api::Type::Boolean
         name: 'disabled'
@@ -107,7 +107,7 @@ objects:
     min_version: beta
     base_url: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers
     self_link: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/{{workload_identity_pool_provider_id}}
-    create_url: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/?workloadIdentityPoolProviderId={{workload_identity_pool_provider_id}}
+    create_url: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers?workloadIdentityPoolProviderId={{workload_identity_pool_provider_id}}
     update_verb: :PATCH
     update_mask: true
     description: A configuration for an external identity provider.
@@ -139,9 +139,9 @@ objects:
         name: 'state'
         description: |
           The state of the provider.
-          STATE_UNSPECIFIED: State unspecified.
-          ACTIVE: The provider is active, and may be used to validate authentication credentials.
-          DELETED: The provider is soft-deleted. Soft-deleted providers are permanently deleted
+          * STATE_UNSPECIFIED: State unspecified.
+          * ACTIVE: The provider is active, and may be used to validate authentication credentials.
+          * DELETED: The provider is soft-deleted. Soft-deleted providers are permanently deleted
           after approximately 30 days. You can restore a soft-deleted provider using
           UndeleteWorkloadIdentityPoolProvider. You cannot reuse the ID of a soft-deleted provider
           until it is permanently deleted.
@@ -160,7 +160,7 @@ objects:
         name: 'name'
         description: |
           The resource name of the provider as
-          `projects/<projectnumber>/locations/global/workloadIdentityPools/<pool-id>/providers/<provider-id>`.
+          `projects/{project}/locations/global/workloadIdentityPools/{workload_identity_pool_id}/providers/{workload_identity_pool_provider_id}`.
         output: true
       - !ruby/object:Api::Type::Boolean
         name: 'disabled'
@@ -254,7 +254,7 @@ objects:
           ```
       - !ruby/object:Api::Type::NestedObject
         name: aws
-        description: An Amazon Web Services identity provider.
+        description: An Amazon Web Services identity provider. Not compatible with the property oidc.
         exactly_one_of:
           - aws
           - oidc
@@ -265,7 +265,7 @@ objects:
             required: true
       - !ruby/object:Api::Type::NestedObject
         name: oidc
-        description: An OpenId Connect 1.0 identity provider.
+        description: An OpenId Connect 1.0 identity provider. Not compatible with the property aws.
         exactly_one_of:
           - aws
           - oidc
