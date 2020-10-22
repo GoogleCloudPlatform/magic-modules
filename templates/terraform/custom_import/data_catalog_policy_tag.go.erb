@@ -1,0 +1,18 @@
+config := meta.(*Config)
+
+// current import_formats can't import fields with forward slashes in their value
+if err := parseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+    return nil, err
+}
+
+name := d.Get("name").(string)
+ptRegex := regexp.MustCompile("(projects/.+/locations/.+/taxonomies/.+)/policyTags/.+")
+
+parts := ptRegex.FindStringSubmatch(name)
+if len(parts) != 2 {
+    return nil, fmt.Errorf("policy tag name does not fit the format %s", ptRegex)
+}
+if err := d.Set("taxonomy", parts[1]); err != nil {
+    return nil, fmt.Errorf("error setting taxonomy: %s", err)
+}
+return []*schema.ResourceData{d}, nil
