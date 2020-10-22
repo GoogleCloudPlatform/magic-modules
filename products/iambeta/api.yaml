@@ -94,7 +94,7 @@ objects:
         name: 'name'
         description: |
           The resource name of the pool as
-          `projects/{project}/locations/global/workloadIdentityPools/{workload_identity_pool_id}`.
+          `projects/{project_number}/locations/global/workloadIdentityPools/{workload_identity_pool_id}`.
         output: true
       - !ruby/object:Api::Type::Boolean
         name: 'disabled'
@@ -160,7 +160,7 @@ objects:
         name: 'name'
         description: |
           The resource name of the provider as
-          `projects/{project}/locations/global/workloadIdentityPools/{workload_identity_pool_id}/providers/{workload_identity_pool_provider_id}`.
+          `projects/{project_number}/locations/global/workloadIdentityPools/{workload_identity_pool_id}/providers/{workload_identity_pool_provider_id}`.
         output: true
       - !ruby/object:Api::Type::Boolean
         name: 'disabled'
