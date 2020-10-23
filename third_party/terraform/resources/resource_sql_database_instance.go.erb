@@ -675,7 +675,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		if err != nil {
 			var gerr *googleapi.Error
 			if errors.As(err, &gerr) {
-				log.Printf("[DEBUG] retrieved googleapi error while creating sn name for %q. skipping precheck. code %v and message: %s", network, gerr.Code, gerr.Body)
+				log.Printf("[DEBUG] retrieved googleapi error while creating sn name for %q. precheck skipped. code %v and message: %s", network, gerr.Code, gerr.Body)
 			} else {
 				return err
 			}
@@ -683,7 +683,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 			response, err := config.NewServiceNetworkingClient(userAgent).Services.Connections.List("services/servicenetworking.googleapis.com").Network(serviceNetworkingNetworkName).Do()
 			if err != nil {
 				// It is possible that the actor creating the SQL Instance might not have permissions to call servicenetworking.services.connections.list
-				log.Printf("[WARNING] Failed to list Service Networking of the project. Skipping Service Networking check.")
+				log.Printf("[WARNING] Failed to list Service Networking of the project. Skipped Service Networking precheck.")
 			} else {
 				if len(response.Connections) < 1 {
 					return fmt.Errorf("Error, failed to create instance because the network doesn't have at least 1 private services connection. Please see https://cloud.google.com/sql/docs/mysql/private-ip#network_requirements for how to create this connection.")
