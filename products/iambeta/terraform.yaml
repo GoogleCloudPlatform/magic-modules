@@ -30,10 +30,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           workload_identity_pool_id: "example-pool"
         min_version: beta
-    docs: !ruby/object:Provider::Terraform::Docs
-      attributes: |
-        * `self_link`: The self link of the created WorkloadIdentityPool in the format
-          `projects/{project_number}/locations/global/workloadIdentityPools/{workload_identity_pool_id}`
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/iam_workload_identity_pool.go.erb
     properties:
@@ -72,10 +68,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           workload_identity_pool_id: "example-pool"
           workload_identity_pool_provider_id: "example-prvdr"
         min_version: beta
-    docs: !ruby/object:Provider::Terraform::Docs
-      attributes: |
-        * `self_link`: The self link of the created WorkloadIdentityPoolProvider in the format
-          `projects/{project_number}/locations/global/workloadIdentityPools/{workload_identity_pool_id}/providers/{workload_identity_pool_provider_id}`
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/iam_workload_identity_pool_provider.go.erb
     properties:
