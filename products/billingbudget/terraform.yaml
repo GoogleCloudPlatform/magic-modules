@@ -29,6 +29,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'billing_budget_lastperiod'
         min_version: beta
         primary_resource_id: 'budget'
+        ignore_read_extra:
+          - budget_filter.0.projects.0
         vars:
           display_name: 'Example Billing Budget'
         test_env_vars:
@@ -38,6 +40,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'billing_budget_filter'
         min_version: beta
         primary_resource_id: 'budget'
+        ignore_read_extra:
+          - budget_filter.0.projects.0
         vars:
           display_name: 'Example Billing Budget'
         test_env_vars:
@@ -47,6 +51,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: 'billing_budget_notify'
         min_version: beta
         primary_resource_id: 'budget'
+        ignore_read_extra:
+          - budget_filter.0.projects.0
         vars:
           budget_name: 'Example Billing Budget'
           channel_name: 'Example Notification Channel'
@@ -60,6 +66,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       budgetFilter: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      budgetFilter.projects: !ruby/object:Overrides::Terraform::PropertyOverride
+        # projects can be set as project IDs or numbers, but are always returned as numbers.
+        # we can't handle this in customizediff because it's not a computed field, and
+        # we can't use a simple ignore_read because that doesn't work on nested fields.
+        # use a custom flattener instead, and set ignore_read_extra for the import tests.
+        custom_flatten: templates/terraform/custom_flatten/billing_budget_filter_projects.go.erb
+        description: | 
+          {{description}
+          If this field is set as a project ID (not number) and the user does not have permission
+          to read the project from the API, Terraform will not detect drift on it.
       amount.lastPeriodAmount: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bool_to_object.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/object_to_bool.go.erb'

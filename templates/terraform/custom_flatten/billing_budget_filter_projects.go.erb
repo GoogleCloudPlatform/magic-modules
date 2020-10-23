@@ -1,0 +1,53 @@
+<%# The license inside this block applies to this file.
+	# Copyright 2020 Google Inc.
+	# Licensed under the Apache License, Version 2.0 (the "License");
+	# you may not use this file except in compliance with the License.
+	# You may obtain a copy of the License at
+	#
+	#     http://www.apache.org/licenses/LICENSE-2.0
+	#
+	# Unless required by applicable law or agreed to in writing, software
+	# distributed under the License is distributed on an "AS IS" BASIS,
+	# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	# See the License for the specific language governing permissions and
+	# limitations under the License.
+-%>
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+    stateProjects := d.Get("budget_filter.0.projects").([]interface{})
+    apiProjects := v.([]interface{})
+
+    if len(stateProjects) != len(apiProjects) {
+        // this is a diff anyway, so just return what we got from the API
+        return v
+    }
+
+    transformed := make([]string, len(stateProjects))
+    for i := 0; i < len(stateProjects); i++ {
+        sp := strings.TrimPrefix(stateProjects[i].(string), "projects/")
+        ap := strings.TrimPrefix(apiProjects[i].(string), "projects/")
+
+        // If they already match, great
+        if sp == ap {
+            transformed[i] = "projects/" + sp
+        }
+
+        // If not, try to read the original one to check if the numbers are the same
+		project, err := config.NewResourceManagerClient(config.userAgent).Projects.Get(sp).Do()
+		if err != nil {
+			// We might not be able to read the project due to missing permissions or API enablement.
+			// If that happens, just assume it matches so we don't need to provide those extra requirements.
+			log.Printf("[DEBUG] couldn't read project, assuming match")
+			transformed[i] = "projects/" + sp
+            continue
+        }
+
+        if strconv.FormatInt(project.ProjectNumber, 10) == ap {
+			log.Printf("[DEBUG] project %v number is %v, matches %v", sp, project.ProjectNumber, ap)
+			transformed[i] = "projects/" + sp
+		} else {
+            transformed[i] = "projects/" + ap
+        }
+    }
+
+    return transformed
+}
