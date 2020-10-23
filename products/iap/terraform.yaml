@@ -153,6 +153,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Brand: !ruby/object:Overrides::Terraform::ResourceOverride
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckForExistence
+      target_occurrences: 5
       actions: ['create']
       operation: !ruby/object:Api::Async::Operation
         timeouts: !ruby/object:Api::Timeouts
@@ -167,6 +168,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       but *will not delete it from Google Cloud.*
     id_format: '{{name}}'
     import_format: ['{{name}}']
+    skip_delete: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "iap_brand"
@@ -178,7 +180,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_domain: :ORG_DOMAIN
         skip_test: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
       custom_import: templates/terraform/custom_import/iap_brand.go.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
   Client: !ruby/object:Overrides::Terraform::ResourceOverride

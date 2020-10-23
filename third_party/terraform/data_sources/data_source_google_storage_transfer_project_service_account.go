@@ -23,21 +23,18 @@ func dataSourceGoogleStorageTransferProjectServiceAccount() *schema.Resource {
 }
 
 func dataSourceGoogleStorageTransferProjectServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientStorageTransfer.UserAgent = fmt.Sprintf("%s %s", config.clientStorageTransfer.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	serviceAccount, err := config.clientStorageTransfer.GoogleServiceAccounts.Get(project).Do()
+	serviceAccount, err := config.NewStorageTransferClient(userAgent).GoogleServiceAccounts.Get(project).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, "Google Cloud Storage Transfer service account not found")
 	}

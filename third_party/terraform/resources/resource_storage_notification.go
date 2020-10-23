@@ -88,14 +88,11 @@ func resourceStorageNotification() *schema.Resource {
 }
 
 func resourceStorageNotificationCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientStorage.UserAgent = fmt.Sprintf("%s %s", config.clientStorage.UserAgent, m.ModuleName)
 
 	bucket := d.Get("bucket").(string)
 
@@ -117,7 +114,7 @@ func resourceStorageNotificationCreate(d *schema.ResourceData, meta interface{})
 		Topic:            computedTopicName,
 	}
 
-	res, err := config.clientStorage.Notifications.Insert(bucket, storageNotification).Do()
+	res, err := config.NewStorageClient(userAgent).Notifications.Insert(bucket, storageNotification).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating notification config for bucket %s: %v", bucket, err)
 	}
@@ -129,10 +126,14 @@ func resourceStorageNotificationCreate(d *schema.ResourceData, meta interface{})
 
 func resourceStorageNotificationRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	bucket, notificationID := resourceStorageNotificationParseID(d.Id())
 
-	res, err := config.clientStorage.Notifications.Get(bucket, notificationID).Do()
+	res, err := config.NewStorageClient(userAgent).Notifications.Get(bucket, notificationID).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Notification configuration %s for bucket %s", notificationID, bucket))
 	}
@@ -167,10 +168,14 @@ func resourceStorageNotificationRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceStorageNotificationDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	bucket, notificationID := resourceStorageNotificationParseID(d.Id())
 
-	err := config.clientStorage.Notifications.Delete(bucket, notificationID).Do()
+	err = config.NewStorageClient(userAgent).Notifications.Delete(bucket, notificationID).Do()
 	if err != nil {
 		return fmt.Errorf("Error deleting notification configuration %s for bucket %s: %v", notificationID, bucket, err)
 	}

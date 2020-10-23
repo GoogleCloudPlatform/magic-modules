@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -34,14 +33,11 @@ func dataSourceGoogleKmsSecretCiphertext() *schema.Resource {
 }
 
 func dataSourceGoogleKmsSecretCiphertextRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientKms.UserAgent = fmt.Sprintf("%s %s", config.clientKms.UserAgent, m.ModuleName)
 
 	cryptoKeyId, err := parseKmsCryptoKeyId(d.Get("crypto_key").(string), config)
 
@@ -55,7 +51,7 @@ func dataSourceGoogleKmsSecretCiphertextRead(d *schema.ResourceData, meta interf
 		Plaintext: plaintext,
 	}
 
-	encryptCall := config.clientKms.Projects.Locations.KeyRings.CryptoKeys.Encrypt(cryptoKeyId.cryptoKeyId(), kmsEncryptRequest)
+	encryptCall := config.NewKmsClient(userAgent).Projects.Locations.KeyRings.CryptoKeys.Encrypt(cryptoKeyId.cryptoKeyId(), kmsEncryptRequest)
 	if config.UserProjectOverride {
 		encryptCall.Header().Set("X-Goog-User-Project", cryptoKeyId.KeyRingId.Project)
 	}
@@ -70,7 +66,7 @@ func dataSourceGoogleKmsSecretCiphertextRead(d *schema.ResourceData, meta interf
 	if err := d.Set("ciphertext", encryptResponse.Ciphertext); err != nil {
 		return fmt.Errorf("Error setting ciphertext: %s", err)
 	}
-	d.SetId(time.Now().UTC().String())
+	d.SetId(d.Get("crypto_key").(string))
 
 	return nil
 }

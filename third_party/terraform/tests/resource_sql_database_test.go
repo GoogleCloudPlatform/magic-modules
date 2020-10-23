@@ -50,16 +50,18 @@ func TestAccSqlDatabase_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				ResourceName:      resourceName,
-				ImportStateId:     fmt.Sprintf("%s/%s/%s", getTestProjectFromEnv(), instanceName, dbName),
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportStateId:           fmt.Sprintf("%s/%s/%s", getTestProjectFromEnv(), instanceName, dbName),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				ResourceName:      resourceName,
-				ImportStateId:     fmt.Sprintf("projects/%s/instances/%s/databases/%s", getTestProjectFromEnv(), instanceName, dbName),
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportStateId:           fmt.Sprintf("projects/%s/instances/%s/databases/%s", getTestProjectFromEnv(), instanceName, dbName),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -144,7 +146,7 @@ func testAccCheckGoogleSqlDatabaseExists(t *testing.T, n string, database *sqlad
 
 		database_name := rs.Primary.Attributes["name"]
 		instance_name := rs.Primary.Attributes["instance"]
-		found, err := config.clientSqlAdmin.Databases.Get(config.Project,
+		found, err := config.NewSqlAdminClient(config.userAgent).Databases.Get(config.Project,
 			instance_name, database_name).Do()
 
 		if err != nil {
@@ -167,7 +169,7 @@ func testAccSqlDatabaseDestroyProducer(t *testing.T) func(s *terraform.State) er
 
 			database_name := rs.Primary.Attributes["name"]
 			instance_name := rs.Primary.Attributes["instance"]
-			_, err := config.clientSqlAdmin.Databases.Get(config.Project,
+			_, err := config.NewSqlAdminClient(config.userAgent).Databases.Get(config.Project,
 				instance_name, database_name).Do()
 
 			if err == nil {
@@ -183,6 +185,7 @@ var testGoogleSqlDatabase_basic = `
 resource "google_sql_database_instance" "instance" {
   name   = "%s"
   region = "us-central1"
+  deletion_protection = false
   settings {
     tier = "db-f1-micro"
   }
@@ -197,6 +200,7 @@ var testGoogleSqlDatabase_latin1 = `
 resource "google_sql_database_instance" "instance" {
   name   = "%s"
   region = "us-central1"
+  deletion_protection = false
   settings {
     tier = "db-f1-micro"
   }

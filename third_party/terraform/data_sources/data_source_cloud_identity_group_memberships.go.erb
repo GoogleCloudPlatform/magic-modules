@@ -38,17 +38,14 @@ func dataSourceGoogleCloudIdentityGroupMemberships() *schema.Resource {
 }
 
 func dataSourceGoogleCloudIdentityGroupMembershipsRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCloudIdentity.UserAgent = fmt.Sprintf("%s %s", config.clientCloudIdentity.UserAgent, m.ModuleName)
 
 	result := []map[string]interface{}{}
-	err = config.clientCloudIdentity.Groups.Memberships.List(d.Get("group").(string)).View("FULL").Pages(config.context, func(resp *cloudidentity.ListMembershipsResponse) error {
+	err = config.NewCloudIdentityClient(userAgent).Groups.Memberships.List(d.Get("group").(string)).View("FULL").Pages(config.context, func(resp *cloudidentity.ListMembershipsResponse) error {
 
 		for _, member := range resp.Memberships {
 			result = append(result, map[string]interface{}{

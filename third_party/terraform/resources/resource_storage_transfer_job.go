@@ -373,19 +373,16 @@ func diffSuppressEmptyStartTimeOfDay(k, old, new string, d *schema.ResourceData)
 }
 
 func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
 
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
-	config.clientStorageTransfer.UserAgent = fmt.Sprintf("%s %s", config.clientStorageTransfer.UserAgent, m.ModuleName)
 
 	transferJob := &storagetransfer.TransferJob{
 		Description:  d.Get("description").(string),
@@ -398,7 +395,7 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 	var res *storagetransfer.TransferJob
 
 	err = retry(func() error {
-		res, err = config.clientStorageTransfer.TransferJobs.Create(transferJob).Do()
+		res, err = config.NewStorageTransferClient(userAgent).TransferJobs.Create(transferJob).Do()
 		return err
 	})
 
@@ -419,6 +416,10 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 
 func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -426,7 +427,7 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 	}
 
 	name := d.Get("name").(string)
-	res, err := config.clientStorageTransfer.TransferJobs.Get(name).ProjectId(project).Do()
+	res, err := config.NewStorageTransferClient(userAgent).TransferJobs.Get(name).ProjectId(project).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Transfer Job %q", name))
 	}
@@ -466,6 +467,10 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 
 func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -510,7 +515,7 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 
 	updateRequest.UpdateTransferJobFieldMask = strings.Join(fieldMask, ",")
 
-	res, err := config.clientStorageTransfer.TransferJobs.Patch(d.Get("name").(string), updateRequest).Do()
+	res, err := config.NewStorageTransferClient(userAgent).TransferJobs.Patch(d.Get("name").(string), updateRequest).Do()
 	if err != nil {
 		return err
 	}
@@ -521,6 +526,10 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 
 func resourceStorageTransferJobDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -545,7 +554,7 @@ func resourceStorageTransferJobDelete(d *schema.ResourceData, meta interface{}) 
 	// Update transfer job with status set to DELETE
 	log.Printf("[DEBUG] Setting status to DELETE for: %v\n\n", transferJobName)
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-		_, err := config.clientStorageTransfer.TransferJobs.Patch(transferJobName, updateRequest).Do()
+		_, err := config.NewStorageTransferClient(userAgent).TransferJobs.Patch(transferJobName, updateRequest).Do()
 		if err != nil {
 			return resource.RetryableError(err)
 		}

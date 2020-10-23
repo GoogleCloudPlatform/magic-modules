@@ -41,21 +41,18 @@ func dataSourceGoogleComputeGlobalAddress() *schema.Resource {
 }
 
 func dataSourceGoogleComputeGlobalAddressRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
 	name := d.Get("name").(string)
-	address, err := config.clientCompute.GlobalAddresses.Get(project, name).Do()
+	address, err := config.NewComputeClient(userAgent).GlobalAddresses.Get(project, name).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Global Address Not Found : %s", name))
 	}

@@ -3,7 +3,6 @@ package google
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -44,14 +43,11 @@ func dataSourceGoogleComposerImageVersions() *schema.Resource {
 }
 
 func dataSourceGoogleComposerImageVersionsRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.userAgent = fmt.Sprintf("%s %s", config.userAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -68,7 +64,7 @@ func dataSourceGoogleComposerImageVersionsRead(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	versions, err := paginatedListRequest(project, url, config, flattenGoogleComposerImageVersions)
+	versions, err := paginatedListRequest(project, url, userAgent, config, flattenGoogleComposerImageVersions)
 	if err != nil {
 		return fmt.Errorf("Error listing Composer image versions: %s", err)
 	}
@@ -84,7 +80,7 @@ func dataSourceGoogleComposerImageVersionsRead(d *schema.ResourceData, meta inte
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	d.SetId(time.Now().UTC().String())
+	d.SetId(fmt.Sprintf("projects/%s/regions/%s", project, region))
 
 	return nil
 }

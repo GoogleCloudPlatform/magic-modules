@@ -30,6 +30,7 @@ type TerraformResourceData interface {
 }
 
 type TerraformResourceDiff interface {
+	HasChange(string) bool
 	GetChange(string) (interface{}, interface{})
 	Get(string) interface{}
 	Clear(string) error
@@ -161,6 +162,11 @@ func expandLabels(d TerraformResourceData) map[string]string {
 // expandEnvironmentVariables pulls the value of "environment_variables" out of a schema.ResourceData as a map[string]string.
 func expandEnvironmentVariables(d *schema.ResourceData) map[string]string {
 	return expandStringMap(d, "environment_variables")
+}
+
+// expandBuildEnvironmentVariables pulls the value of "build_environment_variables" out of a schema.ResourceData as a map[string]string.
+func expandBuildEnvironmentVariables(d *schema.ResourceData) map[string]string {
+	return expandStringMap(d, "build_environment_variables")
 }
 
 // expandStringMap pulls the value of key out of a TerraformResourceData as a map[string]string.
@@ -352,8 +358,8 @@ func serviceAccountFQN(serviceAccount string, d TerraformResourceData, config *C
 	return fmt.Sprintf("projects/-/serviceAccounts/%s@%s.iam.gserviceaccount.com", serviceAccount, project), nil
 }
 
-func paginatedListRequest(project, baseUrl string, config *Config, flattener func(map[string]interface{}) []interface{}) ([]interface{}, error) {
-	res, err := sendRequest(config, "GET", project, baseUrl, nil)
+func paginatedListRequest(project, baseUrl, userAgent string, config *Config, flattener func(map[string]interface{}) []interface{}) ([]interface{}, error) {
+	res, err := sendRequest(config, "GET", project, baseUrl, userAgent, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -365,7 +371,7 @@ func paginatedListRequest(project, baseUrl string, config *Config, flattener fun
 			break
 		}
 		url := fmt.Sprintf("%s?pageToken=%s", baseUrl, pageToken.(string))
-		res, err = sendRequest(config, "GET", project, url, nil)
+		res, err = sendRequest(config, "GET", project, url, userAgent, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -376,9 +382,9 @@ func paginatedListRequest(project, baseUrl string, config *Config, flattener fun
 	return ls, nil
 }
 
-func getInterconnectAttachmentLink(config *Config, project, region, ic string) (string, error) {
+func getInterconnectAttachmentLink(config *Config, project, region, ic, userAgent string) (string, error) {
 	if !strings.Contains(ic, "/") {
-		icData, err := config.clientCompute.InterconnectAttachments.Get(
+		icData, err := config.NewComputeClient(userAgent).InterconnectAttachments.Get(
 			project, region, ic).Do()
 		if err != nil {
 			return "", fmt.Errorf("Error reading interconnect attachment: %s", err)
@@ -451,4 +457,19 @@ func changeFieldSchemaToForceNew(sch *schema.Schema) {
 			}
 		}
 	}
+}
+
+func generateUserAgentString(d *schema.ResourceData, currentUserAgent string) (string, error) {
+	var m providerMeta
+
+	err := d.GetProviderMeta(&m)
+	if err != nil {
+		return currentUserAgent, err
+	}
+
+	if m.ModuleName != "" {
+		return strings.Join([]string{currentUserAgent, m.ModuleName}, " "), nil
+	}
+
+	return currentUserAgent, nil
 }

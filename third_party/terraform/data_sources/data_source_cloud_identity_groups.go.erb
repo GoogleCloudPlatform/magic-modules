@@ -41,17 +41,14 @@ groups or customers/{customer_id} for Google Groups.`,
 }
 
 func dataSourceGoogleCloudIdentityGroupsRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCloudIdentity.UserAgent = fmt.Sprintf("%s %s", config.clientCloudIdentity.UserAgent, m.ModuleName)
 
 	result := []map[string]interface{}{}
-	err = config.clientCloudIdentity.Groups.List().Parent(d.Get("parent").(string)).View("FULL").Pages(config.context, func(resp *cloudidentity.ListGroupsResponse) error {
+	err = config.NewCloudIdentityClient(userAgent).Groups.List().Parent(d.Get("parent").(string)).View("FULL").Pages(config.context, func(resp *cloudidentity.ListGroupsResponse) error {
 		for _, group := range resp.Groups {
 			result = append(result, map[string]interface{}{
 				"name":         group.Name,

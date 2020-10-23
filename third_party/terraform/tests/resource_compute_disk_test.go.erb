@@ -189,7 +189,7 @@ func TestAccComputeDisk_imageDiffSuppressPublicVendorsFamilyNames(t *testing.T) 
 	for _, publicImageProject := range imageMap {
 		token := ""
 		for paginate := true; paginate; {
-			resp, err := config.clientCompute.Images.List(publicImageProject).Filter("deprecated.replacement ne .*images.*").PageToken(token).Do()
+			resp, err := config.NewComputeClient(config.userAgent).Images.List(publicImageProject).Filter("deprecated.replacement ne .*images.*").PageToken(token).Do()
 			if err != nil {
 				t.Fatalf("Can't list public images for project %q", publicImageProject)
 			}
@@ -457,6 +457,29 @@ func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 }
 <% end -%>
 
+<% unless version == 'ga' -%>
+func TestAccComputeDisk_interface(t *testing.T) {
+	t.Parallel()
+
+	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeDisk_interface(diskName),
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
+
 func testAccCheckComputeDiskExists(t *testing.T, n, p string, disk *compute.Disk) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -470,7 +493,7 @@ func testAccCheckComputeDiskExists(t *testing.T, n, p string, disk *compute.Disk
 
 		config := googleProviderConfig(t)
 
-		found, err := config.clientCompute.Disks.Get(
+		found, err := config.NewComputeClient(config.userAgent).Disks.Get(
 			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
 		if err != nil {
 			return err
@@ -668,7 +691,7 @@ resource "google_compute_disk" "foo" {
 
 resource "google_compute_instance" "bar" {
   name         = "%s"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-medium"
   zone         = "us-central1-a"
 
   boot_disk {
@@ -773,5 +796,23 @@ resource "google_compute_disk" "foobar" {
   resource_policies = [google_compute_resource_policy.foo.self_link]
 }
 `, policyName, diskName)
+}
+
+func testAccComputeDisk_interface(diskName string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name      = "%s"
+  image     = data.google_compute_image.my_image.self_link
+  size      = 50
+  type      = "pd-ssd"
+  zone      = "us-central1-a"
+  interface = "NVME"
+}
+`, diskName)
 }
 <% end -%>

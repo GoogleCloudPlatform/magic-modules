@@ -855,7 +855,7 @@ func testAccCheckContainerNodePoolDestroyProducer(t *testing.T) func(s *terrafor
 
 			var err error
 			if location != "" {
-				_, err = config.clientContainer.Projects.Zones.Clusters.NodePools.Get(
+				_, err = config.NewContainerClient(config.userAgent).Projects.Zones.Clusters.NodePools.Get(
 					config.Project, attributes["location"], attributes["cluster"], attributes["name"]).Do()
 			} else {
 				name := fmt.Sprintf(
@@ -865,7 +865,7 @@ func testAccCheckContainerNodePoolDestroyProducer(t *testing.T) func(s *terrafor
 					attributes["cluster"],
 					attributes["name"],
 				)
-				_, err = config.clientContainerBeta.Projects.Locations.Clusters.NodePools.Get(name).Do()
+				_, err = config.NewContainerBetaClient(config.userAgent).Projects.Locations.Clusters.NodePools.Get(name).Do()
 			}
 
 			if err == nil {
@@ -1375,6 +1375,7 @@ resource "google_container_node_pool" "with_sandbox_config" {
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
   node_config {
+    machine_type = "n1-standard-1"  // can't be e2 because of gvisor
     image_type = "COS_CONTAINERD"
 
     sandbox_config {
@@ -1419,6 +1420,7 @@ resource "google_container_node_pool" "with_sandbox_config" {
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
   node_config {
+    machine_type = "n1-standard-1"  // can't be e2 because of gvisor
     image_type = "COS_CONTAINERD"
 
     sandbox_config {
@@ -1630,7 +1632,7 @@ resource "google_container_node_pool" "np_with_gpu" {
   initial_node_count = 1
 
   node_config {
-    machine_type = "n1-standard-1"
+    machine_type = "n1-standard-1"  // can't be e2 because of accelerator
     disk_size_gb = 32
 
     oauth_scopes = [

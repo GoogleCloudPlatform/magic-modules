@@ -64,14 +64,11 @@ func resourceRuntimeconfigVariable() *schema.Resource {
 }
 
 func resourceRuntimeconfigVariableCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientRuntimeconfig.UserAgent = fmt.Sprintf("%s %s", config.clientRuntimeconfig.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -83,7 +80,7 @@ func resourceRuntimeconfigVariableCreate(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	createdVariable, err := config.clientRuntimeconfig.Projects.Configs.Variables.Create(resourceRuntimeconfigFullName(project, parent), variable).Do()
+	createdVariable, err := config.NewRuntimeconfigClient(userAgent).Projects.Configs.Variables.Create(resourceRuntimeconfigFullName(project, parent), variable).Do()
 	if err != nil {
 		return err
 	}
@@ -94,9 +91,13 @@ func resourceRuntimeconfigVariableCreate(d *schema.ResourceData, meta interface{
 
 func resourceRuntimeconfigVariableRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	fullName := d.Id()
-	createdVariable, err := config.clientRuntimeconfig.Projects.Configs.Variables.Get(fullName).Do()
+	createdVariable, err := config.NewRuntimeconfigClient(userAgent).Projects.Configs.Variables.Get(fullName).Do()
 	if err != nil {
 		return err
 	}
@@ -106,6 +107,10 @@ func resourceRuntimeconfigVariableRead(d *schema.ResourceData, meta interface{})
 
 func resourceRuntimeconfigVariableUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
@@ -120,7 +125,7 @@ func resourceRuntimeconfigVariableUpdate(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	createdVariable, err := config.clientRuntimeconfig.Projects.Configs.Variables.Update(variable.Name, variable).Do()
+	createdVariable, err := config.NewRuntimeconfigClient(userAgent).Projects.Configs.Variables.Update(variable.Name, variable).Do()
 	if err != nil {
 		return err
 	}
@@ -129,10 +134,15 @@ func resourceRuntimeconfigVariableUpdate(d *schema.ResourceData, meta interface{
 }
 
 func resourceRuntimeconfigVariableDelete(d *schema.ResourceData, meta interface{}) error {
-	fullName := d.Id()
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
-	_, err := config.clientRuntimeconfig.Projects.Configs.Variables.Delete(fullName).Do()
+	fullName := d.Id()
+
+	_, err = config.NewRuntimeconfigClient(userAgent).Projects.Configs.Variables.Delete(fullName).Do()
 	if err != nil {
 		return err
 	}

@@ -3,7 +3,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/terraform-vcr-community'
       id: tpg-community-vcr-test
       secretEnv: ["TEAMCITY_TOKEN", "GITHUB_TOKEN"]
-      timeout: 2400s
+      timeout: 8000s
       args:
           - $_PR_NUMBER
 

@@ -100,14 +100,11 @@ func resourceComputeNetworkPeering() *schema.Resource {
 }
 
 func resourceComputeNetworkPeeringCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
 
 	networkFieldValue, err := ParseNetworkFieldValue(d.Get("network").(string), d, config)
 	if err != nil {
@@ -129,12 +126,12 @@ func resourceComputeNetworkPeeringCreate(d *schema.ResourceData, meta interface{
 		defer mutexKV.Unlock(kn)
 	}
 
-	addOp, err := config.clientCompute.Networks.AddPeering(networkFieldValue.Project, networkFieldValue.Name, request).Do()
+	addOp, err := config.NewComputeClient(userAgent).Networks.AddPeering(networkFieldValue.Project, networkFieldValue.Name, request).Do()
 	if err != nil {
 		return fmt.Errorf("Error adding network peering: %s", err)
 	}
 
-	err = computeOperationWaitTime(config, addOp, networkFieldValue.Project, "Adding Network Peering", d.Timeout(schema.TimeoutCreate))
+	err = computeOperationWaitTime(config, addOp, networkFieldValue.Project, "Adding Network Peering", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}
@@ -146,6 +143,10 @@ func resourceComputeNetworkPeeringCreate(d *schema.ResourceData, meta interface{
 
 func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	peeringName := d.Get("name").(string)
 	networkFieldValue, err := ParseNetworkFieldValue(d.Get("network").(string), d, config)
@@ -153,7 +154,7 @@ func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	network, err := config.clientCompute.Networks.Get(networkFieldValue.Project, networkFieldValue.Name).Do()
+	network, err := config.NewComputeClient(userAgent).Networks.Get(networkFieldValue.Project, networkFieldValue.Name).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Network %q", networkFieldValue.Name))
 	}
@@ -195,6 +196,10 @@ func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{})
 
 func resourceComputeNetworkPeeringDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	// Remove the `network` to `peer_network` peering
 	name := d.Get("name").(string)
@@ -219,7 +224,7 @@ func resourceComputeNetworkPeeringDelete(d *schema.ResourceData, meta interface{
 		defer mutexKV.Unlock(kn)
 	}
 
-	removeOp, err := config.clientCompute.Networks.RemovePeering(networkFieldValue.Project, networkFieldValue.Name, request).Do()
+	removeOp, err := config.NewComputeClient(userAgent).Networks.RemovePeering(networkFieldValue.Project, networkFieldValue.Name, request).Do()
 	if err != nil {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
 			log.Printf("[WARN] Peering `%s` already removed from network `%s`", name, networkFieldValue.Name)
@@ -227,7 +232,7 @@ func resourceComputeNetworkPeeringDelete(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error removing peering `%s` from network `%s`: %s", name, networkFieldValue.Name, err)
 		}
 	} else {
-		err = computeOperationWaitTime(config, removeOp, networkFieldValue.Project, "Removing Network Peering", d.Timeout(schema.TimeoutDelete))
+		err = computeOperationWaitTime(config, removeOp, networkFieldValue.Project, "Removing Network Peering", userAgent, d.Timeout(schema.TimeoutDelete))
 		if err != nil {
 			return err
 		}
@@ -278,9 +283,14 @@ func resourceComputeNetworkPeeringImport(d *schema.ResourceData, meta interface{
 	network := splits[1]
 	name := splits[2]
 
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return nil, err
+	}
+
 	// Since the format of the network URL in the peering might be different depending on the ComputeBasePath,
 	// just read the network self link from the API.
-	net, err := config.clientCompute.Networks.Get(project, network).Do()
+	net, err := config.NewComputeClient(userAgent).Networks.Get(project, network).Do()
 	if err != nil {
 		return nil, handleNotFoundError(err, d, fmt.Sprintf("Network %q", splits[1]))
 	}

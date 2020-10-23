@@ -126,14 +126,11 @@ func resourceBigtableInstance() *schema.Resource {
 }
 
 func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	// Need to set UserAgent
 
 	ctx := context.Background()
 
@@ -165,7 +162,7 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 
 	conf.Clusters = expandBigtableClusters(d.Get("cluster").([]interface{}), conf.InstanceID)
 
-	c, err := config.bigtableClientFactory.NewInstanceAdminClient(project)
+	c, err := config.BigTableClientFactory(userAgent).NewInstanceAdminClient(project)
 	if err != nil {
 		return fmt.Errorf("Error starting instance admin client. %s", err)
 	}
@@ -188,6 +185,10 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 
 func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -195,7 +196,7 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	c, err := config.bigtableClientFactory.NewInstanceAdminClient(project)
+	c, err := config.BigTableClientFactory(userAgent).NewInstanceAdminClient(project)
 	if err != nil {
 		return fmt.Errorf("Error starting instance admin client. %s", err)
 	}
@@ -248,6 +249,10 @@ func resourceBigtableInstanceRead(d *schema.ResourceData, meta interface{}) erro
 
 func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -255,7 +260,7 @@ func resourceBigtableInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	c, err := config.bigtableClientFactory.NewInstanceAdminClient(project)
+	c, err := config.BigTableClientFactory(userAgent).NewInstanceAdminClient(project)
 	if err != nil {
 		return fmt.Errorf("Error starting instance admin client. %s", err)
 	}
@@ -297,6 +302,11 @@ func resourceBigtableInstanceDestroy(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("cannot destroy instance without setting deletion_protection=false and running `terraform apply`")
 	}
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -304,7 +314,7 @@ func resourceBigtableInstanceDestroy(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	c, err := config.bigtableClientFactory.NewInstanceAdminClient(project)
+	c, err := config.BigTableClientFactory(userAgent).NewInstanceAdminClient(project)
 	if err != nil {
 		return fmt.Errorf("Error starting instance admin client. %s", err)
 	}

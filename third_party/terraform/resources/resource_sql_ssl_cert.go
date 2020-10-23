@@ -92,14 +92,11 @@ func resourceSqlSslCert() *schema.Resource {
 }
 
 func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientSqlAdmin.UserAgent = fmt.Sprintf("%s %s", config.clientSqlAdmin.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -115,13 +112,13 @@ func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 
 	mutexKV.Lock(instanceMutexKey(project, instance))
 	defer mutexKV.Unlock(instanceMutexKey(project, instance))
-	resp, err := config.clientSqlAdmin.SslCerts.Insert(project, instance, sslCertsInsertRequest).Do()
+	resp, err := config.NewSqlAdminClient(userAgent).SslCerts.Insert(project, instance, sslCertsInsertRequest).Do()
 	if err != nil {
 		return fmt.Errorf("Error, failed to insert "+
 			"ssl cert %s into instance %s: %s", commonName, instance, err)
 	}
 
-	err = sqlAdminOperationWaitTime(config, resp.Operation, project, "Create Ssl Cert", d.Timeout(schema.TimeoutCreate))
+	err = sqlAdminOperationWaitTime(config, resp.Operation, project, "Create Ssl Cert", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error, failure waiting for creation of %q "+
 			"in %q: %s", commonName, instance, err)
@@ -146,6 +143,10 @@ func resourceSqlSslCertCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -156,7 +157,7 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 	commonName := d.Get("common_name").(string)
 	fingerprint := d.Get("sha1_fingerprint").(string)
 
-	sslCerts, err := config.clientSqlAdmin.SslCerts.Get(project, instance, fingerprint).Do()
+	sslCerts, err := config.NewSqlAdminClient(userAgent).SslCerts.Get(project, instance, fingerprint).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("SQL Ssl Cert %q in instance %q", commonName, instance))
 	}
@@ -199,6 +200,10 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -211,7 +216,7 @@ func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
 
 	mutexKV.Lock(instanceMutexKey(project, instance))
 	defer mutexKV.Unlock(instanceMutexKey(project, instance))
-	op, err := config.clientSqlAdmin.SslCerts.Delete(project, instance, fingerprint).Do()
+	op, err := config.NewSqlAdminClient(userAgent).SslCerts.Delete(project, instance, fingerprint).Do()
 
 	if err != nil {
 		return fmt.Errorf("Error, failed to delete "+
@@ -219,7 +224,7 @@ func resourceSqlSslCertDelete(d *schema.ResourceData, meta interface{}) error {
 			instance, err)
 	}
 
-	err = sqlAdminOperationWaitTime(config, op, project, "Delete Ssl Cert", d.Timeout(schema.TimeoutDelete))
+	err = sqlAdminOperationWaitTime(config, op, project, "Delete Ssl Cert", userAgent, d.Timeout(schema.TimeoutDelete))
 
 	if err != nil {
 		return fmt.Errorf("Error, failure waiting for deletion of ssl cert %q "+

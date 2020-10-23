@@ -1,8 +1,9 @@
-<% autogen_exception -%>
 package google
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -34,7 +35,7 @@ func testSweepComputeInstanceGroupManager(region string) error {
 		return err
 	}
 
-	found, err := config.clientCompute.InstanceGroupManagers.AggregatedList(config.Project).Do()
+	found, err := config.NewComputeClient(config.userAgent).InstanceGroupManagers.AggregatedList(config.Project).Do()
 	if err != nil {
 		log.Printf("[INFO][SWEEPER_LOG] Error in response from request: %s", err)
 		return nil
@@ -50,7 +51,7 @@ func testSweepComputeInstanceGroupManager(region string) error {
 			}
 
 			// Don't wait on operations as we may have a lot to delete
-			_, err := config.clientCompute.InstanceGroupManagers.Delete(config.Project, GetResourceNameFromSelfLink(zone), igm.Name).Do()
+			_, err := config.NewComputeClient(config.userAgent).InstanceGroupManagers.Delete(config.Project, GetResourceNameFromSelfLink(zone), igm.Name).Do()
 			if err != nil {
 				log.Printf("[INFO][SWEEPER_LOG] Error deleting %s resource %s : %s", resourceName, igm.Name, err)
 			} else {
@@ -331,7 +332,6 @@ func TestAccInstanceGroupManager_autoHealingPolicies(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccInstanceGroupManager_stateful(t *testing.T) {
 	t.Parallel()
 
@@ -365,7 +365,6 @@ func TestAccInstanceGroupManager_stateful(t *testing.T) {
 	})
 }
 
-<% end -%>
 func testAccCheckInstanceGroupManagerDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := googleProviderConfig(t)
@@ -374,7 +373,7 @@ func testAccCheckInstanceGroupManagerDestroyProducer(t *testing.T) func(s *terra
 			if rs.Type != "google_compute_instance_group_manager" {
 				continue
 			}
-			_, err := config.clientCompute.InstanceGroupManagers.Get(
+			_, err := config.NewComputeClient(config.userAgent).InstanceGroupManagers.Get(
 				config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
 			if err == nil {
 				return fmt.Errorf("InstanceGroupManager still exists")
@@ -394,7 +393,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "igm-basic" {
   name           = "%s"
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
 
@@ -459,7 +458,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "igm-basic" {
   name           = "%s"
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
 
@@ -502,7 +501,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "igm-update" {
   name           = "%s"
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
 
@@ -558,7 +557,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "igm-update" {
   name           = "%s"
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
 
@@ -591,7 +590,7 @@ resource "google_compute_target_pool" "igm-update2" {
 
 resource "google_compute_instance_template" "igm-update2" {
   name           = "%s"
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
 
@@ -648,7 +647,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "igm-update" {
   name           = "%s"
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
 
@@ -681,7 +680,7 @@ resource "google_compute_target_pool" "igm-update2" {
 
 resource "google_compute_instance_template" "igm-update2" {
   name           = "%s"
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
 
@@ -732,7 +731,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_instance_template" "igm-update" {
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["%s"]
 
@@ -783,7 +782,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_instance_template" "igm-rolling-update-policy" {
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["terraform-testing"]
 
@@ -839,7 +838,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_instance_template" "igm-rolling-update-policy" {
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["terraform-testing"]
 
@@ -891,7 +890,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_instance_template" "igm-rolling-update-policy" {
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["terraform-testing"]
   disk {
@@ -940,7 +939,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_instance_template" "igm-rolling-update-policy" {
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["terraform-testing"]
   disk {
@@ -989,7 +988,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_instance_template" "igm-basic" {
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
 
@@ -1047,7 +1046,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "igm-basic" {
   name           = "%s"
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
   disk {
@@ -1105,7 +1104,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "igm-basic" {
   name           = "%s"
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
   disk {
@@ -1159,7 +1158,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "igm-primary" {
   name           = "%s"
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
   disk {
@@ -1178,7 +1177,7 @@ resource "google_compute_instance_template" "igm-primary" {
 
 resource "google_compute_instance_template" "igm-canary" {
   name           = "%s"
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
   disk {
@@ -1218,7 +1217,6 @@ resource "google_compute_instance_group_manager" "igm-basic" {
 `, primaryTemplate, canaryTemplate, igm)
 }
 
-<% unless version == 'ga' -%>
 func testAccInstanceGroupManager_stateful(template, target, igm, hck string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1228,7 +1226,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "igm-basic" {
   name           = "%s"
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
   disk {
@@ -1300,7 +1298,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "igm-basic" {
   name           = "%s"
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
   tags           = ["foo", "bar"]
   disk {
@@ -1367,4 +1365,3 @@ resource "google_compute_http_health_check" "zero" {
 }
 `, template, target, igm, hck)
 }
-<% end -%>

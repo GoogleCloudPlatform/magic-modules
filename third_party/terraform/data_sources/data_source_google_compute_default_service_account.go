@@ -35,21 +35,18 @@ func dataSourceGoogleComputeDefaultServiceAccount() *schema.Resource {
 }
 
 func dataSourceGoogleComputeDefaultServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	projectCompResource, err := config.clientCompute.Projects.Get(project).Do()
+	projectCompResource, err := config.NewComputeClient(userAgent).Projects.Get(project).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, "GCE default service account")
 	}
@@ -59,7 +56,7 @@ func dataSourceGoogleComputeDefaultServiceAccountRead(d *schema.ResourceData, me
 		return err
 	}
 
-	sa, err := config.clientIAM.Projects.ServiceAccounts.Get(serviceAccountName).Do()
+	sa, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(serviceAccountName).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Service Account %q", serviceAccountName))
 	}

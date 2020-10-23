@@ -70,6 +70,10 @@ func resourceAppEngineApplication() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"CLOUD_FIRESTORE",
 					"CLOUD_DATASTORE_COMPATIBILITY",
+					// NOTE: this is provided for compatibility with instances from
+					// before CLOUD_DATASTORE_COMPATIBILITY - it cannot be set
+					// for new instances.
+					"CLOUD_DATASTORE",
 				}, false),
 				Computed: true,
 			},
@@ -194,14 +198,11 @@ func appEngineApplicationLocationIDCustomizeDiff(_ context.Context, d *schema.Re
 }
 
 func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientAppEngine.UserAgent = fmt.Sprintf("%s %s", config.clientAppEngine.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -220,7 +221,7 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 	defer mutexKV.Unlock(lockName)
 
 	log.Printf("[DEBUG] Creating App Engine App")
-	op, err := config.clientAppEngine.Apps.Create(app).Do()
+	op, err := config.NewAppEngineClient(userAgent).Apps.Create(app).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating App Engine application: %s", err.Error())
 	}
@@ -228,7 +229,7 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 	d.SetId(project)
 
 	// Wait for the operation to complete
-	waitErr := appEngineOperationWaitTime(config, op, project, "App Engine app to create", d.Timeout(schema.TimeoutCreate))
+	waitErr := appEngineOperationWaitTime(config, op, project, "App Engine app to create", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		d.SetId("")
 		return waitErr
@@ -240,9 +241,13 @@ func resourceAppEngineApplicationCreate(d *schema.ResourceData, meta interface{}
 
 func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	pid := d.Id()
 
-	app, err := config.clientAppEngine.Apps.Get(pid).Do()
+	app, err := config.NewAppEngineClient(userAgent).Apps.Get(pid).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("App Engine Application %q", pid))
 	}
@@ -308,6 +313,10 @@ func resourceAppEngineApplicationRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	pid := d.Id()
 	app, err := expandAppEngineApplication(d, pid)
 	if err != nil {
@@ -322,13 +331,13 @@ func resourceAppEngineApplicationUpdate(d *schema.ResourceData, meta interface{}
 	defer mutexKV.Unlock(lockName)
 
 	log.Printf("[DEBUG] Updating App Engine App")
-	op, err := config.clientAppEngine.Apps.Patch(pid, app).UpdateMask("authDomain,databaseType,servingStatus,featureSettings.splitHealthChecks,iap").Do()
+	op, err := config.NewAppEngineClient(userAgent).Apps.Patch(pid, app).UpdateMask("authDomain,databaseType,servingStatus,featureSettings.splitHealthChecks,iap").Do()
 	if err != nil {
 		return fmt.Errorf("Error updating App Engine application: %s", err.Error())
 	}
 
 	// Wait for the operation to complete
-	waitErr := appEngineOperationWaitTime(config, op, pid, "App Engine app to update", d.Timeout(schema.TimeoutUpdate))
+	waitErr := appEngineOperationWaitTime(config, op, pid, "App Engine app to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if waitErr != nil {
 		return waitErr
 	}

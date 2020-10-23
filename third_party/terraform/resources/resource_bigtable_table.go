@@ -74,14 +74,11 @@ func resourceBigtableTable() *schema.Resource {
 }
 
 func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	// Need to set UserAgent
 
 	ctx := context.Background()
 
@@ -91,7 +88,7 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.bigtableClientFactory.NewAdminClient(project, instanceName)
+	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -144,6 +141,10 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 
 func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -152,7 +153,7 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.bigtableClientFactory.NewAdminClient(project, instanceName)
+	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -179,6 +180,10 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -187,7 +192,7 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.bigtableClientFactory.NewAdminClient(project, instanceName)
+	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}
@@ -227,6 +232,11 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 
 func resourceBigtableTableDestroy(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	ctx := context.Background()
 
 	project, err := getProject(d, config)
@@ -235,7 +245,7 @@ func resourceBigtableTableDestroy(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	instanceName := GetResourceNameFromSelfLink(d.Get("instance_name").(string))
-	c, err := config.bigtableClientFactory.NewAdminClient(project, instanceName)
+	c, err := config.BigTableClientFactory(userAgent).NewAdminClient(project, instanceName)
 	if err != nil {
 		return fmt.Errorf("Error starting admin client. %s", err)
 	}

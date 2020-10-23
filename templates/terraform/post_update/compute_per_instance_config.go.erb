@@ -25,14 +25,14 @@ if err != nil {
 }
 
 log.Printf("[DEBUG] Applying updates to PerInstanceConfig %q: %#v", d.Id(), obj)
-res, err = sendRequestWithTimeout(config, "POST", project, url, obj, d.Timeout(schema.TimeoutUpdate))
+res, err = sendRequestWithTimeout(config, "POST", project, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 
 if err != nil {
 	return fmt.Errorf("Error updating PerInstanceConfig %q: %s", d.Id(), err)
 }
 
 err = computeOperationWaitTime(
-	config, res, project, "Applying update to PerInstanceConfig",
+	config, res, project, "Applying update to PerInstanceConfig", userAgent,
 	d.Timeout(schema.TimeoutUpdate))
 
 if err != nil {

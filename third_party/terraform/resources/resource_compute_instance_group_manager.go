@@ -1,5 +1,3 @@
-// <% autogen_exception -%>
-
 package google
 
 import (
@@ -264,7 +262,6 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				Default:     false,
 				Description: `Whether to wait for all instances to be created/updated before returning. Note that if this is set to true and the operation does not succeed, Terraform will continue trying until it times out.`,
 			},
-<% unless version == 'ga' -%>
 			"stateful_disk": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -282,12 +279,11 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 							Default:      "NEVER",
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"NEVER", "ON_PERMANENT_INSTANCE_DELETION"}, true),
-							Description:  `A value that prescribes what should happen to the stateful disk when the VM instance is deleted. The available options are NEVER and ON_PERMANENT_INSTANCE_DELETION. NEVER detatch the disk when the VM is deleted, but not delete the disk. ON_PERMANENT_INSTANCE_DELETION will delete the stateful disk when the VM is permanently deleted from the instance group. The default is NEVER.`,
+							Description:  `A value that prescribes what should happen to the stateful disk when the VM instance is deleted. The available options are NEVER and ON_PERMANENT_INSTANCE_DELETION. NEVER - detach the disk when the VM is deleted, but do not delete the disk. ON_PERMANENT_INSTANCE_DELETION will delete the stateful disk when the VM is permanently deleted from the instance group. The default is NEVER.`,
 						},
 					},
 				},
 			},
-<% end -%>
 			"operation": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -323,14 +319,11 @@ func getNamedPortsBeta(nps []interface{}) []*computeBeta.NamedPort {
 }
 
 func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientComputeBeta.UserAgent = fmt.Sprintf("%s %s", config.clientComputeBeta.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -353,15 +346,13 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		AutoHealingPolicies: expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		Versions:            expandVersions(d.Get("version").([]interface{})),
 		UpdatePolicy:        expandUpdatePolicy(d.Get("update_policy").([]interface{})),
-<% unless version == 'ga' -%>
-		StatefulPolicy: expandStatefulPolicy(d.Get("stateful_disk").(*schema.Set).List()),
-<% end -%>
+		StatefulPolicy:      expandStatefulPolicy(d.Get("stateful_disk").(*schema.Set).List()),
 		// Force send TargetSize to allow a value of 0.
 		ForceSendFields: []string{"TargetSize"},
 	}
 
 	log.Printf("[DEBUG] InstanceGroupManager insert request: %#v", manager)
-	op, err := config.clientComputeBeta.InstanceGroupManagers.Insert(
+	op, err := config.NewComputeBetaClient(userAgent).InstanceGroupManagers.Insert(
 		project, zone, manager).Do()
 
 	if err != nil {
@@ -376,7 +367,7 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 	d.SetId(id)
 
 	// Wait for the operation to complete
-	err = computeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", d.Timeout(schema.TimeoutCreate))
+	err = computeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		// Check if the create operation failed because Terraform was prematurely terminated. If it was we can persist the
 		// operation id to state so that a subsequent refresh of this resource will wait until the operation has terminated
@@ -443,10 +434,15 @@ func getManager(d *schema.ResourceData, meta interface{}) (*computeBeta.Instance
 		return nil, err
 	}
 
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return nil, err
+	}
+
 	zone, _ := getZone(d, config)
 	name := d.Get("name").(string)
 
-	manager, err := config.clientComputeBeta.InstanceGroupManagers.Get(project, zone, name).Do()
+	manager, err := config.NewComputeBetaClient(userAgent).InstanceGroupManagers.Get(project, zone, name).Do()
 	if err != nil {
 		return nil, handleNotFoundError(err, d, fmt.Sprintf("Instance Group Manager %q", name))
 	}
@@ -464,6 +460,11 @@ func getManager(d *schema.ResourceData, meta interface{}) (*computeBeta.Instance
 
 func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
+
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
@@ -480,10 +481,10 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 		if err := d.Set("operation", op.Name); err != nil {
 			return fmt.Errorf("Error setting operation: %s", err)
 		}
-		err = computeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", d.Timeout(schema.TimeoutCreate))
+		err = computeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
 			// remove from state to allow refresh to finish
-			log.Printf("[DEBUG] Resumed operation returned an error, removing from state: %s",err)
+			log.Printf("[DEBUG] Resumed operation returned an error, removing from state: %s", err)
 			d.SetId("")
 			return nil
 		}
@@ -523,11 +524,9 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err = d.Set("named_port", flattenNamedPortsBeta(manager.NamedPorts)); err != nil {
 		return fmt.Errorf("Error setting named_port in state: %s", err.Error())
 	}
-<% unless version == 'ga' -%>
 	if err = d.Set("stateful_disk", flattenStatefulPolicy(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_disk in state: %s", err.Error())
 	}
-<% end -%>
 	if err := d.Set("fingerprint", manager.Fingerprint); err != nil {
 		return fmt.Errorf("Error setting fingerprint: %s", err)
 	}
@@ -566,6 +565,10 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 
 func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -604,20 +607,18 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		change = true
 	}
 
-<% unless version == 'ga' -%>
 	if d.HasChange("stateful_disk") {
 		updatedManager.StatefulPolicy = expandStatefulPolicy(d.Get("stateful_disk").(*schema.Set).List())
 		change = true
 	}
 
-<% end -%>
 	if change {
-		op, err := config.clientComputeBeta.InstanceGroupManagers.Patch(project, zone, d.Get("name").(string), updatedManager).Do()
+		op, err := config.NewComputeBetaClient(userAgent).InstanceGroupManagers.Patch(project, zone, d.Get("name").(string), updatedManager).Do()
 		if err != nil {
 			return fmt.Errorf("Error updating managed group instances: %s", err)
 		}
 
-		err = computeOperationWaitTime(config, op, project, "Updating managed group instances", d.Timeout(schema.TimeoutUpdate))
+		err = computeOperationWaitTime(config, op, project, "Updating managed group instances", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -635,7 +636,7 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		}
 
 		// Make the request:
-		op, err := config.clientComputeBeta.InstanceGroups.SetNamedPorts(
+		op, err := config.NewComputeBetaClient(userAgent).InstanceGroups.SetNamedPorts(
 			project, zone, d.Get("name").(string), setNamedPorts).Do()
 
 		if err != nil {
@@ -643,7 +644,7 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		}
 
 		// Wait for the operation to complete:
-		err = computeOperationWaitTime(config, op, project, "Updating InstanceGroupManager", d.Timeout(schema.TimeoutUpdate))
+		err = computeOperationWaitTime(config, op, project, "Updating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -654,7 +655,7 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		d.Partial(true)
 
 		targetSize := int64(d.Get("target_size").(int))
-		op, err := config.clientComputeBeta.InstanceGroupManagers.Resize(
+		op, err := config.NewComputeBetaClient(userAgent).InstanceGroupManagers.Resize(
 			project, zone, d.Get("name").(string), targetSize).Do()
 
 		if err != nil {
@@ -662,7 +663,7 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		}
 
 		// Wait for the operation to complete
-		err = computeOperationWaitTime(config, op, project, "Updating InstanceGroupManager", d.Timeout(schema.TimeoutUpdate))
+		err = computeOperationWaitTime(config, op, project, "Updating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -675,6 +676,10 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 
 func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -684,12 +689,12 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 	zone, _ := getZone(d, config)
 	name := d.Get("name").(string)
 
-	op, err := config.clientComputeBeta.InstanceGroupManagers.Delete(project, zone, name).Do()
+	op, err := config.NewComputeBetaClient(userAgent).InstanceGroupManagers.Delete(project, zone, name).Do()
 	attempt := 0
 	for err != nil && attempt < 20 {
 		attempt++
 		time.Sleep(2000 * time.Millisecond)
-		op, err = config.clientComputeBeta.InstanceGroupManagers.Delete(project, zone, name).Do()
+		op, err = config.NewComputeBetaClient(userAgent).InstanceGroupManagers.Delete(project, zone, name).Do()
 	}
 
 	if err != nil {
@@ -699,14 +704,14 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 	currentSize := int64(d.Get("target_size").(int))
 
 	// Wait for the operation to complete
-	err = computeOperationWaitTime(config, op, project, "Deleting InstanceGroupManager", d.Timeout(schema.TimeoutDelete))
+	err = computeOperationWaitTime(config, op, project, "Deleting InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutDelete))
 
 	for err != nil && currentSize > 0 {
 		if !strings.Contains(err.Error(), "timeout") {
 			return err
 		}
 
-		instanceGroup, igErr := config.clientComputeBeta.InstanceGroups.Get(
+		instanceGroup, igErr := config.NewComputeBetaClient(userAgent).InstanceGroups.Get(
 			project, zone, name).Do()
 		if igErr != nil {
 			return fmt.Errorf("Error getting instance group size: %s", err)
@@ -720,7 +725,7 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 
 		log.Printf("[INFO] timeout occurred, but instance group is shrinking (%d < %d)", instanceGroupSize, currentSize)
 		currentSize = instanceGroupSize
-		err = computeOperationWaitTime(config, op, project, "Deleting InstanceGroupManager", d.Timeout(schema.TimeoutDelete))
+		err = computeOperationWaitTime(config, op, project, "Deleting InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutDelete))
 	}
 
 	d.SetId("")
@@ -741,7 +746,6 @@ func expandAutoHealingPolicies(configured []interface{}) []*computeBeta.Instance
 	return autoHealingPolicies
 }
 
-<% unless version == 'ga' -%>
 func expandStatefulPolicy(configured []interface{}) *computeBeta.StatefulPolicy {
 	disks := make(map[string]computeBeta.StatefulPolicyPreservedStateDiskDevice)
 	for _, raw := range configured {
@@ -757,7 +761,6 @@ func expandStatefulPolicy(configured []interface{}) *computeBeta.StatefulPolicy 
 	return nil
 }
 
-<% end -%>
 func expandVersions(configured []interface{}) []*computeBeta.InstanceGroupManagerVersion {
 	versions := make([]*computeBeta.InstanceGroupManagerVersion, 0, len(configured))
 	for _, raw := range configured {
@@ -848,7 +851,6 @@ func flattenAutoHealingPolicies(autoHealingPolicies []*computeBeta.InstanceGroup
 	return autoHealingPoliciesSchema
 }
 
-<% unless version == 'ga' -%>
 func flattenStatefulPolicy(statefulPolicy *computeBeta.StatefulPolicy) []map[string]interface{} {
 	if statefulPolicy == nil || statefulPolicy.PreservedState == nil || statefulPolicy.PreservedState.Disks == nil {
 		return make([]map[string]interface{}, 0, 0)
@@ -865,7 +867,6 @@ func flattenStatefulPolicy(statefulPolicy *computeBeta.StatefulPolicy) []map[str
 	return result
 }
 
-<% end -%>
 func flattenUpdatePolicy(updatePolicy *computeBeta.InstanceGroupManagerUpdatePolicy) []map[string]interface{} {
 	results := []map[string]interface{}{}
 	if updatePolicy != nil {

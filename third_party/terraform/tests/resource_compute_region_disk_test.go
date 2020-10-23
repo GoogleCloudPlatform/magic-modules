@@ -188,7 +188,7 @@ func testAccCheckComputeRegionDiskExists(t *testing.T, n string, disk *computeBe
 
 		config := googleProviderConfig(t)
 
-		found, err := config.clientComputeBeta.RegionDisks.Get(
+		found, err := config.NewComputeBetaClient(config.userAgent).RegionDisks.Get(
 			p, rs.Primary.Attributes["region"], rs.Primary.Attributes["name"]).Do()
 		if err != nil {
 			return err
@@ -394,7 +394,7 @@ resource "google_compute_region_disk" "regiondisk" {
 
 resource "google_compute_instance" "inst" {
   name         = "%s"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-medium"
   zone         = "us-central1-a"
 
   boot_disk {

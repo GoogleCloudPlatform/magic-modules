@@ -23,21 +23,18 @@ func dataSourceGoogleBigqueryDefaultServiceAccount() *schema.Resource {
 }
 
 func dataSourceGoogleBigqueryDefaultServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientBigQuery.UserAgent = fmt.Sprintf("%s %s", config.clientBigQuery.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	projectResource, err := config.clientBigQuery.Projects.GetServiceAccount(project).Do()
+	projectResource, err := config.NewBigQueryClient(userAgent).Projects.GetServiceAccount(project).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, "BigQuery service account not found")
 	}

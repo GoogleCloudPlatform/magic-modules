@@ -102,13 +102,42 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.erb
       custom_delete: templates/terraform/custom_delete/replace_all_access_levels_empty_list.go.erb
-  ServicePerimeter: !ruby/object:Overrides::Terraform::ResourceOverride
+  AccessLevelCondition: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         If you are using User ADCs (Application Default Credentials) with this resource,
         you must specify a `billing_project` and set `user_project_override` to true 
         in the provider configuration. Otherwise the ACM API will return a 403 error. 
         Your account must have the `serviceusage.services.use` permission on the 
+        `billing_project` you defined.
+    async: !ruby/object:Provider::Terraform::PollAsync
+      check_response_func_existence: PollCheckForExistence
+      actions: ['create']
+      operation: !ruby/object:Api::Async::Operation
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 4
+    autogen_async: true
+    exclude_validator: true
+    exclude_import: true # no unique way to specify
+    # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under AccessLevel
+    skip_sweeper: true
+    id_format: "{{access_level}}"
+    import_format: ["{{access_level}}"]
+    mutex: "{{access_level}}"
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "access_context_manager_access_level_condition_basic"
+        skip_test: true
+        primary_resource_id: "access-level-condition"
+        vars:
+          access_level_name: "chromeos_no_lock"
+  ServicePerimeter: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        If you are using User ADCs (Application Default Credentials) with this resource,
+        you must specify a `billing_project` and set `user_project_override` to true
+        in the provider configuration. Otherwise the ACM API will return a 403 error.
+        Your account must have the `serviceusage.services.use` permission on the
         `billing_project` you defined.
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6

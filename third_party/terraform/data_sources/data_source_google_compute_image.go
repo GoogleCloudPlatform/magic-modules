@@ -15,18 +15,24 @@ func dataSourceGoogleComputeImage() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				Computed:      true,
-				ConflictsWith: []string{"family"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ExactlyOneOf: []string{"name", "family", "filter"},
 			},
 			"family": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				Computed:      true,
-				ConflictsWith: []string{"name"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ExactlyOneOf: []string{"name", "family", "filter"},
+			},
+			"filter": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"name", "family", "filter"},
 			},
 			"archive_size_bytes": {
 				Type:     schema.TypeInt,
@@ -105,14 +111,11 @@ func dataSourceGoogleComputeImage() *schema.Resource {
 }
 
 func dataSourceGoogleComputeImageRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -122,14 +125,27 @@ func dataSourceGoogleComputeImageRead(d *schema.ResourceData, meta interface{}) 
 	var image *compute.Image
 	if v, ok := d.GetOk("name"); ok {
 		log.Printf("[DEBUG] Fetching image %s", v.(string))
-		image, err = config.clientCompute.Images.Get(project, v.(string)).Do()
+		image, err = config.NewComputeClient(userAgent).Images.Get(project, v.(string)).Do()
 		log.Printf("[DEBUG] Fetched image %s", v.(string))
 	} else if v, ok := d.GetOk("family"); ok {
 		log.Printf("[DEBUG] Fetching latest non-deprecated image from family %s", v.(string))
-		image, err = config.clientCompute.Images.GetFromFamily(project, v.(string)).Do()
+		image, err = config.NewComputeClient(userAgent).Images.GetFromFamily(project, v.(string)).Do()
 		log.Printf("[DEBUG] Fetched latest non-deprecated image from family %s", v.(string))
+	} else if v, ok := d.GetOk("filter"); ok {
+		images, err := config.NewComputeClient(userAgent).Images.List(project).Filter(v.(string)).Do()
+		if err != nil {
+			return fmt.Errorf("error retrieving list of images: %s", err)
+		}
+
+		if len(images.Items) == 1 {
+			for _, im := range images.Items {
+				image = im
+			}
+		} else {
+			return fmt.Errorf("your filter has returned more than one image or no image. Please refine your filter to return exactly one image")
+		}
 	} else {
-		return fmt.Errorf("one of name or family must be set")
+		return fmt.Errorf("one of name, family or filters must be set")
 	}
 
 	if err != nil {

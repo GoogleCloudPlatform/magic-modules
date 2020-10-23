@@ -84,14 +84,11 @@ func resourceComputeRouterInterface() *schema.Resource {
 }
 
 func resourceComputeRouterInterfaceCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCompute.UserAgent = fmt.Sprintf("%s %s", config.clientCompute.UserAgent, m.ModuleName)
 
 	region, err := getRegion(d, config)
 	if err != nil {
@@ -110,7 +107,7 @@ func resourceComputeRouterInterfaceCreate(d *schema.ResourceData, meta interface
 	mutexKV.Lock(routerLock)
 	defer mutexKV.Unlock(routerLock)
 
-	routersService := config.clientCompute.Routers
+	routersService := config.NewComputeClient(userAgent).Routers
 	router, err := routersService.Get(project, region, routerName).Do()
 	if err != nil {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
@@ -138,7 +135,7 @@ func resourceComputeRouterInterfaceCreate(d *schema.ResourceData, meta interface
 	}
 
 	if vpnVal, ok := d.GetOk("vpn_tunnel"); ok {
-		vpnTunnel, err := getVpnTunnelLink(config, project, region, vpnVal.(string))
+		vpnTunnel, err := getVpnTunnelLink(config, project, region, vpnVal.(string), userAgent)
 		if err != nil {
 			return err
 		}
@@ -146,7 +143,7 @@ func resourceComputeRouterInterfaceCreate(d *schema.ResourceData, meta interface
 	}
 
 	if icVal, ok := d.GetOk("interconnect_attachment"); ok {
-		interconnectAttachment, err := getInterconnectAttachmentLink(config, project, region, icVal.(string))
+		interconnectAttachment, err := getInterconnectAttachmentLink(config, project, region, icVal.(string), userAgent)
 		if err != nil {
 			return err
 		}
@@ -165,7 +162,7 @@ func resourceComputeRouterInterfaceCreate(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Error patching router %s/%s: %s", region, routerName, err)
 	}
 	d.SetId(fmt.Sprintf("%s/%s/%s", region, routerName, ifaceName))
-	err = computeOperationWaitTime(config, op, project, "Patching router", d.Timeout(schema.TimeoutCreate))
+	err = computeOperationWaitTime(config, op, project, "Patching router", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		d.SetId("")
 		return fmt.Errorf("Error waiting to patch router %s/%s: %s", region, routerName, err)
@@ -175,8 +172,11 @@ func resourceComputeRouterInterfaceCreate(d *schema.ResourceData, meta interface
 }
 
 func resourceComputeRouterInterfaceRead(d *schema.ResourceData, meta interface{}) error {
-
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	region, err := getRegion(d, config)
 	if err != nil {
@@ -191,7 +191,7 @@ func resourceComputeRouterInterfaceRead(d *schema.ResourceData, meta interface{}
 	routerName := d.Get("router").(string)
 	ifaceName := d.Get("name").(string)
 
-	routersService := config.clientCompute.Routers
+	routersService := config.NewComputeClient(userAgent).Routers
 	router, err := routersService.Get(project, region, routerName).Do()
 	if err != nil {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
@@ -233,8 +233,11 @@ func resourceComputeRouterInterfaceRead(d *schema.ResourceData, meta interface{}
 }
 
 func resourceComputeRouterInterfaceDelete(d *schema.ResourceData, meta interface{}) error {
-
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	region, err := getRegion(d, config)
 	if err != nil {
@@ -253,7 +256,7 @@ func resourceComputeRouterInterfaceDelete(d *schema.ResourceData, meta interface
 	mutexKV.Lock(routerLock)
 	defer mutexKV.Unlock(routerLock)
 
-	routersService := config.clientCompute.Routers
+	routersService := config.NewComputeClient(userAgent).Routers
 	router, err := routersService.Get(project, region, routerName).Do()
 	if err != nil {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
@@ -300,7 +303,7 @@ func resourceComputeRouterInterfaceDelete(d *schema.ResourceData, meta interface
 		return fmt.Errorf("Error patching router %s/%s: %s", region, routerName, err)
 	}
 
-	err = computeOperationWaitTime(config, op, project, "Patching router", d.Timeout(schema.TimeoutDelete))
+	err = computeOperationWaitTime(config, op, project, "Patching router", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return fmt.Errorf("Error waiting to patch router %s/%s: %s", region, routerName, err)
 	}

@@ -249,6 +249,12 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 				Description: `A set of key/value environment variable pairs to assign to the function.`,
 			},
 
+			"build_environment_variables": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: ` A set of key/value environment variable pairs available during build time.`,
+			},
+
 			"trigger_http": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -332,14 +338,11 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 }
 
 func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientCloudFunctions.UserAgent = fmt.Sprintf("%s %s", config.clientCloudFunctions.UserAgent, m.ModuleName)
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -414,6 +417,10 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 		function.EnvironmentVariables = expandEnvironmentVariables(d)
 	}
 
+	if _, ok := d.GetOk("build_environment_variables"); ok {
+		function.BuildEnvironmentVariables = expandBuildEnvironmentVariables(d)
+	}
+
 	if v, ok := d.GetOk("vpc_connector"); ok {
 		function.VpcConnector = v.(string)
 	}
@@ -432,7 +439,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 	// will sometimes fail a creation operation entirely if it fails to pull
 	// source code and we need to try the whole creation again.
 	rerr := retryTimeDuration(func() error {
-		op, err := config.clientCloudFunctions.Projects.Locations.Functions.Create(
+		op, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Create(
 			cloudFuncId.locationId(), function).Do()
 		if err != nil {
 			return err
@@ -441,7 +448,7 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 		// Name of function should be unique
 		d.SetId(cloudFuncId.cloudFunctionId())
 
-		return cloudFunctionsOperationWait(config, op, "Creating CloudFunctions Function",
+		return cloudFunctionsOperationWait(config, op, "Creating CloudFunctions Function", userAgent,
 			d.Timeout(schema.TimeoutCreate))
 	}, d.Timeout(schema.TimeoutCreate), isCloudFunctionsSourceCodeError)
 	if rerr != nil {
@@ -453,13 +460,17 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 
 func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	cloudFuncId, err := parseCloudFunctionId(d, config)
 	if err != nil {
 		return err
 	}
 
-	function, err := config.clientCloudFunctions.Projects.Locations.Functions.Get(cloudFuncId.cloudFunctionId()).Do()
+	function, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Get(cloudFuncId.cloudFunctionId()).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Target CloudFunctions Function %q", cloudFuncId.Name))
 	}
@@ -553,6 +564,10 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG]: Updating google_cloudfunctions_function")
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	project, err := getProject(d, config)
 	if err != nil {
@@ -619,6 +634,11 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 		updateMaskArr = append(updateMaskArr, "environmentVariables")
 	}
 
+	if d.HasChange("build_environment_variables") {
+		function.EnvironmentVariables = expandEnvironmentVariables(d)
+		updateMaskArr = append(updateMaskArr, "buildEnvironmentVariables")
+	}
+
 	if d.HasChange("vpc_connector") {
 		function.VpcConnector = d.Get("vpc_connector").(string)
 		updateMaskArr = append(updateMaskArr, "vpcConnector")
@@ -642,14 +662,14 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	if len(updateMaskArr) > 0 {
 		log.Printf("[DEBUG] Send Patch CloudFunction Configuration request: %#v", function)
 		updateMask := strings.Join(updateMaskArr, ",")
-		op, err := config.clientCloudFunctions.Projects.Locations.Functions.Patch(function.Name, &function).
+		op, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Patch(function.Name, &function).
 			UpdateMask(updateMask).Do()
 
 		if err != nil {
 			return fmt.Errorf("Error while updating cloudfunction configuration: %s", err)
 		}
 
-		err = cloudFunctionsOperationWait(config, op, "Updating CloudFunctions Function",
+		err = cloudFunctionsOperationWait(config, op, "Updating CloudFunctions Function", userAgent,
 			d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
@@ -662,17 +682,21 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 
 func resourceCloudFunctionsDestroy(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	cloudFuncId, err := parseCloudFunctionId(d, config)
 	if err != nil {
 		return err
 	}
 
-	op, err := config.clientCloudFunctions.Projects.Locations.Functions.Delete(cloudFuncId.cloudFunctionId()).Do()
+	op, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Delete(cloudFuncId.cloudFunctionId()).Do()
 	if err != nil {
 		return err
 	}
-	err = cloudFunctionsOperationWait(config, op, "Deleting CloudFunctions Function",
+	err = cloudFunctionsOperationWait(config, op, "Deleting CloudFunctions Function", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return err

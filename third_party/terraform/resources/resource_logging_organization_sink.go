@@ -38,14 +38,11 @@ func resourceLoggingOrganizationSink() *schema.Resource {
 }
 
 func resourceLoggingOrganizationSinkCreate(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientLogging.UserAgent = fmt.Sprintf("%s %s", config.clientLogging.UserAgent, m.ModuleName)
 
 	org := d.Get("org_id").(string)
 	id, sink := expandResourceLoggingSink(d, "organizations", org)
@@ -53,7 +50,7 @@ func resourceLoggingOrganizationSinkCreate(d *schema.ResourceData, meta interfac
 
 	// Must use a unique writer, since all destinations are in projects.
 	// The API will reject any requests that don't explicitly set 'uniqueWriterIdentity' to true.
-	_, err = config.clientLogging.Organizations.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(true).Do()
+	_, err = config.NewLoggingClient(userAgent).Organizations.Sinks.Create(id.parent(), sink).UniqueWriterIdentity(true).Do()
 	if err != nil {
 		return err
 	}
@@ -64,8 +61,12 @@ func resourceLoggingOrganizationSinkCreate(d *schema.ResourceData, meta interfac
 
 func resourceLoggingOrganizationSinkRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
-	sink, err := config.clientLogging.Organizations.Sinks.Get(d.Id()).Do()
+	sink, err := config.NewLoggingClient(userAgent).Organizations.Sinks.Get(d.Id()).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Organization Logging Sink %s", d.Get("name").(string)))
 	}
@@ -83,6 +84,10 @@ func resourceLoggingOrganizationSinkRead(d *schema.ResourceData, meta interface{
 
 func resourceLoggingOrganizationSinkUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	sink, updateMask := expandResourceLoggingSinkForUpdate(d)
 	// It seems the API might actually accept an update for include_children; this is not in the list of updatable
@@ -91,7 +96,7 @@ func resourceLoggingOrganizationSinkUpdate(d *schema.ResourceData, meta interfac
 	sink.ForceSendFields = append(sink.ForceSendFields, "IncludeChildren")
 
 	// The API will reject any requests that don't explicitly set 'uniqueWriterIdentity' to true.
-	_, err := config.clientLogging.Organizations.Sinks.Patch(d.Id(), sink).
+	_, err = config.NewLoggingClient(userAgent).Organizations.Sinks.Patch(d.Id(), sink).
 		UpdateMask(updateMask).UniqueWriterIdentity(true).Do()
 	if err != nil {
 		return err
@@ -102,8 +107,12 @@ func resourceLoggingOrganizationSinkUpdate(d *schema.ResourceData, meta interfac
 
 func resourceLoggingOrganizationSinkDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
-	_, err := config.clientLogging.Projects.Sinks.Delete(d.Id()).Do()
+	_, err = config.NewLoggingClient(userAgent).Projects.Sinks.Delete(d.Id()).Do()
 	if err != nil {
 		return err
 	}

@@ -41,14 +41,11 @@ func dataSourceGoogleServiceAccountKey() *schema.Resource {
 }
 
 func dataSourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientIAM.UserAgent = fmt.Sprintf("%s %s", config.clientIAM.UserAgent, m.ModuleName)
 
 	keyName := d.Get("name").(string)
 
@@ -62,7 +59,7 @@ func dataSourceGoogleServiceAccountKeyRead(d *schema.ResourceData, meta interfac
 	publicKeyType := d.Get("public_key_type").(string)
 
 	// Confirm the service account key exists
-	sak, err := config.clientIAM.Projects.ServiceAccounts.Keys.Get(keyName).PublicKeyType(publicKeyType).Do()
+	sak, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys.Get(keyName).PublicKeyType(publicKeyType).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Service Account Key %q", keyName))
 	}

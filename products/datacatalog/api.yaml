@@ -17,6 +17,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://datacatalog.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://datacatalog.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -462,6 +465,7 @@ objects:
                 Holds the value for a tag field with string type.
             - !ruby/object:Api::Type::Boolean
               name: boolValue
+              send_empty_value: true
               description: |
                 Holds the value for a tag field with boolean type.
             - !ruby/object:Api::Type::String
@@ -486,3 +490,121 @@ objects:
 
           For attaching a tag to a nested column, use `.` to separate the column names. Example:
           `outer_column.inner_column`
+  - !ruby/object:Api::Resource
+    name: Taxonomy
+    base_url: projects/{{project}}/locations/{{region}}/taxonomies
+    self_link: "{{name}}"
+    min_version: beta
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A collection of policy tags that classify data along a common axis.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': https://cloud.google.com/data-catalog/docs
+      api: https://cloud.google.com/data-catalog/docs/reference/rest/v1beta1/projects.locations.taxonomies
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_attribute: 'taxonomy'
+      import_format: ["projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}", "{{taxonomy}}"]
+      base_url: "projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}"
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: region
+        url_param_only: true
+        input: true
+        description: |
+          Taxonomy location region.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "name"
+        description: |
+          Resource name of this taxonomy, whose format is:
+          "projects/{project}/locations/{region}/taxonomies/{taxonomy}".
+        output: true
+      - !ruby/object:Api::Type::String
+        name: "displayName"
+        description: |
+          User defined name of this taxonomy.
+          It must: contain only unicode letters, numbers, underscores, dashes
+          and spaces; not start or end with spaces; and be at most 200 bytes
+          long when encoded in UTF-8.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: "description"
+        description: |
+          Description of this taxonomy. It must: contain only unicode characters,
+          tabs, newlines, carriage returns and page breaks; and be at most 2000 bytes
+          long when encoded in UTF-8. If not set, defaults to an empty description.
+      - !ruby/object:Api::Type::Array
+        name: "activatedPolicyTypes"
+        description: |
+          A list of policy types that are activated for this taxonomy. If not set,
+          defaults to an empty list.
+        item_type: !ruby/object:Api::Type::Enum # TOOD: should this be enum or string
+          name: 'policyType'
+          description: 'Defines policy types where policy tag can be used for'
+          values:
+            - :POLICY_TYPE_UNSPECIFIED
+            - :FINE_GRAINED_ACCESS_CONTROL
+  - !ruby/object:Api::Resource
+    name: PolicyTag
+    base_url: "{{taxonomy}}/policyTags"
+    self_link: "{{name}}"
+    min_version: beta
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      Denotes one policy tag in a taxonomy.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': https://cloud.google.com/data-catalog/docs
+      api: https://cloud.google.com/data-catalog/docs/reference/rest/v1beta1/projects.locations.taxonomies.policyTags
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_attribute: 'policy_tag'
+      import_format: ["{{%policy_tag}}"]
+      base_url: "{{%policy_tag}}"
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: taxonomy
+        url_param_only: true
+        required: true
+        input: true
+        description: |
+          Taxonomy the policy tag is associated with
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "name"
+        description: |
+          Resource name of this policy tag, whose format is:
+          "projects/{project}/locations/{region}/taxonomies/{taxonomy}/policyTags/{policytag}"
+        output: true
+      - !ruby/object:Api::Type::String
+        name: "displayName"
+        description: |
+          User defined name of this policy tag. It must: be unique within the parent
+          taxonomy; contain only unicode letters, numbers, underscores, dashes and spaces;
+          not start or end with spaces; and be at most 200 bytes long when encoded in UTF-8.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: "description"
+        description: |
+          Description of this policy tag. It must: contain only unicode characters, tabs,
+          newlines, carriage returns and page breaks; and be at most 2000 bytes long when
+          encoded in UTF-8. If not set, defaults to an empty description.
+          If not set, defaults to an empty description.
+      - !ruby/object:Api::Type::String
+        name: "parentPolicyTag"
+        description: |
+          Resource name of this policy tag's parent policy tag.
+          If empty, it means this policy tag is a top level policy tag.
+          If not set, defaults to an empty string.
+      - !ruby/object:Api::Type::Array
+        name: "childPolicyTags"
+        description: |
+          Resource names of child policy tags of this policy tag.
+        item_type: Api::Type::String
+        output: true

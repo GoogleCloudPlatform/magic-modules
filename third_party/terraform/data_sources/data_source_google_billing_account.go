@@ -45,20 +45,17 @@ func dataSourceGoogleBillingAccount() *schema.Resource {
 }
 
 func dataSourceBillingAccountRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientBilling.UserAgent = fmt.Sprintf("%s %s", config.clientBilling.UserAgent, m.ModuleName)
 
 	open, openOk := d.GetOkExists("open")
 
 	var billingAccount *cloudbilling.BillingAccount
 	if v, ok := d.GetOk("billing_account"); ok {
-		resp, err := config.clientBilling.BillingAccounts.Get(canonicalBillingAccountName(v.(string))).Do()
+		resp, err := config.NewBillingClient(userAgent).BillingAccounts.Get(canonicalBillingAccountName(v.(string))).Do()
 		if err != nil {
 			return handleNotFoundError(err, d, fmt.Sprintf("Billing Account Not Found : %s", v))
 		}
@@ -71,7 +68,7 @@ func dataSourceBillingAccountRead(d *schema.ResourceData, meta interface{}) erro
 	} else if v, ok := d.GetOk("display_name"); ok {
 		token := ""
 		for paginate := true; paginate; {
-			resp, err := config.clientBilling.BillingAccounts.List().PageToken(token).Do()
+			resp, err := config.NewBillingClient(userAgent).BillingAccounts.List().PageToken(token).Do()
 			if err != nil {
 				return fmt.Errorf("Error reading billing accounts: %s", err)
 			}
@@ -99,7 +96,7 @@ func dataSourceBillingAccountRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("one of billing_account or display_name must be set")
 	}
 
-	resp, err := config.clientBilling.BillingAccounts.Projects.List(billingAccount.Name).Do()
+	resp, err := config.NewBillingClient(userAgent).BillingAccounts.Projects.List(billingAccount.Name).Do()
 	if err != nil {
 		return fmt.Errorf("Error reading billing account projects: %s", err)
 	}

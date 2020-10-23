@@ -207,8 +207,6 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 		return false
 	})
 	config.client.Transport = rec
-	config.wrappedPubsubClient.Transport = rec
-	config.wrappedBigQueryClient.Transport = rec
 	configs[testName] = config
 	return config, nil
 }
@@ -497,6 +495,8 @@ func TestAccProviderBasePath_setInvalidBasePath(t *testing.T) {
 }
 
 func TestAccProviderMeta_setModuleName(t *testing.T) {
+	// not expected to succeed yet. see https://github.com/hashicorp/terraform-provider-google/issues/7370
+	skipIfVcr(t)
 	t.Parallel()
 
 	moduleName := "my-module"
@@ -507,7 +507,6 @@ func TestAccProviderMeta_setModuleName(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProviderMeta_setModuleName(moduleName, randString(t, 10)),
-				Check:  testAccCheckConfigAgentModified(t, moduleName),
 			},
 			{
 				ResourceName:      "google_compute_address.default",
@@ -516,16 +515,6 @@ func TestAccProviderMeta_setModuleName(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccCheckConfigAgentModified(t *testing.T, moduleName string) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
-		if !strings.Contains(config.userAgent, moduleName) {
-			return fmt.Errorf("expected userAgent to contain provider_meta set module_name")
-		}
-		return nil
-	}
 }
 
 func TestAccProviderUserProjectOverride(t *testing.T) {
@@ -883,6 +872,10 @@ func getTestProjectFromEnv() string {
 
 // testAccPreCheck ensures at least one of the credentials env variables is set.
 func getTestCredsFromEnv() string {
+	// Return empty string if GOOGLE_USE_DEFAULT_CREDENTIALS is set to true.
+	if multiEnvSearch(credsEnvVars) == "true" {
+		return ""
+	}
 	return multiEnvSearch(credsEnvVars)
 }
 

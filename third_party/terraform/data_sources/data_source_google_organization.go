@@ -49,21 +49,18 @@ func dataSourceGoogleOrganization() *schema.Resource {
 }
 
 func dataSourceOrganizationRead(d *schema.ResourceData, meta interface{}) error {
-	var m providerMeta
-
-	err := d.GetProviderMeta(&m)
+	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return err
 	}
-	config := meta.(*Config)
-	config.clientResourceManager.UserAgent = fmt.Sprintf("%s %s", config.clientResourceManager.UserAgent, m.ModuleName)
 
 	var organization *cloudresourcemanager.Organization
 	if v, ok := d.GetOk("domain"); ok {
 		filter := fmt.Sprintf("domain=%s", v.(string))
 		var resp *cloudresourcemanager.SearchOrganizationsResponse
 		err := retryTimeDuration(func() (err error) {
-			resp, err = config.clientResourceManager.Organizations.Search(&cloudresourcemanager.SearchOrganizationsRequest{
+			resp, err = config.NewResourceManagerClient(userAgent).Organizations.Search(&cloudresourcemanager.SearchOrganizationsRequest{
 				Filter: filter,
 			}).Do()
 			return err
@@ -94,7 +91,7 @@ func dataSourceOrganizationRead(d *schema.ResourceData, meta interface{}) error 
 	} else if v, ok := d.GetOk("organization"); ok {
 		var resp *cloudresourcemanager.Organization
 		err := retryTimeDuration(func() (err error) {
-			resp, err = config.clientResourceManager.Organizations.Get(canonicalOrganizationName(v.(string))).Do()
+			resp, err = config.NewResourceManagerClient(userAgent).Organizations.Get(canonicalOrganizationName(v.(string))).Do()
 			return err
 		}, d.Timeout(schema.TimeoutRead))
 		if err != nil {
