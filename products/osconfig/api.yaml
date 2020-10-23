@@ -874,7 +874,7 @@ objects:
                   - rollout.0.disruption_budget.0.fixed
                   - rollout.0.disruption_budget.0.percentage
               - !ruby/object:Api::Type::Integer
-                name: percentage
+                name: percent
                 description: |
                   Specifies the relative value defined as a percentage, which will be multiplied by a reference value.
                 exactly_one_of:
