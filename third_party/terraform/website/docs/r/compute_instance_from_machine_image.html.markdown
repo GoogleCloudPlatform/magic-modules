@@ -55,9 +55,11 @@ The following arguments are supported:
 * `zone` - (Optional) The zone that the machine should be created in. If not
   set, the provider zone is used.
 
-In addition to these, all arguments from `google_compute_instance` are supported
+In addition to these, most* arguments from `google_compute_instance` are supported
 as a way to override the properties in the machine image. All exported attributes
 from `google_compute_instance` are likewise exported here.
+
+~> **Warning:** *Due to API limitations, disk overrides are currently disabled. This includes the "boot_disk", "attached_disk", and "scratch_disk" fields.
 
 ## Attributes Reference
 

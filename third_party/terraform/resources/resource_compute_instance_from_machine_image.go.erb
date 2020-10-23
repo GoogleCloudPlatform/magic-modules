@@ -69,6 +69,25 @@ func computeInstanceFromMachineImageSchema() map[string]*schema.Schema {
 		Description: `Name or self link of a machine image to create the instance from on.`,
 	}
 
+	// Modifying the schema to disable disk overrides, due to an API bug (b/170964971)
+	// TODO: (camthornton) Remove this when disk override functionality in the API is restored
+	for _, field := range []string{"boot_disk", "attached_disk", "scratch_disk"} {
+		s[field].Required = false
+		s[field].Optional = false
+		s[field].Computed = true
+		s[field].MaxItems = 0
+	}
+	bootDiskSchema := s["boot_disk"].Elem.(*schema.Resource).Schema
+	for _, field := range bootDiskSchema {
+		field.AtLeastOneOf = []string{}
+		field.ConflictsWith = []string{}
+	}
+	initializeParamsSchema := bootDiskSchema["initialize_params"].Elem.(*schema.Resource).Schema
+	for _, field := range initializeParamsSchema {
+		field.AtLeastOneOf = []string{}
+	}
+	// End disk schema modifications
+
 	return s
 }
 
