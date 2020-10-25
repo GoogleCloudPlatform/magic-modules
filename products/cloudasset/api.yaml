@@ -107,7 +107,6 @@ objects:
                   Destination on Cloud Pubsub topic.
       - !ruby/object:Api::Type::NestedObject
         name: condition
-        required: false
         description: |
           A condition which determines whether an asset update should be published. If specified, an asset
           will be returned only when the expression evaluates to true. When set, expression field
@@ -122,21 +121,18 @@ objects:
               Textual representation of an expression in Common Expression Language syntax.
           - !ruby/object:Api::Type::String
             name: title
-            required: false
             description: |
-              Optional. Title for the expression, i.e. a short string describing its purpose.
+              Title for the expression, i.e. a short string describing its purpose.
               This can be used e.g. in UIs which allow to enter the expression.
           - !ruby/object:Api::Type::String
             name: description
-            required: false
             description: |
-              Optional. description of the expression. This is a longer text which describes the expression,
+              Description of the expression. This is a longer text which describes the expression,
               e.g. when hovered over it in a UI.
           - !ruby/object:Api::Type::String
             name: location
-            required: false
             description: |
-              Optional. String indicating the location of the expression for error reporting, e.g. a file 
+              String indicating the location of the expression for error reporting, e.g. a file 
               name and a position in the file.
   - !ruby/object:Api::Resource
     name: FolderFeed
@@ -235,7 +231,6 @@ objects:
                   Destination on Cloud Pubsub topic.
       - !ruby/object:Api::Type::NestedObject
         name: condition
-        required: false
         description: |
           A condition which determines whether an asset update should be published. If specified, an asset
           will be returned only when the expression evaluates to true. When set, expression field
@@ -250,21 +245,18 @@ objects:
               Textual representation of an expression in Common Expression Language syntax.
           - !ruby/object:Api::Type::String
             name: title
-            required: false
             description: |
-              Optional. Title for the expression, i.e. a short string describing its purpose.
+              Title for the expression, i.e. a short string describing its purpose.
               This can be used e.g. in UIs which allow to enter the expression.
           - !ruby/object:Api::Type::String
             name: description
-            required: false
             description: |
-              Optional. description of the expression. This is a longer text which describes the expression,
+              Description of the expression. This is a longer text which describes the expression,
               e.g. when hovered over it in a UI.
           - !ruby/object:Api::Type::String
             name: location
-            required: false
             description: |
-              Optional. String indicating the location of the expression for error reporting, e.g. a file 
+              String indicating the location of the expression for error reporting, e.g. a file 
               name and a position in the file.
   - !ruby/object:Api::Resource
     name: OrganizationFeed
@@ -357,7 +349,6 @@ objects:
                   Destination on Cloud Pubsub topic.
       - !ruby/object:Api::Type::NestedObject
         name: condition
-        required: false
         description: |
           A condition which determines whether an asset update should be published. If specified, an asset
           will be returned only when the expression evaluates to true. When set, expression field
@@ -372,19 +363,16 @@ objects:
               Textual representation of an expression in Common Expression Language syntax.
           - !ruby/object:Api::Type::String
             name: title
-            required: false
             description: |
-              Optional. Title for the expression, i.e. a short string describing its purpose.
+              Title for the expression, i.e. a short string describing its purpose.
               This can be used e.g. in UIs which allow to enter the expression.
           - !ruby/object:Api::Type::String
             name: description
-            required: false
             description: |
-              Optional. description of the expression. This is a longer text which describes the expression,
+              Description of the expression. This is a longer text which describes the expression,
               e.g. when hovered over it in a UI.
           - !ruby/object:Api::Type::String
             name: location
-            required: false
             description: |
-              Optional. String indicating the location of the expression for error reporting, e.g. a file 
+              String indicating the location of the expression for error reporting, e.g. a file 
               name and a position in the file.
