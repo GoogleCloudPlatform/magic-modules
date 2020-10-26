@@ -749,6 +749,7 @@ objects:
               - RAPID
               - REGULAR
               - STABLE
+      - !ruby/object:Api::Type::NestedObject
         name: 'shieldedNodes'
         description: 'Shielded Nodes configuration.'
         properties:
@@ -757,6 +758,37 @@ objects:
             description: |
               Whether Shielded Nodes features are enabled on all nodes in this
               cluster.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'networkConfig'
+        description: |
+          ReleaseChannel indicates which release channel a cluster is subscribed to.
+          Release channels are arranged in order of risk and frequency of updates.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableIntraNodeVisibility'
+            description: |
+              Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.
+          - !ruby/object:Api::Type::String
+            name: 'network'
+            output: true
+            description: |
+              The relative name of the Google Compute Engine network to which the cluster is connected.
+              Example: projects/my-project/global/networks/my-network
+          - !ruby/object:Api::Type::String
+            name: 'subnetwork'
+            output: true
+            description: |
+              The relative name of the Google Compute Engine subnetwork to which the cluster is connected.
+              Example: projects/my-project/regions/us-central1/subnetworks/my-subnet
+          - !ruby/object:Api::Type::Boolean
+            name: 'defaultSnatStatus'
+            description: |
+              Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableKubernetesAlpha'
+        description: |
+          Kubernetes alpha features are enabled on this cluster. This includes alpha API groups (e.g. v1alpha1) and features that may not be production
+          ready in the kubernetes version of the master and nodes.
   - !ruby/object:Api::Resource
     name: 'NodePool'
     base_url: projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools
@@ -943,6 +975,18 @@ objects:
                   The attestation is performed against the integrity policy baseline. This
                   baseline is initially derived from the implicitly trusted boot image when
                   the instance is created.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'workloadMetaConfig'
+            description: |
+              WorkloadMetadataConfig defines the metadata configuration to expose to workloads on the node pool.
+            properties:
+              - !ruby/object:Api::Type::Enum
+                name: 'mode'
+                description: |
+                  Mode is the configuration for how to expose metadata to workloads running on the node pool.
+                values:
+                  - :GCE_METADATA
+                  - :GKE_METADATA
       - !ruby/object:Api::Type::Integer
         name: 'initialNodeCount'
         description: |
