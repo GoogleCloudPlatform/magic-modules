@@ -7118,9 +7118,10 @@ objects:
     kind: 'compute#machineImage'
     base_url: projects/{{project}}/global/machineImages
     collection_url_key: 'items'
+    input: true
     has_self_link: true
     description: |
-      Represents a MachineImage resource. Machine images store all the configuration,
+      Represents a Machine Image resource. Machine images store all the configuration,
       metadata, permissions, and data from one or more disks required to create a
       Virtual machine (VM) instance.
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -7128,7 +7129,28 @@ objects:
         'Official Documentation': 'https://cloud.google.com/compute/docs/machine-images'
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/machineImages'
     min_version: beta
-
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 6
+          update_minutes: 6
+          delete_minutes: 6
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
         name: name
@@ -7143,6 +7165,47 @@ objects:
         resource: 'Instance'
         imports: 'selfLink'
         required: true
+      - !ruby/object:Api::Type::Array
+        name: 'storageLocations'
+        description: |
+          The regional or multi-regional Cloud Storage bucket location where the machine image is stored.
+        item_type: Api::Type::String
+        output: true
+      - !ruby/object:Api::Type::Boolean
+        name: guestFlush
+        description: |
+          Specify this to create an application consistent machine image by informing the OS to prepare for the snapshot process.
+          Currently only supported on Windows instances using the Volume Shadow Copy Service (VSS).
+      - !ruby/object:Api::Type::NestedObject
+        name: 'machineImageEncryptionKey'
+        description: |
+          Encrypts the machine image using a customer-supplied encryption key.
+
+          After you encrypt a machine image with a customer-supplied key, you must
+          provide the same key if you use the machine image later (e.g. to create a
+          instance from the image)
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'rawKey'
+            description: |
+              Specifies a 256-bit customer-supplied encryption key, encoded in
+              RFC 4648 base64 to either encrypt or decrypt this resource.
+          - !ruby/object:Api::Type::String
+            name: 'sha256'
+            description: |
+              The RFC 4648 base64 encoded SHA-256 hash of the
+              customer-supplied encryption key that protects this resource.
+            output: true
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyName'
+            output: true
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key. 
+              If absent, the Compute Engine Service Agent service account is used.
   - !ruby/object:Api::Resource
     name: 'MachineType'
     kind: 'compute#machineType'
