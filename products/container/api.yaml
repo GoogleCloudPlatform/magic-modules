@@ -355,6 +355,22 @@ objects:
           The name of the Google Compute Engine network to which the cluster is
           connected. If left unspecified, the default network will be used.
       - !ruby/object:Api::Type::NestedObject
+        name: 'databaseEncryption'
+        description: Configuration of etcd encryption.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'state'
+            description: |
+              Denotes the state of etcd encryption.
+            values:
+              - :ENCRYPTED
+              - :DECRYPTED
+          - !ruby/object:Api::Type::String
+            name: keyName
+            description: |
+              Name of CloudKMS key to use for the encryption of secrets in etcd. Ex.
+              `projects/my-project/locations/global/keyRings/my-ring/cryptoKeys/my-key`
+      - !ruby/object:Api::Type::NestedObject
         name: 'privateClusterConfig'
         description: Configuration for a private cluster.
         properties:
