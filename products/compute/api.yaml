@@ -342,6 +342,36 @@ objects:
                 How long back autoscaling should look when computing recommendations
                 to include directives regarding slower scale down, as described above.
           - !ruby/object:Api::Type::NestedObject
+            name: 'scaleInControl'
+            at_least_one_of:
+             - scale_in_control.0.max_scaled_in_replicas
+             - scale_in_control.0.time_window_sec
+            description: |
+              Defines scale in controls to reduce the risk of response latency
+              and outages due to abrupt scale-in events
+            properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'maxScaledInReplicas'
+              at_least_one_of:
+              - scale_in_control.0.max_scaled_in_replicas.0.fixed
+              - scale_in_control.0.max_scaled_in_replicas.0.percent
+              properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'fixed'
+                description: |
+                  Specifies a fixed number of VM instances. This must be a positive
+                  integer.
+              - !ruby/object:Api::Type::Integer
+                name: 'percent'
+                description: |
+                  Specifies a percentage of instances between 0 to 100%, inclusive.
+                  For example, specify 80 for 80%.
+            - !ruby/object:Api::Type::Integer
+              name: 'timeWindowSec'
+              description: |
+                How long back autoscaling should look when computing recommendations
+                to include directives regarding slower scale down, as described above.
+          - !ruby/object:Api::Type::NestedObject
             name: 'cpuUtilization'
             description: |
               Defines the CPU utilization policy that allows the autoscaler to
@@ -9116,6 +9146,36 @@ objects:
               at_least_one_of:
               - scale_down_control.0.max_scaled_down_replicas.0.fixed
               - scale_down_control.0.max_scaled_down_replicas.0.percent
+              properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'fixed'
+                description: |
+                  Specifies a fixed number of VM instances. This must be a positive
+                  integer.
+              - !ruby/object:Api::Type::Integer
+                name: 'percent'
+                description: |
+                  Specifies a percentage of instances between 0 to 100%, inclusive.
+                  For example, specify 80 for 80%.
+            - !ruby/object:Api::Type::Integer
+              name: 'timeWindowSec'
+              description: |
+                How long back autoscaling should look when computing recommendations
+                to include directives regarding slower scale down, as described above.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'scaleInControl'
+            at_least_one_of:
+             - scale_in_control.0.max_scaled_in_replicas
+             - scale_in_control.0.time_window_sec
+            description: |
+              Defines scale in controls to reduce the risk of response latency
+              and outages due to abrupt scale-in events
+            properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'maxScaledInReplicas'
+              at_least_one_of:
+              - scale_in_control.0.max_scaled_in_replicas.0.fixed
+              - scale_in_control.0.max_scaled_in_replicas.0.percent
               properties:
               - !ruby/object:Api::Type::Integer
                 name: 'fixed'
