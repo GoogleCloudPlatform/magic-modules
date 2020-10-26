@@ -58,7 +58,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validation.IntBetween(-1,31)'
       recurringSchedule.frequency: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      rollout.disruptionBudget.percent: !ruby/object:Overrides::Terraform::PropertyOverride
+      rollout.disruptionBudget.percentage: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(0,100)'
       rollout.disruptionBudget.fixed: !ruby/object:Overrides::Terraform::PropertyOverride
