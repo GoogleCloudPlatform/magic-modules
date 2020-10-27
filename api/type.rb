@@ -45,6 +45,8 @@ module Api
       attr_reader :url_param_only
       attr_reader :required
 
+      # [Additional query Parameters to append to GET calls.
+      attr_reader :read_query_params
       attr_reader :update_verb
       attr_reader :update_url
       # Some updates only allow updating certain fields at once (generally each
@@ -114,6 +116,7 @@ module Api
       check :send_empty_value, type: :boolean
       check :allow_empty_object, type: :boolean
       check :url_param_only, type: :boolean
+      check :read_query_params, type: ::String
 
       raise 'Property cannot be output and required at the same time.' \
         if @output && @required
