@@ -35,6 +35,25 @@ resource "google_data_loss_prevention_inspect_template" "<%= ctx[:primary_resour
 			}
 		}
 
+		rule_set {
+			info_types {
+				name = "MY_CUSTOM_TYPE"
+			}
+			rules {
+				hotword_rule {
+					hotword_regex {
+						pattern = "example*"
+					}
+					proximity {
+						window_before = 50
+					}
+					likelihood_adjustment {
+						fixed_likelihood = "VERY_LIKELY"
+					}
+				}
+			}
+		}
+
 		limits {
 			max_findings_per_item    = 10
 			max_findings_per_request = 50
