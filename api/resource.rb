@@ -78,6 +78,8 @@ module Api
       attr_reader :update_verb
       # [Optional] The HTTP verb used during delete. Defaults to :DELETE.
       attr_reader :delete_verb
+      # [Optional] Additional Query Parameters to append to GET. Defaults to ""
+      attr_reader :read_query_params
       # ====================
       # Collection / Identity URL Configuration
       # ====================
@@ -137,6 +139,7 @@ module Api
       check :create_url, type: String
       check :delete_url, type: String
       check :update_url, type: String
+      check :read_query_params, type: String
       check :update_mask, type: :boolean
       check :description, type: String, required: true
       check :exclude, type: :boolean

@@ -38,7 +38,7 @@ func testAccNotebooksInstance_create_gpu(name string) string {
 resource "google_notebooks_instance" "test" {
   name = "%s"
   location = "us-west1-a"
-  machine_type = "n1-standard-1"
+  machine_type = "n1-standard-1"  // can't be e2 because of accelerator
   metadata = {
     proxy-mode = "service_account"
     terraform  = "true"

@@ -30,6 +30,7 @@ type TerraformResourceData interface {
 }
 
 type TerraformResourceDiff interface {
+	HasChange(string) bool
 	GetChange(string) (interface{}, interface{})
 	Get(string) interface{}
 	Clear(string) error
@@ -161,6 +162,11 @@ func expandLabels(d TerraformResourceData) map[string]string {
 // expandEnvironmentVariables pulls the value of "environment_variables" out of a schema.ResourceData as a map[string]string.
 func expandEnvironmentVariables(d *schema.ResourceData) map[string]string {
 	return expandStringMap(d, "environment_variables")
+}
+
+// expandBuildEnvironmentVariables pulls the value of "build_environment_variables" out of a schema.ResourceData as a map[string]string.
+func expandBuildEnvironmentVariables(d *schema.ResourceData) map[string]string {
+	return expandStringMap(d, "build_environment_variables")
 }
 
 // expandStringMap pulls the value of key out of a TerraformResourceData as a map[string]string.
@@ -461,5 +467,9 @@ func generateUserAgentString(d *schema.ResourceData, currentUserAgent string) (s
 		return currentUserAgent, err
 	}
 
-	return strings.Join([]string{currentUserAgent, m.ModuleName}, " "), nil
+	if m.ModuleName != "" {
+		return strings.Join([]string{currentUserAgent, m.ModuleName}, " "), nil
+	}
+
+	return currentUserAgent, nil
 }

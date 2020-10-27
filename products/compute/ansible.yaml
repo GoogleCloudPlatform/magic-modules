@@ -94,6 +94,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Disk: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       sourceSnapshot: !ruby/object:Overrides::Ansible::PropertyOverride
+        input: true
         description: |
           The source snapshot used to create this disk. You can provide this as
           a partial or full URL to the resource.
@@ -366,6 +367,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RegionPerInstanceConfig: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   TargetGrpcProxy: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  VpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
   resource:

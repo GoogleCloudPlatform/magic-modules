@@ -35,6 +35,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Job: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  Routine: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   Table: !ruby/object:Overrides::Inspec::ResourceOverride
     properties:
       description: !ruby/object:Overrides::Inspec::PropertyOverride

@@ -1,5 +1,3 @@
-// <% autogen_exception -%>
-
 package google
 
 import (
@@ -264,7 +262,6 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				Default:     false,
 				Description: `Whether to wait for all instances to be created/updated before returning. Note that if this is set to true and the operation does not succeed, Terraform will continue trying until it times out.`,
 			},
-<% unless version == 'ga' -%>
 			"stateful_disk": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -282,12 +279,11 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 							Default:      "NEVER",
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"NEVER", "ON_PERMANENT_INSTANCE_DELETION"}, true),
-							Description:  `A value that prescribes what should happen to the stateful disk when the VM instance is deleted. The available options are NEVER and ON_PERMANENT_INSTANCE_DELETION. NEVER detatch the disk when the VM is deleted, but not delete the disk. ON_PERMANENT_INSTANCE_DELETION will delete the stateful disk when the VM is permanently deleted from the instance group. The default is NEVER.`,
+							Description:  `A value that prescribes what should happen to the stateful disk when the VM instance is deleted. The available options are NEVER and ON_PERMANENT_INSTANCE_DELETION. NEVER - detach the disk when the VM is deleted, but do not delete the disk. ON_PERMANENT_INSTANCE_DELETION will delete the stateful disk when the VM is permanently deleted from the instance group. The default is NEVER.`,
 						},
 					},
 				},
 			},
-<% end -%>
 			"operation": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -350,9 +346,7 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		AutoHealingPolicies: expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		Versions:            expandVersions(d.Get("version").([]interface{})),
 		UpdatePolicy:        expandUpdatePolicy(d.Get("update_policy").([]interface{})),
-<% unless version == 'ga' -%>
-		StatefulPolicy: expandStatefulPolicy(d.Get("stateful_disk").(*schema.Set).List()),
-<% end -%>
+		StatefulPolicy:      expandStatefulPolicy(d.Get("stateful_disk").(*schema.Set).List()),
 		// Force send TargetSize to allow a value of 0.
 		ForceSendFields: []string{"TargetSize"},
 	}
@@ -470,7 +464,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err != nil {
 		return err
 	}
-	
+
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
@@ -490,7 +484,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 		err = computeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
 			// remove from state to allow refresh to finish
-			log.Printf("[DEBUG] Resumed operation returned an error, removing from state: %s",err)
+			log.Printf("[DEBUG] Resumed operation returned an error, removing from state: %s", err)
 			d.SetId("")
 			return nil
 		}
@@ -530,11 +524,9 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err = d.Set("named_port", flattenNamedPortsBeta(manager.NamedPorts)); err != nil {
 		return fmt.Errorf("Error setting named_port in state: %s", err.Error())
 	}
-<% unless version == 'ga' -%>
 	if err = d.Set("stateful_disk", flattenStatefulPolicy(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_disk in state: %s", err.Error())
 	}
-<% end -%>
 	if err := d.Set("fingerprint", manager.Fingerprint); err != nil {
 		return fmt.Errorf("Error setting fingerprint: %s", err)
 	}
@@ -615,13 +607,11 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		change = true
 	}
 
-<% unless version == 'ga' -%>
 	if d.HasChange("stateful_disk") {
 		updatedManager.StatefulPolicy = expandStatefulPolicy(d.Get("stateful_disk").(*schema.Set).List())
 		change = true
 	}
 
-<% end -%>
 	if change {
 		op, err := config.NewComputeBetaClient(userAgent).InstanceGroupManagers.Patch(project, zone, d.Get("name").(string), updatedManager).Do()
 		if err != nil {
@@ -756,7 +746,6 @@ func expandAutoHealingPolicies(configured []interface{}) []*computeBeta.Instance
 	return autoHealingPolicies
 }
 
-<% unless version == 'ga' -%>
 func expandStatefulPolicy(configured []interface{}) *computeBeta.StatefulPolicy {
 	disks := make(map[string]computeBeta.StatefulPolicyPreservedStateDiskDevice)
 	for _, raw := range configured {
@@ -772,7 +761,6 @@ func expandStatefulPolicy(configured []interface{}) *computeBeta.StatefulPolicy 
 	return nil
 }
 
-<% end -%>
 func expandVersions(configured []interface{}) []*computeBeta.InstanceGroupManagerVersion {
 	versions := make([]*computeBeta.InstanceGroupManagerVersion, 0, len(configured))
 	for _, raw := range configured {
@@ -863,7 +851,6 @@ func flattenAutoHealingPolicies(autoHealingPolicies []*computeBeta.InstanceGroup
 	return autoHealingPoliciesSchema
 }
 
-<% unless version == 'ga' -%>
 func flattenStatefulPolicy(statefulPolicy *computeBeta.StatefulPolicy) []map[string]interface{} {
 	if statefulPolicy == nil || statefulPolicy.PreservedState == nil || statefulPolicy.PreservedState.Disks == nil {
 		return make([]map[string]interface{}, 0, 0)
@@ -880,7 +867,6 @@ func flattenStatefulPolicy(statefulPolicy *computeBeta.StatefulPolicy) []map[str
 	return result
 }
 
-<% end -%>
 func flattenUpdatePolicy(updatePolicy *computeBeta.InstanceGroupManagerUpdatePolicy) []map[string]interface{} {
 	results := []map[string]interface{}{}
 	if updatePolicy != nil {

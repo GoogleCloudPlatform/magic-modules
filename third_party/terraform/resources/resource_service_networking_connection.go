@@ -70,7 +70,6 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 	if err != nil {
 		return err
 	}
-	config.clientServiceNetworking.UserAgent = userAgent
 
 	network := d.Get("network").(string)
 	serviceNetworkingNetworkName, err := retrieveServiceNetworkingNetworkName(d, config, network, userAgent)
@@ -98,7 +97,7 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 	// The API docs don't specify that you can do connections/-,
 	// but that's what gcloud does, and it's easier than grabbing
 	// the connection name.
-	op, err := config.clientServiceNetworking.Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true).Do()
+	op, err := config.NewServiceNetworkingClient(userAgent).Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true).Do()
 	if err != nil {
 		return err
 	}
@@ -122,7 +121,6 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 	if err != nil {
 		return err
 	}
-	config.clientServiceNetworking.UserAgent = userAgent
 
 	connectionId, err := parseConnectionId(d.Id())
 	if err != nil {
@@ -135,7 +133,7 @@ func resourceServiceNetworkingConnectionRead(d *schema.ResourceData, meta interf
 	}
 
 	parentService := formatParentService(connectionId.Service)
-	response, err := config.clientServiceNetworking.Services.Connections.List(parentService).
+	response, err := config.NewServiceNetworkingClient(userAgent).Services.Connections.List(parentService).
 		Network(serviceNetworkingNetworkName).Do()
 	if err != nil {
 		return err
@@ -176,7 +174,6 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 	if err != nil {
 		return err
 	}
-	config.clientServiceNetworking.UserAgent = userAgent
 
 	connectionId, err := parseConnectionId(d.Id())
 	if err != nil {
@@ -199,7 +196,7 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 
 		// The API docs don't specify that you can do connections/-, but that's what gcloud does,
 		// and it's easier than grabbing the connection name.
-		op, err := config.clientServiceNetworking.Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true).Do()
+		op, err := config.NewServiceNetworkingClient(userAgent).Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true).Do()
 		if err != nil {
 			return err
 		}
@@ -323,10 +320,12 @@ func retrieveServiceNetworkingNetworkName(d *schema.ResourceData, config *Config
 	if pid == "" {
 		return "", fmt.Errorf("Could not determine project")
 	}
-
+	log.Printf("[DEBUG] Retrieving project number by doing a GET with the project id, as required by service networking")
 	project, err := config.NewResourceManagerClient(userAgent).Projects.Get(pid).Do()
 	if err != nil {
-		return "", fmt.Errorf("Failed to retrieve project, pid: %s, err: %s", pid, err)
+		// note: returning a wrapped error is part of this method's contract!
+		// https://blog.golang.org/go1.13-errors
+		return "", fmt.Errorf("Failed to retrieve project, pid: %s, err: %w", pid, err)
 	}
 
 	networkName := networkFieldValue.Name
