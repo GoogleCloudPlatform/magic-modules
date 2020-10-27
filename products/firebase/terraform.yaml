@@ -24,7 +24,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "firebase_project_basic"
         min_version: 'beta'
-        primary_resource_id: "basic"
+        primary_resource_id: "default"
         vars:
           instance_name: "memory-cache"
         test_env_vars:
@@ -62,7 +62,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         test_env_vars:
           org_id: :ORG_ID
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      custom_import: templates/terraform/custom_import/self_link_as_name_set_project.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
