@@ -628,6 +628,98 @@ objects:
                                       description: |
                                         Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names listed
                                         at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
+          - !ruby/object:Api::Type::Array
+            name: 'customInfoTypes'
+            description: |
+              Custom info types to be used. See https://cloud.google.com/dlp/docs/creating-custom-infotypes to learn more.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'infoType'
+                  required: true
+                  description: |
+                    CustomInfoType can either be a new infoType, or an extension of built-in infoType, when the name matches one of existing
+                    infoTypes and that infoType is specified in `info_types` field. Specifying the latter adds findings to the
+                    one detected by the system. If built-in info type is not specified in `info_types` list then the name is
+                    treated as a custom info type.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'name'
+                      required: true
+                      description: |
+                        Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names
+                        listed at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
+                - !ruby/object:Api::Type::Enum
+                  name: 'likelihood'
+                  description: |
+                    Likelihood to return for this CustomInfoType. This base value can be altered by a detection rule if the finding meets the criteria
+                    specified by the rule.
+                  values:
+                    - :VERY_UNLIKELY
+                    - :UNLIKELY
+                    - :POSSIBLE
+                    - :LIKELY
+                    - :VERY_LIKELY
+                  default_value: :VERY_LIKELY
+                - !ruby/object:Api::Type::Enum
+                  name: 'exclusionType'
+                  description: |
+                    If set to EXCLUSION_TYPE_EXCLUDE this infoType will not cause a finding to be returned. It still can be used for rules matching.
+                  values:
+                    - :EXCLUSION_TYPE_EXCLUDE
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'regex'
+                  description: Regular expression which defines the rule.
+                  input: true
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'pattern'
+                      required: true
+                      description: |
+                        Pattern defining the regular expression.
+                        Its syntax (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
+                    - !ruby/object:Api::Type::Array
+                      name: 'groupIndexes'
+                      description: |
+                        The index of the submatch to extract as findings. When not specified, the entire match is returned. No more than 3 may be included.
+                      item_type: Api::Type::Integer
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'dictionary'
+                  description: Dictionary which defines the rule.
+                  input: true
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'wordList'
+                      description: List of words or phrases to search for.
+                      properties:
+                        - !ruby/object:Api::Type::Array
+                          name: 'words'
+                          required: true
+                          description: |
+                            Words or phrases defining the dictionary. The dictionary must contain at least one
+                            phrase and every phrase must contain at least 2 characters that are letters or digits.
+                          item_type: Api::Type::String
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'cloudStoragePath'
+                      description: Newline-delimited file of words in Cloud Storage. Only a single file is accepted.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'path'
+                          required: true
+                          description: |
+                            A url representing a file or path (no wildcards) in Cloud Storage. Example: `gs://[BUCKET_NAME]/dictionary.txt`
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'storedType'
+                  description: A reference to a StoredInfoType to use with scanning.
+                  input: true
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'name'
+                      required: true
+                      description: |
+                        Resource name of the requested StoredInfoType, for example `organizations/433245324/storedInfoTypes/432452342`
+                        or `projects/project-id/storedInfoTypes/432452342`.
+
   - !ruby/object:Api::Resource
     name: 'StoredInfoType'
     create_url:  "{{parent}}/storedInfoTypes"
