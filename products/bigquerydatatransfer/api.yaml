@@ -146,10 +146,9 @@ objects:
         properties:
           - !ruby/object:Api::Type::Boolean
             name: 'enableFailureEmail'
+            required: true
             description: |
               If true, email notifications will be sent on transfer run failures.
-            at_least_one_of:
-              - email_preferences.0.enable_failure_email
       - !ruby/object:Api::Type::String
           name: 'notificationPubsubTopic'
           description: |
