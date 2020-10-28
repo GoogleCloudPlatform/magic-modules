@@ -1,0 +1,9 @@
+---
+steps:
+- name: 'gcr.io/$PROJECT_ID/downstream-builder'
+  id: run-rake-tests
+  entrypoint: bundle
+  args:
+      - exec
+      - rake
+      - test
