@@ -141,7 +141,9 @@ module Provider
                        ['google/retry_transport.go',
                         'third_party/terraform/utils/retry_transport.go'],
                        ['google/error_retry_predicates.go',
-                        'third_party/terraform/utils/error_retry_predicates.go']
+                        'third_party/terraform/utils/error_retry_predicates.go'],
+                       ['google/project_service.go',
+                        'third_party/validator/project_service.go']
                      ])
     end
 
