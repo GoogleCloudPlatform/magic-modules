@@ -21,7 +21,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       cloudSql.credential.password: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
     id_format: "{{name}}"
-    import_format: ["{{name}}"]
+    import_format: ["projects/{{project}}/locations/{{location}}/connections/{{connection_id}}", "{{project}}/{{location}}/{{connection_id}}", "{{location}}/{{connection_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta
