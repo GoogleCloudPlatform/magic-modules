@@ -1048,6 +1048,37 @@ func testAccBigQueryTableFromSheet(context map[string]interface{}) string {
 `, context)
 }
 
+func testAccBigQueryTableFromBigTable(context map[string]interface{}) string {
+	return Nprintf(`
+	resource "google_bigquery_table" "table" {
+		dataset_id = google_bigquery_dataset.dataset.dataset_id
+		table_id   = "tf_test_bigtable_%{random_suffix}"
+
+		external_data_configuration {
+		  autodetect            = true
+		  source_format         = "BIGTABLE"
+		  ignore_unknown_values = true
+
+		  source_uris = [
+			"https://https://googleapis.com/bigtable/projects/project_id/instances/instance_id/tables/table_name",
+		  ]
+		}
+	  }
+
+	  resource "google_bigquery_dataset" "dataset" {
+		dataset_id                  = "tf_test_ds_%{random_suffix}"
+		friendly_name               = "test"
+		description                 = "This is a test description"
+		location                    = "EU"
+		default_table_expiration_ms = 3600000
+
+		labels = {
+		  env = "default"
+		}
+	  }
+`, context)
+}
+
 var TEST_CSV = `lifelock,LifeLock,,web,Tempe,AZ,1-May-07,6850000,USD,b
 lifelock,LifeLock,,web,Tempe,AZ,1-Oct-06,6000000,USD,a
 lifelock,LifeLock,,web,Tempe,AZ,1-Jan-08,25000000,USD,c
