@@ -102,6 +102,8 @@ module Provider
                         'third_party/validator/folder_iam.go'],
                        ['google/container.go',
                         'third_party/validator/container.go'],
+                       ['google/project_service.go',
+                        'third_party/validator/project_service.go']
                        ['google/image.go',
                         'third_party/terraform/utils/image.go'],
                        ['google/disk_type.go',
@@ -141,9 +143,7 @@ module Provider
                        ['google/retry_transport.go',
                         'third_party/terraform/utils/retry_transport.go'],
                        ['google/error_retry_predicates.go',
-                        'third_party/terraform/utils/error_retry_predicates.go'],
-                       ['google/project_service.go',
-                        'third_party/validator/project_service.go']
+                        'third_party/terraform/utils/error_retry_predicates.go']
                      ])
     end
 
