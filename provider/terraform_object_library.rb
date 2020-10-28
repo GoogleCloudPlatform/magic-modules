@@ -103,7 +103,7 @@ module Provider
                        ['google/container.go',
                         'third_party/validator/container.go'],
                        ['google/project_service.go',
-                        'third_party/validator/project_service.go']
+                        'third_party/validator/project_service.go'],
                        ['google/image.go',
                         'third_party/terraform/utils/image.go'],
                        ['google/disk_type.go',
