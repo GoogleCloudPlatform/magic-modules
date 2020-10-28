@@ -138,6 +138,17 @@ objects:
               - schedule_options.0.disable_auto_scheduling
               - schedule_options.0.start_time
               - schedule_options.0.end_time
+      - !ruby/object:Api::Type::NestedObject
+        name: 'emailPreferences'
+        description: |
+          Email notifications will be sent according to these preferences to the
+          email address of the user who owns this transfer config.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableFailureEmail'
+            required: true
+            description: |
+              If true, email notifications will be sent on transfer run failures.
       - !ruby/object:Api::Type::String
           name: 'notificationPubsubTopic'
           description: |
