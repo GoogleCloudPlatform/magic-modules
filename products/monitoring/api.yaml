@@ -1265,7 +1265,7 @@ objects:
                  exclusive of max. Open ranges can be defined by setting
                  just one of min or max.
               properties:
-              - !ruby/object:Api::Type::Integer
+              - !ruby/object:Api::Type::Double
                 name: min
                 at_least_one_of:
                 - service_level_indicator.0.request_based_sli.0.distribution_cut.0.range.0.min
@@ -1274,7 +1274,7 @@ objects:
                   Min value for the range (inclusive). If not given,
                   will be set to "-infinity", defining an open range
                   "< range.max"
-              - !ruby/object:Api::Type::Integer
+              - !ruby/object:Api::Type::Double
                 name: max
                 at_least_one_of:
                 - service_level_indicator.0.request_based_sli.0.distribution_cut.0.range.0.min
@@ -1437,7 +1437,7 @@ objects:
                              exclusive of max. Open ranges can be defined by setting
                              just one of min or max.
                           properties:
-                            - !ruby/object:Api::Type::Integer
+                            - !ruby/object:Api::Type::Double
                               name: min
                               at_least_one_of:
                                 - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut.0.range.0.min
@@ -1446,7 +1446,7 @@ objects:
                                 Min value for the range (inclusive). If not given,
                                 will be set to "-infinity", defining an open range
                                 "< range.max"
-                            - !ruby/object:Api::Type::Integer
+                            - !ruby/object:Api::Type::Double
                               name: max
                               at_least_one_of:
                                 - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut.0.range.0.min
@@ -1545,7 +1545,7 @@ objects:
                       values should satisfy `range.min <= X < range.max` for a
                       good service.
                     properties:
-                      - !ruby/object:Api::Type::Integer
+                      - !ruby/object:Api::Type::Double
                         name: min
                         at_least_one_of:
                           - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.min
@@ -1554,7 +1554,7 @@ objects:
                           Min value for the range (inclusive). If not given,
                           will be set to "-infinity", defining an open range
                           "< range.max"
-                      - !ruby/object:Api::Type::Integer
+                      - !ruby/object:Api::Type::Double
                         name: max
                         at_least_one_of:
                           - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.min
@@ -1603,7 +1603,7 @@ objects:
                       just one of min or max. Summed value `X` should satisfy
                       `range.min <= X < range.max` for a good window.
                     properties:
-                      - !ruby/object:Api::Type::Integer
+                      - !ruby/object:Api::Type::Double
                         name: min
                         at_least_one_of:
                           - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.min
@@ -1612,7 +1612,7 @@ objects:
                           Min value for the range (inclusive). If not given,
                           will be set to "-infinity", defining an open range
                           "< range.max"
-                      - !ruby/object:Api::Type::Integer
+                      - !ruby/object:Api::Type::Double
                         name: max
                         at_least_one_of:
                           - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.min
