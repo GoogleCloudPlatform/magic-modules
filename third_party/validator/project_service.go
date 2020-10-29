@@ -21,9 +21,8 @@ func GetServiceUsageCaiObject(d TerraformResourceData, config *Config) (Asset, e
 				Data:                 obj,
 			},
 		}, nil
-	} else {
-		return Asset{}, err
 	}
+	return Asset{}, err
 }
 
 func GetServiceUsageApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
@@ -31,9 +30,9 @@ func GetServiceUsageApiObject(d TerraformResourceData, config *Config) (map[stri
 	parentProjectProp, err := expandServiceUsageParentProject(d.Get("project"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("project"); !isEmptyValue(reflect.ValueOf(parentProjectProp)) && (ok || !reflect.DeepEqual(v, parentProjectProp)) {
-		obj["parent"] = parentProjectProp
 	}
+	obj["parent"] = parentProjectProp
+
 	serviceNameProp, err := expandServiceUsageServiceName(d.Get("service"), d, config)
 	if err != nil {
 		return nil, err
