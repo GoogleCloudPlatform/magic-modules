@@ -1072,7 +1072,7 @@ func testAccBigQueryTableFromSheet(context map[string]interface{}) string {
 `, context)
 }
 
-func testAccBigQueryTableFromBigTable(context map[string]interface{}) string {
+func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
 	return Nprintf(`
 	resource "google_bigquery_table" "table" {
 		dataset_id = google_bigquery_dataset.dataset.dataset_id
@@ -1084,7 +1084,7 @@ func testAccBigQueryTableFromBigTable(context map[string]interface{}) string {
 		  ignore_unknown_values = true
 
 		  source_uris = [
-			"https://https://googleapis.com/bigtable/projects/project_id/instances/instance_id/tables/table_name",
+			"https://googleapis.com/bigtable/projects/project_id/instances/instance_id/tables/table_name",
 		  ]
 		}
 	  }
