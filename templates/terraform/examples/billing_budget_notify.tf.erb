@@ -31,6 +31,7 @@ resource "google_billing_budget" "<%= ctx[:primary_resource_id] %>" {
     monitoring_notification_channels = [
       google_monitoring_notification_channel.notification_channel.id,
     ]
+    disable_default_iam_recipients = true
   }
 }
 

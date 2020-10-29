@@ -28,12 +28,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/clear_folder_access_approval_settings.go.erb
       pre_create: templates/terraform/update_mask.erb
+      constants: templates/terraform/constants/access_approval.go.erb
     properties:
       notificationEmails: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         default_from_api: true
       enrolledServices: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+        set_hash_func: accessApprovalEnrolledServicesHash
   ProjectSettings: !ruby/object:Overrides::Terraform::ResourceOverride
     legacy_name: "google_project_access_approval_settings"
     import_format: ["projects/{{project}}/accessApprovalSettings"]
@@ -54,6 +56,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       enrolledServices: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+        set_hash_func: accessApprovalEnrolledServicesHash
   OrganizationSettings: !ruby/object:Overrides::Terraform::ResourceOverride
     legacy_name: "google_organization_access_approval_settings"
     import_format: ["organizations/{{organization_id}}/accessApprovalSettings"]
@@ -73,6 +76,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       enrolledServices: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+        set_hash_func: accessApprovalEnrolledServicesHash
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

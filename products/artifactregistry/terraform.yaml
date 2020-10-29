@@ -14,7 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Repository: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: projects/{{project}}/locations/{{location}}/repositories/{{repsitory_id}}
+    id_format: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
     import_format: ["projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}", "{{repository_id}}"]
     autogen_async: true
     examples:

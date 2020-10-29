@@ -1,13 +1,10 @@
-
-<% autogen_exception -%>
 package google
 
-<% unless version == 'ga' -%>
 import (
 	"fmt"
-	"log"
+	"strings"
 
-	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // PerInstanceConfig needs both regular operation polling AND custom polling for deletion which is why this is not generated
@@ -150,4 +147,3 @@ func PollCheckInstanceConfigDeleted(resp map[string]interface{}, respErr error) 
 	}
 	return ErrorPollResult(fmt.Errorf("Expected PerInstanceConfig to be deleting but status is: %s", status))
 }
-<% end -%>

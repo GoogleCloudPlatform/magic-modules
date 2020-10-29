@@ -208,6 +208,7 @@ objects:
                 values:
                   - :COMMENTS_DISABLED
                   - :COMMENTS_ENABLED
+                  - :COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY
               - !ruby/object:Api::Type::Boolean
                 name: 'invertRegex'
                 description: |

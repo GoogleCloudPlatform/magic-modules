@@ -76,7 +76,7 @@ See [Provider Versions](https://terraform.io/docs/providers/google/guides/provid
 <% end -%>
 
 <% markdown_escaped_name = resource_ns_iam.gsub("_", "\\_") %>
-<% params = extract_identifiers(object.self_link_url) -%>
+<% params = extract_identifiers(object.iam_policy.self_link || object.self_link_url) -%>
 <%
 url_properties = object.all_user_properties.select do
   |param| params.include?(param.name)
