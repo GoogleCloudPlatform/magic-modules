@@ -117,7 +117,7 @@ The following arguments are supported:
 * `name` - (Required) The name of the logging sink.
 
 * `destination` - (Required) The destination of the sink (or, in other words, where logs are written to). Can be a
-    Cloud Storage bucket, a PubSub topic, or a BigQuery dataset. Examples:
+    Cloud Storage bucket, a PubSub topic, a BigQuery dataset or a Cloud Logging bucket . Examples:
 ```
 "storage.googleapis.com/[GCS_BUCKET]"
 "bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET]"

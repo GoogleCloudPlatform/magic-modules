@@ -51,7 +51,7 @@ The following arguments are supported:
 * `billing_account` - (Required) The billing account exported to the sink.
 
 * `destination` - (Required) The destination of the sink (or, in other words, where logs are written to). Can be a
-    Cloud Storage bucket, a PubSub topic, or a BigQuery dataset. Examples:
+    Cloud Storage bucket, a PubSub topic, a BigQuery dataset or a Cloud Logging bucket. Examples:
 ```
 "storage.googleapis.com/[GCS_BUCKET]"
 "bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET]"
