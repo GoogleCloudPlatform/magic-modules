@@ -1,6 +1,8 @@
 GCB CI tools for Magic Modules and Google Providers
 ===
 
+test
+
 These tools manage the downstream repositories of [magic-modules](https://github.com/GoogleCloudPlatform/magic-modules), and are collectively referred to as "The Magician".
 
 # CI For Downstream/Magic Modules Developers
