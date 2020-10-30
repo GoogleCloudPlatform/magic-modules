@@ -48,13 +48,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       status: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-    examples: 
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "queue_basic"
         primary_resource_id: "default"
         vars:
           name: "cloud-tasks-queue-test"
-
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_tasks_queue_advanced"
+        primary_resource_id: "advanced_configuration"
+        ignore_read_extra:
+          - "app_engine_routing_override.0.service"
+          - "app_engine_routing_override.0.version"
+          - "app_engine_routing_override.0.instance"
+        vars:
+          name: "instance-name"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

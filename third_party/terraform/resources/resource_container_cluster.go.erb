@@ -602,7 +602,7 @@ func resourceContainerCluster() *schema.Resource {
 							Type:        schema.TypeList,
 							Required:    true,
 							MaxItems:    1,
-							Description: `Notification config for pubsub`,
+							Description: `Notification config for Cloud Pub/Sub`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"enabled": {
@@ -613,10 +613,31 @@ func resourceContainerCluster() *schema.Resource {
 									"topic": {
 										Type:        schema.TypeString,
 										Optional:    true,
-										Description: `The pubsub topic to send the notification to, must be in the format: projects/{project}/topics/{topic}`,
+										Description: `The Cloud Pub/Sub topic to send the notification to, must be in the format: projects/{project}/topics/{topic}`,
 									},
 								},
 							},
+						},
+					},
+				},
+			},
+<% end -%>
+
+<% unless version == 'ga' -%>
+			"confidential_nodes": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				MaxItems:    1,
+				Description: `Configuration for the confidential nodes feature, which makes nodes run on confidential VMs. Warning: This configuration can't be changed (or added/removed) after cluster creation without deleting and recreating the entire cluster.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Required:    true,
+							ForceNew:    true,
+							Description: `Whether Confidential Nodes feature is enabled for all nodes in this cluster.`,
 						},
 					},
 				},
@@ -1297,6 +1318,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 <% unless version == 'ga' -%>
 		NotificationConfig: expandNotificationConfig(d.Get("notification_config")),
 <% end -%>
+<% unless version == 'ga' -%>
+		ConfidentialNodes: expandConfidentialNodes(d.Get("confidential_nodes")),
+<% end -%>
 		ResourceLabels: expandStringMap(d, "resource_labels"),
 	}
 
@@ -1619,6 +1643,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 <% unless version == 'ga' -%>
 	if err := d.Set("notification_config", flattenNotificationConfig(cluster.NotificationConfig)); err != nil {
+		return err
+	}
+	if err := d.Set("confidential_nodes", flattenConfidentialNodes(cluster.ConfidentialNodes)); err != nil {
 		return err
 	}
 	if err := d.Set("enable_tpu", cluster.EnableTpu); err != nil {
@@ -3019,6 +3046,19 @@ func expandNotificationConfig(configured interface{}) *containerBeta.Notificatio
 }
 <% end -%>
 
+<% unless version == 'ga' -%>
+func expandConfidentialNodes(configured interface{}) *containerBeta.ConfidentialNodes {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &containerBeta.ConfidentialNodes{
+		Enabled: config["enabled"].(bool),
+	}
+}
+<% end -%>
+
 func expandMasterAuth(configured interface{}) *containerBeta.MasterAuth {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -3265,6 +3305,18 @@ func flattenNotificationConfig(c *containerBeta.NotificationConfig) []map[string
 			},
 		},
 	}
+}
+<% end -%>
+
+<% unless version == 'ga' -%>
+func flattenConfidentialNodes(c *containerBeta.ConfidentialNodes) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"enabled": c.Enabled,
+		})
+	}
+	return result
 }
 <% end -%>
 

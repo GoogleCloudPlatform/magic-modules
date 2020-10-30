@@ -31,6 +31,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           database_name: "my-database"
           database_instance_name: "my-database-instance"
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+        oics_vars_overrides:
+          deletion_protection: "false"
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 15
       update_minutes: 10

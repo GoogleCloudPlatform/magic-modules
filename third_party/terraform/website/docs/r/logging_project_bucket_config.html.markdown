@@ -32,13 +32,24 @@ resource "google_logging_project_bucket_config" "basic" {
 }
 ```
 
+Create logging bucket with customId
+
+```hcl
+resource "google_logging_project_bucket_config" "basic" {
+	project    = "project_id"
+	location  = "global"
+	retention_days = 30
+	bucket_id = "custom-bucket"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
 * `project` - (Required) The parent resource that contains the logging bucket.
 
-* `location` - (Required) The location of the bucket. The supported locations are: "global" "us-central1"
+* `location` - (Required) The location of the bucket.
 
 * `bucket_id` - (Required) The name of the logging bucket. Logging automatically creates two log buckets: `_Required` and `_Default`.
 

@@ -433,7 +433,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         return err
     }
 
-    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}#{object.read_query_params}" -%>")
     if err != nil {
         return err
     }
@@ -500,7 +500,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%- unless object.virtual_fields.empty? -%>
   // Explicitly set virtual fields to default values if unset
 <%-   object.virtual_fields.each do |field| -%>
-    if _, ok := d.GetOk("<%= field.name -%>"); !ok {
+    if _, ok := d.GetOkExists("<%= field.name -%>"); !ok {
       if err := d.Set("<%= field.name -%>", <%= go_literal(field.default_value) -%>); err != nil {
       	return fmt.Errorf("Error setting <%= field.name -%>: %s", err)
       }
@@ -562,7 +562,6 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     if err != nil {
     	return err
     }
-    config.userAgent = userAgent
 
     billingProject := ""
 
@@ -810,8 +809,8 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
 <% if object.skip_delete -%>
     log.Printf("[WARNING] <%= object.__product.name + " " + object.name %> resources" +
-    " cannot be deleted from GCP. The resource %s will be removed from Terraform" +
-    " state, but will still be present on the server.", d.Id())
+    " cannot be deleted from Google Cloud. The resource %s will be removed from Terraform" +
+    " state, but will still be present on Google Cloud.", d.Id())
     d.SetId("")
 
     return nil
@@ -821,7 +820,6 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     if err != nil {
     	return err
     }
-    config.userAgent = userAgent
 
 <% if object.custom_code.custom_delete -%>
 <%= lines(compile(pwd + '/' + object.custom_code.custom_delete)) -%>

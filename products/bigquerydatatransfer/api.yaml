@@ -98,6 +98,57 @@ objects:
           about the format here:
           https://cloud.google.com/appengine/docs/flexible/python/scheduling-jobs-with-cron-yaml#the_schedule_format
           NOTE: the granularity should be at least 8 hours, or less frequent.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'scheduleOptions'
+        description: |
+          Options customizing the data transfer schedule.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'disableAutoScheduling'
+            description: |
+              If true, automatic scheduling of data transfer runs for this
+              configuration will be disabled. The runs can be started on ad-hoc
+              basis using transferConfigs.startManualRuns API. When automatic
+              scheduling is disabled, the TransferConfig.schedule field will
+              be ignored.
+            at_least_one_of:
+              - schedule_options.0.disable_auto_scheduling
+              - schedule_options.0.start_time
+              - schedule_options.0.end_time
+          - !ruby/object:Api::Type::Time
+            name: 'startTime'
+            description: |
+              Specifies time to start scheduling transfer runs. The first run will be
+              scheduled at or after the start time according to a recurrence pattern
+              defined in the schedule string. The start time can be changed at any
+              moment. The time when a data transfer can be triggered manually is not
+              limited by this option.
+            at_least_one_of:
+              - schedule_options.0.disable_auto_scheduling
+              - schedule_options.0.start_time
+              - schedule_options.0.end_time
+          - !ruby/object:Api::Type::Time
+            name: 'endTime'
+            description: |
+              Defines time to stop scheduling transfer runs. A transfer run cannot be
+              scheduled at or after the end time. The end time can be changed at any
+              moment. The time when a data transfer can be triggered manually is not
+              limited by this option.
+            at_least_one_of:
+              - schedule_options.0.disable_auto_scheduling
+              - schedule_options.0.start_time
+              - schedule_options.0.end_time
+      - !ruby/object:Api::Type::NestedObject
+        name: 'emailPreferences'
+        description: |
+          Email notifications will be sent according to these preferences to the
+          email address of the user who owns this transfer config.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableFailureEmail'
+            required: true
+            description: |
+              If true, email notifications will be sent on transfer run failures.
       - !ruby/object:Api::Type::String
           name: 'notificationPubsubTopic'
           description: |

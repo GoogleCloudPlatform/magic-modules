@@ -153,9 +153,9 @@ func resourceBigQueryTable() *schema.Resource {
 						"source_format": {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: `The data format. Supported values are: "CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "PARQUET", and "DATSTORE_BACKUP". To use "GOOGLE_SHEETS" the scopes must include "googleapis.com/auth/drive.readonly".`,
+							Description: `The data format. Supported values are: "CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "PARQUET", and "DATASTORE_BACKUP". To use "GOOGLE_SHEETS" the scopes must include "googleapis.com/auth/drive.readonly".`,
 							ValidateFunc: validation.StringInSlice([]string{
-								"CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "DATSTORE_BACKUP", "PARQUET",
+								"CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "DATASTORE_BACKUP", "PARQUET",
 							}, false),
 						},
 						// SourceURIs [Required] The fully-qualified URIs that point to your data in Google Cloud.
@@ -451,13 +451,13 @@ func resourceBigQueryTable() *schema.Resource {
 							Description: `Number of milliseconds for which to keep the storage for a partition.`,
 						},
 
-						// Type: [Required] The supported types are DAY and HOUR, which will generate
-						// one partition per day or hour based on data loading time.
+						// Type: [Required] The supported types are DAY, HOUR, MONTH, and YEAR, which will generate
+						// one partition per day, hour, month, and year, respectively.
 						"type": {
 							Type:         schema.TypeString,
 							Required:     true,
-							Description:  `The supported types are DAY and HOUR, which will generate one partition per day or hour based on data loading time.`,
-							ValidateFunc: validation.StringInSlice([]string{"DAY", "HOUR"}, false),
+							Description:  `The supported types are DAY, HOUR, MONTH, and YEAR, which will generate one partition per day, hour, month, and year, respectively.`,
+							ValidateFunc: validation.StringInSlice([]string{"DAY", "HOUR", "MONTH", "YEAR"}, false),
 						},
 
 						// Field: [Optional] The field used to determine how to create a time-based

@@ -126,7 +126,7 @@ objects:
         description: |
           The purpose of this resource, which can be one of the following values:
 
-          - GCE_ENDPOINT for addresses that are used by VM instances, alias IP ranges, internal load balancers, and similar resources.
+          * GCE_ENDPOINT for addresses that are used by VM instances, alias IP ranges, internal load balancers, and similar resources.
 
           This should only be set when using an Internal address.
         values:
@@ -136,8 +136,10 @@ objects:
         exact_version: beta
         description: |
           The purpose of this resource, which can be one of the following values:
-          - GCE_ENDPOINT for addresses that are used by VM instances, alias IP ranges, internal load balancers, and similar resources.
-          - SHARED_LOADBALANCER_VIP for an address that can be used by multiple internal load balancers
+
+          * GCE_ENDPOINT for addresses that are used by VM instances, alias IP ranges, internal load balancers, and similar resources.
+          * SHARED_LOADBALANCER_VIP for an address that can be used by multiple internal load balancers.
+
           This should only be set when using an Internal address.
         values:
           - :GCE_ENDPOINT
@@ -1172,29 +1174,29 @@ objects:
           The load balancing algorithm used within the scope of the locality.
           The possible values are -
 
-          ROUND_ROBIN - This is a simple policy in which each healthy backend
-                        is selected in round robin order.
+          * ROUND_ROBIN - This is a simple policy in which each healthy backend
+                          is selected in round robin order.
 
-          LEAST_REQUEST - An O(1) algorithm which selects two random healthy
-                          hosts and picks the host which has fewer active requests.
+          * LEAST_REQUEST - An O(1) algorithm which selects two random healthy
+                            hosts and picks the host which has fewer active requests.
 
-          RING_HASH - The ring/modulo hash load balancer implements consistent
-                      hashing to backends. The algorithm has the property that the
-                      addition/removal of a host from a set of N hosts only affects
-                      1/N of the requests.
+          * RING_HASH - The ring/modulo hash load balancer implements consistent
+                        hashing to backends. The algorithm has the property that the
+                        addition/removal of a host from a set of N hosts only affects
+                        1/N of the requests.
 
-          RANDOM - The load balancer selects a random healthy host.
+          * RANDOM - The load balancer selects a random healthy host.
 
-          ORIGINAL_DESTINATION - Backend host is selected based on the client
-                                 connection metadata, i.e., connections are opened
-                                 to the same address as the destination address of
-                                 the incoming connection before the connection
-                                 was redirected to the load balancer.
+          * ORIGINAL_DESTINATION - Backend host is selected based on the client
+                                   connection metadata, i.e., connections are opened
+                                   to the same address as the destination address of
+                                   the incoming connection before the connection
+                                   was redirected to the load balancer.
 
-          MAGLEV - used as a drop in replacement for the ring hash load balancer.
-                   Maglev is not as stable as ring hash but has faster table lookup
-                   build times and host selection times. For more information about
-                   Maglev, refer to https://ai.google/research/pubs/pub44824
+          * MAGLEV - used as a drop in replacement for the ring hash load balancer.
+                     Maglev is not as stable as ring hash but has faster table lookup
+                     build times and host selection times. For more information about
+                     Maglev, refer to https://ai.google/research/pubs/pub44824
 
           This field is applicable only when the load_balancing_scheme is set to
           INTERNAL_SELF_MANAGED.
@@ -1983,6 +1985,7 @@ objects:
           balancing cannot be used with the other(s).
         default_value: :INTERNAL
         values:
+          - :EXTERNAL
           - :INTERNAL
           - :INTERNAL_MANAGED
       - !ruby/object:Api::Type::Enum
@@ -1998,29 +2001,29 @@ objects:
           The load balancing algorithm used within the scope of the locality.
           The possible values are -
 
-          ROUND_ROBIN - This is a simple policy in which each healthy backend
-                        is selected in round robin order.
+          * ROUND_ROBIN - This is a simple policy in which each healthy backend
+                          is selected in round robin order.
 
-          LEAST_REQUEST - An O(1) algorithm which selects two random healthy
-                          hosts and picks the host which has fewer active requests.
+          * LEAST_REQUEST - An O(1) algorithm which selects two random healthy
+                            hosts and picks the host which has fewer active requests.
 
-          RING_HASH - The ring/modulo hash load balancer implements consistent
-                      hashing to backends. The algorithm has the property that the
-                      addition/removal of a host from a set of N hosts only affects
-                      1/N of the requests.
+          * RING_HASH - The ring/modulo hash load balancer implements consistent
+                        hashing to backends. The algorithm has the property that the
+                        addition/removal of a host from a set of N hosts only affects
+                        1/N of the requests.
 
-          RANDOM - The load balancer selects a random healthy host.
+          * RANDOM - The load balancer selects a random healthy host.
 
-          ORIGINAL_DESTINATION - Backend host is selected based on the client
-                                 connection metadata, i.e., connections are opened
-                                 to the same address as the destination address of
-                                 the incoming connection before the connection
-                                 was redirected to the load balancer.
+          * ORIGINAL_DESTINATION - Backend host is selected based on the client
+                                   connection metadata, i.e., connections are opened
+                                   to the same address as the destination address of
+                                   the incoming connection before the connection
+                                   was redirected to the load balancer.
 
-          MAGLEV - used as a drop in replacement for the ring hash load balancer.
-                   Maglev is not as stable as ring hash but has faster table lookup
-                   build times and host selection times. For more information about
-                   Maglev, refer to https://ai.google/research/pubs/pub44824
+          * MAGLEV - used as a drop in replacement for the ring hash load balancer.
+                     Maglev is not as stable as ring hash but has faster table lookup
+                     build times and host selection times. For more information about
+                     Maglev, refer to https://ai.google/research/pubs/pub44824
 
           This field is applicable only when the `load_balancing_scheme` is set to
           INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, or HTTP2.
@@ -2909,6 +2912,15 @@ objects:
           are 4096 and 16384, other sizes may be added in the future.
           If an unsupported value is requested, the error message will list
           the supported values for the caller's project.
+      - !ruby/object:Api::Type::Enum
+        name: 'interface'
+        min_version: 'beta'
+        description: |
+          Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
+        default_value: :SCSI
+        values:
+          - :SCSI
+          - :NVME
       - !ruby/object:Api::Type::ResourceRef
         name: 'type'
         resource: 'DiskType'
@@ -4146,6 +4158,7 @@ objects:
         description: |
           An optional description of this resource. Provide this property when
           you create the resource.
+        send_empty_value: true
       - !ruby/object:Api::Type::Integer
         name: 'healthyThreshold'
         description: |
@@ -5670,10 +5683,10 @@ objects:
           URL of the source image used to create this image. In order to create an image, you must provide the full or partial
           URL of one of the following:
 
-          The selfLink URL
-          This property
-          The rawDisk.source URL
-          The sourceDisk URL
+          * The selfLink URL
+          * This property
+          * The rawDisk.source URL
+          * The sourceDisk URL
         resource: 'Image'
         imports: 'selfLink'
       - !ruby/object:Api::Type::ResourceRef
@@ -5683,11 +5696,11 @@ objects:
 
           In order to create an image, you must provide the full or partial URL of one of the following:
 
-          The selfLink URL
-          This property
-          The sourceImage URL
-          The rawDisk.source URL
-          The sourceDisk URL
+          * The selfLink URL
+          * This property
+          * The sourceImage URL
+          * The rawDisk.source URL
+          * The sourceDisk URL
         resource: 'Snapshot'
         imports: 'selfLink'
       - !ruby/object:Api::Type::Enum
@@ -7105,9 +7118,10 @@ objects:
     kind: 'compute#machineImage'
     base_url: projects/{{project}}/global/machineImages
     collection_url_key: 'items'
+    input: true
     has_self_link: true
     description: |
-      Represents a MachineImage resource. Machine images store all the configuration,
+      Represents a Machine Image resource. Machine images store all the configuration,
       metadata, permissions, and data from one or more disks required to create a
       Virtual machine (VM) instance.
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -7115,7 +7129,28 @@ objects:
         'Official Documentation': 'https://cloud.google.com/compute/docs/machine-images'
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/machineImages'
     min_version: beta
-
+    async: !ruby/object:Api::OpAsync
+      operation: !ruby/object:Api::OpAsync::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_minutes: 6
+          update_minutes: 6
+          delete_minutes: 6
+      result: !ruby/object:Api::OpAsync::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::OpAsync::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::OpAsync::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
         name: name
@@ -7130,6 +7165,47 @@ objects:
         resource: 'Instance'
         imports: 'selfLink'
         required: true
+      - !ruby/object:Api::Type::Array
+        name: 'storageLocations'
+        description: |
+          The regional or multi-regional Cloud Storage bucket location where the machine image is stored.
+        item_type: Api::Type::String
+        output: true
+      - !ruby/object:Api::Type::Boolean
+        name: guestFlush
+        description: |
+          Specify this to create an application consistent machine image by informing the OS to prepare for the snapshot process.
+          Currently only supported on Windows instances using the Volume Shadow Copy Service (VSS).
+      - !ruby/object:Api::Type::NestedObject
+        name: 'machineImageEncryptionKey'
+        description: |
+          Encrypts the machine image using a customer-supplied encryption key.
+
+          After you encrypt a machine image with a customer-supplied key, you must
+          provide the same key if you use the machine image later (e.g. to create a
+          instance from the image)
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'rawKey'
+            description: |
+              Specifies a 256-bit customer-supplied encryption key, encoded in
+              RFC 4648 base64 to either encrypt or decrypt this resource.
+          - !ruby/object:Api::Type::String
+            name: 'sha256'
+            description: |
+              The RFC 4648 base64 encoded SHA-256 hash of the
+              customer-supplied encryption key that protects this resource.
+            output: true
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyName'
+            output: true
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyServiceAccount'
+            description: |
+              The service account used for the encryption request for the given KMS key. 
+              If absent, the Compute Engine Service Agent service account is used.
   - !ruby/object:Api::Resource
     name: 'MachineType'
     kind: 'compute#machineType'
@@ -7382,6 +7458,12 @@ objects:
               name: 'peerMtu'
               description: |
                 Maximum Transmission Unit in bytes.
+      - !ruby/object:Api::Type::Integer
+        name: 'mtu'
+        description: |
+          Maximum Transmission Unit in bytes. The minimum value for this field is 1460
+          and the maximum value is 1500 bytes.
+        input: true
   - !ruby/object:Api::Resource
     name: 'NetworkEndpoint'
     kind: 'compute#networkEndpoint'
@@ -7493,6 +7575,10 @@ objects:
       backend with internal load balancers. Because NEG backends allow you to
       specify IP addresses and ports, you can distribute traffic in a granular
       fashion among applications or containers running within VM instances.
+
+      Recreating a network endpoint group that's in use by another resource will give a
+      `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
+      to avoid this type of error.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -7586,8 +7672,8 @@ objects:
     read_verb: :POST
     self_link: projects/{{project}}/global/networkEndpointGroups/{{global_network_endpoint_group}}/listNetworkEndpoints
     identity:
-      - fqdn
       - ipAddress
+      - fqdn
       - port
     nested_query: !ruby/object:Api::Resource::NestedQuery
       keys:
@@ -7659,6 +7745,10 @@ objects:
     description: |
       A global network endpoint group contains endpoints that reside outside of Google Cloud.
       Currently a global network endpoint group can only support a single endpoint.
+
+      Recreating a global network endpoint group that's in use by another resource will give a
+      `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
+      to avoid this type of error.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -7716,7 +7806,6 @@ objects:
     kind: 'compute#networkEndpointGroup'
     base_url: 'projects/{{project}}/regions/{{region}}/networkEndpointGroups'
     input: true
-    min_version: beta
     has_self_link: true
     collection_url_key: 'items'
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -7725,6 +7814,10 @@ objects:
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups'
     description: |
       A regional NEG that can support Serverless Products.
+
+      Recreating a region network endpoint group that's in use by another resource will give a
+      `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
+      to avoid this type of error.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -7950,9 +8043,13 @@ objects:
           The total number of nodes in the node group.
         required: true
         send_empty_value: true
+      - !ruby/object:Api::Type::String
+        name: 'maintenancePolicy'
+        description: |
+          Specifies how to handle instances when a node in the group undergoes maintenance. Set to one of: DEFAULT, RESTART_IN_PLACE, or MIGRATE_WITHIN_NODE_GROUP. The default value is DEFAULT.
+        default_value: DEFAULT
       - !ruby/object:Api::Type::NestedObject
         name: 'autoscalingPolicy'
-        min_version: beta
         description: |
           If you use sole-tenant nodes for your workloads, you can use the node
           group autoscaler to automatically manage the sizes of your node groups.
@@ -8691,7 +8788,7 @@ objects:
                   description: |
                     A value that prescribes what should happen to the stateful disk when the VM instance is deleted.
                     The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`.
-                    `NEVER` detatch the disk when the VM is deleted, but not delete the disk.
+                    `NEVER` - detach the disk when the VM is deleted, but do not delete the disk.
                     `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
                     deleted from the instance group.
                   values:
@@ -8811,7 +8908,7 @@ objects:
                   description: |
                     A value that prescribes what should happen to the stateful disk when the VM instance is deleted.
                     The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`.
-                    `NEVER` detatch the disk when the VM is deleted, but not delete the disk.
+                    `NEVER` - detach the disk when the VM is deleted, but do not delete the disk.
                     `ON_PERMANENT_INSTANCE_DELETION` will delete the stateful disk when the VM is permanently
                     deleted from the instance group.
                   values:
@@ -9891,10 +9988,15 @@ objects:
                                 description: |
                                   The header value must be an integer and its value must be in the range specified
                                   in rangeMatch. If the header does not contain an integer, number or is empty,
-                                  the match fails. For example for a range [-5, 0]   - -3 will match.  - 0 will
-                                  not match.  - 0.25 will not match.  - -3someString will not match.   Only one of
-                                  exactMatch, prefixMatch, suffixMatch, regexMatch, presentMatch or rangeMatch
-                                  must be set.
+                                  the match fails. For example for a range [-5, 0]
+
+                                  * -3 will match
+                                  * 0 will not match
+                                  * 0.25 will not match
+                                  * -3someString will not match.
+
+                                  Only one of exactMatch, prefixMatch, suffixMatch, regexMatch, presentMatch or
+                                  rangeMatch must be set.
                                 properties:
                                   - !ruby/object:Api::Type::Integer
                                     name: 'rangeEnd'
@@ -9973,9 +10075,10 @@ objects:
                                 description: |
                                   Specifies how individual filterLabel matches within the list of filterLabels
                                   contribute towards the overall metadataFilter match. Supported values are:
-                                    - MATCH_ANY: At least one of the filterLabels must have a matching label in the
+
+                                  * MATCH_ANY: At least one of the filterLabels must have a matching label in the
                                   provided metadata.
-                                    - MATCH_ALL: All filterLabels must have matching labels in
+                                  * MATCH_ALL: All filterLabels must have matching labels in
                                   the provided metadata.
                                 values:
                                   - :MATCH_ALL
@@ -10193,25 +10296,26 @@ objects:
                             item_type: Api::Type::String
                             description: |
                               Specfies one or more conditions when this retry rule applies. Valid values are:
-                              - 5xx: Loadbalancer will attempt a retry if the backend service responds with
+
+                              * 5xx: Loadbalancer will attempt a retry if the backend service responds with
                                 any 5xx response code, or if the backend service does not respond at all,
                                 example: disconnects, reset, read timeout, connection failure, and refused
                                 streams.
-                              - gateway-error: Similar to 5xx, but only applies to response codes
+                              * gateway-error: Similar to 5xx, but only applies to response codes
                                 502, 503 or 504.
-                              - connect-failure: Loadbalancer will retry on failures
+                              * connect-failure: Loadbalancer will retry on failures
                                 connecting to backend services, for example due to connection timeouts.
-                              - retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
+                              * retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
                                 Currently the only retriable error supported is 409.
-                              - refused-stream: Loadbalancer will retry if the backend service resets the stream with a
+                              * refused-stream: Loadbalancer will retry if the backend service resets the stream with a
                                 REFUSED_STREAM error code. This reset type indicates that it is safe to retry.
-                              - cancelled: Loadbalancer will retry if the gRPC status code in the response
+                              * cancelled: Loadbalancer will retry if the gRPC status code in the response
                                 header is set to cancelled
-                              - deadline-exceeded: Loadbalancer will retry if the
+                              * deadline-exceeded: Loadbalancer will retry if the
                                 gRPC status code in the response header is set to deadline-exceeded
-                              - resource-exhausted: Loadbalancer will retry if the gRPC status code in the response
+                              * resource-exhausted: Loadbalancer will retry if the gRPC status code in the response
                                 header is set to resource-exhausted
-                              - unavailable: Loadbalancer will retry if the gRPC status code in
+                              * unavailable: Loadbalancer will retry if the gRPC status code in
                                 the response header is set to unavailable
                       - !ruby/object:Api::Type::NestedObject
                         name: 'timeout'
@@ -10618,6 +10722,7 @@ objects:
                             item_type: Api::Type::String
                             description: |
                               Specifies one or more conditions when this retry rule applies. Valid values are:
+
                               - 5xx: Loadbalancer will attempt a retry if the backend service responds with
                               any 5xx response code, or if the backend service does not respond at all,
                               example: disconnects, reset, read timeout, connection failure, and refused
@@ -11070,6 +11175,7 @@ objects:
         description: |
           An optional description of this resource. Provide this property when
           you create the resource.
+        send_empty_value: true
       - !ruby/object:Api::Type::Integer
         name: 'healthyThreshold'
         description: |
@@ -11769,8 +11875,10 @@ objects:
               description: |
                 The gRPC service name for the health check. 
                 The value of grpcServiceName has the following meanings by convention:
-                  - Empty serviceName means the overall status of all services at the backend.
-                  - Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
+
+                * Empty serviceName means the overall status of all services at the backend.
+                * Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
+
                 The grpcServiceName can only be ASCII.
       - !ruby/object:Api::Type::NestedObject
         name: 'logConfig'
@@ -13685,6 +13793,11 @@ objects:
           access Google APIs and services by using Private Google Access.
         update_verb: :POST
         update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess'
+      - !ruby/object:Api::Type::String
+        name: 'privateIpv6GoogleAccess'
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        description: The private IPv6 google access type for the VMs in this subnet. 
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
         resource: 'Region'
@@ -13773,6 +13886,7 @@ objects:
             description: |
               Export filter used to define which VPC flow logs should be logged, as as CEL expression. See
               https://cloud.google.com/vpc/docs/flow-logs#filtering for details on how to format this field.
+              The default value is 'true', which evaluates to include everything.
             default_value: "true"
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
@@ -14368,11 +14482,11 @@ objects:
         description: |
           Session affinity option. Must be one of these values:
 
-          - NONE: Connections from the same client IP may go to any instance in
+          * NONE: Connections from the same client IP may go to any instance in
             the pool.
-          - CLIENT_IP: Connections from the same client IP will go to the same
+          * CLIENT_IP: Connections from the same client IP will go to the same
             instance in the pool while that instance remains healthy.
-          - CLIENT_IP_PROTO: Connections from the same client IP with the same
+          * CLIENT_IP_PROTO: Connections from the same client IP with the same
             IP protocol will go to the same instance in the pool while that
             instance remains healthy.
         input: true
@@ -14663,7 +14777,6 @@ objects:
     collection_url_key: 'items'
     input: true
     has_self_link: true
-    min_version: beta
     description: |
       Represents a VPN gateway running in GCP. This virtual device is managed
       by Google, but used only by you. This type of VPN Gateway allows for the creation
@@ -14672,7 +14785,7 @@ objects:
       guides:
         'Choosing a VPN': https://cloud.google.com/vpn/docs/how-to/choosing-a-vpn
         'Cloud VPN Overview': 'https://cloud.google.com/vpn/docs/concepts/overview'
-      api: https://cloud.google.com/compute/docs/reference/rest/beta/vpnGateways
+      api: https://cloud.google.com/compute/docs/reference/rest/v1/vpnGateways
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -14755,7 +14868,7 @@ objects:
     description: |
       Represents a VPN gateway managed outside of GCP.
     references: !ruby/object:Api::Resource::ReferenceLinks
-      api: https://cloud.google.com/compute/docs/reference/rest/beta/externalVpnGateways
+      api: https://cloud.google.com/compute/docs/reference/rest/v1/externalVpnGateways
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -15315,25 +15428,26 @@ objects:
                             item_type: Api::Type::String
                             description: |
                               Specifies one or more conditions when this retry rule applies. Valid values are:
-                              - 5xx: Loadbalancer will attempt a retry if the backend service responds with
+
+                              * 5xx: Loadbalancer will attempt a retry if the backend service responds with
                               any 5xx response code, or if the backend service does not respond at all,
                               example: disconnects, reset, read timeout, connection failure, and refused
                               streams.
-                              - gateway-error: Similar to 5xx, but only applies to response codes
+                              * gateway-error: Similar to 5xx, but only applies to response codes
                               502, 503 or 504.
-                              - connect-failure: Loadbalancer will retry on failures
+                              * connect-failure: Loadbalancer will retry on failures
                               connecting to backend services, for example due to connection timeouts.
-                              - retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
+                              * retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
                               Currently the only retriable error supported is 409.
-                              - refused-stream: Loadbalancer will retry if the backend service resets the stream with a
+                              * refused-stream: Loadbalancer will retry if the backend service resets the stream with a
                               REFUSED_STREAM error code. This reset type indicates that it is safe to retry.
-                              - cancelled: Loadbalancer will retry if the gRPC status code in the response
+                              * cancelled: Loadbalancer will retry if the gRPC status code in the response
                               header is set to cancelled
-                              - deadline-exceeded: Loadbalancer will retry if the
+                              * deadline-exceeded: Loadbalancer will retry if the
                               gRPC status code in the response header is set to deadline-exceeded
-                              - resource-exhausted: Loadbalancer will retry if the gRPC status code in the response
+                              * resource-exhausted: Loadbalancer will retry if the gRPC status code in the response
                               header is set to resource-exhausted
-                              - unavailable: Loadbalancer will retry if
+                              * unavailable: Loadbalancer will retry if
                               the gRPC status code in the response header is set to unavailable
                       - !ruby/object:Api::Type::NestedObject
                         name: 'timeout'
@@ -16009,25 +16123,26 @@ objects:
                             item_type: Api::Type::String
                             description: |
                               Specfies one or more conditions when this retry rule applies. Valid values are:
-                              - 5xx: Loadbalancer will attempt a retry if the backend service responds with
+
+                              * 5xx: Loadbalancer will attempt a retry if the backend service responds with
                                 any 5xx response code, or if the backend service does not respond at all,
                                 example: disconnects, reset, read timeout, connection failure, and refused
                                 streams.
-                              - gateway-error: Similar to 5xx, but only applies to response codes
+                              * gateway-error: Similar to 5xx, but only applies to response codes
                                 502, 503 or 504.
-                              - connect-failure: Loadbalancer will retry on failures
+                              * connect-failure: Loadbalancer will retry on failures
                                 connecting to backend services, for example due to connection timeouts.
-                              - retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
+                              * retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
                                 Currently the only retriable error supported is 409.
-                              - refused-stream: Loadbalancer will retry if the backend service resets the stream with a
+                              * refused-stream: Loadbalancer will retry if the backend service resets the stream with a
                                 REFUSED_STREAM error code. This reset type indicates that it is safe to retry.
-                              - cancelled: Loadbalancer will retry if the gRPC status code in the response
+                              * cancelled: Loadbalancer will retry if the gRPC status code in the response
                                 header is set to cancelled
-                              - deadline-exceeded: Loadbalancer will retry if the
+                              * deadline-exceeded: Loadbalancer will retry if the
                                 gRPC status code in the response header is set to deadline-exceeded
-                              - resource-exhausted: Loadbalancer will retry if the gRPC status code in the response
+                              * resource-exhausted: Loadbalancer will retry if the gRPC status code in the response
                                 header is set to resource-exhausted
-                              - unavailable: Loadbalancer will retry if the gRPC status code in
+                              * unavailable: Loadbalancer will retry if the gRPC status code in
                                 the response header is set to unavailable
                       - !ruby/object:Api::Type::NestedObject
                         name: 'timeout'
@@ -16454,20 +16569,20 @@ objects:
                       description: |
                         Specfies one or more conditions when this retry rule applies. Valid values are:
 
-                        5xx: Loadbalancer will attempt a retry if the backend service responds with any 5xx response code,
-                        or if the backend service does not respond at all, example: disconnects, reset, read timeout,
-                        connection failure, and refused streams.
-                        gateway-error: Similar to 5xx, but only applies to response codes 502, 503 or 504.
-                        connect-failure: Loadbalancer will retry on failures connecting to backend services,
-                        for example due to connection timeouts.
-                        retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
-                        Currently the only retriable error supported is 409.
-                        refused-stream:Loadbalancer will retry if the backend service resets the stream with a REFUSED_STREAM error code.
-                        This reset type indicates that it is safe to retry.
-                        cancelled: Loadbalancer will retry if the gRPC status code in the response header is set to cancelled
-                        deadline-exceeded: Loadbalancer will retry if the gRPC status code in the response header is set to deadline-exceeded
-                        resource-exhausted: Loadbalancer will retry if the gRPC status code in the response header is set to resource-exhausted
-                        unavailable: Loadbalancer will retry if the gRPC status code in the response header is set to unavailable
+                        * 5xx: Loadbalancer will attempt a retry if the backend service responds with any 5xx response code,
+                          or if the backend service does not respond at all, example: disconnects, reset, read timeout,
+                        * connection failure, and refused streams.
+                        * gateway-error: Similar to 5xx, but only applies to response codes 502, 503 or 504.
+                        * connect-failure: Loadbalancer will retry on failures connecting to backend services,
+                          for example due to connection timeouts.
+                        * retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
+                          Currently the only retriable error supported is 409.
+                        * refused-stream:Loadbalancer will retry if the backend service resets the stream with a REFUSED_STREAM error code.
+                          This reset type indicates that it is safe to retry.
+                        * cancelled: Loadbalancer will retry if the gRPC status code in the response header is set to cancelled
+                        * deadline-exceeded: Loadbalancer will retry if the gRPC status code in the response header is set to deadline-exceeded
+                        * resource-exhausted: Loadbalancer will retry if the gRPC status code in the response header is set to resource-exhausted
+                        * unavailable: Loadbalancer will retry if the gRPC status code in the response header is set to unavailable
                       item_type: Api::Type::String
                     - !ruby/object:Api::Type::Integer
                       name: 'numRetries'
@@ -16906,20 +17021,20 @@ objects:
                 description: |
                   Specfies one or more conditions when this retry rule applies. Valid values are:
 
-                  5xx: Loadbalancer will attempt a retry if the backend service responds with any 5xx response code,
-                  or if the backend service does not respond at all, example: disconnects, reset, read timeout,
-                  connection failure, and refused streams.
-                  gateway-error: Similar to 5xx, but only applies to response codes 502, 503 or 504.
-                  connect-failure: Loadbalancer will retry on failures connecting to backend services,
-                  for example due to connection timeouts.
-                  retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
-                  Currently the only retriable error supported is 409.
-                  refused-stream:Loadbalancer will retry if the backend service resets the stream with a REFUSED_STREAM error code.
-                  This reset type indicates that it is safe to retry.
-                  cancelled: Loadbalancer will retry if the gRPC status code in the response header is set to cancelled
-                  deadline-exceeded: Loadbalancer will retry if the gRPC status code in the response header is set to deadline-exceeded
-                  resource-exhausted: Loadbalancer will retry if the gRPC status code in the response header is set to resource-exhausted
-                  unavailable: Loadbalancer will retry if the gRPC status code in the response header is set to unavailable
+                  * 5xx: Loadbalancer will attempt a retry if the backend service responds with any 5xx response code,
+                    or if the backend service does not respond at all, example: disconnects, reset, read timeout,
+                  * connection failure, and refused streams.
+                  * gateway-error: Similar to 5xx, but only applies to response codes 502, 503 or 504.
+                  * connect-failure: Loadbalancer will retry on failures connecting to backend services,
+                    for example due to connection timeouts.
+                  * retriable-4xx: Loadbalancer will retry for retriable 4xx response codes.
+                    Currently the only retriable error supported is 409.
+                  * refused-stream:Loadbalancer will retry if the backend service resets the stream with a REFUSED_STREAM error code.
+                    This reset type indicates that it is safe to retry.
+                  * cancelled: Loadbalancer will retry if the gRPC status code in the response header is set to cancelled
+                  * deadline-exceeded: Loadbalancer will retry if the gRPC status code in the response header is set to deadline-exceeded
+                  * resource-exhausted: Loadbalancer will retry if the gRPC status code in the response header is set to resource-exhausted
+                  * unavailable: Loadbalancer will retry if the gRPC status code in the response header is set to unavailable
                 at_least_one_of:
                   - default_route_action.0.retry_policy.0.retry_conditions
                   - default_route_action.0.retry_policy.0.num_retries
@@ -17275,37 +17390,36 @@ objects:
         resource: 'VpnGateway'
         imports: 'selfLink'
         input: true
-        min_version: beta
       - !ruby/object:Api::Type::Integer
         name: 'vpnGatewayInterface'
         description: |
           The interface ID of the VPN gateway with which this VPN tunnel is associated.
         input: true
         send_empty_value: true
-        min_version: beta
       - !ruby/object:Api::Type::ResourceRef
         name: 'peerExternalGateway'
         resource: 'ExternalVpnGateway'
         imports: 'selfLink'
         input: true
+        conflicts:
+          - peer_gcp_gateway
         description: |
           URL of the peer side external VPN gateway to which this VPN tunnel is connected.
-        min_version: beta
       - !ruby/object:Api::Type::Integer
         name: 'peerExternalGatewayInterface'
         description: |
           The interface ID of the external VPN gateway to which this VPN tunnel is connected.
-        min_version: beta
         send_empty_value: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'peerGcpGateway'
+        conflicts:
+          - peer_external_gateway
         description: |
           URL of the peer side HA GCP VPN gateway to which this VPN tunnel is connected.
           If provided, the VPN tunnel will automatically use the same vpn_gateway_interface
           ID in the peer GCP VPN gateway.
         resource: 'VpnGateway'
         imports: 'selfLink'
-        min_version: beta
       - !ruby/object:Api::Type::ResourceRef
         name: 'router'
         description: |

@@ -103,7 +103,12 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 				ForceNew:    true,
 				Description: `The region the instance will sit in. Note, Cloud SQL is not available in all regions - choose from one of the options listed here. A valid region must be provided to use this resource. If a region is not provided in the resource definition, the provider region will be used instead, but this will be an apply-time error for instances if the provider region is not supported with Cloud SQL. If you choose not to provide the region argument for this resource, make sure you understand this.`,
 			},
-
+			"deletion_protection": {
+				Type:        schema.TypeBool,
+				Default:     true,
+				Optional:    true,
+				Description: `Used to block Terraform from deleting a SQL Instance.`,
+			},
 			"settings": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -132,7 +137,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 							Optional:    true,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 							Deprecated:  "This property is only applicable to First Generation instances, and First Generation instances are now deprecated.",
-							Description: `This property is only applicable to First Generation instances. First Generation instances are now deprecated, see https://cloud.google.com/sql/docs/mysql/deprecation-notice for information on how to upgrade to Second Generation instances. A list of Google App Engine (GAE) project names that are allowed to access this instance.`,
+							Description: `This property is only applicable to First Generation instances. First Generation instances are now deprecated, see https://cloud.google.com/sql/docs/mysql/deprecation-notice for information on how to upgrade to Second Generation instances. A list of Google App Engine project names that are allowed to access this instance.`,
 						},
 						"availability_type": {
 							Type:             schema.TypeString,
@@ -486,7 +491,7 @@ settings.backup_configuration.binary_log_enabled are both set to true.`,
 							Optional:     true,
 							ForceNew:     true,
 							AtLeastOneOf: replicaConfigurationKeys,
-							Description:  `Path to a SQL file in GCS from which slave instances are created. Format is gs://bucket/filename.`,
+							Description:  `Path to a SQL file in Google Cloud Storage from which slave instances are created. Format is gs://bucket/filename.`,
 						},
 						"failover_target": {
 							Type:         schema.TypeBool,
@@ -657,6 +662,16 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	if err := d.Set("name", name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
+	}
+
+	// SQL Instances that fail to create are expensive- see https://github.com/hashicorp/terraform-provider-google/issues/7154
+	// We can fail fast to stop instance names from getting reserved.
+	network := d.Get("settings.0.ip_configuration.0.private_network").(string)
+	if network != "" {
+		err = sqlDatabaseInstanceServiceNetworkPrecheck(d, config, userAgent, network)
+		if err != nil {
+			return err
+		}
 	}
 
 	instance := &sqladmin.DatabaseInstance{
@@ -1051,6 +1066,12 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
+	// Check if deletion protection is enabled.
+ 
+	if d.Get("deletion_protection").(bool) {
+		return fmt.Errorf("Error, failed to delete instance because deletion_protection is set to true. Set it to false to proceed with instance deletion")
+	}
+
 	// Lock on the master_instance_name just in case deleting a replica causes
 	// operations on the master.
 	if v, ok := d.GetOk("master_instance_name"); ok {
@@ -1083,6 +1104,10 @@ func resourceSqlDatabaseInstanceImport(d *schema.ResourceData, meta interface{})
 		"(?P<project>[^/]+)/(?P<name>[^/]+)",
 		"(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
+	}
+
+	if err := d.Set("deletion_protection", true); err != nil {
+		return nil, fmt.Errorf("Error setting deletion_protection: %s", err)
 	}
 
 	// Replace import id for the resource id
@@ -1288,4 +1313,33 @@ func instanceMutexKey(project, instance_name string) string {
 func sqlDatabaseIsMaster(d *schema.ResourceData) bool {
 	_, ok := d.GetOk("master_instance_name")
 	return !ok
+}
+
+func sqlDatabaseInstanceServiceNetworkPrecheck(d *schema.ResourceData, config *Config, userAgent, network string) error {
+		log.Printf("[DEBUG] checking network %q for at least one service networking connection", network)
+		// This call requires projects.get permissions, which may not have been granted to the Terraform actor,
+		// particularly in shared VPC setups. Most will! But it's not strictly required.
+		serviceNetworkingNetworkName, err := retrieveServiceNetworkingNetworkName(d, config, network, userAgent)
+		if err != nil {
+			var gerr *googleapi.Error
+			if errors.As(err, &gerr) {
+				log.Printf("[DEBUG] retrieved googleapi error while creating sn name for %q. precheck skipped. code %v and message: %s", network, gerr.Code, gerr.Body)
+				return nil
+			}
+
+			return err
+		}
+
+		response, err := config.NewServiceNetworkingClient(userAgent).Services.Connections.List("services/servicenetworking.googleapis.com").Network(serviceNetworkingNetworkName).Do()
+		if err != nil {
+			// It is possible that the actor creating the SQL Instance might not have permissions to call servicenetworking.services.connections.list
+			log.Printf("[WARNING] Failed to list Service Networking of the project. Skipped Service Networking precheck.")
+			return nil
+		}
+
+		if len(response.Connections) < 1 {
+			return fmt.Errorf("Error, failed to create instance because the network doesn't have at least 1 private services connection. Please see https://cloud.google.com/sql/docs/mysql/private-ip#network_requirements for how to create this connection.")
+		}
+
+		return nil
 }

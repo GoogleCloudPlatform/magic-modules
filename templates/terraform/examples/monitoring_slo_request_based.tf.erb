@@ -13,15 +13,10 @@ resource "google_monitoring_slo" "<%= ctx[:primary_resource_id] %>" {
 
   request_based_sli {
     distribution_cut {
-      distribution_filter = join(" AND ", [
-        "metric.type=\"serviceruntime.googleapis.com/api/request_latencies\"",
-        "resource.type=\"consumed_api\"",
-        "resource.label.\"project_id\"=\"<%= ctx[:test_env_vars]['project'] -%>\"",
-      ])
-
-      range {
-        max = 10
-      }
-    }
+          distribution_filter = "metric.type=\"serviceruntime.googleapis.com/api/request_latencies\" resource.type=\"api\"  "
+          range {
+            max = 0.5
+          }
+        }
   }
 }

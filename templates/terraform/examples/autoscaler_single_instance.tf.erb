@@ -22,7 +22,7 @@ resource "google_compute_instance_template" "default" {
   provider = google-beta
 
   name           = "<%= ctx[:vars]['instance_template_name'] %>"
-  machine_type   = "n1-standard-1"
+  machine_type   = "e2-medium"
   can_ip_forward = false
 
   tags = ["foo", "bar"]

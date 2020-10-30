@@ -135,6 +135,20 @@ objects:
         name: 'name'
         description: Name of the instance.
         required: true
+  # This resource is only used to generate IAM resources. They do not correspond to real
+  # GCP resources, and should not be used to generate anything other than IAM suppport.
+  - !ruby/object:Api::Resource
+    name: 'Tunnel'
+    base_url: 'projects/{{project}}/iap_tunnel'
+    self_link: 'projects/{{project}}/iap_tunnel'
+    exclude_resource: true
+    description: |
+      Only used to generate IAM resources
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'project'
+        description: Project ID.
+        required: true
   - !ruby/object:Api::Resource
     name: 'Brand'
     base_url: 'projects/{{project}}/brands'
