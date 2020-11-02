@@ -13793,6 +13793,11 @@ objects:
           access Google APIs and services by using Private Google Access.
         update_verb: :POST
         update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess'
+      - !ruby/object:Api::Type::String
+        name: 'privateIpv6GoogleAccess'
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        description: The private IPv6 google access type for the VMs in this subnet. 
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
         resource: 'Region'
@@ -13881,6 +13886,7 @@ objects:
             description: |
               Export filter used to define which VPC flow logs should be logged, as as CEL expression. See
               https://cloud.google.com/vpc/docs/flow-logs#filtering for details on how to format this field.
+              The default value is 'true', which evaluates to include everything.
             default_value: "true"
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
