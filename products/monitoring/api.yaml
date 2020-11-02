@@ -295,6 +295,59 @@ objects:
                policy.
              output: true
            - !ruby/object:Api::Type::NestedObject
+             name: conditionMonitoringQueryLanguage
+             description: |
+               A Monitoring Query Language query that outputs a boolean stream
+             properties:
+              - !ruby/object:Api::Type::String
+                name: query
+                description: |
+                  Monitoring Query Language query that outputs a boolean stream.
+                required: true
+              - !ruby/object:Api::Type::String
+                name: duration
+                required: true
+                description: |
+                  The amount of time that a time series must
+                  violate the threshold to be considered
+                  failing. Currently, only values that are a
+                  multiple of a minute--e.g., 0, 60, 120, or
+                  300 seconds--are supported. If an invalid
+                  value is given, an error will be returned.
+                  When choosing a duration, it is useful to
+                  keep in mind the frequency of the underlying
+                  time series data (which may also be affected
+                  by any alignments specified in the
+                  aggregations field); a good duration is long
+                  enough so that a single outlier does not
+                  generate spurious alerts, but short enough
+                  that unhealthy states are detected and
+                  alerted on quickly.
+              - !ruby/object:Api::Type::NestedObject
+                name: trigger
+                description: |
+                  The number/percent of time series for which
+                  the comparison must hold in order for the
+                  condition to trigger. If unspecified, then
+                  the condition will trigger if the comparison
+                  is true for any of the time series that have
+                  been identified by filter and aggregations,
+                  or by the ratio, if denominator_filter and
+                  denominator_aggregations are specified.
+                properties:
+                 - !ruby/object:Api::Type::Double
+                   name: percent
+                   description: |
+                     The percentage of time series that
+                     must fail the predicate for the
+                     condition to be triggered.
+                 - !ruby/object:Api::Type::Integer
+                   name: count
+                   description: |
+                     The absolute number of time series
+                     that must fail the predicate for the
+                     condition to be triggered.
+           - !ruby/object:Api::Type::NestedObject
              name: conditionThreshold
              description: |
                A condition that compares a time series against a
@@ -1212,7 +1265,7 @@ objects:
                  exclusive of max. Open ranges can be defined by setting
                  just one of min or max.
               properties:
-              - !ruby/object:Api::Type::Integer
+              - !ruby/object:Api::Type::Double
                 name: min
                 at_least_one_of:
                 - service_level_indicator.0.request_based_sli.0.distribution_cut.0.range.0.min
@@ -1221,7 +1274,7 @@ objects:
                   Min value for the range (inclusive). If not given,
                   will be set to "-infinity", defining an open range
                   "< range.max"
-              - !ruby/object:Api::Type::Integer
+              - !ruby/object:Api::Type::Double
                 name: max
                 at_least_one_of:
                 - service_level_indicator.0.request_based_sli.0.distribution_cut.0.range.0.min
@@ -1384,7 +1437,7 @@ objects:
                              exclusive of max. Open ranges can be defined by setting
                              just one of min or max.
                           properties:
-                            - !ruby/object:Api::Type::Integer
+                            - !ruby/object:Api::Type::Double
                               name: min
                               at_least_one_of:
                                 - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut.0.range.0.min
@@ -1393,7 +1446,7 @@ objects:
                                 Min value for the range (inclusive). If not given,
                                 will be set to "-infinity", defining an open range
                                 "< range.max"
-                            - !ruby/object:Api::Type::Integer
+                            - !ruby/object:Api::Type::Double
                               name: max
                               at_least_one_of:
                                 - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut.0.range.0.min
@@ -1492,7 +1545,7 @@ objects:
                       values should satisfy `range.min <= X < range.max` for a
                       good service.
                     properties:
-                      - !ruby/object:Api::Type::Integer
+                      - !ruby/object:Api::Type::Double
                         name: min
                         at_least_one_of:
                           - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.min
@@ -1501,7 +1554,7 @@ objects:
                           Min value for the range (inclusive). If not given,
                           will be set to "-infinity", defining an open range
                           "< range.max"
-                      - !ruby/object:Api::Type::Integer
+                      - !ruby/object:Api::Type::Double
                         name: max
                         at_least_one_of:
                           - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.min
@@ -1550,7 +1603,7 @@ objects:
                       just one of min or max. Summed value `X` should satisfy
                       `range.min <= X < range.max` for a good window.
                     properties:
-                      - !ruby/object:Api::Type::Integer
+                      - !ruby/object:Api::Type::Double
                         name: min
                         at_least_one_of:
                           - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.min
@@ -1559,7 +1612,7 @@ objects:
                           Min value for the range (inclusive). If not given,
                           will be set to "-infinity", defining an open range
                           "< range.max"
-                      - !ruby/object:Api::Type::Integer
+                      - !ruby/object:Api::Type::Double
                         name: max
                         at_least_one_of:
                           - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.min

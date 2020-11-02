@@ -602,7 +602,7 @@ func resourceContainerCluster() *schema.Resource {
 							Type:        schema.TypeList,
 							Required:    true,
 							MaxItems:    1,
-							Description: `Notification config for pubsub`,
+							Description: `Notification config for Cloud Pub/Sub`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"enabled": {
@@ -613,7 +613,7 @@ func resourceContainerCluster() *schema.Resource {
 									"topic": {
 										Type:        schema.TypeString,
 										Optional:    true,
-										Description: `The pubsub topic to send the notification to, must be in the format: projects/{project}/topics/{topic}`,
+										Description: `The Cloud Pub/Sub topic to send the notification to, must be in the format: projects/{project}/topics/{topic}`,
 									},
 								},
 							},
