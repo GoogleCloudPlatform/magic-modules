@@ -421,6 +421,7 @@ func TestAccBigQueryDataTable_bigtable(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": randString(t, 10),
+		"project":       getTestProjectFromEnv(),
 	}
 
 	vcrTest(t, resource.TestCase{
@@ -1074,6 +1075,31 @@ func testAccBigQueryTableFromSheet(context map[string]interface{}) string {
 
 func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
 	return Nprintf(`
+	resource "google_bigtable_instance" "instance" {
+		name = "tf_test_bigtable_instance_%{random_suffix}"
+
+		cluster {
+			cluster_id = "%{random_suffix}"
+			zone       = "us-central1-b"
+		}
+
+		instance_type = "DEVELOPMENT"
+		deletion_protection = false
+	}
+
+	resource "google_bigtable_table" "table" {
+		name          = "%{random_suffix}"
+		instance_name = google_bigtable_instance.instance.name
+
+		column_family {
+			family = cf-"%{random_suffix}-first"
+		}
+
+		column_family {
+			family = "cf-%{random_suffix}-second"
+		}
+	}
+
 	resource "google_bigquery_table" "table" {
 		dataset_id = google_bigquery_dataset.dataset.dataset_id
 		table_id   = "tf_test_bigtable_%{random_suffix}"
@@ -1084,7 +1110,7 @@ func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
 		  ignore_unknown_values = true
 
 		  source_uris = [
-			"https://googleapis.com/bigtable/projects/project_id/instances/instance_id/tables/table_name",
+			"https://googleapis.com/bigtable/${google_bigtable_table.table.id}",
 		  ]
 		}
 	  }
