@@ -1,0 +1,224 @@
+<% autogen_exception -%>
+package google
+<% unless version == 'ga' -%>
+import (
+	"fmt"
+	"path"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+)
+
+func TestAccHealthcareConsentStoreIdParsing(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		ImportId               string
+		ExpectedError          bool
+		ExpectedTerraformId    string
+		ExpectedConsentStoreId string
+		Config                 *Config
+	}{
+		"id is in project/location/datasetName/consentStoreName format": {
+			ImportId:               "test-project/us-central1/test-dataset/test-store-name",
+			ExpectedError:          false,
+			ExpectedTerraformId:    "test-project/us-central1/test-dataset/test-store-name",
+			ExpectedConsentStoreId: "projects/test-project/locations/us-central1/datasets/test-dataset/consentStores/test-store-name",
+		},
+		"id is in domain:project/location/datasetName/consentStoreName format": {
+			ImportId:               "example.com:test-project/us-central1/test-dataset/test-store-name",
+			ExpectedError:          false,
+			ExpectedTerraformId:    "example.com:test-project/us-central1/test-dataset/test-store-name",
+			ExpectedConsentStoreId: "projects/example.com:test-project/locations/us-central1/datasets/test-dataset/consentStores/test-store-name",
+		},
+		"id is in location/datasetName/consentStoreName format": {
+			ImportId:               "us-central1/test-dataset/test-store-name",
+			ExpectedError:          false,
+			ExpectedTerraformId:    "test-project/us-central1/test-dataset/test-store-name",
+			ExpectedConsentStoreId: "projects/test-project/locations/us-central1/datasets/test-dataset/consentStores/test-store-name",
+			Config:                 &Config{Project: "test-project"},
+		},
+		"id is in location/datasetName/consentStoreName format without project in config": {
+			ImportId:      "us-central1/test-dataset/test-store-name",
+			ExpectedError: true,
+			Config:        &Config{Project: ""},
+		},
+	}
+
+	for tn, tc := range cases {
+		consentStoreId, err := parseHealthcareConsentStoreId(tc.ImportId, tc.Config)
+
+		if tc.ExpectedError && err == nil {
+			t.Fatalf("bad: %s, expected an error", tn)
+		}
+
+		if err != nil {
+			if tc.ExpectedError {
+				continue
+			}
+			t.Fatalf("bad: %s, err: %#v", tn, err)
+		}
+
+		if consentStoreId.terraformId() != tc.ExpectedTerraformId {
+			t.Fatalf("bad: %s, expected Terraform ID to be `%s` but is `%s`", tn, tc.ExpectedTerraformId, consentStoreId.terraformId())
+		}
+
+		if consentStoreId.consentStoreId() != tc.ExpectedConsentStoreId {
+			t.Fatalf("bad: %s, expected ConsentStore ID to be `%s` but is `%s`", tn, tc.ExpectedConsentStoreId, consentStoreId.consentStoreId())
+		}
+	}
+}
+
+func TestAccHealthcareConsentStore_basic(t *testing.T) {
+	t.Parallel()
+
+	datasetName := fmt.Sprintf("tf-test-dataset-%s", randString(t, 10))
+	consentStoreName := fmt.Sprintf("tf-test-consent-store-%s", randString(t, 10))
+	resourceName := "google_healthcare_consent_store.default"
+	ttl := "25h"
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckHealthcareConsentStoreDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleHealthcareConsentStore_basic(consentStoreName, datasetName),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testGoogleHealthcareConsentStore_update(consentStoreName, datasetName, ttl),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleHealthcareConsentStoreUpdate(t, ttl),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testGoogleHealthcareConsentStore_basic(consentStoreName, datasetName),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testGoogleHealthcareConsentStore_basic(consentStoreName, datasetName string) string {
+	return fmt.Sprintf(`
+resource "google_healthcare_consent_store" "default" {
+  name    = "%s"
+  dataset = google_healthcare_dataset.dataset.id
+
+  provider = google-beta
+}
+
+resource "google_healthcare_dataset" "dataset" {
+  name     = "%s"
+  location = "us-central1"
+}
+`, consentStoreName, datasetName)
+}
+
+func testGoogleHealthcareConsentStore_update(consentStoreName, datasetName, ttl string) string {
+	return fmt.Sprintf(`
+resource "google_healthcare_consent_store" "default" {
+  name    = "%s"
+  dataset = google_healthcare_dataset.dataset.id
+
+  enable_consent_create_on_update = true
+  default_consent_ttl             = "%s"
+
+  labels = {
+    label1 = "labelvalue1"
+  }
+  provider = google-beta
+}
+resource "google_healthcare_dataset" "dataset" {
+  name     = "%s"
+  location = "us-central1"
+}
+`, consentStoreName, ttl, datasetName)
+}
+
+func testAccCheckGoogleHealthcareConsentStoreUpdate(t *testing.T, ttl string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		var foundResource = false
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_healthcare_consent_store" {
+				continue
+			}
+			foundResource = true
+
+			config := googleProviderConfig(t)
+
+			gcpResourceUri, err := replaceVarsForTest(config, rs, "{{dataset}}/consentStores/{{name}}")
+			if err != nil {
+				return err
+			}
+
+			response, err := config.NewHealthcareBetaClient(config.userAgent).Projects.Locations.Datasets.ConsentStores.Get(gcpResourceUri).Do()
+			if err != nil {
+				return fmt.Errorf("Unexpected failure while verifying 'updated' dataset: %s", err)
+			}
+
+			if len(response.Labels) == 0 || response.Labels["label1"] != "labelvalue1" {
+				return fmt.Errorf("consentStore labels not updated: %s", gcpResourceUri)
+			}
+
+			if !response.EnableConsentCreateOnUpdate {
+				return fmt.Errorf("consentStore enable_consent_create_on_update not updated")
+			}
+
+			if response.DefaultConsentTtl != ttl {
+				return fmt.Errorf("consentStore default_consent_ttl not updated: %s", response.DefaultConsentTtl)
+			}
+		}
+
+		if !foundResource {
+			return fmt.Errorf("google_healthcare_consent_store resource was missing")
+		}
+		return nil
+	}
+}
+
+func testAccCheckHealthcareConsentStoreDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_healthcare_consent_store" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := googleProviderConfig(t)
+
+			url, err := replaceVarsForTest(config, rs, "{{HealthcareBasePath}}{{dataset}}/consentStores/{{name}}")
+			if err != nil {
+				return err
+			}
+
+			_, err = sendRequest(config, "GET", "", url, config.userAgent, nil)
+			if err == nil {
+				return fmt.Errorf("HealthcareConsentStore still exists at %s", url)
+			}
+		}
+
+		return nil
+	}
+}
+
+<% else %>
+// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
+<% end -%>

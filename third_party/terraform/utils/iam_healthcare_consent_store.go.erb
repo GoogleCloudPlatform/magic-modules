@@ -1,0 +1,132 @@
+<% autogen_exception -%>
+package google
+<% unless version == 'ga' -%>
+
+import (
+	"fmt"
+
+	healthcare "google.golang.org/api/healthcare/v1beta1"
+
+	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"google.golang.org/api/cloudresourcemanager/v1"
+)
+
+var IamHealthcareConsentStoreSchema = map[string]*schema.Schema{
+	"consent_store_id": {
+		Type:     schema.TypeString,
+		Required: true,
+		ForceNew: true,
+	},
+}
+
+type HealthcareConsentStoreIamUpdater struct {
+	resourceId string
+	d          *schema.ResourceData
+	Config     *Config
+}
+
+func NewHealthcareConsentStoreIamUpdater(d *schema.ResourceData, config *Config) (ResourceIamUpdater, error) {
+	consentStore := d.Get("consent_store_id").(string)
+	consentStoreId, err := parseHealthcareConsentStoreId(consentStore, config)
+
+	if err != nil {
+		return nil, errwrap.Wrapf(fmt.Sprintf("Error parsing resource ID for for %s: {{err}}", consentStore), err)
+	}
+
+	return &HealthcareConsentStoreIamUpdater{
+		resourceId: consentStoreId.consentStoreId(),
+		d:          d,
+		Config:     config,
+	}, nil
+}
+
+func ConsentStoreIdParseFunc(d *schema.ResourceData, config *Config) error {
+	consentStoreId, err := parseHealthcareConsentStoreId(d.Id(), config)
+	if err != nil {
+		return err
+	}
+	if err := d.Set("consent_store_id", consentStoreId.consentStoreId()); err != nil {
+		return fmt.Errorf("Error setting consent_store_id: %s", err)
+	}
+	d.SetId(consentStoreId.consentStoreId())
+	return nil
+}
+
+func (u *HealthcareConsentStoreIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
+	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := u.Config.NewHealthcareBetaClient(userAgent).Projects.Locations.Datasets.ConsentStores.GetIamPolicy(u.resourceId).Do()
+
+	if err != nil {
+		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
+	}
+
+	cloudResourcePolicy, err := healthcareToResourceManagerPolicyBeta(p)
+
+	if err != nil {
+		return nil, errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
+	}
+
+	return cloudResourcePolicy, nil
+}
+
+func (u *HealthcareConsentStoreIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
+	healthcarePolicy, err := resourceManagerToHealthcarePolicyBeta(policy)
+
+	if err != nil {
+		return errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
+	}
+
+	userAgent, err := generateUserAgentString(u.d, u.Config.userAgent)
+	if err != nil {
+		return err
+	}
+
+	_, err = u.Config.NewHealthcareBetaClient(userAgent).Projects.Locations.Datasets.ConsentStores.SetIamPolicy(u.resourceId, &healthcare.SetIamPolicyRequest{
+		Policy: healthcarePolicy,
+	}).Do()
+
+	if err != nil {
+		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{err}}", u.DescribeResource()), err)
+	}
+
+	return nil
+}
+
+func (u *HealthcareConsentStoreIamUpdater) GetResourceId() string {
+	return u.resourceId
+}
+
+func (u *HealthcareConsentStoreIamUpdater) GetMutexKey() string {
+	return u.resourceId
+}
+
+func (u *HealthcareConsentStoreIamUpdater) DescribeResource() string {
+	return fmt.Sprintf("Healthcare ConsentStore %q", u.resourceId)
+}
+
+func resourceManagerToHealthcarePolicyBeta(p *cloudresourcemanager.Policy) (*healthcare.Policy, error) {
+	out := &healthcare.Policy{}
+	err := Convert(p, out)
+	if err != nil {
+		return nil, errwrap.Wrapf("Cannot convert a v1 policy to a healthcare policy: {{err}}", err)
+	}
+	return out, nil
+}
+
+func healthcareToResourceManagerPolicyBeta(p *healthcare.Policy) (*cloudresourcemanager.Policy, error) {
+	out := &cloudresourcemanager.Policy{}
+	err := Convert(p, out)
+	if err != nil {
+		return nil, errwrap.Wrapf("Cannot convert a healthcare policy to a v1 policy: {{err}}", err)
+	}
+	return out, nil
+}
+
+<% else %>
+// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
+<% end -%>
