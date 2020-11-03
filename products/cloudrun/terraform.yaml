@@ -188,6 +188,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: 'cloudrunAnnotationDiffSuppress'
       spec.traffic: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       # name is 'special' in magic modules and lives at the root of properties.

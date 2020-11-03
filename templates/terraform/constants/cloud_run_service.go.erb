@@ -5,3 +5,20 @@ func revisionNameCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v i
 	}
 	return nil
 }
+
+const cloudRunGoogleProvidedAnnotation = "serving.knative.dev"
+
+func cloudrunAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diffs for the label provided by Google
+	if strings.Contains(k, cloudRunGoogleProvidedAnnotation) && new == "" {
+		return true
+	}
+
+	// Let diff be determined by labels (above)
+	if strings.Contains(k, "annotations.%") {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
