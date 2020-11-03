@@ -26,6 +26,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 20
       delete_minutes: 10
+      warning: |
+        This resource creates a Datastore Index on a project that has already
+        enabled a Datastore-compatible database. If you haven't already enabled
+        one, you can create a `google_app_engine_application` resource with
+        `database_type` set to `"CLOUD_DATASTORE_COMPATIBILITY"` to do so. Your
+        Datastore location will be the same as the App Engine location specified.
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "datastore_index"

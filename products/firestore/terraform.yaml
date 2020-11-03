@@ -25,6 +25,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     description: |
       {{description}} This resource manages composite indexes and not single
       field indexes.
+    warning: |
+      This resource creates a Firestore Index on a project that already has
+      Firestore enabled. If you haven't already enabled it, you can create a
+      `google_app_engine_application` resource with `database_type` set to
+      `"CLOUD_FIRESTORE"` to do so. Your Firestore location will be the same as
+      the App Engine location specified.
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firestore_index_basic"

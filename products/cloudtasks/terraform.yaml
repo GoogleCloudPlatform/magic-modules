@@ -15,6 +15,11 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Queue: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/locations/{{location}}/queues/{{name}}"
+    warning: |
+      This resource requires an App Engine application to be created on the
+      project you're provisioning it on. If you haven't already enabled it, you
+      can create a `google_app_engine_application` resource to do so. This
+      resource's location will be the same as the App Engine location specified.
     parameters:
       status: !ruby/object:Overrides::Terraform::PropertyOverride
         output: true
