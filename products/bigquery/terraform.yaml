@@ -67,6 +67,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/bigquery_dataset.go.erb
+    warning: |
+      You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`. 
+      The API does accept both formats but it will always return the legacy format which results in Terraform
+      showing permanent diff on each plan and apply operation.
   DatasetAccess: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true # no unique way to specify
     skip_sweeper: true  # covered by Dataset sweeper
@@ -117,6 +121,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       constants: templates/terraform/constants/bigquery_dataset_access.go.erb
       post_create: templates/terraform/post_create/bigquery_dataset_access.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/bigquery_dataset_access.go.erb
+    warning: |
+      You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`. 
+      The API does accept both formats but it will always return the legacy format which results in Terraform
+      showing permanent diff on each plan and apply operation.
   Job: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/jobs/{{job_id}}/location/{{location}}", "projects/{{project}}/jobs/{{job_id}}", "{{project}}/{{job_id}}", "{{job_id}}"]
     skip_delete: true
