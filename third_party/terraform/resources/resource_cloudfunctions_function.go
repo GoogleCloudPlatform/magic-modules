@@ -579,7 +579,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	// The full function needs to supplied in the PATCH call to evaluate some Organization Policies.  https://github.com/hashicorp/terraform-provider-google/issues/6603
+	// The full function needs to supplied in the PATCH call to evaluate some Organization Policies. https://github.com/hashicorp/terraform-provider-google/issues/6603
 	function, err := config.NewCloudFunctionsClient(userAgent).Projects.Locations.Functions.Get(cloudFuncId.cloudFunctionId()).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Target CloudFunctions Function %q", cloudFuncId.Name))
