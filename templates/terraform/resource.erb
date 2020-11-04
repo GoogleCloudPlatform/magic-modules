@@ -211,7 +211,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
-        return err
+        return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
     }
     billingProject = project
 <%  end -%>
@@ -366,7 +366,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 <%  if has_project -%>
         project, err := getProject(d, config)
         if err != nil {
-            return nil, err
+            return nil, fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
         }
         billingProject = project
 <%  end -%>
@@ -443,7 +443,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
-        return err
+        return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
     }
     billingProject = project
 <%  end -%>
@@ -568,7 +568,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
-        return err
+        return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
     }
     billingProject = project
 <%  end -%>
@@ -830,7 +830,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
-        return err
+        return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
     }
     billingProject = project
 <%  end -%>
