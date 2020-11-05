@@ -1,0 +1,14 @@
+
+resource "google_healthcare_consent_store" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+
+  location = "us-central1"
+  consent_id = "<%= ctx[:vars]['consent_id'] %>"
+
+  enable_consent_create_on_update = <%= ctx[:vars]['enable_consent_create_on_update'] %>
+  default_consent_ttl             = "<%= ctx[:vars]['default_consent_ttl'] %>"
+
+  labels = {
+    "<%= ctx[:vars]['label_key'] %>" = "<%= ctx[:vars]['label_value'] %>"
+  }
+}

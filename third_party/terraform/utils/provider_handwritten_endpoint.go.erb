@@ -104,17 +104,6 @@ var DnsBetaCustomEndpointEntry = &schema.Schema{
 	}, DnsBetaDefaultBasePath),
 }
 
-var HealthcareBetaDefaultBasePath = "https://healthcare.googleapis.com/v1beta1/"
-var HealthcareBetaCustomEndpointEntryKey = "healthcare_beta_custom_endpoint"
-var HealthcareBetaCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: validateCustomEndpoint,
-	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_HEALTHCARE_BETA_CUSTOM_ENDPOINT",
-	}, HealthcareBetaDefaultBasePath),
-}
-
 var IAMDefaultBasePath = "https://iam.googleapis.com/v1/"
 var IAMCustomEndpointEntryKey = "iam_custom_endpoint"
 var IAMCustomEndpointEntry = &schema.Schema{

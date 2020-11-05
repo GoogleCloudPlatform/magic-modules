@@ -1,0 +1,22 @@
+resource "google_healthcare_consent_store" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+
+  location = "us-central1"
+  consent_id = "<%= ctx[:vars]['consent_id'] %>"
+}
+
+resource "google_service_account" "test-account" {
+  provider = google-beta
+
+  account_id   = "<%= ctx[:vars]['account_id'] %>"
+  display_name = "Test Service Account"
+}
+
+resource "google_healthcare_consent_store_iam_member" "test-iam" {
+  provider = google-beta
+
+  location = google_healthcare_consent_store.<%= ctx[:primary_resource_id] %>.location
+  dataset = google_healthcare_consent_store.<%= ctx[:primary_resource_id] %>.name
+  role   = "roles/editor"
+  member = "serviceAccount:${google_service_account.test-account.email}"
+}

@@ -1,17 +1,6 @@
-resource "google_healthcare_consent_store" "default" {
-  name    = "<%= ctx[:vars]['fhir_consent_name'] %>"
-  dataset = google_healthcare_dataset.dataset.id
-
-  enable_consent_create_on_update = false
-  default_consent_ttl             = "25h"
-
-  labels = {
-    label1 = "labelvalue1"
-  }
+resource "google_healthcare_consent_store" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
-}
 
-resource "google_healthcare_dataset" "dataset" {
-  name     = "<%= ctx[:vars]['dataset_name'] %>"
   location = "us-central1"
+  consent_id = "<%= ctx[:vars]['consent_id'] %>"
 }

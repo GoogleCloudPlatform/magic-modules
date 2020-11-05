@@ -132,6 +132,42 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
       custom_import: templates/terraform/custom_import/healthcare_hl7_v2_store.go.erb
+  ConsentStore: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: projects/{{project}}/locations/{{location}}/consentStores/{{consent_id}}
+    import_format: ["projects/{{project}}/locations/{{location}}/consentStores/{{consent_id}}", "{{consent_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "healthcare_consent_store_basic"
+        min_version: 'beta'
+        primary_resource_id: "my-consent"
+        vars:
+          consent_id: "my-consent-store"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "healthcare_consent_store_full"
+        min_version: 'beta'
+        primary_resource_id: "my-consent"
+        vars:
+          consent_id: "my-consent-store"
+          enable_consent_create_on_update: "true"
+          default_consent_ttl: "25h"
+          label_key: "label_key"
+          label_value: "label_value"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "healthcare_consent_store_iam"
+        min_version: 'beta'
+        primary_resource_id: "my-consent"
+        vars:
+          account_id: "my-account"
+          consent_store_id: "my-consent-store"
+    properties:
+      location: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      consent_id: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

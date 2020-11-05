@@ -44,7 +44,6 @@ import (
 	"google.golang.org/api/dns/v1"
 	dnsBeta "google.golang.org/api/dns/v1beta2"
 	file "google.golang.org/api/file/v1beta1"
-	healthcareBeta "google.golang.org/api/healthcare/v1beta1"
 	healthcare "google.golang.org/api/healthcare/v1"
 	"google.golang.org/api/iam/v1"
 	iamcredentials "google.golang.org/api/iamcredentials/v1"
@@ -103,7 +102,6 @@ type Config struct {
 	DataprocBetaBasePath string
 	DataflowBasePath string
 	DnsBetaBasePath string
-	HealthcareBetaBasePath string
 	IamCredentialsBasePath string
 	ResourceManagerV2Beta1BasePath string
 	IAMBasePath string
@@ -707,20 +705,6 @@ func (c *Config) NewHealthcareClient(userAgent string) *healthcare.Service {
 	return clientHealthcare
 }
 
-func (c *Config) NewHealthcareBetaClient(userAgent string) *healthcareBeta.Service {
-	healthcareClientBetaBasePath := removeBasePathVersion(c.HealthcareBetaBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud Healthcare client for path %s", healthcareClientBetaBasePath)
-	clientHealthcareBeta, err := healthcareBeta.NewService(c.context, option.WithHTTPClient(c.client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client healthcare beta: %s", err)
-		return nil
-	}
-	clientHealthcareBeta.UserAgent = userAgent
-	clientHealthcareBeta.BasePath = healthcareClientBetaBasePath
-
-	return clientHealthcareBeta
-}
-
 <% unless version == 'ga' -%>
 func (c *Config) NewCloudIdentityClient(userAgent string) *cloudidentity.Service {
 	cloudidentityClientBasePath := removeBasePathVersion(c.CloudIdentityBasePath)
@@ -881,7 +865,6 @@ func ConfigureBasePaths(c *Config) {
 	c.DataprocBasePath = DataprocDefaultBasePath
 	c.DataflowBasePath = DataflowDefaultBasePath
 	c.DnsBetaBasePath = DnsBetaDefaultBasePath
-	c.HealthcareBetaBasePath = HealthcareBetaDefaultBasePath
 	c.IamCredentialsBasePath = IamCredentialsDefaultBasePath
 	c.ResourceManagerV2Beta1BasePath = ResourceManagerV2Beta1DefaultBasePath
 	c.IAMBasePath = IAMDefaultBasePath

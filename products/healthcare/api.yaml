@@ -543,33 +543,42 @@ objects:
   - !ruby/object:Api::Resource
     name: 'ConsentStore'
     kind: "healthcare#consentStore"
-    base_url: '{{dataset}}/consentStores?consentStoreId={{name}}'
-    self_link: '{{dataset}}/consentStores/{{name}}'
+    base_url: 'projects/{{project}}/locations/{{location}}/consentStores?consentStoreId={{consent_id}}'
+    self_link: 'projects/{{project}}/locations/{{location}}/consentStores/{{consent_id}}'
     update_verb: :PATCH
     update_mask: true
     min_version: beta
     description: |
       The Consent Management API is a tool for tracking user consents and the documentation associated with the consents. 
-    parameters:
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'dataset'
-        description: |
-          Identifies the dataset addressed by this request. Must be in the format
-          'projects/{project}/locations/{location}/datasets/{dataset}'
-        required: true
-        input: true
-        resource: 'Dataset'
-        imports: 'selfLink'
-        url_param_only: true
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_attribute: 'consent_id'
+      import_format: ["projects/{{project}}/locations/{{location}}/consentStores/{{consent_id}}", "{{consent_id}}"]
+      base_url: projects/{{project}}/locations/{{location}}/consentStores/{{consent_id}}
+      self_link: projects/{{project}}/locations/{{location}}/consentStores/{{consent_id}}
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
-          The resource name for the ConsentStore.
-
-          ** Changing this property may recreate the Consent store (removing all data) **
+          The resource name for the ConsentStore. for example:
+          "projects/p1/locations/us-central1/consentStores/consent1"
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'consent_id'
+        description: |-
+          The last part of the ConsentStore name, for example:
+          "consent1"
         required: true
         input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        description: |
+          The name of the location this consent store is located in.
+        required: true
+        input: true
+        url_param_only: true
       - !ruby/object:Api::Type::String
         name: 'defaultConsentTtl'
         required: false
