@@ -113,7 +113,6 @@ objects:
         name: apiConfigId
         description: |
           Identifier to assign to the API Config. Must be unique within scope of the parent resource(api).
-        required: true
         input: true
         url_param_only: true
     properties:

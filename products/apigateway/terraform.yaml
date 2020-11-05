@@ -32,6 +32,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "api"
       - !ruby/object:Provider::Terraform::Examples
+        skip_docs: true
         min_version: beta
         name: "apigateway_api_full"
         primary_resource_id: "api"
@@ -43,6 +44,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       managedService: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   ApiConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |
+        * `api_config_id_prefix` - (Optional) Creates a unique name beginning with the
+         specified prefix. Conflicts with `api_config_id`.
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
       update_minutes: 6
@@ -63,6 +68,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "api-cfg"
       - !ruby/object:Provider::Terraform::Examples
+        skip_docs: true
         min_version: beta
         name: "apigateway_api_config_full"
         primary_resource_id: "api_cfg"
@@ -73,6 +79,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       gatewayConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
+      apiConfigId: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      extra_schema_entry: templates/terraform/extra_schema_entry/api_config.erb
+      pre_create: 'templates/terraform/pre_create/api_config.go.erb'
   Gateway: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
@@ -92,6 +103,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "api-gw"
       - !ruby/object:Provider::Terraform::Examples
+        skip_docs: true
         min_version: beta
         name: "apigateway_gateway_full"
         primary_resource_id: "api_gw"
