@@ -38,20 +38,49 @@ or
 b) atomically update every downstream to a fast-forward state that represents the appropriate HEAD as of the beginning of the run
 
 #### Something went wrong!
-Don't panic - this is all quite safe.  :)
+Don't panic - this is all quite safe and we have fixed it before.  We store the state of the pusher tasks in tags (the "sync tags"), one per downstream, and it will be easy to get the system back up and running.  You can send a message to Nathan if you are anxious about running through these steps.  :)
 
-It's possible for a job to be cancelled or fail in the middle of pushing downstreams in a transient way.  The sorts of failures that happen at scale - lightning strikes a datacenter or some other unlikely misfortune happens.  This has a chance to cause a hiccup in the downstream history, but isn't dangerous.  If that happens, the sync tags may need to be manually updated to sit at the same commit, just before the commit which needs to be generated.  Then, the downstream pusher workflow will need to be restarted.
+It's possible for a job to be cancelled or fail in the middle of pushing downstreams in a transient way.  The sorts of failures that happen at scale - lightning strikes a datacenter (ours or GitHub's!) or some other unlikely misfortune happens.  This has a chance to cause a hiccup in the downstream history, but isn't dangerous.  If that happens, the sync tags may need to be manually updated to sit at the same commit, just before the commit which needs to be generated, or some failed tasks might need to be run by hand.
 
 Updating the sync tags is done like this:
 First, check their state: `git fetch origin && git rev-parse origin/tpg-sync origin/tpgb-sync origin/ansible-sync origin/inspec-sync origin/tf-oics-sync origin/tf-conv-sync` will list the commits for each of the sync tags.
-If you have changed the name of the `googlecloudplatform/magic-modules` remote from `origin`, substitute that name instead.
-In normal, steady-state operation, these tags will all be identical.  When a failure occurs, some of them may be one commit ahead of the others.  It is rare for any of them to be 2 or more commits ahead of any other.  If they are not all equal, and there is no pusher task currently running, this means you need to reset them by hand.  If they are all equal, skip the next step.
+(If you have changed the name of the `googlecloudplatform/magic-modules` remote from `origin`, substitute that name instead)
+In normal, steady-state operation, these tags will all be identical.  When a failure occurs, some of them may be one commit ahead of the others.  It is rare for any of them to be 2 or more commits ahead of any other.  If some of them are one commit ahead of the others, and there is no pusher task currently running, this means you need to reset them by hand and rerun the failed jobs.  If they diverge by more than one commit, or a pusher task is currently running, you will need to manually run missing tasks.
 
-Second, find which commit caused the error.  This will usually be easy - cloud build lists the commit which triggered a build, so you can probably just use that one.  You need to set all the sync tags to the parent of that commit.  Say the commit which caused the error is `12345abc`.  You can find the parent of that commit with `git rev-parse 12345abc~` (note the `~` suffix).  Some of the sync tags are likely set to this value already.  For the remainder, simply perform a git push.  Assuming that the parent commit is `98765fed`, that would be `git push origin 98765fed:tf-conv-sync`.
+### Divergence by zero commits
+
+Just click retry on the failed job in Cloud Build.  Yay!
+
+### Divergence by exactly one commit.
+
+Find which commit caused the error.  This will usually be easy - cloud build lists the commit which triggered a build, so you can probably just use that one.  You need to set all the sync tags to the parent of that commit.  Say the commit which caused the error is `12345abc`.  You can find the parent of that commit with `git rev-parse 12345abc~` (note the `~` suffix).  Some of the sync tags are likely set to this value already.  For the remainder, simply perform a git push.  Assuming that the parent commit is `98765fed`, that would be, e.g. `git push origin 98765fed:tf-conv-sync`.
 
 If you are unlucky, there may be open PRs - this only happens if the failure occurred during the ~5 second period surrounding the merging of one of the downstreams.  Close those PRs before proceeding to the final step.
 
-Click "retry" on the failed job in Cloud Build.  Watch the retried job and see if it succeeds - it should!  If it does not, the underlying problem may not have been fixed.
+Finally, click "retry" on the failed job in Cloud Build.  Watch the retried job and see if it succeeds - it should!  If it does not, the underlying problem may not have been fixed.
+
+### Divergence by more than one commit.
+This situation is interesting.  This means that there was a failure but that it went undetected for a little while, or that there was a failure in a PR which was merged at about the same time as another one.  Don't worry, it's still easy to fix!  To understand this, you should know a little more about the way the pusher tasks work.  For each commit merged in Magic Modules, five pusher tasks (part of one pusher job) start.  Each pusher task waits for all previous pusher tasks of the same type to finish.  That is, the TPGB pusher always waits for all previous TPGB pushers, the Ansible pusher waits for all previous Ansible pushers, etc.
+
+When a task fails, all the other tasks which are part of the same job are cancelled.  However, if one of those tasks has already succeeded, the next task of the same kind - the next Ansible pusher, say, since Ansible tends to finish quickly - will be free to start.  That means that all subsequent jobs have partially succeeded - they pushed Ansible, but not TPGB.  You'll need to do the work of the failed tasks yourself in order to restore the steady state.
+
+When this happened the first time, Cameron and Nathan wrote this little shell snippet, which should do it for you.  You will need to get the Magician's github token, either by generating a new one (be sure to clean up after yourself when done), by decrypting the value in .ci/gcb-push-downstream.yml as cloudbuild does, or by accessing the token in Google's internal secret store.
+
+```
+SYNC_TAG=tpgb-sync
+REPO=terraform
+VERSION=beta
+git clone https://github.com/GoogleCloudPlatform/magic-modules fix-gcb-run
+pushd fix-gcb-run
+docker pull gcr.io/graphite-docker-images/downstream-builder;
+for commit in $(git log $SYNC_TAG..master --pretty=%H | tac); do 
+  git checkout $commit && \
+  docker run -v `pwd`:/workspace -w /workspace -e GITHUB_TOKEN=$MAGICIAN_GITHUB_TOKEN -it gcr.io/graphite-docker-images/downstream-builder downstream $REPO $VERSION $commit || \
+  break;
+done
+```
+
+In the event of a failure, this will stop running.  If it succeeds, update the sync tag with `git push origin HEAD:tpg-sync`.
 
 ## Deploying the pipeline
 The code on the PR's branch is used to plan actions - no merge is performed.
