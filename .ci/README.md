@@ -64,7 +64,7 @@ This situation is interesting.  This means that there was a failure but that it 
 
 When a task fails, all the other tasks which are part of the same job are cancelled.  However, if one of those tasks has already succeeded, the next task of the same kind - the next Ansible pusher, say, since Ansible tends to finish quickly - will be free to start.  That means that all subsequent jobs have partially succeeded - they pushed Ansible, but not TPGB.  You'll need to do the work of the failed tasks yourself in order to restore the steady state.
 
-When this happened the first time, Cameron and Nathan wrote this little shell snippet, which should do it for you.  You will need to get the Magician's github token, either by generating a new one (be sure to clean up after yourself when done) or by decrypting the value in .ci/gcb-push-downstream.yml.
+When this happened the first time, Cameron and Nathan wrote this little shell snippet, which should do it for you.  You will need to get the Magician's github token, either by generating a new one (be sure to clean up after yourself when done), by decrypting the value in .ci/gcb-push-downstream.yml as cloudbuild does, or by accessing the token in Google's internal secret store.
 
 ```
 SYNC_TAG=tpgb-sync
