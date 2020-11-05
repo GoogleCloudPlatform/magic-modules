@@ -37,7 +37,7 @@ resource "google_iam_workload_identity_pool" "pool" {
 }
 
 resource "google_iam_workload_identity_pool_provider" "bar" {
-	workload_identity_pool_id          = "pool-%{random_suffix}"
+	workload_identity_pool_id          = google_iam_workload_identity_pool.pool.workload_identity_pool_id
 	workload_identity_pool_provider_id = "bar-provider-%{random_suffix}"
 	display_name                       = "Name of provider"
 	description                        = "OIDC identity pool provider for automated test"
