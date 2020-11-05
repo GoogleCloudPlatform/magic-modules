@@ -8,5 +8,6 @@ if v, ok := d.GetOk("api_config_id"); ok {
 }
 
 if err := d.Set("api_config_id", apiConfigId); err != nil {
-	return fmt.Errorf("Error setting api_config_id: %s", err)
+	return nil, fmt.Errorf("Error setting api_config_id: %s", err)
 }
+return obj, nil

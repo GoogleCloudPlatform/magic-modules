@@ -83,7 +83,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       extra_schema_entry: templates/terraform/extra_schema_entry/api_config.erb
-      pre_create: 'templates/terraform/pre_create/api_config.go.erb'
+      encoder: 'templates/terraform/encoders/api_config.go.erb'
   Gateway: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
