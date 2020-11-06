@@ -61,6 +61,8 @@ module Provider
                            'third_party/terraform/utils/config.go.erb'],
                           ['google/utils.go',
                            'third_party/terraform/utils/utils.go.erb'],
+                          ['google/compute_instance_helpers.go',
+                           'third_party/terraform/utils/compute_instance_helpers.go.erb'],
                           ['google/provider_handwritten_endpoint.go',
                            'third_party/terraform/utils/provider_handwritten_endpoint.go.erb']
                         ],
@@ -124,8 +126,6 @@ module Provider
                         'third_party/terraform/utils/common_operation.go'],
                        ['google/compute_shared_operation.go',
                         'third_party/terraform/utils/compute_shared_operation.go'],
-                       ['google/compute_instance_helpers.go',
-                        'third_party/terraform/utils/compute_instance_helpers.go.erb'],
                        ['google/convert.go',
                         'third_party/terraform/utils/convert.go'],
                        ['google/metadata.go',
