@@ -8,7 +8,7 @@ import (
 
 func dataSourceIAMBetaWorkloadIdentityPool() *schema.Resource {
 
-	dsSchema := (resourceIAMBetaWorkloadIdentityPool().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(resourceIAMBetaWorkloadIdentityPool().Schema)
 	addRequiredFieldsToSchema(dsSchema, "workload_identity_pool_id")
 	addOptionalFieldsToSchema(dsSchema, "project")
 
