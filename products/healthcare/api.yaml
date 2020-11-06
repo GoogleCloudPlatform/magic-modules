@@ -543,8 +543,8 @@ objects:
   - !ruby/object:Api::Resource
     name: 'ConsentStore'
     kind: "healthcare#consentStore"
-    base_url: 'projects/{{project}}/locations/{{location}}/consentStores?consentStoreId={{consent_id}}'
-    self_link: 'projects/{{project}}/locations/{{location}}/consentStores/{{consent_id}}'
+    base_url: "{{dataset}}/consentStores?consentStoreId={{consent_id}}"
+    self_link: "{{dataset}}/consentStores/{{name}}"
     update_verb: :PATCH
     update_mask: true
     min_version: beta
@@ -554,19 +554,24 @@ objects:
       method_name_separator: ':'
       fetch_iam_policy_verb: :POST
       parent_resource_attribute: 'consent_id'
-      import_format: ["projects/{{project}}/locations/{{location}}/consentStores/{{consent_id}}", "{{consent_id}}"]
-      base_url: projects/{{project}}/locations/{{location}}/consentStores/{{consent_id}}
-      self_link: projects/{{project}}/locations/{{location}}/consentStores/{{consent_id}}
+      import_format: ["{{dataset}}/consentStores/{{name}}", "{{name}}"]
+      base_url: "{{dataset}}/consentStores/{{name}}"
+      self_link: "{{dataset}}/consentStores/{{name}}"
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: "dataset"
+        description: |
+          Identifies the dataset addressed by this request. Must be in the format
+          'projects/{project}/locations/{location}/datasets/{dataset}'
+        required: true
+        input: true
+        resource: 'Dataset'
+        imports: 'selfLink'
+        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
-          The resource name for the ConsentStore. for example:
-          "projects/p1/locations/us-central1/consentStores/consent1"
-        output: true
-      - !ruby/object:Api::Type::String
-        name: 'consent_id'
-        description: |-
           The last part of the ConsentStore name, for example:
           "consent1"
         required: true
