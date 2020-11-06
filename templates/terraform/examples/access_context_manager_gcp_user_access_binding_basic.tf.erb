@@ -1,0 +1,6 @@
+resource "google_access_context_manager_gcp_user_access_binding" "<%= ctx[:primary_resource_id] %>" {
+  group_key = "01d520gv4vjcrht"
+  access_levels = [
+    "accessPolicies/9522/accessLevels/device_trusted",
+  ]
+}
