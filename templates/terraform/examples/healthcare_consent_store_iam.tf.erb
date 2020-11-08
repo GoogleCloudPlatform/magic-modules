@@ -1,4 +1,6 @@
 resource "google_healthcare_dataset" "dataset" {
+  provider = google-beta
+
   location = "us-central1"
   name     = "<%= ctx[:vars]['dataset_id'] %>"
 }
@@ -20,7 +22,8 @@ resource "google_service_account" "test-account" {
 resource "google_healthcare_consent_store_iam_member" "test-iam" {
   provider = google-beta
 
-  dataset = google_healthcare_consent_store.<%= ctx[:primary_resource_id] %>.id
-  role    = "roles/editor"
-  member  = "serviceAccount:${google_service_account.test-account.email}"
+  dataset          = google_healthcare_dataset.dataset.id
+  consent_store_id = google_healthcare_consent_store.<%= ctx[:primary_resource_id] %>.name
+  role             = "roles/editor"
+  member           = "serviceAccount:${google_service_account.test-account.email}"
 }

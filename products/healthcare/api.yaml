@@ -543,7 +543,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'ConsentStore'
     kind: "healthcare#consentStore"
-    base_url: "{{dataset}}/consentStores?consentStoreId={{consent_id}}"
+    base_url: "{{dataset}}/consentStores?consentStoreId={{name}}"
     self_link: "{{dataset}}/consentStores/{{name}}"
     update_verb: :PATCH
     update_mask: true
@@ -552,8 +552,8 @@ objects:
       The Consent Management API is a tool for tracking user consents and the documentation associated with the consents. 
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       method_name_separator: ':'
-      fetch_iam_policy_verb: :POST
-      parent_resource_attribute: 'consent_id'
+      fetch_iam_policy_verb: :GET
+      parent_resource_attribute: 'consent_store_id'
       import_format: ["{{dataset}}/consentStores/{{name}}", "{{name}}"]
       base_url: "{{dataset}}/consentStores/{{name}}"
       self_link: "{{dataset}}/consentStores/{{name}}"
@@ -574,13 +574,6 @@ objects:
         description: |
           The last part of the ConsentStore name, for example:
           "consent1"
-        required: true
-        input: true
-        url_param_only: true
-      - !ruby/object:Api::Type::String
-        name: 'location'
-        description: |
-          The name of the location this consent store is located in.
         required: true
         input: true
         url_param_only: true
