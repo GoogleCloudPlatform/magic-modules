@@ -33,7 +33,6 @@ func TestAccCloudIdentityGroup_update(t *testing.T) {
 func testAccCloudIdentityGroup_update(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_identity_group" "cloud_identity_group_basic" {
-  provider = google-beta
   display_name = "tf-test-my-identity-group%{random_suffix}-update"
   description  = "my-description"
 
