@@ -1,7 +1,5 @@
-<% autogen_exception -%>
 package google
 
-<% unless version == 'ga' -%>
 import (
 	"context"
 	"fmt"
@@ -111,4 +109,3 @@ func testSweepCloudIdentityGroup(region string) error {
 
 	return nil
 }
-<% end -%>

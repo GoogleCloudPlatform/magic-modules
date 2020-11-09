@@ -16,6 +16,9 @@ name: CloudIdentity
 display_name: Cloud Identity
 versions:
   - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://cloudidentity.googleapis.com/v1beta1/
+  - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://cloudidentity.googleapis.com/v1beta1/
 scopes:

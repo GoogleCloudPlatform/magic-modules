@@ -1,5 +1,4 @@
 resource "google_cloud_identity_group" "group" {
-  provider = google-beta
   display_name = "<%= ctx[:vars]['id_group'] %>"
 
   parent = "customers/<%= ctx[:test_env_vars]['cust_id'] %>"
@@ -14,7 +13,6 @@ resource "google_cloud_identity_group" "group" {
 }
 
 resource "google_cloud_identity_group_membership" "cloud_identity_group_membership_basic" {
-  provider = google-beta
   group    = google_cloud_identity_group.group.id
 
   member_key {

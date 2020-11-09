@@ -705,7 +705,6 @@ func (c *Config) NewHealthcareClient(userAgent string) *healthcare.Service {
 	return clientHealthcare
 }
 
-<% unless version == 'ga' -%>
 func (c *Config) NewCloudIdentityClient(userAgent string) *cloudidentity.Service {
 	cloudidentityClientBasePath := removeBasePathVersion(c.CloudIdentityBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud CloudIdentity client for path %s", cloudidentityClientBasePath)
@@ -719,7 +718,6 @@ func (c *Config) NewCloudIdentityClient(userAgent string) *cloudidentity.Service
 
 	return clientCloudIdentity
 }
-<% end -%>
 
 func (c *Config) BigTableClientFactory(userAgent string) *BigtableClientFactory {
 	bigtableClientFactory := &BigtableClientFactory{

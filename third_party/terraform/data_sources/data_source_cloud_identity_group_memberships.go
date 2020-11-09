@@ -1,7 +1,5 @@
-<% autogen_exception -%>
 package google
 
-<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"time"
@@ -79,4 +77,3 @@ func flattenCloudIdentityGroupMembershipsRoles(roles []*cloudidentity.Membership
 	}
 	return transformed
 }
-<% end -%>

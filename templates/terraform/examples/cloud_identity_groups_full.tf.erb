@@ -1,5 +1,4 @@
 resource "google_cloud_identity_group" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
   display_name = "<%= ctx[:vars]['id_group'] %>"
   description  = "my new cloud identity group"
 

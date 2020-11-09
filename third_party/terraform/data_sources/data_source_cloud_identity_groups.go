@@ -1,7 +1,5 @@
-<% autogen_exception -%>
 package google
 
-<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"time"
@@ -79,4 +77,3 @@ func flattenCloudIdentityGroupsEntityKey(entityKey *cloudidentity.EntityKey) []i
 	}
 	return []interface{}{transformed}
 }
-<% end -%>

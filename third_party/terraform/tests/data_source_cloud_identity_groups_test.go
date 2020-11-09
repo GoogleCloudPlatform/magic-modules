@@ -1,7 +1,5 @@
-<% autogen_exception -%>
 package google
 
-<% unless version == 'ga' -%>
 import (
 	"regexp"
 	"testing"
@@ -19,7 +17,7 @@ func TestAccDataSourceCloudIdentityGroups_basic(t *testing.T) {
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudIdentityGroupConfig(context),
@@ -44,4 +42,3 @@ data "google_cloud_identity_groups" "groups" {
 }
 `, context)
 }
-<% end -%>

@@ -28,22 +28,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_identity_groups_basic"
         primary_resource_id: "cloud_identity_group_basic"
-        min_version: beta
         vars:
           id_group: "my-identity-group"
         test_env_vars:
           org_domain: :ORG_DOMAIN
           cust_id: :CUST_ID
-      ### The full API doesn't seem to be implemented yet
-      # - !ruby/object:Provider::Terraform::Examples
-      #   name: "cloud_identity_groups_full"
-      #   primary_resource_id: "cloud_identity_group_full"
-      #   min_version: beta
-      #   vars:
-      #     id_group: "my-identity-group"
-      #   test_env_vars:
-      #     org_domain: :ORG_DOMAIN
-      #     cust_id: :CUST_ID
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloud_identity_groups_full"
+        primary_resource_id: "cloud_identity_group_full"
+        vars:
+          id_group: "my-identity-group"
+        test_env_vars:
+          org_domain: :ORG_DOMAIN
+          cust_id: :CUST_ID
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/set_computed_name.erb
       custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.erb
@@ -62,7 +59,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_identity_group_membership"
         primary_resource_id: "cloud_identity_group_membership_basic"
-        min_version: beta
         vars:
           id_group: "my-identity-group"
         test_env_vars:
@@ -71,7 +67,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloud_identity_group_membership_user"
         primary_resource_id: "cloud_identity_group_membership_basic"
-        min_version: beta
         vars:
           id_group: "my-identity-group"
         test_env_vars:
