@@ -6970,7 +6970,6 @@ objects:
           An optional description of this resource.
       - !ruby/object:Api::Type::Enum
         name: 'bandwidth'
-        input: true
         description: |
           Provisioned bandwidth capacity for the interconnect attachment.
           For attachments of type DEDICATED, the user can set the bandwidth.
