@@ -238,9 +238,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     autogen_async: true
     exclude_validator: true
     examples:
-    - !ruby/object:Provider::Terraform::Examples
-      name: "access_context_manager_gcp_user_access_binding_basic"
-      primary_resource_id: "gcp_user_access_binding"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "access_context_manager_gcp_user_access_binding_basic"
+        primary_resource_id: "gcp_user_access_binding"
+        vars:
+          group_id: "my-identity-group"
+          access_level_id: "access_level_id_for_user_access_binding"
+          access_level_name: "chromeos_no_lock"
+        test_env_vars:
+          org_id: :ORG_ID
+          org_domain: :ORG_DOMAIN
+          cust_id: :CUST_ID
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
