@@ -1269,13 +1269,23 @@ objects:
         input: true
   - !ruby/object:Api::Resource
     name: 'GcpUserAccessBinding'
-    base_url: "{{parent}}/gcpUserAccessBindings"
+    base_url: "organizations/{{organization_id}}/gcpUserAccessBindings"
     update_verb: :PATCH
     update_mask: true
     description: |
       Restricts access to Cloud Console and Google Cloud APIs for a set of users using Context-Aware Access.
     references: !ruby/object:Api::Resource::ReferenceLinks
       api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/organizations.gcpUserAccessBindings'
+    parameters:
+      # Parent is a path parameter that _cannot_ be read or sent in the request at all.
+      # This must be done at the provider level.
+      - !ruby/object:Api::Type::String
+        name: organization_id
+        input: true
+        required: true
+        url_param_only: true
+        description: |
+          Required. ID of the parent organization.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
