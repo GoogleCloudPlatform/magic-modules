@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	cloudidentity "google.golang.org/api/cloudidentity/v1"
+	"google.golang.org/api/cloudidentity/v1"
 )
 
 func dataSourceGoogleCloudIdentityGroups() *schema.Resource {
