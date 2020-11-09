@@ -36,8 +36,6 @@ func testAccCloudIdentityGroupConfig(context map[string]interface{}) string {
 	return testAccCloudIdentityGroup_cloudIdentityGroupsBasicExample(context) + Nprintf(`
 
 data "google_cloud_identity_groups" "groups" {
-  provider = google-beta
-
   parent = google_cloud_identity_group.cloud_identity_group_basic.parent
 }
 `, context)

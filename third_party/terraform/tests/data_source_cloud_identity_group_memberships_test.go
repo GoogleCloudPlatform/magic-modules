@@ -40,8 +40,6 @@ func testAccCloudIdentityGroupMembershipConfig(context map[string]interface{}) s
 	return testAccCloudIdentityGroupMembership_cloudIdentityGroupMembershipUserExample(context) + Nprintf(`
 
 data "google_cloud_identity_group_memberships" "members" {
-  provider = google-beta
-
   group = google_cloud_identity_group_membership.cloud_identity_group_membership_basic.group
 }
 `, context)
