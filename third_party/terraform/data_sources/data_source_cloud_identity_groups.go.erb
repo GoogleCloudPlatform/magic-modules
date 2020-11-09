@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -5,7 +6,11 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+<% unless version == 'ga' -%>
+	cloudidentity "google.golang.org/api/cloudidentity/v1beta1"
+<% else -%>
 	"google.golang.org/api/cloudidentity/v1"
+<% end -%>
 )
 
 func dataSourceGoogleCloudIdentityGroups() *schema.Resource {

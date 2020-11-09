@@ -225,6 +225,7 @@ objects:
         input: true
         description: |
           EntityKey of the member.
+        min_version: beta
         exactly_one_of:
           - member_key
           - preferred_member_key
