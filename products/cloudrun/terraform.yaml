@@ -49,6 +49,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'domainMappingLabelDiffSuppress'
       metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: 'cloudrunAnnotationDiffSuppress'
       metadata.namespace: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/set_to_project.go.erb
       metadata.name: !ruby/object:Overrides::Terraform::PropertyOverride
