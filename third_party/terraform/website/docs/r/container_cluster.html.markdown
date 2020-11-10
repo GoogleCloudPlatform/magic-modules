@@ -493,7 +493,7 @@ maintenance_policy {
 
 In beta, one or the other of `recurring_window` and `daily_maintenance_window` is required if a `maintenance_policy` block is supplied.
 
-* `maintenance_exclusions_window` - (Optional) Exceptions to maintenance window. Non-emergency maintenance should not occur in these windows. A cluster can have up to three maintenance exclusions at a time [Maintenance Window and Exclusions](https://cloud.google.com/kubernetes-engine/docs/concepts/maintenance-windows-and-exclusions)
+* `maintenance_exclusion` - (Optional) Exceptions to maintenance window. Non-emergency maintenance should not occur in these windows. A cluster can have up to three maintenance exclusions at a time [Maintenance Window and Exclusions](https://cloud.google.com/kubernetes-engine/docs/concepts/maintenance-windows-and-exclusions)
 
 Specify `start_time` and `end_time` in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) "Zulu" date format.  The start time's date is
 the initial date that the window starts, and the end time is used for calculating duration.  Specify `recurrence` in
@@ -509,17 +509,15 @@ maintenance_policy {
 		end_time = "2019-01-02T00:00:00Z"
 		recurrence = "FREQ=DAILY"
 	}
-    maintenance_exclusion_window{
+    maintenance_exclusion{
+        exclusion_name = "batch job"
         start_time = "2019-01-01T00:00:00Z"
         end_time = "2019-01-02T00:00:00Z"
     }
-    maintenance_exclusion_window{
+    maintenance_exclusion{
+        exclusion_name = "holiday data load"
         start_time = "2019-05-01T00:00:00Z"
         end_time = "2019-05-02T00:00:00Z"
-    }
-    maintenance_exclusion_window{
-        start_time = "2019-06-01T00:00:00Z"
-        end_time = "2019-06-02T00:00:00Z"
     }
 }
 ```

@@ -585,13 +585,17 @@ func resourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
-						"maintenance_exclusion_window": {
+						"maintenance_exclusion": {
 							Type:        schema.TypeSet,
 							Optional:    true,
 							MaxItems:    3,
 							Description: `Exceptions to maintenance window. Non-emergency maintenance should not occur in these windows.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									"exclusion_name": {
+										Type:         schema.TypeString,
+										Required:     true,
+									},
 									"start_time": {
 										Type:         schema.TypeString,
 										Required:     true,
@@ -2921,11 +2925,10 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 	}
 	maintenancePolicy := l[0].(map[string]interface{})
 
-	if maintenanceExclusions, ok := maintenancePolicy["maintenance_exclusion_window"]; ok && len(maintenanceExclusions.(*schema.Set).List()) > 0 {
-		for k, me := range maintenanceExclusions.(*schema.Set).List() {
+	if maintenanceExclusions, ok := maintenancePolicy["maintenance_exclusion"]; ok && len(maintenanceExclusions.(*schema.Set).List()) > 0 {
+		for _, me := range maintenanceExclusions.(*schema.Set).List() {
 			mew := me.(map[string]interface{})
-			blackout := fmt.Sprintf("blackout-%d", k+1)
-			exclusions[blackout] = containerBeta.TimeWindow{
+			exclusions[mew["exclusion_name"].(string)] = containerBeta.TimeWindow{
 				StartTime: mew["start_time"].(string),
 				EndTime:   mew["end_time"].(string),
 			}
@@ -3599,12 +3602,13 @@ func flattenMaintenancePolicy(mp *containerBeta.MaintenancePolicy) []map[string]
 		return nil
 	}
 
-	exclusionWindows := []interface{}{}
+	exclusionWindows := []map[string]interface{}{}
 	if mp.Window.MaintenanceExclusions != nil {
-		for _, tw := range mp.Window.MaintenanceExclusions {
+		for wname, tw := range mp.Window.MaintenanceExclusions {
 			exclusionWindows = append(exclusionWindows, map[string]interface{}{
-				"start_time": tw.StartTime,
-				"end_time":   tw.EndTime,
+				"start_time":  tw.StartTime,
+				"end_time":    tw.EndTime,
+				"exclusion_name": wname,
 			})
 		}
 	}
@@ -3618,7 +3622,7 @@ func flattenMaintenancePolicy(mp *containerBeta.MaintenancePolicy) []map[string]
 						"duration":   mp.Window.DailyMaintenanceWindow.Duration,
 					},
 				},
-				"maintenance_exclusion_window": exclusionWindows,
+				"maintenance_exclusion": exclusionWindows,
 			},
 		}
 	}
@@ -3632,7 +3636,7 @@ func flattenMaintenancePolicy(mp *containerBeta.MaintenancePolicy) []map[string]
 						"recurrence": mp.Window.RecurringWindow.Recurrence,
 					},
 				},
-				"maintenance_exclusion_window": exclusionWindows,
+				"maintenance_exclusion": exclusionWindows,
 			},
 		}
 	}
