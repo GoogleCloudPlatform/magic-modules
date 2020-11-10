@@ -8566,6 +8566,7 @@ objects:
         required: true
       - !ruby/object:Api::Type::NestedObject
         name: network
+        input: true
         description: |
             Specifies the mirrored VPC network. Only packets in this network
             will be mirrored. All mirrored VMs should have a NIC in the given
@@ -8577,6 +8578,7 @@ objects:
             resource: 'Network'
             imports: 'selfLink'
             required: true
+            input: true
         required: true
       - !ruby/object:Api::Type::Integer
         name: priority
