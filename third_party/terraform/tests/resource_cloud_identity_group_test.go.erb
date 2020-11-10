@@ -102,13 +102,6 @@ resource "google_cloud_identity_group" "cloud_identity_group_full" {
   labels = {
     "cloudidentity.googleapis.com/groups.discussion_forum" = ""
   }
-
-  dynamic_group_metadata {
-    queries {
-      resource_type = "USER"
-      query = "organizations.department.exists(org, org.department=='engineering'"
-    }
-  }
 }
 `, context)
 }
