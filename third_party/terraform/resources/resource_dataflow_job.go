@@ -66,13 +66,13 @@ func resourceDataflowJob() *schema.Resource {
 			"template_gcs_path": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: `The GCS path to the Dataflow job template.`,
+				Description: `The Google Cloud Storage path to the Dataflow job template.`,
 			},
 
 			"temp_gcs_location": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: `A writeable location on GCS for the Dataflow job to dump its temporary data.`,
+				Description: `A writeable location on Google Cloud Storage for the Dataflow job to dump its temporary data.`,
 			},
 
 			"zone": {
@@ -515,10 +515,7 @@ func resourceDataflowJobLaunchTemplate(config *Config, project, region, userAgen
 }
 
 func resourceDataflowJobSetupEnv(d *schema.ResourceData, config *Config) (dataflow.RuntimeEnvironment, error) {
-	zone, err := getZone(d, config)
-	if err != nil {
-		return dataflow.RuntimeEnvironment{}, err
-	}
+	zone, _ := getZone(d, config)
 
 	labels := expandStringMap(d, "labels")
 
