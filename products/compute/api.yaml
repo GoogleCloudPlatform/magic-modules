@@ -1123,6 +1123,12 @@ objects:
         description: |
           Headers that the HTTP/S load balancer should add to proxied
           requests.
+      - !ruby/object:Api::Type::Array
+        name: 'customResponseHeaders'
+        item_type: Api::Type::String
+        description: |
+          Headers that the HTTP/S load balancer should add to proxied
+          responses.
       - !ruby/object:Api::Type::Fingerprint
         name: 'fingerprint'
         output: true
