@@ -14,6 +14,10 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Topic: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      note: |
+        You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding 
+        by using the `google_project_service_identity` resource.
     # PubSub resources don't have operations but are negatively cached
     # and eventually consistent.
     # Because some users check whether the PubSub resource exists prior
@@ -111,6 +115,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
         * `path`: Path of the subscription in the format `projects/{project}/subscriptions/{name}`
+      note: |
+        You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding 
+        by using the `google_project_service_identity` resource.
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/shortname_to_url.go.erb
