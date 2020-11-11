@@ -45,7 +45,7 @@ func GetProjectOrgPolicyApiObject(d TerraformResourceData, config *Config) (OrgP
 	return policy, nil
 }
 
-func expandListOrganizationPolicy(configured []interface{}) (*Policy_ListPolicy, error) {
+func expandListOrganizationPolicy(configured []interface{}) (*ListPolicy, error) {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil, nil
 	}
@@ -83,8 +83,8 @@ func expandListOrganizationPolicy(configured []interface{}) (*Policy_ListPolicy,
 	}
 
 	listPolicy := configured[0].(map[string]interface{})
-	return &Policy_ListPolicy{
-		AllValues:         Policy_ListPolicy_AllValues(allValues),
+	return &ListPolicy{
+		AllValues:         ListPolicyAllValues(allValues),
 		AllowedValues:     allowedValues,
 		DeniedValues:      deniedValues,
 		SuggestedValue:    listPolicy["suggested_value"].(string),
@@ -92,7 +92,7 @@ func expandListOrganizationPolicy(configured []interface{}) (*Policy_ListPolicy,
 	}, nil
 }
 
-func expandRestoreOrganizationPolicy(configured []interface{}) (*Policy_RestoreDefault, error) {
+func expandRestoreOrganizationPolicy(configured []interface{}) (*RestoreDefault, error) {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil, nil
 	}
@@ -101,19 +101,19 @@ func expandRestoreOrganizationPolicy(configured []interface{}) (*Policy_RestoreD
 	defaultValue := restoreDefaultMap["default"].(bool)
 
 	if defaultValue {
-		return &Policy_RestoreDefault{}, nil
+		return &RestoreDefault{}, nil
 	}
 
-	return &Policy_RestoreDefault{}, fmt.Errorf("Invalid value for restore_policy. Expecting default = true")
+	return &RestoreDefault{}, fmt.Errorf("Invalid value for restore_policy. Expecting default = true")
 }
 
-func expandBooleanOrganizationPolicy(configured []interface{}) *Policy_BooleanPolicy {
+func expandBooleanOrganizationPolicy(configured []interface{}) *BooleanPolicy {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil
 	}
 
 	booleanPolicy := configured[0].(map[string]interface{})
-	return &Policy_BooleanPolicy{
+	return &BooleanPolicy{
 		Enforced: booleanPolicy["enforced"].(bool),
 	}
 }

@@ -43,11 +43,11 @@ type IAMBinding struct {
 }
 
 type OrgPolicy struct {
-	Constraint     string                 `json:"constraint,omitempty"`
-	ListPolicy     *Policy_ListPolicy     `json:"listPolicy"`
-	BooleanPolicy  *Policy_BooleanPolicy  `json:"booleanPolicy"`
-	RestoreDefault *Policy_RestoreDefault `json:"restoreDefault"`
-	UpdateTime     *Timestamp             `json:"update_time,omitempty"`
+	Constraint     string          `json:"constraint,omitempty"`
+	ListPolicy     *ListPolicy     `json:"listPolicy"`
+	BooleanPolicy  *BooleanPolicy  `json:"booleanPolicy"`
+	RestoreDefault *RestoreDefault `json:"restoreDefault"`
+	UpdateTime     *Timestamp      `json:"update_time,omitempty"`
 }
 
 type Timestamp struct {
@@ -55,21 +55,21 @@ type Timestamp struct {
 	Nanos   int64 `json:"nanos,omitempty"`
 }
 
-type Policy_ListPolicy_AllValues int32
+type ListPolicyAllValues int32
 
-type Policy_ListPolicy struct {
-	AllowedValues     []string                    `json:"allowed_values,omitempty"`
-	DeniedValues      []string                    `json:"denied_values,omitempty"`
-	AllValues         Policy_ListPolicy_AllValues `json:"all_values,omitempty"`
-	SuggestedValue    string                      `json:"suggested_value,omitempty"`
-	InheritFromParent bool                        `json:"inherit_from_parent,omitempty"`
+type ListPolicy struct {
+	AllowedValues     []string            `json:"allowed_values,omitempty"`
+	DeniedValues      []string            `json:"denied_values,omitempty"`
+	AllValues         ListPolicyAllValues `json:"all_values,omitempty"`
+	SuggestedValue    string              `json:"suggested_value,omitempty"`
+	InheritFromParent bool                `json:"inherit_from_parent,omitempty"`
 }
 
-type Policy_BooleanPolicy struct {
+type BooleanPolicy struct {
 	Enforced bool `json:"enforced,omitempty"`
 }
 
-type Policy_RestoreDefault struct {
+type RestoreDefault struct {
 }
 
 // assetName templates an asset.name by looking up and replacing all instances
