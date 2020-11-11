@@ -83,7 +83,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "pubsub_subscription_push"
         primary_resource_id: "example"
-        skip_test: true
         vars:
           topic_name: "example-topic"
           subscription_name: "example-subscription"
@@ -127,7 +126,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       retryPolicy.minimumBackoff: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       retryPolicy.maximumBackoff: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true  
+        default_from_api: true
+      pushConfig.attributes: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'ignoreMissingKeyInMap("x-goog-version")'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/subscription.go.erb
       decoder: templates/terraform/decoders/pubsub_subscription.erb

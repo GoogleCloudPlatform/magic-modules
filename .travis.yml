@@ -1,7 +1,0 @@
-language: ruby # ruby version defined in .ruby-version will be used
-
-script:
-- bundle exec rake test
-
-git:
-  submodules: false
