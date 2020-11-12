@@ -54,7 +54,7 @@ func TestAccBigtableAppProfile_ignoreWarnings(t *testing.T) {
 		CheckDestroy: testAccCheckBigtableAppProfileDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigtableAppProfile_update1(instanceName),
+				Config: testAccBigtableAppProfile_warningsProduced(instanceName),
 			},
 			{
 				ResourceName:            "google_bigtable_app_profile.ap",
