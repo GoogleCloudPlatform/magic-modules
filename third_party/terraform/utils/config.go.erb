@@ -27,6 +27,8 @@ import (
 	"google.golang.org/api/cloudbuild/v1"
 <% unless version == 'ga' -%>
 	cloudidentity "google.golang.org/api/cloudidentity/v1beta1"
+<% else -%>
+	"google.golang.org/api/cloudidentity/v1"
 <% end -%>
 	"google.golang.org/api/cloudfunctions/v1"
 	"google.golang.org/api/cloudiot/v1"
@@ -38,7 +40,7 @@ import (
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/container/v1"
 	containerBeta "google.golang.org/api/container/v1beta1"
-	"google.golang.org/api/dataflow/v1b3"
+	dataflow "google.golang.org/api/dataflow/v1b3"
 	"google.golang.org/api/dataproc/v1"
 	dataprocBeta "google.golang.org/api/dataproc/v1beta2"
 	"google.golang.org/api/dns/v1"
@@ -49,7 +51,7 @@ import (
 	iamcredentials "google.golang.org/api/iamcredentials/v1"
 	cloudlogging "google.golang.org/api/logging/v2"
 	"google.golang.org/api/pubsub/v1"
-	"google.golang.org/api/runtimeconfig/v1beta1"
+	runtimeconfig "google.golang.org/api/runtimeconfig/v1beta1"
 	"google.golang.org/api/servicemanagement/v1"
 	"google.golang.org/api/servicenetworking/v1"
 	"google.golang.org/api/serviceusage/v1"
@@ -705,7 +707,6 @@ func (c *Config) NewHealthcareClient(userAgent string) *healthcare.Service {
 	return clientHealthcare
 }
 
-<% unless version == 'ga' -%>
 func (c *Config) NewCloudIdentityClient(userAgent string) *cloudidentity.Service {
 	cloudidentityClientBasePath := removeBasePathVersion(c.CloudIdentityBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud CloudIdentity client for path %s", cloudidentityClientBasePath)
@@ -719,7 +720,6 @@ func (c *Config) NewCloudIdentityClient(userAgent string) *cloudidentity.Service
 
 	return clientCloudIdentity
 }
-<% end -%>
 
 func (c *Config) BigTableClientFactory(userAgent string) *BigtableClientFactory {
 	bigtableClientFactory := &BigtableClientFactory{

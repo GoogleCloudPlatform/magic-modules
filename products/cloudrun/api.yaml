@@ -30,7 +30,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/run/docs/mapping-custom-domains'
-      api: 'https://cloud.google.com/run/docs/reference/rest/v1alpha1/projects.locations.domainmappings'
+      api: 'https://cloud.google.com/run/docs/reference/rest/v1/projects.locations.domainmappings'
   description: |-
     Resource to hold the state and status of a user's domain mapping.
   input: true
@@ -211,8 +211,6 @@ objects:
         Is required when creating resources. Name is primarily intended
         for creation idempotence and configuration definition. Cannot be updated.
         More info: http://kubernetes.io/docs/user-guide/identifiers#names
-
-
 
 # Cloud Run Service
 - !ruby/object:Api::Resource

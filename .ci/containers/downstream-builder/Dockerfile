@@ -40,12 +40,6 @@ RUN apt-get install -y git build-essential libbz2-dev libssl-dev libreadline-dev
                         libreadline-dev libsqlite3-dev curl llvm libncurses5-dev libncursesw5-dev \
                         xz-utils tk-dev libffi-dev liblzma-dev python-openssl jq
 
-RUN wget https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/master/Gemfile
-RUN wget https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/master/Gemfile.lock
-RUN bundle install
-RUN rbenv rehash
-RUN rm Gemfile Gemfile.lock
-
 RUN curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
 ENV PATH="/root/.pyenv/bin:${PATH}"
 RUN eval "$(pyenv init -)"
@@ -59,6 +53,12 @@ RUN pip install beautifulsoup4 mistune
 RUN pip3 install black
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
+
+ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/master/Gemfile" Gemfile
+ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/master/Gemfile.lock" Gemfile.lock
+RUN bundle install
+RUN rbenv rehash
+RUN rm Gemfile Gemfile.lock
 
 RUN git config --global user.name "Modular Magician"
 RUN git config --global user.email "magic-modules@google.com"
