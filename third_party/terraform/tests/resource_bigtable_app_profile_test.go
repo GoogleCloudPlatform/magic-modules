@@ -57,7 +57,7 @@ func TestAccBigtableAppProfile_ignoreWarnings(t *testing.T) {
 				Config: testAccBigtableAppProfile_warningsProduced(instanceName),
 			},
 			{
-				ResourceName:            "google_bigtable_app_profile.ap",
+				ResourceName:            "google_bigtable_app_profile.gae-profile1",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"ignore_warnings"},
@@ -184,6 +184,5 @@ func testAccBigtableAppProfile_warningsProduced(instanceName string) string {
 
     ignore_warnings               = true
   }
-}
 `, instanceName, instanceName, instanceName, instanceName, instanceName, instanceName, instanceName)
 }
