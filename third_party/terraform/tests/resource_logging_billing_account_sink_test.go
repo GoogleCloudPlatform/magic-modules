@@ -90,8 +90,6 @@ func TestAccLoggingBillingAccountSink_described(t *testing.T) {
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 	billingAccount := getTestBillingAccountFromEnv(t)
 
-	var sink logging.LogSink
-
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -114,8 +112,6 @@ func TestAccLoggingBillingAccountSink_disabled(t *testing.T) {
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 	billingAccount := getTestBillingAccountFromEnv(t)
-
-	var sink logging.LogSink
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },

@@ -92,8 +92,6 @@ func TestAccLoggingOrganizationSink_described(t *testing.T) {
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 
-	var sink logging.LogSink
-
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -116,8 +114,6 @@ func TestAccLoggingOrganizationSink_disabled(t *testing.T) {
 	org := getTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
-
-	var sink logging.LogSink
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },

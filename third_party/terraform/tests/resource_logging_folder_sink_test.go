@@ -49,8 +49,6 @@ func TestAccLoggingFolderSink_described(t *testing.T) {
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 	folderName := "tf-test-folder-" + randString(t, 10)
 
-	var sink logging.LogSink
-
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -74,8 +72,6 @@ func TestAccLoggingFolderSink_disabled(t *testing.T) {
 	sinkName := "tf-test-sink-" + randString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + randString(t, 10)
 	folderName := "tf-test-folder-" + randString(t, 10)
-
-	var sink logging.LogSink
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
