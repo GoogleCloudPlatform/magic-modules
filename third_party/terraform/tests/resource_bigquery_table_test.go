@@ -1092,7 +1092,7 @@ func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
 		instance_name = google_bigtable_instance.instance.name
 
 		column_family {
-			family = cf-"%{random_suffix}-first"
+			family = "cf-%{random_suffix}-first"
 		}
 
 		column_family {
