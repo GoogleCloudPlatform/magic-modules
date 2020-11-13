@@ -71,8 +71,8 @@ func resourceSqlUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Description: `The deletion policy for the user. Setting ABANDON allows the resource
-				to be abandoned rather than deleted. This is useful for situations where Postgres users that cannot be deleted due
-				existing SQL permissions. Possible values are: "ABANDON".`,
+				to be abandoned rather than deleted. This is useful for Postgres, where users cannot be deleted from the API if they
+				have been granted SQL roles. Possible values are: "ABANDON".`,
 				ValidateFunc: validation.StringInSlice([]string{"ABANDON"}, false),
 			},
 		},
