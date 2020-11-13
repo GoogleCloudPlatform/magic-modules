@@ -191,6 +191,9 @@ func resourceRuntimeconfigVariableParseFullName(fullName string) (project, confi
 // schema.ResourceData. Also returns the full name of the parent. Returns nil, "", err upon error.
 func newRuntimeconfigVariableFromResourceData(d *schema.ResourceData, project string) (variable *runtimeconfig.Variable, parent string, err error) {
 
+	text := d.Get("text")
+	value := d.Get("value")
+
 	// TODO(selmanj) here we assume it's a simple name, not a full name. Should probably support full name as well
 	parent = d.Get("parent").(string)
 	name := d.Get("name").(string)
@@ -201,7 +204,7 @@ func newRuntimeconfigVariableFromResourceData(d *schema.ResourceData, project st
 		Name: fullName,
 	}
 
-	if textSet {
+	if text != "" {
 		variable.Text = text.(string)
 	} else {
 		variable.Value = value.(string)
