@@ -32,7 +32,7 @@ resource "google_access_context_manager_access_level" "<%= ctx[:vars]['access_le
 }
 
 resource "google_access_context_manager_access_policy" "access-policy" {
-  parent = "organizations/123456789"
+  parent = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
   title  = "my policy"
 }
 
