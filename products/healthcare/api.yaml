@@ -572,7 +572,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
-          The last part of the ConsentStore name, for example:
+          The name of this ConsentStore, for example:
           "consent1"
         required: true
         input: true
