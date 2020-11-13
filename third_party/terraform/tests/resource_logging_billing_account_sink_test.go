@@ -99,10 +99,6 @@ func TestAccLoggingBillingAccountSink_described(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingBillingAccountSink_described(sinkName, bucketName, billingAccount),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLoggingBillingAccountSinkExists(t, "google_logging_billing_account_sink.described", &sink),
-					testAccCheckLoggingBillingAccountSink(&sink, "google_logging_billing_account_sink.described"),
-				),
 			}, {
 				ResourceName:      "google_logging_billing_account_sink.described",
 				ImportState:       true,
@@ -128,10 +124,6 @@ func TestAccLoggingBillingAccountSink_disabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingBillingAccountSink_disabled(sinkName, bucketName, billingAccount),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLoggingBillingAccountSinkExists(t, "google_logging_billing_account_sink.disabled", &sink),
-					testAccCheckLoggingBillingAccountSink(&sink, "google_logging_billing_account_sink.disabled"),
-				),
 			}, {
 				ResourceName:      "google_logging_billing_account_sink.disabled",
 				ImportState:       true,
@@ -283,6 +275,7 @@ func testAccLoggingBillingAccountSink_described(name, bucketName, billingAccount
 	return fmt.Sprintf(`
 resource "google_logging_billing_account_sink" "described" {
   name            = "%s"
+  description     = "this is a description"
   billing_account = "%s"
   destination     = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
   filter          = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
@@ -315,6 +308,7 @@ resource "google_logging_billing_account_sink" "update" {
   name            = "%s"
   billing_account = "%s"
   destination     = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
+  disabled         = true
   filter          = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
 
@@ -332,7 +326,7 @@ resource "google_logging_billing_account_sink" "heredoc" {
   destination     = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
   filter          = <<EOS
 
-	logName="projects/%s/logs/compute.googleapis.com%%2Factivity_log"
+  logName="projects/%s/logs/compute.googleapis.com%%2Factivity_log"
 AND severity>=ERROR
 
 

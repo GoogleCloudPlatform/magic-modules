@@ -101,10 +101,6 @@ func TestAccLoggingOrganizationSink_described(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingOrganizationSink_described(sinkName, bucketName, org),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLoggingOrganizationSinkExists(t, "google_logging_organization_sink.described", &sink),
-					testAccCheckLoggingOrganizationSink(&sink, "google_logging_organization_sink.described"),
-				),
 			}, {
 				ResourceName:      "google_logging_organization_sink.described",
 				ImportState:       true,
@@ -130,10 +126,6 @@ func TestAccLoggingOrganizationSink_disabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingOrganizationSink_disabled(sinkName, bucketName, org),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLoggingOrganizationSinkExists(t, "google_logging_organization_sink.disabled", &sink),
-					testAccCheckLoggingOrganizationSink(&sink, "google_logging_organization_sink.disabled"),
-				),
 			}, {
 				ResourceName:      "google_logging_organization_sink.disabled",
 				ImportState:       true,
@@ -353,7 +345,7 @@ resource "google_logging_organization_sink" "heredoc" {
   destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
   filter      = <<EOS
 
-	logName="projects/%s/logs/compute.googleapis.com%%2Factivity_log"
+  logName="projects/%s/logs/compute.googleapis.com%%2Factivity_log"
 AND severity>=ERROR
 
 

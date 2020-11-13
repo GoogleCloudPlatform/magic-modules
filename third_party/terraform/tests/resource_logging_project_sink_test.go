@@ -300,7 +300,7 @@ resource "google_logging_project_sink" "heredoc" {
 
   filter = <<EOS
 
-	logName="projects/%s/logs/compute.googleapis.com%%2Factivity_log"
+  logName="projects/%s/logs/compute.googleapis.com%%2Factivity_log"
 AND severity>=ERROR
 
 
@@ -360,16 +360,16 @@ resource "google_logging_project_sink" "loggingbucket" {
   project     = "%s"
   destination = "logging.googleapis.com/projects/%s/locations/global/buckets/_Default"
   exclusions {
-		name = "ex1"
-		description = "test"
-		filter = "resource.type = k8s_container"
-	}
+    name = "ex1"
+    description = "test"
+    filter = "resource.type = k8s_container"
+  }
 
-	exclusions {
-		name = "ex2"
-		description = "test-2"
-		filter = "resource.type = k8s_container"
-	}
+  exclusions {
+    name = "ex2"
+    description = "test-2"
+    filter = "resource.type = k8s_container"
+  }
 
   unique_writer_identity = true
 }
