@@ -5,7 +5,11 @@ if err != nil {
  	return nil, err
 }
 
+<% unless compiler == "terraformobjectlibrary-codegen" -%>
 userAgent, err := generateUserAgentString(d, config.userAgent)
+<% else %>
+userAgent, err := generateUserAgentString(d.(*schema.ResourceData), config.userAgent)
+<% end -%>
 if err != nil {
 	return nil, err
 }
