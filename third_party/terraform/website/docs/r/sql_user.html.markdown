@@ -54,10 +54,10 @@ The following arguments are supported:
     instances this is a Required field.
 
 * `deletion_policy` - (Optional) The deletion policy for the user.
-    Setting ABANDON allows the resource to be abandoned rather than deleted. This is useful
+    Setting `ABANDON` allows the resource to be abandoned rather than deleted. This is useful
     for Postgres, where users cannot be deleted from the API if they have been granted SQL roles.
     
-    Possible values are: "ABANDON".
+    Possible values are: `ABANDON`.
 
 - - -
 
