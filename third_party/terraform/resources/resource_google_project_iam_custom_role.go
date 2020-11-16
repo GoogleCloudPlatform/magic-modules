@@ -230,7 +230,7 @@ func resourceGoogleProjectIamCustomRoleImport(d *schema.ResourceData, meta inter
 	config := meta.(*Config)
 	if err := parseImportId([]string{
 		"projects/(?P<project>[^/]+)/roles/(?P<role_id>[^/]+)",
-		"(?P<project>[^/]+)(?P<role_id>[^/]+)",
+		"(?P<project>[^/]+)/(?P<role_id>[^/]+)",
 		"(?P<role_id>[^/]+)",
 	}, d, config); err != nil {
 		return nil, err
