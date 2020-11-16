@@ -843,6 +843,9 @@ func resourceStorageBucketStateImporter(d *schema.ResourceData, meta interface{}
 }
 
 func expandCors(configured []interface{}) []*storage.BucketCors {
+	if len(configured) == 0 {
+		return nil
+	}
 	corsRules := make([]*storage.BucketCors, 0, len(configured))
 	for _, raw := range configured {
 		data := raw.(map[string]interface{})
