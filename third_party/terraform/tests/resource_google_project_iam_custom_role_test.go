@@ -28,6 +28,12 @@ func TestAccProjectIamCustomRole_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
+				ResourceName:      "google_project_iam_custom_role.foo",
+				ImportStateId:     roleId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccCheckGoogleProjectIamCustomRole_update(roleId),
 			},
 			{
