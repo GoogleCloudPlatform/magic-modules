@@ -449,9 +449,9 @@ objects:
                     Source URL
       - !ruby/object:Api::Type::NestedObject
         name: 'entrypoint'
+        required: true
         description: |
           The entrypoint for the application.
-        required: false
         properties:
           - !ruby/object:Api::Type::String
             name: 'shell'
@@ -1145,6 +1145,7 @@ objects:
             default_value: false
       - !ruby/object:Api::Type::NestedObject
         name: 'entrypoint'
+        required: true
         description: |
           The entrypoint for the application.
         properties:
