@@ -2927,10 +2927,10 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 
 	if maintenanceExclusions, ok := maintenancePolicy["maintenance_exclusion"]; ok && len(maintenanceExclusions.(*schema.Set).List()) > 0 {
 		for _, me := range maintenanceExclusions.(*schema.Set).List() {
-			mew := me.(map[string]interface{})
-			exclusions[mew["exclusion_name"].(string)] = containerBeta.TimeWindow{
-				StartTime: mew["start_time"].(string),
-				EndTime:   mew["end_time"].(string),
+			exclusion := me.(map[string]interface{})
+			exclusions[exclusion["exclusion_name"].(string)] = containerBeta.TimeWindow{
+				StartTime: exclusion["start_time"].(string),
+				EndTime:   exclusion["end_time"].(string),
 			}
 		}
 	}
@@ -3602,13 +3602,13 @@ func flattenMaintenancePolicy(mp *containerBeta.MaintenancePolicy) []map[string]
 		return nil
 	}
 
-	exclusionWindows := []map[string]interface{}{}
+	exclusions := []map[string]interface{}{}
 	if mp.Window.MaintenanceExclusions != nil {
-		for wname, tw := range mp.Window.MaintenanceExclusions {
-			exclusionWindows = append(exclusionWindows, map[string]interface{}{
-				"start_time":  tw.StartTime,
-				"end_time":    tw.EndTime,
-				"exclusion_name": wname,
+		for wName, window := range mp.Window.MaintenanceExclusions {
+			exclusions = append(exclusions, map[string]interface{}{
+				"start_time":  window.StartTime,
+				"end_time":    window.EndTime,
+				"exclusion_name": wName,
 			})
 		}
 	}
@@ -3622,7 +3622,7 @@ func flattenMaintenancePolicy(mp *containerBeta.MaintenancePolicy) []map[string]
 						"duration":   mp.Window.DailyMaintenanceWindow.Duration,
 					},
 				},
-				"maintenance_exclusion": exclusionWindows,
+				"maintenance_exclusion": exclusions,
 			},
 		}
 	}
@@ -3636,7 +3636,7 @@ func flattenMaintenancePolicy(mp *containerBeta.MaintenancePolicy) []map[string]
 						"recurrence": mp.Window.RecurringWindow.Recurrence,
 					},
 				},
-				"maintenance_exclusion": exclusionWindows,
+				"maintenance_exclusion": exclusions,
 			},
 		}
 	}
