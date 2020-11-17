@@ -42,7 +42,7 @@ The following additional attributes are exported:
 
 ## Import
 
-Bigtable Instances can be imported using any of these accepted formats:
+Billing Subaccounts can be imported using any of these accepted formats:
 
 ```
 $ terraform import google_billing_subaccount.default billingAccounts/{billing_account_id}
