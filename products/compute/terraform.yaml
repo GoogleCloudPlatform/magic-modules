@@ -2170,7 +2170,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "default"
         # Random provider
         skip_vcr: true
-        min_version: beta
     description: |
       {{description}}
       For a resource where you provide the key, see the

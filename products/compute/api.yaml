@@ -13241,7 +13241,6 @@ objects:
     # GCP resource as the preceding certificate object.
     name: 'ManagedSslCertificate'
     kind: 'compute#sslCertificate'
-    min_version: beta
     base_url: projects/{{project}}/global/sslCertificates
     collection_url_key: 'items'
     references: !ruby/object:Api::Resource::ReferenceLinks
