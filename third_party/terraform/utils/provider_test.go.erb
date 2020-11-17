@@ -64,7 +64,6 @@ var orgEnvVars = []string{
 	"GOOGLE_ORG",
 }
 
-<% unless version == 'ga' -%>
 var custIdEnvVars = []string{
 	"GOOGLE_CUST_ID",
 }
@@ -72,7 +71,6 @@ var custIdEnvVars = []string{
 var identityUserEnvVars = []string{
 	"GOOGLE_IDENTITY_USER",
 }
-<% end -%>
 
 var orgEnvDomainVars = []string{
 	"GOOGLE_ORG_DOMAIN",
@@ -535,12 +533,9 @@ func TestAccProviderUserProjectOverride(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProviderUserProjectOverride(pid, pname, org, billing, sa),
-				Check: func(s *terraform.State) error {
-					// The token creator IAM API call returns success long before the policy is
-					// actually usable. Wait a solid 2 minutes to ensure we can use it.
-					time.Sleep(2 * time.Minute)
-					return nil
-				},
+				// The token creator IAM API call returns success long before the policy is
+				// actually usable. Wait a solid 2 minutes to ensure we can use it.
+				Check: sleepInSecondsForTest(2 * 60),
 			},
 			{
 				Config:      testAccProviderUserProjectOverride_step2(pid, pname, org, billing, sa, false, topicName),
@@ -888,15 +883,15 @@ func getTestZoneFromEnv() string {
 	return multiEnvSearch(zoneEnvVars)
 }
 
-<% unless version == 'ga' -%>
 func getTestCustIdFromEnv(t *testing.T) string {
+	skipIfEnvNotSet(t, custIdEnvVars...)
 	return multiEnvSearch(custIdEnvVars)
 }
 
 func getTestIdentityUserFromEnv(t *testing.T) string {
+	skipIfEnvNotSet(t, identityUserEnvVars...)
 	return multiEnvSearch(identityUserEnvVars)
 }
-<% end -%>
 
 // Firestore can't be enabled at the same time as Datastore, so we need a new
 // project to manage it until we can enable Firestore programmatically.
@@ -945,5 +940,12 @@ func multiEnvSearch(ks []string) string {
 func skipIfVcr(t *testing.T) {
 	if isVcrEnabled() {
 		t.Skipf("VCR enabled, skipping test: %s", t.Name())
+	}
+}
+
+func sleepInSecondsForTest(t int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		time.Sleep(time.Duration(t) * time.Second)
+		return nil
 	}
 }

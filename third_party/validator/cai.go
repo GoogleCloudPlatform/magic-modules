@@ -14,6 +14,7 @@ type Asset struct {
 	Type      string         `json:"asset_type"`
 	Resource  *AssetResource `json:"resource,omitempty"`
 	IAMPolicy *IAMPolicy     `json:"iam_policy,omitempty"`
+	OrgPolicy []*OrgPolicy   `json:"org_policy,omitempty"`
 }
 
 // AssetResource is the Asset's Resource field.
@@ -39,6 +40,36 @@ type IAMPolicy struct {
 type IAMBinding struct {
 	Role    string   `json:"role"`
 	Members []string `json:"members"`
+}
+
+type OrgPolicy struct {
+	Constraint     string          `json:"constraint,omitempty"`
+	ListPolicy     *ListPolicy     `json:"listPolicy"`
+	BooleanPolicy  *BooleanPolicy  `json:"booleanPolicy"`
+	RestoreDefault *RestoreDefault `json:"restoreDefault"`
+	UpdateTime     *Timestamp      `json:"update_time,omitempty"`
+}
+
+type Timestamp struct {
+	Seconds int64 `json:"seconds,omitempty"`
+	Nanos   int64 `json:"nanos,omitempty"`
+}
+
+type ListPolicyAllValues int32
+
+type ListPolicy struct {
+	AllowedValues     []string            `json:"allowed_values,omitempty"`
+	DeniedValues      []string            `json:"denied_values,omitempty"`
+	AllValues         ListPolicyAllValues `json:"all_values,omitempty"`
+	SuggestedValue    string              `json:"suggested_value,omitempty"`
+	InheritFromParent bool                `json:"inherit_from_parent,omitempty"`
+}
+
+type BooleanPolicy struct {
+	Enforced bool `json:"enforced,omitempty"`
+}
+
+type RestoreDefault struct {
 }
 
 // assetName templates an asset.name by looking up and replacing all instances

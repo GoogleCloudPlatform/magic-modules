@@ -344,6 +344,36 @@ objects:
                 How long back autoscaling should look when computing recommendations
                 to include directives regarding slower scale down, as described above.
           - !ruby/object:Api::Type::NestedObject
+            name: 'scaleInControl'
+            at_least_one_of:
+             - scale_in_control.0.max_scaled_in_replicas
+             - scale_in_control.0.time_window_sec
+            description: |
+              Defines scale in controls to reduce the risk of response latency
+              and outages due to abrupt scale-in events
+            properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'maxScaledInReplicas'
+              at_least_one_of:
+              - scale_in_control.0.max_scaled_in_replicas.0.fixed
+              - scale_in_control.0.max_scaled_in_replicas.0.percent
+              properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'fixed'
+                description: |
+                  Specifies a fixed number of VM instances. This must be a positive
+                  integer.
+              - !ruby/object:Api::Type::Integer
+                name: 'percent'
+                description: |
+                  Specifies a percentage of instances between 0 to 100%, inclusive.
+                  For example, specify 80 for 80%.
+            - !ruby/object:Api::Type::Integer
+              name: 'timeWindowSec'
+              description: |
+                How long back autoscaling should look when computing recommendations
+                to include directives regarding slower scale down, as described above.
+          - !ruby/object:Api::Type::NestedObject
             name: 'cpuUtilization'
             description: |
               Defines the CPU utilization policy that allows the autoscaler to
@@ -1093,6 +1123,12 @@ objects:
         description: |
           Headers that the HTTP/S load balancer should add to proxied
           requests.
+      - !ruby/object:Api::Type::Array
+        name: 'customResponseHeaders'
+        item_type: Api::Type::String
+        description: |
+          Headers that the HTTP/S load balancer should add to proxied
+          responses.
       - !ruby/object:Api::Type::Fingerprint
         name: 'fingerprint'
         output: true
@@ -4124,6 +4160,10 @@ objects:
       continue to poll unhealthy instances. If an instance later responds
       successfully to some number of consecutive probes, it is marked
       healthy again and can receive new connections.
+
+      ~>**NOTE**: Legacy HTTP(S) health checks must be used for target pool-based network
+      load balancers. See the [official guide](https://cloud.google.com/load-balancing/docs/health-check-concepts#selecting_hc)
+      for choosing a type of health check.
     async: !ruby/object:Api::OpAsync
       operation: !ruby/object:Api::OpAsync::Operation
         kind: 'compute#operation'
@@ -6970,7 +7010,6 @@ objects:
           An optional description of this resource.
       - !ruby/object:Api::Type::Enum
         name: 'bandwidth'
-        input: true
         description: |
           Provisioned bandwidth capacity for the interconnect attachment.
           For attachments of type DEDICATED, the user can set the bandwidth.
@@ -8567,6 +8606,7 @@ objects:
         required: true
       - !ruby/object:Api::Type::NestedObject
         name: network
+        input: true
         description: |
             Specifies the mirrored VPC network. Only packets in this network
             will be mirrored. All mirrored VMs should have a NIC in the given
@@ -8578,6 +8618,7 @@ objects:
             resource: 'Network'
             imports: 'selfLink'
             required: true
+            input: true
         required: true
       - !ruby/object:Api::Type::Integer
         name: priority
@@ -9214,6 +9255,36 @@ objects:
               at_least_one_of:
               - scale_down_control.0.max_scaled_down_replicas.0.fixed
               - scale_down_control.0.max_scaled_down_replicas.0.percent
+              properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'fixed'
+                description: |
+                  Specifies a fixed number of VM instances. This must be a positive
+                  integer.
+              - !ruby/object:Api::Type::Integer
+                name: 'percent'
+                description: |
+                  Specifies a percentage of instances between 0 to 100%, inclusive.
+                  For example, specify 80 for 80%.
+            - !ruby/object:Api::Type::Integer
+              name: 'timeWindowSec'
+              description: |
+                How long back autoscaling should look when computing recommendations
+                to include directives regarding slower scale down, as described above.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'scaleInControl'
+            at_least_one_of:
+             - scale_in_control.0.max_scaled_in_replicas
+             - scale_in_control.0.time_window_sec
+            description: |
+              Defines scale in controls to reduce the risk of response latency
+              and outages due to abrupt scale-in events
+            properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'maxScaledInReplicas'
+              at_least_one_of:
+              - scale_in_control.0.max_scaled_in_replicas.0.fixed
+              - scale_in_control.0.max_scaled_in_replicas.0.percent
               properties:
               - !ruby/object:Api::Type::Integer
                 name: 'fixed'
@@ -13793,6 +13864,11 @@ objects:
           access Google APIs and services by using Private Google Access.
         update_verb: :POST
         update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess'
+      - !ruby/object:Api::Type::String
+        name: 'privateIpv6GoogleAccess'
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        description: The private IPv6 google access type for the VMs in this subnet. 
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
         resource: 'Region'
@@ -13881,6 +13957,7 @@ objects:
             description: |
               Export filter used to define which VPC flow logs should be logged, as as CEL expression. See
               https://cloud.google.com/vpc/docs/flow-logs#filtering for details on how to format this field.
+              The default value is 'true', which evaluates to include everything.
             default_value: "true"
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
@@ -14914,7 +14991,7 @@ objects:
               name: 'id'
               send_empty_value: true
               description: |
-                The numberic ID for this interface. Allowed values are based on the redundancy type
+                The numeric ID for this interface. Allowed values are based on the redundancy type
                 of this external VPN gateway
                 * `0 - SINGLE_IP_INTERNALLY_REDUNDANT`
                 * `0, 1 - TWO_IPS_REDUNDANCY`

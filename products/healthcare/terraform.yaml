@@ -106,14 +106,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           pubsub_topic: "hl7-v2-notifications"
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_hl7_v2_store_parser_config"
-        min_version: beta
+        min_version: "beta"
         primary_resource_id: "store"
         vars:
           dataset_name: "example-dataset"
           hl7_v2_store_name: "example-hl7-v2-store"
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_hl7_v2_store_unschematized"
-        min_version: beta
+        min_version: "beta"
         primary_resource_id: "store"
         vars:
           dataset_name: "example-dataset"
@@ -132,6 +132,35 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
       custom_import: templates/terraform/custom_import/healthcare_hl7_v2_store.go.erb
+  ConsentStore: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{dataset}}/consentStores/{{name}}"
+    import_format: ["{{dataset}}/consentStores/{{name}}", "{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "healthcare_consent_store_basic"
+        min_version: "beta"
+        primary_resource_id: "my-consent"
+        vars:
+          dataset_id: "my-dataset"
+          consent_id: "my-consent-store"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "healthcare_consent_store_full"
+        min_version: "beta"
+        primary_resource_id: "my-consent"
+        vars:
+          dataset_id: "my-dataset"
+          consent_id: "my-consent-store"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "healthcare_consent_store_iam"
+        min_version: "beta"
+        primary_resource_id: "my-consent"
+        vars:
+          dataset_id: "my-dataset"
+          account_id: "my-account"
+          consent_id: "my-consent-store"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

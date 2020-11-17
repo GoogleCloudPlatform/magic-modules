@@ -735,7 +735,6 @@ objects:
             name: 'enabled'
             description: If enabled, all container images will be validated by Binary Authorization.
       - !ruby/object:Api::Type::NestedObject
-        min_version: beta
         name: 'releaseChannel'
         description: |
           ReleaseChannel indicates which release channel a cluster is subscribed to.
@@ -761,8 +760,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'networkConfig'
         description: |
-          ReleaseChannel indicates which release channel a cluster is subscribed to.
-          Release channels are arranged in order of risk and frequency of updates.
+          Network configurations
         properties:
           - !ruby/object:Api::Type::Boolean
             name: 'enableIntraNodeVisibility'

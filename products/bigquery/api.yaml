@@ -374,7 +374,6 @@ objects:
               A-Z), numbers (0-9), or underscores (_). The maximum length
               is 1,024 characters.
             required: true
-
   - !ruby/object:Api::Resource
     name: 'Job'
     kind: 'bigquery#job'
@@ -384,6 +383,10 @@ objects:
     description: |
       Jobs are actions that BigQuery runs on your behalf to load data, export data, query data, or copy data.
       Once a BigQuery job is created, it cannot be changed or deleted.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'BigQuery Jobs Intro': 'https://cloud.google.com/bigquery/docs/jobs-overview'
+      api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs'
     properties:
       - !ruby/object:Api::Type::String
         name: 'id'
@@ -1254,6 +1257,7 @@ objects:
               - :AVRO
               - :DATASTORE_BACKUP
               - :BIGTABLE
+              - :ORC
           # TODO: Investigate if this is feasible as a ResourceRef
           # This is a very complicated ResourceRef (one-to-many, where the many are cross-product).
           - !ruby/object:Api::Type::Array

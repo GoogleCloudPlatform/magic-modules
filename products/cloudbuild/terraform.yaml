@@ -15,6 +15,9 @@
 legacy_name: 'cloudbuild'
 overrides: !ruby/object:Overrides::ResourceOverrides
   Trigger: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      note: |
+        You can retrieve the email of the Cloud Build Service Account used in jobs by using the `google_project_service_identity` resource.
     # import by default only works with old-style self links ending in a name
     import_format: ["projects/{{project}}/triggers/{{trigger_id}}"]
     id_format: 'projects/{{project}}/triggers/{{trigger_id}}'

@@ -41,7 +41,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Automating builds using build triggers': 'https://cloud.google.com/cloud-build/docs/running-builds/automate-builds'
-      api: 'https://cloud.google.com/cloud-build/docs/api/reference/rest/'
+      api: 'https://cloud.google.com/cloud-build/docs/api/reference/rest/v1/projects.triggers'
     description: |
       Configuration for an automated build in response to source repository changes.
     properties:

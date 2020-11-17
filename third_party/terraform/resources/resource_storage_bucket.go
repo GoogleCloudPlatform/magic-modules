@@ -87,7 +87,7 @@ func resourceStorageBucket() *schema.Resource {
 				StateFunc: func(s interface{}) string {
 					return strings.ToUpper(s.(string))
 				},
-				Description: `The GCS location`,
+				Description: `The Google Cloud Storage location`,
 			},
 
 			"project": {
@@ -312,7 +312,7 @@ func resourceStorageBucket() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
-							Description: `The object prefix for log objects. If it's not provided, by default GCS sets this to this bucket's name.`,
+							Description: `The object prefix for log objects. If it's not provided, by default Google Cloud Storage sets this to this bucket's name.`,
 						},
 					},
 				},
@@ -476,7 +476,7 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 
 	sb := &storage.Bucket{}
 
-	if d.HasChange("lifecycle_rule") {
+	if detectLifecycleChange(d) {
 		lifecycle, err := expandStorageBucketLifecycle(d.Get("lifecycle_rule"))
 		if err != nil {
 			return err
@@ -843,6 +843,9 @@ func resourceStorageBucketStateImporter(d *schema.ResourceData, meta interface{}
 }
 
 func expandCors(configured []interface{}) []*storage.BucketCors {
+	if len(configured) == 0 {
+		return nil
+	}
 	corsRules := make([]*storage.BucketCors, 0, len(configured))
 	for _, raw := range configured {
 		data := raw.(map[string]interface{})
@@ -1306,4 +1309,23 @@ func lockRetentionPolicy(bucketsService *storage.BucketsService, bucketName stri
 	}
 
 	return nil
+}
+
+// d.HasChange("lifecycle_rule") always returns true, giving false positives. This function detects changes
+// to the list size or the actions/conditions of rules directly.
+func detectLifecycleChange(d *schema.ResourceData) bool {
+	if d.HasChange("lifecycle_rule.#") {
+		return true
+	}
+
+	if l, ok := d.GetOk("lifecycle_rule"); ok {
+		lifecycleRules := l.([]interface{})
+		for i := range lifecycleRules {
+			if d.HasChange(fmt.Sprintf("lifecycle_rule.%d.action", i)) || d.HasChange(fmt.Sprintf("lifecycle_rule.%d.condition", i)) {
+				return true
+			}
+		}
+	}
+
+	return false
 }
