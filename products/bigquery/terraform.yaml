@@ -99,7 +99,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       role: !ruby/object:Overrides::Terraform::PropertyOverride
         # Bigquery allows for two different formats for specific roles
-        # (IAM vs "primitive" format), but will return the primative role in API
+        # (IAM vs "primitive" format), but will return the primitive role in API
         # responses. We identify this fine-grained resource from a list
         # of DatasetAccess objects by comparing role, and we must use the same
         # format when comparing.

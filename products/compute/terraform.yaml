@@ -2517,7 +2517,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "custom_network"
         vars:
           target_name: "custom-network"
-          instance_name: "cusom-network-target-vm"
+          instance_name: "custom-network-target-vm"
     properties:
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true

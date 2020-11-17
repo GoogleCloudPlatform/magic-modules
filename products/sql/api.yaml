@@ -421,7 +421,7 @@ objects:
           - :FAILED
       - !ruby/object:Api::Type::NestedObject
         name: 'diskEncryptionConfiguration'
-        description: 'Disk encyption settings'
+        description: 'Disk encryption settings'
         properties:
           - !ruby/object:Api::Type::String
             name: 'kmsKeyName'
@@ -429,7 +429,7 @@ objects:
               The KMS key used to encrypt the Cloud SQL instance
       - !ruby/object:Api::Type::NestedObject
         name: 'diskEncryptionStatus'
-        description: 'Disk encyption status'
+        description: 'Disk encryption status'
         properties:
           - !ruby/object:Api::Type::String
             name: 'kmsKeyVersionName'
