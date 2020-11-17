@@ -449,7 +449,7 @@ The `authenticator_groups_config` block supports:
 * `security_group` - (Required) The name of the RBAC security group for use with Google security groups in Kubernetes RBAC. Group name must be in format `gke-security-groups@yourdomain.com`.
 
 The `maintenance_policy` block supports:
-* `daily_maintenance_window` - (Required in GA, Optional in Beta) structure documented below.
+* `daily_maintenance_window` - (Optional) structure documented below.
 * `recurring_window` - (Optional) structure documented below
 * `maintenance_exclusion` - (Optional) structure documented below
 
@@ -508,20 +508,20 @@ Examples:
 ```
 maintenance_policy {
   recurring_window {
-		start_time = "2019-01-01T00:00:00Z"
-		end_time = "2019-01-02T00:00:00Z"
-		recurrence = "FREQ=DAILY"
-	}
-    maintenance_exclusion{
-        exclusion_name = "batch job"
-        start_time = "2019-01-01T00:00:00Z"
-        end_time = "2019-01-02T00:00:00Z"
-    }
-    maintenance_exclusion{
-        exclusion_name = "holiday data load"
-        start_time = "2019-05-01T00:00:00Z"
-        end_time = "2019-05-02T00:00:00Z"
-    }
+    start_time = "2019-01-01T00:00:00Z"
+    end_time = "2019-01-02T00:00:00Z"
+    recurrence = "FREQ=DAILY"
+  }
+  maintenance_exclusion{
+    exclusion_name = "batch job"
+    start_time = "2019-01-01T00:00:00Z"
+    end_time = "2019-01-02T00:00:00Z"
+  }
+  maintenance_exclusion{
+    exclusion_name = "holiday data load"
+    start_time = "2019-05-01T00:00:00Z"
+    end_time = "2019-05-02T00:00:00Z"
+  }
 }
 ```
 
