@@ -9940,8 +9940,8 @@ objects:
                     description: |
                       Specifies changes to request and response headers that need to take effect for
                       the selected backendService. The headerAction specified here are applied before
-                      the matching pathMatchers[].headerAction and after pathMatchers[].routeRules[].
-                      routeAction.weightedBackendService.backendServiceWeightAction[].headerAction
+                      the matching pathMatchers[].headerAction and after pathMatchers[].routeRules[].r
+                      outeAction.weightedBackendService.backendServiceWeightAction[].headerAction
                     properties:
                       - !ruby/object:Api::Type::Array
                         name: 'requestHeadersToAdd'
