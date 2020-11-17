@@ -106,6 +106,8 @@ module Provider
                         'third_party/validator/container.go'],
                        ['google/project_service.go',
                         'third_party/validator/project_service.go'],
+                       ['google/monitoring_slo_helper.go',
+                        'third_party/validator/monitoring_slo_helper.go'],
                        ['google/image.go',
                         'third_party/terraform/utils/image.go'],
                        ['google/disk_type.go',
