@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 
@@ -26,6 +27,9 @@ var dataflowTerminalStatesMap = map[string]struct{}{
 	"JOB_STATE_DRAINED":   {},
 }
 
+var subnetRelativeLinkRegex = regexp.MustCompile(`projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/subnetworks/(?P<name>[^/]+)$`)
+var subnetRegionalLinkRegex = regexp.MustCompile(`regions/(?P<region>[^/]+)/subnetworks/(?P<name>[^/]+)$`)
+
 func resourceDataflowJobLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Example Diff: "labels.goog-dataflow-provided-template-version": "word_count" => ""
 	if strings.HasPrefix(k, resourceDataflowJobGoogleProvidedLabelPrefix) && new == "" {
@@ -40,6 +44,23 @@ func resourceDataflowJobLabelDiffSuppress(k, old, new string, d *schema.Resource
 
 	// For other keys, don't suppress diff.
 	return false
+}
+
+func resourceDataflowJobSubnetworkDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// 'old' should always be a self_link ("https://www.googleapis.com/compute/v1/projects/{project}/regions/{region}/subnetworks/{subnetwork_name}")
+	// since 'subnetwork' is converted to a self_link when read from the API.
+	// However, just in case, check if 'old' is not in the expected format.
+	if !subnetRelativeLinkRegex.MatchString(old) {
+		return false
+	}
+	if subnetRegionalLinkRegex.MatchString(new) && !subnetRelativeLinkRegex.MatchString(new) {
+		// 'new' ends with a regional link ("regions/{region}/subnetworks/{subnetwork_name}"),
+		// but not a relative link ("projects/{project}/regions/{region}/subnetworks/{subnetwork_name}")
+		oldMatch := subnetRegionalLinkRegex.FindString(old)
+		newMatch := subnetRegionalLinkRegex.FindString(new)
+		return oldMatch == newMatch
+	}
+	return compareSelfLinkOrResourceName(k, old, new, d)
 }
 
 func resourceDataflowJob() *schema.Resource {
@@ -161,8 +182,8 @@ func resourceDataflowJob() *schema.Resource {
 			"subnetwork": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				DiffSuppressFunc: compareSelfLinkOrResourceName,
-				Description:      `The subnetwork to which VMs will be assigned. Should be of the form "regions/REGION/subnetworks/SUBNETWORK".`,
+				DiffSuppressFunc: resourceDataflowJobSubnetworkDiffSuppress,
+				Description:      `The subnetwork to which VMs will be assigned. This can be one of: the subnetwork's self_link, "projects/{project}/regions/{region}/subnetworks/{subnetwork}", or "regions/{region}/subnetworks/{subnetwork}".`,
 			},
 
 			"machine_type": {
@@ -325,6 +346,15 @@ func resourceDataflowJobRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	if err := d.Set("additional_experiments", optionsMap["experiments"]); err != nil {
 		return fmt.Errorf("Error setting additional_experiments: %s", err)
+	}
+	if v, ok := optionsMap["subnetwork"]; ok && v != nil {
+		subnetwork, err := toSubnetworkSelfLink(v.(string), d, config)
+		if err != nil {
+			return err
+		}
+		if err := d.Set("subnetwork", subnetwork); err != nil {
+			return fmt.Errorf("Error setting subnetwork: %s", err)
+		}
 	}
 
 	if _, ok := dataflowTerminalStatesMap[job.CurrentState]; ok {
@@ -517,6 +547,11 @@ func resourceDataflowJobLaunchTemplate(config *Config, project, region, userAgen
 func resourceDataflowJobSetupEnv(d *schema.ResourceData, config *Config) (dataflow.RuntimeEnvironment, error) {
 	zone, _ := getZone(d, config)
 
+	subnetwork, err := toSubnetworkSelfLink(d.Get("subnetwork").(string), d, config)
+	if err != nil {
+		return dataflow.RuntimeEnvironment{}, err
+	}
+
 	labels := expandStringMap(d, "labels")
 
 	additionalExperiments := convertStringSet(d.Get("additional_experiments").(*schema.Set))
@@ -525,7 +560,7 @@ func resourceDataflowJobSetupEnv(d *schema.ResourceData, config *Config) (datafl
 		MaxWorkers:            int64(d.Get("max_workers").(int)),
 		Network:               d.Get("network").(string),
 		ServiceAccountEmail:   d.Get("service_account_email").(string),
-		Subnetwork:            d.Get("subnetwork").(string),
+		Subnetwork:            subnetwork,
 		TempLocation:          d.Get("temp_gcs_location").(string),
 		MachineType:           d.Get("machine_type").(string),
 		IpConfiguration:       d.Get("ip_configuration").(string),
@@ -615,4 +650,30 @@ func waitForDataflowJobToBeUpdated(d *schema.ResourceData, config *Config, repla
 			return nil
 		}
 	})
+}
+
+// toSubnetworkSelfLink converts the given string to a subnetwork self-link of the format:
+//   https://www.googleapis.com/compute/v1/projects/{project}/regions/{region}/subnetworks/{subnetwork_name}
+// The following input formats are supported:
+// - https://www.googleapis.com/compute/ANY_VERSION/projects/{project}/regions/{region}/subnetworks/{subnetwork_name}
+// - projects/{project}/regions/{region}/subnetworks/{subnetwork_name}
+// - regions/{region}/subnetworks/{subnetwork_name}
+// - {subnetwork_name}
+// - "" (empty string). toSubnetworkSelfLink will return an empty string in this case.
+func toSubnetworkSelfLink(subnetwork string, d *schema.ResourceData, config *Config) (string, error) {
+	fv, err := ParseSubnetworkFieldValue(subnetwork, d, config)
+	if err != nil {
+		return "", err
+	}
+	if fv.RelativeLink() == "" {
+		return "", nil
+	}
+	// Dataflow only respects the legacy compute base path with domain
+	// www.googleapis.com, not compute.googleapis.com
+	legacyComputeBasePath := "https://www.googleapis.com/compute/beta/"
+	url, err := replaceVars(d, config, legacyComputeBasePath+fv.RelativeLink())
+	if err != nil {
+		return "", err
+	}
+	return ConvertSelfLinkToV1(url), nil
 }
