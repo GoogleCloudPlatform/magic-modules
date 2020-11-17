@@ -2,6 +2,22 @@
 
 package google
 
+import (
+<%- # We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
+    # set of imports, which will never guess the major version correctly. -%>
+  "github.com/apparentlymart/go-cidr/cidr"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+  "google.golang.org/api/bigtableadmin/v2"
+)
+
 <%
     resource_name = product_ns + object.name
     properties = object.all_user_properties
