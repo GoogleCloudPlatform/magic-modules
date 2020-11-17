@@ -300,8 +300,8 @@ resource "google_storage_bucket" "log-bucket" {
 func testAccLoggingOrganizationSink_described(sinkName, bucketName, orgId string) string {
 	return fmt.Sprintf(`
 resource "google_logging_organization_sink" "described" {
-  name             = "%s"
-  org_id           = "%s"
+  name        = "%s"
+  org_id      = "%s"
   destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
   description = "this is a description for an organization level logging sink"
@@ -316,8 +316,8 @@ resource "google_storage_bucket" "log-bucket" {
 func testAccLoggingOrganizationSink_disabled(sinkName, bucketName, orgId string) string {
 	return fmt.Sprintf(`
 resource "google_logging_organization_sink" "disabled" {
-  name             = "%s"
-  org_id           = "%s"
+  name        = "%s"
+  org_id      = "%s"
   destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
   disabled    = true
