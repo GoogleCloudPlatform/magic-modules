@@ -23,6 +23,11 @@ func GetProjectOrgPolicyCaiObject(d TerraformResourceData, config *Config) (Asse
 	}
 }
 
+func MergeProjectOrgPolicy(existing, incoming Asset) Asset {
+	existing.OrgPolicy = append(existing.OrgPolicy, incoming.OrgPolicy...)
+	return existing
+}
+
 func GetProjectOrgPolicyApiObject(d TerraformResourceData, config *Config) (OrgPolicy, error) {
 
 	listPolicy, err := expandListOrganizationPolicy(d.Get("list_policy").([]interface{}))
