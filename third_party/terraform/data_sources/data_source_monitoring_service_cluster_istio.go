@@ -4,6 +4,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// No tests are added in this PR as currently there is no TF-supported method that can be used to 
+// enable both services (Cluster Istio and Mesh Istio) in GKE
 func dataSourceMonitoringServiceClusterIstio() *schema.Resource {
 	ciSchema := map[string]*schema.Schema{
 		"location": {
