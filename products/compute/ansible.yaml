@@ -61,6 +61,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionPerInstanceConfig: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  ManagedSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
   Autoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
