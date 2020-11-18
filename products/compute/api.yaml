@@ -562,6 +562,33 @@ objects:
             all responses from this backend had a "Cache-Control: public,
             max-age=[TTL]" header, regardless of any existing Cache-Control
             header. The actual headers served in responses will not be altered.
+        - !ruby/object:Api::Type::Integer
+          name: 'defaultTtl'
+          min_version: beta
+          description: |
+            Specifies the default TTL for cached content served by this origin for responses 
+            that do not have an existing valid TTL (max-age or s-max-age).
+        - !ruby/object:Api::Type::Integer
+          name: 'maxTtl'
+          min_version: beta
+          description: |
+            Specifies the maximum allowed TTL for cached content served by this origin.
+        - !ruby/object:Api::Type::Integer
+          name: 'clientTtl'
+          min_version: beta
+          description: |
+            Specifies the maximum allowed TTL for cached content served by this origin.
+        - !ruby/object:Api::Type::Boolean
+          name: 'negativeCaching'
+          min_version: beta
+          description: |
+            Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects. 
+        - !ruby/object:Api::Type::String
+          name: 'cacheMode'
+          min_version: beta
+          description: |
+            Specifies the cache setting for all responses from this backend. 
+            The possible values are: USE_ORIGIN_HEADERS, FORCE_CACHE_ALL and CACHE_ALL_STATIC
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
