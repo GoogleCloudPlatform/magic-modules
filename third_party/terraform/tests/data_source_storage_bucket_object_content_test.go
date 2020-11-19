@@ -20,7 +20,7 @@ func TestAccDataSourceStorageBucketObjectContent_Basic(t *testing.T) {
 				Config: testAccDataSourceStorageBucketObjectContent_Basic(content, bucket),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_storage_bucket_object_content.default", "content"),
-                                        resource.TestCheckResourceAttr("data.google_storage_bucket_object_content.default", "content", content),
+					resource.TestCheckResourceAttr("data.google_storage_bucket_object_content.default", "content", content),
 				),
 			},
 		},
