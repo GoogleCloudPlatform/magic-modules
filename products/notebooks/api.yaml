@@ -20,7 +20,7 @@ versions:
     base_url: https://notebooks.googleapis.com/v1/
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://notebooks.googleapis.com/v1beta/
+    base_url: https://notebooks.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
