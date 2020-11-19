@@ -16,8 +16,12 @@ name: Notebooks
 display_name: Cloud AI Notebooks
 versions:
   - !ruby/object:Api::Product::Version
+    name: v1
+    base_url: https://notebooks.googleapis.com/v1/
+    default: true
+  - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://notebooks.googleapis.com/v1beta1/
+    base_url: https://notebooks.googleapis.com/v1beta/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -47,7 +51,6 @@ objects:
     name: 'Environment'
     description: |
         A Cloud AI Platform Notebook environment.
-    min_version: beta
     base_url: projects/{{project}}/locations/{{location}}/environments
     create_url: projects/{{project}}/locations/{{location}}/environments?environmentId={{name}}
     self_link: projects/{{project}}/locations/{{location}}/environments/{{name}}
@@ -136,7 +139,6 @@ objects:
     name: 'Instance'
     description: |
         A Cloud AI Platform Notebook instance.
-    min_version: beta
     base_url: projects/{{project}}/locations/{{location}}/instances
     create_url: projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}
     self_link: projects/{{project}}/locations/{{location}}/instances/{{name}}
