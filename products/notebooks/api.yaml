@@ -16,9 +16,8 @@ name: Notebooks
 display_name: Cloud AI Notebooks
 versions:
   - !ruby/object:Api::Product::Version
-    name: v1
+    name: ga
     base_url: https://notebooks.googleapis.com/v1/
-    default: true
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://notebooks.googleapis.com/v1beta/
