@@ -255,6 +255,7 @@ func resourceStorageBucket() *schema.Resource {
 
 			"cors": {
 				Type:     schema.TypeList,
+				Computed: true,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
