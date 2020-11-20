@@ -10,9 +10,9 @@ import (
 )
 
 func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
-    // This resource uses custom retry logic that cannot be sped up without
-    // modifying the actual resource
-    skipIfVcr(t)
+	// This resource uses custom retry logic that cannot be sped up without
+	// modifying the actual resource
+	skipIfVcr(t)
 	t.Parallel()
 
 	randStr := randString(t, 10)
@@ -25,7 +25,7 @@ func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlowFlexTemplateJob_basic(bucket, job),
+				Config: testAccDataflowFlexTemplateJob_basic(bucket, job),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.big_data"),
 				),
@@ -34,8 +34,35 @@ func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
 	})
 }
 
+func TestAccDataflowFlexTemplateJob_withServiceAccount(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	skipIfVcr(t)
+	t.Parallel()
+
+	randStr := randString(t, 10)
+	bucket := "tf-test-dataflow-gcs-" + randStr
+	job := "tf-test-dataflow-job-" + randStr
+	accountId := "tf-test-dataflow-sa" + randStr
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataflowFlexTemplateJob_serviceAccount(bucket, job, accountId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.big_data"),
+					testAccDataflowJobHasServiceAccount(t, "google_dataflow_flex_template_job.big_data", accountId),
+				),
+			},
+		},
+	})
+}
+
 // note: this config creates a job that doesn't actually do anything
-func testAccDataflowFlowFlexTemplateJob_basic(bucket, job string) string {
+func testAccDataflowFlexTemplateJob_basic(bucket, job string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
   name = "%s"
@@ -43,9 +70,9 @@ resource "google_storage_bucket" "temp" {
 }
 
 resource "google_storage_bucket_object" "flex_template" {
-	name   = "flex_template.json"
-	bucket = google_storage_bucket.temp.name
-	content = <<EOF
+  name   = "flex_template.json"
+  bucket = google_storage_bucket.temp.name
+  content = <<EOF
 {
     "image": "my-image",
     "metadata": {
@@ -88,6 +115,83 @@ resource "google_dataflow_flex_template_job" "big_data" {
   }
 }
 `, bucket, job)
+}
+
+// note: this config creates a job that doesn't actually do anything
+func testAccDataflowFlexTemplateJob_serviceAccount(bucket, job, accountId string) string {
+  return fmt.Sprintf(`
+resource "google_storage_bucket" "temp" {
+  name = "%s"
+  force_destroy = true
+}
+
+resource "google_service_account" "dataflow-sa" {
+  account_id   = "%s"
+  display_name = "DataFlow Service Account"
+}
+
+resource "google_storage_bucket_iam_member" "dataflow-gcs" {
+  bucket = google_storage_bucket.temp.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.dataflow-sa.email}"
+}
+
+resource "google_project_iam_member" "dataflow-worker" {
+  role   = "roles/dataflow.worker"
+  member = "serviceAccount:${google_service_account.dataflow-sa.email}"
+}
+
+resource "google_storage_bucket_object" "flex_template" {
+  name   = "flex_template.json"
+  bucket = google_storage_bucket.temp.name
+  content = <<EOF
+{
+    "image": "my-image",
+    "metadata": {
+        "description": "An Apache Beam streaming pipeline that reads JSON encoded messages from Pub/Sub, uses Beam SQL to transform the message data, and writes the results to a BigQuery",
+        "name": "Streaming Beam SQL",
+        "parameters": [
+            {
+                "helpText": "Pub/Sub subscription to read from.",
+                "label": "Pub/Sub input subscription.",
+                "name": "inputSubscription",
+                "regexes": [
+                    "[-_.a-zA-Z0-9]+"
+                ]
+            },
+            {
+                "helpText": "BigQuery table spec to write to, in the form 'project:dataset.table'.",
+                "is_optional": true,
+                "label": "BigQuery output table",
+                "name": "outputTable",
+                "regexes": [
+                    "[^:]+:[^.]+[.].+"
+                ]
+            }
+        ]
+    },
+    "sdkInfo": {
+        "language": "JAVA"
+    }
+}
+EOF
+}
+
+resource "google_dataflow_flex_template_job" "big_data" {
+  name = "%s"
+  container_spec_gcs_path = "${google_storage_bucket.temp.url}/${google_storage_bucket_object.flex_template.name}"
+  on_delete = "cancel"
+  parameters = {
+    inputSubscription = "my-subscription"
+    outputTable  = "my-project:my-dataset.my-table"
+  }
+  service_account_email = google_service_account.dataflow-sa.email
+  depends_on = [
+    google_storage_bucket_iam_member.dataflow-gcs,
+    google_project_iam_member.dataflow-worker
+  ]
+}
+`, bucket, accountId, job)
 }
 
 <% end -%>

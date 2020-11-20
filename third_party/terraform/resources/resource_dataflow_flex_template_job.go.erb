@@ -87,6 +87,12 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
+			"service_account_email": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The Service Account email used to create the job.`,
+			},
 		},
 	}
 }
@@ -109,11 +115,16 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
+	env := dataflow.FlexTemplateRuntimeEnvironment{
+		ServiceAccountEmail: d.Get("service_account_email").(string),
+	}
+
 	request := dataflow.LaunchFlexTemplateRequest{
 		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
 			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
 			JobName:              d.Get("name").(string),
 			Parameters:           expandStringMap(d, "parameters"),
+			Environment:          &env,
 		},
 	}
 
@@ -167,6 +178,9 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	}
 	if err := d.Set("labels", job.Labels); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := d.Set("service_account_email", job.Environment.ServiceAccountEmail); err != nil {
+		return fmt.Errorf("Error setting service_account_email: %s", err)
 	}
 
 	if _, ok := dataflowTerminalStatesMap[job.CurrentState]; ok {
