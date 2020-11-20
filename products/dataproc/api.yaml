@@ -41,7 +41,7 @@ objects:
         input: true
         default_value: global
         description: |
-          The  location where the autoscaling poicy should reside.
+          The  location where the autoscaling policy should reside.
           The default value is `global`.
     properties:
       - !ruby/object:Api::Type::String
@@ -518,7 +518,7 @@ objects:
               - !ruby/object:Api::Type::String
                 name: 'gcePdKmsKeyName'
                 description: |
-                  The Cloud KMS key name to use for PD disk encyption for all instances in the cluster.
+                  The Cloud KMS key name to use for PD disk encryption for all instances in the cluster.
           - !ruby/object:Api::Type::NestedObject
             name: 'securityConfig'
             description: |

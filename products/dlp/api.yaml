@@ -894,7 +894,7 @@ objects:
     update_verb: :PATCH
     update_mask: true
     description: |
-      Allows creation of templates to de-idenfity content.
+      Allows creation of templates to de-identify content.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -1069,7 +1069,7 @@ objects:
                             - !ruby/object:Api::Type::Array
                               name: 'charactersToIgnore'
                               description: |
-                                Characters to skip when doing deidentification of a value. These will be left alone and skipped.
+                                Characters to skip when doing de-identification of a value. These will be left alone and skipped.
                               item_type: !ruby/object:Api::Type::NestedObject
                                 properties:
                                   - !ruby/object:Api::Type::String
