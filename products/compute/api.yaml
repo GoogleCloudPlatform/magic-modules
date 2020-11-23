@@ -552,7 +552,6 @@ objects:
         properties:
         - !ruby/object:Api::Type::Integer
           name: 'signedUrlCacheMaxAgeSec'
-          required: true
           description: |
             Maximum number of seconds the response to a signed URL request will
             be considered fresh. After this time period,
@@ -582,13 +581,44 @@ objects:
           name: 'negativeCaching'
           min_version: beta
           description: |
-            Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects. 
+            Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
+        - !ruby/object:Api::Type::Array
+          name: 'negativeCachingPolicy'
+          min_version: beta
+          description: |
+            Sets a cache TTL for the specified HTTP status code. negativeCaching must be enabled to configure negativeCachingPolicy.
+            Omitting the policy and leaving negativeCaching enabled will use Cloud CDN's default cache TTLs.
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'code'
+                min_version: beta
+                description: |
+                  The HTTP status code to define a TTL against. Only HTTP status codes 300, 301, 308, 404, 405, 410, 421, 451 and 501
+                  can be specified as values, and you cannot specify a status code more than once.
+              - !ruby/object:Api::Type::Integer
+                name: 'ttl'
+                min_version: beta
+                description: |
+                  The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
+                  (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
         - !ruby/object:Api::Type::String
           name: 'cacheMode'
           min_version: beta
           description: |
-            Specifies the cache setting for all responses from this backend. 
+            Specifies the cache setting for all responses from this backend.
             The possible values are: USE_ORIGIN_HEADERS, FORCE_CACHE_ALL and CACHE_ALL_STATIC
+        - !ruby/object:Api::Type::Integer
+          name: 'serveWhileStale'
+          min_version: beta
+          description: |
+            Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache. 
+      - !ruby/object:Api::Type::Array
+        name: 'customResponseHeaders'
+        min_version: beta
+        description: |
+          Headers that the HTTP/S load balancer should add to proxied responses.
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'

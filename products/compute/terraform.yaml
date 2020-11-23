@@ -146,6 +146,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_bucket_name: "image-backend-bucket"
           bucket_name: "image-store-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_full"
+        min_version: beta
+        primary_resource_id: "image_backend_full"
+        skip_docs: true
+        vars:
+          backend_bucket_name: "image-backend-bucket-full"
+          bucket_name: "image-store-bucket-full"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
