@@ -294,6 +294,41 @@ func TestAccComposerEnvironment_withWebServerConfig(t *testing.T) {
 		},
 	})
 }
+
+func TestAccComposerEnvironment_withEncryptionConfig(t *testing.T) {
+	t.Parallel()
+
+        kms := BootstrapKMSKey(t)
+        pid := getTestProjectFromEnv()
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	subnetwork := network + "-1"
+
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComposerEnvironment_encryptionCfg(envName, network, subnetwork),
+			},
+			{
+				ResourceName:      "google_composer_environment.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// This is a terrible clean-up step in order to get destroy to succeed,
+			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
+			// TODO(emilyye): Remove this check if firewall rules bug gets fixed by Composer.
+			{
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+				Config:             testAccComposerEnvironment_encryptionCfgUpdated(envName, network, subnetwork),
+				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
+			},
+		},
+	})
+}
 <% end -%>
 // Checks behavior of node config, including dependencies on Compute resources.
 func TestAccComposerEnvironment_withNodeConfig(t *testing.T) {
@@ -735,6 +770,80 @@ resource "google_compute_subnetwork" "test" {
 `, name, network, subnetwork)
 }
 
+func testAccComposerEnvironment_encryptionCfg(pid, name, kmsKey, network, subnetwork string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_project_iam_member" "kms-project-binding1" {
+  project = data.google_project.project.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:service-${data.google_project.project.number}@cloudcomposer-accounts.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "kms-project-binding2" {
+  project = data.google_project.project.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "kms-project-binding3" {
+  project = data.google_project.project.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "kms-project-binding4" {
+  project = data.google_project.project.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "kms-project-binding5" {
+  project = data.google_project.project.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "iam" {
+  crypto_key_id = google_kms_crypto_key.crypto_key.id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+}
+
+resource "google_composer_environment" "test" {
+	depends_on = [google_project_iam_member.kms-project-binding1]
+
+	name   = "%s"
+	region = "us-central1"
+	config {
+		node_config {
+			network    = google_compute_network.test.self_link
+			subnetwork = google_compute_subnetwork.test.self_link
+			zone       = "us-central1-a"
+		}
+		encryption_config {
+			kms_key_name  = "%s"
+		}
+	}
+}
+
+// use a separate network to avoid conflicts with other tests running in parallel
+// that use the default network/subnet
+resource "google_compute_network" "test" {
+	name                    = "%s"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "test" {
+	name          = "%s"
+	ip_cidr_range = "10.2.0.0/16"
+	region        = "us-central1"
+	network       = google_compute_network.test.self_link
+}
+`, name, kmsKey, network, subnetwork)
+}
 <% end -%>
 func testAccComposerEnvironment_update(name, network, subnetwork string) string {
 	return fmt.Sprintf(`
