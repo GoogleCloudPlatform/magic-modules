@@ -68,8 +68,3 @@ resource "google_dns_record_set" "set" {
   managed_zone = google_dns_managed_zone.zone.name
   rrdatas      = [google_compute_global_forwarding_rule.default.ip_address]
 }
-
-provider "google-beta" {
-  region = "us-central1"
-  zone   = "us-central1-a"
-}
