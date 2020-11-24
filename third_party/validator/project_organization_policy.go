@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"google3/third_party/golang/hashicorp/terraform_plugin_sdk/helper/schema/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func GetProjectOrgPolicyCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
