@@ -1076,7 +1076,7 @@ func testAccBigQueryTableFromSheet(context map[string]interface{}) string {
 func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
 	return Nprintf(`
 	resource "google_bigtable_instance" "instance" {
-		name = "tf_test_bigtable_instance_%{random_suffix}"
+		name = "tf_test_bigtable_inst_%{random_suffix}"
 
 		cluster {
 			cluster_id = "%{random_suffix}"
