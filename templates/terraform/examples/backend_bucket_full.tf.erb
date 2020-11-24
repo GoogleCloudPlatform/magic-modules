@@ -12,7 +12,7 @@ resource "google_compute_backend_bucket" "image_backend" {
     negative_caching = true
   }
   custom_response_headers = [
-    "X-Client-Geo-Location:{client_region},{client_city}"
+    "X-Client-Geo-Location:{client_region},{client_city}",
     "X-Tested-By:Magic-Modules"
   ]
 }
