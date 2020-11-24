@@ -1,23 +1,16 @@
-config := meta.(*Config)
+	config := meta.(*Config)
 
-if err := parseImportId([]string{
-  "projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/taxonomies/(?P<taxonomy>[^/]+)/policyTags/(?P<name>)",
-  "(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<taxonomy>[^/]+)/(?P<name>)"}, d, config); err != nil {
-	return nil, err
-}
+	if err := parseImportId([]string{
+		"(?P<taxonomy>projects/[^/]+/locations/[^/]+/taxonomies/[^/]+)/policyTags/(?P<name>.+)"}, d, config); err != nil {
+		return nil, err
+	}
 
-originalName := d.Get("name").(string)
-originalTaxonomy := d.Get("taxonomy").(string)
-project := d.Get("project").(string)
-location := d.Get("location").(string)
-taxonomy := fmt.Sprintf("projects/%s/locations/%s/taxonomies/%s", project, location, originalTaxonomy)
-name := fmt.Sprintf("%s/policyTags/%s", taxonomy, originalName)
+	originalName := d.Get("name").(string)
+	originalTaxonomy := d.Get("taxonomy").(string)
+	name := fmt.Sprintf("%s/policyTags/%s", originalTaxonomy, originalName)
 
-if err := d.Set("taxonomy", taxonomy); err != nil {
-	return nil, fmt.Errorf("Error setting taxonomy: %s", err)
-}
-if err := d.Set("name", name); err != nil {
-	return nil, fmt.Errorf("Error setting name: %s", err)
-}
-d.SetId(name)
-return []*schema.ResourceData{d}, nil
+	if err := d.Set("name", name); err != nil {
+		return nil, fmt.Errorf("Error setting name: %s", err)
+	}
+	d.SetId(name)
+	return []*schema.ResourceData{d}, nil
