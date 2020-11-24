@@ -1,7 +1,6 @@
 <% autogen_exception -%>
 package google
 
-<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"testing"
@@ -120,4 +119,3 @@ data "google_compute_resource_policy" "%s" {
 }
 `, rsName, randomSuffix, dsName, rsName, rsName)
 }
-<% end -%>
