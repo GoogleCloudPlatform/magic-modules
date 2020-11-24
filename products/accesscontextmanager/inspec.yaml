@@ -21,7 +21,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Inspec::PropertyOverride
         name_from_self_link: true
   AccessLevel: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    base_url: accessPolicies/{{parent}}/accessLevels
+    self_link: accessPolicies/{{parent}}/accessLevels/{{name}}
+    privileged: true
+    properties:
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        name_from_self_link: true
+        description: "Name of the access level"
+      parent: !ruby/object:Overrides::Inspec::PropertyOverride
+        name_from_self_link: true
+        description: "Name of the parent access policy"
   AccessLevels: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   AccessLevelCondition: !ruby/object:Overrides::Inspec::ResourceOverride

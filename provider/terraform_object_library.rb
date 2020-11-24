@@ -61,6 +61,8 @@ module Provider
                            'third_party/terraform/utils/config.go.erb'],
                           ['google/utils.go',
                            'third_party/terraform/utils/utils.go.erb'],
+                          ['google/compute_instance_helpers.go',
+                           'third_party/terraform/utils/compute_instance_helpers.go.erb'],
                           ['google/provider_handwritten_endpoint.go',
                            'third_party/terraform/utils/provider_handwritten_endpoint.go.erb']
                         ],
@@ -98,12 +100,16 @@ module Provider
                         'third_party/validator/organization_iam.go'],
                        ['google/project_iam.go',
                         'third_party/validator/project_iam.go'],
+                       ['google/project_organization_policy.go',
+                        'third_party/validator/project_organization_policy.go'],
                        ['google/folder_iam.go',
                         'third_party/validator/folder_iam.go'],
                        ['google/container.go',
                         'third_party/validator/container.go'],
                        ['google/project_service.go',
                         'third_party/validator/project_service.go'],
+                       ['google/monitoring_slo_helper.go',
+                        'third_party/validator/monitoring_slo_helper.go'],
                        ['google/image.go',
                         'third_party/terraform/utils/image.go'],
                        ['google/disk_type.go',
@@ -124,8 +130,6 @@ module Provider
                         'third_party/terraform/utils/common_operation.go'],
                        ['google/compute_shared_operation.go',
                         'third_party/terraform/utils/compute_shared_operation.go'],
-                       ['google/compute_instance_helpers.go',
-                        'third_party/terraform/utils/compute_instance_helpers.go.erb'],
                        ['google/convert.go',
                         'third_party/terraform/utils/convert.go'],
                        ['google/metadata.go',
@@ -143,7 +147,17 @@ module Provider
                        ['google/retry_transport.go',
                         'third_party/terraform/utils/retry_transport.go'],
                        ['google/error_retry_predicates.go',
-                        'third_party/terraform/utils/error_retry_predicates.go']
+                        'third_party/terraform/utils/error_retry_predicates.go'],
+                       ['google/pubsub_utils.go',
+                        'third_party/terraform/utils/pubsub_utils.go'],
+                       ['google/sqladmin_operation.go',
+                        'third_party/terraform/utils/sqladmin_operation.go'],
+                       ['google/path_or_contents.go',
+                        'third_party/terraform/utils/path_or_contents.go'],
+                       ['google/mutexkv.go',
+                        'third_party/terraform/utils/mutexkv.go'],
+                       ['google/hashcode.go',
+                        'third_party/terraform/utils/hashcode.go']
                      ])
     end
 

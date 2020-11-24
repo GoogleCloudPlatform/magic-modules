@@ -941,7 +941,6 @@ resource "google_spanner_database" "database" {
   instance     = google_spanner_instance.spanner_instance.name
   name         = var.spannerdatabase["name"]
   ddl          = [var.spannerdatabase["ddl"]]
-  deletion_protection = false
 }
 
 resource "google_cloud_scheduler_job" "job" {
@@ -976,6 +975,25 @@ resource "google_access_context_manager_access_policy" "access-policy" {
   count  = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
   parent = "organizations/${var.gcp_organization_id}"
   title  = var.service_perimeter["policy_title"]
+}
+
+resource "google_access_context_manager_access_level" "access-level" {
+  count  = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  parent = "accessPolicies/${google_access_context_manager_access_policy.access-policy.0.name}"
+  name   = "accessPolicies/${google_access_context_manager_access_policy.access-policy.0.name}/accessLevels/os_lock"
+  title  = "os_lock"
+  basic {
+    conditions {
+      device_policy {
+        require_screen_lock = true
+      }
+      regions = [
+    "CH",
+    "IT",
+    "US",
+      ]
+    }
+  }
 }
 
 variable "firewall" {

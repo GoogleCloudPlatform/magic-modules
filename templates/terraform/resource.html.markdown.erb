@@ -83,6 +83,10 @@ To get more information about <%= object.name -%>, see:
 
 ~> **Warning:** <%= object.docs.warning -%>
 <%- end -%>
+<%- unless object.docs.note.nil? -%>
+
+~> **Note:** <%= object.docs.note -%>
+<%- end -%>
 <%- if !sensitive_props.empty? -%>
 <%-
   sense_props = sensitive_props.map! {|prop| "`"+prop.lineage+"`"}.to_sentence

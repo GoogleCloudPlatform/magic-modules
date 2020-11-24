@@ -1,6 +1,4 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -19,7 +17,7 @@ func TestAccCloudIdentityGroup_update(t *testing.T) {
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
+		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudIdentityGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -35,7 +33,6 @@ func TestAccCloudIdentityGroup_update(t *testing.T) {
 func testAccCloudIdentityGroup_update(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_cloud_identity_group" "cloud_identity_group_basic" {
-  provider = google-beta
   display_name = "tf-test-my-identity-group%{random_suffix}-update"
   description  = "my-description"
 
@@ -51,4 +48,3 @@ resource "google_cloud_identity_group" "cloud_identity_group_basic" {
 }
 `, context)
 }
-<% end -%>
