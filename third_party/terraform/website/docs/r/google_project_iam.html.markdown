@@ -62,7 +62,7 @@ resource "google_project_iam_policy" "project" {
 
 data "google_iam_policy" "admin" {
   binding {
-    role = "roles/editor"
+    role = "roles/compute.admin"
 
     members = [
       "user:jane@example.com",
@@ -95,7 +95,7 @@ With IAM Conditions:
 ```hcl
 resource "google_project_iam_binding" "project" {
   project = "your-project-id"
-  role    = "roles/editor"
+  role    = "roles/container.admin"
 
   members = [
     "user:jane@example.com",
@@ -124,7 +124,7 @@ With IAM Conditions:
 ```hcl
 resource "google_project_iam_member" "project" {
   project = "your-project-id"
-  role    = "roles/editor"
+  role    = "roles/firebase.admin"
   member  = "user:jane@example.com"
 
   condition {
