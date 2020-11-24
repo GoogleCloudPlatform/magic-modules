@@ -168,16 +168,18 @@ func resourceBigtableGCPolicyRead(d *schema.ResourceData, meta interface{}) erro
 
 	defer c.Close()
 
-	name := d.Get("table").(string)
-	ti, err := c.TableInfo(ctx, name)
+	tableName := d.Get("table").(string)
+	columnFamily := d.Get("column_family").(string)
+
+	ti, err := c.TableInfo(ctx, tableName)
 	if err != nil {
-		log.Printf("[WARN] Removing %s because it's gone", name)
+		log.Printf("[WARN] Removing %s because its table %s doesn't exist.", d.Id(), tableName)
 		d.SetId("")
 		return nil
 	}
 
 	for _, fi := range ti.FamilyInfos {
-		if fi.Name == name {
+		if fi.Name == columnFamily {
 			d.SetId(fi.GCPolicy)
 			break
 		}
