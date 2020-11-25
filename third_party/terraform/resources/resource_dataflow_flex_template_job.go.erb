@@ -41,6 +41,14 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"zone": {
+				Type:     schema.TypeString,
+				Optional: true,
+				// ForceNew applies to both stream and batch jobs
+				ForceNew:    true,
+				Description: `The zone in which the created job should run. If it is not provided, the provider zone is used.`,
+			},
+
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -115,8 +123,11 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
+	zone, _ := getZone(d, config)
+
 	env := dataflow.FlexTemplateRuntimeEnvironment{
 		ServiceAccountEmail: d.Get("service_account_email").(string),
+		Zone:                zone,
 	}
 
 	request := dataflow.LaunchFlexTemplateRequest{
