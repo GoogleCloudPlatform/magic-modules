@@ -146,6 +146,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_bucket_name: "image-backend-bucket"
           bucket_name: "image-store-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_full"
+        min_version: beta
+        primary_resource_id: "image_backend_full"
+        skip_docs: true
+        vars:
+          backend_bucket_name: "image-backend-bucket-full"
+          bucket_name: "image-store-bucket-full"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -153,6 +161,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
       cdnPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.cacheMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.negativeCaching: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true
