@@ -109,6 +109,10 @@ func testAccDataflowFlexTemplateJobGetGeneratedInstance(t *testing.T, s *terrafo
 		if len(instances.Items) > 1 {
 			return resource.NonRetryableError(fmt.Errorf("Wrong number of matching instances for dataflow job: %s, %d", rs.Primary.ID, len(instances.Items)))
 		}
+		instance = instances.Items[0]
+		if instance == nil {
+			return resource.NonRetryableError(fmt.Errorf("invalid instance"))
+		}
 		return nil
 	})
 	if err != nil {
