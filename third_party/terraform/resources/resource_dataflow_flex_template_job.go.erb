@@ -190,9 +190,6 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	if err := d.Set("labels", job.Labels); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
-	if err := d.Set("service_account_email", job.Environment.ServiceAccountEmail); err != nil {
-		return fmt.Errorf("Error setting service_account_email: %s", err)
-	}
 
 	if _, ok := dataflowTerminalStatesMap[job.CurrentState]; ok {
 		log.Printf("[DEBUG] Removing resource '%s' because it is in state %s.\n", job.Name, job.CurrentState)
