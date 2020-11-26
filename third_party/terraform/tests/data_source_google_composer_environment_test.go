@@ -10,23 +10,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-var testAccCheckGoogleComposerEnvironmentConfig = `
-data "google_composer_environment" "composer_env" {
-	name = "data-test"
-}
-`
-
 func TestAccDataSourceComposerEnvironment_basic(t *testing.T) {
 	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": randString(t, 10),
+	}
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckGoogleComposerEnvironmentConfig,
+				Config: testAccDataSourceComposerEnvironment_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleComposerEnvironmentMeta("data.google_composer_environment.composer_env"),
+					testAccCheckGoogleComposerEnvironmentMeta("data.google_composer_environment.test"),
 				),
 			},
 		},
@@ -74,4 +72,41 @@ func testAccCheckGoogleComposerEnvironmentMeta(n string) resource.TestCheckFunc 
 
 		return nil
 	}
+}
+
+func testAccDataSourceComposerEnvironment_basic(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_composer_environment" "test" {
+	name   = "composer-env-%{random_suffix}"
+	region = "us-central1"
+
+	config {
+		node_config {
+			network    = google_compute_network.test.self_link
+			subnetwork = google_compute_subnetwork.test.self_link
+			zone       = "us-central1-a"
+		}
+	}
+}
+
+// use a separate network to avoid conflicts with other tests running in parallel
+// that use the default network/subnet
+resource "google_compute_network" "test" {
+	name                    = "composer-net-%{random_suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "test" {
+	name          = "composer-subnet-%{random_suffix}"
+	ip_cidr_range = "10.2.0.0/16"
+	region        = "us-central1"
+	network       = google_compute_network.test.self_link
+}
+
+data "google_composer_environment" "test" {
+	name = google_composer_environment.test.name
+
+	depends_on = [google_composer_environment.test]
+}
+`, context)
 }
