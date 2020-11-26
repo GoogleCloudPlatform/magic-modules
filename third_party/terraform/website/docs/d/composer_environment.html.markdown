@@ -14,8 +14,14 @@ Provides access to Cloud Composer environment configuration in a region for a gi
 ## Example Usage
 
 ```hcl
+resource "google_composer_environment" "composer_env" {
+    name = "composer-environment"
+}
+
 data "google_composer_environment" "composer_env" {
-    name = "data_google_composer_environment_test"
+    name = google_composer_environment.test.name
+
+    depends_on = [google_composer_environment.composer_env]
 }
 
 output "debug" {
