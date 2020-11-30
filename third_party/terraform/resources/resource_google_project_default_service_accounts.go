@@ -80,12 +80,12 @@ func resourceGoogleProjectDefaultServiceAccountsDoAction(d *schema.ResourceData,
 		_, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Undelete(serviceAccountSelfLink, &iam.UndeleteServiceAccountRequest{}).Do()
 		errExpected := restorePolicy == "REVERT_AND_IGNORE_FAILURE"
 		errReceived := err != nil
-		if errExpected && errReceived {
+		if errReceived {
+			if !errExpected {
+				return fmt.Errorf("cannot undelete service account %s: %v", serviceAccountSelfLink, err)
+			}
 			log.Printf("cannot undelete service account %s: %v", serviceAccountSelfLink, err)
 			log.Printf("restore policy is %s... ignoring error", restorePolicy)
-		}
-		if !errExpected && errReceived {
-			return fmt.Errorf("cannot undelete service account %s: %v", serviceAccountSelfLink, err)
 		}
 	case "DISABLE":
 		_, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Disable(serviceAccountSelfLink, &iam.DisableServiceAccountRequest{}).Do()
@@ -96,12 +96,12 @@ func resourceGoogleProjectDefaultServiceAccountsDoAction(d *schema.ResourceData,
 		_, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Enable(serviceAccountSelfLink, &iam.EnableServiceAccountRequest{}).Do()
 		errReceived := err != nil
 		errExpected := restorePolicy == "REVERT_AND_IGNORE_FAILURE"
-		if errExpected && errReceived {
+		if errReceived {
+			if !errExpected {
+				return fmt.Errorf("cannot enable service account %s: %v", serviceAccountSelfLink, err)
+			}
 			log.Printf("cannot enable service account %s: %v", serviceAccountSelfLink, err)
 			log.Printf("restore policy is %s... ignoring error", restorePolicy)
-		}
-		if !errExpected && errReceived {
-			return fmt.Errorf("cannot enable service account %s: %v", serviceAccountSelfLink, err)
 		}
 	case "DEPRIVILEGE":
 		iamPolicy, err := config.NewResourceManagerClient(userAgent).Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).Do()
