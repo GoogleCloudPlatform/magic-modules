@@ -20,8 +20,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/bigquery_connection_flatten.go.erb'
       cloudSql.credential.password: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
-    id_format: "{{name}}"
-    import_format: ["{{name}}"]
+    id_format: "projects/{{project}}/locations/{{location}}/connections/{{connection_id}}"
+    import_format: ["projects/{{project}}/locations/{{location}}/connections/{{connection_id}}", "{{project}}/{{location}}/{{connection_id}}", "{{location}}/{{connection_id}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         min_version: beta
