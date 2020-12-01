@@ -2672,7 +2672,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           url_map_name: "urlmap"
           login_backend_service_name: "login"
-          home_backend_service_name: "home"
           http_health_check_name: "health-check"
           backend_bucket_name: "static-asset-backend-bucket"
           storage_bucket_name: "static-asset-bucket"
