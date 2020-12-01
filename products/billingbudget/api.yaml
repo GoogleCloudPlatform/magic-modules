@@ -203,7 +203,9 @@ objects:
                     - :CURRENT_SPEND
                     - :FORECASTED_SPEND
           - !ruby/object:Api::Type::NestedObject
-            name: notificationsRule
+            name: allUpdatesRule
+            api_name: notificationsRule
+            deprecation_message: This field has been renamed by Google to notifications_rule. It will be renamed and unavailable in the next major release.
             description: |
               Defines notifications that are sent on every update to the
               billing account's spend, regardless of the thresholds defined
@@ -211,9 +213,10 @@ objects:
             properties:
               - !ruby/object:Api::Type::String
                 name: pubsubTopic
+                deprecation_message: The parent field has been renamed by Google to notifications_rule. It will be renamed and unavailable in the next major release.
                 at_least_one_of:
-                  - budget.0.notifications_rule.0.pubsub_topic
-                  - budget.0.notifications_rule.0.monitoring_notification_channels
+                  - budget.0.all_updates_rule.0.pubsub_topic
+                  - budget.0.all_updates_rule.0.monitoring_notification_channels
                 description: |
                   The name of the Cloud Pub/Sub topic where budget related
                   messages will be published, in the form
@@ -221,6 +224,7 @@ objects:
                   at regular intervals to the topic.
               - !ruby/object:Api::Type::String
                 name: schemaVersion
+                deprecation_message: The parent field has been renamed by Google to notifications_rule. It will be renamed and unavailable in the next major release.
                 default_value: "1.0"
                 description: |
                   The schema version of the notification. Only "1.0" is
@@ -228,9 +232,10 @@ objects:
                   https://cloud.google.com/billing/docs/how-to/budgets#notification_format.
               - !ruby/object:Api::Type::Array
                 name: monitoringNotificationChannels
+                deprecation_message: The parent field has been renamed by Google to notifications_rule. It will be renamed and unavailable in the next major release.
                 at_least_one_of:
-                  - budget.0.notifications_rule.0.pubsub_topic
-                  - budget.0.notifications_rule.0.monitoring_notification_channels
+                  - budget.0.all_updates_rule.0.pubsub_topic
+                  - budget.0.all_updates_rule.0.monitoring_notification_channels
                 description: |
                   The full resource name of a monitoring notification
                   channel in the form
@@ -239,6 +244,7 @@ objects:
                 item_type: Api::Type::String
               - !ruby/object:Api::Type::Boolean
                 name: disableDefaultIamRecipients
+                deprecation_message: The parent field has been renamed by Google to notifications_rule. It will be renamed and unavailable in the next major release.
                 default_value: false
                 description: |
                   Boolean. When set to true, disables default notifications sent

@@ -27,7 +27,7 @@ resource "google_billing_budget" "<%= ctx[:primary_resource_id] %>" {
     spend_basis       = "FORECASTED_SPEND"
   }
   
-  notifications_rule {
+  all_updates_rule {
     monitoring_notification_channels = [
       google_monitoring_notification_channel.notification_channel.id,
     ]
