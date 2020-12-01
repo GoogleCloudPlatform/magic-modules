@@ -60,7 +60,8 @@ Template.
 - - -
 
 * `parameters` - (Optional) Key/Value pairs to be passed to the Dataflow job (as
-used in the template).
+used in the template). Additional [pipeline options](https://cloud.google.com/dataflow/docs/guides/specifying-exec-params#setting-other-cloud-dataflow-pipeline-options)
+such as `serviceAccount`, `workerMachineType`, etc can be specified here.
 
 * `labels` - (Optional) User labels to be specified for the job. Keys and values
 should follow the restrictions specified in the [labeling restrictions](https://cloud.google.com/compute/docs/labeling-resources#restrictions)
@@ -76,11 +77,7 @@ deletion during `terraform destroy`.  See above note.
 * `project` - (Optional) The project in which the resource belongs. If it is not
 provided, the provider project is used.
 
-* `zone` - (Optional) The zone in which the created job should run. If it is not provided, the provider zone is used.
-
 * `region` - (Optional) The region in which the created job should run.
-
-* `service_account_email` - (Optional) The Service Account email used to create the job.
 
 ## Attributes Reference
 In addition to the arguments listed above, the following computed attributes are exported:

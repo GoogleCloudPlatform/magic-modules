@@ -41,15 +41,6 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"zone": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				// ForceNew applies to both stream and batch jobs
-				ForceNew:    true,
-				Description: `The zone in which the created job should run. If it is not provided, the provider zone is used.`,
-			},
-
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -96,12 +87,6 @@ func resourceDataflowFlexTemplateJob() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
-			"service_account_email": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: `The Service Account email used to create the job.`,
-			},
 		},
 	}
 }
@@ -124,21 +109,11 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	// Zone is optional in the dataflow API, so it is ok to ignore the error if zone
-	// cannot be determinied in either resource config or provider.
-	zone, _ := getZone(d, config)
-
-	env := dataflow.FlexTemplateRuntimeEnvironment{
-		ServiceAccountEmail: d.Get("service_account_email").(string),
-		Zone:                zone,
-	}
-
 	request := dataflow.LaunchFlexTemplateRequest{
 		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
 			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
 			JobName:              d.Get("name").(string),
 			Parameters:           expandStringMap(d, "parameters"),
-			Environment:          &env,
 		},
 	}
 
