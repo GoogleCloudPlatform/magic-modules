@@ -40,7 +40,7 @@ objects:
       guides:
         'Creating a budget':
           'https://cloud.google.com/billing/docs/how-to/budgets'
-      api: 'https://cloud.google.com/billing/docs/reference/budget/rest/v1beta1/billingAccounts.budgets'
+      api: 'https://cloud.google.com/billing/docs/reference/budget/rest/v1/billingAccounts.budgets'
     parameters:
       - !ruby/object:Api::Type::String
         name: billingAccount
