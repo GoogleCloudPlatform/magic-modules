@@ -1,0 +1,11 @@
+resource "google_firestore_document" "<%= ctx[:primary_resource_id] %>" {
+  collection = "somenewcollection"
+  document_id = "my-doc-%{random_suffix}"
+  fields     = "{\"something\":{\"mapValue\":{\"fields\":{\"akey\":{\"stringValue\":\"avalue\"}}}}}"
+}
+
+resource "google_firestore_document" "sub_document" {
+  collection = "${google_firestore_document.<%= ctx[:primary_resource_id] %>.path}/subdocs"
+  document_id = "bitcoinkey"
+  fields     = "{\"something\":{\"mapValue\":{\"fields\":{\"ayo\":{\"stringValue\":\"val2\"}}}}}"
+}
