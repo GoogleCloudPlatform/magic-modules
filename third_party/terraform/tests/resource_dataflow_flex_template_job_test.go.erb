@@ -44,6 +44,7 @@ func TestAccDataflowFlexTemplateJob_withServiceAccount(t *testing.T) {
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	accountId := "tf-test-dataflow-sa" + randStr
+	zone := "us-central1-b"
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -51,19 +52,19 @@ func TestAccDataflowFlexTemplateJob_withServiceAccount(t *testing.T) {
 		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_serviceAccount(bucket, job, accountId),
+				Config: testAccDataflowFlexTemplateJob_serviceAccount(bucket, job, accountId, zone),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowJobExists(t, "google_dataflow_flex_template_job.big_data"),
-					testAccDataflowFlexTemplateJobHasServiceAccount(t, "google_dataflow_flex_template_job.big_data", accountId),
+					testAccDataflowFlexTemplateJobHasServiceAccount(t, "google_dataflow_flex_template_job.big_data", accountId, zone),
 				),
 			},
 		},
 	})
 }
 
-func testAccDataflowFlexTemplateJobHasServiceAccount(t *testing.T, res, expectedId string) resource.TestCheckFunc {
+func testAccDataflowFlexTemplateJobHasServiceAccount(t *testing.T, res, expectedId, zone string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		instance, err := testAccDataflowFlexTemplateJobGetGeneratedInstance(t, s, res)
+		instance, err := testAccDataflowFlexTemplateJobGetGeneratedInstance(t, s, res, zone)
 		if err != nil {
 			return fmt.Errorf("Error getting dataflow job instance: %s", err)
 		}
@@ -79,7 +80,7 @@ func testAccDataflowFlexTemplateJobHasServiceAccount(t *testing.T, res, expected
 	}
 }
 
-func testAccDataflowFlexTemplateJobGetGeneratedInstance(t *testing.T, s *terraform.State, res string) (*compute.Instance, error) {
+func testAccDataflowFlexTemplateJobGetGeneratedInstance(t *testing.T, s *terraform.State, res, zone string) (*compute.Instance, error) {
 	rs, ok := s.RootModule().Resources[res]
 	if !ok {
 		return nil, fmt.Errorf("resource %q not in state", res)
@@ -95,7 +96,7 @@ func testAccDataflowFlexTemplateJobGetGeneratedInstance(t *testing.T, s *terrafo
 
 	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
 		instances, rerr := config.NewComputeClient(config.userAgent).Instances.
-			List(config.Project, config.Zone).
+			List(config.Project, zone).
 			Filter(filter).
 			MaxResults(2).
 			Do()
@@ -177,7 +178,7 @@ resource "google_dataflow_flex_template_job" "big_data" {
 }
 
 // note: this config creates a job that doesn't actually do anything
-func testAccDataflowFlexTemplateJob_serviceAccount(bucket, job, accountId string) string {
+func testAccDataflowFlexTemplateJob_serviceAccount(bucket, job, accountId, zone string) string {
   return fmt.Sprintf(`
 resource "google_storage_bucket" "temp" {
   name = "%s"
@@ -244,13 +245,14 @@ resource "google_dataflow_flex_template_job" "big_data" {
     inputSubscription = "my-subscription"
     outputTable  = "my-project:my-dataset.my-table"
     serviceAccount = google_service_account.dataflow-sa.email
+    zone = "%s"
   }
   depends_on = [
     google_storage_bucket_iam_member.dataflow-gcs,
     google_project_iam_member.dataflow-worker
   ]
 }
-`, bucket, accountId, job)
+`, bucket, accountId, job, zone)
 }
 
 <% end -%>
