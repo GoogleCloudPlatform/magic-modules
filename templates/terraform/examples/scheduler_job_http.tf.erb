@@ -12,5 +12,6 @@ resource "google_cloud_scheduler_job" "job" {
   http_target {
     http_method = "POST"
     uri         = "https://example.com/ping"
+    body        = base64encode("{"foo":"bar"}")
   }
 }
