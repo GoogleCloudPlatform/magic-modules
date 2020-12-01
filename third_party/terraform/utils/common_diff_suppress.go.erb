@@ -136,7 +136,6 @@ func locationDiffSuppressHelper(a, b string) bool {
 		strings.Replace(a, "/locations/", "/zones/", 1) == b
 }
 
-<% unless version == 'ga' -%>
 // For managed SSL certs, if new is an absolute FQDN (trailing '.') but old isn't, treat them as equals.
 func absoluteDomainSuppress(k, old, new string, _ *schema.ResourceData) bool {
 	if strings.HasPrefix(k, "managed.0.domains.") {
@@ -145,6 +144,7 @@ func absoluteDomainSuppress(k, old, new string, _ *schema.ResourceData) bool {
 	return old == new
 }
 
+<% unless version == 'ga' -%>
 func timestampDiffSuppress(format string) schema.SchemaDiffSuppressFunc {
 	return func(_, old, new string, _ *schema.ResourceData) bool {
 		oldT, err := time.Parse(format, old)
