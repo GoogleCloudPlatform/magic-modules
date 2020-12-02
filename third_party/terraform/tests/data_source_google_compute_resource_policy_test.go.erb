@@ -1,7 +1,6 @@
 <% autogen_exception -%>
 package google
 
-<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"testing"
@@ -27,51 +26,12 @@ func TestAccDataSourceComputeResourcePolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeResourcePolicyConfig(rsName, dsName, randomSuffix),
-				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceComputeResourcePolicyCheck(t, dsFullName, rsFullName),
-				),
+				Check:  checkDataSourceStateMatchesResourceState(rsFullName, dsFullName),
 			},
 		},
 	})
 }
 
-func testAccDataSourceComputeResourcePolicyCheck(t *testing.T, dataSourceName string, resourceName string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		ds, ok := s.RootModule().Resources[dataSourceName]
-		if !ok {
-			return fmt.Errorf("root module has no resource called %s", dataSourceName)
-		}
-
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("can't find %s in state", resourceName)
-		}
-
-		dsAttr := ds.Primary.Attributes
-		rsAttr := rs.Primary.Attributes
-
-		policyAttrsToTest := []string{
-			"name",
-		}
-
-		for _, attrToCheck := range policyAttrsToTest {
-			if dsAttr[attrToCheck] != rsAttr[attrToCheck] {
-				return fmt.Errorf(
-					"%s is %s; want %s",
-					attrToCheck,
-					dsAttr[attrToCheck],
-					rsAttr[attrToCheck],
-				)
-			}
-		}
-
-		if !compareSelfLinkOrResourceName("", dsAttr["self_link"], rsAttr["self_link"], nil) && dsAttr["self_link"] != rsAttr["self_link"] {
-			return fmt.Errorf("self link does not match: %s vs %s", dsAttr["self_link"], rsAttr["self_link"])
-		}
-
-		return nil
-	}
-}
 
 func testAccCheckDataSourceComputeResourcePolicyDestroy(t *testing.T, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -120,4 +80,3 @@ data "google_compute_resource_policy" "%s" {
 }
 `, rsName, randomSuffix, dsName, rsName, rsName)
 }
-<% end -%>
