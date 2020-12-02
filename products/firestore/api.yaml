@@ -137,7 +137,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'documentId'
         description: |
-          The client-assigned document ID to use for this document durring creation.
+          The client-assigned document ID to use for this document during creation.
         required: true
         url_param_only: true
     properties:
