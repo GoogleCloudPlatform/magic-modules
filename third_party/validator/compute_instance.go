@@ -19,7 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func GetComputeInstanceCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+func GetComputeInstanceCaiObject(d TerraformResourceData, config *Config) {
 	name, err := assetName(d, config, "//compute.googleapis.com/projects/{{project}}/zones/{{zone}}/instances/{{name}}")
 	if err != nil {
 		return Asset{}, err
