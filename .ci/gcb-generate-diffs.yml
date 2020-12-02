@@ -179,13 +179,6 @@ steps:
       args:
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/terraform-google-conversion-tester'
-      id: tgc-test
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["diff"]
-      args:
-          - $_PR_NUMBER
-
     - name: 'gcr.io/graphite-docker-images/terraform-tester'
       id: tpgb-test
       secretEnv: ["GITHUB_TOKEN"]
