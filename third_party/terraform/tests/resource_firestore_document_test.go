@@ -11,13 +11,14 @@ func TestAccFirestoreDocument_update(t *testing.T) {
 	t.Parallel()
 
 	name := fmt.Sprintf("tf-test-%d", randInt(t))
+	project := getTestFirestoreProjectFromEnv(t)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccFirestoreDocument_update(name),
+				Config: testAccFirestoreDocument_update(project, name),
 			},
 			resource.TestStep{
 				ResourceName:      "google_firestore_document.instance",
@@ -25,7 +26,7 @@ func TestAccFirestoreDocument_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			resource.TestStep{
-				Config: testAccFirestoreDocument_update2(name),
+				Config: testAccFirestoreDocument_update2(project, name),
 			},
 			resource.TestStep{
 				ResourceName:      "google_firestore_document.instance",
@@ -36,24 +37,26 @@ func TestAccFirestoreDocument_update(t *testing.T) {
 	})
 }
 
-func testAccFirestoreDocument_update(name string) string {
+func testAccFirestoreDocument_update(project, name string) string {
 	return fmt.Sprintf(`
 resource "google_firestore_document" "instance" {
-	database   = "(default)"
-	collection = "somenewcollection"
+	project     = "%s"
+	database    = "(default)"
+	collection  = "somenewcollection"
 	document_id = "%s"
-	fields     = "{\"something\":{\"mapValue\":{\"fields\":{\"yo\":{\"stringValue\":\"val1\"}}}}}"
+	fields      = "{\"something\":{\"mapValue\":{\"fields\":{\"yo\":{\"stringValue\":\"val1\"}}}}}"
 }
-`, name)
+`, project, name)
 }
 
-func testAccFirestoreDocument_update2(name string) string {
+func testAccFirestoreDocument_update2(project, name string) string {
 	return fmt.Sprintf(`
 resource "google_firestore_document" "instance" {
-	database   = "(default)"
-	collection = "somenewcollection"
+	project     = "%s"
+	database    = "(default)"
+	collection  = "somenewcollection"
 	document_id = "%s"
-	fields     = "{\"something\":{\"mapValue\":{\"fields\":{\"yo\":{\"stringValue\":\"val2\"}}}}}"
+	fields      = "{\"something\":{\"mapValue\":{\"fields\":{\"yo\":{\"stringValue\":\"val2\"}}}}}"
 }
-`, name)
+`, project, name)
 }
