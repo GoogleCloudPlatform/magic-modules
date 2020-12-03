@@ -12,7 +12,6 @@ func TestAccFirestoreDocument_update(t *testing.T) {
 
 	name := fmt.Sprintf("tf-test-%d", randInt(t))
 	project := getTestFirestoreProjectFromEnv(t)
-
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
