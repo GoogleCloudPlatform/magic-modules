@@ -11,24 +11,24 @@ func TestAccFirestoreDocument_update(t *testing.T) {
 	t.Parallel()
 
 	name := fmt.Sprintf("tf-test-%d", randInt(t))
-
 	project := getTestFirestoreProjectFromEnv(t)
+
 	vcrTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccFirestoreDocument_update(project, name),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_firestore_document.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccFirestoreDocument_update2(project, name),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_firestore_document.instance",
 				ImportState:       true,
 				ImportStateVerify: true,
