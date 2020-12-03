@@ -602,12 +602,16 @@ objects:
                 description: |
                   The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
                   (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
-        - !ruby/object:Api::Type::String
+        - !ruby/object:Api::Type::Enum
           name: 'cacheMode'
           min_version: beta
           description: |
             Specifies the cache setting for all responses from this backend.
             The possible values are: USE_ORIGIN_HEADERS, FORCE_CACHE_ALL and CACHE_ALL_STATIC
+          values:
+            - :USE_ORIGIN_HEADERS
+            - :FORCE_CACHE_ALL
+            - :CACHE_ALL_STATIC
         - !ruby/object:Api::Type::Integer
           name: 'serveWhileStale'
           min_version: beta
@@ -1200,12 +1204,16 @@ objects:
                   description: |
                     The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
                     (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
-          - !ruby/object:Api::Type::String
+          - !ruby/object:Api::Type::Enum
             name: 'cacheMode'
             min_version: beta
             description: |
               Specifies the cache setting for all responses from this backend.
               The possible values are: USE_ORIGIN_HEADERS, FORCE_CACHE_ALL and CACHE_ALL_STATIC
+            values:
+              - :USE_ORIGIN_HEADERS
+              - :FORCE_CACHE_ALL
+              - :CACHE_ALL_STATIC
           - !ruby/object:Api::Type::Integer
             name: 'serveWhileStale'
             min_version: beta
@@ -2175,12 +2183,16 @@ objects:
                   description: |
                     The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
                     (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
-          - !ruby/object:Api::Type::String
+          - !ruby/object:Api::Type::Enum
             name: 'cacheMode'
             min_version: beta
             description: |
               Specifies the cache setting for all responses from this backend.
               The possible values are: USE_ORIGIN_HEADERS, FORCE_CACHE_ALL and CACHE_ALL_STATIC
+            values:
+              - :USE_ORIGIN_HEADERS
+              - :FORCE_CACHE_ALL
+              - :CACHE_ALL_STATIC
           - !ruby/object:Api::Type::Integer
             name: 'serveWhileStale'
             min_version: beta
