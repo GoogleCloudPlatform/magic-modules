@@ -120,6 +120,11 @@ module Provider
       # a reference to the primary resource to create IAM policies for
       attr_reader :primary_resource_name
 
+      # The name of the location/region override for use in IAM tests. IAM
+      # tests may need this if the location is not inherited on the resource
+      # for one reason or another
+      attr_reader :region_override
+
       # The path to this example's Terraform config.
       # Defaults to `templates/terraform/examples/{{name}}.tf.erb`
       attr_reader :config_path

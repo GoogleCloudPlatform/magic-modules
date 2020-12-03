@@ -35,21 +35,29 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "notebook_instance_basic"
         primary_resource_id: "instance"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"random_suffix\"])"
+        region_override: "us-west1-a"
         vars:
           instance_name: "notebooks-instance"
       - !ruby/object:Provider::Terraform::Examples
         name: "notebook_instance_basic_container"
         primary_resource_id: "instance"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"random_suffix\"])"
+        region_override: "us-west1-a"
         vars:
           instance_name: "notebooks-instance"
       - !ruby/object:Provider::Terraform::Examples
         name: "notebook_instance_basic_gpu"
         primary_resource_id: "instance"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"random_suffix\"])"
+        region_override: "us-west1-a"
         vars:
           instance_name: "notebooks-instance"
       - !ruby/object:Provider::Terraform::Examples
         name: "notebook_instance_full"
         primary_resource_id: "instance"
+        primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\", context[\"random_suffix\"])"
+        region_override: "us-west1-a"
         vars:
           instance_name: "notebooks-instance"
         test_env_vars:
@@ -85,11 +93,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # but it gets merged with metadata that the server sets. This prevents us
         # from detecting drift.
         ignore_read: true
-      name: !ruby/object:Overrides::Terraform::PropertyOverride      
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: compareSelfLinkOrResourceName
-        default_from_api: true     
+        default_from_api: true
       serviceAccount: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       subnet: !ruby/object:Overrides::Terraform::PropertyOverride
