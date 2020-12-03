@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-// metadata is not present if the API returns an error
+// We use this decoder to add the path field
 if name, ok := res["name"]; ok {
 	re := regexp.MustCompile("^projects/[^/]+/databases/[^/]+/documents/(.+)$")
 	match := re.FindStringSubmatch(name.(string))
