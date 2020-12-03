@@ -48,7 +48,7 @@ import_url = import_format.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.bas
 		<% import_qualifiers.push('getTestZoneFromEnv()') -%>
 	<% elsif param == 'region' || param == 'location' -%>
 		<% if example.region_override.nil? -%>
-				<<% import_qualifiers.push('getTestRegionFromEnv()') -%>
+				<% import_qualifiers.push('getTestRegionFromEnv()') -%>
 			<% else -%>
 				<% import_qualifiers.push("\"#{example.region_override}\"") -%>
 			<% end -%>
