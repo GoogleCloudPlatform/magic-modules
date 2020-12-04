@@ -1243,6 +1243,7 @@ objects:
           requests.
       - !ruby/object:Api::Type::Array
         name: 'customResponseHeaders'
+        min_version: beta
         item_type: Api::Type::String
         description: |
           Headers that the HTTP/S load balancer should add to proxied
