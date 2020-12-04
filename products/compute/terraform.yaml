@@ -197,6 +197,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           backend_service_name: "backend-service"
           http_health_check_name: "health-check"
       - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_cache"
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+          http_health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_traffic_director_round_robin"
         min_version: beta
         primary_resource_id: "default"
@@ -236,6 +242,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
       cdnPolicy.cacheKeyPolicy.queryStringBlacklist: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+      cdnPolicy.cacheMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.negativeCaching: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       connectionDraining: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       connectionDraining.drainingTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -286,6 +296,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
+        name: "region_backend_service_cache"
+        primary_resource_id: "default"
+        vars:
+          region_backend_service_name: "region-service"
+          health_check_name: "rbs-health-check"
+      - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_round_robin"
         primary_resource_id: "default"
         vars:
@@ -318,6 +334,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: templates/terraform/decoders/region_backend_service.go.erb
       resource_definition: 'templates/terraform/resource_definition/region_backend_service.go.erb'
     properties:
+      cdnPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.cacheKeyPolicy.queryStringWhitelist: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      cdnPolicy.cacheKeyPolicy.queryStringBlacklist: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      cdnPolicy.cacheMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.negativeCaching: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         required: false
