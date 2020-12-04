@@ -218,6 +218,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           health_check_name: "health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_network_endpoint"
+        min_version: beta
         primary_resource_id: "default"
         vars:
           backend_service_name: "backend-service"
