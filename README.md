@@ -7,8 +7,7 @@
 
 ## Overview
 
-Magic Modules is a tool used to autogenerate support in a variety of open source DevOps
-tools for Google Cloud Platform. [GCP "resource"](https://cloud.google.com/docs/overview/#gcp_resources)
+Magic Modules is a tool used to generate support for Google Cloud Platform in declarative tools. [GCP "resource"](https://cloud.google.com/docs/overview/#gcp_resources)
 definitions are encoded in a shared data file, and that data is used to fill in
 tool-specific templates across each of the tools Magic Modules
 generates.
