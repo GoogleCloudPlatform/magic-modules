@@ -22,7 +22,7 @@ for i := len(oldDdls); i < len(newDdls); i++ {
     updateDdls = append(updateDdls, newDdls[i].(string))
 }
 
-obj["statements"] = strings.Join(updateDdls, ",")
+obj["statements"] = updateDdls
 delete(obj, "name")
 delete(obj, "instance")
 delete(obj, "extraStatements")
