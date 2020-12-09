@@ -185,7 +185,7 @@ func TestAccLoggingProjectSink_loggingbucket(t *testing.T) {
 	})
 }
 
-func TestAccLoggingProjectSink_bigqueryOptionCustomizedDiff(t *testing.T) {
+func TestLoggingProjectSink_bigqueryOptionCustomizedDiff(t *testing.T) {
 	t.Parallel()
 
 	type LoggingProjectSink struct {

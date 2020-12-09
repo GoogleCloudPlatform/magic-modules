@@ -79,7 +79,7 @@ func resourceLoggingProjectSinkCustomizeDiffFunc(diff TerraformResourceDiff) err
 	if bigqueryOptions > 0 {
 		uwi := diff.Get("unique_writer_identity")
 		if !uwi.(bool) {
-			return errors.New("unique_writer_identity must be true when bigquery_options is suppplied")
+			return errors.New("unique_writer_identity must be true when bigquery_options is supplied")
 		}
 	}
 	return nil
