@@ -123,7 +123,7 @@ module Compile
       content = ctx.local_variable_get(:_erbout) if has_erbout # save code
       ctx.local_variable_set(:compiler, compiler)
       Google::LOGGER.debug "Compiling #{file}"
-      input = ERB.new get_helper_file(file), trim_mode: '->'
+      input = ERB.new(get_helper_file(file), nil, '->')
       compiled = input.result(ctx)
       ctx.local_variable_set(:_erbout, content) if has_erbout # restore code
       compiled
