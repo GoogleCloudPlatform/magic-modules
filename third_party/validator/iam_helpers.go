@@ -9,6 +9,7 @@ import (
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
 
+// adding a comment
 // expandIamPolicyBindings is used in google_<type>_iam_policy resources.
 func expandIamPolicyBindings(d TerraformResourceData) ([]IAMBinding, error) {
 	ps := d.Get("policy_data").(string)
