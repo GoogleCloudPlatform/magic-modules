@@ -106,7 +106,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -240,7 +240,7 @@ objects:
         required: true
         input: true
     properties:
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'Unique identifier for the resource.'
         output: true
@@ -636,7 +636,7 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'enableCdn'
         description: 'If true, enable Cloud CDN for this BackendBucket.'
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'Unique identifier for the resource.'
         output: true
@@ -1276,7 +1276,7 @@ objects:
            or serverless NEG as a backend.
 
            For internal load balancing, a URL to a HealthCheck resource must be specified instead.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -2289,7 +2289,7 @@ objects:
 
            A health check must be specified unless the backend service uses an internet
            or serverless NEG as a backend.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -2822,7 +2822,7 @@ objects:
         name: 'description'
         description: 'An optional description of this resource.'
         output: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -3163,7 +3163,7 @@ objects:
         description: |
           An optional description of this resource. Provide this property when
           you create the resource.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -3450,7 +3450,7 @@ objects:
             values:
               - :EXCLUDE_ALL_METADATA
               - :INCLUDE_ALL_METADATA
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -3624,7 +3624,7 @@ objects:
         description: |
           An optional description of this resource. Provide this property when
           you create the resource.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -3895,7 +3895,7 @@ objects:
         name: 'description'
         description: |
           An optional description of this resource.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: |
           The unique identifier for the resource. This identifier is defined by
@@ -4024,7 +4024,7 @@ objects:
         description: |
           An optional description of this resource. Provide this property when
           you create the resource.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -4284,7 +4284,7 @@ objects:
           The value of the host header in the HTTP health check request. If
           left empty (default value), the public IP on behalf of which this
           health check is performed will be used.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: |
           The unique identifier for the resource. This identifier is defined by
@@ -4380,7 +4380,7 @@ objects:
           The value of the host header in the HTTPS health check request. If
           left empty (default value), the public IP on behalf of which this
           health check is performed will be used.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: |
           The unique identifier for the resource. This identifier is defined by
@@ -4486,7 +4486,7 @@ objects:
           A so-far unhealthy instance will be marked healthy after this many
           consecutive successes. The default value is 2.
         default_value: 2
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: |
           The unique identifier for the resource. This identifier is defined by
@@ -5239,7 +5239,7 @@ objects:
         description: |
           An optional description of this resource. Provide this property when
           you create the resource.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: |
           The unique identifier for the resource. This identifier
@@ -5872,7 +5872,7 @@ objects:
                 - :UEFI_COMPATIBLE
                 - :VIRTIO_SCSI_MULTIQUEUE
                 - :WINDOWS
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: |
           The unique identifier for the resource. This identifier
@@ -6307,7 +6307,7 @@ objects:
           hostname is [INSTANCE_NAME].c.[PROJECT_ID].internal when using the
           global DNS, and [INSTANCE_NAME].[ZONE].c.[PROJECT_ID].internal when
           using zonal DNS.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: |
           The unique identifier for the resource. This identifier is defined by
@@ -6686,7 +6686,7 @@ objects:
           An optional description of this resource. Provide this property when
           you create the resource.
       # 'fingerprint' not applicable to state convergence.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'A unique identifier for this instance group.'
         output: true
@@ -6869,7 +6869,7 @@ objects:
           you create the resource.
         input: true
       # fingerprint ignored as it is an internal locking detail
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'A unique identifier for this resource'
         output: true
@@ -7144,7 +7144,7 @@ objects:
           you create the resource.
         input: true
       # fingerprint ignored as it is an internal locking detail
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'A unique identifier for this resource'
         output: true
@@ -7601,7 +7601,7 @@ objects:
         description: |
           The number of virtual CPUs that are available to the instance.
         output: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -7680,7 +7680,7 @@ objects:
         description: |
           The gateway address for default routing out of the network. This value
           is selected by GCP.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -7926,7 +7926,7 @@ objects:
           Zone where the network endpoint group is located.
         required: true
     properties:
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -8088,7 +8088,7 @@ objects:
         path: 'error/errors'
         message: 'message'
     properties:
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -9362,7 +9362,7 @@ objects:
         name: 'description'
         description: 'An optional description of this resource.'
         output: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -9449,7 +9449,7 @@ objects:
         required: true
         input: true
     properties:
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'Unique identifier for the resource.'
         output: true
@@ -9790,7 +9790,7 @@ objects:
         name: 'description'
         description: 'An optional description of this resource.'
         output: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -9956,7 +9956,7 @@ objects:
         description: |
           An optional description of this resource. Provide this property when
           you create the resource.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -10127,7 +10127,7 @@ objects:
               description: |
                 The name of the PathMatcher to use to match the path portion of
                 the URL if the hostRule matches the URL's host portion.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -11534,7 +11534,7 @@ objects:
           A so-far unhealthy instance will be marked healthy after this many
           consecutive successes. The default value is 2.
         default_value: 2
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: |
           The unique identifier for the resource. This identifier is defined by
@@ -12691,7 +12691,7 @@ objects:
         input: true
         required: true
     properties:
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -13173,7 +13173,7 @@ objects:
         name: 'name'
         description: 'Name of the security policy.'
         required: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -13386,7 +13386,7 @@ objects:
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
         output: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -13498,7 +13498,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -13566,7 +13566,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -13670,7 +13670,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -13745,7 +13745,7 @@ objects:
         name: 'description'
         description: |
           An optional description of this resource.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         output: true
         description: |
@@ -13900,7 +13900,7 @@ objects:
         name: 'description'
         description: 'An optional description of this resource.'
         input: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -14043,7 +14043,7 @@ objects:
           The gateway address for default routes to reach destination addresses
           outside this subnetwork.
         output: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -14287,7 +14287,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -14353,7 +14353,7 @@ objects:
         name: 'description'
         description: 'An optional description of this resource.'
         input: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -14470,7 +14470,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -14545,7 +14545,7 @@ objects:
         name: 'description'
         description: 'An optional description of this resource.'
         input: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -14801,7 +14801,7 @@ objects:
           A member instance in this pool is considered healthy if and only if
           the health checks pass. If not specified it means all member instances
           will be considered healthy at all times.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -14887,7 +14887,7 @@ objects:
         name: 'description'
         description: 'An optional description of this resource.'
         input: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -14991,7 +14991,7 @@ objects:
         name: 'description'
         description: 'An optional description of this resource.'
         input: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -15085,7 +15085,7 @@ objects:
           character, which cannot be a dash.
         required: true
         input: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -15184,7 +15184,7 @@ objects:
           character, which cannot be a dash.
         required: true
         input: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -15338,7 +15338,7 @@ objects:
         description: |
           An optional description of this resource. Provide this property when you create
           the resource.
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
@@ -17902,7 +17902,7 @@ objects:
         name: 'description'
         description: 'An optional textual description of the resource.'
         output: true
-      - !ruby/object:Api::Type::Integer
+      - !ruby/object:Api::Type::String
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
