@@ -26,19 +26,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "example"
         vars:
           name: "workflow"
-      # - !ruby/object:Provider::Terraform::Examples
-      #   name: "pubsub_topic_cmek"
-      #   primary_resource_id: "example"
-      #   skip_test: true
-      #   vars:
-      #     topic_name: "example-topic"
-      #     key_name: "example-key"
-      #     keyring_name: "example-keyring"
-      # - !ruby/object:Provider::Terraform::Examples
-      #   name: "pubsub_topic_geo_restricted"
-      #   primary_resource_id: "example"
-      #   vars:
-      #     topic_name: "example-topic"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'

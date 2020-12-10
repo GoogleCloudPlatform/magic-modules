@@ -61,13 +61,13 @@ objects:
       - !ruby/object:Api::Type::String
         name: region
         description: The region of the workflow.
-        url_param_only: true   
+        url_param_only: true
+        input: true
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
-        description: 'Name of the Workflow.'
+        description: Name of the Workflow.
         input: true
-        # pattern: 'projects/{{project}}/locations/{{region}}/workflows/{{name}}'
     properties:
       - !ruby/object:Api::Type::String
         name: 'description'
