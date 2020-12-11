@@ -33,10 +33,10 @@ func resourceBillingSubaccount() *schema.Resource {
 				DiffSuppressFunc: compareSelfLinkOrResourceName,
 			},
 			"deletion_policy": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Default:    "",
-				Validation: validation.StringInSlice([]string{"RENAME_ON_DESTROY", ""}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "",
+				ValidateFunc: validation.StringInSlice([]string{"RENAME_ON_DESTROY", ""}, false),
 			},
 			"billing_account_id": {
 				Type:     schema.TypeString,
@@ -56,6 +56,10 @@ func resourceBillingSubaccount() *schema.Resource {
 
 func resourceBillingSubaccountCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	displayName := d.Get("display_name").(string)
 	masterBillingAccount := d.Get("master_billing_account").(string)
@@ -65,7 +69,7 @@ func resourceBillingSubaccountCreate(d *schema.ResourceData, meta interface{}) e
 		MasterBillingAccount: canonicalBillingAccountName(masterBillingAccount),
 	}
 
-	res, err := config.clientBilling.BillingAccounts.Create(billingAccount).Do()
+	res, err := config.NewBillingClient(userAgent).BillingAccounts.Create(billingAccount).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating billing subaccount '%s' in master account '%s': %s", displayName, masterBillingAccount, err)
 	}
@@ -77,10 +81,14 @@ func resourceBillingSubaccountCreate(d *schema.ResourceData, meta interface{}) e
 
 func resourceBillingSubaccountRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 
-	billingAccount, err := config.clientBilling.BillingAccounts.Get(d.Id()).Do()
+	billingAccount, err := config.NewBillingClient(userAgent).BillingAccounts.Get(d.Id()).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Billing Subaccount Not Found : %s", id))
 	}
@@ -96,12 +104,16 @@ func resourceBillingSubaccountRead(d *schema.ResourceData, meta interface{}) err
 
 func resourceBillingSubaccountUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	if ok := d.HasChange("display_name"); ok {
 		billingAccount := &cloudbilling.BillingAccount{
 			DisplayName: d.Get("display_name").(string),
 		}
-		_, err := config.clientBilling.BillingAccounts.Patch(d.Id(), billingAccount).UpdateMask("display_name").Do()
+		_, err := config.NewBillingClient(userAgent).BillingAccounts.Patch(d.Id(), billingAccount).UpdateMask("display_name").Do()
 		if err != nil {
 			return handleNotFoundError(err, d, fmt.Sprintf("Error updating billing account : %s", d.Id()))
 		}
@@ -111,6 +123,10 @@ func resourceBillingSubaccountUpdate(d *schema.ResourceData, meta interface{}) e
 
 func resourceBillingSubaccountDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
+	if err != nil {
+		return err
+	}
 
 	deletionPolicy := d.Get("deletion_policy").(string)
 
@@ -119,7 +135,7 @@ func resourceBillingSubaccountDelete(d *schema.ResourceData, meta interface{}) e
 		billingAccount := &cloudbilling.BillingAccount{
 			DisplayName: "Terraform Destroyed " + t.Format("20060102150405"),
 		}
-		_, err := config.clientBilling.BillingAccounts.Patch(d.Id(), billingAccount).UpdateMask("display_name").Do()
+		_, err := config.NewBillingClient(userAgent).BillingAccounts.Patch(d.Id(), billingAccount).UpdateMask("display_name").Do()
 		if err != nil {
 			return handleNotFoundError(err, d, fmt.Sprintf("Error updating billing account : %s", d.Id()))
 		}
