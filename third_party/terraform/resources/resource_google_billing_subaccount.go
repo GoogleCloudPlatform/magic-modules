@@ -15,21 +15,15 @@ func resourceBillingSubaccount() *schema.Resource {
 		Read:   resourceBillingSubaccountRead,
 		Delete: resourceBillingSubaccountDelete,
 		Update: resourceBillingSubaccountUpdate,
+
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+
 		Schema: map[string]*schema.Schema{
 			"display_name": {
 				Type:     schema.TypeString,
 				Required: true,
-			},
-			"open": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 			"master_billing_account": {
 				Type:             schema.TypeString,
@@ -37,14 +31,22 @@ func resourceBillingSubaccount() *schema.Resource {
 				ForceNew:         true,
 				DiffSuppressFunc: compareSelfLinkOrResourceName,
 			},
-			"billing_account_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"rename_on_destroy": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
+			},
+			"billing_account_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"open": {
+				Type:     schema.TypeBool,
+				Computed: true,
 			},
 		},
 	}
