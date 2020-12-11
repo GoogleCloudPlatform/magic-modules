@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/cloudbilling/v1"
 )
 
@@ -31,10 +32,11 @@ func resourceBillingSubaccount() *schema.Resource {
 				ForceNew:         true,
 				DiffSuppressFunc: compareSelfLinkOrResourceName,
 			},
-			"rename_on_destroy": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+			"deletion_policy": {
+				Type:       schema.TypeString,
+				Optional:   true,
+				Default:    "",
+				Validation: validation.StringInSlice([]string{"RENAME_ON_DESTROY", ""}, false),
 			},
 			"billing_account_id": {
 				Type:     schema.TypeString,
@@ -110,9 +112,9 @@ func resourceBillingSubaccountUpdate(d *schema.ResourceData, meta interface{}) e
 func resourceBillingSubaccountDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	renameOnDestroy := d.Get("rename_on_destroy").(bool)
+	deletionPolicy := d.Get("deletion_policy").(string)
 
-	if renameOnDestroy {
+	if deletionPolicy == "RENAME_ON_DESTROY" {
 		t := time.Now()
 		billingAccount := &cloudbilling.BillingAccount{
 			DisplayName: "Terraform Destroyed " + t.Format("20060102150405"),
