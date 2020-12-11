@@ -78,12 +78,10 @@ func resourceBillingSubaccountRead(d *schema.ResourceData, meta interface{}) err
 
 	id := d.Id()
 
-	res, err := config.clientBilling.BillingAccounts.Get(d.Id()).Do()
+	billingAccount, err := config.clientBilling.BillingAccounts.Get(d.Id()).Do()
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Billing Subaccount Not Found : %s", id))
 	}
-
-	billingAccount := res
 
 	d.Set("name", billingAccount.Name)
 	d.Set("display_name", billingAccount.DisplayName)
