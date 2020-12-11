@@ -90,15 +90,16 @@ instead of SSH. You will probably not have to do this in your typical developmen
 
 Run the compiler:
 ```bash
-ruby compiler.rb -p products/pubsub -e ansible -o build
+ruby compiler.rb -p products/pubsub -e ansible -o build/ansible
 ```
 
 This command tells us to run the compiler for the pubsub API, and generate Ansible into the
-`build/build/plugins/modules` directory.
+`build/ansible/plugins/modules` directory.
 
-Let's see our changes! Navigate to the Ansible submodule and run `git diff` to see what changed:
+Let's see our changes! Navigate to the Ansible folder
 ```bash
-cd build/build/plugins/modules/, view gcp_pubsub_topic.py
+cd build/ansible/plugins/modules/
+// view gcp_pubsub_topic.py in editor of your choice.
 ```
 
 ## Congratulations!
