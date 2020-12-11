@@ -69,11 +69,8 @@ func resourceBillingSubaccountCreate(d *schema.ResourceData, meta interface{}) e
 	}
 
 	d.SetId(res.Name)
-	d.Set("name", res.Name)
-	d.Set("open", res.Open)
-	d.Set("billing_account_id", GetResourceNameFromSelfLink(d.Get("name").(string)))
 
-	return nil
+	return resourceBillingSubaccountRead(d, meta)
 }
 
 func resourceBillingSubaccountRead(d *schema.ResourceData, meta interface{}) error {
