@@ -216,9 +216,9 @@ module Compile
     # The key-value pair may be a Hash or a Binding
     def compile_string(ctx, source)
       if ctx.is_a? Binding
-        ERB.new(source, trim_mode: '->').result(ctx).split("\n")
+        ERB.new(source, nil, '->').result(ctx).split("\n")
       elsif ctx.is_a? Hash
-        ERB.new(source, trim_mode: '->').result(
+        ERB.new(source, nil, '->').result(
           OpenStruct.new(ctx).instance_eval { binding.of_caller(1) }
         ).split("\n")
       else
