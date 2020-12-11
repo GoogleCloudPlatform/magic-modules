@@ -27,8 +27,9 @@ resource "google_billing_subaccount" "subaccount" {
 * `master_billing_account` (Required) - The name of the master billing account that the subaccount
   will be created under in the form `{billing_account_id}` or `billingAccounts/{billing_account_id}`.
 
-* `rename_on_destroy` (Optional) - If `true` the billing account display_name will be changed to
-  "Terraform Destroyed" along with a timestamp.  If `false` this will not occur.  Default is `false`.
+* `deletion_policy` (Optional) - If set to "RENAME_ON_DESTROY" the billing account display_name
+  will be changed to "Terraform Destroyed" along with a timestamp.  If set to "" this will not occur.
+  Default is "".
 
 ## Attributes Reference
 
@@ -46,5 +47,4 @@ Billing Subaccounts can be imported using any of these accepted formats:
 
 ```
 $ terraform import google_billing_subaccount.default billingAccounts/{billing_account_id}
-$ terraform import google_billing_subaccount.default {billing_account_id}
 ```
