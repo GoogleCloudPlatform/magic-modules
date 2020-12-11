@@ -247,47 +247,7 @@ module Provider
       end
 
       def generate_resource_tests(pwd, data)
-        prod_name = data.object.name.underscore
-        path = ["products/#{data.product.api_name}",
-                "examples/ansible/#{prod_name}.yaml"].join('/')
-
-        return if data.object.tests.tests.empty?
-
-        target_folder = data.output_folder
-
-        name = module_name(data.object)
-
-        # Generate the main file with a list of tests.
-        path = File.join(target_folder,
-                         "tests/integration/targets/#{name}/tasks/main.yml")
-        data.generate(
-          pwd,
-          'templates/ansible/tests_main.erb',
-          path,
-          self
-        )
-
-        # Generate each of the tests individually
-        data.object.tests.tests.each do |t|
-          path = File.join(target_folder,
-                           "tests/integration/targets/#{name}/tasks/#{t.name}.yml")
-          data.generate(
-            pwd,
-            t.path,
-            path,
-            self
-          )
-        end
-
-        # Generate 'defaults' file that contains variables.
-        path = File.join(target_folder,
-                         "tests/integration/targets/#{name}/defaults/main.yml")
-        data.generate(
-          pwd,
-          'templates/ansible/integration_test_variables.erb',
-          path,
-          self
-        )
+        return
       end
 
       def generate_resource_sweepers(pwd, data)
@@ -367,7 +327,7 @@ module Provider
     end
 
     def copy_common_files(output_folder, generate_code, generate_docs, provider_name = 'ansible')
-      super(output_folder, generate_code, generate_docs, provider_name)
+      return
     end
 
     def module_utils_import_path
