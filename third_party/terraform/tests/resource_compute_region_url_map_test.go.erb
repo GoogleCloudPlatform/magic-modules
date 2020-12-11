@@ -192,7 +192,7 @@ func TestAccComputeRegionUrlMap_defaultUrlRedirectWithinPathMatcher(t *testing.T
 		CheckDestroy: testAccCheckComputeUrlMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccComputeRegionUrlMap_defaultUrlRedirectWithinPathMatcherConfig(randomSuffix),
+				Config: testAccComputeRegionUrlMap_defaultUrlRedirectWithinPathMatcherConfig(randomSuffix),
 			},
 			{
 				ResourceName:      "google_compute_region_url_map.foobar",
@@ -878,7 +878,7 @@ resource "google_compute_region_url_map" "foobar" {
 `, randomSuffix)
 }
 
-func TestAccComputeRegionUrlMap_defaultUrlRedirectWithinPathMatcherConfig(randomSuffix string) string {
+func testAccComputeRegionUrlMap_defaultUrlRedirectWithinPathMatcherConfig(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_url_map" "foobar" {
   name            = "urlmap-test-%s"
