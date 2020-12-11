@@ -46,6 +46,8 @@ module Provider
         check :compile, type: Hash
         check :copy, type: Hash
         check :resource, type: Hash
+
+        @resource = {}
       end
     end
 
