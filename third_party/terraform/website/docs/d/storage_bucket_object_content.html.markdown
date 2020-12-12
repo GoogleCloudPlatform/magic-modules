@@ -10,7 +10,7 @@ description: |-
 
 # google\_storage\_bucket\_object\_content
 
-Gets an existing object content  inside an existing bucket in Google Cloud Storage service (GCS).
+Gets an existing object content inside an existing bucket in Google Cloud Storage service (GCS).
 See [the official documentation](https://cloud.google.com/storage/docs/key-terms#objects)
 and
 [API](https://cloud.google.com/storage/docs/json_api/v1/objects).
@@ -45,4 +45,3 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `content` - (Computed) [Content-Language](https://tools.ietf.org/html/rfc7231#section-3.1.3.2) of the object content.
-
