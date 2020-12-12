@@ -29,8 +29,6 @@ func TestAccFirebaseWebApp_firebaseWebAppFull(t *testing.T) {
 				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, "2"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "api_key"),
-                                        //      comment below check as database_url is not included in the api response 
-                                        //	resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "database_url"),
 					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "auth_domain"),
 					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "storage_bucket"),
 				),
