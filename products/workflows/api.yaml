@@ -72,6 +72,20 @@ objects:
         name: 'description'
         description: |
           Description of the workflow provided by the user. Must be at most 1000 unicode characters long.
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          The timestamp of when the workflow was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. 
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          The timestamp of when the workflow was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. 
+      - !ruby/object:Api::Type::String
+        name: 'state'
+        output: true
+        description: State of the workflow deployment.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
