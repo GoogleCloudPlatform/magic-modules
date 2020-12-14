@@ -14,11 +14,16 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Workflow: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |
+        * `workflow_id_prefix` - (Optional) Creates a unique name beginning with the
+         specified prefix. If this and workflow_id are unspecified, a random value is chosen for the name.
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
       update_minutes: 6
       delete_minutes: 6
     autogen_async: true
+    id_format: '{{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "workflow_basic"
@@ -28,14 +33,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           name: "workflow"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
         diff_suppress_func: 'compareSelfLinkOrResourceName'
-        custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
-        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       serviceAccount: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       description: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      extra_schema_entry: templates/terraform/extra_schema_entry/workflow.erb
+      encoder: templates/terraform/encoders/workflow.go.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

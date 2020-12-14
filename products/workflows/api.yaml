@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2020 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -54,21 +54,20 @@ objects:
       api: 'https://cloud.google.com/workflows/docs/reference/rest/v1beta/projects.locations.workflows'
     base_url: projects/{{project}}/locations/{{region}}/workflows
     create_url: projects/{{project}}/locations/{{region}}/workflows?workflowId={{name}}
+    self_link: '{{name}}'
     update_verb: :PATCH
     update_mask: true
-    # update_url: projects/{{project}}/topics/{{name}}
     parameters:
       - !ruby/object:Api::Type::String
         name: region
         description: The region of the workflow.
         url_param_only: true
         input: true
+    properties:
       - !ruby/object:Api::Type::String
         name: 'name'
-        required: true
         description: Name of the Workflow.
-        input: true
-    properties:
+        output: true
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |

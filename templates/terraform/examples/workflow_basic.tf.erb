@@ -3,7 +3,6 @@ resource "google_workflows_workflow" "<%= ctx[:primary_resource_id] %>" {
   name          = "<%= ctx[:vars]['name'] %>"
   region        = "us-central1"
   description   = "Magic"
-  service_account = google_service_account.<%= ctx[:primary_resource_id] %>.email
   source_contents = <<-EOF
   # This is a sample workflow, feel free to replace it with your source code
   #
@@ -30,13 +29,5 @@ resource "google_workflows_workflow" "<%= ctx[:primary_resource_id] %>" {
       result: WikiResult
   - returnOutput:
       return: $${WikiResult.body[1]}
-
 EOF
-}
-
-resource "google_service_account" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
-
-  account_id   = "<%= ctx[:vars]['name'] %>"
-  display_name = "Test Service Account"
 }
