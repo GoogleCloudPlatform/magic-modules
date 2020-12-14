@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -70,8 +69,6 @@ func TestAccRedisInstance_regionFromLocation(t *testing.T) {
 	})
 }
 
-
-<% unless version == 'ga' -%>
 func TestAccRedisInstance_redisInstanceAuthEnabled(t *testing.T) {
 	t.Parallel()
 
@@ -94,7 +91,7 @@ func TestAccRedisInstance_redisInstanceAuthEnabled(t *testing.T) {
 				ResourceName:            "google_redis_instance.cache",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region"},
+				ImportStateVerifyIgnore: []string{"region", "auth_string"},
 			},
 			{
 				Config: testAccRedisInstance_redisInstanceAuthDisabled(context),
@@ -103,12 +100,11 @@ func TestAccRedisInstance_redisInstanceAuthEnabled(t *testing.T) {
 				ResourceName:            "google_redis_instance.cache",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region"},
+				ImportStateVerifyIgnore: []string{"region", "auth_string"},
 			},
 		},
 	})
 }
-<% end -%>
 
 func testAccRedisInstance_update(name string) string {
 	return fmt.Sprintf(`
@@ -161,8 +157,6 @@ resource "google_redis_instance" "test" {
 `, name, zone)
 }
 
-
-<% unless version == 'ga' -%>
 func testAccRedisInstance_redisInstanceAuthEnabled(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_redis_instance" "cache" {
@@ -182,4 +176,3 @@ resource "google_redis_instance" "cache" {
 }
 `, context)
 }
-<% end -%>

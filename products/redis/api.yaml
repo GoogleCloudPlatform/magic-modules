@@ -78,7 +78,6 @@ objects:
           instance. If set to "true" AUTH is enabled on the instance.
           Default value is "false" meaning AUTH is disabled.
         default_value: false
-        min_version: beta
       - !ruby/object:Api::Type::String
         name: authorizedNetwork
         description: |
