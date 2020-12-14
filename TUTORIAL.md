@@ -16,14 +16,14 @@ This tutorial will walk you through the components that make up Magic Modules.
 Each product's api definition is stored in the magic-modules repo.
 
 Let's open
-<walkthrough-editor-open-file filePath="magic-modules/products/pubsub/api.yaml"
+<walkthrough-editor-open-file filePath="products/pubsub/api.yaml"
                               text="products/pubsub/api.yaml">
 </walkthrough-editor-open-file>.
 
 ### Product Metadata
 
 The
-<walkthrough-editor-select-regex filePath="magic-modules/products/pubsub/api.yaml"
+<walkthrough-editor-select-regex filePath="products/pubsub/api.yaml"
                                  regex="!ruby/object:Api::Product"
                                  text="top section">
 </walkthrough-editor-select-regex>
@@ -34,7 +34,7 @@ provides metadata about the API, such as name, scopes, and versions.
 Each `api.yaml` file contains a list of resources. A resource is an item in that product,
 such as a PubSub Subscription, a Compute Instance, or a GKE Cluster.
 Let's
-<walkthrough-editor-select-regex filePath="magic-modules/products/pubsub/api.yaml"
+<walkthrough-editor-select-regex filePath="products/pubsub/api.yaml"
                                  regex="!ruby/object:Api::Resource"
                                  text="look at">
 </walkthrough-editor-select-regex>
@@ -45,7 +45,7 @@ This section contains data about the resource, such as its name, description, an
 ### Properties
 
 Each resource contains a list of
-<walkthrough-editor-select-regex filePath="magic-modules/products/pubsub/api.yaml"
+<walkthrough-editor-select-regex filePath="products/pubsub/api.yaml"
                                  regex="properties:"
                                  text="properties">
 </walkthrough-editor-select-regex>
@@ -62,7 +62,7 @@ Within each product directory, each provider has its own `[provider].yaml` file 
 specific to that provider.
 
 Let's look at
-<walkthrough-editor-open-file filePath="magic-modules/products/pubsub/ansible.yaml"
+<walkthrough-editor-open-file filePath="products/pubsub/ansible.yaml"
                               text="products/pubsub/ansible.yaml">
 </walkthrough-editor-open-file>.
 
@@ -75,7 +75,7 @@ To add a new API or resource, the only files that need to be modified are `api.y
 `[provider].yaml`, and any custom code or provider-specific extras.
 
 Let's actually make a change. Go back to
-<walkthrough-editor-open-file filePath="magic-modules/products/pubsub/api.yaml"
+<walkthrough-editor-open-file filePath="products/pubsub/api.yaml"
                               text="products/pubsub/api.yaml">
 </walkthrough-editor-open-file>
 
