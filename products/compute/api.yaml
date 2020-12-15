@@ -122,27 +122,19 @@ objects:
         required: true
       - !ruby/object:Api::Type::Enum
         name: purpose
-        exact_version: ga
         description: |
           The purpose of this resource, which can be one of the following values:
 
           * GCE_ENDPOINT for addresses that are used by VM instances, alias IP ranges, internal load balancers, and similar resources.
 
-          This should only be set when using an Internal address.
-        values:
-          - :GCE_ENDPOINT
-      - !ruby/object:Api::Type::Enum
-        name: purpose
-        exact_version: beta
-        description: |
-          The purpose of this resource, which can be one of the following values:
-
-          * GCE_ENDPOINT for addresses that are used by VM instances, alias IP ranges, internal load balancers, and similar resources.
           * SHARED_LOADBALANCER_VIP for an address that can be used by multiple internal load balancers.
 
+          * VPC_PEERING for addresses that are reserved for VPC peer networks.
+
           This should only be set when using an Internal address.
         values:
           - :GCE_ENDPOINT
+          - :VPC_PEERING
           - :SHARED_LOADBALANCER_VIP
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
@@ -552,7 +544,6 @@ objects:
         properties:
         - !ruby/object:Api::Type::Integer
           name: 'signedUrlCacheMaxAgeSec'
-          required: true
           description: |
             Maximum number of seconds the response to a signed URL request will
             be considered fresh. After this time period,
@@ -562,6 +553,69 @@ objects:
             all responses from this backend had a "Cache-Control: public,
             max-age=[TTL]" header, regardless of any existing Cache-Control
             header. The actual headers served in responses will not be altered.
+        - !ruby/object:Api::Type::Integer
+          name: 'defaultTtl'
+          min_version: beta
+          description: |
+            Specifies the default TTL for cached content served by this origin for responses 
+            that do not have an existing valid TTL (max-age or s-max-age).
+        - !ruby/object:Api::Type::Integer
+          name: 'maxTtl'
+          min_version: beta
+          description: |
+            Specifies the maximum allowed TTL for cached content served by this origin.
+        - !ruby/object:Api::Type::Integer
+          name: 'clientTtl'
+          min_version: beta
+          description: |
+            Specifies the maximum allowed TTL for cached content served by this origin.
+        - !ruby/object:Api::Type::Boolean
+          name: 'negativeCaching'
+          min_version: beta
+          description: |
+            Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
+        - !ruby/object:Api::Type::Array
+          name: 'negativeCachingPolicy'
+          min_version: beta
+          description: |
+            Sets a cache TTL for the specified HTTP status code. negativeCaching must be enabled to configure negativeCachingPolicy.
+            Omitting the policy and leaving negativeCaching enabled will use Cloud CDN's default cache TTLs.
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'code'
+                min_version: beta
+                description: |
+                  The HTTP status code to define a TTL against. Only HTTP status codes 300, 301, 308, 404, 405, 410, 421, 451 and 501
+                  can be specified as values, and you cannot specify a status code more than once.
+              - !ruby/object:Api::Type::Integer
+                name: 'ttl'
+                min_version: beta
+                description: |
+                  The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
+                  (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
+        - !ruby/object:Api::Type::Enum
+          name: 'cacheMode'
+          min_version: beta
+          description: |
+            Specifies the cache setting for all responses from this backend.
+            The possible values are: USE_ORIGIN_HEADERS, FORCE_CACHE_ALL and CACHE_ALL_STATIC
+          values:
+            - :USE_ORIGIN_HEADERS
+            - :FORCE_CACHE_ALL
+            - :CACHE_ALL_STATIC
+        - !ruby/object:Api::Type::Integer
+          name: 'serveWhileStale'
+          min_version: beta
+          description: |
+            Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache. 
+
+      - !ruby/object:Api::Type::Array
+        name: 'customResponseHeaders'
+        min_version: beta
+        description: |
+          Headers that the HTTP/S load balancer should add to proxied responses.
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
@@ -1101,6 +1155,62 @@ objects:
               "Cache-Control: public, max-age=[TTL]" header, regardless of any
               existing Cache-Control header. The actual headers served in
               responses will not be altered.
+          - !ruby/object:Api::Type::Integer
+            name: 'defaultTtl'
+            min_version: beta
+            description: |
+              Specifies the default TTL for cached content served by this origin for responses 
+              that do not have an existing valid TTL (max-age or s-max-age).
+          - !ruby/object:Api::Type::Integer
+            name: 'maxTtl'
+            min_version: beta
+            description: |
+              Specifies the maximum allowed TTL for cached content served by this origin.
+          - !ruby/object:Api::Type::Integer
+            name: 'clientTtl'
+            min_version: beta
+            description: |
+              Specifies the maximum allowed TTL for cached content served by this origin.
+          - !ruby/object:Api::Type::Boolean
+            name: 'negativeCaching'
+            min_version: beta
+            description: |
+              Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
+          - !ruby/object:Api::Type::Array
+            name: 'negativeCachingPolicy'
+            min_version: beta
+            description: |
+              Sets a cache TTL for the specified HTTP status code. negativeCaching must be enabled to configure negativeCachingPolicy.
+              Omitting the policy and leaving negativeCaching enabled will use Cloud CDN's default cache TTLs.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: 'code'
+                  min_version: beta
+                  description: |
+                    The HTTP status code to define a TTL against. Only HTTP status codes 300, 301, 308, 404, 405, 410, 421, 451 and 501
+                    can be specified as values, and you cannot specify a status code more than once.
+                - !ruby/object:Api::Type::Integer
+                  name: 'ttl'
+                  min_version: beta
+                  description: |
+                    The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
+                    (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
+          - !ruby/object:Api::Type::Enum
+            name: 'cacheMode'
+            min_version: beta
+            description: |
+              Specifies the cache setting for all responses from this backend.
+              The possible values are: USE_ORIGIN_HEADERS, FORCE_CACHE_ALL and CACHE_ALL_STATIC
+            values:
+              - :USE_ORIGIN_HEADERS
+              - :FORCE_CACHE_ALL
+              - :CACHE_ALL_STATIC
+          - !ruby/object:Api::Type::Integer
+            name: 'serveWhileStale'
+            min_version: beta
+            description: |
+              Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache. 
       - !ruby/object:Api::Type::NestedObject
         name: 'connectionDraining'
         description: |
@@ -1125,6 +1235,7 @@ objects:
           requests.
       - !ruby/object:Api::Type::Array
         name: 'customResponseHeaders'
+        min_version: beta
         item_type: Api::Type::String
         description: |
           Headers that the HTTP/S load balancer should add to proxied
@@ -1924,6 +2035,164 @@ objects:
               virtual node.
               Defaults to 1024.
       - !ruby/object:Api::Type::NestedObject
+        name: 'cdnPolicy'
+        description: 'Cloud CDN configuration for this BackendService.'
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'cacheKeyPolicy'
+            description: 'The CacheKeyPolicy for this CdnPolicy.'
+            at_least_one_of:
+              - cdn_policy.0.cache_key_policy
+              - cdn_policy.0.signed_url_cache_max_age_sec
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'includeHost'
+                send_empty_value: true
+                at_least_one_of:
+                  - cdn_policy.0.cache_key_policy.0.include_host
+                  - cdn_policy.0.cache_key_policy.0.include_protocol
+                  - cdn_policy.0.cache_key_policy.0.include_query_string
+                  - cdn_policy.0.cache_key_policy.0.query_string_blacklist
+                  - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                description: |
+                  If true requests to different hosts will be cached separately.
+              - !ruby/object:Api::Type::Boolean
+                name: 'includeProtocol'
+                send_empty_value: true
+                at_least_one_of:
+                  - cdn_policy.0.cache_key_policy.0.include_host
+                  - cdn_policy.0.cache_key_policy.0.include_protocol
+                  - cdn_policy.0.cache_key_policy.0.include_query_string
+                  - cdn_policy.0.cache_key_policy.0.query_string_blacklist
+                  - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                description: |
+                  If true, http and https requests will be cached separately.
+              - !ruby/object:Api::Type::Boolean
+                name: 'includeQueryString'
+                send_empty_value: true
+                at_least_one_of:
+                  - cdn_policy.0.cache_key_policy.0.include_host
+                  - cdn_policy.0.cache_key_policy.0.include_protocol
+                  - cdn_policy.0.cache_key_policy.0.include_query_string
+                  - cdn_policy.0.cache_key_policy.0.query_string_blacklist
+                  - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                description: |
+                  If true, include query string parameters in the cache key
+                  according to query_string_whitelist and
+                  query_string_blacklist. If neither is set, the entire query
+                  string will be included.
+
+                  If false, the query string will be excluded from the cache
+                  key entirely.
+              - !ruby/object:Api::Type::Array
+                name: 'queryStringBlacklist'
+                send_empty_value: true
+                at_least_one_of:
+                  - cdn_policy.0.cache_key_policy.0.include_host
+                  - cdn_policy.0.cache_key_policy.0.include_protocol
+                  - cdn_policy.0.cache_key_policy.0.include_query_string
+                  - cdn_policy.0.cache_key_policy.0.query_string_blacklist
+                  - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                description: |
+                  Names of query string parameters to exclude in cache keys.
+
+                  All other parameters will be included. Either specify
+                  query_string_whitelist or query_string_blacklist, not both.
+                  '&' and '=' will be percent encoded and not treated as
+                  delimiters.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Array
+                send_empty_value: true
+                name: 'queryStringWhitelist'
+                at_least_one_of:
+                  - cdn_policy.0.cache_key_policy.0.include_host
+                  - cdn_policy.0.cache_key_policy.0.include_protocol
+                  - cdn_policy.0.cache_key_policy.0.include_query_string
+                  - cdn_policy.0.cache_key_policy.0.query_string_blacklist
+                  - cdn_policy.0.cache_key_policy.0.query_string_whitelist
+                description: |
+                  Names of query string parameters to include in cache keys.
+
+                  All other parameters will be excluded. Either specify
+                  query_string_whitelist or query_string_blacklist, not both.
+                  '&' and '=' will be percent encoded and not treated as
+                  delimiters.
+                item_type: Api::Type::String
+          - !ruby/object:Api::Type::Integer
+            name: 'signedUrlCacheMaxAgeSec'
+            default_value: 3600
+            at_least_one_of:
+              - cdn_policy.0.cache_key_policy
+              - cdn_policy.0.signed_url_cache_max_age_sec
+            description: |
+              Maximum number of seconds the response to a signed URL request
+              will be considered fresh, defaults to 1hr (3600s). After this
+              time period, the response will be revalidated before
+              being served.
+
+              When serving responses to signed URL requests, Cloud CDN will
+              internally behave as though all responses from this backend had a
+              "Cache-Control: public, max-age=[TTL]" header, regardless of any
+              existing Cache-Control header. The actual headers served in
+              responses will not be altered.
+          - !ruby/object:Api::Type::Integer
+            name: 'defaultTtl'
+            min_version: beta
+            description: |
+              Specifies the default TTL for cached content served by this origin for responses 
+              that do not have an existing valid TTL (max-age or s-max-age).
+          - !ruby/object:Api::Type::Integer
+            name: 'maxTtl'
+            min_version: beta
+            description: |
+              Specifies the maximum allowed TTL for cached content served by this origin.
+          - !ruby/object:Api::Type::Integer
+            name: 'clientTtl'
+            min_version: beta
+            description: |
+              Specifies the maximum allowed TTL for cached content served by this origin.
+          - !ruby/object:Api::Type::Boolean
+            name: 'negativeCaching'
+            min_version: beta
+            description: |
+              Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
+          - !ruby/object:Api::Type::Array
+            name: 'negativeCachingPolicy'
+            min_version: beta
+            description: |
+              Sets a cache TTL for the specified HTTP status code. negativeCaching must be enabled to configure negativeCachingPolicy.
+              Omitting the policy and leaving negativeCaching enabled will use Cloud CDN's default cache TTLs.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: 'code'
+                  min_version: beta
+                  description: |
+                    The HTTP status code to define a TTL against. Only HTTP status codes 300, 301, 308, 404, 405, 410, 421, 451 and 501
+                    can be specified as values, and you cannot specify a status code more than once.
+                - !ruby/object:Api::Type::Integer
+                  name: 'ttl'
+                  min_version: beta
+                  description: |
+                    The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
+                    (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
+          - !ruby/object:Api::Type::Enum
+            name: 'cacheMode'
+            min_version: beta
+            description: |
+              Specifies the cache setting for all responses from this backend.
+              The possible values are: USE_ORIGIN_HEADERS, FORCE_CACHE_ALL and CACHE_ALL_STATIC
+            values:
+              - :USE_ORIGIN_HEADERS
+              - :FORCE_CACHE_ALL
+              - :CACHE_ALL_STATIC
+          - !ruby/object:Api::Type::Integer
+            name: 'serveWhileStale'
+            min_version: beta
+            description: |
+              Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache. 
+
+      - !ruby/object:Api::Type::NestedObject
         name: 'connectionDraining'
         description: |
           Settings for connection draining
@@ -1990,6 +2259,10 @@ objects:
               backend in the "force" mode, where traffic will be spread to the healthy
               VMs with the best effort, or to all VMs when no VM is healthy.
               This field is only used with l4 load balancing.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableCDN'
+        description: |
+          If true, enable Cloud CDN for this RegionBackendService.
       - !ruby/object:Api::Type::Fingerprint
         name: 'fingerprint'
         output: true
@@ -5591,6 +5864,7 @@ objects:
                 - :UEFI_COMPATIBLE
                 - :VIRTIO_SCSI_MULTIQUEUE
                 - :WINDOWS
+                - :GVNIC
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: |
@@ -6078,7 +6352,7 @@ objects:
         description: 'A reference to a machine type which defines VM kind.'
         update_url: projects/{{project}}/zones/{{zone}}/instances/{{name}}/setMachineType
         update_verb: :POST
-      # TODO(alexstephen): Add metatdata
+      # TODO(alexstephen): Add metadata
       - !ruby/object:Api::Type::String
         name: 'minCpuPlatform'
         description: |
@@ -7509,8 +7783,8 @@ objects:
     base_url:  'projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}'
     description: |
       A Network endpoint represents a IP address and port combination that is
-      part of a specific network endpoint group (NEG). NEGs are zonals
-      collection of these endpoints for GCP resources within a
+      part of a specific network endpoint group (NEG). NEGs are zonal
+      collections of these endpoints for GCP resources within a
       single subnet. **NOTE**: Network endpoints cannot be created outside of a
       network endpoint group.
     input: true
@@ -10011,7 +10285,7 @@ objects:
                         - !ruby/object:Api::Type::String
                           name: 'fullPathMatch'
                           description: |
-                            For satifying the matchRule condition, the path of the request must exactly
+                            For satisfying the matchRule condition, the path of the request must exactly
                             match the value specified in fullPathMatch after removing any query parameters
                             and anchor that may be part of the original URL. FullPathMatch must be between 1
                             and 1024 characters. Only one of prefixMatch, fullPathMatch or regexMatch must
@@ -10082,7 +10356,7 @@ objects:
                               - !ruby/object:Api::Type::String
                                 name: 'regexMatch'
                                 description: |
-                                  The value of the header must match the regualar expression specified in
+                                  The value of the header must match the regular expression specified in
                                   regexMatch. For regular expression grammar, please see:
                                   en.cppreference.com/w/cpp/regex/ecmascript  For matching against a port
                                   specified in the HTTP request, use a headerMatch with headerName set to PORT and
@@ -10157,7 +10431,7 @@ objects:
                         - !ruby/object:Api::Type::String
                           name: 'prefixMatch'
                           description: |
-                            For satifying the matchRule condition, the request's path must begin with the
+                            For satisfying the matchRule condition, the request's path must begin with the
                             specified prefixMatch. prefixMatch must begin with a /. The value must be
                             between 1 and 1024 characters. Only one of prefixMatch, fullPathMatch or
                             regexMatch must be specified.
@@ -10196,7 +10470,7 @@ objects:
                         - !ruby/object:Api::Type::String
                           name: 'regexMatch'
                           description: |
-                            For satifying the matchRule condition, the path of the request must satisfy the
+                            For satisfying the matchRule condition, the path of the request must satisfy the
                             regular expression specified in regexMatch after removing any query parameters
                             and anchor supplied with the original URL. For regular expression grammar please
                             see en.cppreference.com/w/cpp/regex/ecmascript  Only one of prefixMatch,
@@ -10238,7 +10512,7 @@ objects:
                             name: 'allowOriginRegexes'
                             item_type: Api::Type::String
                             description: |
-                              Specifies the regualar expression patterns that match allowed origins. For
+                              Specifies the regular expression patterns that match allowed origins. For
                               regular expression grammar please see en.cppreference.com/w/cpp/regex/ecmascript
                               An origin is allowed if it matches either allow_origins or allow_origin_regex.
                           - !ruby/object:Api::Type::Array
@@ -10366,7 +10640,7 @@ objects:
                             name: 'retryConditions'
                             item_type: Api::Type::String
                             description: |
-                              Specfies one or more conditions when this retry rule applies. Valid values are:
+                              Specifies one or more conditions when this retry rule applies. Valid values are:
 
                               * 5xx: Loadbalancer will attempt a retry if the backend service responds with
                                 any 5xx response code, or if the backend service does not respond at all,
@@ -10662,7 +10936,7 @@ objects:
                             name: 'allowOriginRegexes'
                             item_type: Api::Type::String
                             description: |
-                              Specifies the regualar expression patterns that match allowed origins. For
+                              Specifies the regular expression patterns that match allowed origins. For
                               regular expression grammar please see en.cppreference.com/w/cpp/regex/ecmascript
                               An origin is allowed if it matches either allow_origins or allow_origin_regex.
                           - !ruby/object:Api::Type::Array
@@ -13241,7 +13515,6 @@ objects:
     # GCP resource as the preceding certificate object.
     name: 'ManagedSslCertificate'
     kind: 'compute#sslCertificate'
-    min_version: beta
     base_url: projects/{{project}}/global/sslCertificates
     collection_url_key: 'items'
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -15368,7 +15641,7 @@ objects:
                             name: 'allowOriginRegexes'
                             item_type: Api::Type::String
                             description: |
-                              Specifies the regualar expression patterns that match allowed origins. For
+                              Specifies the regular expression patterns that match allowed origins. For
                               regular expression grammar please see en.cppreference.com/w/cpp/regex/ecmascript
                               An origin is allowed if it matches either allow_origins or allow_origin_regex.
                           - !ruby/object:Api::Type::Array
@@ -15842,7 +16115,7 @@ objects:
                         - !ruby/object:Api::Type::String
                           name: 'fullPathMatch'
                           description: |
-                            For satifying the matchRule condition, the path of the request must exactly
+                            For satisfying the matchRule condition, the path of the request must exactly
                             match the value specified in fullPathMatch after removing any query parameters
                             and anchor that may be part of the original URL. FullPathMatch must be between 1
                             and 1024 characters. Only one of prefixMatch, fullPathMatch or regexMatch must
@@ -15908,7 +16181,7 @@ objects:
                               - !ruby/object:Api::Type::String
                                 name: 'regexMatch'
                                 description: |
-                                  The value of the header must match the regualar expression specified in
+                                  The value of the header must match the regular expression specified in
                                   regexMatch. For regular expression grammar, please see:
                                   en.cppreference.com/w/cpp/regex/ecmascript  For matching against a port
                                   specified in the HTTP request, use a headerMatch with headerName set to PORT and
@@ -15982,7 +16255,7 @@ objects:
                         - !ruby/object:Api::Type::String
                           name: 'prefixMatch'
                           description: |
-                            For satifying the matchRule condition, the request's path must begin with the
+                            For satisfying the matchRule condition, the request's path must begin with the
                             specified prefixMatch. prefixMatch must begin with a /. The value must be
                             between 1 and 1024 characters. Only one of prefixMatch, fullPathMatch or
                             regexMatch must be specified.
@@ -16021,7 +16294,7 @@ objects:
                         - !ruby/object:Api::Type::String
                           name: 'regexMatch'
                           description: |
-                            For satifying the matchRule condition, the path of the request must satisfy the
+                            For satisfying the matchRule condition, the path of the request must satisfy the
                             regular expression specified in regexMatch after removing any query parameters
                             and anchor supplied with the original URL. For regular expression grammar please
                             see en.cppreference.com/w/cpp/regex/ecmascript  Only one of prefixMatch,
@@ -16063,7 +16336,7 @@ objects:
                             name: 'allowOriginRegexes'
                             item_type: Api::Type::String
                             description: |
-                              Specifies the regualar expression patterns that match allowed origins. For
+                              Specifies the regular expression patterns that match allowed origins. For
                               regular expression grammar please see en.cppreference.com/w/cpp/regex/ecmascript
                               An origin is allowed if it matches either allow_origins or allow_origin_regex.
                           - !ruby/object:Api::Type::Array
@@ -16707,7 +16980,7 @@ objects:
                     - !ruby/object:Api::Type::Array
                       name: 'allowOriginRegexes'
                       description: |
-                        Specifies the regualar expression patterns that match allowed origins. For regular expression grammar
+                        Specifies the regular expression patterns that match allowed origins. For regular expression grammar
                         please see en.cppreference.com/w/cpp/regex/ecmascript
                         An origin is allowed if it matches either an item in allowOrigins or an item in allowOriginRegexes.
                       item_type: Api::Type::String
@@ -17202,7 +17475,7 @@ objects:
               - !ruby/object:Api::Type::Array
                 name: 'allowOriginRegexes'
                 description: |
-                  Specifies the regualar expression patterns that match allowed origins. For regular expression grammar
+                  Specifies the regular expression patterns that match allowed origins. For regular expression grammar
                   please see en.cppreference.com/w/cpp/regex/ecmascript
                   An origin is allowed if it matches either an item in allowOrigins or an item in allowOriginRegexes.
                 at_least_one_of:
