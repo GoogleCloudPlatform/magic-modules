@@ -93,11 +93,21 @@ func resourceBillingSubaccountRead(d *schema.ResourceData, meta interface{}) err
 		return handleNotFoundError(err, d, fmt.Sprintf("Billing Subaccount Not Found : %s", id))
 	}
 
-	d.Set("name", billingAccount.Name)
-	d.Set("display_name", billingAccount.DisplayName)
-	d.Set("open", billingAccount.Open)
-	d.Set("master_billing_account", billingAccount.MasterBillingAccount)
-	d.Set("billing_account_id", strings.TrimPrefix(d.Get("name").(string), "billingAccounts/"))
+	if err := d.Set("name", billingAccount.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("display_name", billingAccount.DisplayName); err != nil {
+		return fmt.Errorf("Error setting display_na,e: %s", err)
+	}
+	if err := d.Set("open", billingAccount.Open); err != nil {
+		return fmt.Errorf("Error setting open: %s", err)
+	}
+	if err := d.Set("master_billing_account", billingAccount.MasterBillingAccount); err != nil {
+		return fmt.Errorf("Error setting master_billing_account: %s", err)
+	}
+	if err := d.Set("billing_account_id", strings.TrimPrefix(d.Get("name").(string), "billingAccounts/")); err != nil {
+		return fmt.Errorf("Error setting billing_account_id: %s", err)
+	}
 
 	return nil
 }
