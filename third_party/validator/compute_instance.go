@@ -236,7 +236,7 @@ func expandInstanceGuestAccelerators(d TerraformResourceData, config *Config) ([
 }
 
 func expandBootDisk(d TerraformResourceData, config *Config, project string) (*computeBeta.AttachedDisk, error) {
-	userAgent, err := generateUserAgentString(d.(*schema.ResourceData), config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
 		return nil, err
 	}
