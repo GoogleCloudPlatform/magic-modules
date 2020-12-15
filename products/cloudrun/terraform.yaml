@@ -58,7 +58,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       spec.forceOverride: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
+        custom_flatten: templates/terraform/custom_flatten/cloudrun_ignore_force_override.go.erb
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "locations/{{location}}/namespaces/{{project}}/services/{{name}}"
     import_format: ["locations/{{location}}/namespaces/{{project}}/services/{{name}}"]
