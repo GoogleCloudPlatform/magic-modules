@@ -44,7 +44,7 @@ func TestAccBillingSubaccount_basic(t *testing.T) {
 				ResourceName:            "google_billing_subaccount.subaccount",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"rename_on_destroy"},
+				ImportStateVerifyIgnore: []string{"deletion_policy"},
 			},
 			{
 				// Test Billing Subaccount update
@@ -55,7 +55,7 @@ func TestAccBillingSubaccount_basic(t *testing.T) {
 				ResourceName:            "google_billing_subaccount.subaccount",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"rename_on_destroy"},
+				ImportStateVerifyIgnore: []string{"deletion_policy"},
 			},
 		},
 	})
@@ -84,7 +84,7 @@ func testAccBillingSubccount_renameOnDestroy(masterBillingAccountId string) stri
 resource "google_billing_subaccount" "subaccount_with_rename_on_destroy" {
   display_name = "Test Billing Subaccount (Rename on Destroy)"
   master_billing_account  = "%s"
-  rename_on_destroy = true
+  deletion_policy = "RENAME_ON_DESTROY"
 }
 `, masterBillingAccountId)
 }
@@ -94,7 +94,7 @@ func testAccBillingSubccount_updateRenameOnDestroy(masterBillingAccountId string
 resource "google_billing_subaccount" "subaccount_with_rename_on_destroy" {
   display_name = "Rename Test Billing Subaccount (Rename on Destroy)"
   master_billing_account  = "%s"
-  rename_on_destroy = true
+  deletion_policy = "RENAME_ON_DESTROY"
 }
 `, masterBillingAccountId)
 }
