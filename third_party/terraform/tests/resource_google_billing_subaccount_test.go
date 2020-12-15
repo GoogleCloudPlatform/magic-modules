@@ -89,16 +89,6 @@ resource "google_billing_subaccount" "subaccount_with_rename_on_destroy" {
 `, masterBillingAccountId)
 }
 
-func testAccBillingSubccount_updateRenameOnDestroy(masterBillingAccountId string) string {
-	return fmt.Sprintf(`
-resource "google_billing_subaccount" "subaccount_with_rename_on_destroy" {
-  display_name = "Rename Test Billing Subaccount (Rename on Destroy)"
-  master_billing_account  = "%s"
-  deletion_policy = "RENAME_ON_DESTROY"
-}
-`, masterBillingAccountId)
-}
-
 func testAccCheckGoogleBillingSubaccountExists(bindingResourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		subaccount, ok := s.RootModule().Resources["google_billing_subaccount."+bindingResourceName]
