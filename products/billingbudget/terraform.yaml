@@ -14,52 +14,66 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Budget: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        If you are using User ADCs (Application Default Credentials) with this resource,
+        you must specify a `billing_project` and set `user_project_override` to true
+        in the provider configuration. Otherwise the Billing Budgets API will return a 403 error.
+        Your account must have the `serviceusage.services.use` permission on the
+        `billing_project` you defined.
     id_format: '{{name}}'
-    import_format: ['{{name}}']
+    exclude_import: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_basic'
-        min_version: beta
         primary_resource_id: 'budget'
         vars:
           display_name: 'Example Billing Budget'
         test_env_vars:
           billing_acct: :BILLING_ACCT
+        skip_import_test: true
       - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_lastperiod'
-        min_version: beta
         primary_resource_id: 'budget'
         vars:
           display_name: 'Example Billing Budget'
         test_env_vars:
           billing_acct: :BILLING_ACCT
-          project: :PROJECT_NAME
+        skip_import_test: true
       - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_filter'
-        min_version: beta
         primary_resource_id: 'budget'
         vars:
           display_name: 'Example Billing Budget'
         test_env_vars:
           billing_acct: :BILLING_ACCT
-          project: :PROJECT_NAME
+        skip_import_test: true
       - !ruby/object:Provider::Terraform::Examples
         name: 'billing_budget_notify'
-        min_version: beta
         primary_resource_id: 'budget'
         vars:
           budget_name: 'Example Billing Budget'
           channel_name: 'Example Notification Channel'
         test_env_vars:
           billing_acct: :BILLING_ACCT
-          project: :PROJECT_NAME
+        skip_import_test: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
     properties:
-      budget: !ruby/object:Overrides::Terraform::PropertyOverride
-        flatten_object: true
-      budget.amount.lastPeriodAmount: !ruby/object:Overrides::Terraform::PropertyOverride
+      allUpdatesRule.schemaVersion: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
+      budgetFilter.creditTypes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      budgetFilter: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      budgetFilter.services: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      budgetFilter.subaccounts: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      budgetFilter.labels: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      amount.lastPeriodAmount: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/bool_to_object.go.erb'
         custom_flatten: 'templates/terraform/custom_flatten/object_to_bool.go.erb'
 
