@@ -45,7 +45,7 @@ resource "google_composer_environment" "test" {
 
 ### With GKE and Compute Resource Dependencies
 
-**NOTE** To use custom service accounts, you need to give at least `role/composer.worker` to the service account being used Composer Nodes on the Composer project.
+**NOTE** To use custom service accounts, you need to give at least `role/composer.worker` to the service account being used by GKE Nodes on the Composer project.
 You may need to assign additional roles depending on what the Airflow DAGs will be running.
 
 ```hcl
