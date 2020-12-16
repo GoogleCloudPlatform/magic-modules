@@ -87,7 +87,7 @@ resource "google_access_context_manager_access_policy" "access-policy" {
 
 resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_access_binding" {
   organization_id = "%{org_id}"
-  group_key       = google_cloud_identity_group.group.id
+  group_key       = trimprefix("groups/", google_cloud_identity_group.group.id)
   access_levels   = [
     google_access_context_manager_access_level.tf_test_access_level_id_for_user_access_binding%{random_suffix}.name,
   ]
