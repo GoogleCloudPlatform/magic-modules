@@ -12979,6 +12979,13 @@ objects:
               - :ERRORS_ONLY
               - :TRANSLATIONS_ONLY
               - :ALL
+      - !ruby/object:Api::Type::Boolean
+        name: enableEndpointIndependentMapping
+        description: |
+          Specifies if endpoint independent mapping is enabled. This is enabled by default. For more information
+          see the [official documentation](https://cloud.google.com/nat/docs/overview#specs-rfcs).
+        default_value: true
+        send_empty_value: true
   - !ruby/object:Api::Resource
     name: 'RouterBgpPeer'
     base_url: projects/{{project}}/regions/{{region}}/routers/{{router}}

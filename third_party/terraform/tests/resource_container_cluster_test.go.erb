@@ -2462,7 +2462,7 @@ resource "google_container_cluster" "confidential_nodes" {
   enable_shielded_nodes = true
   // Minimum version for confidential node support.
   // Can be removed once default version is greater or equal to this version.
-  min_master_version = "1.18.9-gke.1501"
+  min_master_version = "1.18.12-gke.300"
   release_channel {
     channel = "RAPID"
   }
@@ -2490,7 +2490,7 @@ resource "google_container_cluster" "confidential_nodes" {
   enable_shielded_nodes = true
   // Minimum version for confidential node support.
   // Can be removed once default version is greater or equal to this version.
-  min_master_version = "1.18.9-gke.1501"
+  min_master_version = "1.18.12-gke.300"
   release_channel {
     channel = "RAPID"
   }
@@ -4387,6 +4387,8 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
+  ip_allocation_policy { 
+  }
 
   datapath_provider = "%s"
 
