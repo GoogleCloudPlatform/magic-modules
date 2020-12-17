@@ -237,6 +237,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{name}}"
     autogen_async: true
     exclude_validator: true
+    exclude_resource: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "access_context_manager_gcp_user_access_binding_basic"
