@@ -228,6 +228,17 @@ func isMonitoringConcurrentEditError(err error) (bool, string) {
 	return false, ""
 }
 
+// Retry if filestore operation returns a 429 with a specific message for
+// concurrent operations.
+func isNotFilestoreQuotaError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 429 {
+			return false, ""
+		}
+	}
+	return isCommonRetryableErrorCode(err)
+}
+
 // Retry if App Engine operation returns a 409 with a specific message for
 // concurrent operations.
 func isAppEngineRetryableError(err error) (bool, string) {
