@@ -178,7 +178,7 @@ all_product_files.each do |product_name|
 
   unless product_api.exists_at_version_or_lower(version)
     Google::LOGGER.info \
-      "'#{product_name}' does not have a '#{version}' version, skipping"
+      "#{product_name} does not have a '#{version}' version, skipping"
     next
   end
 
