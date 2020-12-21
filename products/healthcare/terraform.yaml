@@ -121,6 +121,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      parserConfig.segmentTerminator: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateBase64String'
       parserConfig.schema: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
         custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
