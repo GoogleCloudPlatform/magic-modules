@@ -352,7 +352,7 @@ resource "google_storage_bucket" "log-bucket" {
 `, name, project, project, bucketName)
 }
 
-func testAccLoggingProjectSink_disabled_update(name, project, bucketName, disbaled string) string {
+func testAccLoggingProjectSink_disabled_update(name, project, bucketName, disabled string) string {
 	return fmt.Sprintf(`
 resource "google_logging_project_sink" "disabled" {
   name        = "%s"
@@ -367,7 +367,7 @@ resource "google_logging_project_sink" "disabled" {
 resource "google_storage_bucket" "log-bucket" {
   name = "%s"
 }
-`, name, project, project, disbaled, bucketName)
+`, name, project, project, disabled, bucketName)
 }
 
 func testAccLoggingProjectSink_uniqueWriter(name, bucketName string) string {
