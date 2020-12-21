@@ -3502,13 +3502,13 @@ func flattenPrivateClusterConfig(c *containerBeta.PrivateClusterConfig) []map[st
 }
 
 <% unless version == 'ga' -%>
+// Like most GKE blocks, this is not returned from the API at all when false. This causes trouble
+// for users who've set enabled = false in config as they will get a permadiff. Always setting the
+// field resolves that. We can assume if it was not returned, it's false.
 func flattenPrivateClusterConfigMasterGlobalAccessConfig(c *containerBeta.PrivateClusterMasterGlobalAccessConfig) []map[string]interface{} {
-	if c == nil {
-		return nil
-	}
 	return []map[string]interface{}{
 		{
-			"enabled": c.Enabled,
+			"enabled": c != nil && c.Enabled,
 		},
 	}
 }
