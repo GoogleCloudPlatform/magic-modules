@@ -1084,7 +1084,8 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	if r, ok := d.GetOk("restore_backup_context"); ok {
+	if d.HasChange("restore_backup_context") {
+		r := d.Get("restore_backup_context")
 		err = sqlDatabaseInstanceRestoreFromBackup(d, config, userAgent, project, d.Get("name").(string), r)
 		if err != nil {
 			return err
@@ -1397,7 +1398,7 @@ func expandRestoreBackupContext(configured []interface{}) *sqladmin.RestoreBacku
 	}
 }
 
-func sqlDatabaseInstanceRestoreFromBackup(d *schema.ResourceData, config *Config, userAgent, project, instanceId string, r []interface{}) error {
+func sqlDatabaseInstanceRestoreFromBackup(d *schema.ResourceData, config *Config, userAgent, project, instanceId string, r interface{}) error {
 	log.Printf("[DEBUG] Initiating SQL database instance backup restore")
 	restoreContext := r.([]interface{})
 
