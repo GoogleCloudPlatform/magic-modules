@@ -104,6 +104,29 @@ func TestAccMonitoringSlo_basic(t *testing.T) {
 	})
 }
 
+func TestAccMonitoringSlo_availabilitySli(t *testing.T) {
+	t.Parallel()
+
+	var generatedId string
+	vcrTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckMonitoringSloDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMonitoringSlo_availabilitySli(),
+				Check:  setTestCheckMonitoringSloId("google_monitoring_slo.primary", &generatedId),
+			},
+			{
+				ResourceName:      "google_monitoring_slo.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Ignore input-only field for import
+				ImportStateVerifyIgnore: []string{"service"},
+			},
+		},
+	})
+}
 func TestAccMonitoringSlo_requestBased(t *testing.T) {
 	t.Parallel()
 
@@ -409,6 +432,25 @@ resource "google_monitoring_slo" "primary" {
 `
 }
 
+func testAccMonitoringSlo_availabilitySli() string {
+	return `
+data "google_monitoring_app_engine_service" "ae" {
+  module_id = "default"
+}
+
+resource "google_monitoring_slo" "primary" {
+  service = data.google_monitoring_app_engine_service.ae.service_id
+
+  goal = 0.9
+  rolling_period_days = 1
+
+  basic_sli {
+	availability {
+	}
+  }
+}
+`
+}
 func testAccMonitoringSloForSli(randSuffix, sliConfig string) string {
 	return fmt.Sprintf(`
 resource "google_monitoring_custom_service" "srv" {
