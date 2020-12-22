@@ -40,7 +40,7 @@ module Provider
       # assumption that it was this run that modified it.
       if File.exist?(path) && File.mtime(path) > @env[:start_time]
         raise "#{path} was already modified during this run.. check to see if"\
-              " there is both a .go and .go.erb version of this file"
+              ' there is both a .go and .go.erb version of this file'
       end
 
       # You're looking at some magic here!
