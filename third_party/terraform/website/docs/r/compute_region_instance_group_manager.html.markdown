@@ -17,7 +17,7 @@ To get more information about regionInstanceGroupManagers, see:
 
 * [API documentation](https://cloud.google.com/compute/docs/reference/latest/regionInstanceGroupManagers)
 * How-to Guides
-    * [Access Policy Guide](https://cloud.google.com/compute/docs/instance-groups/distributing-instances-with-regional-instance-groups)
+    * [Regional Instance Groups Guide](https://cloud.google.com/compute/docs/instance-groups/distributing-instances-with-regional-instance-groups)
 
 ~> **Note:** Use [google_compute_instance_group_manager](/docs/providers/google/r/compute_instance_group_manager.html) to create a zonal instance group manager.
 
