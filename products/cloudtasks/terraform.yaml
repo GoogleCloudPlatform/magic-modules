@@ -15,6 +15,8 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Queue: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/locations/{{location}}/queues/{{name}}"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: "templates/terraform/constants/cloud_tasks_retry_config_custom_diff.go"
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         This resource requires an App Engine application to be created on the
@@ -44,6 +46,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       retryConfig.maxRetryDuration: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: 'suppressOmittedMaxDuration'
       retryConfig.minBackoff: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       retryConfig.maxBackoff: !ruby/object:Overrides::Terraform::PropertyOverride
