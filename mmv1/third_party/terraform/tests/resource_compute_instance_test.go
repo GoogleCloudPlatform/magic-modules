@@ -968,7 +968,7 @@ func TestAccComputeInstance_reservationAffinities(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_reservationAffinityConfig(instanceName, "NO_RESERVATION"),
+				Config: testAccComputeInstance_reservationAffinity_nonSpecificReservationConfig(instanceName, "NO_RESERVATION"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
 					testAccCheckComputeInstanceHasReservationAffinity(&instance, "NO_RESERVATION"),
@@ -976,7 +976,7 @@ func TestAccComputeInstance_reservationAffinities(t *testing.T) {
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 			{
-				Config: testAccComputeInstance_reservationAffinityConfig(instanceName, "ANY_RESERVATION"),
+				Config: testAccComputeInstance_reservationAffinity_nonSpecificReservationConfig(instanceName, "ANY_RESERVATION"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
 					testAccCheckComputeInstanceHasReservationAffinity(&instance, "ANY_RESERVATION"),
@@ -984,7 +984,7 @@ func TestAccComputeInstance_reservationAffinities(t *testing.T) {
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 			{
-				Config: testAccComputeInstance_reservationAffinityConfig(instanceName, "SPECIFIC_RESERVATION"),
+				Config: testAccComputeInstance_reservationAffinity_specificReservationConfig(instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
 					testAccCheckComputeInstanceHasReservationAffinity(&instance, "SPECIFIC_RESERVATION", instanceName),
@@ -5139,33 +5139,8 @@ resource "google_compute_node_group" "nodes" {
 `, instance, nodeTemplate, nodeGroup)
 }
 
-func testAccComputeInstance_reservationAffinityConfig(instanceName, reservationType string) string {
-	var reservationCfg, reservationInstanceCfgSection string
-
-	if reservationType == "SPECIFIC_RESERVATION" {
-		reservationCfg = fmt.Sprintf(`
-resource "google_compute_reservation" "reservation" {
-  name = "%s"
-  zone = "us-central1-a"
-
-  specific_reservation {
-    count = 1
-    instance_properties {
-      machine_type = "n1-standard-1"
-    }
-  }
-
-  specific_reservation_required = true
-}`, instanceName)
-
-		reservationInstanceCfgSection = fmt.Sprintf(`
-	specific_reservation {
-		key = "compute.googleapis.com/reservation-name"
-		values = ["%s"]
-	}`, instanceName)
-	}
-
-	instanceCfg := fmt.Sprintf(`
+func testAccComputeInstance_reservationAffinity_nonSpecificReservationConfig(instanceName, reservationType string) string {
+	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-9"
   project = "debian-cloud"
@@ -5188,12 +5163,55 @@ resource "google_compute_instance" "foobar" {
 
   reservation_affinity {
     type = "%s"
-
-    %s
   }
-}`, instanceName, reservationType, reservationInstanceCfgSection)
+}`, instanceName, reservationType)
+}
 
-	return strings.Join([]string{reservationCfg, instanceCfg}, "\n")
+func testAccComputeInstance_reservationAffinity_specificReservationConfig(instanceName string) string {
+	return `
+data "google_compute_image" "my_image" {
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_reservation" "reservation" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      machine_type = "n1-standard-1"
+    }
+  }
+
+  specific_reservation_required = true
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%[1]s"
+  machine_type = "n1-standard-1"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  reservation_affinity {
+    type = "SPECIFIC_RESERVATION"
+
+	specific_reservation {
+		key    = "compute.googleapis.com/reservation-name"
+		values = ["%[1]s"]
+	}
+  }
+}`, instanceName)
 }
 
 func testAccComputeInstance_shieldedVmConfig(instance string, enableSecureBoot bool, enableVtpm bool, enableIntegrityMonitoring bool) string {
