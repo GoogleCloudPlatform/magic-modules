@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"reflect"
-	"sort"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
@@ -24,53 +22,113 @@ func checkNameExists(jsonList []interface{}) error {
 	return nil
 }
 
-// JSONBytesEqual compares the JSON in two byte slices.
-// Reference: https://stackoverflow.com/questions/32408890/how-to-compare-two-json-requests
-func JSONBytesEqual(a, b []byte) (bool, error) {
-	var j, j2 interface{}
-	if err := json.Unmarshal(a, &j); err != nil {
-		return false, err
+func jsonCompareWithMapKeyOverride(a, b interface{}, compareMapKeyVal func(key string, val1, val2 map[string]interface{}) bool) (bool, error) {
+	switch a.(type) {
+	case []interface{}:
+		arrayA := a.([]interface{})
+		arrayB, ok := b.([]interface{})
+		if !ok {
+			return false, nil
+		} else if len(arrayA) != len(arrayB) {
+			return false, nil
+		}
+		for i := range arrayA {
+			eq, err := jsonCompareWithMapKeyOverride(arrayA[i], arrayB[i], compareMapKeyVal)
+			if err != nil {
+				return false, err
+			} else if !eq {
+				return false, nil
+			}
+		}
+		return true, nil
+	case map[string]interface{}:
+		objectA := a.(map[string]interface{})
+		objectB, ok := b.(map[string]interface{})
+		if !ok {
+			return false, nil
+		}
+
+		var unionOfKeys map[string]bool = make(map[string]bool)
+		for key := range objectA {
+			unionOfKeys[key] = true
+		}
+		for key := range objectB {
+			unionOfKeys[key] = true
+		}
+
+		for key := range unionOfKeys {
+			eq := compareMapKeyVal(key, objectA, objectB)
+			if !eq {
+				valA, ok1 := objectA[key]
+				valB, ok2 := objectB[key]
+				if !ok1 || !ok2 {
+					return false, nil
+				}
+				eq, err := jsonCompareWithMapKeyOverride(valA, valB, compareMapKeyVal)
+				if err != nil || !eq {
+					return false, err
+				}
+			}
+		}
+		return true, nil
+	case string, float64, bool, nil:
+		return a == b, nil
+	default:
+		return false, errors.New("tried to iterate through json but encountered a non native type to json deserialization... please ensure you are passing a json object from json.Unmarshall")
 	}
-	if j == nil {
-		return false, fmt.Errorf("The old schema value was nil")
+}
+
+// checks if the value is within the array, only works for generics
+// because objects and arrays will take the reference comparison
+func valueIsInArray(value interface{}, array []interface{}) bool {
+	for _, item := range array {
+		if item == value {
+			return true
+		}
 	}
-	jList := j.([]interface{})
-	if err := checkNameExists(jList); err != nil {
-		return false, err
+	return false
+}
+
+func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interface{}) bool {
+	// we rely on the fallback to nil if the object does not have the key
+	valA, _ := objectA[key]
+	valB, _ := objectB[key]
+	switch key {
+	case "mode":
+		equivelentSet := []interface{}{nil, "NULLABLE"}
+		eq := valueIsInArray(valA, equivelentSet) && valueIsInArray(valB, equivelentSet)
+		return eq
+	case "description":
+		equivelentSet := []interface{}{nil, ""}
+		eq := valueIsInArray(valA, equivelentSet) && valueIsInArray(valB, equivelentSet)
+		return eq
+	case "type":
+		equivelentSet1 := []interface{}{"INTEGER", "INT64"}
+		equivelentSet2 := []interface{}{"FLOAT", "FLOAT64"}
+		eq1 := valueIsInArray(valA, equivelentSet1) && valueIsInArray(valB, equivelentSet1)
+		eq2 := valueIsInArray(valA, equivelentSet2) && valueIsInArray(valB, equivelentSet2)
+		eq := eq1 || eq2
+		return eq
 	}
-	sort.Slice(jList, func(i, k int) bool {
-		return jList[i].(map[string]interface{})["name"].(string) < jList[k].(map[string]interface{})["name"].(string)
-	})
-	if err := json.Unmarshal(b, &j2); err != nil {
-		return false, err
-	}
-	if j2 == nil {
-		return false, fmt.Errorf("The new schema value was nil")
-	}
-	j2List := j2.([]interface{})
-	if err := checkNameExists(j2List); err != nil {
-		return false, err
-	}
-	sort.Slice(j2List, func(i, k int) bool {
-		return j2List[i].(map[string]interface{})["name"].(string) < j2List[k].(map[string]interface{})["name"].(string)
-	})
-	return reflect.DeepEqual(j2List, jList), nil
+
+	// otherwise rely on default behavior
+	return false
 }
 
 // Compare the JSON strings are equal
 func bigQueryTableSchemaDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
-	// The API can return an empty schema which gets encoded to "null"
-	// during read.
+	// The API can return an empty schema which gets encoded to "null" during read.
 	if old == "null" {
 		old = "[]"
 	}
-	oldBytes := []byte(old)
-	newBytes := []byte(new)
+	var a, b interface{}
+	json.Unmarshal([]byte(old), &a)
+	json.Unmarshal([]byte(new), &b)
 
-	eq, err := JSONBytesEqual(oldBytes, newBytes)
+	eq, err := jsonCompareWithMapKeyOverride(a, b, bigQueryTableMapKeyOverride)
 	if err != nil {
 		log.Printf("[DEBUG] %v", err)
-		log.Printf("[DEBUG] Error comparing JSON bytes: %v, %v", old, new)
+		log.Printf("[DEBUG] Error comparing JSON: %v, %v", old, new)
 	}
 
 	return eq

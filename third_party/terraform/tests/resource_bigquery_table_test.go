@@ -1,6 +1,7 @@
 package google
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -414,6 +415,92 @@ func TestAccBigQueryDataTable_sheet(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestUnitBigQueryDataTable_jsonEquivelency(t *testing.T) {
+	t.Parallel()
+	if len(testUnitBigQueryDataTableJSONEquivelencyResults) != len(testUnitBigQueryDataTableJSONEquivelencyData) {
+		t.Error("these arrays aren't equal length! whatchu doing son?!?")
+	}
+
+	for i, testcase := range testUnitBigQueryDataTableJSONEquivelencyData {
+		var a, b interface{}
+		json.Unmarshal([]byte(testcase[0]), &a)
+		json.Unmarshal([]byte(testcase[1]), &b)
+		eq, err := jsonCompareWithMapKeyOverride(a, b, bigQueryTableMapKeyOverride)
+		if err != nil {
+			t.Errorf("ahhhh an error I did not expect this! especially not on testscase %v", i)
+		}
+		if eq != testUnitBigQueryDataTableJSONEquivelencyResults[i] {
+			t.Errorf("expected equivelency result of %v but got %v for testcase number %v", testUnitBigQueryDataTableJSONEquivelencyResults[i], eq, i)
+		}
+	}
+}
+
+var testUnitBigQueryDataTableJSONEquivelencyResults = []bool{
+	true,
+	false,
+	true,
+	false,
+	true,
+	false,
+	true,
+	false,
+	true,
+	false,
+	true,
+	false,
+}
+
+var testUnitBigQueryDataTableJSONEquivelencyData = [][2]string{
+	[2]string{
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
+	},
+	[2]string{
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"finalKey\" : {} }]",
+		"[{\"someKey\": \"someValue\", \"finalKey\" : {} }]",
+	},
+	[2]string{
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"mode\": \"NULLABLE\"  }]",
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
+	},
+	[2]string{
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"mode\": \"NULLABLE\"  }]",
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"mode\": \"somethingRandom\"  }]",
+	},
+	[2]string{
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"description\": \"\"  }]",
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
+	},
+	[2]string{
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"description\": \"\"  }]",
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"description\": \"somethingRandom\"  }]",
+	},
+	[2]string{
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"INTEGER\"  }]",
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"INT64\"  }]",
+	},
+	[2]string{
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"INTEGER\"  }]",
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"somethingRandom\"  }]",
+	},
+	[2]string{
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"FLOAT\"  }]",
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"FLOAT64\"  }]",
+	},
+	[2]string{
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\", \"type\": \"FLOAT\"  }]",
+		"[{\"someKey\": \"someValue\", \"anotherKey\" : \"anotherValue\" }]",
+	},
+	[2]string{
+		"[1,2,3]",
+		"[1,2,3]",
+	},
+	[2]string{
+		"[1,2,3]",
+		"[1,2,\"banana\"]",
+	},
 }
 
 func testAccCheckBigQueryExtData(t *testing.T, expectedQuoteChar string) resource.TestCheckFunc {
