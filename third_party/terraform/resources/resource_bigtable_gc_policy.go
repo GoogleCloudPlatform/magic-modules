@@ -87,9 +87,9 @@ func resourceBigtableGCPolicy() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"number": {
-							Type:         schema.TypeInt,
-							Required:     true,
-							Description:  `Number of version before applying the GC policy.`,
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: `Number of version before applying the GC policy.`,
 						},
 					},
 				},
