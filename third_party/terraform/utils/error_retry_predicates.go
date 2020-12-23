@@ -271,13 +271,6 @@ func isNotFoundRetryableError(opType string) RetryErrorPredicateFunc {
 	}
 }
 
-func isStoragePreconditionError(err error) (bool, string) {
-	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 412 {
-		return true, fmt.Sprintf("Retry on storage precondition not met")
-	}
-	return false, ""
-}
-
 func isDataflowJobUpdateRetryableError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 404 && strings.Contains(gerr.Body, "in RUNNING OR DRAINING state") {
