@@ -787,7 +787,6 @@ func TestAccComputeInstanceTemplate_shieldedVmConfig2(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T) {
 	t.Parallel()
 
@@ -795,7 +794,7 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
+		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -808,8 +807,6 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 	    },
 	})
 }
-
-<% end -%>
 
 func TestAccComputeInstanceTemplate_enableDisplay(t *testing.T) {
 	t.Parallel()
@@ -1230,7 +1227,6 @@ func testAccCheckComputeInstanceTemplateHasShieldedVmConfig(instanceTemplate *co
 	}
 }
 
-<% unless version == 'ga' -%>
 func testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(instanceTemplate *computeBeta.InstanceTemplate, EnableConfidentialCompute bool) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
@@ -1241,8 +1237,6 @@ func testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(instanceTe
 		return nil
 	}
 }
-
-<% end -%>
 
 func testAccCheckComputeInstanceTemplateLacksShieldedVmConfig(instanceTemplate *computeBeta.InstanceTemplate) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -2113,17 +2107,14 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix, enableSecureBoot, enableVtpm, enableIntegrityMonitoring)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeInstanceTemplateConfidentialInstanceConfig(suffix string, enableConfidentialCompute bool) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  provider = google-beta
   family  = "ubuntu-2004-lts"
   project = "ubuntu-os-cloud"
 }
 
 resource "google_compute_instance_template" "foobar" {
-  provider     = google-beta
   name         = "cvm-%s"
   machine_type = "n2d-standard-2"
 
@@ -2148,7 +2139,6 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, suffix, enableConfidentialCompute)
 }
-<% end -%>
 
 func testAccComputeInstanceTemplate_enableDisplay(suffix string) string {
 	return fmt.Sprintf(`
