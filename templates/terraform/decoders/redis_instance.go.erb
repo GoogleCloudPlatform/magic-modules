@@ -34,10 +34,10 @@ if v, ok := res["authEnabled"].(bool); ok {
 		if err := d.Set("auth_string", res["authString"]); err != nil {
 			return nil, fmt.Errorf("Error reading Instance: %s", err)
 		}
-	} else {
-		if err := d.Set("auth_string", ""); err != nil {
-			return nil, fmt.Errorf("Error reading Instance: %s", err)
-		}
+	}
+} else {
+	if err := d.Set("auth_string", ""); err != nil {
+		return nil, fmt.Errorf("Error reading Instance: %s", err)
 	}
 }
 

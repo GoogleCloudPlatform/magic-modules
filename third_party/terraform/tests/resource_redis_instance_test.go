@@ -91,7 +91,7 @@ func TestAccRedisInstance_redisInstanceAuthEnabled(t *testing.T) {
 				ResourceName:            "google_redis_instance.cache",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region", "auth_string"},
+				ImportStateVerifyIgnore: []string{"region"},
 			},
 			{
 				Config: testAccRedisInstance_redisInstanceAuthDisabled(context),
@@ -100,7 +100,7 @@ func TestAccRedisInstance_redisInstanceAuthEnabled(t *testing.T) {
 				ResourceName:            "google_redis_instance.cache",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region", "auth_string"},
+				ImportStateVerifyIgnore: []string{"region"},
 			},
 		},
 	})
