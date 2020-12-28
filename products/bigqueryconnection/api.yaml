@@ -28,7 +28,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Connection'
     base_url: projects/{{project}}/locations/{{location}}/connections
-    self_link: "{{name}}"
+    self_link: projects/{{project}}/locations/{{location}}/connections/{{connection_id}}
     create_url: projects/{{project}}/locations/{{location}}/connections?connectionId={{connection_id}}
     update_verb: :PATCH
     update_mask: true
@@ -51,7 +51,6 @@ objects:
           Optional connection id that should be assigned to the created connection. 
         required: false
         input: true
-        url_param_only: true
       - !ruby/object:Api::Type::String
         name: 'location'
         required: false

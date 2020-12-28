@@ -150,6 +150,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           instance_name: "tunnel-vm"
         primary_resource_name: "fmt.Sprintf(\"tf-test-tunnel-vm%s\", context[\"random_suffix\"])"
+  Tunnel: !ruby/object:Overrides::Terraform::ResourceOverride
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      fetch_iam_policy_verb: :POST
+      parent_resource_type: 'google_project_service'
+      parent_resource_attribute: 'project'
+      allowed_iam_role: 'roles/iap.tunnelResourceAccessor'
+      iam_conditions_request_type: :REQUEST_BODY
+    id_format: "projects/{{project}}/iap_tunnel"
+    import_format: ["projects/{{project}}/iap_tunnel"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iap_project"
+        primary_resource_id: "project_service"
+        primary_resource_name: "fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+        test_env_vars:
+          org_id: :ORG_ID
   Brand: !ruby/object:Overrides::Terraform::ResourceOverride
     async: !ruby/object:Provider::Terraform::PollAsync
       check_response_func_existence: PollCheckForExistence
@@ -168,6 +186,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       but *will not delete it from Google Cloud.*
     id_format: '{{name}}'
     import_format: ['{{name}}']
+    skip_delete: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "iap_brand"
@@ -179,13 +198,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_domain: :ORG_DOMAIN
         skip_test: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
       custom_import: templates/terraform/custom_import/iap_brand.go.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
   Client: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: '{{brand}}/identityAwareProxyClients/{{client_id}}'
     self_link: '{{brand}}/identityAwareProxyClients/{{client_id}}'
     import_format: ['{{brand}}/identityAwareProxyClients/{{client_id}}']
+    error_retry_predicates: ["iapClient409Operation"]
     # Child of iap brand resource
     skip_sweeper: true
     examples:

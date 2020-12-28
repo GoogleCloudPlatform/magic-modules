@@ -187,7 +187,39 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/data_catalog_tag.go.erb
       encoder: templates/terraform/encoders/data_catalog_tag.go.erb
-# This is for copying files over
+  Taxonomy: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_catalog_taxonomy_basic"
+        primary_resource_id: "basic_taxonomy"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_my_taxonomy%s\", context[\"random_suffix\"])"
+        vars:
+          display_name: "my_display_name"
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/extract_taxonomy.go.erb
+  PolicyTag: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_catalog_taxonomies_policy_tag_basic"
+        primary_resource_id: "basic_policy_tag"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_my_policy_tag%s\", context[\"random_suffix\"])"
+        vars:
+          taxonomy_display_name: "taxonomy_display_name"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "data_catalog_taxonomies_policy_tag_child_policies"
+        primary_resource_id: "child_policy"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_my_child_tag%s\", context[\"random_suffix\"])"
+        vars:
+          taxonomy_display_name: "taxonomy_display_name"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/extract_taxonomy.go.erb
+  # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.

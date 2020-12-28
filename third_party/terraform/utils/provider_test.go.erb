@@ -64,7 +64,6 @@ var orgEnvVars = []string{
 	"GOOGLE_ORG",
 }
 
-<% unless version == 'ga' -%>
 var custIdEnvVars = []string{
 	"GOOGLE_CUST_ID",
 }
@@ -72,7 +71,6 @@ var custIdEnvVars = []string{
 var identityUserEnvVars = []string{
 	"GOOGLE_IDENTITY_USER",
 }
-<% end -%>
 
 var orgEnvDomainVars = []string{
 	"GOOGLE_ORG_DOMAIN",
@@ -99,6 +97,10 @@ type VcrSource struct {
 }
 
 var sources map[string]VcrSource
+
+var masterBillingAccountEnvVars = []string{
+	"GOOGLE_MASTER_BILLING_ACCOUNT",
+}
 
 func init() {
 	configs = make(map[string]*Config)
@@ -304,7 +306,7 @@ func vcrSource(t *testing.T, path, mode string) (*VcrSource, error) {
 	case "REPLAYING":
 		seed, err := readSeedFromFile(vcrSeedFile(path, t.Name()))
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("no cassette found on disk for %s, please replay this testcase in recording mode - %w", t.Name(), err)
 		}
 		s := rand.NewSource(seed)
 		vcrSource := VcrSource{seed: seed, source: s}
@@ -495,6 +497,8 @@ func TestAccProviderBasePath_setInvalidBasePath(t *testing.T) {
 }
 
 func TestAccProviderMeta_setModuleName(t *testing.T) {
+	// not expected to succeed yet. see https://github.com/hashicorp/terraform-provider-google/issues/7370
+	skipIfVcr(t)
 	t.Parallel()
 
 	moduleName := "my-module"
@@ -505,7 +509,6 @@ func TestAccProviderMeta_setModuleName(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProviderMeta_setModuleName(moduleName, randString(t, 10)),
-				Check:  testAccCheckConfigAgentModified(t, moduleName),
 			},
 			{
 				ResourceName:      "google_compute_address.default",
@@ -514,16 +517,6 @@ func TestAccProviderMeta_setModuleName(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccCheckConfigAgentModified(t *testing.T, moduleName string) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
-		if !strings.Contains(config.userAgent, moduleName) {
-			return fmt.Errorf("expected userAgent to contain provider_meta set module_name")
-		}
-		return nil
-	}
 }
 
 func TestAccProviderUserProjectOverride(t *testing.T) {
@@ -544,12 +537,9 @@ func TestAccProviderUserProjectOverride(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProviderUserProjectOverride(pid, pname, org, billing, sa),
-				Check: func(s *terraform.State) error {
-					// The token creator IAM API call returns success long before the policy is
-					// actually usable. Wait a solid 2 minutes to ensure we can use it.
-					time.Sleep(2 * time.Minute)
-					return nil
-				},
+				// The token creator IAM API call returns success long before the policy is
+				// actually usable. Wait a solid 2 minutes to ensure we can use it.
+				Check: sleepInSecondsForTest(2 * 60),
 			},
 			{
 				Config:      testAccProviderUserProjectOverride_step2(pid, pname, org, billing, sa, false, topicName),
@@ -897,15 +887,15 @@ func getTestZoneFromEnv() string {
 	return multiEnvSearch(zoneEnvVars)
 }
 
-<% unless version == 'ga' -%>
 func getTestCustIdFromEnv(t *testing.T) string {
+	skipIfEnvNotSet(t, custIdEnvVars...)
 	return multiEnvSearch(custIdEnvVars)
 }
 
 func getTestIdentityUserFromEnv(t *testing.T) string {
+	skipIfEnvNotSet(t, identityUserEnvVars...)
 	return multiEnvSearch(identityUserEnvVars)
 }
-<% end -%>
 
 // Firestore can't be enabled at the same time as Datastore, so we need a new
 // project to manage it until we can enable Firestore programmatically.
@@ -934,6 +924,11 @@ func getTestBillingAccountFromEnv(t *testing.T) string {
 	return multiEnvSearch(billingAccountEnvVars)
 }
 
+func getTestMasterBillingAccountFromEnv(t *testing.T) string {
+	skipIfEnvNotSet(t, masterBillingAccountEnvVars...)
+	return multiEnvSearch(masterBillingAccountEnvVars)
+}
+
 func getTestServiceAccountFromEnv(t *testing.T) string {
 	skipIfEnvNotSet(t, serviceAccountEnvVars...)
 	return multiEnvSearch(serviceAccountEnvVars)
@@ -954,5 +949,12 @@ func multiEnvSearch(ks []string) string {
 func skipIfVcr(t *testing.T) {
 	if isVcrEnabled() {
 		t.Skipf("VCR enabled, skipping test: %s", t.Name())
+	}
+}
+
+func sleepInSecondsForTest(t int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		time.Sleep(time.Duration(t) * time.Second)
+		return nil
 	}
 }

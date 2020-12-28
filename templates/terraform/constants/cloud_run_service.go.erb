@@ -5,3 +5,20 @@ func revisionNameCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v i
 	}
 	return nil
 }
+
+var cloudRunGoogleProvidedAnnotations = regexp.MustCompile("serving\\.knative\\.dev/(?:(?:creator)|(?:lastModifier))$")
+
+func cloudrunAnnotationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Suppress diffs for the annotations provided by Google
+	if cloudRunGoogleProvidedAnnotations.MatchString(k) && new == "" {
+		return true
+	}
+
+	// Let diff be determined by annotations (above)
+	if strings.Contains(k, "annotations.%") {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}

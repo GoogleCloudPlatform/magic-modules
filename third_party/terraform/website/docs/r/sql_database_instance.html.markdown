@@ -198,9 +198,10 @@ The following arguments are supported:
 
 * `database_version` - (Optional, Default: `MYSQL_5_6`) The MySQL, PostgreSQL or
 SQL Server (beta) version to use. Supported values include `MYSQL_5_6`,
-`MYSQL_5_7`, `POSTGRES_9_6`,`POSTGRES_10`, `POSTGRES_11`, `POSTGRES_12`, `SQLSERVER_2017_STANDARD`,
+`MYSQL_5_7`, `MYSQL_8_0`, `POSTGRES_9_6`,`POSTGRES_10`, `POSTGRES_11`, 
+`POSTGRES_12`, `POSTGRES_13`, `SQLSERVER_2017_STANDARD`, 
 `SQLSERVER_2017_ENTERPRISE`, `SQLSERVER_2017_EXPRESS`, `SQLSERVER_2017_WEB`.
-[Database Version Policies](https://cloud.google.com/sql/docs/sqlserver/db-versions)
+[Database Version Policies](https://cloud.google.com/sql/docs/db-versions)
 includes an up-to-date reference of supported versions.
 
 * `name` - (Optional, Computed) The name of the instance. If the name is left
@@ -291,6 +292,8 @@ The optional `settings.backup_configuration` subblock supports:
     configuration starts.
 * `point_in_time_recovery_enabled` - (Optional) True if Point-in-time recovery is enabled. Will restart database if enabled after instance creation. Valid only for PostgreSQL instances.
 
+* `location` - (Optional) The region where the backup will be stored
+
 The optional `settings.ip_configuration` subblock supports:
 
 * `ipv4_enabled` - (Optional) Whether this Cloud SQL instance should be assigned
@@ -303,8 +306,7 @@ Specifying a network enables private IP.
 Either `ipv4_enabled` must be enabled or a `private_network` must be configured.
 This setting can be updated, but it cannot be removed after it is set.
 
-* `require_ssl` - (Optional) True if mysqld should default to `REQUIRE X509`
-    for users connecting over IP.
+* `require_ssl` - (Optional) Whether SSL connections over IP are enforced or not.
 
 The optional `settings.ip_configuration.authorized_networks[]` sublist supports:
 

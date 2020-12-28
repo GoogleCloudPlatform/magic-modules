@@ -18,9 +18,14 @@ and
 ## Example Usage
 
 ```hcl
+resource "google_service_account" "default" {
+  account_id   = "service_account_id"
+  display_name = "Service Account"
+}
+
 resource "google_compute_instance" "default" {
   name         = "test"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-medium"
   zone         = "us-central1-a"
 
   tags = ["foo", "bar"]
@@ -51,7 +56,9 @@ resource "google_compute_instance" "default" {
   metadata_startup_script = "echo hi > /test.txt"
 
   service_account {
-    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    email  = google_service_account.default.email
+    scopes = ["cloud-platform"]
   }
 }
 ```
@@ -122,9 +129,7 @@ The following arguments are supported:
    Debian, CentOS, RHEL, SLES, Container-Optimized OS, and Ubuntu images
    support this key.  Windows instances require other keys depending on the format
    of the script and the time you would like it to run - see [this table](https://cloud.google.com/compute/docs/startupscript#providing_a_startup_script_for_windows_instances).
-   For Container-Optimized OS, `metadata.user-data` accepts an Ignition Config,
-   see [this page](https://coreos.com/os/docs/latest/booting-on-google-compute-engine.html)
-   for more information.  For the convenience of the users of `metadata.startup-script`,
+   For the convenience of the users of `metadata.startup-script`,
    we provide a special attribute, `metadata_startup_script`, which is documented below.
 
 * `metadata_startup_script` - (Optional) An alternative to using the
@@ -167,6 +172,7 @@ The following arguments are supported:
 
 * `resource_policies` (Optional) -- A list of short names or self_links of resource policies to attach to the instance. Modifying this list will cause the instance to recreate. Currently a max of 1 resource policy is supported.
 
+* `confidential_instance_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - Enable [Confidential Mode](https://cloud.google.com/compute/confidential-vm/docs/about-cvm) on this VM.
 
 ---
 
@@ -351,6 +357,10 @@ The `shielded_instance_config` block supports:
 
 * `enable_integrity_monitoring` (Optional) -- Compare the most recent boot measurements to the integrity policy baseline and return a pair of pass/fail results depending on whether they match or not. Defaults to true.
   **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
+
+The `confidential_instance_config` block supports:
+
+* `enable_confidential_compute` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Defines whether the instance should have confidential compute enabled. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
 
 ## Attributes Reference
 

@@ -56,6 +56,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           template: "temp"
         test_env_vars:
           project: :PROJECT_NAME
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dlp_inspect_template_custom_type"
+        primary_resource_id: "custom"
+        vars:
+          template: "temp"
+        test_env_vars:
+          project: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/wrap_object.go.erb
       custom_import: templates/terraform/custom_import/dlp_import.go.erb

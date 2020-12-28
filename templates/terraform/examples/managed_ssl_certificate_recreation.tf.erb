@@ -2,7 +2,6 @@
 // recreate the ssl certificate and update the target https proxy correctly
 
 resource "google_compute_target_https_proxy" "default" {
-  provider = google-beta
   name             = "test-proxy"
   url_map          = google_compute_url_map.default.id
   ssl_certificates = [google_compute_managed_ssl_certificate.cert.id]
@@ -22,7 +21,6 @@ resource "random_id" "certificate" {
 }
 
 resource "google_compute_managed_ssl_certificate" "cert" {
-  provider = google-beta
   name     = random_id.certificate.hex
 
   lifecycle {
@@ -35,7 +33,6 @@ resource "google_compute_managed_ssl_certificate" "cert" {
 }
 
 resource "google_compute_url_map" "default" {
-  provider = google-beta
   name            = "url-map"
   description     = "a description"
   default_service = google_compute_backend_service.default.id
@@ -54,7 +51,6 @@ resource "google_compute_url_map" "default" {
 }
 
 resource "google_compute_backend_service" "default" {
-  provider = google-beta
   name          = "backend-service"
   port_name     = "http"
   protocol      = "HTTP"
@@ -63,7 +59,6 @@ resource "google_compute_backend_service" "default" {
 }
 
 resource "google_compute_http_health_check" "default" {
-  provider = google-beta
   name               = "http-health-check"
   request_path       = "/"
   check_interval_sec = 1

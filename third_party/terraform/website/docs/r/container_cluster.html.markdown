@@ -26,6 +26,11 @@ plaintext. [Read more about sensitive data in state](/docs/state/sensitive-data.
 ## Example Usage - with a separately managed node pool (recommended)
 
 ```hcl
+resource "google_service_account" "default" {
+  account_id   = "service-account-id"
+  display_name = "Service Account"
+}
+
 resource "google_container_cluster" "primary" {
   name     = "my-gke-cluster"
   location = "us-central1"
@@ -35,15 +40,6 @@ resource "google_container_cluster" "primary" {
   # node pool and immediately delete it.
   remove_default_node_pool = true
   initial_node_count       = 1
-
-  master_auth {
-    username = ""
-    password = ""
-
-    client_certificate_config {
-      issue_client_certificate = false
-    }
-  }
 }
 
 resource "google_container_node_pool" "primary_preemptible_nodes" {
@@ -56,11 +52,9 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
     preemptible  = true
     machine_type = "e2-medium"
 
-    metadata = {
-      disable-legacy-endpoints = "true"
-    }
-
-    oauth_scopes = [
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    service_account = google_service_account.default.email
+    oauth_scopes    = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]
   }
@@ -70,36 +64,26 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
 ## Example Usage - with the default node pool
 
 ```hcl
+resource "google_service_account" "default" {
+  account_id   = "service-account-id"
+  display_name = "Service Account"
+}
+
 resource "google_container_cluster" "primary" {
   name               = "marcellus-wallace"
   location           = "us-central1-a"
   initial_node_count = 3
-
-  master_auth {
-    username = ""
-    password = ""
-
-    client_certificate_config {
-      issue_client_certificate = false
-    }
-  }
-
   node_config {
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    service_account = google_service_account.default.email
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]
-
-    metadata = {
-      disable-legacy-endpoints = "true"
-    }
-
     labels = {
       foo = "bar"
     }
-
     tags = ["foo", "bar"]
   }
-
   timeouts {
     create = "30m"
     update = "40m"
@@ -203,7 +187,7 @@ Kubernetes master. Some values in this block are only returned by the API if
 your service account has permission to get credentials for your GKE cluster. If
 you see an unexpected diff removing a username/password or unsetting your client
 cert, ensure you have the `container.clusters.getCredentials` permission.
-Structure is documented below.
+Structure is documented below. This has been deprecated as of GKE 1.19.
 
 * `master_authorized_networks_config` - (Optional) The desired configuration options
     for master authorized networks. Omit the nested `cidr_blocks` attribute to disallow
@@ -325,7 +309,7 @@ The `default_snat_status` block supports
 *  `disabled` - (Required) Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic
 
 The `cluster_telemetry` block supports
-* `type` - Telemetry integration for the cluster. Supported values (`ENABLE, DISABLE, SYSTEM_ONLY`);
+* `type` - Telemetry integration for the cluster. Supported values (`ENABLED, DISABLED, SYSTEM_ONLY`);
    `SYSTEM_ONLY` (Only system components are monitored and logged) is only available in GKE versions 1.15 and later.
 
 The `addons_config` block supports:
@@ -449,11 +433,17 @@ The `authenticator_groups_config` block supports:
 * `security_group` - (Required) The name of the RBAC security group for use with Google security groups in Kubernetes RBAC. Group name must be in format `gke-security-groups@yourdomain.com`.
 
 The `maintenance_policy` block supports:
+* `daily_maintenance_window` - (Optional) structure documented below.
+* `recurring_window` - (Optional) structure documented below
+* `maintenance_exclusion` - (Optional) structure documented below
 
-* `daily_maintenance_window` - (Required in GA, Optional in Beta) Time window specified for daily maintenance operations.
+In beta, one or the other of `recurring_window` and `daily_maintenance_window` is required if a `maintenance_policy` block is supplied.
+
+* `daily_maintenance_window` - Time window specified for daily maintenance operations.
     Specify `start_time` in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) format "HH:MM”,
     where HH : \[00-23\] and MM : \[00-59\] GMT. For example:
 
+Examples:
 ```hcl
 maintenance_policy {
   daily_maintenance_window {
@@ -462,8 +452,7 @@ maintenance_policy {
 }
 ```
 
-* `recurring_window` - (Optional) Time window for
-recurring maintenance operations.
+* `recurring_window` - Time window for recurring maintenance operations.
 
 Specify `start_time` and `end_time` in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) "Zulu" date format.  The start time's date is
 the initial date that the window starts, and the end time is used for calculating duration.  Specify `recurrence` in
@@ -491,7 +480,34 @@ maintenance_policy {
 }
 ```
 
-In beta, one or the other of `recurring_window` and `daily_maintenance_window` is required if a `maintenance_policy` block is supplied.
+* `maintenance_exclusion` - Exceptions to maintenance window. Non-emergency maintenance should not occur in these windows. A cluster can have up to three maintenance exclusions at a time [Maintenance Window and Exclusions](https://cloud.google.com/kubernetes-engine/docs/concepts/maintenance-windows-and-exclusions)
+
+Specify `start_time` and `end_time` in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) "Zulu" date format.  The start time's date is
+the initial date that the window starts, and the end time is used for calculating duration.Specify `recurrence` in
+[RFC5545](https://tools.ietf.org/html/rfc5545#section-3.8.5.3) RRULE format, to specify when this recurs.
+Note that GKE may accept other formats, but will return values in UTC, causing a permanent diff. 
+
+Examples:
+
+```
+maintenance_policy {
+  recurring_window {
+    start_time = "2019-01-01T00:00:00Z"
+    end_time = "2019-01-02T00:00:00Z"
+    recurrence = "FREQ=DAILY"
+  }
+  maintenance_exclusion{
+    exclusion_name = "batch job"
+    start_time = "2019-01-01T00:00:00Z"
+    end_time = "2019-01-02T00:00:00Z"
+  }
+  maintenance_exclusion{
+    exclusion_name = "holiday data load"
+    start_time = "2019-05-01T00:00:00Z"
+    end_time = "2019-05-02T00:00:00Z"
+  }
+}
+```
 
 The `ip_allocation_policy` block supports:
 
@@ -519,10 +535,10 @@ pick a specific range to use.
 The `master_auth` block supports:
 
 * `password` - (Optional) The password to use for HTTP basic authentication when accessing
-    the Kubernetes master endpoint.
+    the Kubernetes master endpoint. This has been deprecated as of GKE 1.19.
 
 * `username` - (Optional) The username to use for HTTP basic authentication when accessing
-    the Kubernetes master endpoint. If not present basic auth will be disabled.
+    the Kubernetes master endpoint. If not present basic auth will be disabled. This has been deprecated as of GKE 1.19.
 
 * `client_certificate_config` - (Optional) Whether client certificate authorization is enabled for this cluster.  For example:
 
@@ -610,11 +626,6 @@ The `node_config` block supports:
 
 * `service_account` - (Optional) The service account to be used by the Node VMs.
     If not specified, the "default" service account is used.
-    In order to use the configured `oauth_scopes` for logging and monitoring, the service account being used needs the
-    [roles/logging.logWriter](https://cloud.google.com/iam/docs/understanding-roles#stackdriver_logging_roles) and
-    [roles/monitoring.metricWriter](https://cloud.google.com/iam/docs/understanding-roles#stackdriver_monitoring_roles) roles.
-
-     -> Projects that enable the [Cloud Compute Engine API](https://cloud.google.com/compute/) with Terraform may need these roles added manually to the service account. Projects that enable the API in the Cloud Console should have them added automatically.
 
 * `shielded_instance_config` - (Optional) Shielded Instance options. Structure is documented below.
 

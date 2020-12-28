@@ -19,9 +19,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
       ~> **Note:** KeyRings cannot be deleted from Google Cloud Platform.
       Destroying a Terraform-managed KeyRing will remove it from state but
-      *will not delete the resource on the server.*
+      *will not delete the resource from the project.*
     id_format: "projects/{{project}}/locations/{{location}}/keyRings/{{name}}"
     import_format: ["projects/{{project}}/locations/{{location}}/keyRings/{{name}}"]
+    skip_delete: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "kms_key_ring_basic"
@@ -42,7 +43,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       location: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
       decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
       encoder: templates/terraform/encoders/send_nil_body.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/kms_self_link.erb
@@ -53,7 +53,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       ~> **Note:** CryptoKeys cannot be deleted from Google Cloud Platform.
       Destroying a Terraform-managed CryptoKey will remove it from state
       and delete all CryptoKeyVersions, rendering the key unusable, but *will
-      not delete the resource on the server.* When Terraform destroys these keys,
+      not delete the resource from the project.* When Terraform destroys these keys,
       any data previously encrypted with these keys will be irrecoverable.
       For this reason, it is strongly recommended that you add lifecycle hooks
       to the resource to prevent accidental destruction.
@@ -108,7 +108,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
       ~> **Note:** KeyRingImportJobs cannot be deleted from Google Cloud Platform.
       Destroying a Terraform-managed KeyRingImportJob will remove it from state but
-      *will not delete the resource on the server.* 
+      *will not delete the resource from the project.* 
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     examples:
@@ -117,6 +117,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "import-job"
         vars:
           keyring: "keyring-example"
+          cryptokey: "cryptokey-example"
         skip_test: true
     properties:
       createTime: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -144,6 +145,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     supports_indirect_user_project_override: true
     exclude_import: true
     exclude_validator: true
+    skip_delete: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "kms_secret_ciphertext_basic"
@@ -167,7 +169,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       ciphertext: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
       post_create: templates/terraform/post_create/kms_secret_ciphertext.go.erb
       decoder: templates/terraform/decoders/noop.go.erb
 # This is for copying files over

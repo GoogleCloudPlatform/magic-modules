@@ -35,7 +35,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "address_with_shared_loadbalancer_vip"
         primary_resource_id: "internal_with_shared_loadbalancer_vip"
-        min_version: 'beta'
         vars:
           address_name: "my-internal-address"
         skip_docs: true  # It is almost identical to internal_with_gce_endpoint
@@ -146,6 +145,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_bucket_name: "image-backend-bucket"
           bucket_name: "image-store-bucket"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_full"
+        min_version: beta
+        primary_resource_id: "image_backend_full"
+        skip_docs: true
+        vars:
+          backend_bucket_name: "image-backend-bucket-full"
+          bucket_name: "image-store-bucket-full"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -153,6 +160,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
       cdnPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.cacheMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.negativeCaching: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true
@@ -185,6 +196,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           backend_service_name: "backend-service"
           http_health_check_name: "health-check"
       - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_cache_simple"
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+          http_health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_cache"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+          http_health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_traffic_director_round_robin"
         min_version: beta
         primary_resource_id: "default"
@@ -200,6 +224,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           health_check_name: "health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_service_network_endpoint"
+        min_version: beta
         primary_resource_id: "default"
         vars:
           backend_service_name: "backend-service"
@@ -224,11 +249,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
       cdnPolicy.cacheKeyPolicy.queryStringBlacklist: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+      cdnPolicy.cacheMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.negativeCaching: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       connectionDraining: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       connectionDraining.drainingTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         name: connection_draining_timeout_sec
       customRequestHeaders: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      customResponseHeaders: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
       backends.group: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkRelativePaths'
@@ -272,11 +303,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
       - !ruby/object:Provider::Terraform::Examples
+        name: "region_backend_service_cache"
+        primary_resource_id: "default"
+        vars:
+          region_backend_service_name: "region-service"
+          health_check_name: "rbs-health-check"
+      - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_round_robin"
         primary_resource_id: "default"
         vars:
           region_backend_service_name: "region-service"
           health_check_name: "rbs-health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_backend_service_external"
+        primary_resource_id: "default"
+        vars:
+          region_backend_service_name: "region-service"
+          health_check_name: "rbs-health-check"
+        min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "region_backend_service_ilb_ring_hash"
         primary_resource_id: "default"
@@ -297,6 +341,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: templates/terraform/decoders/region_backend_service.go.erb
       resource_definition: 'templates/terraform/resource_definition/region_backend_service.go.erb'
     properties:
+      cdnPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.cacheKeyPolicy.queryStringWhitelist: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      cdnPolicy.cacheKeyPolicy.queryStringBlacklist: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      cdnPolicy.cacheMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.negativeCaching: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         required: false
@@ -592,6 +646,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
   ForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "forwarding_rule_externallb"
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "website-forwarding-rule"
+          backend_name: "website-backend"
+          network_name: "website-net"
+        min_version: beta
       - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_global_internallb"
         primary_resource_id: "default"
@@ -1058,6 +1120,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   License: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   MachineImage: !ruby/object:Overrides::Terraform::ResourceOverride
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      allowed_iam_role: 'roles/compute.admin'
+      parent_resource_attribute: 'machine_image'
+      iam_conditions_request_type: :QUERY_PARAM
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "machine_image_basic"
@@ -1072,6 +1138,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "network_basic"
+        primary_resource_id: "vpc_network"
+        vars:
+          network_name: "vpc-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_custom_mtu"
         primary_resource_id: "vpc_network"
         vars:
           network_name: "vpc-network"
@@ -1108,6 +1179,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         # while required inside routingConfig, routingMode is an optional convenience
         # field.
         required: false
+        default_from_api: true
+      mtu: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
@@ -1242,6 +1315,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}"]
     # format from google_compute_network_peering
     mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
+    skip_delete: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "network_peering_routes_config_basic"
@@ -1266,7 +1340,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       exportCustomRoutes: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_delete: 'templates/terraform/custom_delete/skip_delete.go.erb'
       encoder: 'templates/terraform/encoders/network_peering_routes_config.go.erb'
   NodeGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
@@ -2139,10 +2212,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           http_health_check_name: "http-health-check"
       - !ruby/object:Provider::Terraform::Examples
         name: "managed_ssl_certificate_recreation"
-        primary_resource_id: "default"
+        primary_resource_id: "cert"
         # Random provider
         skip_vcr: true
-        min_version: beta
     description: |
       {{description}}
       For a resource where you provide the key, see the
@@ -2359,6 +2431,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
+      privateIpv6GoogleAccess: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
@@ -2487,7 +2561,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "custom_network"
         vars:
           target_name: "custom-network"
-          instance_name: "cusom-network-target-vm"
+          instance_name: "custom-network-target-vm"
     properties:
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -2548,6 +2622,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_value: :NONE
   TargetVpnGateway: !ruby/object:Overrides::Terraform::ResourceOverride
     name: 'VpnGateway'
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        Classic VPN is deprecating certain functionality on October 31, 2021. For more information,
+        see the [Classic VPN partial deprecation page](https://cloud.google.com/network-connectivity/docs/vpn/deprecations/classic-vpn-deprecation).
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "target_vpn_gateway_basic"
@@ -2604,7 +2682,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   ExternalVpnGateway: !ruby/object:Overrides::Terraform::ResourceOverride
-    min_version: 'beta'
     properties:
       interfaces: !ruby/object:Overrides::Terraform::PropertyOverride
         name: interface
@@ -2627,7 +2704,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           url_map_name: "urlmap"
           login_backend_service_name: "login"
-          home_backend_service_name: "home"
           http_health_check_name: "health-check"
           backend_bucket_name: "static-asset-backend-bucket"
           storage_bucket_name: "static-asset-bucket"
@@ -2683,7 +2759,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       defaultService: !ruby/object:Overrides::Terraform::PropertyOverride
         # ResourceRef only supports 1 type and UrlMap has references to a BackendBucket or BackendService.
         # Just read the self_link string instead of extracting the name and making a self_link out of it.
-        custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
+        custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
         description: The backend service or backend bucket to use when none of the given rules match.
       hostRules: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "host_rule"
@@ -2695,21 +2771,37 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       pathMatchers.defaultService: !ruby/object:Overrides::Terraform::PropertyOverride
         # ResourceRef only supports 1 type and UrlMap has references to a BackendBucket or BackendService.
         # Just read the self_link string instead of extracting the name and making a self_link out of it.
-        custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
+        custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
         description: The backend service or backend bucket to use when none of the given paths match.
       pathMatchers.pathRules: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "path_rule"
       pathMatchers.pathRules.paths: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+      pathMatchers.defaultRouteAction.weightedBackendServices.backendService: !ruby/object:Overrides::Terraform::PropertyOverride
+        # ResourceRef only supports 1 type and UrlMap has references to a BackendBucket or BackendService.
+        # Just read the self_link string instead of extracting the name and making a self_link out of it.
+        custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
+      pathMatchers.defaultRouteAction.requestMirrorPolicy.backendService: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
+      defaultRouteAction.weightedBackendServices.backendService: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
+      defaultRouteAction.requestMirrorPolicy.backendService: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
+      pathMatchers.routeRules.service: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
       pathMatchers.pathRules.service: !ruby/object:Overrides::Terraform::PropertyOverride
-        # ResourceRef only supports 1 type and UrlMap has references to a BackendBucket or BackendService.
-        # Just read the self_link string instead of extracting the name and making a self_link out of it.
-        custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
+        custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
         description: The backend service or backend bucket to use if any of the given paths match.
+      pathMatchers.routeRules.routeAction.weightedBackendServices.backendService: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
+      pathMatchers.pathRules.routeAction.weightedBackendServices.backendService: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
+      pathMatchers.routeRules.routeAction.requestMirrorPolicy.backendService: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
+      pathMatchers.pathRules.routeAction.requestMirrorPolicy.backendService: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
       tests.service: !ruby/object:Overrides::Terraform::PropertyOverride
-        # ResourceRef only supports 1 type and UrlMap has references to a BackendBucket or BackendService.
-        # Just read the self_link string instead of extracting the name and making a self_link out of it.
-        custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
+        custom_expand: 'templates/terraform/custom_expand/reference_to_backend.erb'
         description: The backend service or backend bucket link that should be matched by this test.
       tests: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "test"

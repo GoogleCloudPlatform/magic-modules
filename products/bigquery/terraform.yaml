@@ -67,6 +67,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/bigquery_dataset.go.erb
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`. 
+        The API does accept both formats but it will always return the legacy format which results in Terraform
+        showing permanent diff on each plan and apply operation.
   DatasetAccess: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true # no unique way to specify
     skip_sweeper: true  # covered by Dataset sweeper
@@ -94,7 +99,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
       role: !ruby/object:Overrides::Terraform::PropertyOverride
         # Bigquery allows for two different formats for specific roles
-        # (IAM vs "primitive" format), but will return the primative role in API
+        # (IAM vs "primitive" format), but will return the primitive role in API
         # responses. We identify this fine-grained resource from a list
         # of DatasetAccess objects by comparing role, and we must use the same
         # format when comparing.
@@ -117,6 +122,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       constants: templates/terraform/constants/bigquery_dataset_access.go.erb
       post_create: templates/terraform/post_create/bigquery_dataset_access.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/bigquery_dataset_access.go.erb
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`. 
+        The API does accept both formats but it will always return the legacy format which results in Terraform
+        showing permanent diff on each plan and apply operation.
   Job: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/jobs/{{job_id}}/location/{{location}}", "projects/{{project}}/jobs/{{job_id}}", "{{project}}/{{job_id}}", "{{job_id}}"]
     skip_delete: true
@@ -336,7 +346,43 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           dataset_id: "dataset_id"
           table_id: "table_id"
-
+  Routine: !ruby/object:Overrides::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/datasets/{{dataset_id}}/routines/{{routine_id}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "big_query_routine_basic"
+        primary_resource_id: "sproc"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_dataset_id%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf_test_table_id%s\", context[\"random_suffix\"])"
+        vars:
+          dataset_id: "dataset_id"
+          routine_id: "routine_id"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "big_query_routine_json"
+        primary_resource_id: "sproc"
+        primary_resource_name: "fmt.Sprintf(\"tf_test_dataset_id%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf_test_table_id%s\", context[\"random_suffix\"])"
+        vars:
+          dataset_id: "dataset_id"
+          routine_id: "routine_id"
+    properties:
+      routineReference: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/bigquery_routine_ref.go.erb'
+        flatten_object: true
+      routineReference.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      arguments.dataType: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringIsJSON'
+      returnType: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.StringIsJSON'
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

@@ -18,6 +18,11 @@ and
 ## Example Usage
 
 ```hcl
+resource "google_service_account" "default" {
+  account_id   = "service-account-id"
+  display_name = "Service Account"
+}
+
 resource "google_compute_instance_template" "default" {
   name        = "appserver-template"
   description = "This template is used to create app server instances."
@@ -29,7 +34,7 @@ resource "google_compute_instance_template" "default" {
   }
 
   instance_description = "description assigned to instances"
-  machine_type         = "n1-standard-1"
+  machine_type         = "e2-medium"
   can_ip_forward       = false
 
   scheduling {
@@ -61,7 +66,9 @@ resource "google_compute_instance_template" "default" {
   }
 
   service_account {
-    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    email  = google_service_account.default.email
+    scopes = ["cloud-platform"]
   }
 }
 
@@ -92,7 +99,7 @@ with `name_prefix`.  Example:
 ```hcl
 resource "google_compute_instance_template" "instance_template" {
   name_prefix  = "instance-template-"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-medium"
   region       = "us-central1"
 
   // boot disk
@@ -148,7 +155,7 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_instance_template" "instance_template" {
   name_prefix  = "instance-template-"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-medium"
   region       = "us-central1"
 
   // boot disk
@@ -165,7 +172,7 @@ the image for the template to the family:
 ```tf
 resource "google_compute_instance_template" "instance_template" {
   name_prefix  = "instance-template-"
-  machine_type = "n1-standard-1"
+  machine_type = "e2-medium"
   region       = "us-central1"
 
   // boot disk
@@ -246,6 +253,8 @@ The following arguments are supported:
 
 * `enable_display` - (Optional) Enable [Virtual Displays](https://cloud.google.com/compute/docs/instances/enable-instance-virtual-display#verify_display_driver) on this instance.
 **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true in order to update this field.
+
+* `confidential_instance_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - Enable [Confidential Mode](https://cloud.google.com/compute/confidential-vm/docs/about-cvm) on this VM.
 
 The `disk` block supports:
 
@@ -409,6 +418,10 @@ The `shielded_instance_config` block supports:
 * `enable_vtpm` (Optional) -- Use a virtualized trusted platform module, which is a specialized computer chip you can use to encrypt objects like keys and certificates. Defaults to true.
 
 * `enable_integrity_monitoring` (Optional) -- Compare the most recent boot measurements to the integrity policy baseline and return a pair of pass/fail results depending on whether they match or not. Defaults to true.
+
+The `confidential_instance_config` block supports:
+
+* `enable_confidential_compute` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Defines whether the instance should have confidential compute enabled. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
 
 ## Attributes Reference
 

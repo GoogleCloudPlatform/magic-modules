@@ -25,9 +25,12 @@ resource "google_service_account_key" "mykey" {
 }
 ```
 
-## Example Usage, save key in Kubernetes secret
+## Example Usage, save key in Kubernetes secret - DEPRECATED
 
 ```hcl
+# Workload Identity is the recommended way of accessing Google Cloud APIs from pods.
+# https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+
 resource "google_service_account" "myaccount" {
   account_id   = "myaccount"
   display_name = "My Service Account"
@@ -83,3 +86,7 @@ service account keys through the CLI or web console. This is only populated when
 
 * `valid_before` - The key can be used before this timestamp.
 A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
+
+## Import
+
+This resource does not support import.

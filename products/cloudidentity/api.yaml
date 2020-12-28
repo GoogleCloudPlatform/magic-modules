@@ -16,6 +16,9 @@ name: CloudIdentity
 display_name: Cloud Identity
 versions:
   - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://cloudidentity.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://cloudidentity.googleapis.com/v1beta1/
 scopes:
@@ -113,88 +116,6 @@ objects:
           Must not contain more than one entry. Must contain the entry
           'cloudidentity.googleapis.com/groups.discussion_forum': '' if the Group is a Google Group or
           'system/groups/external': '' if the Group is an external-identity-mapped group.
-      # TODO (mbang): The full API doesn't seem to be implemented yet
-      # - !ruby/object:Api::Type::Array
-      #   name: 'additionalGroupKeys'
-      #   input: true
-      #   description: |
-      #     Additional entity key aliases for a Group.
-      #   item_type: !ruby/object:Api::Type::NestedObject
-      #     properties:
-      #       - !ruby/object:Api::Type::String
-      #         name: 'id'
-      #         required: true
-      #         description: |
-      #           The ID of the entity.
-
-      #           For Google-managed entities, the id must be the email address of an existing
-      #           group or user.
-
-      #           For external-identity-mapped entities, the id must be a string conforming
-      #           to the Identity Source's requirements.
-
-      #           Must be unique within a namespace.
-      #       - !ruby/object:Api::Type::String
-      #         name: 'namespace'
-      #         description: |
-      #           The namespace in which the entity exists.
-
-      #           If not specified, the EntityKey represents a Google-managed entity
-      #           such as a Google user or a Google Group.
-
-      #           If specified, the EntityKey represents an external-identity-mapped group.
-      #           The namespace must correspond to an identity source created in Admin Console
-      #           and must be in the form of `identitysources/{identity_source_id}.
-      # - !ruby/object:Api::Type::NestedObject
-      #   name: 'dynamicGroupMetadata'
-      #   input: true
-      #   description: |
-      #     Dynamic group metadata like queries and status.
-      #   properties:
-      #     - !ruby/object:Api::Type::Array
-      #       name: 'queries'
-      #       required: true
-      #       description: |
-      #         Memberships will be the union of all queries. Only one entry with USER resource is currently supported.
-      #       item_type: !ruby/object:Api::Type::NestedObject
-      #         properties:
-      #           - !ruby/object:Api::Type::Enum
-      #             name: 'resourceType'
-      #             description: |
-      #               Resources supported for dynamic groups.
-      #             default_value: :USER
-      #             values:
-      #               - :USER
-      #           - !ruby/object:Api::Type::String
-      #             name: 'query'
-      #             description: |
-      #               Query that determines the memberships of the dynamic group.
-
-      #               Examples: All users with at least one organizations.department of engineering.
-
-      #               user.organizations.exists(org, org.department=='engineering')
-
-      #               All users with at least one location that has area of foo and building_id of bar.
-
-      #               user.locations.exists(loc, loc.area=='foo' && loc.building_id=='bar')
-      #     - !ruby/object:Api::Type::NestedObject
-      #       name: 'DynamicGroupStatus'
-      #       output: true
-      #       description: |
-      #         Status of the dynamic group.
-      #       properties:
-      #         - !ruby/object:Api::Type::String
-      #           name: 'status'
-      #           description: |
-      #             Status of the dynamic group.
-      #         - !ruby/object:Api::Type::String
-      #           name: 'statusTime'
-      #           description: |
-      #             The latest time at which the dynamic group is guaranteed to be in the given status.
-      #             For example, if status is: UP_TO_DATE - The latest time at which this dynamic group
-      #             was confirmed to be up to date. UPDATING_MEMBERSHIPS - The time at which dynamic group was created.
-
-      #             A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
   - !ruby/object:Api::Resource
     name: 'GroupMembership'
     base_url: '{{group}}/memberships'
@@ -222,6 +143,7 @@ objects:
         input: true
         description: |
           EntityKey of the member.
+        min_version: beta
         exactly_one_of:
           - member_key
           - preferred_member_key

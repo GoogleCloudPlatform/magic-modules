@@ -31,6 +31,7 @@ module Provider
       # The text will be injected at the bottom of the specified
       # section.
       attr_reader :warning
+      attr_reader :note
       attr_reader :required_properties
       attr_reader :optional_properties
       attr_reader :attributes
@@ -38,6 +39,7 @@ module Provider
       def validate
         super
         check :warning, type: String
+        check :note, type: String
         check :required_properties, type: String
         check :optional_properties, type: String
         check :attributes, type: String

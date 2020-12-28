@@ -18,6 +18,28 @@ func optionalPrefixSuppress(prefix string) schema.SchemaDiffSuppressFunc {
 	}
 }
 
+func ignoreMissingKeyInMap(key string) schema.SchemaDiffSuppressFunc {
+	return func(k, old, new string, d *schema.ResourceData) bool {
+		log.Printf("suppressing diff %q with old %q, new %q", k, old, new)
+		if strings.HasSuffix(k, ".%") {
+			oldNum, err := strconv.Atoi(old)
+			if err != nil {
+				log.Printf("[ERROR] could not parse %q as number, no longer attempting diff suppress", old)
+				return false
+			}
+			newNum, err := strconv.Atoi(new)
+			if err != nil {
+				log.Printf("[ERROR] could not parse %q as number, no longer attempting diff suppress", new)
+				return false
+			}
+			return oldNum+1 == newNum
+		} else if strings.HasSuffix(k, "." + key) {
+			return old == ""
+		}
+		return false
+	}
+}
+
 func optionalSurroundingSpacesSuppress(k, old, new string, d *schema.ResourceData) bool {
 	return strings.TrimSpace(old) == strings.TrimSpace(new)
 }
@@ -114,7 +136,6 @@ func locationDiffSuppressHelper(a, b string) bool {
 		strings.Replace(a, "/locations/", "/zones/", 1) == b
 }
 
-<% unless version == 'ga' -%>
 // For managed SSL certs, if new is an absolute FQDN (trailing '.') but old isn't, treat them as equals.
 func absoluteDomainSuppress(k, old, new string, _ *schema.ResourceData) bool {
 	if strings.HasPrefix(k, "managed.0.domains.") {
@@ -123,6 +144,7 @@ func absoluteDomainSuppress(k, old, new string, _ *schema.ResourceData) bool {
 	return old == new
 }
 
+<% unless version == 'ga' -%>
 func timestampDiffSuppress(format string) schema.SchemaDiffSuppressFunc {
 	return func(_, old, new string, _ *schema.ResourceData) bool {
 		oldT, err := time.Parse(format, old)

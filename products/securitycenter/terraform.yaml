@@ -15,6 +15,7 @@
 legacy_name: scc
 overrides: !ruby/object:Overrides::ResourceOverrides
   Source: !ruby/object:Overrides::Terraform::ResourceOverride
+    skip_delete: true
     examples:
      - !ruby/object:Provider::Terraform::Examples
       name: "scc_source_basic"
@@ -33,7 +34,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '[\p{L}\p{N}]({\p{L}\p{N}_- ]{0,30}[\p{L}\p{N}])?'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      custom_delete: templates/terraform/custom_delete/skip_delete.go.erb
       custom_import: templates/terraform/custom_import/scc_source_self_link_as_name_set_organization.go.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
 # This is for copying files over

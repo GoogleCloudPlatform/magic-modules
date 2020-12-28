@@ -29,7 +29,19 @@ func TestAccBigqueryConnectionConnection_bigqueryConnectionBasic(t *testing.T) {
 				Config: testAccBigqueryConnectionConnection_bigqueryConnectionBasic(context),
 			},
 			{
+				ImportState:             true,
+				ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"cloud_sql.0.credential.0.password", "cloud_sql.0.credential.0.username"},
+				ResourceName:            "google_bigquery_connection.connection",
+			},
+			{
 				Config: testAccBigqueryConnectionConnection_bigqueryConnectionBasicUpdate(context),
+			},
+			{
+				ImportState:             true,
+				ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"cloud_sql.0.credential.0.password", "cloud_sql.0.credential.0.username"},
+				ResourceName:            "google_bigquery_connection.connection",
 			},
 		},
 	})

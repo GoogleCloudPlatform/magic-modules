@@ -977,6 +977,25 @@ resource "google_access_context_manager_access_policy" "access-policy" {
   title  = var.service_perimeter["policy_title"]
 }
 
+resource "google_access_context_manager_access_level" "access-level" {
+  count  = "${var.gcp_organization_id == "" ? 0 : var.gcp_enable_privileged_resources}"
+  parent = "accessPolicies/${google_access_context_manager_access_policy.access-policy.0.name}"
+  name   = "accessPolicies/${google_access_context_manager_access_policy.access-policy.0.name}/accessLevels/os_lock"
+  title  = "os_lock"
+  basic {
+    conditions {
+      device_policy {
+        require_screen_lock = true
+      }
+      regions = [
+    "CH",
+    "IT",
+    "US",
+      ]
+    }
+  }
+}
+
 variable "firewall" {
   type = any
 }

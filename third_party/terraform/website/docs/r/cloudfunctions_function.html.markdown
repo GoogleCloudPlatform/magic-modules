@@ -113,7 +113,7 @@ Eg. `"nodejs8"`, `"nodejs10"`, `"python37"`, `"go111"`, `"go113"`.
 
 * `description` - (Optional) Description of the function.
 
-* `available_memory_mb` - (Optional) Memory (in MB), available to the function. Default value is 256MB. Allowed values are: 128MB, 256MB, 512MB, 1024MB, and 2048MB.
+* `available_memory_mb` - (Optional) Memory (in MB), available to the function. Default value is 256MB. Allowed values are: 128MB, 256MB, 512MB, 1024MB, 2048MB and 4096MB.
 
 * `timeout` - (Optional) Timeout (in seconds) for the function. Default value is 60 seconds. Cannot be more than 540 seconds.
 
@@ -130,6 +130,8 @@ Eg. `"nodejs8"`, `"nodejs10"`, `"python37"`, `"go111"`, `"go113"`.
 * `service_account_email` - (Optional) If provided, the self-provided service account to run the function with.
 
 * `environment_variables` - (Optional) A set of key/value environment variable pairs to assign to the function.
+
+* `build_environment_variables` - (Optional) A set of key/value environment variable pairs available during build time.
 
 * `vpc_connector` - (Optional) The VPC Network Connector that this cloud function can connect to. It should be set up as fully-qualified URI. The format of this field is `projects/*/locations/*/connectors/*`.
 

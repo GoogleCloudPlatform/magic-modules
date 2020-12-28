@@ -585,6 +585,30 @@ func resourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						"maintenance_exclusion": {
+							Type:        schema.TypeSet,
+							Optional:    true,
+							MaxItems:    3,
+							Description: `Exceptions to maintenance window. Non-emergency maintenance should not occur in these windows.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"exclusion_name": {
+										Type:         schema.TypeString,
+										Required:     true,
+									},
+									"start_time": {
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: validateRFC3339Date,
+									},
+									"end_time": {
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: validateRFC3339Date,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -602,7 +626,7 @@ func resourceContainerCluster() *schema.Resource {
 							Type:        schema.TypeList,
 							Required:    true,
 							MaxItems:    1,
-							Description: `Notification config for pubsub`,
+							Description: `Notification config for Cloud Pub/Sub`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"enabled": {
@@ -613,10 +637,31 @@ func resourceContainerCluster() *schema.Resource {
 									"topic": {
 										Type:        schema.TypeString,
 										Optional:    true,
-										Description: `The pubsub topic to send the notification to, must be in the format: projects/{project}/topics/{topic}`,
+										Description: `The Cloud Pub/Sub topic to send the notification to, must be in the format: projects/{project}/topics/{topic}`,
 									},
 								},
 							},
+						},
+					},
+				},
+			},
+<% end -%>
+
+<% unless version == 'ga' -%>
+			"confidential_nodes": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				MaxItems:    1,
+				Description: `Configuration for the confidential nodes feature, which makes nodes run on confidential VMs. Warning: This configuration can't be changed (or added/removed) after cluster creation without deleting and recreating the entire cluster.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Required:    true,
+							ForceNew:    true,
+							Description: `Whether Confidential Nodes feature is enabled for all nodes in this cluster.`,
 						},
 					},
 				},
@@ -1052,7 +1097,7 @@ func resourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				MaxItems:    1,
-				Description: `Configuration options for the Release channel feature, which provide more control over automatic upgrades of your GKE clusters.`,
+				Description: `Configuration options for the Release channel feature, which provide more control over automatic upgrades of your GKE clusters. Note that removing this field from your config will not unenroll it. Instead, use the "UNSPECIFIED" channel.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"channel": {
@@ -1060,7 +1105,11 @@ func resourceContainerCluster() *schema.Resource {
 							Required:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"UNSPECIFIED", "RAPID", "REGULAR", "STABLE"}, false),
 							DiffSuppressFunc: emptyOrDefaultStringSuppress("UNSPECIFIED"),
-							Description:      `The selected release channel.`,
+							Description:      `The selected release channel. Accepted values are:
+* UNSPECIFIED: Not set.
+* RAPID: Weekly upgrade cadence; Early testers and developers who requires new features.
+* REGULAR: Multiple per month upgrade cadence; Production users who need features not yet offered in the Stable channel.
+* STABLE: Every few months upgrade cadence; Production users who need stability above all else, and for whom frequent upgrades are too risky.`,
 						},
 					},
 				},
@@ -1296,6 +1345,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		MasterAuth:     expandMasterAuth(d.Get("master_auth")),
 <% unless version == 'ga' -%>
 		NotificationConfig: expandNotificationConfig(d.Get("notification_config")),
+<% end -%>
+<% unless version == 'ga' -%>
+		ConfidentialNodes: expandConfidentialNodes(d.Get("confidential_nodes")),
 <% end -%>
 		ResourceLabels: expandStringMap(d, "resource_labels"),
 	}
@@ -1619,6 +1671,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 <% unless version == 'ga' -%>
 	if err := d.Set("notification_config", flattenNotificationConfig(cluster.NotificationConfig)); err != nil {
+		return err
+	}
+	if err := d.Set("confidential_nodes", flattenConfidentialNodes(cluster.ConfidentialNodes)); err != nil {
 		return err
 	}
 	if err := d.Set("enable_tpu", cluster.EnableTpu); err != nil {
@@ -2874,6 +2929,16 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 	}
 	maintenancePolicy := l[0].(map[string]interface{})
 
+	if maintenanceExclusions, ok := maintenancePolicy["maintenance_exclusion"]; ok && len(maintenanceExclusions.(*schema.Set).List()) > 0 {
+		for _, me := range maintenanceExclusions.(*schema.Set).List() {
+			exclusion := me.(map[string]interface{})
+			exclusions[exclusion["exclusion_name"].(string)] = containerBeta.TimeWindow{
+				StartTime: exclusion["start_time"].(string),
+				EndTime:   exclusion["end_time"].(string),
+			}
+		}
+	}
+
 	if dailyMaintenanceWindow, ok := maintenancePolicy["daily_maintenance_window"]; ok && len(dailyMaintenanceWindow.([]interface{})) > 0 {
 		dmw := dailyMaintenanceWindow.([]interface{})[0].(map[string]interface{})
 		startTime := dmw["start_time"].(string)
@@ -3015,6 +3080,19 @@ func expandNotificationConfig(configured interface{}) *containerBeta.Notificatio
 		Pubsub: &containerBeta.PubSub{
 			Enabled: false,
 		},
+	}
+}
+<% end -%>
+
+<% unless version == 'ga' -%>
+func expandConfidentialNodes(configured interface{}) *containerBeta.ConfidentialNodes {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &containerBeta.ConfidentialNodes{
+		Enabled: config["enabled"].(bool),
 	}
 }
 <% end -%>
@@ -3268,6 +3346,18 @@ func flattenNotificationConfig(c *containerBeta.NotificationConfig) []map[string
 }
 <% end -%>
 
+<% unless version == 'ga' -%>
+func flattenConfidentialNodes(c *containerBeta.ConfidentialNodes) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"enabled": c.Enabled,
+		})
+	}
+	return result
+}
+<% end -%>
+
 func flattenNetworkPolicy(c *containerBeta.NetworkPolicy) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -3515,6 +3605,18 @@ func flattenMaintenancePolicy(mp *containerBeta.MaintenancePolicy) []map[string]
 	if mp == nil || mp.Window == nil {
 		return nil
 	}
+
+	exclusions := []map[string]interface{}{}
+	if mp.Window.MaintenanceExclusions != nil {
+		for wName, window := range mp.Window.MaintenanceExclusions {
+			exclusions = append(exclusions, map[string]interface{}{
+				"start_time":  window.StartTime,
+				"end_time":    window.EndTime,
+				"exclusion_name": wName,
+			})
+		}
+	}
+
 	if mp.Window.DailyMaintenanceWindow != nil {
 		return []map[string]interface{}{
 			{
@@ -3524,6 +3626,7 @@ func flattenMaintenancePolicy(mp *containerBeta.MaintenancePolicy) []map[string]
 						"duration":   mp.Window.DailyMaintenanceWindow.Duration,
 					},
 				},
+				"maintenance_exclusion": exclusions,
 			},
 		}
 	}
@@ -3537,6 +3640,7 @@ func flattenMaintenancePolicy(mp *containerBeta.MaintenancePolicy) []map[string]
 						"recurrence": mp.Window.RecurringWindow.Recurrence,
 					},
 				},
+				"maintenance_exclusion": exclusions,
 			},
 		}
 	}
@@ -3821,7 +3925,12 @@ func containerClusterPrivateClusterConfigCustomDiff(_ context.Context, d *schema
 		blockValueKnown := d.NewValueKnown("private_cluster_config.0.master_ipv4_cidr_block")
 
 		if blockValueKnown && (block == nil || block == "") {
-			return fmt.Errorf("master_ipv4_cidr_block must be set if enable_private_nodes == true")
+			return fmt.Errorf("master_ipv4_cidr_block must be set if enable_private_nodes is true")
+		}
+	} else {
+		block := config["master_ipv4_cidr_block"]
+		if block != nil && block != "" {
+			return fmt.Errorf("master_ipv4_cidr_block can only be set if enable_private_nodes is true")
 		}
 	}
 	return nil

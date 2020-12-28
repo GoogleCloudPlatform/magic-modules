@@ -49,6 +49,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'domainMappingLabelDiffSuppress'
       metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: 'cloudrunAnnotationDiffSuppress'
       metadata.namespace: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/set_to_project.go.erb
       metadata.name: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -56,6 +57,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       spec.routeName: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
         diff_suppress_func: 'compareSelfLinkOrResourceName'
+      spec.forceOverride: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/cloudrun_ignore_force_override.go.erb
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "locations/{{location}}/namespaces/{{project}}/services/{{name}}"
     import_format: ["locations/{{location}}/namespaces/{{project}}/services/{{name}}"]
@@ -188,6 +191,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        diff_suppress_func: 'cloudrunAnnotationDiffSuppress'
       spec.traffic: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       # name is 'special' in magic modules and lives at the root of properties.
