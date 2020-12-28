@@ -4936,7 +4936,7 @@ resource "google_compute_disk" "foobar" {
 
 resource "google_compute_instance" "foobar" {
   name           = "%s"
-  machine_type   = "n1-standard-1"
+  machine_type   = "n2-standard-2"
   zone           = "us-central1-a"
   can_ip_forward = false
 	tags           = ["foo", "bar"]
