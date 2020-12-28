@@ -47,7 +47,11 @@ import_url = import_format.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.bas
 	<% elsif param == 'zone' -%>
 		<% import_qualifiers.push('getTestZoneFromEnv()') -%>
 	<% elsif param == 'region' || param == 'location' -%>
-		<% import_qualifiers.push('getTestRegionFromEnv()') -%>
+		<% if example.region_override.nil? -%>
+				<% import_qualifiers.push('getTestRegionFromEnv()') -%>
+			<% else -%>
+				<% import_qualifiers.push("\"#{example.region_override}\"") -%>
+			<% end -%>
 	<% end -%>
 <% end -%>
 func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
@@ -404,7 +408,7 @@ func testAcc<%= resource_name -%>IamBinding_basicGenerated(context map[string]in
 <%= example.config_test_body(pwd) -%>
 
 resource "<%= resource_ns_iam -%>_binding" "foo" {
-<% unless object.min_version.name == "ga" -%> 
+<% unless object.min_version.name == "ga" -%>
   provider = google-beta
 <% end -%>
 <%= lines(compile(pwd + '/' + object.iam_policy.example_config_body)) -%>

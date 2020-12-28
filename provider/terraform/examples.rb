@@ -116,9 +116,17 @@ module Provider
       # Whether to skip generating docs for this example
       attr_reader :skip_docs
 
+      # Whether to skip import tests for this example
+      attr_reader :skip_import_test
+
       # The name of the primary resource for use in IAM tests. IAM tests need
       # a reference to the primary resource to create IAM policies for
       attr_reader :primary_resource_name
+
+      # The name of the location/region override for use in IAM tests. IAM
+      # tests may need this if the location is not inherited on the resource
+      # for one reason or another
+      attr_reader :region_override
 
       # The path to this example's Terraform config.
       # Defaults to `templates/terraform/examples/{{name}}.tf.erb`
@@ -274,6 +282,7 @@ module Provider
         check :ignore_read_extra, type: Array, item_type: String, default: []
         check :primary_resource_name, type: String
         check :skip_test, type: TrueClass
+        check :skip_import_test, type: TrueClass
         check :skip_docs, type: TrueClass
         check :config_path, type: String, default: "templates/terraform/examples/#{name}.tf.erb"
         check :skip_vcr, type: TrueClass

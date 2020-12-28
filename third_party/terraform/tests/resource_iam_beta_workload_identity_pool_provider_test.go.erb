@@ -172,7 +172,7 @@ resource "google_iam_workload_identity_pool_provider" "my_provider" {
   workload_identity_pool_id          = google_iam_workload_identity_pool.my_pool.workload_identity_pool_id
   workload_identity_pool_provider_id = "my-provider-%{random_suffix}"
   aws {
-    account_id = "888888888888"
+    account_id = "999999999999"
   }
 }
 `, context)
@@ -191,7 +191,8 @@ resource "google_iam_workload_identity_pool_provider" "my_provider" {
 	"google.subject"                  = "assertion.sub"
   }
   oidc {
-    issuer_uri        = "https://sts.windows.net/azure-tenant-id-basic"
+    allowed_audiences = ["https://example.com/gcp-oidc-federation", "example.com/gcp-oidc-federation"]
+    issuer_uri        = "https://sts.windows.net/azure-tenant-id-full"
   }
 }
 `, context)
