@@ -1163,10 +1163,11 @@ objects:
                 - service_level_indicator.0.basic_sli.0.latency
                 - service_level_indicator.0.basic_sli.0.availability
               properties:
-                - !ruby/object:Api::Type::String
-                  name: forFuture
+                - !ruby/object:Api::Type::Boolean
+                  name: enabled
+                  default_value: true
                   description: |
-                    Place holder
+                    Enable availability sli
         - !ruby/object:Api::Type::NestedObject
           name: requestBasedSli
           api_name: 'requestBased'
