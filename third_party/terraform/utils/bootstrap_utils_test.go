@@ -370,11 +370,11 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 			err = retryTimeDuration(func() (operr error) {
 				op, operr = config.NewSqlAdminClient(config.userAgent).Instances.Insert(project, instance).Do()
 				return operr
-			}, time.Duration(5)*time.Minute, isSqlOperationInProgressError)
+			}, time.Duration(20)*time.Minute, isSqlOperationInProgressError)
 			if err != nil {
 				t.Fatalf("Error, failed to create instance %s: %s", instance.Name, err)
 			}
-			err = sqlAdminOperationWaitTime(config, op, project, "Create Instance", config.userAgent, time.Duration(5)*time.Minute)
+			err = sqlAdminOperationWaitTime(config, op, project, "Create Instance", config.userAgent, time.Duration(20)*time.Minute)
 			if err != nil {
 				t.Fatalf("Error, failed to create instance %s: %s", instance.Name, err)
 			}
@@ -398,11 +398,11 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 		err = retryTimeDuration(func() (operr error) {
 			op, operr = config.NewSqlAdminClient(config.userAgent).BackupRuns.Insert(project, instance.Name, backupRun).Do()
 			return operr
-		}, time.Duration(5)*time.Minute, isSqlOperationInProgressError)
+		}, time.Duration(20)*time.Minute, isSqlOperationInProgressError)
 		if err != nil {
 			t.Fatalf("Error, failed to create instance backup: %s", err)
 		}
-		err = sqlAdminOperationWaitTime(config, op, project, "Backup Instance", config.userAgent, time.Duration(5)*time.Minute)
+		err = sqlAdminOperationWaitTime(config, op, project, "Backup Instance", config.userAgent, time.Duration(20)*time.Minute)
 		if err != nil {
 			t.Fatalf("Error, failed to create instance backup: %s", err)
 		}
