@@ -274,6 +274,17 @@ func TestAccLoggingProjectSink_disabled_update(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccLoggingProjectSink_disabled_update(sinkName, getTestProjectFromEnv(), bucketName, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_logging_project_sink.disabled", "disabled", "true"),
+				),
+			},
+			{
+				ResourceName:      "google_logging_project_sink.disabled",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
