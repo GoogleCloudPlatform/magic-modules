@@ -49,8 +49,8 @@ Do not indent the block and make sure to leave newlines, so you don't confuse
 the Markdown parser. 
 
 To qualify that a change is specific to the beta provider add `(beta)`
-at the end of the release note. This will omit the note from changelogs
-for the ga release.
+at the end of the release note.\
+This will omit the note from changelogs for the ga release.
 
 ~~~
 
